@@ -1,4 +1,4 @@
-package xfp.java.sets;
+package xfp.java.algebra;
 
 import java.util.Map;
 import java.util.Objects;

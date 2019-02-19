@@ -1,4 +1,4 @@
-package xfp.java.sets;
+package xfp.java.algebra;
 
 import java.util.Collections;
 import java.util.Map;
@@ -7,8 +7,8 @@ import java.util.function.Supplier;
 
 import org.apache.commons.rng.UniformRandomProvider;
 
-import xfp.java.sets.Set;
-import xfp.java.sets.Sets;
+import xfp.java.algebra.Set;
+import xfp.java.algebra.Sets;
 import xfp.java.exceptions.Exceptions;
 
 /** General, possibly unbounded, sets of <code>Object</code>s, 

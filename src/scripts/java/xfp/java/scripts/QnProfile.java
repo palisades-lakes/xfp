@@ -11,7 +11,7 @@ import xfp.java.algebra.TwoSetsTwoOperations;
 import xfp.java.prng.PRNG;
 import xfp.java.prng.Seeds;
 import xfp.java.test.algebra.AlgebraicStructureTests;
-import xfp.java.test.sets.SetTests;
+import xfp.java.test.algebra.SetTests;
 
 //----------------------------------------------------------------
 /** Profiling rational vector spaces. 

@@ -11,12 +11,11 @@ import java.util.function.UnaryOperator;
 
 import org.apache.commons.rng.UniformRandomProvider;
 
-import xfp.java.sets.BigDecimals;
-import xfp.java.sets.BigFractions;
-import xfp.java.sets.BigFractionsN;
-import xfp.java.sets.Qn;
-import xfp.java.sets.Ratios;
-import xfp.java.sets.Set;
+import xfp.java.linear.BigFractionsN;
+import xfp.java.linear.Qn;
+import xfp.java.numbers.BigDecimals;
+import xfp.java.numbers.BigFractions;
+import xfp.java.numbers.Ratios;
 
 /** Group-like structures: One set plus closed binary operation.
  * 

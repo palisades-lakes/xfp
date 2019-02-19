@@ -1,4 +1,4 @@
-package xfp.java.sets;
+package xfp.java.numbers;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -13,6 +13,7 @@ import org.apache.commons.rng.UniformRandomProvider;
 
 import clojure.lang.Numbers;
 import clojure.lang.Ratio;
+import xfp.java.algebra.Set;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
 

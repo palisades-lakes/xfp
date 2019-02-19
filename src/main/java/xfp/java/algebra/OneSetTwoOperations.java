@@ -13,11 +13,10 @@ import java.util.function.UnaryOperator;
 import org.apache.commons.math3.fraction.BigFraction;
 import org.apache.commons.rng.UniformRandomProvider;
 
-import xfp.java.sets.BigDecimals;
-import xfp.java.sets.BigFractions;
-import xfp.java.sets.Q;
-import xfp.java.sets.Ratios;
-import xfp.java.sets.Set;
+import xfp.java.numbers.BigDecimals;
+import xfp.java.numbers.BigFractions;
+import xfp.java.numbers.Q;
+import xfp.java.numbers.Ratios;
 
 /** One set plus 2 operations.
  * 
@@ -203,7 +202,8 @@ public final class OneSetTwoOperations implements Set {
     assert Objects.nonNull(additiveInverse);
     assert Objects.nonNull(multiply);
     assert Objects.nonNull(multiplicativeIdentity);
-    assert Objects.nonNull(multiplicativeInverse);
+    // rings won't have multiplicative inverses
+    //assert Objects.nonNull(multiplicativeInverse);
     assert Objects.nonNull(elements);
     _add = add;
     _additiveIdentity = additiveIdentity;

@@ -1,4 +1,4 @@
-package xfp.java.sets;
+package xfp.java.linear;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,9 +15,9 @@ import org.apache.commons.rng.UniformRandomProvider;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 
-import xfp.java.sets.BigFractions;
-import xfp.java.sets.BigFractionsN;
-import xfp.java.sets.Set;
+import xfp.java.algebra.Set;
+import xfp.java.linear.BigFractionsN;
+import xfp.java.numbers.BigFractions;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
 

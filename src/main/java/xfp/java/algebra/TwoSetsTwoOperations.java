@@ -13,9 +13,8 @@ import org.apache.commons.rng.UniformRandomProvider;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 
-import xfp.java.sets.BigFractionsN;
-import xfp.java.sets.Qn;
-import xfp.java.sets.Set;
+import xfp.java.linear.BigFractionsN;
+import xfp.java.linear.Qn;
 
 /** Module-like structures, including linear (vector) spaces.
  * Two sets, 'elements' and 'scalars'.

@@ -1,4 +1,4 @@
-package xfp.java.sets;
+package xfp.java.numbers;
 
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -10,6 +10,7 @@ import java.util.function.UnaryOperator;
 
 import org.apache.commons.rng.UniformRandomProvider;
 
+import xfp.java.algebra.Set;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
 

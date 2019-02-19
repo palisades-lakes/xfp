@@ -11,8 +11,6 @@ import java.util.function.UnaryOperator;
 import com.google.common.collect.ImmutableList;
 
 import xfp.java.Classes;
-import xfp.java.sets.Set;
-import xfp.java.sets.Sets;
 
 /** Constructor methods for Predicates/BiPredicate closures on 
  * sets and operations.

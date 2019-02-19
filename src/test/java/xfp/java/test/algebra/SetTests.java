@@ -1,4 +1,4 @@
-package xfp.java.test.sets;
+package xfp.java.test.algebra;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -7,13 +7,13 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 
 import xfp.java.Classes;
+import xfp.java.algebra.Set;
+import xfp.java.algebra.Sets;
+import xfp.java.numbers.BigDecimals;
+import xfp.java.numbers.BigFractions;
+import xfp.java.numbers.Ratios;
 import xfp.java.prng.PRNG;
 import xfp.java.prng.Seeds;
-import xfp.java.sets.BigDecimals;
-import xfp.java.sets.BigFractions;
-import xfp.java.sets.Ratios;
-import xfp.java.sets.Set;
-import xfp.java.sets.Sets;
 
 //----------------------------------------------------------------
 /** Common code for testing sets. 

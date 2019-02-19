@@ -13,7 +13,6 @@ import xfp.java.algebra.OneSetTwoOperations;
 import xfp.java.algebra.TwoSetsTwoOperations;
 import xfp.java.prng.PRNG;
 import xfp.java.prng.Seeds;
-import xfp.java.test.sets.SetTests;
 
 //----------------------------------------------------------------
 /** Common code for testing sets. 
