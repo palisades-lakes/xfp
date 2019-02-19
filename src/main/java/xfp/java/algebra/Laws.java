@@ -10,8 +10,7 @@ import java.util.function.UnaryOperator;
 
 import com.google.common.collect.ImmutableList;
 
-import xfp.java.algebra.OneSetOneOperation;
-import xfp.java.algebra.OneSetTwoOperations;
+import xfp.java.Classes;
 import xfp.java.sets.Set;
 import xfp.java.sets.Sets;
 
@@ -36,7 +35,7 @@ import xfp.java.sets.Sets;
  * no instance state or methods.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-01-22
+ * @version 2019-02-19
  */
 
 @SuppressWarnings("unchecked")
@@ -51,6 +50,8 @@ public final class Laws {
   closed (final Set elements,
           final BinaryOperator operation) {
     return new Predicate<Supplier> () {
+      @Override
+      public final String toString () { return "closed"; }
       @Override
       public final boolean test (final Supplier samples) {
         final Object a = samples.get();
@@ -69,6 +70,8 @@ public final class Laws {
   associative (final Set elements,
                final BinaryOperator operation) {
     return new Predicate<Supplier> () {
+      @Override
+      public final String toString () { return "associative"; }
       @Override
       public final boolean test (final Supplier samples) {
         final Object a = samples.get();
@@ -99,6 +102,11 @@ public final class Laws {
             final Object excluded) {
     return new Predicate<Supplier> () {
       @Override
+      public final String toString () { 
+        return identity + " is not an identity for " + 
+          operation + " on " + elements + "\n" +
+          "excluding " + excluded; }
+      @Override
       public final boolean test (final Supplier samples) {
         // TODO: what if we want <code>null</code> 
         // to be the identity? IS there an example where null is
@@ -121,6 +129,10 @@ public final class Laws {
             final BinaryOperator operation,
             final Object identity) {
     return new Predicate<Supplier> () {
+      @Override
+      public final String toString () { 
+        return identity + " is not an identity for " + 
+          operation + " on " + elements; }
       @Override
       public final boolean test (final Supplier samples) {
         // TODO: what if we want <code>null</code> 
@@ -152,6 +164,14 @@ public final class Laws {
            final Object excluded) {
     return new Predicate<Supplier> () {
       @Override
+      public final String toString () { 
+        return inverse + " is not an inverse for " +
+          operation + " on " + elements +
+          " relative to " + 
+          Classes.getSimpleName(Classes.getClass(identity)) + ":" +
+          identity + "\n" +
+          "excluding " + excluded; }
+      @Override
       public final boolean test (final Supplier samples) {
         final Object a = samples.get();
         if (Sets.contains(excluded,a)) { return true; }
@@ -159,10 +179,18 @@ public final class Laws {
         assert elements.contains(identity);
         final Object ainv = inverse.apply(a);
         final BiPredicate equal = elements.equivalence();
-        return 
+        final boolean result =  
           equal.test(identity,operation.apply(a,ainv))
           && 
-          equal.test(identity,operation.apply(ainv,a)); } }; }
+          equal.test(identity,operation.apply(ainv,a)); 
+        if (! result) {
+          System.out.println(a);
+          System.out.println(ainv);
+          System.out.println(operation.apply(a,ainv));
+          System.out.println(operation.apply(ainv,a));
+          System.out.println(); } 
+        return result; } }; 
+  }
 
   /** Does <code>(operation a (inverse a)) == 
    * (operation (inverse a) a) = identity</code>
@@ -184,6 +212,8 @@ public final class Laws {
   commutative (final Set elements,
                final BinaryOperator operation) {
     return new Predicate<Supplier> () {
+      @Override
+      public final String toString () { return "commutative"; }
       @Override
       public final boolean test (final Supplier samples) {
         final Object a = samples.get();
@@ -258,6 +288,8 @@ public final class Laws {
                 final BinaryOperator multiply) {
     return new Predicate<Supplier> () {
       @Override
+      public final String toString () { return "distributive"; }
+      @Override
       public final boolean test (final Supplier samples) {
         final Object a = samples.get();
         assert elements.contains(a);
@@ -313,7 +345,7 @@ public final class Laws {
       distributive(elements,add,multiply));}
 
   public static final List<Predicate> 
-  commutativering (final BinaryOperator add,
+  commutativeRing (final BinaryOperator add,
                    final Object additiveIdentity,
                    final UnaryOperator additiveInverse,
                    final BinaryOperator multiply,
@@ -333,7 +365,7 @@ public final class Laws {
       distributive(elements,add,multiply));}
 
   public static final List<Predicate> 
-  divisionring (final BinaryOperator add,
+  divisionRing (final BinaryOperator add,
                 final Object additiveIdentity,
                 final UnaryOperator additiveInverse,
                 final BinaryOperator multiply,
@@ -391,6 +423,8 @@ public final class Laws {
           final BinaryOperator operation) {
     return new BiPredicate<Supplier,Supplier> () {
       @Override
+      public final String toString () { return "closed"; }
+      @Override
       public final boolean test (final Supplier elementSamples,
                                  final Supplier scalarSamples) {
         final Object a = scalarSamples.get();
@@ -411,6 +445,8 @@ public final class Laws {
                final BiFunction multiply,
                final BiFunction scale) {
     return new BiPredicate<Supplier,Supplier> () {
+      @Override
+      public final String toString () { return "associative"; }
       @Override
       public final boolean test (final Supplier elementSamples,
                                  final Supplier scalarSamples) {
@@ -439,6 +475,8 @@ public final class Laws {
                 final BinaryOperator add,
                 final BiFunction scale) {
     return new BiPredicate<Supplier,Supplier> () {
+      @Override
+      public final String toString () { return "distributive"; }
       @Override
       public final boolean test (final Supplier elementSamples,
                                  final Supplier scalarSamples) {
@@ -470,8 +508,8 @@ public final class Laws {
           final OneSetOneOperation elements,
           final OneSetTwoOperations scalars) {
     final ImmutableList.Builder b = ImmutableList.builder();
-    //    b.addAll(scalars.ringLaws());
-    //    b.addAll(elements.commutativegroupLaws());
+    //b.addAll(scalars.ringLaws());
+    //b.addAll(elements.commutativegroupLaws());
     b.add(
       associative(elements,scalars,scalars.multiply(),scale),
       distributive(elements,scalars,elements.operation(),scale));
@@ -483,8 +521,8 @@ public final class Laws {
                final OneSetOneOperation elements,
                final OneSetTwoOperations scalars) {
     final ImmutableList.Builder b = ImmutableList.builder();
-    //    b.addAll(scalars.fieldLaws());
-    //    b.addAll(elements.commutativegroupLaws());
+    //b.addAll(scalars.fieldLaws());
+    //b.addAll(elements.commutativegroupLaws());
     b.add(
       associative(elements,scalars,scalars.multiply(),scale),
       distributive(elements,scalars,elements.operation(),scale));

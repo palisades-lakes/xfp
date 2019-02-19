@@ -11,11 +11,11 @@ import java.util.function.UnaryOperator;
 
 import org.apache.commons.rng.UniformRandomProvider;
 
-import xfp.java.algebra.Laws;
-import xfp.java.algebra.OneSetOneOperation;
+import xfp.java.sets.BigDecimals;
 import xfp.java.sets.BigFractions;
 import xfp.java.sets.BigFractionsN;
 import xfp.java.sets.Qn;
+import xfp.java.sets.Ratios;
 import xfp.java.sets.Set;
 
 /** Group-like structures: One set plus closed binary operation.
@@ -177,11 +177,29 @@ public final class OneSetOneOperation implements Set {
   //--------------------------------------------------------------
   // pre-define some standard magmas
 
+  public static final OneSetOneOperation BIGDECIMALS_ADD = 
+    OneSetOneOperation.make(BigDecimals.ADD,BigDecimals.get());
+
+  public static final OneSetOneOperation BIGDECIMALS_MULTIPLY = 
+    OneSetOneOperation.make(BigDecimals.MULTIPLY,BigDecimals.get());
+
+  //--------------------------------------------------------------
+  // pre-define some standard magmas
+
   public static final OneSetOneOperation BIGFRACTIONS_ADD = 
     OneSetOneOperation.make(BigFractions.ADD,BigFractions.get());
 
   public static final OneSetOneOperation BIGFRACTIONS_MULTIPLY = 
     OneSetOneOperation.make(BigFractions.MULTIPLY,BigFractions.get());
+
+  //--------------------------------------------------------------
+  // pre-define some standard magmas
+
+  public static final OneSetOneOperation RATIOS_ADD = 
+    OneSetOneOperation.make(Ratios.ADD,Ratios.get());
+
+  public static final OneSetOneOperation RATIOS_MULTIPLY = 
+    OneSetOneOperation.make(Ratios.MULTIPLY,Ratios.get());
 
   //--------------------------------------------------------------
   // TODO: cache by n?

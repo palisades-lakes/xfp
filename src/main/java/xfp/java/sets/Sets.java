@@ -8,7 +8,6 @@ import java.util.function.Supplier;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.CollectionSampler;
 
-import xfp.java.sets.Set;
 import xfp.java.exceptions.Exceptions;
 
 /** Utilities merging <code>java.util.Set</code> and
@@ -17,7 +16,7 @@ import xfp.java.exceptions.Exceptions;
  * Static methods only; no state.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-01-11
+ * @version 2019-02-19
  */
 
 @SuppressWarnings("unchecked")

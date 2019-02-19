@@ -1,5 +1,13 @@
 package xfp.java.test.numbers;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
+import java.math.BigInteger;
+
+import org.junit.jupiter.api.Test;
+
+import clojure.lang.Ratio;
+
 //import org.junit.jupiter.api.Test;
 
 //----------------------------------------------------------------
@@ -16,10 +24,18 @@ package xfp.java.test.numbers;
 
 public final class RatioTest {
 
-//  @SuppressWarnings({ "static-method" })
-//  @Test
-//  public final void problems () {
-// }
+  // (1) equals is wrong, unless always in reduced form?
+  // not true if you call the public constructor
+  //
+  // (2) need clojure tests to demonstrate surprising coercions
+  
+  @SuppressWarnings({ "static-method" })
+  @Test
+  public final void equivalenceFailure () {
+    final Ratio q0 = new Ratio(BigInteger.ONE,BigInteger.ONE);
+    final Ratio q1 = new Ratio(BigInteger.TWO,BigInteger.TWO);
+    // WRONG: this should be true, but clojure Ratio is broken.
+    assertFalse(q0.equals(q1)); }
 
   //--------------------------------------------------------------
 }

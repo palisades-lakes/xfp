@@ -13,10 +13,6 @@ import org.apache.commons.rng.UniformRandomProvider;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 
-import xfp.java.algebra.Laws;
-import xfp.java.algebra.OneSetOneOperation;
-import xfp.java.algebra.OneSetTwoOperations;
-import xfp.java.algebra.TwoSetsTwoOperations;
 import xfp.java.sets.BigFractionsN;
 import xfp.java.sets.Qn;
 import xfp.java.sets.Set;
@@ -40,7 +36,7 @@ import xfp.java.sets.Set;
  * linear to affine spaces, etc.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-01-29
+ * @version 2019-02-19
  */
 @SuppressWarnings("unchecked")
 public final class TwoSetsTwoOperations implements Set {

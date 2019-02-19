@@ -1,5 +1,6 @@
 package xfp.java.algebra;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -12,16 +13,16 @@ import java.util.function.UnaryOperator;
 import org.apache.commons.math3.fraction.BigFraction;
 import org.apache.commons.rng.UniformRandomProvider;
 
-import xfp.java.algebra.Laws;
-import xfp.java.algebra.OneSetTwoOperations;
+import xfp.java.sets.BigDecimals;
 import xfp.java.sets.BigFractions;
 import xfp.java.sets.Q;
+import xfp.java.sets.Ratios;
 import xfp.java.sets.Set;
 
 /** One set plus 2 operations.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-01-29
+ * @version 2019-02-19
  */
 @SuppressWarnings("unchecked")
 public final class OneSetTwoOperations implements Set {
@@ -89,15 +90,15 @@ public final class OneSetTwoOperations implements Set {
       elements()); }
 
   public final List<Predicate> 
-  commutativeringLaws () {
-    return Laws.commutativering(
+  commutativeRingLaws () {
+    return Laws.commutativeRing(
       add(),additiveIdentity(),additiveInverse(),
       multiply(),multiplicativeIdentity(),
       elements()); }
 
   public final List<Predicate> 
-  divisionreingLaws () {
-    return Laws.divisionring(
+  divisionRingLaws () {
+    return Laws.divisionRing(
       add(),additiveIdentity(),additiveInverse(),
       multiply(),multiplicativeIdentity(),multiplicativeInverse(),
       elements()); } 
@@ -105,8 +106,12 @@ public final class OneSetTwoOperations implements Set {
   public final List<Predicate> 
   fieldLaws () {
     return Laws.field(
-      add(),additiveIdentity(),additiveInverse(),
-      multiply(),multiplicativeIdentity(),multiplicativeInverse(),
+      add(),
+      additiveIdentity(),
+      additiveInverse(),
+      multiply(),
+      multiplicativeIdentity(),
+      multiplicativeInverse(),
       elements()); } 
 
   //--------------------------------------------------------------
@@ -236,6 +241,18 @@ public final class OneSetTwoOperations implements Set {
 
   //--------------------------------------------------------------
 
+  public static final OneSetTwoOperations BIGDECIMALS_RING = 
+    OneSetTwoOperations.make(
+      BigDecimals.ADD,
+      BigDecimal.ZERO,
+      BigDecimals.ADDITIVE_INVERSE,
+      BigDecimals.MULTIPLY,
+      BigDecimal.ONE,
+      // no multiplicative inverse for BigDecimal
+      // divide can result in non-terminating decimal expansion
+      null, 
+      BigDecimals.get());
+
   public static final OneSetTwoOperations BIGFRACTIONS_FIELD = 
     OneSetTwoOperations.make(
       BigFractions.ADD,
@@ -246,6 +263,15 @@ public final class OneSetTwoOperations implements Set {
       BigFractions.MULTIPLICATIVE_INVERSE,
       BigFractions.get());
 
+  public static final OneSetTwoOperations RATIOS_FIELD = 
+    OneSetTwoOperations.make(
+      Ratios.ADD,
+      Ratios.ZERO,
+      Ratios.ADDITIVE_INVERSE,
+      Ratios.MULTIPLY,
+      Ratios.ONE,
+      Ratios.MULTIPLICATIVE_INVERSE,
+      Ratios.get());
 
   public static final OneSetTwoOperations Q_FIELD = 
     OneSetTwoOperations.make(

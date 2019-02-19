@@ -4,8 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.function.Supplier;
 
+import org.junit.jupiter.api.Test;
+
+import xfp.java.Classes;
 import xfp.java.prng.PRNG;
 import xfp.java.prng.Seeds;
+import xfp.java.sets.BigDecimals;
+import xfp.java.sets.BigFractions;
+import xfp.java.sets.Ratios;
 import xfp.java.sets.Set;
 import xfp.java.sets.Sets;
 
@@ -13,7 +19,7 @@ import xfp.java.sets.Sets;
 /** Common code for testing sets. 
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-01-29
+ * @version 2019-02-19
  */
 
 @SuppressWarnings("unchecked")
@@ -32,7 +38,9 @@ public final class SetTests {
       //System.out.println("element=" + x);
       assertTrue(
         set.contains(x),
-        () -> set.toString() + "\n does not contain \n" + x); } }
+        () -> set.toString() + "\n does not contain \n" + 
+          Classes.getSimpleName(Classes.getClass(x)) + ": " +
+        x); } }
 
   private static final void testEquivalence (final Set set) {
     final Supplier g = 
@@ -46,6 +54,23 @@ public final class SetTests {
   public static final void tests (final Set set) {
     testMembership(set);
     testEquivalence(set); }
+
+  //--------------------------------------------------------------
+
+  @SuppressWarnings({ "static-method" })
+  @Test
+  public final void bigDecimals () { 
+    SetTests.tests(BigDecimals.get()); }
+
+  @SuppressWarnings({ "static-method" })
+  @Test
+  public final void bigFractions () { 
+    SetTests.tests(BigFractions.get()); }
+
+  @SuppressWarnings({ "static-method" })
+  @Test
+  public final void ratios () { 
+    SetTests.tests(Ratios.get()); }
 
   //--------------------------------------------------------------
 }

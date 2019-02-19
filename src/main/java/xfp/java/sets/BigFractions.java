@@ -11,8 +11,6 @@ import java.util.function.UnaryOperator;
 import org.apache.commons.math3.fraction.BigFraction;
 import org.apache.commons.rng.UniformRandomProvider;
 
-import xfp.java.sets.BigFractions;
-import xfp.java.sets.Set;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
 
@@ -38,6 +36,7 @@ public final class BigFractions implements Set {
     if (null == q0) {
       if (null == q1) { return true; }
       return false; }
+    if (null == q1) { return false; }
     final BigInteger n0 = q0.getNumerator(); 
     final BigInteger d0 = q0.getDenominator(); 
     final BigInteger n1 = q1.getNumerator(); 
@@ -45,8 +44,7 @@ public final class BigFractions implements Set {
     return n0.multiply(d1).equals(n1.multiply(d0)); }
 
   private static final BiPredicate<BigFraction,BigFraction> 
-  BIGFRACTION_EQUALS = 
-  new BiPredicate<BigFraction,BigFraction>() {
+  EQUALS = new BiPredicate<BigFraction,BigFraction>() {
 
     // BigFraction.equals reduces both arguments before checking
     // numerator and denominators are equal.
@@ -66,7 +64,7 @@ public final class BigFractions implements Set {
 
   @Override
   public final BiPredicate equivalence () {
-    return BIGFRACTION_EQUALS; }
+    return EQUALS; }
 
   //--------------------------------------------------------------
 

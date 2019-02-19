@@ -8,7 +8,6 @@ import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 
-import xfp.java.test.algebra.AlgebraicStructureTests;
 import xfp.java.algebra.OneSetOneOperation;
 import xfp.java.algebra.OneSetTwoOperations;
 import xfp.java.algebra.TwoSetsTwoOperations;
@@ -56,6 +55,18 @@ public final class AlgebraicStructureTests {
         assertTrue(law.test(g)); } } }
 
   public static final void 
+  commutativeRingTests (final OneSetTwoOperations commutativeRing) {
+    SetTests.tests(commutativeRing);
+    final Supplier g = 
+      commutativeRing.generator( 
+        PRNG.well44497b(
+          Seeds.seed("seeds/Well44497b-2019-01-11.txt")));
+
+    for(final Predicate law : commutativeRing.commutativeRingLaws()) {
+      for (int i=0; i<TRYS; i++) {
+        assertTrue(law.test(g), law.toString() + " failed."); } } }
+
+  public static final void 
   fieldTests (final OneSetTwoOperations field) {
     SetTests.tests(field);
     final Supplier g = 
@@ -65,14 +76,28 @@ public final class AlgebraicStructureTests {
 
     for(final Predicate law : field.fieldLaws()) {
       for (int i=0; i<TRYS; i++) {
-        assertTrue(law.test(g)); } } }
+        assertTrue(law.test(g), law.toString() + " failed."); } } }
+
+  @SuppressWarnings({ "static-method" })
+  @Test
+  public final void bigDecimals () {
+    magmaTests(OneSetOneOperation.BIGDECIMALS_ADD);
+    magmaTests(OneSetOneOperation.BIGDECIMALS_MULTIPLY); 
+    commutativeRingTests(OneSetTwoOperations.BIGDECIMALS_RING);  }
 
   @SuppressWarnings({ "static-method" })
   @Test
   public final void bigFractions () {
     magmaTests(OneSetOneOperation.BIGFRACTIONS_ADD);
     magmaTests(OneSetOneOperation.BIGFRACTIONS_MULTIPLY); 
-    fieldTests(OneSetTwoOperations.BIGFRACTIONS_FIELD); }
+    fieldTests(OneSetTwoOperations.BIGFRACTIONS_FIELD);  }
+
+  @SuppressWarnings({ "static-method" })
+  @Test
+  public final void ratios () {
+    magmaTests(OneSetOneOperation.RATIOS_ADD);
+    magmaTests(OneSetOneOperation.RATIOS_MULTIPLY); 
+    fieldTests(OneSetTwoOperations.RATIOS_FIELD); }
 
   @SuppressWarnings({ "static-method" })
   @Test
