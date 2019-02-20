@@ -105,6 +105,9 @@ public final class Ratios implements Set {
 
     public static final Ratios get () { return SINGLETON; } 
 
+    public static final Ratio add (final Ratio q0, final Ratio q1) {
+      return Numbers.toRatio(Numbers.add(q0,q1)); }
+    
     public static final BinaryOperator<Ratio> ADD =
       new BinaryOperator<Ratio> () {
       @Override
@@ -112,26 +115,32 @@ public final class Ratios implements Set {
       @Override
       public final Ratio apply (final Ratio q0, 
                                 final Ratio q1) {
-        return Numbers.toRatio(Numbers.add(q0,q1)); } 
+        return add(q0,q1); } 
     };
 
     public static final Ratio ZERO =
       new Ratio(BigInteger.ZERO,BigInteger.ONE);
 
+    public static final Ratio negate (final Ratio q) {
+      return Numbers.toRatio(Numbers.minus(q)); } 
+    
     public static final UnaryOperator<Ratio>
     ADDITIVE_INVERSE =
     new UnaryOperator<Ratio> () {
       @Override
       public final Ratio apply (final Ratio q) {
-        return Numbers.toRatio(Numbers.minus(q)); } 
+        return negate(q); } 
     };
 
+    public static final Ratio multiply (final Ratio q0, final Ratio q1) {
+      return Numbers.toRatio(Numbers.multiply(q0,q1)); }
+    
     public static final BinaryOperator<Ratio> MULTIPLY =
       new BinaryOperator<Ratio>() {
       @Override
       public final Ratio apply (final Ratio q0, 
                                 final Ratio q1) {
-        return Numbers.toRatio(Numbers.multiply(q0,q1)); } 
+        return multiply(q0,q1); } 
     };
 
     public static final Ratio ONE =

@@ -39,7 +39,7 @@ public final class SetTests {
       assertTrue(
         set.contains(x),
         () -> set.toString() + "\n does not contain \n" + 
-          Classes.getSimpleName(Classes.getClass(x)) + ": " +
+          Classes.className(x) + ": " +
         x); } }
 
   private static final void testEquivalence (final Set set) {

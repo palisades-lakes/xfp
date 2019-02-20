@@ -45,7 +45,7 @@ public final class QnProfile {
         PRNG.well44497b(
           Seeds.seed("seeds/Well44497b-2019-01-09.txt")));
 
-    for(final Object law : space.linearspaceLaws()) {
+    for(final Object law : space.linearSpaceLaws()) {
       for (int i=0; i<TRYS; i++) {
         if (law instanceof Predicate) {
           assertTrue(((Predicate) law).test(vg)); }

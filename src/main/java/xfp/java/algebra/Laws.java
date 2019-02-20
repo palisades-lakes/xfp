@@ -166,7 +166,7 @@ public final class Laws {
         return inverse + " is not an inverse for " +
           operation + " on " + elements +
           " relative to " + 
-          Classes.getSimpleName(Classes.getClass(identity)) + ":" +
+          Classes.className(identity) + ":" +
           identity + "\n" +
           "excluding " + excluded; }
       @Override
@@ -496,31 +496,28 @@ public final class Laws {
   //--------------------------------------------------------------
   // by algebraic structure
 
-  // laws might be Predicate or BiPredicate
-  // TODO: define new interface for multi-arity predicates?
-  // some laws apply to scalars alone, some to elements alone,
-  // some to elements and scalars together..
-
+  // just the laws involving both scalars and elements
+  // TwoSetsTwoOperations adds the laws for the scalars and 
+  // elements separately
+  
   public static final List
   module (final BiFunction scale,
           final OneSetOneOperation elements,
           final OneSetTwoOperations scalars) {
     final ImmutableList.Builder b = ImmutableList.builder();
-    //b.addAll(scalars.ringLaws());
-    //b.addAll(elements.commutativegroupLaws());
     b.add(
       associative(elements,scalars,scalars.multiply(),scale),
       distributive(elements,scalars,elements.operation(),scale));
     return b.build(); }
 
+  // just the laws involving both scalars and elements
+  
   /** Perhaps more commonly called 'vector' space. */
   public static final List
-  linearspace (final BiFunction scale,
+  linearSpace (final BiFunction scale,
                final OneSetOneOperation elements,
                final OneSetTwoOperations scalars) {
     final ImmutableList.Builder b = ImmutableList.builder();
-    //b.addAll(scalars.fieldLaws());
-    //b.addAll(elements.commutativegroupLaws());
     b.add(
       associative(elements,scalars,scalars.multiply(),scale),
       distributive(elements,scalars,elements.operation(),scale));

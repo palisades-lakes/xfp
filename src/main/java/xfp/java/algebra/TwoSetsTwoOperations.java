@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import org.apache.commons.rng.UniformRandomProvider;
@@ -13,8 +12,10 @@ import org.apache.commons.rng.UniformRandomProvider;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 
+import xfp.java.linear.BigDecimalsN;
 import xfp.java.linear.BigFractionsN;
 import xfp.java.linear.Qn;
+import xfp.java.linear.RatiosN;
 
 /** Module-like structures, including linear (vector) spaces.
  * Two sets, 'elements' and 'scalars'.
@@ -64,20 +65,36 @@ public final class TwoSetsTwoOperations implements Set {
 
   //--------------------------------------------------------------
   // laws for some specific algebraic structures, for testing
+  // Because there are 2 sets, we return a map:
+  // { scalars scalarLaws
+  //   elements elementLaws
+  //   space spaceLaws }
 
-  public final List<BiPredicate> moduleLaws () {
+  public final Map<Set,List> moduleLaws () {
     return 
-      Laws.module(
+      Map.of(
+        elements(),
+        ((OneSetOneOperation) elements()).commutativeGroupLaws(),
+        scalars(),
+        ((OneSetTwoOperations) scalars()).ringLaws(),
+        this, 
+        Laws.module(
         multiply(),
         (OneSetOneOperation) elements(),
-        (OneSetTwoOperations) scalars()); }
+        (OneSetTwoOperations) scalars())); }
 
-  public final List<Predicate> linearspaceLaws () {
+  public final Map<Set,List> linearSpaceLaws () {
     return
-      Laws.linearspace(
+      Map.of(
+        elements(),
+        ((OneSetOneOperation) elements()).commutativeGroupLaws(),
+        scalars(),
+        ((OneSetTwoOperations) scalars()).ringLaws(),
+        this, 
+      Laws.linearSpace(
         multiply(),
         (OneSetOneOperation) elements(),
-        (OneSetTwoOperations) scalars()); }
+        (OneSetTwoOperations) scalars())); }
 
   //--------------------------------------------------------------
   // Set methods
@@ -164,6 +181,35 @@ public final class TwoSetsTwoOperations implements Set {
    * <code>BigFraction[n]</code>.
    */
 
+  private static final TwoSetsTwoOperations makeBDn (final int n) { 
+    return
+      TwoSetsTwoOperations.make(
+        BigDecimalsN.scaler(n),
+        OneSetOneOperation.bigDecimalsNGroup(n),
+        OneSetTwoOperations.BIGDECIMALS_RING); }
+
+  private static final IntObjectMap<TwoSetsTwoOperations> 
+  _bdnCache = new IntObjectHashMap();
+
+  /** n-dimensional rational module, implemented with
+   * <code>BigDecimal[]</code>.
+   * (not a vector space because BigDecimal doesn't have a 
+   * multiplicative inverse.)
+   */
+  public static final TwoSetsTwoOperations getBDn (final int dimension) {
+    final TwoSetsTwoOperations qn0 = _bdnCache.get(dimension);
+    if (null != qn0) { return qn0; }
+    final TwoSetsTwoOperations qn1 = makeBDn(dimension); 
+    _bdnCache.put(dimension,qn1);
+    return qn1; }
+
+  //--------------------------------------------------------------
+  // TODO: should this be its own class?
+
+  /** n-dimensional rational vector space, implemented with
+   * <code>BigFraction[n]</code>.
+   */
+
   private static final TwoSetsTwoOperations makeBFn (final int n) { 
     return
       TwoSetsTwoOperations.make(
@@ -182,6 +228,33 @@ public final class TwoSetsTwoOperations implements Set {
     if (null != qn0) { return qn0; }
     final TwoSetsTwoOperations qn1 = makeBFn(dimension); 
     _bfnCache.put(dimension,qn1);
+    return qn1; }
+
+  //--------------------------------------------------------------
+  // TODO: should this be its own class?
+
+  /** n-dimensional rational vector space, implemented with
+   * <code>Ratio[n]</code>.
+   */
+
+  private static final TwoSetsTwoOperations makeRatiosN (final int n) { 
+    return
+      TwoSetsTwoOperations.make(
+        RatiosN.scaler(n),
+        OneSetOneOperation.ratiosNGroup(n),
+        OneSetTwoOperations.RATIOS_FIELD); }
+
+  private static final IntObjectMap<TwoSetsTwoOperations> 
+  _ratiosNCache = new IntObjectHashMap();
+
+  /** n-dimensional rational vector space, implemented with
+   * <code>BigFraction[]</code>.
+   */
+  public static final TwoSetsTwoOperations getRatiosN (final int dimension) {
+    final TwoSetsTwoOperations qn0 = _ratiosNCache.get(dimension);
+    if (null != qn0) { return qn0; }
+    final TwoSetsTwoOperations qn1 = makeRatiosN(dimension); 
+    _ratiosNCache.put(dimension,qn1);
     return qn1; }
 
   //--------------------------------------------------------------

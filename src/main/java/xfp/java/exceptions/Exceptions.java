@@ -34,7 +34,7 @@ public final class Exceptions {
                         final Class... args) {
     final String[] argClasses =
       Stream.of(args)
-      .map(x -> Classes.getSimpleName(x))
+      .map(x -> Classes.simpleName(x))
       .toArray(String[]::new);
     return unsupportedOperation(
       receiver.getSimpleName(),method,argClasses); }

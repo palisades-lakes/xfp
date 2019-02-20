@@ -11,8 +11,10 @@ import java.util.function.UnaryOperator;
 
 import org.apache.commons.rng.UniformRandomProvider;
 
+import xfp.java.linear.BigDecimalsN;
 import xfp.java.linear.BigFractionsN;
 import xfp.java.linear.Qn;
+import xfp.java.linear.RatiosN;
 import xfp.java.numbers.BigDecimals;
 import xfp.java.numbers.BigFractions;
 import xfp.java.numbers.Ratios;
@@ -68,7 +70,7 @@ public final class OneSetOneOperation implements Set {
       Laws.group(elements(),operation(),identity(),inverse());}
 
   public final List<Predicate> 
-  commutativegroupLaws  () {
+  commutativeGroupLaws  () {
     assert Objects.nonNull(identity());
     assert Objects.nonNull(inverse());
     return 
@@ -204,6 +206,18 @@ public final class OneSetOneOperation implements Set {
   // TODO: cache by n?
   
   public static final OneSetOneOperation 
+  bigDecimalsNGroup (final int n) {
+    return
+      OneSetOneOperation.make(
+        BigDecimalsN.adder(n),
+        BigDecimalsN.get(n),
+        BigDecimalsN.additiveIdentity(n),
+        BigDecimalsN.additiveInverse(n)); }
+
+  //--------------------------------------------------------------
+  // TODO: cache by n?
+  
+  public static final OneSetOneOperation 
   bigFractionsNGroup (final int n) {
     return
       OneSetOneOperation.make(
@@ -211,6 +225,18 @@ public final class OneSetOneOperation implements Set {
         BigFractionsN.get(n),
         BigFractionsN.additiveIdentity(n),
         BigFractionsN.additiveInverse(n)); }
+
+  //--------------------------------------------------------------
+  // TODO: cache by n?
+  
+  public static final OneSetOneOperation 
+  ratiosNGroup (final int n) {
+    return
+      OneSetOneOperation.make(
+        RatiosN.adder(n),
+        RatiosN.get(n),
+        RatiosN.additiveIdentity(n),
+        RatiosN.additiveInverse(n)); }
 
   //--------------------------------------------------------------
   // TODO: cache by n?
