@@ -62,6 +62,17 @@
  </build>
  <dependencies>
   <dependency>
+   <groupId>criterium</groupId>
+   <artifactId>criterium</artifactId>
+   <version>${criterium-version}</version>
+   <exclusions>
+    <exclusion>
+     <groupId>org.clojure</groupId>
+     <artifactId>clojure</artifactId>
+    </exclusion>
+   </exclusions>
+  </dependency>
+  <dependency>
    <groupId>org.apache.commons</groupId>
    <artifactId>commons-math3</artifactId>
    <version>${commons-math3-version}</version>
