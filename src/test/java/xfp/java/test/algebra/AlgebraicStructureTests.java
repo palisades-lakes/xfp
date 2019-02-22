@@ -21,7 +21,7 @@ import xfp.java.prng.Seeds;
 /** Common code for testing sets. 
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-01-22
+ * @version 2019-02-21
  */
 
 @SuppressWarnings("unchecked")
@@ -114,14 +114,30 @@ public final class AlgebraicStructureTests {
     SetTests.tests(space);
   
     final Map<Set,List> lawLists = space.linearSpaceLaws();
+    if (null == lawLists) {
+      System.out.println(space);
+      throw new RuntimeException("no laws!");
+    }
     
     final OneSetOneOperation elements = 
       (OneSetOneOperation) space.elements();
+    if (null == elements) {
+      System.out.println(space);
+      throw new RuntimeException("no elements!");
+    }
+
     final Supplier vg = 
       space.elements().generator( 
         PRNG.well44497b(
           Seeds.seed("seeds/Well44497b-2019-01-09.txt")));
-    for(final Object law : lawLists.get(elements)) {
+
+    if (null == lawLists.get(elements)) {
+      System.out.println(space);
+      System.out.println(elements);
+      System.out.println(lawLists);
+      throw new RuntimeException("no elements!");
+    }
+    for (final Object law : lawLists.get(elements)) {
       for (int i=0; i<LINEARSPACE_TRYS; i++) {
         assertTrue(((Predicate) law).test(vg));} } 
     
@@ -146,30 +162,30 @@ public final class AlgebraicStructureTests {
       final TwoSetsTwoOperations bdn = TwoSetsTwoOperations.getBDn(n);
       AlgebraicStructureTests.twoSetsTwoOperationsTests(bdn); } }
 
-  @SuppressWarnings({ "static-method" })
-  @Test
-  public final void ratiosN () {
-    for (final int n : new int[] { 1, 3, 13, 127}) {
-      final TwoSetsTwoOperations ratiosN = 
-        TwoSetsTwoOperations.getRatiosN(n);
-      AlgebraicStructureTests.twoSetsTwoOperationsTests(ratiosN); } }
-
-  @SuppressWarnings({ "static-method" })
-  @Test
-  public final void bigFractionN () {
-    for (final int n : new int[] { 1, 3, 13, 127}) {
-      final TwoSetsTwoOperations bfn = 
-        TwoSetsTwoOperations.getBFn(n);
-      AlgebraicStructureTests.twoSetsTwoOperationsTests(bfn); } }
-
-  @SuppressWarnings({ "static-method" })
-  @Test
-  public final void qN () {
-    for (final int n : new int[] { 1, 3, 13, 127}) {
-      final TwoSetsTwoOperations qn = 
-        TwoSetsTwoOperations.getQn(n);
-      AlgebraicStructureTests.twoSetsTwoOperationsTests(qn); } }
-
+//  @SuppressWarnings({ "static-method" })
+//  @Test
+//  public final void ratiosN () {
+//    for (final int n : new int[] { 1, 3, 13, 127}) {
+//      final TwoSetsTwoOperations ratiosN = 
+//        TwoSetsTwoOperations.getRatiosN(n);
+//      AlgebraicStructureTests.twoSetsTwoOperationsTests(ratiosN); } }
+//
+//  @SuppressWarnings({ "static-method" })
+//  @Test
+//  public final void bigFractionN () {
+//    for (final int n : new int[] { 1, 3, 13, 127}) {
+//      final TwoSetsTwoOperations bfn = 
+//        TwoSetsTwoOperations.getBFn(n);
+//      AlgebraicStructureTests.twoSetsTwoOperationsTests(bfn); } }
+//
+//  @SuppressWarnings({ "static-method" })
+//  @Test
+//  public final void qN () {
+//    for (final int n : new int[] { 1, 3, 13, 127}) {
+//      final TwoSetsTwoOperations qn = 
+//        TwoSetsTwoOperations.getQn(n);
+//      AlgebraicStructureTests.twoSetsTwoOperationsTests(qn); } }
+//
   //--------------------------------------------------------------
 }
 //--------------------------------------------------------------

@@ -36,7 +36,7 @@ import xfp.java.linear.RatiosN;
  * linear to affine spaces, etc.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-19
+ * @version 2019-02-21
  */
 @SuppressWarnings("unchecked")
 public final class TwoSetsTwoOperations implements Set {
@@ -139,7 +139,6 @@ public final class TwoSetsTwoOperations implements Set {
       return false; }
     return true; }
 
-
   @Override
   public final String toString () { 
     return "S2O2[" + 
@@ -150,7 +149,6 @@ public final class TwoSetsTwoOperations implements Set {
   //--------------------------------------------------------------
   // construction
   //--------------------------------------------------------------
-
 
   private TwoSetsTwoOperations (final BiFunction multiply,
                                 final Set elements,
@@ -184,7 +182,7 @@ public final class TwoSetsTwoOperations implements Set {
   private static final TwoSetsTwoOperations makeBDn (final int n) { 
     return
       TwoSetsTwoOperations.make(
-        BigDecimalsN.scaler(n),
+        BigDecimalsN.get(n).scaler(),
         OneSetOneOperation.bigDecimalsNGroup(n),
         OneSetTwoOperations.BIGDECIMALS_RING); }
 
@@ -240,7 +238,7 @@ public final class TwoSetsTwoOperations implements Set {
   private static final TwoSetsTwoOperations makeRatiosN (final int n) { 
     return
       TwoSetsTwoOperations.make(
-        RatiosN.scaler(n),
+        RatiosN.get(n).scaler(),
         OneSetOneOperation.ratiosNGroup(n),
         OneSetTwoOperations.RATIOS_FIELD); }
 
@@ -267,7 +265,7 @@ public final class TwoSetsTwoOperations implements Set {
   private static final TwoSetsTwoOperations makeQn (final int n) { 
     return
       TwoSetsTwoOperations.make(
-        Qn.scaler(n),
+        Qn.get(n).scaler(),
         OneSetOneOperation.qnGroup(n),
         OneSetTwoOperations.Q_FIELD); }
 

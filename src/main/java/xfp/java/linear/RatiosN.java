@@ -27,7 +27,7 @@ import xfp.java.prng.Generators;
  * for sparse vectors, etc.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-19
+ * @version 2019-02-21
  */
 @SuppressWarnings("unchecked")
 public final class RatiosN implements Set {
@@ -35,39 +35,97 @@ public final class RatiosN implements Set {
   private final int _dimension;
   public final int dimension () { return _dimension; }
 
-  private final BiPredicate<Ratio[],Ratio[]> 
-  _equivalence =
-  new BiPredicate<Ratio[],Ratio[]>() {
-    @Override
-    public final String toString () { return "RatioN.equals"; }
+  //--------------------------------------------------------------
+  // operations for algebraic structures over Ratio arrays.
+  //--------------------------------------------------------------
+  /** A <code>BinaryOperator</code> that adds elementwise
+   * <code>Ratio[]</code> instances of length 
+   * <code>dimension</code>.
+   */
 
-    // Ratio.equals reduces both arguments before checking
-    // numerator and denominators are equal.
-    // Guessing our Ratios are usually already reduced.
-    //     @Override
-    //    public final boolean test (final Ratio[] q0, 
-    //                               final Ratio[] q1) {
-    //      assert null != q0;
-    //      assert null != q1;
-    //      assert _dimension == q0.length;
-    //      assert _dimension == q1.length;
-    //      return Arrays.deepEquals(q0,q1); }
-    @Override
-    public final boolean test (final Ratio[] q0, 
-                               final Ratio[] q1) {
-      assert null != q0;
-      assert null != q1;
-      assert _dimension == q0.length;
-      assert _dimension == q1.length;
-      for (int i=0;i<_dimension;i++) {
-        if (! Ratios.equalRatios(q0[i],q1[i])) {
-          return false; } }
-      return true;
-    }
-  };
+  private final Ratio[] add (final Ratio[] q0, 
+                             final Ratio[] q1) {
+    assert contains(q0);
+    assert contains(q1);
+    final Ratio[] qq = new Ratio[_dimension];
+    for (int i=0;i<dimension();i++) { 
+      qq[i] = Ratios.get().add(q0[i],q1[i]); }
+    return qq; }
+
+  public final BinaryOperator<Ratio[]> adder () {
+    return
+      new BinaryOperator<Ratio[]>() {
+        @Override
+        public final Ratio[] apply (final Ratio[] q0, 
+                                    final Ratio[] q1) {
+          return RatiosN.this.add(q0,q1); } }; }
+
+  //--------------------------------------------------------------
+
+  public final Ratio[] additiveIdentity () {
+    final Ratio[] qq = new Ratio[dimension()];
+    Arrays.fill(qq,Ratios.get().additiveIdentity());
+    return qq; }
+
+  //--------------------------------------------------------------
+
+  private final Ratio[] negate (final Ratio[] q) {
+    assert contains(q);
+    final Ratio[] qq = new Ratio[dimension()];
+    for (int i=0;i<_dimension;i++) { 
+      qq[i] = Ratios.get().negate(q[i]); }
+    return qq; } 
+
+  public final UnaryOperator<Ratio[]> additiveInverse () {
+    return 
+      new UnaryOperator<Ratio[]>() {
+        @Override
+        public final Ratio[] apply (final Ratio[] q) {
+          return RatiosN.this.negate(q); } }; }
+
+  //--------------------------------------------------------------
+
+  private final Ratio[] scale (final Ratio a, 
+                               final Ratio[] q) {
+    assert contains(q);
+    final Ratio[] qq = new Ratio[dimension()];
+    for (int i=0;i<dimension();i++) { 
+      qq[i] = Ratios.get().multiply(q[i],a); }
+    return qq; } 
+
+  public final BiFunction<Ratio,Ratio[],Ratio[]> 
+  scaler () {
+    return
+      new BiFunction<Ratio,Ratio[],Ratio[]>() {
+        @Override
+        public final Ratio[] apply (final Ratio a, 
+                                    final Ratio[] q) {
+          return RatiosN.this.scale(a,q); } }; }
 
   //--------------------------------------------------------------
   // Set methods
+  //--------------------------------------------------------------
+
+  private final boolean equals (final Ratio[] q0, 
+                                final Ratio[] q1) {
+    assert null != q0;
+    assert null != q1;
+    assert _dimension == q0.length;
+    assert _dimension == q1.length;
+    for (int i=0;i<_dimension;i++) {
+      if (! Ratios.get().equals(q0[i],q1[i])) {
+        return false; } }
+    return true; }
+
+  @Override
+  public final BiPredicate equivalence () { 
+    return new BiPredicate<Ratio[],Ratio[]>() {
+
+      @Override
+      public final boolean test (final Ratio[] q0, 
+                                 final Ratio[] q1) {
+        return RatiosN.this.equals(q0,q1); } }; }
+
   //--------------------------------------------------------------
 
   @Override
@@ -75,10 +133,7 @@ public final class RatiosN implements Set {
     return 
       (element instanceof Ratio[])
       &&
-      ((Ratio[]) element).length == _dimension; }
-
-  @Override
-  public final BiPredicate equivalence () { return _equivalence; }
+      ((Ratio[]) element).length == dimension(); }
 
   //--------------------------------------------------------------
   /** Intended primarily for testing. 
@@ -101,12 +156,15 @@ public final class RatiosN implements Set {
   //--------------------------------------------------------------
 
   @Override
-  public final int hashCode () { return 0; }
+  public final int hashCode () { return dimension(); }
 
-  // singleton
   @Override
   public final boolean equals (final Object that) {
-    return that instanceof RatiosN; }
+    if (this == that) { return true; }
+    return 
+      (that instanceof RatiosN)
+      &&
+      dimension() == ((RatiosN) that).dimension(); }
 
   @Override
   public final String toString () { return "Ratio^" + _dimension; }
@@ -129,74 +187,6 @@ public final class RatiosN implements Set {
     final RatiosN dn1 = new RatiosN(dimension); 
     _cache.put(dimension,dn1);
     return dn1; }
-
-  //--------------------------------------------------------------
-  // operations for algebraic structures over Ratio tuples.
-  //--------------------------------------------------------------
-  /** A <code>BinaryOperator</code> that adds elementwise
-   * <code>Ratio[]</code> instances of length 
-   * <code>dimension</code>.
-   */
-
-  public static final BinaryOperator<Ratio[]> 
-  adder (final int dimension) {
-    assert dimension > 0;
-    return
-      new BinaryOperator<Ratio[]>() {
-        @Override
-        public final String toString () { return "RatioN.add"; }
-        @Override
-        public final Ratio[] apply (final Ratio[] q0, 
-                                    final Ratio[] q1) {
-          assert null != q0;
-          assert null != q1;
-          assert dimension == q0.length;
-          assert dimension == q1.length;
-          final Ratio[] qq = new Ratio[dimension];
-          for (int i=0;i<dimension;i++) { 
-            qq[i] = Ratios.add(q0[i],q1[i]); }
-          return qq; } }; }
-
-  // TODO: special sparse representation for zero vector?
-
-  public static final Ratio[] 
-    additiveIdentity (final int dimension) {
-    assert dimension > 0;
-    final Ratio[] qq = new Ratio[dimension];
-    Arrays.fill(qq,Ratios.ZERO);
-    return qq; }
-
-  public static final UnaryOperator<Ratio[]>
-  additiveInverse (final int dimension) {
-    assert dimension > 0;
-    return 
-      new UnaryOperator<Ratio[]>() {
-        @Override
-        public final Ratio[] apply (final Ratio[] q) {
-          assert null != q;
-          assert dimension == q.length;
-          final Ratio[] qq = new Ratio[dimension];
-          for (int i=0;i<dimension;i++) { 
-            qq[i] = Ratios.negate(q[i]); }
-          return qq; } }; }
-
-  public static final 
-  BiFunction<Ratio,Ratio[],Ratio[]> 
-  scaler (final int dimension) {
-    assert dimension > 0;
-    return
-      new BiFunction<Ratio,Ratio[],Ratio[]>() {
-        @Override
-        public final String toString () { return "RatioN.scale"; }
-        @Override
-        public final Ratio[] apply (final Ratio a, 
-                                    final Ratio[] q) {
-          assert null != q;
-          assert dimension == q.length;
-          final Ratio[] qq = new Ratio[dimension];
-          for (int i=0;i<dimension;i++) { 
-            qq[i] = Ratios.multiply(q[i],a); }
-          return qq; } }; }
 
   //--------------------------------------------------------------
 }

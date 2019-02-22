@@ -16,7 +16,6 @@ import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 
 import xfp.java.algebra.Set;
-import xfp.java.linear.BigFractionsN;
 import xfp.java.numbers.BigFractions;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
@@ -28,7 +27,7 @@ import xfp.java.prng.Generators;
  * for sparse vectors, etc.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-01-29
+ * @version 2019-02-21
  */
 @SuppressWarnings("unchecked")
 public final class BigFractionsN implements Set {
@@ -36,37 +35,95 @@ public final class BigFractionsN implements Set {
   private final int _dimension;
   public final int dimension () { return _dimension; }
 
-  private final BiPredicate<BigFraction[],BigFraction[]> 
-  _equivalence =
-  new BiPredicate<BigFraction[],BigFraction[]>() {
+  //--------------------------------------------------------------
+  // operations for algebraic structures over BigFraction arrays.
+  //--------------------------------------------------------------
+  /** A <code>BinaryOperator</code> that adds elementwise
+   * <code>BigFraction[]</code> instances of length 
+   * <code>dimension</code>.
+   */
 
-    // BigFraction.equals reduces both arguments before checking
-    // numerator and denominators are equal.
-    // Guessing our BigFractions are usually already reduced.
-//     @Override
-//    public final boolean test (final BigFraction[] q0, 
-//                               final BigFraction[] q1) {
-//      assert null != q0;
-//      assert null != q1;
-//      assert _dimension == q0.length;
-//      assert _dimension == q1.length;
-//      return Arrays.deepEquals(q0,q1); }
-    @Override
-    public final boolean test (final BigFraction[] q0, 
-                               final BigFraction[] q1) {
-      assert null != q0;
-      assert null != q1;
-      assert _dimension == q0.length;
-      assert _dimension == q1.length;
-      for (int i=0;i<_dimension;i++) {
-        if (! BigFractions.equalBigFractions(q0[i],q1[i])) {
-          return false; } }
-      return true;
-      }
-  };
+  private final BigFraction[] add (final BigFraction[] q0, 
+                                   final BigFraction[] q1) {
+    assert contains(q0);
+    assert contains(q1);
+    final BigFraction[] qq = new BigFraction[_dimension];
+    for (int i=0;i<dimension();i++) { qq[i] = q0[i].add(q1[i]); }
+    return qq; }
+
+  public final BinaryOperator<BigFraction[]> adder () {
+    return
+      new BinaryOperator<BigFraction[]>() {
+        @Override
+        public final BigFraction[] apply (final BigFraction[] q0, 
+                                          final BigFraction[] q1) {
+          return BigFractionsN.this.add(q0,q1); } }; }
+
+  //--------------------------------------------------------------
+
+  public final BigFraction[] additiveIdentity () {
+    final BigFraction[] qq = new BigFraction[dimension()];
+    Arrays.fill(qq,BigFraction.ZERO);
+    return qq; }
+
+  //--------------------------------------------------------------
+
+  private final BigFraction[] invert (final BigFraction[] q) {
+    assert contains(q);
+    final BigFraction[] qq = new BigFraction[dimension()];
+    for (int i=0;i<_dimension;i++) { qq[i] = q[i].negate(); }
+    return qq; } 
+
+  public final UnaryOperator<BigFraction[]> additiveInverse () {
+    return 
+      new UnaryOperator<BigFraction[]>() {
+        @Override
+        public final BigFraction[] apply (final BigFraction[] q) {
+          return BigFractionsN.this.invert(q); } }; }
+
+  //--------------------------------------------------------------
+
+  private final BigFraction[] scale (final BigFraction a, 
+                                     final BigFraction[] q) {
+    assert contains(q);
+    final BigFraction[] qq = new BigFraction[dimension()];
+    for (int i=0;i<dimension();i++) { 
+      qq[i] = q[i].multiply(a); }
+    return qq; } 
+
+  public final BiFunction<BigFraction,BigFraction[],BigFraction[]> 
+  scaler () {
+    return
+      new BiFunction<BigFraction,BigFraction[],BigFraction[]>() {
+        @Override
+        public final BigFraction[] apply (final BigFraction a, 
+                                          final BigFraction[] q) {
+          return BigFractionsN.this.scale(a,q); } }; }
 
   //--------------------------------------------------------------
   // Set methods
+  //--------------------------------------------------------------
+
+  private final boolean equals (final BigFraction[] q0, 
+                                final BigFraction[] q1) {
+    assert null != q0;
+    assert null != q1;
+    assert _dimension == q0.length;
+    assert _dimension == q1.length;
+    for (int i=0;i<_dimension;i++) {
+      if (! BigFractions.get().equals(q0[i],q1[i])) {
+        return false; } }
+    return true; }
+
+  @Override
+  public final BiPredicate equivalence () { 
+    return new BiPredicate<BigFraction[],BigFraction[]>() {
+
+      @Override
+      public final boolean test (final BigFraction[] q0, 
+                                 final BigFraction[] q1) {
+        return BigFractionsN.this.equals(q0,q1); } }; }
+
   //--------------------------------------------------------------
 
   @Override
@@ -74,11 +131,7 @@ public final class BigFractionsN implements Set {
     return 
       (element instanceof BigFraction[])
       &&
-      ((BigFraction[]) element).length == _dimension; }
-
-
-  @Override
-  public final BiPredicate equivalence () { return _equivalence; }
+      ((BigFraction[]) element).length == dimension(); }
 
   //--------------------------------------------------------------
   /** Intended primarily for testing. 
@@ -90,7 +143,7 @@ public final class BigFractionsN implements Set {
       new Supplier () {
       final Generator bf = 
         Generators.bigFractionGenerator(_dimension,urp);
-        @Override
+      @Override
       public final Object get () { return bf.next(); } }; }
 
   @Override
@@ -102,12 +155,16 @@ public final class BigFractionsN implements Set {
   //--------------------------------------------------------------
 
   @Override
-  public final int hashCode () { return 0; }
+  public final int hashCode () { 
+    return dimension(); }
 
-  // singleton
   @Override
   public final boolean equals (final Object that) {
-    return that instanceof BigFractionsN; }
+    if (this == that) { return true; }
+    return 
+      (that instanceof BigFractionsN)
+      &&
+      dimension() == ((BigFractionsN) that).dimension(); }
 
   @Override
   public final String toString () { return "BF^" + _dimension; }
@@ -116,7 +173,7 @@ public final class BigFractionsN implements Set {
   // construction
   //--------------------------------------------------------------
   // TODO: support zero-dimensional space?
-  
+
   private BigFractionsN (final int dimension) { 
     assert dimension > 0;
     _dimension = dimension; }

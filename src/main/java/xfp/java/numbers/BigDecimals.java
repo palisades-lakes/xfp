@@ -18,9 +18,94 @@ import xfp.java.prng.Generators;
  * <code>BigDecimal</code>.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-19
+ * @version 2019-02-21
  */
 public final class BigDecimals implements Set {
+
+  //--------------------------------------------------------------
+  // operations for algebraic structures over BigDecimals.
+  //--------------------------------------------------------------
+
+  // TODO: is consistency with other algebraic structure classes
+  // worth the indirection?
+
+  private final BigDecimal add (final BigDecimal q0, 
+                                final BigDecimal q1) {
+    assert contains(q0);
+    assert contains(q1);
+    return q0.add(q1); } 
+
+  public final BinaryOperator<BigDecimal> adder () {
+    return new BinaryOperator<BigDecimal> () {
+      @Override
+      public final String toString () { return "BD.add()"; }
+      @Override
+      public final BigDecimal apply (final BigDecimal q0, 
+                                     final BigDecimal q1) {
+        return BigDecimals.this.add(q0,q1); } }; }
+
+  //--------------------------------------------------------------
+
+  @SuppressWarnings("static-method")
+  public final BigDecimal additiveIdentity () {
+    return BigDecimal.ZERO; }
+  
+  //--------------------------------------------------------------
+
+  // TODO: is consistency with other algebraic structure classes
+  // worth the indirection?
+
+  private final BigDecimal negate (final BigDecimal q) {
+    assert contains(q);
+    return q.negate(); } 
+
+  public final UnaryOperator<BigDecimal> additiveInverse () {
+    return new UnaryOperator<BigDecimal> () {
+      @Override
+      public final String toString () { return "BD.negate()"; }
+      @Override
+      public final BigDecimal apply (final BigDecimal q) {
+        return BigDecimals.this.negate(q); } }; }
+
+  //--------------------------------------------------------------
+
+  private final BigDecimal multiply (final BigDecimal q0, 
+                                     final BigDecimal q1) {
+    assert contains(q0);
+    assert contains(q1);
+    return q0.multiply(q1); } 
+
+  public final BinaryOperator<BigDecimal> multiplier () {
+    return new BinaryOperator<BigDecimal>() {
+      @Override
+      public final String toString () { return "BD.multiply()"; }
+      @Override
+      public final BigDecimal apply (final BigDecimal q0, 
+                                     final BigDecimal q1) {
+        return BigDecimals.this.multiply(q0,q1); } }; }
+
+  //--------------------------------------------------------------
+  
+  @SuppressWarnings("static-method")
+  public final BigDecimal multiplicativeIdentity () {
+    return BigDecimal.ONE; }
+
+  //--------------------------------------------------------------
+
+  private final BigDecimal reciprocal (final BigDecimal q) {
+    assert contains(q);
+    // only a partial inverse
+    if (BigDecimal.ZERO.equals(q)) { return null; }
+    return BigDecimal.ONE.divide(q);  } 
+
+
+  public final UnaryOperator<BigDecimal> multiplicativeInverse () {
+    return new UnaryOperator<BigDecimal> () {
+      @Override
+      public final String toString () { return "BD.inverse()"; }
+      @Override
+      public final BigDecimal apply (final BigDecimal q) {
+        return BigDecimals.this.reciprocal(q); } }; }
 
   //--------------------------------------------------------------
   // Set methods
@@ -30,27 +115,31 @@ public final class BigDecimals implements Set {
   public final boolean contains (final Object element) {
     return element instanceof BigDecimal; }
 
-  public static final boolean equalBigDecimals (final BigDecimal q0, 
-                                                 final BigDecimal q1) {
+  //--------------------------------------------------------------
+
+  /** Note: BigDecimal.equal doesn't test for equality as rational
+   * numbers.
+   */
+  @SuppressWarnings("static-method")
+  public final boolean equals (final BigDecimal q0, 
+                               final BigDecimal q1) {
     if (q0 == q1) { return true; }
-    if (null == q0) {
+    if (null == q0) { 
       if (null == q1) { return true; }
       return false; }
     if (null == q1) { return false; }
     final int c = q0.compareTo(q1);
     return 0 == c; }
 
-  private static final BiPredicate<BigDecimal,BigDecimal> 
-  EQUALS = 
-  new BiPredicate<BigDecimal,BigDecimal>() {
-    @Override
-    public final boolean test (final BigDecimal q0, 
-                               final BigDecimal q1) {
-      return equalBigDecimals(q0,q1); }
-  };
-
   @Override
-  public final BiPredicate equivalence () { return EQUALS; }
+  public final BiPredicate equivalence () {
+    return new BiPredicate<BigDecimal,BigDecimal>() {
+      @Override
+      public final String toString () { return "BD.equals()"; }
+      @Override
+      public final boolean test (final BigDecimal q0, 
+                                 final BigDecimal q1) {
+        return BigDecimals.this.equals(q0,q1); } }; }
 
   //--------------------------------------------------------------
 
@@ -74,7 +163,7 @@ public final class BigDecimals implements Set {
   @Override
   public final int hashCode () { return 0; }
 
-  // singleton
+  // singleton?
   @Override
   public final boolean equals (final Object that) {
     return that instanceof BigDecimals; }
@@ -92,52 +181,6 @@ public final class BigDecimals implements Set {
     new BigDecimals();
 
   public static final BigDecimals get () { return SINGLETON; } 
-
-  public static final BinaryOperator<BigDecimal> ADD =
-    new BinaryOperator<BigDecimal> () {
-    @Override
-    public final String toString () { 
-      return "BigDecimal.add()"; }
-    @Override
-    public final BigDecimal apply (final BigDecimal q0, 
-                                   final BigDecimal q1) {
-      return q0.add(q1); } 
-  };
-
-  public static final UnaryOperator<BigDecimal>
-  ADDITIVE_INVERSE =
-  new UnaryOperator<BigDecimal> () {
-    @Override
-    public final String toString () { 
-      return "BigDecimal.negate()"; }
-    @Override
-    public final BigDecimal apply (final BigDecimal q) {
-      return q.negate(); } 
-  };
-
-  public static final BinaryOperator<BigDecimal> MULTIPLY =
-    new BinaryOperator<BigDecimal>() {
-    @Override
-    public final String toString () { 
-      return "BigDecimal.multiply()"; }
-    @Override
-    public final BigDecimal apply (final BigDecimal q0, 
-                                   final BigDecimal q1) {
-      return q0.multiply(q1); } 
-  };
-
-  public static final UnaryOperator<BigDecimal>
-  MULTIPLICATIVE_INVERSE =
-  new UnaryOperator<BigDecimal> () {
-    @Override
-    public final String toString () { 
-      return "BigDecimal.inverse()"; }
-    @Override
-    public final BigDecimal apply (final BigDecimal q) {
-      // only a partial inverse
-      if (BigDecimal.ZERO.equals(q)) { return null; }
-      return BigDecimal.ONE.divide(q); } 
-  };
 
   //--------------------------------------------------------------
 }

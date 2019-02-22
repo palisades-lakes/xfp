@@ -25,7 +25,7 @@ import xfp.java.numbers.Ratios;
  * etc.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-01-29
+ * @version 2019-02-21
  */
 @SuppressWarnings("unchecked")
 public final class OneSetOneOperation implements Set {
@@ -179,76 +179,90 @@ public final class OneSetOneOperation implements Set {
   // pre-define some standard magmas
 
   public static final OneSetOneOperation BIGDECIMALS_ADD = 
-    OneSetOneOperation.make(BigDecimals.ADD,BigDecimals.get());
+    OneSetOneOperation.make(
+      BigDecimals.get().adder(),
+      BigDecimals.get());
 
   public static final OneSetOneOperation BIGDECIMALS_MULTIPLY = 
-    OneSetOneOperation.make(BigDecimals.MULTIPLY,BigDecimals.get());
+    OneSetOneOperation.make(
+      BigDecimals.get().multiplier(),
+      BigDecimals.get());
 
   //--------------------------------------------------------------
-  // pre-define some standard magmas
 
   public static final OneSetOneOperation BIGFRACTIONS_ADD = 
-    OneSetOneOperation.make(BigFractions.ADD,BigFractions.get());
+    OneSetOneOperation.make(
+      BigFractions.get().adder(),
+      BigFractions.get());
 
   public static final OneSetOneOperation BIGFRACTIONS_MULTIPLY = 
-    OneSetOneOperation.make(BigFractions.MULTIPLY,BigFractions.get());
+    OneSetOneOperation.make(
+      BigFractions.get().multiplier(),
+      BigFractions.get());
 
   //--------------------------------------------------------------
-  // pre-define some standard magmas
 
   public static final OneSetOneOperation RATIOS_ADD = 
-    OneSetOneOperation.make(Ratios.ADD,Ratios.get());
+    OneSetOneOperation.make(
+      Ratios.get().adder(),
+      Ratios.get());
 
   public static final OneSetOneOperation RATIOS_MULTIPLY = 
-    OneSetOneOperation.make(Ratios.MULTIPLY,Ratios.get());
+    OneSetOneOperation.make(
+      Ratios.get().multiplier(),
+      Ratios.get());
 
   //--------------------------------------------------------------
   // TODO: cache by n?
   
   public static final OneSetOneOperation 
   bigDecimalsNGroup (final int n) {
+    final BigDecimalsN bdn = BigDecimalsN.get(n);
     return
       OneSetOneOperation.make(
-        BigDecimalsN.adder(n),
-        BigDecimalsN.get(n),
-        BigDecimalsN.additiveIdentity(n),
-        BigDecimalsN.additiveInverse(n)); }
+        bdn.adder(),
+        bdn,
+        bdn.additiveIdentity(),
+        bdn.additiveInverse()); }
 
   //--------------------------------------------------------------
   // TODO: cache by n?
   
   public static final OneSetOneOperation 
   bigFractionsNGroup (final int n) {
+    final BigFractionsN bfn = BigFractionsN.get(n);
     return
       OneSetOneOperation.make(
-        BigFractionsN.adder(n),
-        BigFractionsN.get(n),
-        BigFractionsN.additiveIdentity(n),
-        BigFractionsN.additiveInverse(n)); }
+        bfn.adder(),
+        bfn,
+        bfn.additiveIdentity(),
+        bfn.additiveInverse()); }
 
   //--------------------------------------------------------------
   // TODO: cache by n?
   
   public static final OneSetOneOperation 
   ratiosNGroup (final int n) {
+    final RatiosN ratioN = RatiosN.get(n);
     return
       OneSetOneOperation.make(
-        RatiosN.adder(n),
-        RatiosN.get(n),
-        RatiosN.additiveIdentity(n),
-        RatiosN.additiveInverse(n)); }
+        ratioN.adder(),
+        ratioN,
+        ratioN.additiveIdentity(),
+        ratioN.additiveInverse()); }
 
   //--------------------------------------------------------------
   // TODO: cache by n?
   
   public static final OneSetOneOperation 
   qnGroup (final int n) {
+    final Qn qn = Qn.get(n);
     return
       OneSetOneOperation.make(
-        Qn.adder(n),
-        Qn.get(n),
-        Qn.additiveIdentity(n),
-        Qn.additiveInverse(n)); }
+        qn.adder(),
+        qn,
+        qn.additiveIdentity(),
+        qn.additiveInverse()); }
 
   //--------------------------------------------------------------
 }

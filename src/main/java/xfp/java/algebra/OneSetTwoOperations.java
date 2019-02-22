@@ -1,6 +1,5 @@
 package xfp.java.algebra;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -10,7 +9,6 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
-import org.apache.commons.math3.fraction.BigFraction;
 import org.apache.commons.rng.UniformRandomProvider;
 
 import xfp.java.numbers.BigDecimals;
@@ -21,7 +19,7 @@ import xfp.java.numbers.Ratios;
 /** One set plus 2 operations.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-19
+ * @version 2019-02-21
  */
 @SuppressWarnings("unchecked")
 public final class OneSetTwoOperations implements Set {
@@ -243,44 +241,44 @@ public final class OneSetTwoOperations implements Set {
 
   public static final OneSetTwoOperations BIGDECIMALS_RING = 
     OneSetTwoOperations.make(
-      BigDecimals.ADD,
-      BigDecimal.ZERO,
-      BigDecimals.ADDITIVE_INVERSE,
-      BigDecimals.MULTIPLY,
-      BigDecimal.ONE,
+      BigDecimals.get().adder(),
+      BigDecimals.get().additiveIdentity(),
+      BigDecimals.get().additiveInverse(),
+      BigDecimals.get().multiplier(),
+      BigDecimals.get().multiplicativeIdentity(),
       // no multiplicative inverse for BigDecimal
       // divide can result in non-terminating decimal expansion
       null, 
-      BigDecimals.get());
+      BigDecimals.get()); 
 
   public static final OneSetTwoOperations BIGFRACTIONS_FIELD = 
     OneSetTwoOperations.make(
-      BigFractions.ADD,
-      BigFraction.ZERO,
-      BigFractions.ADDITIVE_INVERSE,
-      BigFractions.MULTIPLY,
-      BigFraction.ONE,
-      BigFractions.MULTIPLICATIVE_INVERSE,
+      BigFractions.get().adder(),
+      BigFractions.get().additiveIdentity(),
+      BigFractions.get().additiveInverse(),
+      BigFractions.get().multiplier(),
+      BigFractions.get().multiplicativeIdentity(),
+      BigFractions.get().multiplicativeInverse(),
       BigFractions.get());
 
   public static final OneSetTwoOperations RATIOS_FIELD = 
     OneSetTwoOperations.make(
-      Ratios.ADD,
-      Ratios.ZERO,
-      Ratios.ADDITIVE_INVERSE,
-      Ratios.MULTIPLY,
-      Ratios.ONE,
-      Ratios.MULTIPLICATIVE_INVERSE,
+      Ratios.get().adder(),
+      Ratios.get().additiveIdentity(),
+      Ratios.get().additiveInverse(),
+      Ratios.get().multiplier(),
+      Ratios.get().multiplicativeIdentity(),
+      Ratios.get().multiplicativeInverse(),
       Ratios.get());
 
   public static final OneSetTwoOperations Q_FIELD = 
     OneSetTwoOperations.make(
-      Q.ADD,
-      BigFraction.ZERO,
-      Q.ADDITIVE_INVERSE,
-      Q.MULTIPLY,
-      BigFraction.ONE,
-      Q.MULTIPLICATIVE_INVERSE,
+      Q.get().adder(),
+      Q.get().additiveIdentity(),
+      Q.get().additiveInverse(),
+      Q.get().multiplier(),
+      Q.get().multiplicativeIdentity(),
+      Q.get().multiplicativeInverse(),
       Q.get());
 
   //--------------------------------------------------------------

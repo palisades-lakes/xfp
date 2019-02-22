@@ -12,26 +12,113 @@ import org.apache.commons.math3.fraction.BigFraction;
 import org.apache.commons.rng.UniformRandomProvider;
 
 import xfp.java.algebra.Set;
-import xfp.java.exceptions.Exceptions;
-import xfp.java.numbers.Q;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
 
 /** The set of rational numbers, accepting any 'reasonable' 
- * representation. Calculation converts to BigFraction where
+ * representation. Calculation converts to Number where
  * necessary.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-01-29
+ * @version 2019-02-21
  */
+
 public final class Q implements Set {
 
   //--------------------------------------------------------------
-  // class methods
+  // operations for algebraic structures over (rational) NUubers.
   //--------------------------------------------------------------
 
+  // TODO: is consistency with other algebraic structure classes
+  // worth the indirection?
+
+  private final Number add (final Number x0, 
+                            final Number x1) {
+    assert(contains(x0));
+    assert(contains(x1));
+    final BigFraction q0 = BigFractions.toBigFraction(x0);
+    final BigFraction q1 = BigFractions.toBigFraction(x1);
+    return q0.add(q1); } 
+
+  public final BinaryOperator<Number> adder () {
+    return new BinaryOperator<Number> () {
+      @Override
+      public final String toString () { return "Q.add()"; }
+      @Override
+      public final Number apply (final Number q0, 
+                                 final Number q1) {
+        return Q.this.add(q0,q1); } }; }
+
+  //--------------------------------------------------------------
+
+  @SuppressWarnings("static-method")
+  public final Object additiveIdentity () {
+    return BigFraction.ZERO; }
+  
+  //--------------------------------------------------------------
+
+  // TODO: is consistency with other algebraic structure classes
+  // worth the indirection?
+
+  private final Number negate (final Number x) {
+    assert contains(x);
+    return BigFractions.toBigFraction(x).negate(); } 
+
+  public final UnaryOperator<Number> additiveInverse () {
+    return new UnaryOperator<Number> () {
+      @Override
+      public final String toString () { return "Q.negate()"; }
+      @Override
+      public final Number apply (final Number q) {
+        return Q.this.negate(q); } }; }
+
+  //--------------------------------------------------------------
+
+  private final Number multiply (final Number x0, 
+                                 final Number x1) {
+    assert(contains(x0));
+    assert(contains(x1));
+    final BigFraction q0 = BigFractions.toBigFraction(x0);
+    final BigFraction q1 = BigFractions.toBigFraction(x1);
+    return q0.multiply(q1); } 
+
+  public final BinaryOperator<Number> multiplier () {
+    return new BinaryOperator<Number>() {
+      @Override
+      public final String toString () { return "Q.multiply()"; }
+      @Override
+      public final Number apply (final Number q0, 
+                                 final Number q1) {
+        return Q.this.multiply(q0,q1); } }; }
+
+  //--------------------------------------------------------------
+
+  @SuppressWarnings("static-method")
+  public final Object multiplicativeIdentity () {
+    return BigFraction.ONE; }
+
+  //--------------------------------------------------------------
+
+  private final Number reciprocal (final Number x) {
+    assert contains(x);
+    final BigFraction q = BigFractions.toBigFraction(x);
+    // only a partial inverse
+    if (BigInteger.ZERO.equals(q.getNumerator())) { return null; }
+    return q.reciprocal();  } 
+
+  public final UnaryOperator<Number> multiplicativeInverse () {
+    return new UnaryOperator<Number> () {
+      @Override
+      public final String toString () { return "Q.inverse()"; }
+      @Override
+      public final Number apply (final Number q) {
+        return Q.this.reciprocal(q); } }; }
+
+  //--------------------------------------------------------------
+  // Set methods
+  //--------------------------------------------------------------
   // All known java numbers are rational, meaning there's an 
-  // exact, loss-less conversion to BigFraction, used by methods
+  // exact, loss-less conversion to Number, used by methods
   // below. But we can't know how to convert unknown
   // implementations of java.lang.Number, so we have to exclude 
   // those, for the start.
@@ -39,25 +126,29 @@ public final class Q implements Set {
   // TODO: collect some stats and order tests by frequency?
 
   public static final boolean knownRational (final Object x) {
-    if (x instanceof BigFraction) { return true; }
-    if (x instanceof Double) { return true; }
-    if (x instanceof Integer) { return true; }
-    if (x instanceof Long) { return true; }
-    if (x instanceof Float) { return true; }
-    if (x instanceof Short) { return true; }
-    if (x instanceof Byte) { return true; }
-    if (x instanceof BigInteger){ return true; }
+    if (x instanceof Number) { return true; }
+//    if (x instanceof Double) { return true; }
+//    if (x instanceof Integer) { return true; }
+//    if (x instanceof Long) { return true; }
+//    if (x instanceof Float) { return true; }
+//    if (x instanceof Short) { return true; }
+//    if (x instanceof Byte) { return true; }
+//    if (x instanceof BigInteger){ return true; }
+//    if (x instanceof BigFraction){ return true; }
     return false; }
 
   public static final boolean knownRational (final Class c) {
-    if (BigFraction.class.equals(c)) { return true; }
-    if (BigInteger.class.equals(c)) { return true; }
-    if (Byte.class.equals(c)) { return true; }
-    if (Short.class.equals(c)) { return true; }
-    if (Integer.class.equals(c)) { return true; }
-    if (Long.class.equals(c)) { return true; }
-    if (Float.class.equals(c)) { return true; }
-    if (Double.class.equals(c)) { return true; }
+    if (Number.class.isAssignableFrom(c)) { return true; }
+//    if (BigFraction.class.equals(c)) { return true; }
+//    if (BigDecimal.class.equals(c)) { return true; }
+//    if (Ratio.class.equals(c)) { return true; }
+//    if (BigInteger.class.equals(c)) { return true; }
+//    if (Byte.class.equals(c)) { return true; }
+//    if (Short.class.equals(c)) { return true; }
+//    if (Integer.class.equals(c)) { return true; }
+//    if (Long.class.equals(c)) { return true; }
+//    if (Float.class.equals(c)) { return true; }
+//    if (Double.class.equals(c)) { return true; }
     if (Byte.TYPE.equals(c)) { return true; }
     if (Short.TYPE.equals(c)) { return true; }
     if (Integer.TYPE.equals(c)) { return true; }
@@ -65,82 +156,6 @@ public final class Q implements Set {
     if (Float.TYPE.equals(c)) { return true; }
     if (Double.TYPE.equals(c)) { return true; }
     return false; }
-
-  //--------------------------------------------------------------
-
-  public static final BigFraction toBigFraction (final byte x) {
-    return new BigFraction(x); }
-
-  public static final BigFraction toBigFraction (final short x) {
-    return new BigFraction(x); }
-
-  public static final BigFraction toBigFraction (final int x) {
-    return new BigFraction(x); }
-
-  public static final BigFraction toBigFraction (final long x) {
-    return new BigFraction(x); }
-
-  public static final BigFraction toBigFraction (final float x) {
-    return new BigFraction(x); }
-
-  public static final BigFraction toBigFraction (final double x) {
-    return new BigFraction(x); }
-
-  public static final BigFraction toBigFraction (final Object x) {
-    assert knownRational(x) : 
-      x + " is not a known rational number type";
-    if (x instanceof BigFraction) { 
-      return (BigFraction) x; }
-    if (x instanceof Double) { 
-      return new BigFraction(((Double) x).doubleValue()); }
-    if (x instanceof Integer) {
-      return new BigFraction(((Integer) x).intValue()); }
-    if (x instanceof Long) { 
-      return new BigFraction(((Long) x).longValue()); }
-    if (x instanceof Float) {
-      return new BigFraction(((Float) x).floatValue()); }
-    if (x instanceof Short) {
-      return new BigFraction(((Short) x).intValue()); }
-    if (x instanceof Byte) {
-      return new BigFraction(((Byte) x).intValue()); }
-    if (x instanceof BigInteger) {
-      return new BigFraction(((BigInteger) x)); }
-    throw Exceptions.unsupportedOperation(
-      Q.class,"toBigFraction",x); }
-
-  // BigFraction.equals reduces both arguments before checking
-  // numerator and denominators are equal.
-  // Guessing our BigFractions are usually already reduced.
-  // Try n0*d1 == n1*d0 instead
-  // TODO: try using BigINteger.bitLength() to decide
-  // which method to use?
-
-  private static final boolean 
-  equalBigFractions (final BigFraction q0, 
-                     final BigFraction q1) {
-    if (q0 == q1) { return true; }
-    if (null == q0) {
-      if (null == q1) { return true; }
-      return false; }
-    final BigInteger n0 = q0.getNumerator(); 
-    final BigInteger d0 = q0.getDenominator(); 
-    final BigInteger n1 = q1.getNumerator(); 
-    final BigInteger d1 = q1.getDenominator(); 
-    return n0.multiply(d1).equals(n1.multiply(d0)); }
-
-  private static final BiPredicate<Number,Number> EQUALS = 
-    new BiPredicate<Number,Number>() {
-    @Override
-    public final boolean test (final Number x0, 
-                               final Number x1) {
-      final BigFraction q0 = toBigFraction(x0);
-      final BigFraction q1 = toBigFraction(x1);
-      return equalBigFractions(q0,q1); }
-  };
-
-  //--------------------------------------------------------------
-  // Set methods
-  //--------------------------------------------------------------
 
   @Override
   public final boolean contains (final Object element) {
@@ -178,8 +193,22 @@ public final class Q implements Set {
 
   //--------------------------------------------------------------
 
+  private final boolean equals (final Number x0, 
+                                final Number x1) {
+    assert(contains(x0));
+    assert(contains(x1));
+    final BigFraction q0 = BigFractions.toBigFraction(x0);
+    final BigFraction q1 = BigFractions.toBigFraction(x1);
+    return BigFractions.get().equals(q0,q1); } 
+
   @Override
-  public final BiPredicate equivalence () { return EQUALS; }
+  public final BiPredicate equivalence () { 
+    return  
+      new BiPredicate<Number,Number>() {
+      @Override
+      public final boolean test (final Number x0, 
+                                 final Number x1) {
+        return Q.this.equals(x0,x1); } }; }
 
   //--------------------------------------------------------------
 
@@ -220,46 +249,6 @@ public final class Q implements Set {
   private static final Q SINGLETON = new Q();
 
   public static final Q get () { return SINGLETON; } 
-
-  public static final BinaryOperator<Number> ADD =
-    new BinaryOperator<Number>() {
-    @Override
-    public final BigFraction apply (final Number x0, 
-                                    final Number x1) {
-      final BigFraction q0 = toBigFraction(x0);
-      final BigFraction q1 = toBigFraction(x1);
-      return q0.add(q1); } 
-  };
-
-  public static final UnaryOperator<Number>
-  ADDITIVE_INVERSE =
-  new UnaryOperator<Number>() {
-    @Override
-    public final Number apply (final Number x) {
-      final BigFraction q = toBigFraction(x);
-      return q.negate(); } 
-  };
-
-  public static final BinaryOperator<Number> MULTIPLY =
-    new BinaryOperator<Number>() {
-    @Override
-    public final BigFraction apply (final Number x0, 
-                                    final Number x1) {
-      final BigFraction q0 = toBigFraction(x0);
-      final BigFraction q1 = toBigFraction(x1);
-      return q0.multiply(q1); } 
-  };
-
-  public static final UnaryOperator<Number>
-  MULTIPLICATIVE_INVERSE =
-  new UnaryOperator<Number>() {
-    @Override
-    public final BigFraction apply (final Number x) {
-      final BigFraction q = toBigFraction(x);
-      // only a partial inverse
-      if (BigFraction.ZERO.equals(q)) { return null; }
-      return q.reciprocal(); } 
-  };
 
   //--------------------------------------------------------------
 }

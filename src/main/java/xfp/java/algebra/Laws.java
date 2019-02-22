@@ -101,9 +101,11 @@ public final class Laws {
     return new Predicate<Supplier> () {
       @Override
       public final String toString () { 
-        return identity + " is not an identity for " + 
-          operation + " on " + elements + "\n" +
-          "excluding " + excluded; }
+        return identity.toString(); }
+//      public final String toString () { 
+//        return identity + " is not an identity for " + 
+//          operation + " on " + elements + "\n" +
+//          "excluding " + excluded; }
       @Override
       public final boolean test (final Supplier samples) {
         // TODO: what if we want <code>null</code> 
@@ -129,8 +131,10 @@ public final class Laws {
     return new Predicate<Supplier> () {
       @Override
       public final String toString () { 
-        return identity + " is not an identity for " + 
-          operation + " on " + elements; }
+        return identity.toString(); }
+//      public final String toString () { 
+//        return identity + " is not an identity for " + 
+//          operation + " on " + elements; }
       @Override
       public final boolean test (final Supplier samples) {
         // TODO: what if we want <code>null</code> 
