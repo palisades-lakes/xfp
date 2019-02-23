@@ -1,5 +1,6 @@
 package xfp.java.algebra;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
@@ -8,9 +9,12 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
+import org.apache.commons.math3.fraction.BigFraction;
+
 import com.google.common.collect.ImmutableList;
 
 import xfp.java.Classes;
+import xfp.java.numbers.BigFractions;
 
 /** Constructor methods for Predicates/BiPredicate closures on 
  * sets and operations.
@@ -33,7 +37,7 @@ import xfp.java.Classes;
  * no instance state or methods.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-19
+ * @version 2019-02-22
  */
 
 @SuppressWarnings("unchecked")
@@ -79,10 +83,18 @@ public final class Laws {
         final Object c = samples.get();
         assert elements.contains(c);
         final BiPredicate equal = elements.equivalence();
-        return 
-          equal.test(
-            operation.apply(a,operation.apply(b,c)),
-            operation.apply(operation.apply(a,b),c)); } }; }
+        final Object right = operation.apply(a,operation.apply(b,c));
+        final Object left = operation.apply(operation.apply(a,b),c); 
+        final boolean pass = equal.test(right,left);
+        if (! pass) {
+          System.out.println();
+          System.out.println(operation);
+          System.out.println(a);
+          System.out.println(b);
+          System.out.println(c);
+          System.out.println(right);
+          System.out.println(left); }
+        return pass; } }; }
 
   //--------------------------------------------------------------
   // TODO: right identity vs left identity?
@@ -143,7 +155,8 @@ public final class Laws {
         if (null == identity) { return false; }
         final Object a = samples.get();
         assert elements.contains(a);
-        assert elements.contains(identity);
+        assert elements.contains(identity) :
+          elements + " doesn't contain " + identity;
         final Object r = operation.apply(a,identity);
         final Object l = operation.apply(identity,a);
         final BiPredicate equal = elements.equivalence();
@@ -167,12 +180,14 @@ public final class Laws {
     return new Predicate<Supplier> () {
       @Override
       public final String toString () { 
-        return inverse + " is not an inverse for " +
-          operation + " on " + elements +
-          " relative to " + 
-          Classes.className(identity) + ":" +
-          identity + "\n" +
-          "excluding " + excluded; }
+        return inverse.toString(); }
+//          public final String toString () { 
+//          return inverse + " is not an inverse for " +
+//          operation + " on " + elements +
+//          " relative to " + 
+//          Classes.className(identity) + ":" +
+//          identity + "\n" +
+//          "excluding " + excluded; }
       @Override
       public final boolean test (final Supplier samples) {
         final Object a = samples.get();
@@ -460,10 +475,28 @@ public final class Laws {
         final Object c = elementSamples.get();
         assert elements.contains(c);
         final BiPredicate equal = elements.equivalence();
-        return 
-          equal.test(
-            scale.apply(a,scale.apply(b,c)),
-            scale.apply(multiply.apply(a,b),c)); } }; }
+        final Object right = scale.apply(a,scale.apply(b,c));
+        final Object left = scale.apply(multiply.apply(a,b),c);
+        final boolean pass = equal.test(right,left);
+        if (! pass) {
+          System.out.println();
+          System.out.println(multiply);
+          System.out.println(scale);
+          System.out.println(Classes.className(a) + ":" + a);
+          System.out.println(BigFractions.toBigFraction(a));
+          System.out.println(Classes.className(b) + ":" + b);
+          System.out.println("toBigFraction:" + BigFractions.toBigFraction(b));
+          final BigInteger bi = BigInteger.valueOf(((Long) b).longValue());
+          System.out.println("BigInteger:" + bi);
+          System.out.println("BigFraction(bi):" + new BigFraction(bi));
+          System.out.println("BigFraction(bi,1):" + new BigFraction(bi,BigInteger.ONE));
+          
+          System.out.println();
+          System.out.println(elements.toString(c));
+          System.out.println(elements.toString(BigFractions.toBigFraction(c)));
+          System.out.println(elements.toString(right));
+          System.out.println(elements.toString(left)); }
+        return pass; } }; }
 
   //--------------------------------------------------------------
   /** Does <code>scale</code> distribute over <code>add</code>?

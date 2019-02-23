@@ -1,14 +1,14 @@
 package xfp.java.algebra;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 
 import org.apache.commons.rng.UniformRandomProvider;
 
-import xfp.java.algebra.Set;
-import xfp.java.algebra.Sets;
 import xfp.java.exceptions.Exceptions;
 
 /** General, possibly unbounded, sets of <code>Object</code>s, 
@@ -49,7 +49,7 @@ import xfp.java.exceptions.Exceptions;
  * classes, represented by some element of each equivalence class.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-01-31
+ * @version 2019-02-22
  */
 public interface Set {
 
@@ -111,6 +111,28 @@ public interface Set {
   public default boolean contains (final char element) {
     return false; }
 
+  //--------------------------------------------------------------
+  
+  public default String toString (final Object e) {
+    assert contains(e);
+    if (e instanceof byte[]) {
+      return Arrays.toString((byte[]) e); }
+    if (e instanceof boolean[]) {
+      return Arrays.toString((boolean[]) e); }
+    if (e instanceof char[]) {
+      return Arrays.toString((char[]) e); }
+    if (e instanceof int[]) {
+      return Arrays.toString((int[]) e); }
+    if (e instanceof long[]) {
+      return Arrays.toString((long[]) e); }
+    if (e instanceof float[]) {
+      return Arrays.toString((float[]) e); }
+    if (e instanceof double[]) {
+      return Arrays.toString((double[]) e); }
+    if (e instanceof Object[]) {
+      return Arrays.toString((Object[]) e); }
+    return Objects.toString(e); }
+  
   //--------------------------------------------------------------
   // TODO: is this just a Function that maps options to values?
   // That is, Is a set a function from all java objects to its

@@ -49,14 +49,15 @@ public final class BigFractions implements Set {
     return new BigFraction(x); }
 
   public static final BigFraction toBigFraction (final Number x) {
-
     if (x instanceof BigFraction) { return (BigFraction) x; }
     if (x instanceof Double) { 
       return new BigFraction(((Double) x).doubleValue()); }
     if (x instanceof Integer) {
       return new BigFraction(((Integer) x).intValue()); }
     if (x instanceof Long) { 
-      return new BigFraction(((Long) x).longValue()); }
+      final BigInteger bi = BigInteger.valueOf(((Long) x).longValue());
+      return new BigFraction(bi); }
+//    return new BigFraction(((Long) x).longValue()); }
     if (x instanceof Float) {
       return new BigFraction(((Float) x).floatValue()); }
     if (x instanceof Short) {
@@ -124,7 +125,7 @@ public final class BigFractions implements Set {
 
     if (x instanceof BigFraction) { return x; }
     if (x instanceof Number) { 
-      return new BigFraction(((Number) x).doubleValue()); }
+      return toBigFraction(((Number) x)); }
  
     if (x instanceof BigFraction[]) { return x; }
 

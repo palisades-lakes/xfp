@@ -4,11 +4,7 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.function.BiPredicate;
-import java.util.function.BinaryOperator;
 import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
 
 import org.apache.commons.math3.fraction.BigFraction;
 import org.apache.commons.rng.UniformRandomProvider;
@@ -16,7 +12,6 @@ import org.apache.commons.rng.UniformRandomProvider;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 
-import xfp.java.algebra.Set;
 import xfp.java.numbers.BigFractions;
 import xfp.java.numbers.Q;
 import xfp.java.prng.Generator;
@@ -39,15 +34,10 @@ import xfp.java.prng.Generators;
  * that can be used to represent tuples of rational numbers.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-21
+ * @version 2019-02-22
  */
 @SuppressWarnings("unchecked")
-public final class Qn implements Set {
-
-  //--------------------------------------------------------------
-
-  private final int _dimension;
-  public final int dimension () { return _dimension; }
+public final class Qn extends LinearSpaceLike {
 
   //--------------------------------------------------------------
   // operations for algebraic structures over BigFraction arrays.
@@ -57,8 +47,9 @@ public final class Qn implements Set {
    * <code>dimension</code>.
    */
 
-  private final BigFraction[] add (final Object x0, 
-                                   final Object x1) {
+  @Override
+  public final Object add (final Object x0, 
+                           final Object x1) {
     assert contains(x0);
     assert contains(x1);
     final BigFraction[] q0 = 
@@ -69,24 +60,18 @@ public final class Qn implements Set {
     for (int i=0;i<dimension();i++) { qq[i] = q0[i].add(q1[i]); }
     return qq; }
 
-  public final BinaryOperator adder () {
-    return
-      new BinaryOperator() {
-      @Override
-      public final Object apply (final Object q0, 
-                                 final Object q1) {
-        return Qn.this.add(q0,q1); } }; }
-
   //--------------------------------------------------------------
 
-  public final BigFraction[] additiveIdentity () {
-    final BigFraction[] qq = new BigFraction[dimension()];
+  @Override
+  public final Object zero (final int n) {
+    final BigFraction[] qq = new BigFraction[n];
     Arrays.fill(qq,BigFraction.ZERO);
     return qq; }
 
   //--------------------------------------------------------------
 
-  private final BigFraction[] negate (final Object x) {
+  @Override
+  public final BigFraction[] negate (final Object x) {
     assert contains(x);
     final BigFraction[] q = 
       (BigFraction[]) BigFractions.toBigFraction(x);
@@ -94,17 +79,11 @@ public final class Qn implements Set {
     for (int i=0;i<dimension();i++) { qq[i] = q[i].negate(); }
     return qq; } 
 
-  public final UnaryOperator additiveInverse () {
-    return 
-      new UnaryOperator () {
-      @Override
-      public final Object apply (final Object q) {
-        return Qn.this.negate(q); } }; }
-
   //--------------------------------------------------------------
 
-  private final BigFraction[] scale (final Object a, 
-                                     final Object x) {
+  @Override
+  public final Object scale (final Object a, 
+                             final Object x) {
     assert contains(x);
     final BigFraction b = 
       (BigFraction) BigFractions.toBigFraction(a);
@@ -115,21 +94,13 @@ public final class Qn implements Set {
       qq[i] = q[i].multiply(b); }
     return qq; } 
 
-  public final BiFunction 
-  scaler () {
-    return
-      new BiFunction() {
-      @Override
-      public final Object apply (final Object a, 
-                                 final Object q) {
-        return Qn.this.scale(a,q); } }; }
-
   //--------------------------------------------------------------
   // Set methods
   //--------------------------------------------------------------
 
-  private final boolean equals (final Object x0, 
-                                final Object x1) {
+  @Override
+  public final boolean equals (final Object x0, 
+                               final Object x1) {
     assert contains(x0);
     assert contains(x1);
     final BigFraction[] q0 = 
@@ -140,15 +111,6 @@ public final class Qn implements Set {
       if (! BigFractions.get().equals(q0[i],q1[i])) {
         return false; } }
     return true; }
-
-  @Override
-  public final BiPredicate equivalence () { 
-    return new BiPredicate<BigFraction[],BigFraction[]>() {
-
-      @Override
-      public final boolean test (final BigFraction[] q0, 
-                                 final BigFraction[] q1) {
-        return Qn.this.equals(q0,q1); } }; }
 
   //--------------------------------------------------------------
 
@@ -163,6 +125,7 @@ public final class Qn implements Set {
   //--------------------------------------------------------------
   /** Intended primarily for testing. 
    */
+
   @Override
   public final Supplier generator (final UniformRandomProvider urp,
                                    final Map options) {
@@ -181,17 +144,6 @@ public final class Qn implements Set {
   //--------------------------------------------------------------
 
   @Override
-  public final int hashCode () { return dimension(); }
-
-  // singleton
-  @Override
-  public final boolean equals (final Object that) {
-    return 
-      (that instanceof Qn)
-      &&
-      (dimension() == ((Qn) that).dimension()); }
-
-  @Override
   public final String toString () { return "Q^" + dimension(); }
 
   //--------------------------------------------------------------
@@ -199,9 +151,7 @@ public final class Qn implements Set {
   //--------------------------------------------------------------
   // TODO: support zero-dimensional space?
 
-  private Qn (final int dimension) { 
-    assert dimension > 0;
-    _dimension = dimension; }
+  private Qn (final int dimension) { super(dimension); }
 
   private static final IntObjectMap<Qn> _cache = 
     new IntObjectHashMap();

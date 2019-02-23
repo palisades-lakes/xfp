@@ -20,7 +20,7 @@ import xfp.java.prng.Generators;
  * necessary.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-21
+ * @version 2019-02-22
  */
 
 public final class Q implements Set {
@@ -52,7 +52,7 @@ public final class Q implements Set {
   //--------------------------------------------------------------
 
   @SuppressWarnings("static-method")
-  public final Object additiveIdentity () {
+  public final Object additiveIdentity () { 
     return BigFraction.ZERO; }
   
   //--------------------------------------------------------------
