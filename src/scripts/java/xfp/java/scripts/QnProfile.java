@@ -2,16 +2,14 @@ package xfp.java.scripts;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.List;
 import java.util.Map;
-import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import xfp.java.algebra.OneSetOneOperation;
-import xfp.java.algebra.OneSetTwoOperations;
 import xfp.java.algebra.Set;
+import xfp.java.algebra.Structure;
 import xfp.java.algebra.TwoSetsTwoOperations;
+import xfp.java.linear.Qn;
 import xfp.java.prng.PRNG;
 import xfp.java.prng.Seeds;
 import xfp.java.test.algebra.SetTests;
@@ -31,44 +29,25 @@ public final class QnProfile {
   private static final int TRYS = 1023;
 
   private static final void 
-  twoSetsTwoOperationsTests (final TwoSetsTwoOperations space) {
-
-    SetTests.tests(space);
-    
-    final Map<Set,List> lawLists = space.linearSpaceLaws();
-    
-    final OneSetOneOperation elements = 
-      (OneSetOneOperation) space.elements();
-    final Supplier vg = 
-      space.elements().generator( 
+  structureTests (final Structure s,
+                  final int n) {
+    SetTests.tests(s);
+    final Map<Set,Supplier> samplers = 
+      s.samplers(
         PRNG.well44497b(
           Seeds.seed("seeds/Well44497b-2019-01-09.txt")));
-    for(final Object law : lawLists.get(elements)) {
-      for (int i=0; i<TRYS; i++) {
-        assertTrue(((Predicate) law).test(vg));} } 
-    
-    final OneSetTwoOperations scalars = 
-      (OneSetTwoOperations) space.scalars();
-    final Supplier sg = 
-      space.scalars().generator( 
-        PRNG.well44497b(
-          Seeds.seed("seeds/Well44497b-2019-01-11.txt")));
-    for(final Object law : lawLists.get(scalars)) {
-      for (int i=0; i<TRYS; i++) {
-        assertTrue(((Predicate) law).test(sg));} } 
-  
-    for(final Object law : lawLists.get(space)) {
-      for (int i=0; i<TRYS; i++) {
-        assertTrue(((BiPredicate) law).test(vg,sg));} } }
+    for(final Predicate law : s.laws()) {
+      for (int i=0; i<n; i++) {
+        assertTrue(law.test(samplers)); } } }
+
 
   //--------------------------------------------------------------
 
   public static final void main (final String[] args) {
     for (final int n : new int[] { 1, 3, 13, 127, 1023}) {
       System.out.println(n);
-      final TwoSetsTwoOperations qn = 
-        TwoSetsTwoOperations.getQn(n);
-      twoSetsTwoOperationsTests(qn); } }
+      final TwoSetsTwoOperations qn = Qn.getQnSpace(n);
+      structureTests(qn,n); } }
 
   //--------------------------------------------------------------
 }

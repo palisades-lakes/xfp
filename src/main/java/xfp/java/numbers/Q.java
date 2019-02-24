@@ -11,6 +11,9 @@ import java.util.function.UnaryOperator;
 import org.apache.commons.math3.fraction.BigFraction;
 import org.apache.commons.rng.UniformRandomProvider;
 
+import xfp.java.Classes;
+import xfp.java.algebra.OneSetOneOperation;
+import xfp.java.algebra.OneSetTwoOperations;
 import xfp.java.algebra.Set;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
@@ -20,7 +23,7 @@ import xfp.java.prng.Generators;
  * necessary.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-22
+ * @version 2019-02-23
  */
 
 public final class Q implements Set {
@@ -76,8 +79,10 @@ public final class Q implements Set {
 
   private final Number multiply (final Number x0, 
                                  final Number x1) {
-    assert(contains(x0));
-    assert(contains(x1));
+    assert contains(x0) : 
+      "x0 " + Classes.className(x0) + ":" + x0 + " not in " + this;
+    assert contains(x1)  : 
+      "x1 " + Classes.className(x1) + ":" + x1 + " not in " + this;
     final BigFraction q0 = BigFractions.toBigFraction(x0);
     final BigFraction q1 = BigFractions.toBigFraction(x1);
     return q0.multiply(q1); } 
@@ -251,6 +256,25 @@ public final class Q implements Set {
   public static final Q get () { return SINGLETON; } 
 
   //--------------------------------------------------------------
+
+  public static final OneSetOneOperation ADDITIVE_MAGMA = 
+  OneSetOneOperation.magma(get().adder(),get());
+
+  public static final OneSetOneOperation MULTIPLICATIVE_MAGMA = 
+  OneSetOneOperation.magma(get().multiplier(),get());
+
+  public static final OneSetTwoOperations FIELD = 
+  OneSetTwoOperations.field(
+    get().adder(),
+    get().additiveIdentity(),
+    get().additiveInverse(),
+    get().multiplier(),
+    get().multiplicativeIdentity(),
+    get().multiplicativeInverse(),
+    get());
+
+  //--------------------------------------------------------------
+
 }
 //--------------------------------------------------------------
 

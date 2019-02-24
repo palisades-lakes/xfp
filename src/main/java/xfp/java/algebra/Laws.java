@@ -1,7 +1,7 @@
 package xfp.java.algebra;
 
 import java.math.BigInteger;
-import java.util.List;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.BinaryOperator;
@@ -37,7 +37,7 @@ import xfp.java.numbers.BigFractions;
  * no instance state or methods.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-22
+ * @version 2019-02-23
  */
 
 @SuppressWarnings("unchecked")
@@ -48,14 +48,18 @@ public final class Laws {
   //--------------------------------------------------------------
   /** Is the value of the operation an element of the structure?
    */
-  public final static Predicate<Supplier> 
+  public final static Predicate<Map<Set,Supplier>>
   closed (final Set elements,
           final BinaryOperator operation) {
-    return new Predicate<Supplier> () {
+    return new Predicate<Map<Set,Supplier>> () {
       @Override
       public final String toString () { return "closed"; }
       @Override
-      public final boolean test (final Supplier samples) {
+      public final boolean test (final Map<Set,Supplier> samplers) {
+        final Supplier samples = samplers.get(elements);
+        assert null != samples :
+          "samplers: " + samplers + "\n" +
+          "elements: " + elements;
         final Object a = samples.get();
         assert elements.contains(a) :
           a + " is not an element of " + elements;
@@ -68,14 +72,15 @@ public final class Laws {
   /** Is the operation associative?
    */
 
-  public final static Predicate<Supplier>  
+  public final static Predicate<Map<Set,Supplier>>  
   associative (final Set elements,
                final BinaryOperator operation) {
-    return new Predicate<Supplier> () {
+    return new Predicate<Map<Set,Supplier>> () {
       @Override
       public final String toString () { return "associative"; }
       @Override
-      public final boolean test (final Supplier samples) {
+      public final boolean test (final Map<Set,Supplier> samplers) {
+        final Supplier samples = samplers.get(elements);
         final Object a = samples.get();
         assert elements.contains(a);
         final Object b = samples.get();
@@ -105,50 +110,56 @@ public final class Laws {
    * identity (zero) breaking multiplicative identity in a 
    * ring-like structure.
    */
-  public final static Predicate<Supplier> 
+  public final static Predicate<Map<Set,Supplier>> 
   identity (final Set elements,
             final BinaryOperator operation,
             final Object identity,
-            final Object excluded) {
-    return new Predicate<Supplier> () {
+            final java.util.Set excluded) {
+    return new Predicate<Map<Set,Supplier>> () {
       @Override
       public final String toString () { 
         return identity.toString(); }
-//      public final String toString () { 
-//        return identity + " is not an identity for " + 
-//          operation + " on " + elements + "\n" +
-//          "excluding " + excluded; }
+      //      public final String toString () { 
+      //        return identity + " is not an identity for " + 
+      //          operation + " on " + elements + "\n" +
+      //          "excluding " + excluded; }
       @Override
-      public final boolean test (final Supplier samples) {
+      public final boolean test (final Map<Set,Supplier> samplers) {
         // TODO: what if we want <code>null</code> 
         // to be the identity? IS there an example where null is
         // better than empty list, empty string, ...
+        final Supplier samples = samplers.get(elements);
         if (null == identity) { return false; }
         final Object a = samples.get();
-        if (Sets.contains(excluded,a)) {return true; }
+        // contains doesn't work because test needs to obey 
+        // structure's definition of equivalence
+        //if (Sets.contains(excluded,a)) { return true; }
+        final BiPredicate eq = elements.equivalence();
+        for (final Object x : (excluded)) {
+          if (eq.test(x,a)) { return true; } }
         assert elements.contains(a);
         assert elements.contains(identity);
         final Object r = operation.apply(a,identity);
         final Object l = operation.apply(identity,a);
-        final BiPredicate equal = elements.equivalence();
-        return equal.test(a,r) && equal.test(a,l); } }; }
+        return eq.test(a,r) && eq.test(a,l); } }; }
 
   /** Does <code>(operation a identity) == 
    * (operation identity a) = a</code>?
    */
-  public final static Predicate<Supplier> 
+  public final static Predicate<Map<Set,Supplier>> 
   identity (final Set elements,
             final BinaryOperator operation,
             final Object identity) {
-    return new Predicate<Supplier> () {
+    return new Predicate<Map<Set,Supplier>> () {
       @Override
       public final String toString () { 
         return identity.toString(); }
-//      public final String toString () { 
-//        return identity + " is not an identity for " + 
-//          operation + " on " + elements; }
+      //      public final String toString () { 
+      //        return identity + " is not an identity for " + 
+      //          operation + " on " + elements; }
       @Override
-      public final boolean test (final Supplier samples) {
+      public final boolean test (final Map<Set,Supplier> samplers) {
+        final Supplier samples = samplers.get(elements);
         // TODO: what if we want <code>null</code> 
         // to be the identity? IS there an example where null is
         // better than empty list, empty string, ...
@@ -171,35 +182,49 @@ public final class Laws {
    * identity (zero) having no inverse element for the
    * multiplicative operation in a ring-like structure.
    */
-  public final static Predicate<Supplier>  
+  public final static Predicate<Map<Set,Supplier>>  
   inverse (final Set elements,
            final BinaryOperator operation,
            final Object identity,
            final UnaryOperator inverse,
-           final Object excluded) {
-    return new Predicate<Supplier> () {
+           final java.util.Set excluded) {
+    return new Predicate<Map<Set,Supplier>> () {
       @Override
       public final String toString () { 
         return inverse.toString(); }
-//          public final String toString () { 
-//          return inverse + " is not an inverse for " +
-//          operation + " on " + elements +
-//          " relative to " + 
-//          Classes.className(identity) + ":" +
-//          identity + "\n" +
-//          "excluding " + excluded; }
+      //          public final String toString () { 
+      //          return inverse + " is not an inverse for " +
+      //          operation + " on " + elements +
+      //          " relative to " + 
+      //          Classes.className(identity) + ":" +
+      //          identity + "\n" +
+      //          "excluding " + excluded; }
       @Override
-      public final boolean test (final Supplier samples) {
+      public final boolean test (final Map<Set,Supplier> samplers) {
+        final Supplier samples = samplers.get(elements);
         final Object a = samples.get();
-        if (Sets.contains(excluded,a)) { return true; }
+        // contains doesn't work because test needs to obey 
+        // structure's definition of equivalence
+        //if (Sets.contains(excluded,a)) { return true; }
+        final BiPredicate eq = elements.equivalence();
+        for (final Object x : (excluded)) {
+          if (eq.test(x,a)) { return true; } }
         assert elements.contains(a);
         assert elements.contains(identity);
         final Object ainv = inverse.apply(a);
-        final BiPredicate equal = elements.equivalence();
+//        if (! elements.contains(ainv)) {
+//          System.out.println(elements);
+//          System.out.println(Classes.className(excluded) + ":" + excluded);
+//          for (final Object x : (excluded)) {
+//            System.out.println(Classes.className(x) + ":" + x);
+//          }
+//          System.out.println("a: " + Classes.className(a) + ":" + a);
+//          System.out.println(ainv);
+//        }
         final boolean result =  
-          equal.test(identity,operation.apply(a,ainv))
+          eq.test(identity,operation.apply(a,ainv))
           && 
-          equal.test(identity,operation.apply(ainv,a)); 
+          eq.test(identity,operation.apply(ainv,a)); 
         if (! result) {
           System.out.println(a);
           System.out.println(ainv);
@@ -213,7 +238,7 @@ public final class Laws {
    * (operation (inverse a) a) = identity</code>
    * for all <code>a</code> in <code>elements</code>?
    */
-  public final static Predicate<Supplier>  
+  public final static Predicate<Map<Set,Supplier>>  
   inverse (final Set elements,
            final BinaryOperator operation,
            final Object identity,
@@ -225,14 +250,15 @@ public final class Laws {
   /** Is the operation commutative (aka symmetric)?
    */
 
-  public final static Predicate<Supplier>  
+  public final static Predicate<Map<Set,Supplier>>  
   commutative (final Set elements,
                final BinaryOperator operation) {
-    return new Predicate<Supplier> () {
+    return new Predicate<Map<Set,Supplier>> () {
       @Override
       public final String toString () { return "commutative"; }
       @Override
-      public final boolean test (final Supplier samples) {
+      public final boolean test (final Map<Set,Supplier> samplers) {
+        final Supplier samples = samplers.get(elements);
         final Object a = samples.get();
         assert elements.contains(a);
         final Object b = samples.get();
@@ -247,44 +273,44 @@ public final class Laws {
   // by algebraic structure
   // TODO: reuse code by adding elements to (immutable) lists
 
-  public static final List<Predicate> 
+  public static final ImmutableList<Predicate<Map<Set,Supplier>>>
   magma  (final Set elements,
           final BinaryOperator operation) {
-    return List.of(closed(elements,operation));}
+    return ImmutableList.of(closed(elements,operation));}
 
-  public static final List<Predicate> 
+  public static final ImmutableList<Predicate<Map<Set,Supplier>>> 
   semigroup  (final Set elements,
               final BinaryOperator operation) {
-    return List.of(
+    return ImmutableList.of(
       closed(elements,operation),
       associative(elements,operation));}
 
-  public static final List<Predicate> 
+  public static final ImmutableList<Predicate<Map<Set,Supplier>>> 
   monoid  (final Set elements,
            final BinaryOperator operation,
            final Object identity) {
-    return List.of(
+    return ImmutableList.of(
       closed(elements,operation),
       associative(elements,operation),
       identity(elements,operation,identity));}
 
-  public static final List<Predicate> 
+  public static final ImmutableList<Predicate<Map<Set,Supplier>>> 
   group  (final Set elements,
           final BinaryOperator operation,
           final Object identity,
           final UnaryOperator inverse) {
-    return List.of(
+    return ImmutableList.of(
       closed(elements,operation),
       associative(elements,operation),
       identity(elements,operation,identity),
       inverse(elements,operation,identity,inverse));}
 
-  public static final List<Predicate> 
+  public static final ImmutableList<Predicate<Map<Set,Supplier>>> 
   commutativegroup  (final Set elements,
                      final BinaryOperator operation,
                      final Object identity,
                      final UnaryOperator inverse) {
-    return List.of(
+    return ImmutableList.of(
       closed(elements,operation),
       associative(elements,operation),
       identity(elements,operation,identity),
@@ -299,15 +325,16 @@ public final class Laws {
    * (Ring-like version)
    */
 
-  public final static Predicate<Supplier>  
+  public final static Predicate<Map<Set,Supplier>>  
   distributive (final Set elements,
                 final BinaryOperator add,
                 final BinaryOperator multiply) {
-    return new Predicate<Supplier> () {
+    return new Predicate<Map<Set,Supplier>> () {
       @Override
       public final String toString () { return "distributive"; }
       @Override
-      public final boolean test (final Supplier samples) {
+      public final boolean test (final Map<Set,Supplier> samplers) {
+        final Supplier samples = samplers.get(elements);
         final Object a = samples.get();
         assert elements.contains(a);
         final Object b = samples.get();
@@ -325,13 +352,13 @@ public final class Laws {
   //--------------------------------------------------------------
   // by algebraic structure
 
-  public static final List<Predicate> 
+  public static final ImmutableList<Predicate<Map<Set,Supplier>>> 
   semiring (final BinaryOperator add,
             final Object additiveIdentity,
             final BinaryOperator multiply,
             final Object multiplicativeIdentity,
             final Set elements){
-    return List.of(
+    return ImmutableList.of(
       closed(elements,add),
       associative(elements,add),
       identity(elements,add,additiveIdentity),
@@ -342,14 +369,14 @@ public final class Laws {
         java.util.Set.of(additiveIdentity)),
       distributive(elements,add,multiply));}
 
-  public static final List<Predicate> 
+  public static final ImmutableList<Predicate<Map<Set,Supplier>>> 
   ring (final BinaryOperator add,
         final Object additiveIdentity,
         final UnaryOperator additiveInverse,
         final BinaryOperator multiply,
         final Object multiplicativeIdentity,
         final Set elements){
-    return List.of(
+    return ImmutableList.of(
       closed(elements,add),
       associative(elements,add),
       identity(elements,add,additiveIdentity),
@@ -361,14 +388,14 @@ public final class Laws {
         java.util.Set.of(additiveIdentity)),
       distributive(elements,add,multiply));}
 
-  public static final List<Predicate> 
+  public static final ImmutableList<Predicate<Map<Set,Supplier>>> 
   commutativeRing (final BinaryOperator add,
                    final Object additiveIdentity,
                    final UnaryOperator additiveInverse,
                    final BinaryOperator multiply,
                    final Object multiplicativeIdentity,
                    final Set elements){
-    return List.of(
+    return ImmutableList.of(
       closed(elements,add),
       associative(elements,add),
       identity(elements,add,additiveIdentity),
@@ -381,7 +408,7 @@ public final class Laws {
       commutative(elements,multiply),
       distributive(elements,add,multiply));}
 
-  public static final List<Predicate> 
+  public static final ImmutableList<Predicate<Map<Set,Supplier>>> 
   divisionRing (final BinaryOperator add,
                 final Object additiveIdentity,
                 final UnaryOperator additiveInverse,
@@ -389,7 +416,7 @@ public final class Laws {
                 final Object multiplicativeIdentity,
                 final UnaryOperator multiplicativeInverse,
                 final Set elements) {
-    return List.of(
+    return ImmutableList.of(
       closed(elements,add),
       associative(elements,add),
       identity(elements,add,additiveIdentity),
@@ -404,7 +431,7 @@ public final class Laws {
         java.util.Set.of(additiveIdentity)),
       distributive(elements,add,multiply));}
 
-  public static final List<Predicate> 
+  public static final ImmutableList<Predicate<Map<Set,Supplier>>> 
   field (final BinaryOperator add,
          final Object additiveIdentity,
          final UnaryOperator additiveInverse,
@@ -412,7 +439,7 @@ public final class Laws {
          final Object multiplicativeIdentity,
          final UnaryOperator multiplicativeInverse,
          final Set elements) {
-    return List.of(
+    return ImmutableList.of(
       closed(elements,add),
       associative(elements,add),
       identity(elements,add,additiveIdentity),
@@ -428,22 +455,53 @@ public final class Laws {
       commutative(elements,multiply),
       distributive(elements,add,multiply));}
 
+  // NOT a standard algebraic structure
+  // TODO: test for laws that are violated?
+  @SuppressWarnings("unused") 
+  public static final ImmutableList<Predicate<Map<Set,Supplier>>> 
+  floatingPoint (final BinaryOperator add,
+                 final Object additiveIdentity,
+                 final UnaryOperator additiveInverse,
+                 final BinaryOperator multiply,
+                 final Object multiplicativeIdentity,
+                 final UnaryOperator multiplicativeInverse,
+                 final Set elements) {
+    return ImmutableList.of(
+      closed(elements,add),
+      //associative(elements,add),
+      identity(elements,add,additiveIdentity),
+      //inverse(elements,add,additiveIdentity,additiveInverse),
+      commutative(elements,add),
+      closed(elements,multiply),
+      //associative(elements,multiply),
+      identity(elements,multiply,multiplicativeIdentity,
+        java.util.Set.of(additiveIdentity)),
+      //inverse(elements,multiply,multiplicativeIdentity,
+      //  multiplicativeInverse,
+      //  java.util.Set.of(additiveIdentity)),
+      commutative(elements,multiply)
+      //,distributive(elements,add,multiply)
+      );}
+
   //--------------------------------------------------------------
   // Two sets: scalars and elements/vectors
   //--------------------------------------------------------------
   /** Is the value of the operation an element of the structure?
    */
 
-  public final static BiPredicate<Supplier,Supplier> 
+  public final static Predicate<Map<Set,Supplier>>
   closed (final Set elements,
           final Set scalars,
           final BinaryOperator operation) {
-    return new BiPredicate<Supplier,Supplier> () {
+    return new Predicate<Map<Set,Supplier>> () {
       @Override
       public final String toString () { return "closed"; }
       @Override
-      public final boolean test (final Supplier elementSamples,
-                                 final Supplier scalarSamples) {
+      public final boolean test (final Map<Set,Supplier> samplers) {
+        final Supplier scalarSamples = samplers.get(scalars);
+        assert null != scalarSamples;
+        final Supplier elementSamples = samplers.get(elements);
+        assert null != elementSamples;
         final Object a = scalarSamples.get();
         assert scalars.contains(a);
         final Object b = elementSamples.get();
@@ -456,18 +514,20 @@ public final class Laws {
    * (Module-like version)
    */
 
-  public final static BiPredicate<Supplier,Supplier> 
+  public final static Predicate<Map<Set,Supplier>>
   associative (final Set elements,
                final Set scalars,
                final BiFunction multiply,
                final BiFunction scale) {
-    return new BiPredicate<Supplier,Supplier> () {
+    return new Predicate<Map<Set,Supplier>> () {
       @Override
       public final String toString () { return "associative"; }
       @Override
-      public final boolean test (final Supplier elementSamples,
-                                 final Supplier scalarSamples) {
-
+      public final boolean test (final Map<Set,Supplier> samplers) {
+        final Supplier scalarSamples = samplers.get(scalars);
+        assert null != scalarSamples;
+        final Supplier elementSamples = samplers.get(elements);
+        assert null != elementSamples;
         final Object a = scalarSamples.get();
         assert scalars.contains(a);
         final Object b = scalarSamples.get();
@@ -490,7 +550,7 @@ public final class Laws {
           System.out.println("BigInteger:" + bi);
           System.out.println("BigFraction(bi):" + new BigFraction(bi));
           System.out.println("BigFraction(bi,1):" + new BigFraction(bi,BigInteger.ONE));
-          
+
           System.out.println();
           System.out.println(elements.toString(c));
           System.out.println(elements.toString(BigFractions.toBigFraction(c)));
@@ -504,18 +564,20 @@ public final class Laws {
    * (Module-like version)
    */
 
-  public final static BiPredicate<Supplier,Supplier> 
+  public final static Predicate<Map<Set,Supplier>>
   distributive (final Set elements,
                 final Set scalars,
                 final BinaryOperator add,
                 final BiFunction scale) {
-    return new BiPredicate<Supplier,Supplier> () {
+    return new Predicate<Map<Set,Supplier>> () {
       @Override
       public final String toString () { return "distributive"; }
       @Override
-      public final boolean test (final Supplier elementSamples,
-                                 final Supplier scalarSamples) {
-
+      public final boolean test (final Map<Set,Supplier> samplers) {
+        final Supplier scalarSamples = samplers.get(scalars);
+        assert null != scalarSamples;
+        final Supplier elementSamples = samplers.get(elements);
+        assert null != elementSamples;
         final Object a = scalarSamples.get();
         assert scalars.contains(a);
         final Object b = elementSamples.get();
@@ -531,33 +593,21 @@ public final class Laws {
               scale.apply(a,c))); } }; }
 
   //--------------------------------------------------------------
-  // by algebraic structure
+  /** Whether these are laws for linear spaces, or modules, or
+   * something else, is determined by the laws in the 
+   * elements and scalars structures.
+   */
 
-  // just the laws involving both scalars and elements
-  // TwoSetsTwoOperations adds the laws for the scalars and 
-  // elements separately
-  
-  public static final List
-  module (final BiFunction scale,
-          final OneSetOneOperation elements,
-          final OneSetTwoOperations scalars) {
+  public static final ImmutableList
+  linearSpaceLike (final BiFunction scale,
+                   final OneSetOneOperation elements,
+                   final OneSetTwoOperations scalars) {
     final ImmutableList.Builder b = ImmutableList.builder();
     b.add(
       associative(elements,scalars,scalars.multiply(),scale),
       distributive(elements,scalars,elements.operation(),scale));
-    return b.build(); }
-
-  // just the laws involving both scalars and elements
-  
-  /** Perhaps more commonly called 'vector' space. */
-  public static final List
-  linearSpace (final BiFunction scale,
-               final OneSetOneOperation elements,
-               final OneSetTwoOperations scalars) {
-    final ImmutableList.Builder b = ImmutableList.builder();
-    b.add(
-      associative(elements,scalars,scalars.multiply(),scale),
-      distributive(elements,scalars,elements.operation(),scale));
+    b.addAll(elements.laws());
+    b.addAll(scalars.laws());
     return b.build(); }
 
   //--------------------------------------------------------------

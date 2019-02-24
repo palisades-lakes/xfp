@@ -13,6 +13,8 @@ import org.apache.commons.rng.UniformRandomProvider;
 
 import clojure.lang.Numbers;
 import clojure.lang.Ratio;
+import xfp.java.algebra.OneSetOneOperation;
+import xfp.java.algebra.OneSetTwoOperations;
 import xfp.java.algebra.Set;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
@@ -201,10 +203,27 @@ public final class Ratios implements Set {
 
   private Ratios () { }
 
-  private static final Ratios SINGLETON = 
-    new Ratios();
+  private static final Ratios SINGLETON = new Ratios();
 
   public static final Ratios get () { return SINGLETON; } 
+
+  //--------------------------------------------------------------
+
+  public static final OneSetOneOperation ADDITIVE_MAGMA = 
+  OneSetOneOperation.magma(get().adder(),get());
+
+  public static final OneSetOneOperation MULTIPLICATIVE_MAGMA = 
+  OneSetOneOperation.magma(get().multiplier(),get());
+
+  public static final OneSetTwoOperations FIELD = 
+  OneSetTwoOperations.field(
+    get().adder(),
+    get().additiveIdentity(),
+    get().additiveInverse(),
+    get().multiplier(),
+    get().multiplicativeIdentity(),
+    get().multiplicativeInverse(),
+    get());
 
   //--------------------------------------------------------------
 }

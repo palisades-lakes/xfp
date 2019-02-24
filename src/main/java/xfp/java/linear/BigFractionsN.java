@@ -14,6 +14,8 @@ import org.apache.commons.rng.UniformRandomProvider;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 
+import xfp.java.algebra.OneSetOneOperation;
+import xfp.java.algebra.TwoSetsTwoOperations;
 import xfp.java.numbers.BigFractions;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
@@ -25,7 +27,7 @@ import xfp.java.prng.Generators;
  * for sparse vectors, etc.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-21
+ * @version 2019-02-23
  */
 @SuppressWarnings("unchecked")
 public final class BigFractionsN extends LinearSpaceLike  {
@@ -142,6 +144,15 @@ public final class BigFractionsN extends LinearSpaceLike  {
   //--------------------------------------------------------------
   // TODO: support zero-dimensional space?
 
+  public static final OneSetOneOperation 
+  bigFractionsNGroup (final int n) {
+    final BigFractionsN bfn = get(n);
+    return OneSetOneOperation.commutativeGroup(
+        bfn.adder(),
+        bfn,
+        bfn.additiveIdentity(),
+        bfn.additiveInverse()); }
+
   private BigFractionsN (final int dimension) { 
     super(dimension); }
 
@@ -217,6 +228,33 @@ public final class BigFractionsN extends LinearSpaceLike  {
           return qq; } }; }
 
   //--------------------------------------------------------------
+  /** n-dimensional rational vector space, implemented with
+   * <code>BigFraction[n]</code>.
+   */
+
+  private static final TwoSetsTwoOperations 
+  makeBFnSpace (final int n) { 
+    return
+      TwoSetsTwoOperations.linearSpaceLike(
+        BigFractionsN.scaler(n),
+        BigFractionsN.bigFractionsNGroup(n),
+        BigFractions.FIELD); }
+
+  private static final IntObjectMap<TwoSetsTwoOperations> 
+  _bfnCache = new IntObjectHashMap();
+
+  /** n-dimensional rational vector space, implemented with
+   * <code>BigFraction[]</code>.
+   */
+  public static final TwoSetsTwoOperations 
+  getBFnSpace (final int dimension) {
+    final TwoSetsTwoOperations qn0 = _bfnCache.get(dimension);
+    if (null != qn0) { return qn0; }
+    final TwoSetsTwoOperations qn1 = makeBFnSpace(dimension); 
+    _bfnCache.put(dimension,qn1);
+    return qn1; }
+
+ //--------------------------------------------------------------
 }
 //--------------------------------------------------------------
 

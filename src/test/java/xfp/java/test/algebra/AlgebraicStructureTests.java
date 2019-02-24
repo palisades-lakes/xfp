@@ -2,18 +2,22 @@ package xfp.java.test.algebra;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.List;
 import java.util.Map;
-import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 
-import xfp.java.algebra.OneSetOneOperation;
-import xfp.java.algebra.OneSetTwoOperations;
 import xfp.java.algebra.Set;
-import xfp.java.algebra.TwoSetsTwoOperations;
+import xfp.java.algebra.Structure;
+import xfp.java.linear.BigDecimalsN;
+import xfp.java.linear.BigFractionsN;
+import xfp.java.linear.Qn;
+import xfp.java.linear.RatiosN;
+import xfp.java.numbers.BigDecimals;
+import xfp.java.numbers.BigFractions;
+import xfp.java.numbers.Q;
+import xfp.java.numbers.Ratios;
 import xfp.java.prng.PRNG;
 import xfp.java.prng.Seeds;
 
@@ -21,172 +25,60 @@ import xfp.java.prng.Seeds;
 /** Common code for testing sets. 
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-21
+ * @version 2019-02-23
  */
 
 @SuppressWarnings("unchecked")
 public final class AlgebraicStructureTests {
 
-  private static final int TRYS = 1000;
-  static final int LINEARSPACE_TRYS = 127;
-
-  // TODO: should each structure know what laws it obeys?
-  // almost surely.
-  // then only need one test method...
-
-  public static final void 
-  magmaTests (final OneSetOneOperation magma) {
-    SetTests.tests(magma);
-    final Supplier g = 
-      magma.generator( 
-        PRNG.well44497b(
-          Seeds.seed("seeds/Well44497b-2019-01-09.txt")));
-    for(final Predicate law : magma.magmaLaws()) {
-      for (int i=0; i<TRYS; i++) {
-        assertTrue(law.test(g)); } } }
-
-  public static final void 
-  commutativeGroupTests (final OneSetOneOperation group) {
-    SetTests.tests(group);
-    final Supplier g = 
-      group.generator( 
-        PRNG.well44497b(
-          Seeds.seed("seeds/Well44497b-2019-01-09.txt")));
-    for(final Predicate law : group.commutativeGroupLaws()) {
-      for (int i=0; i<TRYS; i++) {
-        assertTrue(law.test(g)); } } }
-
-  public static final void 
-  commutativeRingTests (final OneSetTwoOperations commutativeRing) {
-    SetTests.tests(commutativeRing);
-    final Supplier g = 
-      commutativeRing.generator( 
-        PRNG.well44497b(
-          Seeds.seed("seeds/Well44497b-2019-01-11.txt")));
-
-    for(final Predicate law : commutativeRing.commutativeRingLaws()) {
-      for (int i=0; i<TRYS; i++) {
-        assertTrue(law.test(g), law.toString() + " failed."); } } }
-
-  public static final void 
-  fieldTests (final OneSetTwoOperations field) {
-    SetTests.tests(field);
-    final Supplier g = 
-      field.generator( 
-        PRNG.well44497b(
-          Seeds.seed("seeds/Well44497b-2019-01-11.txt")));
-
-    for(final Predicate law : field.fieldLaws()) {
-      for (int i=0; i<TRYS; i++) {
-        assertTrue(law.test(g), law.toString() + " failed."); } } }
-
-  @SuppressWarnings({ "static-method" })
-  @Test
-  public final void bigDecimals () {
-    magmaTests(OneSetOneOperation.BIGDECIMALS_ADD);
-    magmaTests(OneSetOneOperation.BIGDECIMALS_MULTIPLY); 
-    commutativeRingTests(OneSetTwoOperations.BIGDECIMALS_RING);  }
-
-  @SuppressWarnings({ "static-method" })
-  @Test
-  public final void bigFractions () {
-    magmaTests(OneSetOneOperation.BIGFRACTIONS_ADD);
-    magmaTests(OneSetOneOperation.BIGFRACTIONS_MULTIPLY); 
-    fieldTests(OneSetTwoOperations.BIGFRACTIONS_FIELD);  }
-
-  @SuppressWarnings({ "static-method" })
-  @Test
-  public final void ratios () {
-    magmaTests(OneSetOneOperation.RATIOS_ADD);
-    magmaTests(OneSetOneOperation.RATIOS_MULTIPLY); 
-    fieldTests(OneSetTwoOperations.RATIOS_FIELD); }
-
-  @SuppressWarnings({ "static-method" })
-  @Test
-  public final void qTests () {
-    fieldTests(OneSetTwoOperations.Q_FIELD); }
+  private static final int TRYS = 1023;
+  static final int SPACE_TRYS = 127;
 
   //--------------------------------------------------------------
 
-  public static final void 
-  twoSetsTwoOperationsTests (final TwoSetsTwoOperations space) {
-
-    SetTests.tests(space);
-
-    final Map<Set,List> lawLists = space.linearSpaceLaws();
-    if (null == lawLists) {
-      System.out.println(space);
-      throw new RuntimeException("no laws!");
-    }
-
-    final OneSetOneOperation elements = 
-      (OneSetOneOperation) space.elements();
-    if (null == elements) {
-      System.out.println(space);
-      throw new RuntimeException("no elements!");
-    }
-
-    final Supplier vg = 
-      space.elements().generator( 
+  private static final void 
+  structureTests (final Structure s,
+                  final int n) {
+    SetTests.tests(s);
+    final Map<Set,Supplier> samplers = 
+      s.samplers(
         PRNG.well44497b(
           Seeds.seed("seeds/Well44497b-2019-01-09.txt")));
+    for(final Predicate law : s.laws()) {
+      for (int i=0; i<n; i++) {
+        assertTrue(law.test(samplers)); } } }
 
-    if (null == lawLists.get(elements)) {
-      System.out.println(space);
-      System.out.println(elements);
-      System.out.println(lawLists);
-      throw new RuntimeException("no elements!");
-    }
-    for (int i=0; i<LINEARSPACE_TRYS; i++) {
-      for (final Object law : lawLists.get(elements)) {
-        assertTrue(((Predicate) law).test(vg),law.toString());} } 
-
-    final OneSetTwoOperations scalars = 
-      (OneSetTwoOperations) space.scalars();
-    final Supplier sg = 
-      space.scalars().generator( 
-        PRNG.well44497b(
-          Seeds.seed("seeds/Well44497b-2019-01-11.txt")));
-    for (int i=0; i<LINEARSPACE_TRYS; i++) {
-      for(final Object law : lawLists.get(scalars)) {
-        assertTrue(((Predicate) law).test(sg),law.toString());} } 
-
-    for (int i=0; i<LINEARSPACE_TRYS; i++) {
-      for(final Object law : lawLists.get(space)) {
-        final boolean success = ((BiPredicate) law).test(vg,sg);
-        if (! success) { System.out.println(law); }
-        assertTrue(success, law.toString());} } }
+  //--------------------------------------------------------------
 
   @SuppressWarnings({ "static-method" })
   @Test
-  public final void bigDecimalN () {
-    for (final int n : new int[] { 1, 3, 13, 127}) {
-      final TwoSetsTwoOperations bdn = TwoSetsTwoOperations.getBDn(n);
-      AlgebraicStructureTests.twoSetsTwoOperationsTests(bdn); } }
+  public final void tests () {
 
-  @SuppressWarnings({ "static-method" })
-  @Test
-  public final void ratiosN () {
+    structureTests(BigDecimals.ADDITIVE_MAGMA,TRYS);
+    structureTests(BigDecimals.MULTIPLICATIVE_MAGMA,TRYS); 
+    structureTests(BigDecimals.RING,TRYS);  
+    
+    structureTests(BigFractions.ADDITIVE_MAGMA,TRYS);
+    structureTests(BigFractions.MULTIPLICATIVE_MAGMA,TRYS); 
+    structureTests(BigFractions.FIELD,TRYS); 
+    
+    structureTests(Ratios.ADDITIVE_MAGMA,TRYS);
+    structureTests(Ratios.MULTIPLICATIVE_MAGMA,TRYS); 
+    structureTests(Ratios.FIELD,TRYS); 
+    
+    structureTests(Q.FIELD,TRYS); 
+    
     for (final int n : new int[] { 1, 3, 13, 127}) {
-      final TwoSetsTwoOperations ratiosN = 
-        TwoSetsTwoOperations.getRatiosN(n);
-      AlgebraicStructureTests.twoSetsTwoOperationsTests(ratiosN); } }
+      structureTests(BigDecimalsN.bigDecimalsNGroup(n),SPACE_TRYS); 
+      structureTests(BigFractionsN.bigFractionsNGroup(n),SPACE_TRYS); 
+      structureTests(RatiosN.ratiosNGroup(n),SPACE_TRYS); 
+      structureTests(Qn.qnGroup(n),SPACE_TRYS); 
+      structureTests(BigDecimalsN.getBDnSpace(n),SPACE_TRYS); 
+      structureTests(BigFractionsN.getBFnSpace(n),SPACE_TRYS); 
+      structureTests(RatiosN.getRatiosnSpace(n),SPACE_TRYS); 
+      structureTests(Qn.getQnSpace(n),SPACE_TRYS); 
+      } }
 
-  @SuppressWarnings({ "static-method" })
-  @Test
-  public final void bigFractionN () {
-    for (final int n : new int[] { 1, 3, 13, 127}) {
-      final TwoSetsTwoOperations bfn = 
-        TwoSetsTwoOperations.getBFn(n);
-      AlgebraicStructureTests.twoSetsTwoOperationsTests(bfn); } }
-
-  @SuppressWarnings({ "static-method" })
-  @Test
-  public final void qN () {
-    for (final int n : new int[] { 1, 3, 13, 127}) {
-      final TwoSetsTwoOperations qn = 
-        TwoSetsTwoOperations.getQn(n);
-      AlgebraicStructureTests.twoSetsTwoOperationsTests(qn); } }
 
   //--------------------------------------------------------------
 }

@@ -12,6 +12,8 @@ import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 
 import clojure.lang.Ratio;
+import xfp.java.algebra.OneSetOneOperation;
+import xfp.java.algebra.TwoSetsTwoOperations;
 import xfp.java.numbers.Ratios;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
@@ -146,6 +148,15 @@ public final class RatiosN extends LinearSpaceLike {
   //--------------------------------------------------------------
   // TODO: support zero-dimensional space?
 
+  public static final OneSetOneOperation 
+  ratiosNGroup (final int n) {
+    final RatiosN ratioN = get(n);
+    return OneSetOneOperation.commutativeGroup(
+        ratioN.adder(),
+        ratioN,
+        ratioN.additiveIdentity(),
+        ratioN.additiveInverse()); }
+
   private RatiosN (final int dimension) { 
     super(dimension); }
 
@@ -158,6 +169,32 @@ public final class RatiosN extends LinearSpaceLike {
     final RatiosN dn1 = new RatiosN(dimension); 
     _cache.put(dimension,dn1);
     return dn1; }
+
+  //--------------------------------------------------------------
+  /** n-dimensional rational vector space, implemented with
+   * <code>Ratio[n]</code>.
+   */
+
+  private static final TwoSetsTwoOperations ratioNSapce (final int n) { 
+    return
+      TwoSetsTwoOperations.linearSpaceLike(
+        RatiosN.get(n).scaler(),
+        RatiosN.ratiosNGroup(n),
+        Ratios.FIELD); }
+
+  private static final IntObjectMap<TwoSetsTwoOperations> 
+  _ratiosNCache = new IntObjectHashMap();
+
+  /** n-dimensional rational vector space, implemented with
+   * <code>BigFraction[]</code>.
+   */
+  public static final TwoSetsTwoOperations 
+  getRatiosnSpace (final int dimension) {
+    final TwoSetsTwoOperations qn0 = _ratiosNCache.get(dimension);
+    if (null != qn0) { return qn0; }
+    final TwoSetsTwoOperations qn1 = ratioNSapce(dimension); 
+    _ratiosNCache.put(dimension,qn1);
+    return qn1; }
 
   //--------------------------------------------------------------
 }

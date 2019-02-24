@@ -11,6 +11,8 @@ import java.util.function.UnaryOperator;
 import org.apache.commons.math3.fraction.BigFraction;
 import org.apache.commons.rng.UniformRandomProvider;
 
+import xfp.java.algebra.OneSetOneOperation;
+import xfp.java.algebra.OneSetTwoOperations;
 import xfp.java.algebra.Set;
 import xfp.java.exceptions.Exceptions;
 import xfp.java.prng.Generator;
@@ -20,7 +22,7 @@ import xfp.java.prng.Generators;
  * <code>BigFraction</code>
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-21
+ * @version 2019-02-23
  */
 public final class BigFractions implements Set {
 
@@ -312,10 +314,27 @@ public final class BigFractions implements Set {
 
   private BigFractions () { }
 
-  private static final BigFractions SINGLETON = 
-    new BigFractions();
+  private static final BigFractions SINGLETON = new BigFractions();
 
   public static final BigFractions get () { return SINGLETON; } 
+
+  //--------------------------------------------------------------
+
+  public static final OneSetOneOperation ADDITIVE_MAGMA = 
+  OneSetOneOperation.magma(get().adder(),get());
+
+  public static final OneSetOneOperation MULTIPLICATIVE_MAGMA = 
+  OneSetOneOperation.magma(get().multiplier(),get());
+
+  public static final OneSetTwoOperations FIELD = 
+  OneSetTwoOperations.field(
+    get().adder(),
+    get().additiveIdentity(),
+    get().additiveInverse(),
+    get().multiplier(),
+    get().multiplicativeIdentity(),
+    get().multiplicativeInverse(),
+    get());
 
   //--------------------------------------------------------------
 }

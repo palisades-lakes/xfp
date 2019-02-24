@@ -11,6 +11,8 @@ import org.apache.commons.rng.UniformRandomProvider;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 
+import xfp.java.algebra.OneSetOneOperation;
+import xfp.java.algebra.TwoSetsTwoOperations;
 import xfp.java.numbers.BigDecimals;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
@@ -139,6 +141,15 @@ public final class BigDecimalsN extends LinearSpaceLike {
   //--------------------------------------------------------------
   // TODO: support zero-dimensional space?
 
+  public static final OneSetOneOperation 
+  bigDecimalsNGroup (final int n) {
+    final BigDecimalsN bdn = get(n);
+    return OneSetOneOperation.commutativeGroup(
+      bdn.adder(),
+      bdn,
+      bdn.additiveIdentity(),
+      bdn.additiveInverse()); }
+
   private BigDecimalsN (final int dimension) { 
     super(dimension);  }
 
@@ -151,6 +162,32 @@ public final class BigDecimalsN extends LinearSpaceLike {
     final BigDecimalsN dn1 = new BigDecimalsN(dimension); 
     _cache.put(dimension,dn1);
     return dn1; }
+
+  //--------------------------------------------------------------
+
+  private static final TwoSetsTwoOperations 
+  makeBDnSpace (final int n) { 
+    return
+      TwoSetsTwoOperations.linearSpaceLike(
+        BigDecimalsN.get(n).scaler(),
+        BigDecimalsN.bigDecimalsNGroup(n),
+        BigDecimals.RING); }
+
+  private static final IntObjectMap<TwoSetsTwoOperations> 
+  _bdnCache = new IntObjectHashMap();
+
+  /** n-dimensional rational module, implemented with
+   * <code>BigDecimal[]</code>.
+   * (not a vector space because BigDecimal doesn't have a 
+   * multiplicative inverse.)
+   */
+  public static final TwoSetsTwoOperations 
+  getBDnSpace (final int dimension) {
+    final TwoSetsTwoOperations qn0 = _bdnCache.get(dimension);
+    if (null != qn0) { return qn0; }
+    final TwoSetsTwoOperations qn1 = makeBDnSpace(dimension); 
+    _bdnCache.put(dimension,qn1);
+    return qn1; }
 
   //--------------------------------------------------------------
 }

@@ -19,13 +19,13 @@ import xfp.java.prng.Seeds;
 /** Common code for testing sets. 
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-19
+ * @version 2019-02-23
  */
 
 @SuppressWarnings("unchecked")
 public final class SetTests {
 
-  private static final int TRYS = 1000;
+  private static final int TRYS = 1023;
   
   private static final void testMembership (final Set set) {
     final Supplier g = 

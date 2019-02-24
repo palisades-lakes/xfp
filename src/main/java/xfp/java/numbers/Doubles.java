@@ -1,11 +1,24 @@
 package xfp.java.numbers;
 
+import java.util.Collections;
+import java.util.Map;
+import java.util.function.BiPredicate;
+import java.util.function.BinaryOperator;
+import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
+
+import org.apache.commons.rng.UniformRandomProvider;
+
+import xfp.java.algebra.Set;
+import xfp.java.prng.Generator;
+import xfp.java.prng.Generators;
+
 /** Utilities for <code>double</code>, <code>double[]</code>.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-01-29
+ * @version 2019-02-23
  */
-public final class Doubles  {
+public final class Doubles implements Set {
 
   //--------------------------------------------------------------
   // private
@@ -61,12 +74,170 @@ public final class Doubles  {
     return Double.longBitsToDouble(ss | se | t); }
 
   //--------------------------------------------------------------
-  // disable constructor
+  // operations for algebraic structures over Doubles.
   //--------------------------------------------------------------
 
-  private Doubles () {
-    throw new UnsupportedOperationException(
-      "can't instantiate " + getClass()); }
+  // TODO: is consistency with other algebraic structure classes
+  // worth the indirection?
+
+  @SuppressWarnings("static-method")
+  private final Double add (final Double q0, 
+                            final Double q1) {
+    assert null != q0;
+    assert null != q1;
+    return Double.valueOf(q0.doubleValue() + q1.doubleValue()); } 
+
+  public final BinaryOperator<Double> adder () {
+    return new BinaryOperator<Double> () {
+      @Override
+      public final String toString () { return "D.add()"; }
+      @Override
+      public final Double apply (final Double q0, 
+                                 final Double q1) {
+        return Doubles.this.add(q0,q1); } }; }
+
+  //--------------------------------------------------------------
+
+  private static final Double ZERO = Double.valueOf(0.0);
+
+  @SuppressWarnings("static-method")
+  public final Double additiveIdentity () { return ZERO; }
+
+  //--------------------------------------------------------------
+
+  // TODO: is consistency with other algebraic structure classes
+  // worth the indirection?
+
+  @SuppressWarnings("static-method")
+  private final Double negate (final Double q) {
+    assert null != q;
+    return  Double.valueOf(- q.doubleValue()); } 
+
+  public final UnaryOperator<Double> additiveInverse () {
+    return new UnaryOperator<Double> () {
+      @Override
+      public final String toString () { return "D.negate()"; }
+      @Override
+      public final Double apply (final Double q) {
+        return Doubles.this.negate(q); } }; }
+
+  //--------------------------------------------------------------
+
+  @SuppressWarnings("static-method")
+  private final Double multiply (final Double q0, 
+                                 final Double q1) {
+    assert null != q0;
+    assert null != q1;
+    return Double.valueOf(q0.doubleValue() * q1.doubleValue()); } 
+
+  public final BinaryOperator<Double> multiplier () {
+    return new BinaryOperator<Double>() {
+      @Override
+      public final String toString () { return "D.multiply()"; }
+      @Override
+      public final Double apply (final Double q0, 
+                                 final Double q1) {
+        return Doubles.this.multiply(q0,q1); } }; }
+
+  //--------------------------------------------------------------
+
+  private static final Double ONE = Double.valueOf(1.0);
+
+  @SuppressWarnings("static-method")
+  public final Double multiplicativeIdentity () { return ONE; }
+
+  //--------------------------------------------------------------
+
+  @SuppressWarnings("static-method")
+  private final Double reciprocal (final Double q) {
+    assert null != q;
+    final double z = q.doubleValue();
+    // only a partial inverse
+    if (0.0 == z) { return null; }
+    return Double.valueOf(1.0/z);  } 
+
+  public final UnaryOperator<Double> multiplicativeInverse () {
+    return new UnaryOperator<Double> () {
+      @Override
+      public final String toString () { return "D.inverse()"; }
+      @Override
+      public final Double apply (final Double q) {
+        return Doubles.this.reciprocal(q); } }; }
+
+  //--------------------------------------------------------------
+  // Set methods
+  //--------------------------------------------------------------
+
+  @Override
+  public final boolean contains (final Object element) {
+    return element instanceof Double; }
+
+  @Override
+  public final boolean contains (final double element) {
+    return true; }
+
+  //--------------------------------------------------------------
+  // Double.equals reduces both arguments before checking
+  // numerator and denominators are equal.
+  // Guessing our Doubles are usually already reduced.
+  // Try n0*d1 == n1*d0 instead
+  // TODO: use BigInteger.bitLength() to decide
+  // which method to use?
+
+  @SuppressWarnings("static-method")
+  public final boolean equals (final Double q0, 
+                               final Double q1) {
+    assert null != q0;
+    assert null != q1;
+    return q0.equals(q1); }
+
+  @Override
+  public final BiPredicate equivalence () {
+    return new BiPredicate<Double,Double>() {
+      @Override
+      public final boolean test (final Double q0, 
+                                 final Double q1) {
+        return Doubles.this.equals(q0,q1); } }; }
+
+  //--------------------------------------------------------------
+
+  @Override
+  public final Supplier generator (final UniformRandomProvider urp,
+                                   final Map options) {
+    final Generator g = Generators.finiteDoubleGenerator(urp);
+    return 
+      new Supplier () {
+      @Override
+      public final Object get () { return g.next(); } }; }
+
+  @Override
+  public final Supplier generator (final UniformRandomProvider urp) {
+    return generator(urp,Collections.emptyMap()); }
+
+  //--------------------------------------------------------------
+  // Object methods
+  //--------------------------------------------------------------
+
+  @Override
+  public final int hashCode () { return 0; }
+
+  // singleton
+  @Override
+  public final boolean equals (final Object that) {
+    return that instanceof Doubles; }
+
+  @Override
+  public final String toString () { return "D"; }
+
+  //--------------------------------------------------------------
+  // construction
+  //--------------------------------------------------------------
+
+  private Doubles () { }
+
+  private static final Doubles SINGLETON = new Doubles();
+
+  public static final Doubles get () { return SINGLETON; } 
 
   //--------------------------------------------------------------
 }

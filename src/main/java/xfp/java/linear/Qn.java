@@ -12,6 +12,8 @@ import org.apache.commons.rng.UniformRandomProvider;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 
+import xfp.java.algebra.OneSetOneOperation;
+import xfp.java.algebra.TwoSetsTwoOperations;
 import xfp.java.numbers.BigFractions;
 import xfp.java.numbers.Q;
 import xfp.java.prng.Generator;
@@ -151,6 +153,15 @@ public final class Qn extends LinearSpaceLike {
   //--------------------------------------------------------------
   // TODO: support zero-dimensional space?
 
+  public static final OneSetOneOperation 
+  qnGroup (final int n) {
+    final Qn qn = get(n);
+    return OneSetOneOperation.commutativeGroup(
+        qn.adder(),
+        qn,
+        qn.additiveIdentity(),
+        qn.additiveInverse()); }
+
   private Qn (final int dimension) { super(dimension); }
 
   private static final IntObjectMap<Qn> _cache = 
@@ -162,6 +173,33 @@ public final class Qn extends LinearSpaceLike {
     final Qn dn1 = new Qn(dimension); 
     _cache.put(dimension,dn1);
     return dn1; }
+
+  //--------------------------------------------------------------
+  /** n-dimensional rational vector space, implemented with
+   * any known rational array.
+   */
+
+  private static final TwoSetsTwoOperations 
+  makeQnSpace (final int n) { 
+    return
+      TwoSetsTwoOperations.linearSpaceLike(
+        Qn.get(n).scaler(),
+        Qn.qnGroup(n),
+        Q.FIELD); }
+
+  private static final IntObjectMap<TwoSetsTwoOperations> 
+  _qnCache = new IntObjectHashMap();
+
+  /** n-dimensional rational vector space, implemented with
+   * <code>BigFraction[]</code>.
+   */
+  public static final TwoSetsTwoOperations 
+  getQnSpace (final int dimension) {
+    final TwoSetsTwoOperations qn0 = _qnCache.get(dimension);
+    if (null != qn0) { return qn0; }
+    final TwoSetsTwoOperations qn1 = makeQnSpace(dimension); 
+    _qnCache.put(dimension,qn1);
+    return qn1; }
 
   //--------------------------------------------------------------
 }

@@ -10,6 +10,8 @@ import java.util.function.UnaryOperator;
 
 import org.apache.commons.rng.UniformRandomProvider;
 
+import xfp.java.algebra.OneSetOneOperation;
+import xfp.java.algebra.OneSetTwoOperations;
 import xfp.java.algebra.Set;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
@@ -183,6 +185,28 @@ public final class BigDecimals implements Set {
   public static final BigDecimals get () { return SINGLETON; } 
 
   //--------------------------------------------------------------
+  // pre-defined structures
+  //--------------------------------------------------------------
+
+  public static final OneSetOneOperation ADDITIVE_MAGMA = 
+  OneSetOneOperation.magma(get().adder(),get());
+
+  public static final OneSetOneOperation MULTIPLICATIVE_MAGMA = 
+  OneSetOneOperation.magma(get().multiplier(),get());
+
+  public static final OneSetTwoOperations RING = 
+  OneSetTwoOperations.commutativeRing(
+    get().adder(),
+    get().additiveIdentity(),
+    get().additiveInverse(),
+    get().multiplier(),
+    get().multiplicativeIdentity(),
+    // no multiplicative inverse for BigDecimal
+    // divide can result in non-terminating decimal expansion
+    null, 
+    get());
+
+
 }
 //--------------------------------------------------------------
 
