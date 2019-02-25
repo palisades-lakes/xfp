@@ -120,7 +120,6 @@ public final class OneSetTwoOperations extends Structure {
   // construction
   //--------------------------------------------------------------
 
-
   private 
   OneSetTwoOperations (final BinaryOperator add,
                        final Object additiveIdentity,

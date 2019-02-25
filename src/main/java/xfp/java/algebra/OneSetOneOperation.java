@@ -12,7 +12,7 @@ import com.google.common.collect.ImmutableList;
 /** Group-like structures.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-23
+ * @version 2019-02-24
  */
 @SuppressWarnings("unchecked")
 public final class OneSetOneOperation extends Structure {
@@ -27,33 +27,6 @@ public final class OneSetOneOperation extends Structure {
   private final UnaryOperator _inverse;
   /** may be null. */
   public final UnaryOperator inverse () { return _inverse; }
-
-  //--------------------------------------------------------------
-  // laws for some specific algebraic structures, for testing
-
-  public final ImmutableList<Predicate<Map<Set,Supplier>>> 
-  semigroupLaws () {
-    return Laws.semigroup(elements(),operation());}
-
-  public final ImmutableList<Predicate<Map<Set,Supplier>>>  
-  monoidLaws () {
-    assert Objects.nonNull(identity());
-    return Laws.monoid(elements(),operation(),identity());}
-
-  public final ImmutableList<Predicate<Map<Set,Supplier>>> 
-  groupLaws () {
-    assert Objects.nonNull(identity());
-    assert Objects.nonNull(inverse());
-    return 
-      Laws.group(elements(),operation(),identity(),inverse());}
-
-  public final ImmutableList<Predicate<Map<Set,Supplier>>> 
-  commutativeGroupLaws () {
-    assert Objects.nonNull(identity());
-    assert Objects.nonNull(inverse());
-    return 
-      Laws.commutativegroup(
-        elements(),operation(),identity(),inverse());}
 
   //--------------------------------------------------------------
   // Object methods
@@ -137,20 +110,20 @@ public final class OneSetOneOperation extends Structure {
   public static final OneSetOneOperation 
   magma (final BinaryOperator operation,
          final Set elements) {
-    return make(
-      operation,elements,Laws.magma(elements,operation)); }
+    return 
+      make(operation,elements,Laws.magma(elements,operation)); }
 
   //--------------------------------------------------------------
- 
+
   public static final OneSetOneOperation 
   commutativeGroup (final BinaryOperator operation,
                     final Set elements,
                     final Object identity,
                     final UnaryOperator inverse) {
-    return make(
-      operation,elements,identity,inverse,
-      Laws.commutativegroup(
-        elements,operation,identity,inverse)); }
+    return 
+      make(operation,elements,identity,inverse,
+        Laws.commutativegroup(
+          elements,operation,identity,inverse)); }
 
   //--------------------------------------------------------------
 }

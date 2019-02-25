@@ -20,7 +20,7 @@ import xfp.java.test.algebra.SetTests;
  * jy --source 11 src/scripts/java/xfp/java/scripts/QnProfile.java
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-20
+ * @version 2019-02-24
  */
 
 @SuppressWarnings("unchecked")
@@ -29,15 +29,14 @@ public final class QnProfile {
   private static final int TRYS = 1023;
 
   private static final void 
-  structureTests (final Structure s,
-                  final int n) {
+  structureTests (final Structure s) {
     SetTests.tests(s);
-    final Map<Set,Supplier> samplers = 
-      s.samplers(
-        PRNG.well44497b(
-          Seeds.seed("seeds/Well44497b-2019-01-09.txt")));
     for(final Predicate law : s.laws()) {
-      for (int i=0; i<n; i++) {
+      final Map<Set,Supplier> samplers = 
+        s.generators(
+          PRNG.well44497b(
+            Seeds.seed("seeds/Well44497b-2019-01-09.txt")));
+      for (int i=0; i<TRYS; i++) {
         assertTrue(law.test(samplers)); } } }
 
 
@@ -47,7 +46,7 @@ public final class QnProfile {
     for (final int n : new int[] { 1, 3, 13, 127, 1023}) {
       System.out.println(n);
       final TwoSetsTwoOperations qn = Qn.getQnSpace(n);
-      structureTests(qn,n); } }
+      structureTests(qn); } }
 
   //--------------------------------------------------------------
 }

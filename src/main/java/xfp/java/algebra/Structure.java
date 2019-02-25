@@ -33,10 +33,6 @@ public abstract class Structure implements Set {
   public final Iterable<Predicate<Map<Set,Supplier>>> laws () { 
     return _laws; }
 
-  // TODO: more general specification for generators
-  public Map<Set,Supplier> samplers (final UniformRandomProvider urp) {
-    return ImmutableMap.of(elements(),elements().generator(urp)); }
-  
   //--------------------------------------------------------------
   // Set methods
   //--------------------------------------------------------------
@@ -61,6 +57,12 @@ public abstract class Structure implements Set {
                                    final Map options) { 
     return _elements.generator(prng,options); }
 
+  // TODO: more general specification for generators
+  @Override
+  public ImmutableMap<Set,Supplier> 
+  generators (final UniformRandomProvider urp) {
+    return elements().generators(urp); }
+  
   //--------------------------------------------------------------
   // construction
   //--------------------------------------------------------------

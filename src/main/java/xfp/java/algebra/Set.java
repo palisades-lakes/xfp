@@ -9,6 +9,8 @@ import java.util.function.Supplier;
 
 import org.apache.commons.rng.UniformRandomProvider;
 
+import com.google.common.collect.ImmutableMap;
+
 import xfp.java.exceptions.Exceptions;
 
 /** General, possibly unbounded, sets of <code>Object</code>s, 
@@ -49,8 +51,9 @@ import xfp.java.exceptions.Exceptions;
  * classes, represented by some element of each equivalence class.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-22
+ * @version 2019-02-24
  */
+
 public interface Set {
 
   // TODO: would it be better treat base sets as collections
@@ -61,10 +64,10 @@ public interface Set {
   // BiPredicate with an interface that handles all pairs of
   // primtives? 8x8 = 64 methods, though we might reduce to
   // (boolean,boolean), (char,char) + 6x6 number primitives
-  
+
   // TODO: would identity (eq, ==) be better than Object.equals()
   // as the default?
-  
+
   /** The equivalence relation that's used to map implementation
    * objects to the true elements of the set, which are 
    * equivalence classes of objects.
@@ -112,7 +115,7 @@ public interface Set {
     return false; }
 
   //--------------------------------------------------------------
-  
+
   public default String toString (final Object e) {
     assert contains(e);
     if (e instanceof byte[]) {
@@ -132,7 +135,7 @@ public interface Set {
     if (e instanceof Object[]) {
       return Arrays.toString((Object[]) e); }
     return Objects.toString(e); }
-  
+
   //--------------------------------------------------------------
   // TODO: is this just a Function that maps options to values?
   // That is, Is a set a function from all java objects to its
@@ -185,19 +188,30 @@ public interface Set {
 
   // TODO: replace Supplier with an interface that has 
   // generateArray(), generateList(), etc, convenience methods.
-  
+
   // TODO: replace Supplier with an interface than has 0-arity
   // <i>primititive</i>Value() methods?
-  
+
   // TODO: move prng to options?
 
-  public default Supplier generator (final UniformRandomProvider prng,
+  public default Supplier generator (final UniformRandomProvider urp,
                                      final Map options) {
     throw Exceptions.unsupportedOperation(
-      this,"generator",prng,options); }
+      this,"generator",urp,options); }
 
-  public default Supplier generator (final UniformRandomProvider prng) {
-    return generator(prng,Collections.emptyMap()); }
+  public default Supplier generator (final UniformRandomProvider urp) {
+    return generator(urp,Collections.emptyMap()); }
+
+  /** Return as a trivial map to make it easier to merge into
+   * results for more complicated structures of which this set
+   * might be a component.
+   */
+  public default ImmutableMap<Set,Supplier> 
+  generators (final UniformRandomProvider urp) {
+    return 
+      ImmutableMap.of(
+        this,
+        generator(urp,Collections.emptyMap())); }
 
   //--------------------------------------------------------------
   /** should eventually cover the whole set.
@@ -215,7 +229,7 @@ public interface Set {
     return iterator(Collections.emptyMap()); }
 
   public static Set EMPTY_SET = new Set() {};
-  
+
   /** Contains all Java Objects and primitives. */
   public static Set ALL_JAVA_VALUES = new Set() {
 
@@ -264,7 +278,7 @@ public interface Set {
     public boolean contains (final char element) {
       return true; } };
 
-  //--------------------------------------------------------------
+      //--------------------------------------------------------------
 }
 //--------------------------------------------------------------
 

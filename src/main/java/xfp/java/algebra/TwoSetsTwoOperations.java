@@ -14,8 +14,7 @@ import com.google.common.collect.ImmutableMap;
 /** Module-like structures, including linear (vector) spaces.
  * <p>
  * Two sets, 'elements' and 'scalars'.
- * Two operations: element 'addition' and 
- * 'multiplication' of elements by scalars.
+ * One operation: 'multiplication' of elements by scalars.
  * <p>
  * The scalars are (usually) an instance of some one set two 
  * operation structure, like a ring or a field.
@@ -35,12 +34,15 @@ import com.google.common.collect.ImmutableMap;
  * linear to affine spaces, etc.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-23
+ * @version 2019-02-24
  */
 @SuppressWarnings("unchecked")
 public final class TwoSetsTwoOperations extends Structure {
 
+  //--------------------------------------------------------------
+
   private final Set _scalars;
+
   /** Secondary set.
    * <p>
    * Typically a ring (giving a module) or a field (giving a 
@@ -48,21 +50,26 @@ public final class TwoSetsTwoOperations extends Structure {
    */
   public final Set scalars () { return _scalars; }
 
+  //--------------------------------------------------------------
+  // Operation over primary X secondary sets.
+  
   private final BiFunction _scale;
+
   /** Multiply an element by a scalar. */
   public final BiFunction multiply () { return _scale; }
 
   //--------------------------------------------------------------
-  // Structure methods
+  // Set methods
   //--------------------------------------------------------------
 
-  // TODO: more general specification for generators
   @Override
-  public Map<Set,Supplier> samplers (final UniformRandomProvider urp) {
-    final Set e = elements();
-    return ImmutableMap.of(
-      elements(),elements().generator(urp),
-      scalars(),scalars().generator(urp)); }
+  public final ImmutableMap<Set,Supplier> 
+  generators (final UniformRandomProvider urp) {
+    final ImmutableMap.Builder<Set,Supplier> b = 
+      ImmutableMap.builder();
+    b.putAll(elements().generators(urp));
+    b.putAll(scalars().generators(urp));
+    return b.build(); }
   
   //--------------------------------------------------------------
   // Object methods

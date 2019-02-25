@@ -37,7 +37,7 @@ import xfp.java.numbers.BigFractions;
  * no instance state or methods.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-23
+ * @version 2019-02-24
  */
 
 @SuppressWarnings("unchecked")
@@ -525,7 +525,8 @@ public final class Laws {
       @Override
       public final boolean test (final Map<Set,Supplier> samplers) {
         final Supplier scalarSamples = samplers.get(scalars);
-        assert null != scalarSamples;
+        assert null != scalarSamples :
+          samplers.toString() + "\n" + scalars;
         final Supplier elementSamples = samplers.get(elements);
         assert null != elementSamples;
         final Object a = scalarSamples.get();
@@ -550,7 +551,6 @@ public final class Laws {
           System.out.println("BigInteger:" + bi);
           System.out.println("BigFraction(bi):" + new BigFraction(bi));
           System.out.println("BigFraction(bi,1):" + new BigFraction(bi,BigInteger.ONE));
-
           System.out.println();
           System.out.println(elements.toString(c));
           System.out.println(elements.toString(BigFractions.toBigFraction(c)));
@@ -603,9 +603,11 @@ public final class Laws {
                    final OneSetOneOperation elements,
                    final OneSetTwoOperations scalars) {
     final ImmutableList.Builder b = ImmutableList.builder();
+    final Set e = elements.elements();
+    final Set s = scalars.elements();
     b.add(
-      associative(elements,scalars,scalars.multiply(),scale),
-      distributive(elements,scalars,elements.operation(),scale));
+      associative(e,s,scalars.multiply(),scale),
+      distributive(e,s,elements.operation(),scale));
     b.addAll(elements.laws());
     b.addAll(scalars.laws());
     return b.build(); }

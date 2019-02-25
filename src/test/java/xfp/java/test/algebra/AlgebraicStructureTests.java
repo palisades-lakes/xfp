@@ -25,7 +25,7 @@ import xfp.java.prng.Seeds;
 /** Common code for testing sets. 
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-23
+ * @version 2019-02-24
  */
 
 @SuppressWarnings("unchecked")
@@ -41,7 +41,7 @@ public final class AlgebraicStructureTests {
                   final int n) {
     SetTests.tests(s);
     final Map<Set,Supplier> samplers = 
-      s.samplers(
+      s.generators(
         PRNG.well44497b(
           Seeds.seed("seeds/Well44497b-2019-01-09.txt")));
     for(final Predicate law : s.laws()) {
