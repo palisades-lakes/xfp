@@ -184,7 +184,7 @@ public final class OneSetTwoOperations extends Structure {
         add,additiveIdentity,additiveInverse,
         multiply,multiplicativeIdentity,elements)); }
 
-   
+
 
   //--------------------------------------------------------------
 
@@ -201,6 +201,28 @@ public final class OneSetTwoOperations extends Structure {
       multiply,multiplicativeIdentity,multiplicativeInverse,
       elements,
       Laws.field(
+        add,additiveIdentity,additiveInverse,
+        multiply,multiplicativeIdentity,multiplicativeInverse,
+        elements)); }
+
+  //--------------------------------------------------------------
+  /** Same operations as a field, but not associative or 
+   * distributive.
+   */
+
+  public static final OneSetTwoOperations 
+  floatingPoint (final BinaryOperator add,
+                 final Object additiveIdentity,
+                 final UnaryOperator additiveInverse,
+                 final BinaryOperator multiply,
+                 final Object multiplicativeIdentity,
+                 final UnaryOperator multiplicativeInverse,
+                 final Set elements) {
+    return make(
+      add,additiveIdentity,additiveInverse,
+      multiply,multiplicativeIdentity,multiplicativeInverse,
+      elements,
+      Laws.floatingPoint(
         add,additiveIdentity,additiveInverse,
         multiply,multiplicativeIdentity,multiplicativeInverse,
         elements)); }

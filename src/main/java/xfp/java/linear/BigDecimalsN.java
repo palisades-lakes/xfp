@@ -12,7 +12,7 @@ import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 
 import xfp.java.algebra.OneSetOneOperation;
-import xfp.java.algebra.TwoSetsTwoOperations;
+import xfp.java.algebra.TwoSetsOneOperation;
 import xfp.java.numbers.BigDecimals;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
@@ -24,7 +24,7 @@ import xfp.java.prng.Generators;
  * for sparse vectors, etc.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-22
+ * @version 2019-02-25
  */
 @SuppressWarnings("unchecked")
 public final class BigDecimalsN extends LinearSpaceLike {
@@ -141,15 +141,6 @@ public final class BigDecimalsN extends LinearSpaceLike {
   //--------------------------------------------------------------
   // TODO: support zero-dimensional space?
 
-  public static final OneSetOneOperation 
-  bigDecimalsNGroup (final int n) {
-    final BigDecimalsN bdn = get(n);
-    return OneSetOneOperation.commutativeGroup(
-      bdn.adder(),
-      bdn,
-      bdn.additiveIdentity(),
-      bdn.additiveInverse()); }
-
   private BigDecimalsN (final int dimension) { 
     super(dimension);  }
 
@@ -165,29 +156,39 @@ public final class BigDecimalsN extends LinearSpaceLike {
 
   //--------------------------------------------------------------
 
-  private static final TwoSetsTwoOperations 
-  makeBDnSpace (final int n) { 
+  public static final OneSetOneOperation group (final int n) {
+    final BigDecimalsN bdn = get(n);
+    return OneSetOneOperation.commutativeGroup(
+      bdn.adder(),
+      bdn,
+      bdn.additiveIdentity(),
+      bdn.additiveInverse()); }
+
+  //--------------------------------------------------------------
+
+  private static final TwoSetsOneOperation 
+  makeSpace (final int n) { 
     return
-      TwoSetsTwoOperations.linearSpaceLike(
+      TwoSetsOneOperation.linearSpaceLike(
         BigDecimalsN.get(n).scaler(),
-        BigDecimalsN.bigDecimalsNGroup(n),
+        BigDecimalsN.group(n),
         BigDecimals.RING); }
 
-  private static final IntObjectMap<TwoSetsTwoOperations> 
-  _bdnCache = new IntObjectHashMap();
+  private static final IntObjectMap<TwoSetsOneOperation> 
+  _spaceCache = new IntObjectHashMap();
 
   /** n-dimensional rational module, implemented with
    * <code>BigDecimal[]</code>.
    * (not a vector space because BigDecimal doesn't have a 
    * multiplicative inverse.)
    */
-  public static final TwoSetsTwoOperations 
-  getBDnSpace (final int dimension) {
-    final TwoSetsTwoOperations qn0 = _bdnCache.get(dimension);
-    if (null != qn0) { return qn0; }
-    final TwoSetsTwoOperations qn1 = makeBDnSpace(dimension); 
-    _bdnCache.put(dimension,qn1);
-    return qn1; }
+  public static final TwoSetsOneOperation 
+  space (final int dimension) {
+    final TwoSetsOneOperation space0 = _spaceCache.get(dimension);
+    if (null != space0) { return space0; }
+    final TwoSetsOneOperation space1 = makeSpace(dimension); 
+    _spaceCache.put(dimension,space1);
+    return space1; }
 
   //--------------------------------------------------------------
 }

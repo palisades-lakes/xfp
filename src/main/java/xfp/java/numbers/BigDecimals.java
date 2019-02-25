@@ -20,7 +20,7 @@ import xfp.java.prng.Generators;
  * <code>BigDecimal</code>.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-21
+ * @version 2019-02-25
  */
 public final class BigDecimals implements Set {
 

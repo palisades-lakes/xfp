@@ -9,10 +9,11 @@ import java.util.function.UnaryOperator;
 import xfp.java.algebra.Set;
 
 /** Base class for structures that are like linear spaces.
- * Main reason is that the field isn't really a field.
+ * Main reason a structure might not be a true linear space
+ * is that the scalars might not be a field.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-22
+ * @version 2019-02-25
  */
 @SuppressWarnings("unchecked")
 public abstract class LinearSpaceLike implements Set {

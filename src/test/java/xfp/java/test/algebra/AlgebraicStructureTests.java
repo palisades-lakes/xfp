@@ -12,10 +12,14 @@ import xfp.java.algebra.Set;
 import xfp.java.algebra.Structure;
 import xfp.java.linear.BigDecimalsN;
 import xfp.java.linear.BigFractionsN;
+import xfp.java.linear.Dn;
+import xfp.java.linear.Fn;
 import xfp.java.linear.Qn;
 import xfp.java.linear.RatiosN;
 import xfp.java.numbers.BigDecimals;
 import xfp.java.numbers.BigFractions;
+import xfp.java.numbers.Doubles;
+import xfp.java.numbers.Floats;
 import xfp.java.numbers.Q;
 import xfp.java.numbers.Ratios;
 import xfp.java.prng.PRNG;
@@ -25,7 +29,7 @@ import xfp.java.prng.Seeds;
 /** Common code for testing sets. 
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-24
+ * @version 2019-02-25
  */
 
 @SuppressWarnings("unchecked")
@@ -40,13 +44,14 @@ public final class AlgebraicStructureTests {
   structureTests (final Structure s,
                   final int n) {
     SetTests.tests(s);
-    final Map<Set,Supplier> samplers = 
+    final Map<Set,Supplier> generators = 
       s.generators(
         PRNG.well44497b(
           Seeds.seed("seeds/Well44497b-2019-01-09.txt")));
     for(final Predicate law : s.laws()) {
       for (int i=0; i<n; i++) {
-        assertTrue(law.test(samplers)); } } }
+        final boolean result = law.test(generators);
+        assertTrue(result); } } }
 
   //--------------------------------------------------------------
 
@@ -68,15 +73,32 @@ public final class AlgebraicStructureTests {
     
     structureTests(Q.FIELD,TRYS); 
     
-    for (final int n : new int[] { 1, 3, 13, 127}) {
-      structureTests(BigDecimalsN.bigDecimalsNGroup(n),SPACE_TRYS); 
-      structureTests(BigFractionsN.bigFractionsNGroup(n),SPACE_TRYS); 
-      structureTests(RatiosN.ratiosNGroup(n),SPACE_TRYS); 
-      structureTests(Qn.qnGroup(n),SPACE_TRYS); 
-      structureTests(BigDecimalsN.getBDnSpace(n),SPACE_TRYS); 
-      structureTests(BigFractionsN.getBFnSpace(n),SPACE_TRYS); 
-      structureTests(RatiosN.getRatiosnSpace(n),SPACE_TRYS); 
-      structureTests(Qn.getQnSpace(n),SPACE_TRYS); 
+    structureTests(Floats.ADDITIVE_MAGMA,TRYS);
+    structureTests(Floats.MULTIPLICATIVE_MAGMA,TRYS); 
+    structureTests(Floats.FLOATING_POINT,TRYS); 
+    
+    structureTests(Doubles.ADDITIVE_MAGMA,TRYS);
+    structureTests(Doubles.MULTIPLICATIVE_MAGMA,TRYS); 
+    structureTests(Doubles.FLOATING_POINT,TRYS); 
+    
+    for (final int n : new int[] { 1, 3, 255}) {
+      structureTests(BigDecimalsN.group(n),SPACE_TRYS); 
+      structureTests(BigDecimalsN.space(n),SPACE_TRYS); 
+      
+      structureTests(BigFractionsN.group(n),SPACE_TRYS); 
+      structureTests(BigFractionsN.space(n),SPACE_TRYS); 
+      
+      structureTests(RatiosN.group(n),SPACE_TRYS); 
+      structureTests(RatiosN.space(n),SPACE_TRYS); 
+
+      structureTests(Qn.group(n),SPACE_TRYS);
+      structureTests(Qn.space(n),SPACE_TRYS); 
+
+      structureTests(Fn.magma(n),SPACE_TRYS); 
+      structureTests(Fn.space(n),SPACE_TRYS); 
+
+      structureTests(Dn.magma(n),SPACE_TRYS); 
+      structureTests(Dn.space(n),SPACE_TRYS); 
       } }
 
 

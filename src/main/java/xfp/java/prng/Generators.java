@@ -19,14 +19,16 @@ import xfp.java.numbers.Floats;
  * that return different values on each call.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-19
+ * @version 2019-02-25
  */
 
 @SuppressWarnings("unchecked")
 public final class Generators {
 
   //--------------------------------------------------------------
-
+  // TODO; Integer[], Double[], etc., generators?
+  // TODO: move Generator definitions into Set classes
+  
   public static final Generator 
   byteGenerator (final UniformRandomProvider urp) {
     return new Generator () {
@@ -236,6 +238,9 @@ public final class Generators {
         for (int i=0;i<n;i++) { z[i] = g.nextFloat(); }
         return z; } }; }
 
+  //--------------------------------------------------------------
+  // TODO: Double[] generators
+  
   public static final Generator 
   finiteDoubleGenerator (final UniformRandomProvider urp,
                          final int delta) {

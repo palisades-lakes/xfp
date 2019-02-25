@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import org.apache.commons.math3.fraction.BigFraction;
 import org.apache.commons.rng.UniformRandomProvider;
 
 import com.carrotsearch.hppc.IntObjectHashMap;
@@ -14,8 +13,7 @@ import com.carrotsearch.hppc.IntObjectMap;
 
 import xfp.java.algebra.OneSetOneOperation;
 import xfp.java.algebra.TwoSetsOneOperation;
-import xfp.java.numbers.BigFractions;
-import xfp.java.numbers.Q;
+import xfp.java.numbers.Floats;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
 
@@ -39,62 +37,59 @@ import xfp.java.prng.Generators;
  * @version 2019-02-25
  */
 @SuppressWarnings("unchecked")
-public final class Qn extends LinearSpaceLike {
+public final class Fn extends LinearSpaceLike {
 
   //--------------------------------------------------------------
-  // operations for algebraic structures over BigFraction arrays.
+  // operations for algebraic structures over float[] arrays.
   //--------------------------------------------------------------
-  /** A <code>BinaryOperator</code> that adds elementwise
-   * <code>BigFraction[]</code> instances of length 
-   * <code>dimension</code>.
-   */
 
-  @Override
-  public final Object add (final Object x0, 
-                           final Object x1) {
+  public final float[] add (final float[] x0, 
+                           final float[] x1) {
     assert contains(x0);
     assert contains(x1);
-    final BigFraction[] q0 = 
-      (BigFraction[]) BigFractions.toBigFraction(x0);
-    final BigFraction[] q1 = 
-      (BigFraction[]) BigFractions.toBigFraction(x1);
-    final BigFraction[] qq = new BigFraction[dimension()];
-    for (int i=0;i<dimension();i++) { qq[i] = q0[i].add(q1[i]); }
+    final float[] qq = new float[dimension()];
+    for (int i=0;i<dimension();i++) { qq[i] = x0[i] + x1[i]; }
+    return qq; }
+
+  @Override
+  public final float[] add (final Object x0, 
+                           final Object x1) {
+    return add((float[]) x0, (float[]) x1); }
+  
+  //--------------------------------------------------------------
+
+  @Override
+  public final float[] zero (final int n) {
+    final float[] qq = new float[n];
+    Arrays.fill(qq,0.0F);
     return qq; }
 
   //--------------------------------------------------------------
 
-  @Override
-  public final Object zero (final int n) {
-    final BigFraction[] qq = new BigFraction[n];
-    Arrays.fill(qq,BigFraction.ZERO);
-    return qq; }
-
-  //--------------------------------------------------------------
-
-  @Override
-  public final BigFraction[] negate (final Object x) {
+  public final float[] negate (final float[] x) {
     assert contains(x);
-    final BigFraction[] q = 
-      (BigFraction[]) BigFractions.toBigFraction(x);
-    final BigFraction[] qq = new BigFraction[dimension()];
-    for (int i=0;i<dimension();i++) { qq[i] = q[i].negate(); }
+    final float[] qq = new float[dimension()];
+    for (int i=0;i<dimension();i++) { qq[i] = - x[i]; }
     return qq; } 
 
+  @Override
+  public final float[] negate (final Object x) {
+    return negate((float[]) x); } 
+
   //--------------------------------------------------------------
 
-  @Override
-  public final Object scale (final Object a, 
-                             final Object x) {
+  public final float[] scale (final float a, 
+                             final float[] x) {
     assert contains(x);
-    final BigFraction b = 
-      (BigFraction) BigFractions.toBigFraction(a);
-    final BigFraction[] q = 
-      (BigFraction[]) BigFractions.toBigFraction(x);
-    final BigFraction[] qq = new BigFraction[dimension()];
+    final float[] qq = new float[dimension()];
     for (int i=0;i<dimension();i++) { 
-      qq[i] = q[i].multiply(b); }
+      qq[i] = a * x[i]; }
     return qq; } 
+
+  @Override
+  public final float[] scale (final Object a, 
+                             final Object x) {
+    return scale(((Number) a).floatValue(), (float[]) x); } 
 
   //--------------------------------------------------------------
   // Set methods
@@ -105,14 +100,7 @@ public final class Qn extends LinearSpaceLike {
                                final Object x1) {
     assert contains(x0);
     assert contains(x1);
-    final BigFraction[] q0 = 
-      (BigFraction[]) BigFractions.toBigFraction(x0);
-    final BigFraction[] q1 = 
-      (BigFraction[]) BigFractions.toBigFraction(x1);
-    for (int i=0;i<dimension();i++) {
-      if (! BigFractions.get().equals(q0[i],q1[i])) {
-        return false; } }
-    return true; }
+    return Arrays.equals((float[]) x0, (float[]) x1); }
 
   //--------------------------------------------------------------
 
@@ -121,7 +109,7 @@ public final class Qn extends LinearSpaceLike {
     if (null == element) { return false; }
     final Class c = element.getClass();
     if (! c.isArray()) { return false; }
-    if (! Q.knownRational(c.getComponentType())) { return false; }
+    if (! Float.TYPE.equals((c.getComponentType()))) { return false; }
     return Array.getLength(element) == dimension(); }
 
   //--------------------------------------------------------------
@@ -133,7 +121,8 @@ public final class Qn extends LinearSpaceLike {
                                    final Map options) {
     return 
       new Supplier () {
-      final Generator g = Generators.qnGenerator(dimension(),urp);
+      final Generator g = 
+        Generators.finiteFloatGenerator(dimension(),urp);
       @Override
       public final Object get () { return g.next(); } }; }
 
@@ -146,34 +135,30 @@ public final class Qn extends LinearSpaceLike {
   //--------------------------------------------------------------
 
   @Override
-  public final String toString () { return "Q^" + dimension(); }
+  public final String toString () { return "F^" + dimension(); }
 
   //--------------------------------------------------------------
   // construction
   //--------------------------------------------------------------
   // TODO: support zero-dimensional space?
 
-  private Qn (final int dimension) { super(dimension); }
+  private Fn (final int dimension) { super(dimension); }
 
-  private static final IntObjectMap<Qn> _cache = 
+  private static final IntObjectMap<Fn> _cache = 
     new IntObjectHashMap();
 
-  public static final Qn get (final int dimension) {
-    final Qn dn0 = _cache.get(dimension);
+  public static final Fn get (final int dimension) {
+    final Fn dn0 = _cache.get(dimension);
     if (null != dn0) { return dn0; }
-    final Qn dn1 = new Qn(dimension); 
+    final Fn dn1 = new Fn(dimension); 
     _cache.put(dimension,dn1);
     return dn1; }
 
   //--------------------------------------------------------------
 
-  public static final OneSetOneOperation group (final int n) {
-    final Qn qn = get(n);
-    return OneSetOneOperation.commutativeGroup(
-        qn.adder(),
-        qn,
-        qn.additiveIdentity(),
-        qn.additiveInverse()); }
+  public static final OneSetOneOperation magma (final int n) {
+    final Fn g = get(n);
+    return OneSetOneOperation.magma(g.adder(),g); }
 
   //--------------------------------------------------------------
   /** n-dimensional rational vector space, implemented with
@@ -183,16 +168,16 @@ public final class Qn extends LinearSpaceLike {
   private static final TwoSetsOneOperation 
   makeSpace (final int n) { 
     return
-      TwoSetsOneOperation.linearSpaceLike(
-        Qn.get(n).scaler(),
-        Qn.group(n),
-        Q.FIELD); }
+      TwoSetsOneOperation.floatingPointSpace(
+        Fn.get(n).scaler(),
+        Fn.magma(n),
+        Floats.FLOATING_POINT); }
 
   private static final IntObjectMap<TwoSetsOneOperation> 
   _spaceCache = new IntObjectHashMap();
 
-  /** n-dimensional rational vector space, implemented with
-   * <code>BigFraction[]</code>.
+  /** n-dimensional floating point space, implemented with
+   * <code>float[]</code>.
    */
   public static final TwoSetsOneOperation 
   space (final int dimension) {

@@ -34,10 +34,10 @@ import com.google.common.collect.ImmutableMap;
  * linear to affine spaces, etc.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-24
+ * @version 2019-02-25
  */
 @SuppressWarnings("unchecked")
-public final class TwoSetsTwoOperations extends Structure {
+public final class TwoSetsOneOperation extends Structure {
 
   //--------------------------------------------------------------
 
@@ -56,7 +56,7 @@ public final class TwoSetsTwoOperations extends Structure {
   private final BiFunction _scale;
 
   /** Multiply an element by a scalar. */
-  public final BiFunction multiply () { return _scale; }
+  public final BiFunction scale () { return _scale; }
 
   //--------------------------------------------------------------
   // Set methods
@@ -79,7 +79,7 @@ public final class TwoSetsTwoOperations extends Structure {
   public final int hashCode () { 
     return 
       Objects.hash(
-        multiply(),
+        scale(),
         elements(),
         scalars()); }
 
@@ -88,8 +88,8 @@ public final class TwoSetsTwoOperations extends Structure {
     if (this == obj) return true;
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
-    final TwoSetsTwoOperations other = (TwoSetsTwoOperations) obj;
-    if (! Objects.equals(multiply(),other.multiply())) {
+    final TwoSetsOneOperation other = (TwoSetsOneOperation) obj;
+    if (! Objects.equals(scale(),other.scale())) {
       return false; }
     if (! Objects.equals(elements(),other.elements())) { 
       return false; }
@@ -99,8 +99,8 @@ public final class TwoSetsTwoOperations extends Structure {
 
   @Override
   public final String toString () { 
-    return "S2O2[" + 
-      //",\n" + multiply() + "," + 
+    return "S2O1[" + 
+      //",\n" + scale () + "," + 
       elements() + "," + scalars() +
       "]"; }
 
@@ -109,7 +109,7 @@ public final class TwoSetsTwoOperations extends Structure {
   //--------------------------------------------------------------
 
   private 
-  TwoSetsTwoOperations (final BiFunction multiply,
+  TwoSetsOneOperation (final BiFunction multiply,
                         final Set elements,
                         final Set scalars,
                         final ImmutableList<Predicate<Map<Set,Supplier>>> laws) { 
@@ -121,13 +121,13 @@ public final class TwoSetsTwoOperations extends Structure {
 
   //--------------------------------------------------------------
 
-  public static final TwoSetsTwoOperations 
+  public static final TwoSetsOneOperation 
   make (final BiFunction multiply,
         final Set elements,
         final Set scalars,
         final ImmutableList<Predicate<Map<Set,Supplier>>> laws) {
 
-    return new TwoSetsTwoOperations(
+    return new TwoSetsOneOperation(
       multiply,
       elements,
       scalars,
@@ -138,7 +138,8 @@ public final class TwoSetsTwoOperations extends Structure {
    * else is determined by the laws contained in the elements and
    * scalars.
    */
-  public static final TwoSetsTwoOperations 
+  
+  public static final TwoSetsOneOperation 
   linearSpaceLike (final BiFunction multiply,
                    final Set elements,
                    final Set scalars) {
@@ -147,6 +148,24 @@ public final class TwoSetsTwoOperations extends Structure {
       elements,
       scalars,
       Laws.linearSpaceLike(
+        multiply,
+        (OneSetOneOperation) elements,
+        (OneSetTwoOperations) scalars)); }
+
+  //--------------------------------------------------------------
+  /** Same operations as module/linear space, but few laws apply,
+   * due to floating point rounding.
+   */
+  
+  public static final TwoSetsOneOperation 
+  floatingPointSpace (final BiFunction multiply,
+                   final Set elements,
+                   final Set scalars) {
+    return make(
+      multiply,
+      elements,
+      scalars,
+      Laws.floatingPointSpace(
         multiply,
         (OneSetOneOperation) elements,
         (OneSetTwoOperations) scalars)); }

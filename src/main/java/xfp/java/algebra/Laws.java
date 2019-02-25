@@ -23,7 +23,7 @@ import xfp.java.numbers.BigFractions;
  * plus 'laws' involving universal quantifiers impose
  * constraint on ops. No existential quantifiers as in traditional
  * definitions makes testing easier --- can check universal
- * quantified predicate approximately, using samples, but no easy
+ * quantified predicate approximately, using generator, but no easy
  * way to even approximately determine the truth of 'there exists'
  * statements.
  * 
@@ -37,7 +37,7 @@ import xfp.java.numbers.BigFractions;
  * no instance state or methods.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-24
+ * @version 2019-02-25
  */
 
 @SuppressWarnings("unchecked")
@@ -53,17 +53,17 @@ public final class Laws {
           final BinaryOperator operation) {
     return new Predicate<Map<Set,Supplier>> () {
       @Override
-      public final String toString () { return "closed"; }
+      public final String toString () { return "closed binary"; }
       @Override
-      public final boolean test (final Map<Set,Supplier> samplers) {
-        final Supplier samples = samplers.get(elements);
-        assert null != samples :
-          "samplers: " + samplers + "\n" +
+      public final boolean test (final Map<Set,Supplier> generators) {
+        final Supplier generator = generators.get(elements);
+        assert null != generator :
+          "generators: " + generators + "\n" +
           "elements: " + elements;
-        final Object a = samples.get();
+        final Object a = generator.get();
         assert elements.contains(a) :
           a + " is not an element of " + elements;
-        final Object b = samples.get();
+        final Object b = generator.get();
         assert elements.contains(b):
           b + " is not an element of " + elements;
         return elements.contains(operation.apply(a,b)); } }; }
@@ -77,15 +77,15 @@ public final class Laws {
                final BinaryOperator operation) {
     return new Predicate<Map<Set,Supplier>> () {
       @Override
-      public final String toString () { return "associative"; }
+      public final String toString () { return "associative binary"; }
       @Override
-      public final boolean test (final Map<Set,Supplier> samplers) {
-        final Supplier samples = samplers.get(elements);
-        final Object a = samples.get();
+      public final boolean test (final Map<Set,Supplier> generators) {
+        final Supplier generator = generators.get(elements);
+        final Object a = generator.get();
         assert elements.contains(a);
-        final Object b = samples.get();
+        final Object b = generator.get();
         assert elements.contains(b);
-        final Object c = samples.get();
+        final Object c = generator.get();
         assert elements.contains(c);
         final BiPredicate equal = elements.equivalence();
         final Object right = operation.apply(a,operation.apply(b,c));
@@ -118,19 +118,19 @@ public final class Laws {
     return new Predicate<Map<Set,Supplier>> () {
       @Override
       public final String toString () { 
-        return identity.toString(); }
+        return "identity:" + identity.toString(); }
       //      public final String toString () { 
       //        return identity + " is not an identity for " + 
       //          operation + " on " + elements + "\n" +
       //          "excluding " + excluded; }
       @Override
-      public final boolean test (final Map<Set,Supplier> samplers) {
+      public final boolean test (final Map<Set,Supplier> generators) {
         // TODO: what if we want <code>null</code> 
         // to be the identity? IS there an example where null is
         // better than empty list, empty string, ...
-        final Supplier samples = samplers.get(elements);
+        final Supplier generator = generators.get(elements);
         if (null == identity) { return false; }
-        final Object a = samples.get();
+        final Object a = generator.get();
         // contains doesn't work because test needs to obey 
         // structure's definition of equivalence
         //if (Sets.contains(excluded,a)) { return true; }
@@ -153,18 +153,18 @@ public final class Laws {
     return new Predicate<Map<Set,Supplier>> () {
       @Override
       public final String toString () { 
-        return identity.toString(); }
+        return "identity:" + identity.toString(); }
       //      public final String toString () { 
       //        return identity + " is not an identity for " + 
       //          operation + " on " + elements; }
       @Override
-      public final boolean test (final Map<Set,Supplier> samplers) {
-        final Supplier samples = samplers.get(elements);
+      public final boolean test (final Map<Set,Supplier> generators) {
+        final Supplier generator = generators.get(elements);
         // TODO: what if we want <code>null</code> 
         // to be the identity? IS there an example where null is
         // better than empty list, empty string, ...
         if (null == identity) { return false; }
-        final Object a = samples.get();
+        final Object a = generator.get();
         assert elements.contains(a);
         assert elements.contains(identity) :
           elements + " doesn't contain " + identity;
@@ -191,7 +191,7 @@ public final class Laws {
     return new Predicate<Map<Set,Supplier>> () {
       @Override
       public final String toString () { 
-        return inverse.toString(); }
+        return "inverse:" + inverse.toString(); }
       //          public final String toString () { 
       //          return inverse + " is not an inverse for " +
       //          operation + " on " + elements +
@@ -200,9 +200,9 @@ public final class Laws {
       //          identity + "\n" +
       //          "excluding " + excluded; }
       @Override
-      public final boolean test (final Map<Set,Supplier> samplers) {
-        final Supplier samples = samplers.get(elements);
-        final Object a = samples.get();
+      public final boolean test (final Map<Set,Supplier> generators) {
+        final Supplier generator = generators.get(elements);
+        final Object a = generator.get();
         // contains doesn't work because test needs to obey 
         // structure's definition of equivalence
         //if (Sets.contains(excluded,a)) { return true; }
@@ -212,15 +212,15 @@ public final class Laws {
         assert elements.contains(a);
         assert elements.contains(identity);
         final Object ainv = inverse.apply(a);
-//        if (! elements.contains(ainv)) {
-//          System.out.println(elements);
-//          System.out.println(Classes.className(excluded) + ":" + excluded);
-//          for (final Object x : (excluded)) {
-//            System.out.println(Classes.className(x) + ":" + x);
-//          }
-//          System.out.println("a: " + Classes.className(a) + ":" + a);
-//          System.out.println(ainv);
-//        }
+        //        if (! elements.contains(ainv)) {
+        //          System.out.println(elements);
+        //          System.out.println(Classes.className(excluded) + ":" + excluded);
+        //          for (final Object x : (excluded)) {
+        //            System.out.println(Classes.className(x) + ":" + x);
+        //          }
+        //          System.out.println("a: " + Classes.className(a) + ":" + a);
+        //          System.out.println(ainv);
+        //        }
         final boolean result =  
           eq.test(identity,operation.apply(a,ainv))
           && 
@@ -257,11 +257,11 @@ public final class Laws {
       @Override
       public final String toString () { return "commutative"; }
       @Override
-      public final boolean test (final Map<Set,Supplier> samplers) {
-        final Supplier samples = samplers.get(elements);
-        final Object a = samples.get();
+      public final boolean test (final Map<Set,Supplier> generators) {
+        final Supplier generator = generators.get(elements);
+        final Object a = generator.get();
         assert elements.contains(a);
-        final Object b = samples.get();
+        final Object b = generator.get();
         assert elements.contains(b);
         final BiPredicate equal = elements.equivalence();
         return 
@@ -331,15 +331,15 @@ public final class Laws {
                 final BinaryOperator multiply) {
     return new Predicate<Map<Set,Supplier>> () {
       @Override
-      public final String toString () { return "distributive"; }
+      public final String toString () { return "distributive ringlike"; }
       @Override
-      public final boolean test (final Map<Set,Supplier> samplers) {
-        final Supplier samples = samplers.get(elements);
-        final Object a = samples.get();
+      public final boolean test (final Map<Set,Supplier> generators) {
+        final Supplier generator = generators.get(elements);
+        final Object a = generator.get();
         assert elements.contains(a);
-        final Object b = samples.get();
+        final Object b = generator.get();
         assert elements.contains(b);
-        final Object c = samples.get();
+        final Object c = generator.get();
         assert elements.contains(c);
         final BiPredicate equal = elements.equivalence();
         return 
@@ -486,27 +486,27 @@ public final class Laws {
   //--------------------------------------------------------------
   // Two sets: scalars and elements/vectors
   //--------------------------------------------------------------
-  /** Is the value of the operation an element of the structure?
+  /** Is a scaled element still an element of the structure?
    */
 
   public final static Predicate<Map<Set,Supplier>>
   closed (final Set elements,
           final Set scalars,
-          final BinaryOperator operation) {
+          final BiFunction scale) {
     return new Predicate<Map<Set,Supplier>> () {
       @Override
-      public final String toString () { return "closed"; }
+      public final String toString () { return "closed scaling"; }
       @Override
-      public final boolean test (final Map<Set,Supplier> samplers) {
-        final Supplier scalarSamples = samplers.get(scalars);
+      public final boolean test (final Map<Set,Supplier> generators) {
+        final Supplier scalarSamples = generators.get(scalars);
         assert null != scalarSamples;
-        final Supplier elementSamples = samplers.get(elements);
+        final Supplier elementSamples = generators.get(elements);
         assert null != elementSamples;
         final Object a = scalarSamples.get();
         assert scalars.contains(a);
         final Object b = elementSamples.get();
         assert elements.contains(b);
-        return elements.contains(operation.apply(a,b)); } }; }
+        return elements.contains(scale.apply(a,b)); } }; }
 
   //--------------------------------------------------------------
   /** Is code>multiply</code> associative with <code>scale</code>?
@@ -521,13 +521,14 @@ public final class Laws {
                final BiFunction scale) {
     return new Predicate<Map<Set,Supplier>> () {
       @Override
-      public final String toString () { return "associative"; }
+      public final String toString () { return "associative scaling"; }
       @Override
-      public final boolean test (final Map<Set,Supplier> samplers) {
-        final Supplier scalarSamples = samplers.get(scalars);
+      public final boolean test (final Map<Set,Supplier> generators) {
+        try {
+        final Supplier scalarSamples = generators.get(scalars);
         assert null != scalarSamples :
-          samplers.toString() + "\n" + scalars;
-        final Supplier elementSamples = samplers.get(elements);
+          generators.toString() + "\n" + scalars;
+        final Supplier elementSamples = generators.get(elements);
         assert null != elementSamples;
         final Object a = scalarSamples.get();
         assert scalars.contains(a);
@@ -556,7 +557,13 @@ public final class Laws {
           System.out.println(elements.toString(BigFractions.toBigFraction(c)));
           System.out.println(elements.toString(right));
           System.out.println(elements.toString(left)); }
-        return pass; } }; }
+        return pass; }
+        catch (final Throwable t) {
+          System.out.println(elements);
+          System.out.println(scalars);
+          throw t;
+          } } };
+        }
 
   //--------------------------------------------------------------
   /** Does <code>scale</code> distribute over <code>add</code>?
@@ -571,12 +578,12 @@ public final class Laws {
                 final BiFunction scale) {
     return new Predicate<Map<Set,Supplier>> () {
       @Override
-      public final String toString () { return "distributive"; }
+      public final String toString () { return "distributive scale over add"; }
       @Override
-      public final boolean test (final Map<Set,Supplier> samplers) {
-        final Supplier scalarSamples = samplers.get(scalars);
+      public final boolean test (final Map<Set,Supplier> generators) {
+        final Supplier scalarSamples = generators.get(scalars);
         assert null != scalarSamples;
-        final Supplier elementSamples = samplers.get(elements);
+        final Supplier elementSamples = generators.get(elements);
         assert null != elementSamples;
         final Object a = scalarSamples.get();
         assert scalars.contains(a);
@@ -606,8 +613,22 @@ public final class Laws {
     final Set e = elements.elements();
     final Set s = scalars.elements();
     b.add(
+      closed(e,s,scale),
       associative(e,s,scalars.multiply(),scale),
       distributive(e,s,elements.operation(),scale));
+    b.addAll(elements.laws());
+    b.addAll(scalars.laws());
+    return b.build(); }
+
+  public static final ImmutableList
+  floatingPointSpace (final BiFunction scale,
+                      final OneSetOneOperation elements,
+                      final OneSetTwoOperations scalars) {
+    final ImmutableList.Builder b = ImmutableList.builder();
+    final Set e = elements.elements();
+    final Set s = scalars.elements();
+    b.add(
+      closed(e,s,scale));
     b.addAll(elements.laws());
     b.addAll(scalars.laws());
     return b.build(); }

@@ -13,7 +13,7 @@ import com.carrotsearch.hppc.IntObjectMap;
 
 import clojure.lang.Ratio;
 import xfp.java.algebra.OneSetOneOperation;
-import xfp.java.algebra.TwoSetsTwoOperations;
+import xfp.java.algebra.TwoSetsOneOperation;
 import xfp.java.numbers.Ratios;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
@@ -25,7 +25,7 @@ import xfp.java.prng.Generators;
  * for sparse vectors, etc.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-22
+ * @version 2019-02-25
  */
 @SuppressWarnings("unchecked")
 public final class RatiosN extends LinearSpaceLike {
@@ -148,15 +148,6 @@ public final class RatiosN extends LinearSpaceLike {
   //--------------------------------------------------------------
   // TODO: support zero-dimensional space?
 
-  public static final OneSetOneOperation 
-  ratiosNGroup (final int n) {
-    final RatiosN ratioN = get(n);
-    return OneSetOneOperation.commutativeGroup(
-        ratioN.adder(),
-        ratioN,
-        ratioN.additiveIdentity(),
-        ratioN.additiveInverse()); }
-
   private RatiosN (final int dimension) { 
     super(dimension); }
 
@@ -171,30 +162,42 @@ public final class RatiosN extends LinearSpaceLike {
     return dn1; }
 
   //--------------------------------------------------------------
+
+  public static final OneSetOneOperation 
+  group (final int n) {
+    final RatiosN ratioN = get(n);
+    return OneSetOneOperation.commutativeGroup(
+        ratioN.adder(),
+        ratioN,
+        ratioN.additiveIdentity(),
+        ratioN.additiveInverse()); }
+
+  //--------------------------------------------------------------
   /** n-dimensional rational vector space, implemented with
    * <code>Ratio[n]</code>.
    */
 
-  private static final TwoSetsTwoOperations ratioNSapce (final int n) { 
+  private static final TwoSetsOneOperation 
+  makeSpace (final int n) { 
     return
-      TwoSetsTwoOperations.linearSpaceLike(
+      TwoSetsOneOperation.linearSpaceLike(
         RatiosN.get(n).scaler(),
-        RatiosN.ratiosNGroup(n),
+        RatiosN.group(n),
         Ratios.FIELD); }
 
-  private static final IntObjectMap<TwoSetsTwoOperations> 
-  _ratiosNCache = new IntObjectHashMap();
+  private static final IntObjectMap<TwoSetsOneOperation> 
+  _spaceCache = new IntObjectHashMap();
 
   /** n-dimensional rational vector space, implemented with
-   * <code>BigFraction[]</code>.
+   * <code>Ratio[]</code>.
    */
-  public static final TwoSetsTwoOperations 
-  getRatiosnSpace (final int dimension) {
-    final TwoSetsTwoOperations qn0 = _ratiosNCache.get(dimension);
-    if (null != qn0) { return qn0; }
-    final TwoSetsTwoOperations qn1 = ratioNSapce(dimension); 
-    _ratiosNCache.put(dimension,qn1);
-    return qn1; }
+  public static final TwoSetsOneOperation 
+  space (final int dimension) {
+    final TwoSetsOneOperation space0 = _spaceCache.get(dimension);
+    if (null != space0) { return space0; }
+    final TwoSetsOneOperation space1 = makeSpace(dimension); 
+    _spaceCache.put(dimension,space1);
+    return space1; }
 
   //--------------------------------------------------------------
 }

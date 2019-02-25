@@ -9,6 +9,8 @@ import java.util.function.UnaryOperator;
 
 import org.apache.commons.rng.UniformRandomProvider;
 
+import xfp.java.algebra.OneSetOneOperation;
+import xfp.java.algebra.OneSetTwoOperations;
 import xfp.java.algebra.Set;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
@@ -16,7 +18,7 @@ import xfp.java.prng.Generators;
 /** Utilities for <code>double</code>, <code>double[]</code>.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-23
+ * @version 2019-02-25
  */
 public final class Doubles implements Set {
 
@@ -238,6 +240,26 @@ public final class Doubles implements Set {
   private static final Doubles SINGLETON = new Doubles();
 
   public static final Doubles get () { return SINGLETON; } 
+
+  //--------------------------------------------------------------
+  // pre-defined structures
+  //--------------------------------------------------------------
+
+  public static final OneSetOneOperation ADDITIVE_MAGMA = 
+  OneSetOneOperation.magma(get().adder(),get());
+
+  public static final OneSetOneOperation MULTIPLICATIVE_MAGMA = 
+  OneSetOneOperation.magma(get().multiplier(),get());
+
+  public static final OneSetTwoOperations FLOATING_POINT = 
+  OneSetTwoOperations.floatingPoint(
+    get().adder(),
+    get().additiveIdentity(),
+    get().additiveInverse(),
+    get().multiplier(),
+    get().multiplicativeIdentity(),
+    get().multiplicativeInverse(),
+    get());
 
   //--------------------------------------------------------------
 }

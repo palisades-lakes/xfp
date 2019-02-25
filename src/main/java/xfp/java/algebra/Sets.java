@@ -47,7 +47,7 @@ public final class Sets {
 
   //--------------------------------------------------------------
 
-  public static final Supplier sampler (final Object set,
+  public static final Supplier generator (final Object set,
                                         final UniformRandomProvider prng,
                                         final Map options) {
     if (set instanceof Set) {
@@ -72,34 +72,34 @@ public final class Sets {
    */
   public final static boolean isReflexive (final Set elements,
                                            final BiPredicate equivalent,
-                                           final Supplier samples) {
-    final Object a = samples.get();
+                                           final Supplier generator) {
+    final Object a = generator.get();
     assert elements.contains(a);
     return equivalent.test(a,a); }
 
   /** Is a = a?
    */
   public final static boolean isReflexive (final Set elements,
-                                           final Supplier samples) {
-    return isReflexive(elements,elements.equivalence(),samples); }
+                                           final Supplier generator) {
+    return isReflexive(elements,elements.equivalence(),generator); }
 
   //--------------------------------------------------------------
   /** Is a = a?
    */
   public final static boolean isSymmetric (final Set elements,
                                            final BiPredicate equivalent,
-                                           final Supplier samples) {
-    final Object a = samples.get();
+                                           final Supplier generator) {
+    final Object a = generator.get();
     assert elements.contains(a);
-    final Object b = samples.get();
+    final Object b = generator.get();
     assert elements.contains(b);
     return equivalent.test(a,b) == equivalent.test(b,a); }
 
   /** Is a = a?
    */
   public final static boolean isSymmetric (final Set elements,
-                                           final Supplier samples) {
-    return isSymmetric(elements,elements.equivalence(),samples); }
+                                           final Supplier generator) {
+    return isSymmetric(elements,elements.equivalence(),generator); }
 
   //--------------------------------------------------------------
   // disable constructor
