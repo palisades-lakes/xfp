@@ -16,7 +16,7 @@ import xfp.java.exceptions.Exceptions;
  * Static methods only; no state.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-19
+ * @version 2019-02-26
  */
 
 @SuppressWarnings("unchecked")
@@ -48,22 +48,22 @@ public final class Sets {
   //--------------------------------------------------------------
 
   public static final Supplier generator (final Object set,
-                                        final UniformRandomProvider prng,
-                                        final Map options) {
+                                          final Map options) {
     if (set instanceof Set) {
-      return ((Set) set).generator(prng,options); }
+      return ((Set) set).generator(options); }
 
     if (set instanceof java.util.Set) {
-      assert null == options;
+      final UniformRandomProvider urp = Set.urp(options);
+      assert null != urp;
       final CollectionSampler cs =
-        new CollectionSampler(prng,((java.util.Set) set)); 
+        new CollectionSampler(urp,((java.util.Set) set)); 
       return
         new Supplier () {
         @Override
         public final Object get () { return cs.sample(); } }; }
 
     throw Exceptions.unsupportedOperation(
-      null,"contains",set,prng,options); }
+      null,"contains",set,options); }
 
   //--------------------------------------------------------------
   // predicates on equivalence relation

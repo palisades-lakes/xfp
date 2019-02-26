@@ -6,6 +6,8 @@ import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 
+import com.google.common.collect.ImmutableMap;
+
 import xfp.java.Classes;
 import xfp.java.algebra.Set;
 import xfp.java.algebra.Sets;
@@ -19,19 +21,21 @@ import xfp.java.prng.Seeds;
 /** Common code for testing sets. 
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-23
+ * @version 2019-02-26
  */
 
 @SuppressWarnings("unchecked")
 public final class SetTests {
 
   private static final int TRYS = 1023;
-  
+
   private static final void testMembership (final Set set) {
     final Supplier g = 
       set.generator( 
-      PRNG.well44497b(
-        Seeds.seed("seeds/Well44497b-2019-01-05.txt")));
+        ImmutableMap.of(
+          Set.URP,
+          PRNG.well44497b(
+            Seeds.seed("seeds/Well44497b-2019-01-05.txt"))));
     for (int i=0; i<TRYS; i++) {
       //System.out.println("set=" + set);
       final Object x = g.get();
@@ -40,13 +44,15 @@ public final class SetTests {
         set.contains(x),
         () -> set.toString() + "\n does not contain \n" + 
           Classes.className(x) + ": " +
-        x); } }
+          x); } }
 
   private static final void testEquivalence (final Set set) {
     final Supplier g = 
       set.generator( 
-      PRNG.well44497b(
-        Seeds.seed("seeds/Well44497b-2019-01-07.txt")));
+        ImmutableMap.of(
+          Set.URP,
+          PRNG.well44497b(
+            Seeds.seed("seeds/Well44497b-2019-01-07.txt"))));
     for (int i=0; i<TRYS; i++) {
       assertTrue(Sets.isReflexive(set,g));
       assertTrue(Sets.isSymmetric(set,g)); } }

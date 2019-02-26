@@ -2,7 +2,6 @@ package xfp.java.linear;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -13,6 +12,7 @@ import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 
 import xfp.java.algebra.OneSetOneOperation;
+import xfp.java.algebra.Set;
 import xfp.java.algebra.TwoSetsOneOperation;
 import xfp.java.numbers.BigFractions;
 import xfp.java.numbers.Q;
@@ -128,8 +128,8 @@ public final class Qn extends LinearSpaceLike {
    */
 
   @Override
-  public final Supplier generator (final UniformRandomProvider urp,
-                                   final Map options) {
+  public final Supplier generator (final Map options) {
+    final UniformRandomProvider urp = Set.urp(options);
     return 
       new Supplier () {
       final Generator g =
@@ -137,10 +137,6 @@ public final class Qn extends LinearSpaceLike {
       //        Generators.qnGenerator(dimension(),urp);
       @Override
       public final Object get () { return g.next(); } }; }
-
-  @Override
-  public final Supplier generator (final UniformRandomProvider urp) {
-    return generator(urp,Collections.emptyMap()); }
 
   //--------------------------------------------------------------
   // Object methods

@@ -4,6 +4,8 @@ import java.util.Map;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import com.google.common.collect.ImmutableMap;
+
 import xfp.java.algebra.Set;
 import xfp.java.algebra.Sets;
 import xfp.java.algebra.Structure;
@@ -16,7 +18,7 @@ import xfp.java.prng.Seeds;
  * jy --source 11 src/scripts/java/xfp/java/scripts/QnProfile.java
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-25
+ * @version 2019-02-26
  */
 
 @SuppressWarnings("unchecked")
@@ -34,8 +36,10 @@ public final class Profile {
                                               final int ntrys) {
     final Supplier g = 
       set.generator( 
-        PRNG.well44497b(
-          Seeds.seed("seeds/Well44497b-2019-01-05.txt")));
+        ImmutableMap.of(
+          Set.URP,
+          PRNG.well44497b(
+            Seeds.seed("seeds/Well44497b-2019-01-05.txt"))));
     for (int i=0; i<ntrys; i++) {
       final Object x = g.get();
       if (! set.contains(x)) { return false; } } 
@@ -45,8 +49,10 @@ public final class Profile {
                                                final int ntrys) {
     final Supplier g = 
       set.generator( 
-        PRNG.well44497b(
-          Seeds.seed("seeds/Well44497b-2019-01-07.txt")));
+        ImmutableMap.of(
+          Set.URP,
+          PRNG.well44497b(
+            Seeds.seed("seeds/Well44497b-2019-01-07.txt"))));
     for (int i=0; i<ntrys; i++) {
       if (! Sets.isReflexive(set,g)) { return false; }
       if (! Sets.isSymmetric(set,g)) { return false; } }
@@ -66,8 +72,10 @@ public final class Profile {
                   final int ntrys) {
     final Map<Set,Supplier> generators = 
       s.generators(
-        PRNG.well44497b(
-          Seeds.seed("seeds/Well44497b-2019-01-09.txt")));
+        ImmutableMap.of(
+          Set.URP,
+          PRNG.well44497b(
+            Seeds.seed("seeds/Well44497b-2019-01-09.txt"))));
     for(final Predicate<Map<Set,Supplier>> law : s.laws()) {
       System.out.println(law);
       for (int i=0; i<ntrys; i++) {

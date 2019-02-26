@@ -8,6 +8,8 @@ import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 
+import com.google.common.collect.ImmutableMap;
+
 import xfp.java.algebra.Set;
 import xfp.java.algebra.Structure;
 import xfp.java.linear.BigDecimalsN;
@@ -29,7 +31,7 @@ import xfp.java.prng.Seeds;
 /** Common code for testing sets. 
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-25
+ * @version 2019-02-26
  */
 
 @SuppressWarnings("unchecked")
@@ -46,8 +48,10 @@ public final class AlgebraicStructureTests {
     SetTests.tests(s);
     final Map<Set,Supplier> generators = 
       s.generators(
-        PRNG.well44497b(
-          Seeds.seed("seeds/Well44497b-2019-01-09.txt")));
+        ImmutableMap.of(
+          Set.URP,
+          PRNG.well44497b(
+            Seeds.seed("seeds/Well44497b-2019-01-09.txt"))));
     for(final Predicate law : s.laws()) {
       for (int i=0; i<n; i++) {
         final boolean result = law.test(generators);
@@ -62,32 +66,32 @@ public final class AlgebraicStructureTests {
     structureTests(BigDecimals.ADDITIVE_MAGMA,TRYS);
     structureTests(BigDecimals.MULTIPLICATIVE_MAGMA,TRYS); 
     structureTests(BigDecimals.RING,TRYS);  
-    
+
     structureTests(BigFractions.ADDITIVE_MAGMA,TRYS);
     structureTests(BigFractions.MULTIPLICATIVE_MAGMA,TRYS); 
     structureTests(BigFractions.FIELD,TRYS); 
-    
+
     structureTests(Ratios.ADDITIVE_MAGMA,TRYS);
     structureTests(Ratios.MULTIPLICATIVE_MAGMA,TRYS); 
     structureTests(Ratios.FIELD,TRYS); 
-    
+
     structureTests(Q.FIELD,TRYS); 
-    
+
     structureTests(Floats.ADDITIVE_MAGMA,TRYS);
     structureTests(Floats.MULTIPLICATIVE_MAGMA,TRYS); 
     structureTests(Floats.FLOATING_POINT,TRYS); 
-    
+
     structureTests(Doubles.ADDITIVE_MAGMA,TRYS);
     structureTests(Doubles.MULTIPLICATIVE_MAGMA,TRYS); 
     structureTests(Doubles.FLOATING_POINT,TRYS); 
-    
+
     for (final int n : new int[] { 1, 3, 255}) {
       structureTests(BigDecimalsN.group(n),SPACE_TRYS); 
       structureTests(BigDecimalsN.space(n),SPACE_TRYS); 
-      
+
       structureTests(BigFractionsN.group(n),SPACE_TRYS); 
       structureTests(BigFractionsN.space(n),SPACE_TRYS); 
-      
+
       structureTests(RatiosN.group(n),SPACE_TRYS); 
       structureTests(RatiosN.space(n),SPACE_TRYS); 
 
@@ -99,7 +103,7 @@ public final class AlgebraicStructureTests {
 
       structureTests(Dn.magma(n),SPACE_TRYS); 
       structureTests(Dn.space(n),SPACE_TRYS); 
-      } }
+    } }
 
 
   //--------------------------------------------------------------

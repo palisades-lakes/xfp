@@ -1,6 +1,5 @@
 package xfp.java.numbers;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.function.BiPredicate;
 import java.util.function.BinaryOperator;
@@ -18,7 +17,7 @@ import xfp.java.prng.Generators;
 /** Utilities for <code>double</code>, <code>double[]</code>.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-25
+ * @version 2019-02-26
  */
 public final class Doubles implements Set {
 
@@ -204,17 +203,13 @@ public final class Doubles implements Set {
   //--------------------------------------------------------------
 
   @Override
-  public final Supplier generator (final UniformRandomProvider urp,
-                                   final Map options) {
+  public final Supplier generator (final Map options) {
+    final UniformRandomProvider urp = Set.urp(options);
     final Generator g = Generators.finiteDoubleGenerator(urp);
     return 
       new Supplier () {
       @Override
       public final Object get () { return g.next(); } }; }
-
-  @Override
-  public final Supplier generator (final UniformRandomProvider urp) {
-    return generator(urp,Collections.emptyMap()); }
 
   //--------------------------------------------------------------
   // Object methods

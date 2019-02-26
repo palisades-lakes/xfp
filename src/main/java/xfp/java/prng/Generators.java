@@ -19,7 +19,7 @@ import xfp.java.numbers.Floats;
  * that return different values on each call.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-25
+ * @version 2019-02-26
  */
 
 @SuppressWarnings("unchecked")

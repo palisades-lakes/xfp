@@ -11,11 +11,13 @@ import org.apache.commons.rng.UniformRandomProvider;
 
 import com.google.common.collect.ImmutableMap;
 
+import clojure.lang.Keyword;
 import xfp.java.exceptions.Exceptions;
+import xfp.java.prng.PRNG;
 
 /** General, possibly unbounded, sets of <code>Object</code>s, 
  * and primitive values, as opposed to <code>java.util.Set</code>
- * (and primitve variants) which are enumerated finite sets.
+ * (and primitive variants) which are enumerated finite sets.
  *
  * A usable set provides 2 basic functionalities:
  * <ol>
@@ -51,7 +53,7 @@ import xfp.java.exceptions.Exceptions;
  * classes, represented by some element of each equivalence class.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-24
+ * @version 2019-02-26
  */
 
 public interface Set {
@@ -178,9 +180,6 @@ public interface Set {
   //      this,"get",options); }
 
   //--------------------------------------------------------------
-  // TODO: don't always need a prng, might be iterating over a
-  // set of edge cases, move prng to options?
-
   // TODO: is there a reasonable way to specify generating 
   // n_k elements from k=1..m sets?
   // In clojure, might take a map from set to count and return
@@ -192,26 +191,44 @@ public interface Set {
   // TODO: replace Supplier with an interface than has 0-arity
   // <i>primititive</i>Value() methods?
 
-  // TODO: move prng to options?
+  public static final Keyword URP = Keyword.intern("urp");
+  public static final Keyword SEED = Keyword.intern("seed");
 
-  public default Supplier generator (final UniformRandomProvider urp,
-                                     final Map options) {
+   /** Get a <code>UniformRandomProvider</code>
+    * based on the <code>options</code>:
+    * <ol>
+    * <li> First look for <code>UniformRandomProvider</code> value
+    * associated with the key * <code>:urp</code>. If not null, 
+    * asn the right type, return that. 
+    * <li> Then look for an <code>int[]</code> value for the
+    * <code>:seed</code> key. NUll or not, the seed value is 
+    * passed to {@link PRNG#well44497b(int[])} to create the
+    * <code>UniformRandomProvider</code>. A null seed is 
+    * equivalent to choosing a new 'random' seed for the 
+    * <code>UniformRandomProvider</code>.
+   * <p>
+   * In the future may use other options to choose a 
+   * <code>UniformRandomProvider</code>.
+   */
+  
+  public static UniformRandomProvider urp (final Map options) {
+    final UniformRandomProvider u0 =  
+      (UniformRandomProvider) URP.invoke(options); 
+    if (null != u0) { return u0; }
+    final int[] seed = (int[]) SEED.invoke(options);
+    return PRNG.well44497b(seed);  }
+  
+  public default Supplier generator (final Map options) {
     throw Exceptions.unsupportedOperation(
-      this,"generator",urp,options); }
-
-  public default Supplier generator (final UniformRandomProvider urp) {
-    return generator(urp,Collections.emptyMap()); }
+      this,"generator",options); }
 
   /** Return as a trivial map to make it easier to merge into
    * results for more complicated structures of which this set
    * might be a component.
    */
   public default ImmutableMap<Set,Supplier> 
-  generators (final UniformRandomProvider urp) {
-    return 
-      ImmutableMap.of(
-        this,
-        generator(urp,Collections.emptyMap())); }
+  generators (final Map options) {
+    return ImmutableMap.of(this, generator(options)); }
 
   //--------------------------------------------------------------
   /** should eventually cover the whole set.

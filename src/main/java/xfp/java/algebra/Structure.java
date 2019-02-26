@@ -6,8 +6,6 @@ import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import org.apache.commons.rng.UniformRandomProvider;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
@@ -53,15 +51,14 @@ public abstract class Structure implements Set {
     return _elements.equivalence(); }
 
   @Override
-  public final Supplier generator (final UniformRandomProvider prng,
-                                   final Map options) { 
-    return _elements.generator(prng,options); }
+  public final Supplier generator (final Map options) { 
+    return _elements.generator(options); }
 
   // TODO: more general specification for generators
   @Override
   public ImmutableMap<Set,Supplier> 
-  generators (final UniformRandomProvider urp) {
-    return elements().generators(urp); }
+  generators (final Map options) {
+    return elements().generators(options); }
   
   //--------------------------------------------------------------
   // construction

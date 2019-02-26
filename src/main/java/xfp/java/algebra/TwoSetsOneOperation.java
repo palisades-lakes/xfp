@@ -6,8 +6,6 @@ import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import org.apache.commons.rng.UniformRandomProvider;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
@@ -34,7 +32,7 @@ import com.google.common.collect.ImmutableMap;
  * linear to affine spaces, etc.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-25
+ * @version 2019-02-26
  */
 @SuppressWarnings("unchecked")
 public final class TwoSetsOneOperation extends Structure {
@@ -64,11 +62,11 @@ public final class TwoSetsOneOperation extends Structure {
 
   @Override
   public final ImmutableMap<Set,Supplier> 
-  generators (final UniformRandomProvider urp) {
+  generators (final Map options) {
     final ImmutableMap.Builder<Set,Supplier> b = 
       ImmutableMap.builder();
-    b.putAll(elements().generators(urp));
-    b.putAll(scalars().generators(urp));
+    b.putAll(elements().generators(options));
+    b.putAll(scalars().generators(options));
     return b.build(); }
   
   //--------------------------------------------------------------

@@ -1,7 +1,6 @@
 package xfp.java.numbers;
 
 import java.math.BigInteger;
-import java.util.Collections;
 import java.util.Map;
 import java.util.function.BiPredicate;
 import java.util.function.BinaryOperator;
@@ -23,7 +22,7 @@ import xfp.java.prng.Generators;
  * necessary.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-23
+ * @version 2019-02-26
  */
 
 public final class Q implements Set {
@@ -218,17 +217,14 @@ public final class Q implements Set {
   //--------------------------------------------------------------
 
   @Override
-  public final Supplier generator (final UniformRandomProvider urp,
-                                   final Map options) {
-    final Generator fng = Generators.finiteNumberGenerator(urp); 
+  public final Supplier generator (final Map options) {
+    final UniformRandomProvider urp = Set.urp(options);
+    //final Generator g = Generators.finiteNumberGenerator(urp); 
+    final Generator g = Generators.bigFractionGenerator(urp);
     return 
       new Supplier () {
       @Override
-      public final Object get () { return fng.next(); } }; }
-
-  @Override
-  public final Supplier generator (final UniformRandomProvider urp) {
-    return generator(urp,Collections.emptyMap()); }
+      public final Object get () { return g.next(); } }; }
 
   //--------------------------------------------------------------
   // Object methods

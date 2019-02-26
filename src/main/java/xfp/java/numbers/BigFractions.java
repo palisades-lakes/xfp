@@ -1,7 +1,6 @@
 package xfp.java.numbers;
 
 import java.math.BigInteger;
-import java.util.Collections;
 import java.util.Map;
 import java.util.function.BiPredicate;
 import java.util.function.BinaryOperator;
@@ -280,17 +279,13 @@ public final class BigFractions implements Set {
   //--------------------------------------------------------------
 
   @Override
-  public final Supplier generator (final UniformRandomProvider urp,
-                                   final Map options) {
+  public final Supplier generator (final Map options) {
+    final UniformRandomProvider urp = Set.urp(options);
     final Generator bfs = Generators.bigFractionGenerator(urp);
     return 
       new Supplier () {
       @Override
       public final Object get () { return bfs.next(); } }; }
-
-  @Override
-  public final Supplier generator (final UniformRandomProvider urp) {
-    return generator(urp,Collections.emptyMap()); }
 
   //--------------------------------------------------------------
   // Object methods
