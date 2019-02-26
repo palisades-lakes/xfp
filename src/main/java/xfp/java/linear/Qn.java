@@ -42,7 +42,7 @@ import xfp.java.prng.Generators;
 public final class Qn extends LinearSpaceLike {
 
   //--------------------------------------------------------------
-  // operations for algebraic structures over BigFraction arrays.
+  // operations for algebraic structures over rational arrays.
   //--------------------------------------------------------------
   /** A <code>BinaryOperator</code> that adds elementwise
    * <code>BigFraction[]</code> instances of length 
@@ -65,10 +65,10 @@ public final class Qn extends LinearSpaceLike {
   //--------------------------------------------------------------
 
   @Override
-  public final Object zero (final int n) {
-    final BigFraction[] qq = new BigFraction[n];
-    Arrays.fill(qq,BigFraction.ZERO);
-    return qq; }
+  public final BigFraction[] zero (final int n) {
+    final BigFraction[] z = new BigFraction[n];
+    Arrays.fill(z,BigFraction.ZERO);
+    return z; }
 
   //--------------------------------------------------------------
 
@@ -84,16 +84,15 @@ public final class Qn extends LinearSpaceLike {
   //--------------------------------------------------------------
 
   @Override
-  public final Object scale (final Object a, 
-                             final Object x) {
+  public final BigFraction[] scale (final Object a, 
+                                    final Object x) {
     assert contains(x);
     final BigFraction b = 
       (BigFraction) BigFractions.toBigFraction(a);
     final BigFraction[] q = 
       (BigFraction[]) BigFractions.toBigFraction(x);
     final BigFraction[] qq = new BigFraction[dimension()];
-    for (int i=0;i<dimension();i++) { 
-      qq[i] = q[i].multiply(b); }
+    for (int i=0;i<dimension();i++) { qq[i] = q[i].multiply(b); }
     return qq; } 
 
   //--------------------------------------------------------------
@@ -133,7 +132,9 @@ public final class Qn extends LinearSpaceLike {
                                    final Map options) {
     return 
       new Supplier () {
-      final Generator g = Generators.qnGenerator(dimension(),urp);
+      final Generator g =
+        Generators.bigFractionGenerator(dimension(),urp);
+      //        Generators.qnGenerator(dimension(),urp);
       @Override
       public final Object get () { return g.next(); } }; }
 
@@ -159,21 +160,21 @@ public final class Qn extends LinearSpaceLike {
     new IntObjectHashMap();
 
   public static final Qn get (final int dimension) {
-    final Qn dn0 = _cache.get(dimension);
-    if (null != dn0) { return dn0; }
-    final Qn dn1 = new Qn(dimension); 
-    _cache.put(dimension,dn1);
-    return dn1; }
+    final Qn s0 = _cache.get(dimension);
+    if (null != s0) { return s0; }
+    final Qn s1 = new Qn(dimension); 
+    _cache.put(dimension,s1);
+    return s1; }
 
   //--------------------------------------------------------------
 
   public static final OneSetOneOperation group (final int n) {
-    final Qn qn = get(n);
+    final Qn g = get(n);
     return OneSetOneOperation.commutativeGroup(
-        qn.adder(),
-        qn,
-        qn.additiveIdentity(),
-        qn.additiveInverse()); }
+      g.adder(),
+      g,
+      g.additiveIdentity(),
+      g.additiveInverse()); }
 
   //--------------------------------------------------------------
   /** n-dimensional rational vector space, implemented with
@@ -184,8 +185,8 @@ public final class Qn extends LinearSpaceLike {
   makeSpace (final int n) { 
     return
       TwoSetsOneOperation.linearSpaceLike(
-        Qn.get(n).scaler(),
-        Qn.group(n),
+        get(n).scaler(),
+        group(n),
         Q.FIELD); }
 
   private static final IntObjectMap<TwoSetsOneOperation> 

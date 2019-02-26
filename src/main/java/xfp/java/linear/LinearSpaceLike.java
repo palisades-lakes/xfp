@@ -78,6 +78,43 @@ public abstract class LinearSpaceLike implements Set {
     return dimension() == ((LinearSpaceLike) that).dimension(); }
 
   //--------------------------------------------------------------
+
+  private final class Equivalence implements BiPredicate {
+    @Override
+    public final String toString () {
+      return LinearSpaceLike.this.toString() + ".equals"; }
+    @Override
+    public final boolean test (final Object q0, 
+                               final Object q1) {
+      return LinearSpaceLike.this.equals(q0,q1); } }
+
+  private final class Scaler implements BiFunction{
+    @Override
+    public final String toString () {
+      return LinearSpaceLike.this.toString() + ".scale"; }
+    @Override
+    public final Object apply (final Object a, 
+                               final Object q) {
+      return LinearSpaceLike.this.scale(a,q); }  }
+
+  private final class AdditiveInverse implements UnaryOperator {
+    @Override
+    public final String toString () {
+      return LinearSpaceLike.this.toString() + ".negate"; }
+    @Override
+    public final Object apply (final Object q) {
+      return LinearSpaceLike.this.negate(q); } }
+
+  private final class Adder implements BinaryOperator {
+    @Override
+    public final String toString () {
+      return LinearSpaceLike.this.toString() + ".add"; }
+    @Override
+    public final Object apply (final Object q0, 
+                               final Object q1) {
+      return LinearSpaceLike.this.add(q0,q1); } }
+
+  //--------------------------------------------------------------
   // construction
   //--------------------------------------------------------------
   // TODO: support zero-dimensional space?
@@ -86,48 +123,11 @@ public abstract class LinearSpaceLike implements Set {
 
     assert dimension > 0;
     _dimension = dimension;
-
-    _equivalence = new BiPredicate() {
-      @Override
-      public final String toString () {
-        return LinearSpaceLike.this.toString() + ".equals"; }
-      @Override
-      public final boolean test (final Object q0, 
-                                 final Object q1) {
-        return LinearSpaceLike.this.equals(q0,q1); } 
-    };
-
-    _scaler = new BiFunction() {
-      @Override
-      public final String toString () {
-        return LinearSpaceLike.this.toString() + ".scale"; }
-      @Override
-      public final Object apply (final Object a, 
-                                 final Object q) {
-        return LinearSpaceLike.this.scale(a,q); } 
-    };
-
-    _additiveInverse  = new UnaryOperator() {
-      @Override
-      public final String toString () {
-        return LinearSpaceLike.this.toString() + ".negate"; }
-      @Override
-      public final Object apply (final Object q) {
-        return LinearSpaceLike.this.negate(q); } 
-    };
-
+    _equivalence = new Equivalence();
+    _scaler = new Scaler();
+    _additiveInverse  = new AdditiveInverse();
     _additiveIdentity = zero(dimension);
-
-    _adder = new BinaryOperator() {
-      @Override
-      public final String toString () {
-        return LinearSpaceLike.this.toString() + ".add"; }
-      @Override
-      public final Object apply (final Object q0, 
-                                 final Object q1) {
-        return LinearSpaceLike.this.add(q0,q1); } 
-    };
-  }
+    _adder = new Adder(); }
 
   //--------------------------------------------------------------
 }

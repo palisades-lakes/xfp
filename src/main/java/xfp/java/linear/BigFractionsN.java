@@ -3,10 +3,7 @@ package xfp.java.linear;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.function.BinaryOperator;
 import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
 
 import org.apache.commons.math3.fraction.BigFraction;
 import org.apache.commons.rng.UniformRandomProvider;
@@ -22,9 +19,16 @@ import xfp.java.prng.Generators;
 
 /** The set of instances of <code>BigFraction[dimension]</code>).
  * 
- * TODO: generalize to tuples of <code>BigFraction</code>
+ * This is primarily intended to support implementing the standard
+ * <em>rational</em> linear space <b>Q</b><sup>n</sup>.
+ * (Essentially <b>R</b><sup>n</sup> except over the rational
+ * numbers rather than the reals.)
+
+ * TODO: generalize to tuples 
  * implemented with lists, <code>int</code> indexed maps
  * for sparse vectors, etc.
+ * Long term goal is to support any useful data structures
+ * that can be used to represent tuples of rational numbers.
  * 
  * @author palisades dot lakes at gmail dot com
  * @version 2019-02-25
@@ -40,72 +44,63 @@ public final class BigFractionsN extends LinearSpaceLike  {
    * <code>dimension</code>.
    */
 
-  private final BigFraction[] add (final BigFraction[] q0, 
-                                   final BigFraction[] q1) {
-    assert contains(q0);
-    assert contains(q1);
+  @Override
+  public final BigFraction[] add (final Object x0, 
+                                  final Object x1) {
+    assert contains(x0);
+    assert contains(x1);
+    final BigFraction[] q0 = (BigFraction[]) x0;
+    final BigFraction[] q1 = (BigFraction[]) x1;
     final BigFraction[] qq = new BigFraction[dimension()];
     for (int i=0;i<dimension();i++) { qq[i] = q0[i].add(q1[i]); }
     return qq; }
 
-  @Override
-  public final Object add (final Object q0, 
-                           final Object q1) {
-    return add((BigFraction[]) q0, (BigFraction[]) q1); }
-
   //--------------------------------------------------------------
 
   @Override
-  public final Object zero (final int n) {
+  public final BigFraction[] zero (final int n) {
     final BigFraction[] z = new BigFraction[n];
     Arrays.fill(z,BigFraction.ZERO);
     return z; }
 
   //--------------------------------------------------------------
 
-  private final BigFraction[] negate (final BigFraction[] q) {
-    assert contains(q);
+  @Override
+  public final BigFraction[] negate (final Object x) {
+    assert contains(x);
+    final BigFraction[] q = (BigFraction[]) x;
     final BigFraction[] qq = new BigFraction[dimension()];
     for (int i=0;i<dimension();i++) { qq[i] = q[i].negate(); }
     return qq; } 
 
-  @Override
-  public final Object negate (final Object q) {
-    return negate((BigFraction[]) q); } 
-
   //--------------------------------------------------------------
-
-  private final BigFraction[] scale (final BigFraction a, 
-                                     final BigFraction[] q) {
-    assert contains(q);
-    final BigFraction[] qq = new BigFraction[dimension()];
-    for (int i=0;i<dimension();i++) { 
-      qq[i] = q[i].multiply(a); }
-    return qq; } 
 
   @Override
   public final Object scale (final Object a, 
-                             final Object q) {
-    return scale((BigFraction) a, (BigFraction[]) q); } 
+                             final Object x) {
+    assert contains(x);
+    final BigFraction b = (BigFraction) a;
+    final BigFraction[] q = (BigFraction[]) x;
+    final BigFraction[] qq = new BigFraction[dimension()];
+    for (int i=0;i<dimension();i++) { qq[i] = q[i].multiply(b); }
+    return qq; } 
 
   //--------------------------------------------------------------
   // Set methods
   //--------------------------------------------------------------
 
-  private final boolean equals (final BigFraction[] q0, 
-                                final BigFraction[] q1) {
-    assert contains(q0);
-    assert contains(q1);
+  @Override
+  public final boolean equals (final Object x0, 
+                               final Object x1) {
+    assert contains(x0);
+    assert contains(x1);
+    final BigFraction[] q0 = (BigFraction[]) x0;
+    final BigFraction[] q1 = (BigFraction[]) x1;
     for (int i=0;i<dimension();i++) {
       if (! BigFractions.get().equals(q0[i],q1[i])) {
         return false; } }
     return true; }
 
-  @Override
-  public final boolean equals (final Object q0,
-                               final Object q1) {
-    return equals((BigFraction[]) q0, (BigFraction[]) q1); }
-  
   //--------------------------------------------------------------
 
   @Override
@@ -118,15 +113,16 @@ public final class BigFractionsN extends LinearSpaceLike  {
   //--------------------------------------------------------------
   /** Intended primarily for testing. 
    */
+
   @Override
   public final Supplier generator (final UniformRandomProvider urp,
                                    final Map options) {
     return 
       new Supplier () {
-      final Generator bf = 
+      final Generator g =
         Generators.bigFractionGenerator(dimension(),urp);
       @Override
-      public final Object get () { return bf.next(); } }; }
+      public final Object get () { return g.next(); } }; }
 
   @Override
   public final Supplier generator (final UniformRandomProvider urp) {
@@ -144,89 +140,27 @@ public final class BigFractionsN extends LinearSpaceLike  {
   //--------------------------------------------------------------
   // TODO: support zero-dimensional space?
 
-  private BigFractionsN (final int dimension) { 
-    super(dimension); }
+  private BigFractionsN (final int dimension) { super(dimension); }
 
   private static final IntObjectMap<BigFractionsN> _cache = 
     new IntObjectHashMap();
 
   public static final BigFractionsN get (final int dimension) {
-    final BigFractionsN dn0 = _cache.get(dimension);
-    if (null != dn0) { return dn0; }
-    final BigFractionsN dn1 = new BigFractionsN(dimension); 
-    _cache.put(dimension,dn1);
-    return dn1; }
-
-  //--------------------------------------------------------------
-  // operations for algebraic structures over BigFraction tuples.
-  //--------------------------------------------------------------
-  /** A <code>BinaryOperator</code> that adds elementwise
-   * <code>BigFraction[]</code> instances of length 
-   * <code>dimension</code>.
-   */
-
-  public static final BinaryOperator<BigFraction[]> 
-  adder (final int dimension) {
-    assert dimension > 0;
-    return
-      new BinaryOperator<BigFraction[]>() {
-        @Override
-        public final BigFraction[] apply (final BigFraction[] q0, 
-                                          final BigFraction[] q1) {
-          assert null != q0;
-          assert null != q1;
-          assert dimension == q0.length;
-          assert dimension == q1.length;
-          final BigFraction[] qq = new BigFraction[dimension];
-          for (int i=0;i<dimension;i++) { qq[i] = q0[i].add(q1[i]); }
-          return qq; } }; }
-
-  // TODO: special sparse representation for zero vector?
-
-  public static final BigFraction[] 
-    additiveIdentity (final int dimension) {
-    assert dimension > 0;
-    final BigFraction[] qq = new BigFraction[dimension];
-    Arrays.fill(qq,BigFraction.ZERO);
-    return qq; }
-
-  public static final UnaryOperator<BigFraction[]>
-  additiveInverse (final int dimension) {
-    assert dimension > 0;
-    return 
-      new UnaryOperator<BigFraction[]>() {
-        @Override
-        public final BigFraction[] apply (final BigFraction[] q) {
-          assert null != q;
-          assert dimension == q.length;
-          final BigFraction[] qq = new BigFraction[dimension];
-          for (int i=0;i<dimension;i++) { qq[i] = q[i].negate(); }
-          return qq; } }; }
-
-  public static final 
-  BiFunction<BigFraction,BigFraction[],BigFraction[]> 
-  scaler (final int dimension) {
-    assert dimension > 0;
-    return
-      new BiFunction<BigFraction,BigFraction[],BigFraction[]>() {
-        @Override
-        public final BigFraction[] apply (final BigFraction a, 
-                                          final BigFraction[] q) {
-          assert null != q;
-          assert dimension == q.length;
-          final BigFraction[] qq = new BigFraction[dimension];
-          for (int i=0;i<dimension;i++) { qq[i] = q[i].multiply(a); }
-          return qq; } }; }
+    final BigFractionsN s0 = _cache.get(dimension);
+    if (null != s0) { return s0; }
+    final BigFractionsN s1 = new BigFractionsN(dimension); 
+    _cache.put(dimension,s1);
+    return s1; }
 
   //--------------------------------------------------------------
 
   public static final OneSetOneOperation group (final int n) {
-    final BigFractionsN bfn = get(n);
+    final BigFractionsN g = get(n);
     return OneSetOneOperation.commutativeGroup(
-        bfn.adder(),
-        bfn,
-        bfn.additiveIdentity(),
-        bfn.additiveInverse()); }
+      g.adder(),
+      g,
+      g.additiveIdentity(),
+      g.additiveInverse()); }
 
   //--------------------------------------------------------------
   /** n-dimensional rational vector space, implemented with
@@ -237,8 +171,8 @@ public final class BigFractionsN extends LinearSpaceLike  {
   makeSpace (final int n) { 
     return
       TwoSetsOneOperation.linearSpaceLike(
-        BigFractionsN.scaler(n),
-        BigFractionsN.group(n),
+        get(n).scaler(),
+        group(n),
         BigFractions.FIELD); }
 
   private static final IntObjectMap<TwoSetsOneOperation> 
@@ -255,7 +189,7 @@ public final class BigFractionsN extends LinearSpaceLike  {
     _spaceCache.put(dimension,space1);
     return space1; }
 
- //--------------------------------------------------------------
+  //--------------------------------------------------------------
 }
 //--------------------------------------------------------------
 
