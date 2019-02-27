@@ -1,6 +1,8 @@
 package xfp.java.numbers;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
 import java.util.Map;
 import java.util.function.BiPredicate;
 import java.util.function.BinaryOperator;
@@ -21,7 +23,7 @@ import xfp.java.prng.Generators;
  * <code>BigFraction</code>
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-23
+ * @version 2019-02-27
  */
 public final class BigFractions implements Set {
 
@@ -58,7 +60,7 @@ public final class BigFractions implements Set {
     if (x instanceof Long) { 
       final BigInteger bi = BigInteger.valueOf(((Long) x).longValue());
       return new BigFraction(bi); }
-//    return new BigFraction(((Long) x).longValue()); }
+    //    return new BigFraction(((Long) x).longValue()); }
     if (x instanceof Float) {
       return new BigFraction(((Float) x).floatValue()); }
     if (x instanceof Short) {
@@ -127,7 +129,7 @@ public final class BigFractions implements Set {
     if (x instanceof BigFraction) { return x; }
     if (x instanceof Number) { 
       return toBigFraction(((Number) x)); }
- 
+
     if (x instanceof BigFraction[]) { return x; }
 
     if (x instanceof byte[]) { 
@@ -153,6 +155,40 @@ public final class BigFractions implements Set {
 
     throw Exceptions.unsupportedOperation(
       BigFractions.class,"toBigFraction",x); }
+
+  //--------------------------------------------------------------
+  // from BigFraction to other numbers
+  // adapted from clojure.lang.Ratio
+  //--------------------------------------------------------------
+
+  public static final BigInteger 
+  bigIntegerValue (final BigFraction f){
+    return f.getNumerator().divide(f.getDenominator()); }
+
+  public static final BigDecimal 
+  decimalValue (final BigFraction f,
+                final MathContext mc) {
+    final BigDecimal numerator = 
+      new BigDecimal(f.getNumerator());
+    final BigDecimal denominator = 
+      new BigDecimal(f.getDenominator());
+    return numerator.divide(denominator, mc); }
+
+  public static final BigDecimal 
+  decimalValue (final BigFraction f) {
+    return decimalValue(f,MathContext.UNLIMITED); }
+
+  public static final double doubleValue (final BigFraction f) {
+    return decimalValue(f,MathContext.DECIMAL64).doubleValue(); }
+
+  public static final int intValue (final BigFraction f) {
+    return (int) doubleValue(f); }
+
+  public static final long longValue (final BigFraction f) {
+    return bigIntegerValue(f).longValue(); }
+
+  public static final float floatValue (final BigFraction f) {
+    return (float)doubleValue(f); }
 
   //--------------------------------------------------------------
   // operations for algebraic structures over BigFractions.
@@ -181,7 +217,7 @@ public final class BigFractions implements Set {
   @SuppressWarnings("static-method")
   public final BigFraction additiveIdentity () {
     return BigFraction.ZERO; }
-  
+
   //--------------------------------------------------------------
 
   // TODO: is consistency with other algebraic structure classes
@@ -221,7 +257,7 @@ public final class BigFractions implements Set {
   @SuppressWarnings("static-method")
   public final BigFraction multiplicativeIdentity () {
     return BigFraction.ONE; }
-  
+
   //--------------------------------------------------------------
 
   private final BigFraction reciprocal (final BigFraction q) {
@@ -316,20 +352,20 @@ public final class BigFractions implements Set {
   //--------------------------------------------------------------
 
   public static final OneSetOneOperation ADDITIVE_MAGMA = 
-  OneSetOneOperation.magma(get().adder(),get());
+    OneSetOneOperation.magma(get().adder(),get());
 
   public static final OneSetOneOperation MULTIPLICATIVE_MAGMA = 
-  OneSetOneOperation.magma(get().multiplier(),get());
+    OneSetOneOperation.magma(get().multiplier(),get());
 
   public static final OneSetTwoOperations FIELD = 
-  OneSetTwoOperations.field(
-    get().adder(),
-    get().additiveIdentity(),
-    get().additiveInverse(),
-    get().multiplier(),
-    get().multiplicativeIdentity(),
-    get().multiplicativeInverse(),
-    get());
+    OneSetTwoOperations.field(
+      get().adder(),
+      get().additiveIdentity(),
+      get().additiveInverse(),
+      get().multiplier(),
+      get().multiplicativeIdentity(),
+      get().multiplicativeInverse(),
+      get());
 
   //--------------------------------------------------------------
 }
