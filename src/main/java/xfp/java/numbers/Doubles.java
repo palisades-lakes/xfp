@@ -75,6 +75,12 @@ public final class Doubles implements Set {
     return Double.longBitsToDouble(ss | se | t); }
 
   //--------------------------------------------------------------
+  /** The largest integer that can be represented exactly 
+   * in <code>double</code>.
+   */
+  public static final double MAX_INTEGER = 9007199254740992D;
+  
+  //--------------------------------------------------------------
   // operations for algebraic structures over Doubles.
   //--------------------------------------------------------------
 

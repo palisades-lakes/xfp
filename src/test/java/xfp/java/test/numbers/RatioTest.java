@@ -8,8 +8,6 @@ import org.junit.jupiter.api.Test;
 
 import clojure.lang.Ratio;
 
-//import org.junit.jupiter.api.Test;
-
 //----------------------------------------------------------------
 /** Tests showing why I use <code>BigFraction</code> for 
  * rationals rather than <code>clojure.lang.Ratio</code>. 

@@ -1,7 +1,5 @@
 package xfp.java.test.numbers;
 
-//import org.junit.jupiter.api.Test;
-
 //----------------------------------------------------------------
 /** Tests showing why I use <code>BigFraction</code> for 
  * rationals rather than <c ode.BigDecimal</code>. 
