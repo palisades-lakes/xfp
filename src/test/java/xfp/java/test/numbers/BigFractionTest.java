@@ -7,6 +7,7 @@ import java.math.BigInteger;
 import org.apache.commons.math3.fraction.BigFraction;
 import org.junit.jupiter.api.Test;
 
+import xfp.java.numbers.BigFractions;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
 import xfp.java.prng.PRNG;
@@ -46,11 +47,12 @@ public final class BigFractionTest {
     if (s0 != s1) { return (s0 > s1) ? 1 : -1; }
     if (s0 == 0) { return 0; }
 
-    final int cn = n0.compareTo(n1);
-    final int cd = d0.compareTo(d1);
-    if ((0 == cn) && (0 == cd)) { return 0; }
-    if ((0 > cn) && (0 < cd)) { return -1; }
-    if ((0 < cn) && (0 > cd)) { return 1; }
+    // something wrong here
+//    final int cn = n0.compareTo(n1);
+//    final int cd = d0.compareTo(d1);
+//    if ((0 == cn) && (0 == cd)) { return 0; }
+//    if ((0 > cn) && (0 < cd)) { return -1; }
+//    if ((0 < cn) && (0 > cd)) { return 1; }
     
     final BigInteger nOd = n0.multiply(d1);
     final BigInteger dOn = d0.multiply(n1);
@@ -88,8 +90,15 @@ public final class BigFractionTest {
     double xlo = x;
     double xhi = Math.nextUp(xlo);
     BigFraction fhi = new BigFraction(xhi);
-    while (0 > compare(fhi,f)) {
-      xlo = xhi; xhi = Math.nextUp(xlo); }
+    int iterations = 0;
+    while (compare(fhi,f) < 0) {
+      xlo = xhi; 
+      xhi = Math.nextUp(xlo); 
+      fhi = new BigFraction(xhi); 
+    iterations++;
+      System.out.println("searchUp:" + iterations + " [" + xlo + ", " + xhi + "]"); 
+    }
+    System.out.println("searchUp:" + iterations + " [" + xlo + ", " + xhi + "]"); 
     return round(xlo,new BigFraction(xlo),f,xhi,fhi);  }
 
   /** find a double interval that brackets f, assuming x &lt; f.
@@ -101,21 +110,29 @@ public final class BigFractionTest {
     double xhi = x;
     double xlo = Math.nextDown(xhi);
     BigFraction flo = new BigFraction(xlo);
-    while (0 < compare(flo,f)) {
+    int iterations = 0;
+    while (compare(flo,f) > 0) {
       xhi = xlo; 
       xlo = Math.nextDown(xhi); 
-      flo = new BigFraction(xlo); }
+      flo = new BigFraction(xlo); 
+      iterations++;
+      System.out.println("searchDown:" + iterations + " [" + xlo + ", " + xhi + "]"); 
+//      System.out.println(f); 
+//      System.out.println(flo); 
+      System.out.println("searchDown:" + iterations + " [" + xlo + ", " + xhi + "]"); 
+      }
     return round(xlo,flo,f,xhi,new BigFraction(xhi));  }
 
   private static final double doubleValue (final BigFraction f) {
     //return f.doubleValue(); }
     //    return BigFractions.doubleValue(f); }
-    final double x = f.doubleValue();
+    //final double x = f.doubleValue();
+    final double x = BigFractions.doubleValue(f);
     final BigFraction fx = new BigFraction(x);
     final int c = compare(fx,f);
-    if (0 == c) { return x; }
-    else if (0 > c) { return searchUp(f,x); }
-    else { return searchDown(f,x); } }
+    if (c > 0) { return searchDown(f,x); }
+    if (c < 0) { return searchUp(f,x); }
+    return x; }
 
   //--------------------------------------------------------------
   /** print the values with a common denominator,
@@ -174,18 +191,18 @@ public final class BigFractionTest {
       final BigFraction f1 = new BigFraction(d1).reduce();
       result = compare(f1,f) > 0; } 
     else { result = true; }
-    if (! result) { System.out.println(msg(f)); }
     return result; }
 
   //--------------------------------------------------------------
 
-  private static final int TRYS = 16 * 1023;
+  private static final int TRYS = 32;
 
   @SuppressWarnings({ "static-method" })
   @Test
   public final void roundingTest () {
-    final BigFraction f0 = new BigFraction(13,11);
-    assertTrue(correctRounding(f0), msg(f0)); }
+    final BigFraction f = new BigFraction(13,11);
+    assertTrue(correctRounding(f), 
+      () -> { return msg(f); }); }
 
   @SuppressWarnings({ "static-method" })
   @Test
@@ -201,7 +218,8 @@ public final class BigFractionTest {
       final long n = g.nextLong();
       final long d = g.nextLong();
       final BigFraction f = new BigFraction(n,d).reduce();
-      assertTrue(correctRounding(f),"\n" + i + msg(f)); } }
+      assertTrue(correctRounding(f), 
+        () -> { return msg(f); }); } }
 
   @SuppressWarnings({ "static-method" })
   @Test
@@ -213,7 +231,8 @@ public final class BigFractionTest {
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
       final BigFraction f = new BigFraction(x).reduce();
-      assertTrue(correctRounding(f),"\n" + i + msg(f)); } }
+      assertTrue(correctRounding(f), 
+        () -> { return msg(f); }); } }
 
   //--------------------------------------------------------------
 }
