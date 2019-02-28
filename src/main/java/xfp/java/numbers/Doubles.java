@@ -17,7 +17,7 @@ import xfp.java.prng.Generators;
 /** Utilities for <code>double</code>, <code>double[]</code>.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-26
+ * @version 2019-02-28
  */
 public final class Doubles implements Set {
 
@@ -25,33 +25,82 @@ public final class Doubles implements Set {
   // private
   //--------------------------------------------------------------
 
-  //  private static final int SIGN_BITS = 1;
-  private static final int EXPONENT_BITS = 11;
-  private static final int SIGNIFICAND_BITS = 52;
+  public static final int SIGN_BITS = 1;
+  public static final int EXPONENT_BITS = 11;
+  public static final int SIGNIFICAND_BITS = 52;
 
-  //  private static final long SIGN_MASK =
-  //    1L << (EXPONENT_BITS + SIGNIFICAND_BITS);
+  public static final long SIGN_MASK =
+    1L << (EXPONENT_BITS + SIGNIFICAND_BITS);
 
-  //  private static final long EXPONENT_MASK =
-  //    ((1L << EXPONENT_BITS) - 1L) << SIGNIFICAND_BITS;
+  public static final long EXPONENT_MASK =
+    ((1L << EXPONENT_BITS) - 1L) << SIGNIFICAND_BITS;
 
   public static final long SIGNIFICAND_MASK =
     (1L << SIGNIFICAND_BITS) - 1L;
 
-  //  private static final int EXPONENT_BIAS =
-  //    (1 << (EXPONENT_BITS - 1)) - 1;
+  public static final int EXPONENT_BIAS =
+    (1 << (EXPONENT_BITS - 1)) - 1;
 
   public static final int MAXIMUM_BIASED_EXPONENT =
     (1 << EXPONENT_BITS) - 1;
 
-  //  private static final int MAXIMUM_EXPONENT =
-  //    EXPONENT_BIAS;
+  public static final int MAXIMUM_EXPONENT =
+    EXPONENT_BIAS;
 
-  //  private static final int MINIMUM_NORMAL_EXPONENT =
-  //    1 - MAXIMUM_EXPONENT;
+  public static final int MINIMUM_NORMAL_EXPONENT =
+    1 - MAXIMUM_EXPONENT;
 
-  //  private static final int MINIMUM_SUBNORMAL_EXPONENT =
-  //    MINIMUM_NORMAL_EXPONENT - SIGNIFICAND_BITS;
+  public static final int MINIMUM_SUBNORMAL_EXPONENT =
+    MINIMUM_NORMAL_EXPONENT - SIGNIFICAND_BITS;
+
+  // eclipse validates constant expressions at build time
+  //  static {
+  //    assert ((~0L) == (SIGN_MASK | EXPONENT_MASK | SIGNIFICAND_MASK));
+  //    assert (0L == (SIGN_MASK & EXPONENT_MASK));
+  //    assert (0L == (EXPONENT_MASK & SIGNIFICAND_MASK));
+  //    assert (0L == (SIGN_MASK & SIGNIFICAND_MASK));
+  //  }
+  //--------------------------------------------------------------
+
+  public static final long significand (final double x) {
+    return
+      SIGNIFICAND_MASK
+      &
+      Double.doubleToRawLongBits(x); }
+
+  //--------------------------------------------------------------
+
+  public static final int biasedExponent (final double x) {
+    return
+      (int)
+      ((EXPONENT_MASK
+        &
+        Double.doubleToRawLongBits(x))
+        >> SIGNIFICAND_BITS); }
+
+  //--------------------------------------------------------------
+
+  public static final int unbiasedExponent (final double x) {
+    return biasedExponent(x) - EXPONENT_BIAS; }
+
+  //--------------------------------------------------------------
+
+  public static final int signBit (final double x) {
+    return  (int)
+      ((SIGN_MASK
+        &
+        Double.doubleToRawLongBits(x))
+        >> (EXPONENT_BITS + SIGNIFICAND_BITS)); }
+
+  public static final boolean nonNegative (final double x) {
+    return  0 == signBit(x); }
+
+  //--------------------------------------------------------------
+
+  public static final boolean isNormal (final double x) {
+    final int be = biasedExponent(x);
+    return (0.0 == x) || ((0 != be) && (0x7ff != be)); }
+
 
   public static final double makeDouble (final int s,
                                          final int e,

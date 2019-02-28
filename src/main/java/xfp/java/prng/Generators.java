@@ -19,7 +19,7 @@ import xfp.java.numbers.Floats;
  * that return different values on each call.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-26
+ * @version 2019-02-28
  */
 
 @SuppressWarnings("unchecked")
@@ -28,7 +28,7 @@ public final class Generators {
   //--------------------------------------------------------------
   // TODO; Integer[], Double[], etc., generators?
   // TODO: move Generator definitions into Set classes
-  
+
   public static final Generator 
   byteGenerator (final UniformRandomProvider urp) {
     return new Generator () {
@@ -240,7 +240,7 @@ public final class Generators {
 
   //--------------------------------------------------------------
   // TODO: Double[] generators
-  
+
   public static final Generator 
   finiteDoubleGenerator (final UniformRandomProvider urp,
                          final int delta) {
@@ -279,6 +279,100 @@ public final class Generators {
                          final UniformRandomProvider urp) {
     return new Generator () {
       final Generator g = finiteDoubleGenerator(urp);
+      @Override
+      public final Object next () {
+        final double[] z = new double[n];
+        for (int i=0;i<n;i++) { z[i] = g.nextDouble(); }
+        return z; } }; }
+
+  //--------------------------------------------------------------
+
+  public static final Generator 
+  normalDoubleGenerator (final UniformRandomProvider urp,
+                         final int delta) {
+    final Generator d = doubleGenerator(urp,delta);
+    return new Generator () {
+      @Override
+      public final double nextDouble () {
+        // TODO: fix infinite loop
+        for (;;) {
+          final double x = d.nextDouble();
+          if (Double.isFinite(x) && Doubles.isNormal(x)) { 
+            return x; } } } 
+      @Override
+      public final Object next () {
+        return Double.valueOf(nextDouble()); } }; }
+
+  public static final Generator 
+  normalDoubleGenerator (final int n,
+                         final UniformRandomProvider urp,
+                         final int delta) {
+    return new Generator () {
+      final Generator g = normalDoubleGenerator(urp,delta);
+      @Override
+      public final Object next () {
+        final double[] z = new double[n];
+        for (int i=0;i<n;i++) { z[i] = g.nextDouble(); }
+        return z; } }; }
+
+  public static final Generator 
+  normalDoubleGenerator (final UniformRandomProvider urp) {
+    return 
+      normalDoubleGenerator(
+        urp,1+Doubles.MAXIMUM_BIASED_EXPONENT); } 
+
+  public static final Generator 
+  normalDoubleGenerator (final int n,
+                         final UniformRandomProvider urp) {
+    return new Generator () {
+      final Generator g = normalDoubleGenerator(urp);
+      @Override
+      public final Object next () {
+        final double[] z = new double[n];
+        for (int i=0;i<n;i++) { z[i] = g.nextDouble(); }
+        return z; } }; }
+
+  //--------------------------------------------------------------
+
+  public static final Generator 
+  subnormalDoubleGenerator (final UniformRandomProvider urp,
+                            final int delta) {
+    final Generator d = doubleGenerator(urp,delta);
+    return new Generator () {
+      @Override
+      public final double nextDouble () {
+        // TODO: fix infinite loop
+        for (;;) {
+          final double x = d.nextDouble();
+          if ((Double.isFinite(x)) && (! Doubles.isNormal(x))) { 
+            return x; } } } 
+      @Override
+      public final Object next () {
+        return Double.valueOf(nextDouble()); } }; }
+
+  public static final Generator 
+  subnormalDoubleGenerator (final int n,
+                            final UniformRandomProvider urp,
+                            final int delta) {
+    return new Generator () {
+      final Generator g = subnormalDoubleGenerator(urp,delta);
+      @Override
+      public final Object next () {
+        final double[] z = new double[n];
+        for (int i=0;i<n;i++) { z[i] = g.nextDouble(); }
+        return z; } }; }
+
+  public static final Generator 
+  subnormalDoubleGenerator (final UniformRandomProvider urp) {
+    return 
+      subnormalDoubleGenerator(
+        urp,1+Doubles.MAXIMUM_BIASED_EXPONENT); } 
+
+  public static final Generator 
+  subnormalDoubleGenerator (final int n,
+                            final UniformRandomProvider urp) {
+    return new Generator () {
+      final Generator g = subnormalDoubleGenerator(urp);
       @Override
       public final Object next () {
         final double[] z = new double[n];

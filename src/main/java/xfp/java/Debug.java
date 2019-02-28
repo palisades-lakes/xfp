@@ -17,7 +17,7 @@ public final class Debug {
   /** Hex string representation of the bits implementing the double.
    */
 
-  public static final String hexString (final double x) {
+  public static final String hexBits (final double x) {
     return 
       Long.toHexString(Double.doubleToLongBits(x))
       .toUpperCase(); }
