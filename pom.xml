@@ -78,6 +78,21 @@
    <version>${commons-math3-version}</version>
   </dependency>
   <dependency>
+   <groupId>org.jscience</groupId>
+   <artifactId>jscience</artifactId>
+   <version>${jscience-version}</version>
+  </dependency>
+  <dependency>
+   <groupId>de.uni-mannheim.rz.krum</groupId>
+   <artifactId>jas</artifactId>
+   <version>${jas-version}</version>
+  </dependency>
+  <dependency>
+   <groupId>org.apfloat</groupId>
+   <artifactId>apfloat</artifactId>
+   <version>${apfloat-version}</version>
+  </dependency>
+  <dependency>
    <groupId>org.apache.commons</groupId>
    <artifactId>commons-rng-sampling</artifactId>
    <version>${commons-rng-version}</version>
