@@ -82,11 +82,13 @@
    <artifactId>jscience</artifactId>
    <version>${jscience-version}</version>
   </dependency>
+  <!-- BigRational not useful
   <dependency>
    <groupId>de.uni-mannheim.rz.krum</groupId>
    <artifactId>jas</artifactId>
    <version>${jas-version}</version>
   </dependency>
+   -->
   <dependency>
    <groupId>org.apfloat</groupId>
    <artifactId>apfloat</artifactId>
