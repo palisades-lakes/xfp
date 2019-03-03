@@ -78,23 +78,6 @@
    <version>${commons-math3-version}</version>
   </dependency>
   <dependency>
-   <groupId>org.jscience</groupId>
-   <artifactId>jscience</artifactId>
-   <version>${jscience-version}</version>
-  </dependency>
-  <!-- BigRational not useful
-  <dependency>
-   <groupId>de.uni-mannheim.rz.krum</groupId>
-   <artifactId>jas</artifactId>
-   <version>${jas-version}</version>
-  </dependency>
-   -->
-  <dependency>
-   <groupId>org.apfloat</groupId>
-   <artifactId>apfloat</artifactId>
-   <version>${apfloat-version}</version>
-  </dependency>
-  <dependency>
    <groupId>org.apache.commons</groupId>
    <artifactId>commons-rng-sampling</artifactId>
    <version>${commons-rng-version}</version>
@@ -114,6 +97,29 @@
    <artifactId>hppc</artifactId>
    <version>${hppc-version}</version>
   </dependency>
+  <!-- 
+  Rational.doubleValue() is interesting, but no easy way to go
+  double -> Rational
+  <dependency>
+   <groupId>org.jscience</groupId>
+   <artifactId>jscience</artifactId>
+   <version>${jscience-version}</version>
+  </dependency>
+  -->
+  <!-- BigRational not useful
+  <dependency>
+   <groupId>de.uni-mannheim.rz.krum</groupId>
+   <artifactId>jas</artifactId>
+   <version>${jas-version}</version>
+  </dependency>
+   -->
+  <!-- no easy path double -> Rational double
+  <dependency>
+   <groupId>org.apfloat</groupId>
+   <artifactId>apfloat</artifactId>
+   <version>${apfloat-version}</version>
+  </dependency>
+   -->
   <dependency>
    <groupId>org.junit.jupiter</groupId>
    <artifactId>junit-jupiter-api</artifactId>
