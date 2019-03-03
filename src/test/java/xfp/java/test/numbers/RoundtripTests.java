@@ -5,9 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
+import java.math.RoundingMode;
 
 import org.apache.commons.math3.fraction.BigFraction;
 import org.junit.jupiter.api.Test;
+
+import com.upokecenter.numbers.ERational;
 
 import xfp.java.numbers.Doubles;
 import xfp.java.prng.Generator;
@@ -27,8 +30,6 @@ import xfp.java.prng.Seeds;
  */
 
 public final class RoundtripTests {
-
-  private static final int TRYS = 1024*1024;
 
   public static final Generator finiteDoubles () {
     return
@@ -102,6 +103,7 @@ public final class RoundtripTests {
   //--------------------------------------------------------------
   // BigDecimal
   // within an ulp, not exact...
+
   public static final double toDouble (final BigFraction f) {
     //final BigFraction fr = f.reduce();
     final BigInteger n = f.getNumerator();
@@ -111,35 +113,105 @@ public final class RoundtripTests {
     final BigInteger d = f.getDenominator();
     final BigDecimal n10 = new BigDecimal(n);
     final BigDecimal d10 = new BigDecimal(d);
-    final BigDecimal x10 = n10.divide(d10,MathContext.DECIMAL128); 
+    //final MathContext mc = MathContext.DECIMAL128;
+    final MathContext mc = new MathContext(128,RoundingMode.HALF_UP);
+    final BigDecimal x10 = n10.divide(d10,mc); 
     final double x = x10.doubleValue();
     if (Doubles.isNormal(x)) { return x; }
     return 2.0*x; }
   //    return toDouble(f.multiply(2)); }
 
   //--------------------------------------------------------------
-  /** BigFraction should be able to represent any double exactly.
+
+  private static final int TRYS = 32*1024;
+
+  //--------------------------------------------------------------
+  /** ERational should be able to represent any double exactly.
    */
 
-  public static final boolean double2BigFraction2Double () {
+  public static final boolean double2ERational2Double () {
     final Generator g = 
-      finiteDoubles();
-    //      subnormalDoubles();
+      //finiteDoubles();
+      subnormalDoubles();
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
-      final BigFraction f = new BigFraction(x);
-      final double xf = toDouble(f);
-      //      if (x != xf) { 
-      final double dx = Math.abs(x - xf);
-      if (dx > Math.ulp(x)) { 
-        System.out.println("\n" + 
-          "toDouble:" + i + " " + Doubles.isNormal(x) +"\n" +
+      final ERational f = ERational.FromDouble(x);
+      final double xf = f.ToDouble();
+      if (x != xf) { 
+        System.out.println("\n\n" + 
+          "ERational.ToDouble:" + Doubles.isNormal(x) +"\n" +
+          x + "\n" +
+          xf + "\n\n" +
           Double.toHexString(x) + "\n" +
-          Double.toHexString(xf) + "\n" +
+          Double.toHexString(xf) + "\n\n" +
           f.getNumerator() + "\n" +
-          f.getDenominator());
-        return false; } } 
+          f.getDenominator() + "\n\n" +
+          f.getNumerator().ToRadixString(16) + "\n" +
+          f.getDenominator().ToRadixString(16));
+        return false; } }
     return true; }
+
+  //  public static final boolean double2ERational2Double () {
+  //    final double x = -0x0.19c0ba819d5c3p-1022;
+  //    final ERational f = ERational.FromDouble(x);
+  //    final double xf = f.ToDouble();
+  //    System.out.println("\n\n" + 
+  //      "ERational.ToDouble:" + Doubles.isNormal(x) +"\n" +
+  //      x + "\n" +
+  //      xf + "\n\n" +
+  //      Double.toHexString(x) + "\n" +
+  //      Double.toHexString(xf) + "\n\n" +
+  ////      f.getNumerator() + "\n" +
+  ////      f.getDenominator() + "\n\n" +
+  //      f.getNumerator().ToRadixString(16) + "\n" +
+  //      f.getDenominator().ToRadixString(16));
+  //    //final double dx = Math.abs(x - xf);
+  //    //if (dx > Math.ulp(x)) { 
+  //    if (x != xf) { 
+  //      return false; } 
+  //    return true; }
+
+  //  public static final boolean double2BigFraction2Double () {
+  //    final double x = -0x0.19c0ba819d5c3p-1022;
+  //    final BigFraction f = new BigFraction(x);
+  //    final double xf = toDouble(f);
+  //    System.out.println("\n\n" + 
+  //      "toDouble:" + Doubles.isNormal(x) +"\n" +
+  //      x + "\n" +
+  //      xf + "\n\n" +
+  //      Double.toHexString(x) + "\n" +
+  //      Double.toHexString(xf) + "\n\n" +
+  ////      f.getNumerator() + "\n" +
+  ////      f.getDenominator() + "\n\n" +
+  //      f.getNumerator().toString(16) + "\n" +
+  //      f.getDenominator().toString(16));
+  //    //final double dx = Math.abs(x - xf);
+  //    //if (dx > Math.ulp(x)) { 
+  //    if (x != xf) { 
+  //      return false; } 
+  //    return true; }
+
+  //  public static final boolean double2BigFraction2Double () {
+  //    final Generator g = 
+  //      finiteDoubles();
+  //    //      subnormalDoubles();
+  //    for (int i=0;i<TRYS;i++) {
+  //      final double x = g.nextDouble();
+  //      final BigFraction f = new BigFraction(x);
+  //      final double xf = toDouble(f);
+  //      if (x != xf) { 
+  //        //        final double dx = Math.abs(x - xf);
+  //        //        if (dx > Math.ulp(x)) { 
+  //        System.out.println("\n\n" + 
+  //          "toDouble:" + i + " " + Doubles.isNormal(x) +"\n" +
+  //          x + "\n" +
+  //          xf + "\n\n" +
+  //          Double.toHexString(x) + "\n" +
+  //          Double.toHexString(xf) + "\n\n" +
+  //          f.getNumerator().toString(16) + "\n" +
+  //          f.getDenominator().toString(16));
+  //        return false; } } 
+  //    return true; }
 
   //--------------------------------------------------------------
 
@@ -299,7 +371,8 @@ public final class RoundtripTests {
   @Test
   public final void roundTripTest () {
 
-    assertTrue(double2BigFraction2Double());
+    assertTrue(double2ERational2Double());
+    //assertTrue(double2BigFraction2Double());
 
     // This should be true.
     // BigFraction should be able to represent any double exactly.

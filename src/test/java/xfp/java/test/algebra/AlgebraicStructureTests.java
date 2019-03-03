@@ -31,14 +31,14 @@ import xfp.java.prng.Seeds;
 /** Common code for testing sets. 
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-26
+ * @version 2019-03-03
  */
 
 @SuppressWarnings("unchecked")
 public final class AlgebraicStructureTests {
 
-  private static final int TRYS = 1023;
-  static final int SPACE_TRYS = 127;
+  private static final int TRYS = 512;
+  static final int SPACE_TRYS = 64;
 
   //--------------------------------------------------------------
 
