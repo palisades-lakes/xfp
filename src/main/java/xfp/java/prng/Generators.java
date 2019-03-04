@@ -10,6 +10,8 @@ import org.apache.commons.rng.sampling.CollectionSampler;
 import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
 import org.apache.commons.rng.sampling.distribution.ContinuousUniformSampler;
 
+import com.upokecenter.numbers.ERational;
+
 import clojure.lang.Numbers;
 import clojure.lang.Ratio;
 import xfp.java.numbers.Doubles;
@@ -19,7 +21,7 @@ import xfp.java.numbers.Floats;
  * that return different values on each call.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-28
+ * @version 2019-03-03
  */
 
 @SuppressWarnings("unchecked")
@@ -429,6 +431,54 @@ public final class Generators {
 
   //--------------------------------------------------------------
   // TODO: options?
+  // TODO: generator from big integers that cover more than 
+  // double range
+  // TODO: using a DoubleSampler: those are (?) the most likely
+  // values to see, but could do something to extend the 
+  // range to values not representable as double.
+
+  /** Intended primarily for testing. Sample a random double
+   * (see {@link xfp.java.prng.DoubleSampler})
+   * and convert to <code>ERational</code>
+   * with {@link #DOUBLE_P} probability;
+   * otherwise return {@link ERational#ZERO} or 
+   * {@link ERational#ONE}, {@link ERational#MINUS_ONE},  
+   * with equal probability (these are potential edge cases).
+   */
+
+  public static final Generator 
+  eRationalGenerator (final UniformRandomProvider urp) {
+    final double dp = 0.9;
+    return new Generator () {
+      private final ContinuousSampler choose = 
+        new ContinuousUniformSampler(urp,0.0,1.0);
+      private final Generator fdg = finiteDoubleGenerator(urp);
+      private final CollectionSampler edgeCases = 
+        new CollectionSampler(
+          urp,
+          List.of(
+            ERational.Zero,
+            ERational.One,
+            ERational.One.Negate()));
+      @Override
+      public Object next () { 
+        final boolean edge = choose.sample() > dp;
+        if (edge) { return edgeCases.sample(); }
+        return ERational.FromDouble(fdg.nextDouble()); } }; }
+
+  public static final Generator 
+  eRationalGenerator (final int n,
+                        final UniformRandomProvider urp) {
+    return new Generator () {
+      final Generator g = eRationalGenerator(urp);
+      @Override
+      public final Object next () {
+        final ERational[] z = new ERational[n];
+        for (int i=0;i<n;i++) { z[i] = (ERational) g.next(); }
+        return z; } }; }
+
+  //--------------------------------------------------------------
+  // TODO: options?
   // TODO: using a DoubleSampler: those are (?) the most likely
   // values to see, but could do something to extend the 
   // range to values not representable as double.
@@ -438,7 +488,7 @@ public final class Generators {
    * and convert to <code>BigFraction</code>
    * with {@link #DOUBLE_P} probability;
    * otherwise return {@link BigFraction#ZERO} or 
-   * {@link BigFractrion#ONE}, {@link BigFractrion#MINUS_ONE},  
+   * {@link BigFraction#ONE}, {@link BigFraction#MINUS_ONE},  
    * with equal probability (these are potential edge cases).
    */
 

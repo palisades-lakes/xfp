@@ -15,12 +15,14 @@ import xfp.java.algebra.Structure;
 import xfp.java.linear.BigDecimalsN;
 import xfp.java.linear.BigFractionsN;
 import xfp.java.linear.Dn;
+import xfp.java.linear.ERationalsN;
 import xfp.java.linear.Fn;
 import xfp.java.linear.Qn;
 import xfp.java.linear.RatiosN;
 import xfp.java.numbers.BigDecimals;
 import xfp.java.numbers.BigFractions;
 import xfp.java.numbers.Doubles;
+import xfp.java.numbers.ERationals;
 import xfp.java.numbers.Floats;
 import xfp.java.numbers.Q;
 import xfp.java.numbers.Ratios;
@@ -63,6 +65,10 @@ public final class AlgebraicStructureTests {
   @Test
   public final void tests () {
 
+    structureTests(ERationals.ADDITIVE_MAGMA,TRYS);
+    structureTests(ERationals.MULTIPLICATIVE_MAGMA,TRYS); 
+    structureTests(ERationals.FIELD,TRYS);  
+
     structureTests(BigDecimals.ADDITIVE_MAGMA,TRYS);
     structureTests(BigDecimals.MULTIPLICATIVE_MAGMA,TRYS); 
     structureTests(BigDecimals.RING,TRYS);  
@@ -86,6 +92,9 @@ public final class AlgebraicStructureTests {
     structureTests(Doubles.FLOATING_POINT,TRYS); 
 
     for (final int n : new int[] { 1, 3, 255}) {
+      structureTests(ERationalsN.group(n),SPACE_TRYS); 
+      structureTests(ERationalsN.space(n),SPACE_TRYS); 
+
       structureTests(BigDecimalsN.group(n),SPACE_TRYS); 
       structureTests(BigDecimalsN.space(n),SPACE_TRYS); 
 
