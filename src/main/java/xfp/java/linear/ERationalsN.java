@@ -120,7 +120,7 @@ public final class ERationalsN extends LinearSpaceLike  {
     return 
       new Supplier () {
       final Generator g =
-        Generators.eRationalGenerator(dimension(),urp);
+        Generators.eRationalFromDoubleGenerator(dimension(),urp);
       @Override
       public final Object get () { return g.next(); } }; }
 

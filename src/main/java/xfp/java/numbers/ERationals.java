@@ -23,7 +23,7 @@ import xfp.java.prng.Generators;
  * <code>ERational</code>
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-03
+ * @version 2019-03-04
  */
 public final class ERationals implements Set {
 
@@ -51,17 +51,19 @@ public final class ERationals implements Set {
   public static final ERational toERational (final byte x) {
     return ERational.FromByte(x); }
 
-  public static final ERational toERational (final Number x) {
-    // TODO: contribute or fork ERational extends Number?
-    //if (x instanceof ERational) { return (ERational) x; }
-    //    if (x instanceof BigDecimal) {
-    //      return toERational(((BigDecimal) x).intValue()); }
-    if (x instanceof BigInteger) {
-      // TODO: is this correct?
-      return ERational.FromEInteger(
-        EInteger.FromBytes(
-          ((BigInteger) x).toByteArray(),
-          false)); }
+  public static final ERational toERational (final EInteger x) {
+    return ERational.FromEInteger(x); }
+
+  public static final ERational toERational (final BigInteger x) {
+    return ERational.FromEInteger(
+      EInteger.FromBytes(x.toByteArray(), false)); }
+  
+  public static final ERational toERational (final Object x) {
+    if (x instanceof ERational) { return (ERational) x; }
+    if (x instanceof EInteger) { return toERational((EInteger) x); }
+    if (x instanceof BigInteger) {return toERational((BigInteger) x); }
+    // TODO: too tricky with rounding modes, etc.
+    // if (x instanceof BigDecimal) {return toERational((BigDecimal) x); }
     if (x instanceof Double) { 
       return toERational(((Double) x).doubleValue()); }
     if (x instanceof Integer) {
@@ -74,56 +76,54 @@ public final class ERationals implements Set {
       return toERational(((Short) x).intValue()); }
     if (x instanceof Byte) {
       return toERational(((Byte) x).intValue()); }
-    //    if (x instanceof EInteger) {
-    //      return ERational.FromEInteger((EInteger) x); }
     throw Exceptions.unsupportedOperation(
       ERationals.class,"toERational",x); } 
 
   //--------------------------------------------------------------
 
-  public static final ERational[] toERational (final Number[] x) {
+  public static final ERational[] toERationalArray (final Object[] x) {
     final int n = x.length;
     final ERational[] y = new ERational[n];
     for (int i=0;i<n;i++) { y[i] = toERational(x[i]); }
     return y; }
 
   public static final ERational[]
-    toERational (final double[] x) {
+    toERationalArray (final double[] x) {
     final int n = x.length;
     final ERational[] y = new ERational[n];
     for (int i=0;i<n;i++) { y[i] = toERational(x[i]); }
     return y; }
 
   public static final ERational[]
-    toERational (final float[] x) {
+    toERationalArray (final float[] x) {
     final int n = x.length;
     final ERational[] y = new ERational[n];
     for (int i=0;i<n;i++) { y[i] = toERational(x[i]); }
     return y; }
 
   public static final ERational[]
-    toERational (final long[] x) {
+    toERationalArray (final long[] x) {
     final int n = x.length;
     final ERational[] y = new ERational[n];
     for (int i=0;i<n;i++) { y[i] = toERational(x[i]); }
     return y; }
 
   public static final ERational[]
-    toERational (final int[] x) {
+    toERationalArray (final int[] x) {
     final int n = x.length;
     final ERational[] y = new ERational[n];
     for (int i=0;i<n;i++) { y[i] = toERational(x[i]); }
     return y; }
 
   public static final ERational[]
-    toERational (final short[] x) {
+    toERationalArray (final short[] x) {
     final int n = x.length;
     final ERational[] y = new ERational[n];
     for (int i=0;i<n;i++) { y[i] = toERational(x[i]); }
     return y; }
 
   public static final ERational[] 
-    toERational (final byte[] x) {
+    toERationalArray (final byte[] x) {
     final int n = x.length;
     final ERational[] y = new ERational[n];
     for (int i=0;i<n;i++) { y[i] = toERational(x[i]); }
@@ -131,59 +131,55 @@ public final class ERationals implements Set {
 
   //--------------------------------------------------------------
 
-  public static final Object toERational (final Object x) {
+  public static final ERational[] toERationalArray (final Object x) {
 
-    if (x instanceof ERational) { return x; }
-    if (x instanceof Number) { 
-      return toERational(((Number) x)); }
-
-    if (x instanceof ERational[]) { return x; }
+    if (x instanceof ERational[]) { return (ERational[]) x; }
 
     if (x instanceof byte[]) { 
-      return toERational((byte[]) x); }
+      return toERationalArray((byte[]) x); }
 
     if (x instanceof short[]) { 
-      return toERational((short[]) x); }
+      return toERationalArray((short[]) x); }
 
     if (x instanceof int[]) { 
-      return toERational((int[]) x); }
+      return toERationalArray((int[]) x); }
 
     if (x instanceof long[]) { 
-      return toERational((long[]) x); }
+      return toERationalArray((long[]) x); }
 
     if (x instanceof float[]) { 
-      return toERational((float[]) x); }
+      return toERationalArray((float[]) x); }
 
     if (x instanceof double[]) { 
-      return toERational((double[]) x); }
+      return toERationalArray((double[]) x); }
 
-    if (x instanceof Number[]) { 
-      return toERational((Number[]) x); }
+    if (x instanceof Object[]) { 
+      return toERationalArray((Object[]) x); }
 
     throw Exceptions.unsupportedOperation(
-      ERationals.class,"toERational",x); }
+      ERationals.class,"toERationalArray",x); }
 
   //--------------------------------------------------------------
   // from ERational to other numbers
   // adapted from clojure.lang.Ratio
   //--------------------------------------------------------------
 
-//  public static final EInteger 
-//  bigIntegerValue (final ERational f){
-//    return f.getNumerator().divide(f.getDenominator()); }
-//
-//  public static final BigDecimal 
-//  decimalValue (final ERational f,
-//                final MathContext mc) {
-//    final BigDecimal numerator = 
-//      new BigDecimal(f.getNumerator());
-//    final BigDecimal denominator = 
-//      new BigDecimal(f.getDenominator());
-//    return numerator.divide(denominator, mc); }
-//
-//  public static final BigDecimal 
-//  decimalValue (final ERational f) {
-//    return decimalValue(f,MathContext.UNLIMITED); }
+  //  public static final EInteger 
+  //  bigIntegerValue (final ERational f){
+  //    return f.getNumerator().divide(f.getDenominator()); }
+  //
+  //  public static final BigDecimal 
+  //  decimalValue (final ERational f,
+  //                final MathContext mc) {
+  //    final BigDecimal numerator = 
+  //      new BigDecimal(f.getNumerator());
+  //    final BigDecimal denominator = 
+  //      new BigDecimal(f.getDenominator());
+  //    return numerator.divide(denominator, mc); }
+  //
+  //  public static final BigDecimal 
+  //  decimalValue (final ERational f) {
+  //    return decimalValue(f,MathContext.UNLIMITED); }
 
   public static final double doubleValue (final ERational f) {
     return f.ToDouble(); }
@@ -267,20 +263,20 @@ public final class ERationals implements Set {
 
   //--------------------------------------------------------------
 
-  private final ERational reciprocal (final ERational q) {
-    assert contains(q);
+  public static final ERational reciprocal (final ERational q) {
     // only a partial inverse
     if (ERational.Zero.equals(q)) { return null; }
     return 
       ERational.Create(q.getDenominator(),q.getNumerator());  } 
 
+  @SuppressWarnings("static-method")
   public final UnaryOperator<ERational> multiplicativeInverse () {
     return new UnaryOperator<ERational> () {
       @Override
       public final String toString () { return "BF.inverse()"; }
       @Override
       public final ERational apply (final ERational q) {
-        return ERationals.this.reciprocal(q); } }; }
+        return ERationals.reciprocal(q); } }; }
 
   //--------------------------------------------------------------
   // Set methods
@@ -325,7 +321,7 @@ public final class ERationals implements Set {
   @Override
   public final Supplier generator (final Map options) {
     final UniformRandomProvider urp = Set.urp(options);
-    final Generator bfs = Generators.eRationalGenerator(urp);
+    final Generator bfs = Generators.eRationalFromDoubleGenerator(urp);
     return 
       new Supplier () {
       @Override

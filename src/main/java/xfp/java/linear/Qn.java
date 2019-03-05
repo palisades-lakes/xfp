@@ -5,16 +5,16 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import org.apache.commons.math3.fraction.BigFraction;
 import org.apache.commons.rng.UniformRandomProvider;
 
 import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
+import com.upokecenter.numbers.ERational;
 
 import xfp.java.algebra.OneSetOneOperation;
 import xfp.java.algebra.Set;
 import xfp.java.algebra.TwoSetsOneOperation;
-import xfp.java.numbers.BigFractions;
+import xfp.java.numbers.ERationals;
 import xfp.java.numbers.Q;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
@@ -36,7 +36,7 @@ import xfp.java.prng.Generators;
  * that can be used to represent tuples of rational numbers.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-25
+ * @version 2019-03-04
  */
 @SuppressWarnings("unchecked")
 public final class Qn extends LinearSpaceLike {
@@ -45,7 +45,7 @@ public final class Qn extends LinearSpaceLike {
   // operations for algebraic structures over rational arrays.
   //--------------------------------------------------------------
   /** A <code>BinaryOperator</code> that adds elementwise
-   * <code>BigFraction[]</code> instances of length 
+   * <code>ERational[]</code> instances of length 
    * <code>dimension</code>.
    */
 
@@ -54,45 +54,42 @@ public final class Qn extends LinearSpaceLike {
                            final Object x1) {
     assert contains(x0);
     assert contains(x1);
-    final BigFraction[] q0 = 
-      (BigFraction[]) BigFractions.toBigFraction(x0);
-    final BigFraction[] q1 = 
-      (BigFraction[]) BigFractions.toBigFraction(x1);
-    final BigFraction[] qq = new BigFraction[dimension()];
-    for (int i=0;i<dimension();i++) { qq[i] = q0[i].add(q1[i]); }
+    final ERational[] q0 = ERationals.toERationalArray(x0);
+    final ERational[] q1 = ERationals.toERationalArray(x1);
+    final ERational[] qq = new ERational[dimension()];
+    for (int i=0;i<dimension();i++) { qq[i] = q0[i].Add(q1[i]); }
     return qq; }
 
   //--------------------------------------------------------------
 
   @Override
-  public final BigFraction[] zero (final int n) {
-    final BigFraction[] z = new BigFraction[n];
-    Arrays.fill(z,BigFraction.ZERO);
+  public final ERational[] zero (final int n) {
+    final ERational[] z = new ERational[n];
+    Arrays.fill(z,ERational.Zero);
     return z; }
 
   //--------------------------------------------------------------
 
   @Override
-  public final BigFraction[] negate (final Object x) {
+  public final ERational[] negate (final Object x) {
     assert contains(x);
-    final BigFraction[] q = 
-      (BigFraction[]) BigFractions.toBigFraction(x);
-    final BigFraction[] qq = new BigFraction[dimension()];
-    for (int i=0;i<dimension();i++) { qq[i] = q[i].negate(); }
+    final ERational[] q = 
+      ERationals.toERationalArray(x);
+    final ERational[] qq = new ERational[dimension()];
+    for (int i=0;i<dimension();i++) { qq[i] = q[i].Negate(); }
     return qq; } 
 
   //--------------------------------------------------------------
 
   @Override
-  public final BigFraction[] scale (final Object a, 
-                                    final Object x) {
+  public final ERational[] scale (final Object a, 
+                                  final Object x) {
     assert contains(x);
-    final BigFraction b = 
-      (BigFraction) BigFractions.toBigFraction(a);
-    final BigFraction[] q = 
-      (BigFraction[]) BigFractions.toBigFraction(x);
-    final BigFraction[] qq = new BigFraction[dimension()];
-    for (int i=0;i<dimension();i++) { qq[i] = q[i].multiply(b); }
+    final ERational b = 
+      ERationals.toERational(a);
+    final ERational[] q = ERationals.toERationalArray(x);
+    final ERational[] qq = new ERational[dimension()];
+    for (int i=0;i<dimension();i++) { qq[i] = q[i].Multiply(b); }
     return qq; } 
 
   //--------------------------------------------------------------
@@ -104,12 +101,10 @@ public final class Qn extends LinearSpaceLike {
                                final Object x1) {
     assert contains(x0);
     assert contains(x1);
-    final BigFraction[] q0 = 
-      (BigFraction[]) BigFractions.toBigFraction(x0);
-    final BigFraction[] q1 = 
-      (BigFraction[]) BigFractions.toBigFraction(x1);
+    final ERational[] q0 = ERationals.toERationalArray(x0);
+    final ERational[] q1 = ERationals.toERationalArray(x1);
     for (int i=0;i<dimension();i++) {
-      if (! BigFractions.get().equals(q0[i],q1[i])) {
+      if (! ERationals.get().equals(q0[i],q1[i])) {
         return false; } }
     return true; }
 
@@ -120,8 +115,13 @@ public final class Qn extends LinearSpaceLike {
     if (null == element) { return false; }
     final Class c = element.getClass();
     if (! c.isArray()) { return false; }
-    if (! Q.knownRational(c.getComponentType())) { return false; }
-    return Array.getLength(element) == dimension(); }
+    final int n = Array.getLength(element);
+    if (n != dimension()) { return false; }
+    if (Q.knownRational(c.getComponentType())) { return true; }
+    for (int i=0;i<n;i++) {
+      if (! Q.get().contains(Array.get(element,i))) {
+        return false; } }
+    return true; }
 
   //--------------------------------------------------------------
   /** Intended primarily for testing. 
@@ -133,8 +133,8 @@ public final class Qn extends LinearSpaceLike {
     return 
       new Supplier () {
       final Generator g =
-        Generators.bigFractionGenerator(dimension(),urp);
-      //        Generators.qnGenerator(dimension(),urp);
+        Generators.eRationalFromDoubleGenerator(dimension(),urp);
+      //Generators.qnGenerator(dimension(),urp);
       @Override
       public final Object get () { return g.next(); } }; }
 
@@ -189,7 +189,7 @@ public final class Qn extends LinearSpaceLike {
   _spaceCache = new IntObjectHashMap();
 
   /** n-dimensional rational vector space, implemented with
-   * <code>BigFraction[]</code>.
+   * <code>ERational[]</code>.
    */
   public static final TwoSetsOneOperation 
   space (final int dimension) {

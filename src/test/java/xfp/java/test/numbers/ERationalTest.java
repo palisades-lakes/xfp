@@ -20,13 +20,15 @@ import xfp.java.prng.Seeds;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-03
+ * @version 2019-03-04
  */
 
 public final class ERationalTest {
 
   //--------------------------------------------------------------
 
+  /** Conversion to and from BigInteger. 
+   */
   private static final boolean 
   correctRounding (final ERational f) {
     // TODO: this is necessary but not sufficient to ensure 
@@ -56,9 +58,24 @@ public final class ERationalTest {
     final ERational f = ERational.Create(13,11);
     assertTrue(correctRounding(f)); }
 
-  // TODO: generator for EInteger that covers more than double 
-  // range and generator for ERational based on that
-  
+  @SuppressWarnings({ "static-method" })
+  @Test
+  public final void fromEIntegersRoundingTest () {
+    final Generator gn = 
+      Generators.eIntegerGenerator(
+        PRNG.well44497b(
+          Seeds.seed("seeds/Well44497b-2019-01-05.txt")));
+    final Generator gd = 
+      Generators.nonzeroEIntegerGenerator(
+        PRNG.well44497b(
+          Seeds.seed("seeds/Well44497b-2019-01-07.txt")));
+    for (int i=0;i<TRYS;i++) {
+      // some longs will not be exactly representable as doubles
+      final EInteger n = (EInteger) gn.next();
+      final EInteger d = (EInteger) gd.next();
+      final ERational f = ERational.Create(n,d);
+      assertTrue(correctRounding(f)); } }
+
   @SuppressWarnings({ "static-method" })
   @Test
   public final void fromLongsRoundingTest () {

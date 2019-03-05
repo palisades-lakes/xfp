@@ -10,6 +10,7 @@ import org.apache.commons.rng.sampling.CollectionSampler;
 import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
 import org.apache.commons.rng.sampling.distribution.ContinuousUniformSampler;
 
+import com.upokecenter.numbers.EInteger;
 import com.upokecenter.numbers.ERational;
 
 import clojure.lang.Numbers;
@@ -21,7 +22,7 @@ import xfp.java.numbers.Floats;
  * that return different values on each call.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-03
+ * @version 2019-03-04
  */
 
 @SuppressWarnings("unchecked")
@@ -382,6 +383,51 @@ public final class Generators {
         return z; } }; }
 
   //--------------------------------------------------------------
+
+  private static final byte[] 
+    nextBytes (final UniformRandomProvider urp,
+               final int n) {
+    final byte[] b = new byte[n];
+    urp.nextBytes(b);
+    return b; }
+
+  /** Intended primarily for testing. <b>
+   * Generate enough bytes to at least cover the range of 
+   * <code>double</code> values.
+   */
+
+  public static final Generator 
+  bigIntegerGenerator (final UniformRandomProvider urp) {
+    final double dp = 0.99;
+    return new Generator () {
+      private final ContinuousSampler choose = 
+        new ContinuousUniformSampler(urp,0.0,1.0);
+      private final CollectionSampler edgeCases = 
+        new CollectionSampler(
+          urp,
+          List.of(
+            BigInteger.ZERO,
+            BigInteger.ONE,
+            BigInteger.TWO,
+            BigInteger.TEN));
+      @Override
+      public Object next () { 
+        final boolean edge = choose.sample() > dp;
+        if (edge) { return edgeCases.sample(); }
+        return new BigInteger(nextBytes(urp,1024)); } }; }
+
+  public static final Generator 
+  bigIntegerGenerator (final int n,
+                       final UniformRandomProvider urp) {
+    return new Generator () {
+      final Generator g = bigIntegerGenerator(urp);
+      @Override
+      public final Object next () {
+        final BigInteger[] z = new BigInteger[n];
+        for (int i=0;i<n;i++) { z[i] = (BigInteger) g.next(); }
+        return z; } }; }
+
+  //--------------------------------------------------------------
   // TODO: options?
   // TODO: using a DoubleSampler: those are (?) the most likely
   // values to see, but could do something to extend the 
@@ -429,6 +475,79 @@ public final class Generators {
         for (int i=0;i<n;i++) { z[i] = (BigDecimal) g.next(); }
         return z; } }; }
 
+  /** Intended primarily for testing. <b>
+   * Generate enough bytes to at least cover the range of 
+   * <code>double</code> values.
+   */
+
+  public static final Generator 
+  eIntegerGenerator (final UniformRandomProvider urp) {
+    final double dp = 0.99;
+    return new Generator () {
+      private final ContinuousSampler choose = 
+        new ContinuousUniformSampler(urp,0.0,1.0);
+      private final CollectionSampler edgeCases = 
+        new CollectionSampler(
+          urp,
+          List.of(
+            EInteger.getZero(),
+            EInteger.getOne(),
+            EInteger.getTen()));
+      @Override
+      public Object next () { 
+        final boolean edge = choose.sample() > dp;
+        if (edge) { return edgeCases.sample(); }
+        return EInteger.FromBytes(nextBytes(urp,1024),false); } }; }
+
+  public static final Generator 
+  eIntegerGenerator (final int n,
+                     final UniformRandomProvider urp) {
+    return new Generator () {
+      final Generator g = eIntegerGenerator(urp);
+      @Override
+      public final Object next () {
+        final EInteger[] z = new EInteger[n];
+        for (int i=0;i<n;i++) { z[i] = (EInteger) g.next(); }
+        return z; } }; }
+
+  /** Intended primarily for testing. <b>
+   * Generate enough bytes to at least cover the range of 
+   * <code>double</code> values.
+   */
+
+  public static final Generator 
+  nonzeroEIntegerGenerator (final UniformRandomProvider urp) {
+    final double dp = 0.99;
+    return new Generator () {
+      private final ContinuousSampler choose = 
+        new ContinuousUniformSampler(urp,0.0,1.0);
+      private final CollectionSampler edgeCases = 
+        new CollectionSampler(
+          urp,
+          List.of(
+            EInteger.getOne(),
+            EInteger.getTen()));
+      @Override
+      public Object next () { 
+        final boolean edge = choose.sample() > dp;
+        if (edge) { return edgeCases.sample(); }
+        // TODO: bound infinite loop?
+        for (;;) {
+          final EInteger e =
+            EInteger.FromBytes(nextBytes(urp,1024),false); 
+          if (! e.isZero()) { return e; } } } }; }
+
+  public static final Generator 
+  nonzeroEIntegerGenerator (final int n,
+                            final UniformRandomProvider urp) {
+    return new Generator () {
+      final Generator g = eIntegerGenerator(urp);
+      @Override
+      public final Object next () {
+        final EInteger[] z = new EInteger[n];
+        for (int i=0;i<n;i++) { z[i] = (EInteger) g.next(); }
+        return z; } }; }
+
   //--------------------------------------------------------------
   // TODO: options?
   // TODO: generator from big integers that cover more than 
@@ -447,7 +566,7 @@ public final class Generators {
    */
 
   public static final Generator 
-  eRationalGenerator (final UniformRandomProvider urp) {
+  eRationalFromDoubleGenerator (final UniformRandomProvider urp) {
     final double dp = 0.9;
     return new Generator () {
       private final ContinuousSampler choose = 
@@ -467,10 +586,10 @@ public final class Generators {
         return ERational.FromDouble(fdg.nextDouble()); } }; }
 
   public static final Generator 
-  eRationalGenerator (final int n,
-                        final UniformRandomProvider urp) {
+  eRationalFromDoubleGenerator (final int n,
+                                final UniformRandomProvider urp) {
     return new Generator () {
-      final Generator g = eRationalGenerator(urp);
+      final Generator g = eRationalFromDoubleGenerator(urp);
       @Override
       public final Object next () {
         final ERational[] z = new ERational[n];
@@ -610,7 +729,14 @@ public final class Generators {
             longGenerator(urp),
             floatGenerator(urp),
             doubleGenerator(urp),
-            bigFractionGenerator(urp)));
+            bigIntegerGenerator(urp),
+            //bigDecimalGenerator(urp),
+            eIntegerGenerator(urp),
+            eRationalFromDoubleGenerator(urp)
+            // clojure.lang.Ratio doesn't round correctly
+            // BigFraction.doubleValue() doesn't round correctly.
+            //,bigFractionGenerator(urp)
+            ));
       @Override
       public final Object next () {
         return generators.sample().next(); } }; }
@@ -649,7 +775,14 @@ public final class Generators {
             longGenerator(urp),
             finiteFloatGenerator(urp),
             finiteDoubleGenerator(urp),
-            bigFractionGenerator(urp)));
+            bigIntegerGenerator(urp),
+            //bigDecimalGenerator(urp),
+            eIntegerGenerator(urp),
+            eRationalFromDoubleGenerator(urp)
+            // clojure.lang.Ratio doesn't round correctly
+            // BigFraction.doubleValue() doesn't round correctly.
+            //,bigFractionGenerator(urp)
+            ));
       @Override
       public final Object next () {
         return generators.sample().next(); } }; }
@@ -661,12 +794,12 @@ public final class Generators {
       final Generator g = finiteNumberGenerator(urp);
       @Override
       public final Object next () {
-        final Number[] z = new Number[n];
-        for (int i=0;i<n;i++) { z[i] = (Number) g.next(); }
+        final Object[] z = new Object[n];
+        for (int i=0;i<n;i++) { z[i] = g.next(); }
         return z; } }; }
 
   //--------------------------------------------------------------
-  /** Generate arrays representing vectors in an n-dimnesional
+  /** Generate arrays representing vectors in an n-dimensional
    * rational linear space, returning all possible number array 
    * types.
    */
@@ -683,10 +816,16 @@ public final class Generators {
             shortGenerator(n,urp),
             intGenerator(n,urp),
             longGenerator(n,urp),
+            bigIntegerGenerator(n,urp),
+            //bigDecimalGenerator(n,urp),
             finiteFloatGenerator(n,urp),
             finiteDoubleGenerator(n,urp),
-            bigFractionGenerator(n,urp),
-            finiteNumberGenerator(n,urp)));
+            eIntegerGenerator(n,urp),
+            eRationalFromDoubleGenerator(n,urp)
+            // clojure.lang.Ratio doesn't round correctly
+            // BigFraction.doubleValue() doesn't round correctly.
+            //,bigFractionGenerator(n,urp),
+            ,finiteNumberGenerator(n,urp)));
       @Override
       public final Object next () {
         return generators.sample().next(); } }; }

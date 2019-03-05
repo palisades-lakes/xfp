@@ -1,14 +1,15 @@
 package xfp.java.numbers;
 
-import java.math.BigInteger;
 import java.util.Map;
 import java.util.function.BiPredicate;
 import java.util.function.BinaryOperator;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
-import org.apache.commons.math3.fraction.BigFraction;
 import org.apache.commons.rng.UniformRandomProvider;
+
+import com.upokecenter.numbers.EInteger;
+import com.upokecenter.numbers.ERational;
 
 import xfp.java.Classes;
 import xfp.java.algebra.OneSetOneOperation;
@@ -22,7 +23,7 @@ import xfp.java.prng.Generators;
  * necessary.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-26
+ * @version 2019-03-04
  */
 
 public final class Q implements Set {
@@ -34,88 +35,88 @@ public final class Q implements Set {
   // TODO: is consistency with other algebraic structure classes
   // worth the indirection?
 
-  private final Number add (final Number x0, 
-                            final Number x1) {
+  private final Object add (final Object x0, 
+                            final Object x1) {
     assert(contains(x0));
     assert(contains(x1));
-    final BigFraction q0 = BigFractions.toBigFraction(x0);
-    final BigFraction q1 = BigFractions.toBigFraction(x1);
-    return q0.add(q1); } 
+    final ERational q0 = ERationals.toERational(x0);
+    final ERational q1 = ERationals.toERational(x1);
+    return q0.Add(q1); } 
 
-  public final BinaryOperator<Number> adder () {
-    return new BinaryOperator<Number> () {
+  public final BinaryOperator adder () {
+    return new BinaryOperator () {
       @Override
       public final String toString () { return "Q.add()"; }
       @Override
-      public final Number apply (final Number q0, 
-                                 final Number q1) {
+      public final Object apply (final Object q0, 
+                                 final Object q1) {
         return Q.this.add(q0,q1); } }; }
 
   //--------------------------------------------------------------
 
   @SuppressWarnings("static-method")
   public final Object additiveIdentity () { 
-    return BigFraction.ZERO; }
-  
+    return ERational.Zero; }
+
   //--------------------------------------------------------------
 
   // TODO: is consistency with other algebraic structure classes
   // worth the indirection?
 
-  private final Number negate (final Number x) {
+  private final ERational negate (final Object x) {
     assert contains(x);
-    return BigFractions.toBigFraction(x).negate(); } 
+    return ERationals.toERational(x).Negate(); } 
 
-  public final UnaryOperator<Number> additiveInverse () {
-    return new UnaryOperator<Number> () {
+  public final UnaryOperator additiveInverse () {
+    return new UnaryOperator () {
       @Override
       public final String toString () { return "Q.negate()"; }
       @Override
-      public final Number apply (final Number q) {
+      public final Object apply (final Object q) {
         return Q.this.negate(q); } }; }
 
   //--------------------------------------------------------------
 
-  private final Number multiply (final Number x0, 
-                                 final Number x1) {
+  private final ERational multiply (final Object x0, 
+                                    final Object x1) {
     assert contains(x0) : 
       "x0 " + Classes.className(x0) + ":" + x0 + " not in " + this;
     assert contains(x1)  : 
       "x1 " + Classes.className(x1) + ":" + x1 + " not in " + this;
-    final BigFraction q0 = BigFractions.toBigFraction(x0);
-    final BigFraction q1 = BigFractions.toBigFraction(x1);
-    return q0.multiply(q1); } 
+    final ERational q0 = ERationals.toERational(x0);
+    final ERational q1 = ERationals.toERational(x1);
+    return q0.Multiply(q1); } 
 
-  public final BinaryOperator<Number> multiplier () {
-    return new BinaryOperator<Number>() {
+  public final BinaryOperator multiplier () {
+    return new BinaryOperator () {
       @Override
       public final String toString () { return "Q.multiply()"; }
       @Override
-      public final Number apply (final Number q0, 
-                                 final Number q1) {
+      public final Object apply (final Object q0, 
+                                 final Object q1) {
         return Q.this.multiply(q0,q1); } }; }
 
   //--------------------------------------------------------------
 
   @SuppressWarnings("static-method")
   public final Object multiplicativeIdentity () {
-    return BigFraction.ONE; }
+    return ERational.One; }
 
   //--------------------------------------------------------------
 
-  private final Number reciprocal (final Number x) {
+  private final ERational reciprocal (final Object x) {
     assert contains(x);
-    final BigFraction q = BigFractions.toBigFraction(x);
+    final ERational q = ERationals.toERational(x);
     // only a partial inverse
-    if (BigInteger.ZERO.equals(q.getNumerator())) { return null; }
-    return q.reciprocal();  } 
+    if (q.getNumerator().isZero()) { return null; }
+    return ERationals.reciprocal(q);  } 
 
-  public final UnaryOperator<Number> multiplicativeInverse () {
-    return new UnaryOperator<Number> () {
+  public final UnaryOperator multiplicativeInverse () {
+    return new UnaryOperator () {
       @Override
       public final String toString () { return "Q.inverse()"; }
       @Override
-      public final Number apply (final Number q) {
+      public final Object apply (final Object q) {
         return Q.this.reciprocal(q); } }; }
 
   //--------------------------------------------------------------
@@ -131,28 +132,14 @@ public final class Q implements Set {
 
   public static final boolean knownRational (final Object x) {
     if (x instanceof Number) { return true; }
-//    if (x instanceof Double) { return true; }
-//    if (x instanceof Integer) { return true; }
-//    if (x instanceof Long) { return true; }
-//    if (x instanceof Float) { return true; }
-//    if (x instanceof Short) { return true; }
-//    if (x instanceof Byte) { return true; }
-//    if (x instanceof BigInteger){ return true; }
-//    if (x instanceof BigFraction){ return true; }
+    if (x instanceof ERational){ return true; }
+    if (x instanceof EInteger){ return true; }
     return false; }
 
   public static final boolean knownRational (final Class c) {
     if (Number.class.isAssignableFrom(c)) { return true; }
-//    if (BigFraction.class.equals(c)) { return true; }
-//    if (BigDecimal.class.equals(c)) { return true; }
-//    if (Ratio.class.equals(c)) { return true; }
-//    if (BigInteger.class.equals(c)) { return true; }
-//    if (Byte.class.equals(c)) { return true; }
-//    if (Short.class.equals(c)) { return true; }
-//    if (Integer.class.equals(c)) { return true; }
-//    if (Long.class.equals(c)) { return true; }
-//    if (Float.class.equals(c)) { return true; }
-//    if (Double.class.equals(c)) { return true; }
+    if (ERational.class.equals(c)) { return true; }
+    if (EInteger.class.equals(c)) { return true; }
     if (Byte.TYPE.equals(c)) { return true; }
     if (Short.TYPE.equals(c)) { return true; }
     if (Integer.TYPE.equals(c)) { return true; }
@@ -197,21 +184,21 @@ public final class Q implements Set {
 
   //--------------------------------------------------------------
 
-  private final boolean equals (final Number x0, 
-                                final Number x1) {
+  private final boolean equals (final Object x0, 
+                                final Object x1) {
     assert(contains(x0));
     assert(contains(x1));
-    final BigFraction q0 = BigFractions.toBigFraction(x0);
-    final BigFraction q1 = BigFractions.toBigFraction(x1);
-    return BigFractions.get().equals(q0,q1); } 
+    final ERational q0 = ERationals.toERational(x0);
+    final ERational q1 = ERationals.toERational(x1);
+    return ERationals.get().equals(q0,q1); } 
 
   @Override
   public final BiPredicate equivalence () { 
     return  
-      new BiPredicate<Number,Number>() {
+      new BiPredicate() {
       @Override
-      public final boolean test (final Number x0, 
-                                 final Number x1) {
+      public final boolean test (final Object x0, 
+                                 final Object x1) {
         return Q.this.equals(x0,x1); } }; }
 
   //--------------------------------------------------------------
@@ -220,7 +207,7 @@ public final class Q implements Set {
   public final Supplier generator (final Map options) {
     final UniformRandomProvider urp = Set.urp(options);
     //final Generator g = Generators.finiteNumberGenerator(urp); 
-    final Generator g = Generators.bigFractionGenerator(urp);
+    final Generator g = Generators.eRationalFromDoubleGenerator(urp); 
     return 
       new Supplier () {
       @Override
@@ -254,20 +241,20 @@ public final class Q implements Set {
   //--------------------------------------------------------------
 
   public static final OneSetOneOperation ADDITIVE_MAGMA = 
-  OneSetOneOperation.magma(get().adder(),get());
+    OneSetOneOperation.magma(get().adder(),get());
 
   public static final OneSetOneOperation MULTIPLICATIVE_MAGMA = 
-  OneSetOneOperation.magma(get().multiplier(),get());
+    OneSetOneOperation.magma(get().multiplier(),get());
 
   public static final OneSetTwoOperations FIELD = 
-  OneSetTwoOperations.field(
-    get().adder(),
-    get().additiveIdentity(),
-    get().additiveInverse(),
-    get().multiplier(),
-    get().multiplicativeIdentity(),
-    get().multiplicativeInverse(),
-    get());
+    OneSetTwoOperations.field(
+      get().adder(),
+      get().additiveIdentity(),
+      get().additiveInverse(),
+      get().multiplier(),
+      get().multiplicativeIdentity(),
+      get().multiplicativeInverse(),
+      get());
 
   //--------------------------------------------------------------
 
