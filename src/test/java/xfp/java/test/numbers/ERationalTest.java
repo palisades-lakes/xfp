@@ -10,7 +10,6 @@ import com.upokecenter.numbers.ERational;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
 import xfp.java.prng.PRNG;
-import xfp.java.prng.Seeds;
 
 //----------------------------------------------------------------
 /** Test desired properties of ERational. 
@@ -20,7 +19,7 @@ import xfp.java.prng.Seeds;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-04
+ * @version 2019-03-05
  */
 
 public final class ERationalTest {
@@ -63,12 +62,10 @@ public final class ERationalTest {
   public final void fromEIntegersRoundingTest () {
     final Generator gn = 
       Generators.eIntegerGenerator(
-        PRNG.well44497b(
-          Seeds.seed("seeds/Well44497b-2019-01-05.txt")));
+        PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
     final Generator gd = 
       Generators.nonzeroEIntegerGenerator(
-        PRNG.well44497b(
-          Seeds.seed("seeds/Well44497b-2019-01-07.txt")));
+        PRNG.well44497b("seeds/Well44497b-2019-01-07.txt"));
     for (int i=0;i<TRYS;i++) {
       // some longs will not be exactly representable as doubles
       final EInteger n = (EInteger) gn.next();
@@ -81,8 +78,7 @@ public final class ERationalTest {
   public final void fromLongsRoundingTest () {
     final Generator g = 
       Generators.longGenerator(
-        PRNG.well44497b(
-          Seeds.seed("seeds/Well44497b-2019-01-05.txt")));
+        PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
     for (int i=0;i<TRYS;i++) {
       // some longs will not be exactly representable as doubles
       final long n = g.nextLong();
@@ -97,8 +93,7 @@ public final class ERationalTest {
   public final void finiteDoubleRoundingTest () {
     final Generator g = 
       Generators.finiteDoubleGenerator(
-        PRNG.well44497b(
-          Seeds.seed("seeds/Well44497b-2019-01-05.txt")));
+        PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
       final ERational f = ERational.FromDouble(x);
@@ -109,8 +104,7 @@ public final class ERationalTest {
   public final void subnormalDoubleRoundingTest () {
     final Generator g = 
       Generators.subnormalDoubleGenerator(
-        PRNG.well44497b(
-          Seeds.seed("seeds/Well44497b-2019-01-05.txt")));
+        PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
       final ERational f = ERational.FromDouble(x);

@@ -11,7 +11,6 @@ import com.upokecenter.numbers.EInteger;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
 import xfp.java.prng.PRNG;
-import xfp.java.prng.Seeds;
 
 //----------------------------------------------------------------
 /** Test desired properties of EInteger. 
@@ -21,7 +20,7 @@ import xfp.java.prng.Seeds;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-04
+ * @version 2019-03-05
  */
 
 public final class EIntegerTest {
@@ -35,8 +34,7 @@ public final class EIntegerTest {
   public final void fromBigIntegerTest () {
     final Generator g = 
       Generators.bigIntegerGenerator(
-        PRNG.well44497b(
-          Seeds.seed("seeds/Well44497b-2019-01-05.txt")));
+        PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
     for (int i=0;i<TRYS;i++) {
       // some longs will not be exactly representable as doubles
       final BigInteger b0 = (BigInteger) g.next();
@@ -54,8 +52,7 @@ public final class EIntegerTest {
   public final void fromEIntegerTest () {
     final Generator g = 
       Generators.eIntegerGenerator(
-        PRNG.well44497b(
-          Seeds.seed("seeds/Well44497b-2019-01-05.txt")));
+        PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
     for (int i=0;i<TRYS;i++) {
       // some longs will not be exactly representable as doubles
       final EInteger e0 = (EInteger) g.next();

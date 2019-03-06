@@ -16,7 +16,6 @@ import xfp.java.numbers.Doubles;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
 import xfp.java.prng.PRNG;
-import xfp.java.prng.Seeds;
 
 //----------------------------------------------------------------
 /** Test number conversions expected to be lossless. 
@@ -26,7 +25,7 @@ import xfp.java.prng.Seeds;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-02
+ * @version 2019-03-05
  */
 
 public final class RoundtripTests {
@@ -34,14 +33,12 @@ public final class RoundtripTests {
   public static final Generator finiteDoubles () {
     return
       Generators.finiteDoubleGenerator(
-        PRNG.well44497b(
-          Seeds.seed("seeds/Well44497b-2019-01-05.txt"))); }
+        PRNG.well44497b("seeds/Well44497b-2019-01-05.txt")); }
 
   public static final Generator subnormalDoubles () {
     return
       Generators.subnormalDoubleGenerator(
-        PRNG.well44497b(
-          Seeds.seed("seeds/Well44497b-2019-01-05.txt"))); }
+        PRNG.well44497b("seeds/Well44497b-2019-01-05.txt")); }
 
   //--------------------------------------------------------------
   // continued fraction like

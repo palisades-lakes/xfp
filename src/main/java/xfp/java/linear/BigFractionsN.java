@@ -31,10 +31,39 @@ import xfp.java.prng.Generators;
  * that can be used to represent tuples of rational numbers.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-26
+ * @version 2019-03-05
  */
 @SuppressWarnings("unchecked")
 public final class BigFractionsN extends LinearSpaceLike  {
+
+  //--------------------------------------------------------------
+  // operations on arrays 
+  // TODO: better elsewhere?
+  //--------------------------------------------------------------
+
+  public static final double naiveSum (final double[] x) {
+    final int n = x.length;
+    if (0 == n) { return 0.0; }
+    BigFraction sum = new BigFraction(x[0]);
+    for (int i=1;i<n;i++) { 
+      sum = sum.add(new BigFraction(x[i])); }
+    return sum.doubleValue(); }
+
+  public static final double naiveDot (final double[] x0,
+                                       final double[] x1) {
+    final int n = x0.length;
+    assert n == x1.length;
+    if (0 == n) { return 0.0; }
+    BigFraction sum = 
+      new BigFraction(x0[0])
+      .multiply(
+        new BigFraction(x1[0]));
+    for (int i=1;i<x0.length;i++) { 
+      sum = sum.add(
+        new BigFraction(x0[i])
+        .multiply(
+          new BigFraction(x1[i]))); }
+    return sum.doubleValue(); }
 
   //--------------------------------------------------------------
   // operations for algebraic structures over BigFraction arrays.

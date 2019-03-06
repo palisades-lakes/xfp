@@ -16,7 +16,6 @@ import xfp.java.numbers.BigFractions;
 import xfp.java.numbers.ERationals;
 import xfp.java.numbers.Ratios;
 import xfp.java.prng.PRNG;
-import xfp.java.prng.Seeds;
 
 //----------------------------------------------------------------
 /** Common code for testing sets. 
@@ -35,8 +34,7 @@ public final class SetTests {
       set.generator( 
         ImmutableMap.of(
           Set.URP,
-          PRNG.well44497b(
-            Seeds.seed("seeds/Well44497b-2019-01-05.txt"))));
+          PRNG.well44497b("seeds/Well44497b-2019-01-05.txt")));
     for (int i=0; i<TRYS; i++) {
       //System.out.println("set=" + set);
       final Object x = g.get();
@@ -52,8 +50,7 @@ public final class SetTests {
       set.generator( 
         ImmutableMap.of(
           Set.URP,
-          PRNG.well44497b(
-            Seeds.seed("seeds/Well44497b-2019-01-07.txt"))));
+          PRNG.well44497b("seeds/Well44497b-2019-01-07.txt")));
     for (int i=0; i<TRYS; i++) {
       assertTrue(Sets.isReflexive(set,g));
       assertTrue(Sets.isSymmetric(set,g)); } }

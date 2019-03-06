@@ -17,12 +17,12 @@ import xfp.java.prng.Generators;
 /** Utilities for <code>double</code>, <code>double[]</code>.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-28
+ * @version 2019-03-05
  */
 public final class Doubles implements Set {
 
   //--------------------------------------------------------------
-  // private
+  // double bit analysis
   //--------------------------------------------------------------
 
   public static final int SIGN_BITS = 1;
@@ -44,8 +44,7 @@ public final class Doubles implements Set {
   public static final int MAXIMUM_BIASED_EXPONENT =
     (1 << EXPONENT_BITS) - 1;
 
-  public static final int MAXIMUM_EXPONENT =
-    EXPONENT_BIAS;
+  public static final int MAXIMUM_EXPONENT = EXPONENT_BIAS;
 
   public static final int MINIMUM_NORMAL_EXPONENT =
     1 - MAXIMUM_EXPONENT;
@@ -100,7 +99,6 @@ public final class Doubles implements Set {
   public static final boolean isNormal (final double x) {
     final int be = biasedExponent(x);
     return (0.0 == x) || ((0 != be) && (0x7ff != be)); }
-
 
   public static final double makeDouble (final int s,
                                          final int e,

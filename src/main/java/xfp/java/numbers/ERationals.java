@@ -23,7 +23,7 @@ import xfp.java.prng.Generators;
  * <code>ERational</code>
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-04
+ * @version 2019-03-05
  */
 public final class ERationals implements Set {
 
@@ -57,7 +57,7 @@ public final class ERationals implements Set {
   public static final ERational toERational (final BigInteger x) {
     return ERational.FromEInteger(
       EInteger.FromBytes(x.toByteArray(), false)); }
-  
+
   public static final ERational toERational (final Object x) {
     if (x instanceof ERational) { return (ERational) x; }
     if (x instanceof EInteger) { return toERational((EInteger) x); }
@@ -321,11 +321,13 @@ public final class ERationals implements Set {
   @Override
   public final Supplier generator (final Map options) {
     final UniformRandomProvider urp = Set.urp(options);
-    final Generator bfs = Generators.eRationalFromDoubleGenerator(urp);
+    final Generator g = 
+      Generators.eRationalFromEIntegerGenerator(urp);
+    //    Generators.eRationalFromDoubleGenerator(urp);
     return 
       new Supplier () {
       @Override
-      public final Object get () { return bfs.next(); } }; }
+      public final Object get () { return g.next(); } }; }
 
   //--------------------------------------------------------------
   // Object methods

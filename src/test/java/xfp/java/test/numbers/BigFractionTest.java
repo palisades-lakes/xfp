@@ -324,8 +324,7 @@ public final class BigFractionTest {
 //        // TODO: does this generator really cover all longs?
 //        final Generator g = 
 //          Generators.longGenerator(
-//            PRNG.well44497b(
-//              Seeds.seed("seeds/Well44497b-2019-01-05.txt")));
+//            PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
 //        for (int i=0;i<TRYS;i++) {
 //          // some longs will not be exactly representable as doubles
 //          final long n = g.nextLong();
@@ -339,8 +338,7 @@ public final class BigFractionTest {
 //  public final void fromNormalDoubleRoundingTest () {
 //    final Generator g = 
 //      Generators.normalDoubleGenerator(
-//        PRNG.well44497b(
-//          Seeds.seed("seeds/Well44497b-2019-01-05.txt")));
+//        PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
 //    for (int i=0;i<TRYS;i++) {
 //      final double x = g.nextDouble();
 //      debugPrintln();
@@ -362,8 +360,7 @@ public final class BigFractionTest {
 //    public final void fromSubnormalDoubleRoundingTest () {
 //      final Generator g = 
 //        Generators.subnormalDoubleGenerator(
-//          PRNG.well44497b(
-//            Seeds.seed("seeds/Well44497b-2019-01-05.txt")));
+//          PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
 //      for (int i=0;i<TRYS;i++) {
 //        final double x = g.nextDouble();
 //        debugPrintln();
@@ -385,8 +382,7 @@ public final class BigFractionTest {
   //  public final void fromDoubleRoundingTest () {
   //    final Generator g = 
   //      Generators.finiteDoubleGenerator(
-  //        PRNG.well44497b(
-  //          Seeds.seed("seeds/Well44497b-2019-01-05.txt")));
+  //        PRNG.well44497b("seeds/Well44497b-2019-01-05.txt")))
   //    for (int i=0;i<TRYS;i++) {
   //      final double x = g.nextDouble();
   //      debugPrintln();

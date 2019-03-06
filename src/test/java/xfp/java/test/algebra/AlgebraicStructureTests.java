@@ -27,13 +27,12 @@ import xfp.java.numbers.Floats;
 import xfp.java.numbers.Q;
 import xfp.java.numbers.Ratios;
 import xfp.java.prng.PRNG;
-import xfp.java.prng.Seeds;
 
 //----------------------------------------------------------------
 /** Common code for testing sets. 
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-03
+ * @version 2019-03-05
  */
 
 @SuppressWarnings("unchecked")
@@ -52,8 +51,7 @@ public final class AlgebraicStructureTests {
       s.generators(
         ImmutableMap.of(
           Set.URP,
-          PRNG.well44497b(
-            Seeds.seed("seeds/Well44497b-2019-01-09.txt"))));
+          PRNG.well44497b("seeds/Well44497b-2019-01-09.txt")));
     for(final Predicate law : s.laws()) {
       for (int i=0; i<n; i++) {
         final boolean result = law.test(generators);

@@ -53,7 +53,7 @@ import xfp.java.prng.PRNG;
  * classes, represented by some element of each equivalence class.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-26
+ * @version 2019-03-05
  */
 
 public interface Set {
@@ -215,7 +215,7 @@ public interface Set {
     final UniformRandomProvider u0 =  
       (UniformRandomProvider) URP.invoke(options); 
     if (null != u0) { return u0; }
-    final int[] seed = (int[]) SEED.invoke(options);
+    final Object seed = SEED.invoke(options);
     return PRNG.well44497b(seed);  }
   
   public default Supplier generator (final Map options) {

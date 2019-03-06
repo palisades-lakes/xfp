@@ -22,7 +22,7 @@ import xfp.java.numbers.Floats;
  * that return different values on each call.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-04
+ * @version 2019-03-05
  */
 
 @SuppressWarnings("unchecked")
@@ -169,6 +169,11 @@ public final class Generators {
         return Double.valueOf(nextDouble()); } }; }
 
   public static final Generator 
+  doubleGenerator (final UniformRandomProvider urp) {
+    return 
+      doubleGenerator(urp,1+Doubles.MAXIMUM_BIASED_EXPONENT); } 
+
+  public static final Generator 
   doubleGenerator (final int n,
                    final UniformRandomProvider urp,
                    final int delta) {
@@ -181,20 +186,10 @@ public final class Generators {
         return z; } }; }
 
   public static final Generator 
-  doubleGenerator (final UniformRandomProvider urp) {
-    return 
-      doubleGenerator(urp,1+Doubles.MAXIMUM_BIASED_EXPONENT); } 
-
-  public static final Generator 
   doubleGenerator (final int n,
                    final UniformRandomProvider urp) {
-    return new Generator () {
-      final Generator g = doubleGenerator(urp);
-      @Override
-      public final Object next () {
-        final double[] z = new double[n];
-        for (int i=0;i<n;i++) { z[i] = g.nextDouble(); }
-        return z; } }; }
+    return 
+      doubleGenerator(n,urp,1+Doubles.MAXIMUM_BIASED_EXPONENT); }
 
   //--------------------------------------------------------------
 
@@ -214,6 +209,11 @@ public final class Generators {
         return Float.valueOf(nextFloat()); } }; }
 
   public static final Generator 
+  finiteFloatGenerator (final UniformRandomProvider urp) {
+    return 
+      finiteFloatGenerator(urp,1+Floats.MAXIMUM_BIASED_EXPONENT); } 
+
+  public static final Generator 
   finiteFloatGenerator (final int n,
                         final UniformRandomProvider urp,
                         final int delta) {
@@ -226,20 +226,11 @@ public final class Generators {
         return z; } }; }
 
   public static final Generator 
-  finiteFloatGenerator (final UniformRandomProvider urp) {
-    return 
-      finiteFloatGenerator(urp,1+Floats.MAXIMUM_BIASED_EXPONENT); } 
-
-  public static final Generator 
   finiteFloatGenerator (final int n,
                         final UniformRandomProvider urp) {
-    return new Generator () {
-      final Generator g = finiteFloatGenerator(urp);
-      @Override
-      public final Object next () {
-        final float[] z = new float[n];
-        for (int i=0;i<n;i++) { z[i] = g.nextFloat(); }
-        return z; } }; }
+    return 
+      finiteFloatGenerator(
+        n,urp,1+Floats.MAXIMUM_BIASED_EXPONENT); }
 
   //--------------------------------------------------------------
   // TODO: Double[] generators
@@ -260,6 +251,12 @@ public final class Generators {
         return Double.valueOf(nextDouble()); } }; }
 
   public static final Generator 
+  finiteDoubleGenerator (final UniformRandomProvider urp) {
+    return 
+      finiteDoubleGenerator(
+        urp,1+Doubles.MAXIMUM_BIASED_EXPONENT); } 
+
+  public static final Generator 
   finiteDoubleGenerator (final int n,
                          final UniformRandomProvider urp,
                          final int delta) {
@@ -272,21 +269,10 @@ public final class Generators {
         return z; } }; }
 
   public static final Generator 
-  finiteDoubleGenerator (final UniformRandomProvider urp) {
-    return 
-      finiteDoubleGenerator(
-        urp,1+Doubles.MAXIMUM_BIASED_EXPONENT); } 
-
-  public static final Generator 
   finiteDoubleGenerator (final int n,
                          final UniformRandomProvider urp) {
-    return new Generator () {
-      final Generator g = finiteDoubleGenerator(urp);
-      @Override
-      public final Object next () {
-        final double[] z = new double[n];
-        for (int i=0;i<n;i++) { z[i] = g.nextDouble(); }
-        return z; } }; }
+    return finiteDoubleGenerator(
+      n,urp,1+Doubles.MAXIMUM_BIASED_EXPONENT); }
 
   //--------------------------------------------------------------
 
@@ -590,6 +576,46 @@ public final class Generators {
                                 final UniformRandomProvider urp) {
     return new Generator () {
       final Generator g = eRationalFromDoubleGenerator(urp);
+      @Override
+      public final Object next () {
+        final ERational[] z = new ERational[n];
+        for (int i=0;i<n;i++) { z[i] = (ERational) g.next(); }
+        return z; } }; }
+
+  //--------------------------------------------------------------
+  // ratio of EIntegers uniformly (?) sampled from a range 
+  // greater than doubles.
+  //--------------------------------------------------------------
+
+  public static final Generator 
+  eRationalFromEIntegerGenerator (final UniformRandomProvider urp) {
+    final double dp = 0.9;
+    return new Generator () {
+      private final ContinuousSampler choose = 
+        new ContinuousUniformSampler(urp,0.0,1.0);
+      final Generator gn = Generators.eIntegerGenerator(urp);
+      final Generator gd = Generators.nonzeroEIntegerGenerator(urp);
+      private final CollectionSampler edgeCases = 
+        new CollectionSampler(
+          urp,
+          List.of(
+            ERational.Zero,
+            ERational.One,
+            ERational.One.Negate()));
+      @Override
+      public Object next () { 
+        final boolean edge = choose.sample() > dp;
+        if (edge) { return edgeCases.sample(); }
+        final EInteger n = (EInteger) gn.next();
+        final EInteger d = (EInteger) gd.next();
+        final ERational f = ERational.Create(n,d);
+        return f; } }; }
+
+  public static final Generator 
+  eRationalFromEintegerGenerator (final int n,
+                                  final UniformRandomProvider urp) {
+    return new Generator () {
+      final Generator g = eRationalFromEIntegerGenerator(urp);
       @Override
       public final Object next () {
         final ERational[] z = new ERational[n];

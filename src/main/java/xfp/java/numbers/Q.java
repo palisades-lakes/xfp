@@ -23,7 +23,7 @@ import xfp.java.prng.Generators;
  * necessary.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-04
+ * @version 2019-03-05
  */
 
 public final class Q implements Set {
@@ -206,8 +206,8 @@ public final class Q implements Set {
   @Override
   public final Supplier generator (final Map options) {
     final UniformRandomProvider urp = Set.urp(options);
-    //final Generator g = Generators.finiteNumberGenerator(urp); 
-    final Generator g = Generators.eRationalFromDoubleGenerator(urp); 
+    final Generator g = Generators.finiteNumberGenerator(urp); 
+    //final Generator g = Generators.eRationalFromDoubleGenerator(urp); 
     return 
       new Supplier () {
       @Override

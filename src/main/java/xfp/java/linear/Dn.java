@@ -34,17 +34,60 @@ import xfp.java.prng.Generators;
  * that can be used to represent tuples of rational numbers.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-26
+ * @version 2019-03-05
  */
 @SuppressWarnings("unchecked")
+strictfp
 public final class Dn extends LinearSpaceLike {
+
+  //--------------------------------------------------------------
+  // operations on arrays of double
+  // TODO: better elsewhere?
+  //--------------------------------------------------------------
+  
+  public static final double[] concatenate (final double[] x0,
+                                            final double[] x1) {
+    final double[] x = new double[x0.length + x1.length];
+    for (int i=0;i<x0.length;i++) { x[i] = x0[i]; }
+    for (int i=0;i<x1.length;i++) { x[i+x0.length] = x1[i]; }
+    return x; }
+  
+  //--------------------------------------------------------------
+
+  public static final double naiveSum (final double[] x) {
+    final int n = x.length;
+    if (0 == n) { return 0.0; }
+    double sum = x[0];
+    for (int i=1;i<n;i++) { sum += x[i]; }
+    return sum; }
+
+  //--------------------------------------------------------------
+
+  public static final double naiveDot (final double[] x0,
+                                       final double[] x1) {
+    final int n = x0.length;
+    assert n == x1.length;
+    if (0 == n) { return 0.0; }
+    double sum = x0[0] * x1[0];
+    for (int i=1;i<x0.length;i++) { sum = sum + (x0[i] * x1[i]); }
+    return sum; }
+
+  public static final double fmaDot (final double[] x0,
+                                     final double[] x1) {
+    final int n = x0.length;
+    assert n == x1.length;
+    if (0 == n) { return 0.0; }
+    double sum = x0[0] * x1[0];
+    for (int i=1;i<x0.length;i++) { 
+      sum = Math.fma(x0[i],x1[i],sum); }
+    return sum; }
 
   //--------------------------------------------------------------
   // operations for algebraic structures over double[] arrays.
   //--------------------------------------------------------------
 
   public final double[] add (final double[] x0, 
-                           final double[] x1) {
+                             final double[] x1) {
     assert contains(x0);
     assert contains(x1);
     final double[] qq = new double[dimension()];
@@ -53,9 +96,9 @@ public final class Dn extends LinearSpaceLike {
 
   @Override
   public final double[] add (final Object x0, 
-                           final Object x1) {
+                             final Object x1) {
     return add((double[]) x0, (double[]) x1); }
-  
+
   //--------------------------------------------------------------
 
   @Override
@@ -79,7 +122,7 @@ public final class Dn extends LinearSpaceLike {
   //--------------------------------------------------------------
 
   public final double[] scale (final double a, 
-                             final double[] x) {
+                               final double[] x) {
     assert contains(x);
     final double[] qq = new double[dimension()];
     for (int i=0;i<dimension();i++) { 
@@ -88,7 +131,7 @@ public final class Dn extends LinearSpaceLike {
 
   @Override
   public final double[] scale (final Object a, 
-                             final Object x) {
+                               final Object x) {
     return scale(((Number) a).doubleValue(), (double[]) x); } 
 
   //--------------------------------------------------------------
