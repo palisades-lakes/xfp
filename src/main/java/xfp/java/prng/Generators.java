@@ -22,7 +22,7 @@ import xfp.java.numbers.Floats;
  * that return different values on each call.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-05
+ * @version 2019-03-06
  */
 
 @SuppressWarnings("unchecked")
@@ -112,42 +112,49 @@ public final class Generators {
         for (int i=0;i<n;i++) { z[i] = g.nextLong(); }
         return z; } }; }
 
+  //--------------------------------------------------------------
+
   public static final Generator 
   floatGenerator (final UniformRandomProvider urp,
-                  final int delta) {
+                  final int eMin,
+                  final int eMax) {
+    final int eRan = eMax -eMin;
     return new Generator () {
       @Override
       public final float nextFloat () { 
-        return Floats.makeFloat(
-          urp.nextInt(2),
-          urp.nextInt(delta),
-          urp.nextInt() & Floats.SIGNIFICAND_MASK); } 
+        final int s = urp.nextInt(2);
+        final int d = urp.nextInt(eRan);
+        final int e = d + eMin; // unbiased exponent
+        final int t = urp.nextInt() & Floats.SIGNIFICAND_MASK;
+        return Floats.makeFloat(s,e,t); } 
       @Override
       public final Object next () {
         return Float.valueOf(nextFloat()); } }; }
 
   public static final Generator 
-  floatGenerator (final int n,
-                  final UniformRandomProvider urp,
-                  final int delta) {
-    return new Generator () {
-      final Generator g = floatGenerator(urp,delta);
-      @Override
-      public final Object next () {
-        final float[] z = new float[n];
-        for (int i=0;i<n;i++) { z[i] = g.nextFloat(); }
-        return z; } }; }
+  floatGenerator (final UniformRandomProvider urp,
+                  final int eMax) {
+    return 
+      floatGenerator(
+        urp,
+        Floats.MINIMUM_EXPONENT,
+        eMax); } 
 
   public static final Generator 
   floatGenerator (final UniformRandomProvider urp) {
     return 
-      floatGenerator(urp,1+Floats.MAXIMUM_BIASED_EXPONENT); } 
+      floatGenerator(
+        urp,
+        Floats.MINIMUM_EXPONENT,
+        Floats.MAXIMUM_EXPONENT); } 
 
   public static final Generator 
   floatGenerator (final int n,
-                  final UniformRandomProvider urp) {
+                  final UniformRandomProvider urp,
+                  final int eMin,
+                  final int eMax) {
     return new Generator () {
-      final Generator g = floatGenerator(urp);
+      final Generator g = floatGenerator(urp,eMin,eMax);
       @Override
       public final Object next () {
         final float[] z = new float[n];
@@ -155,30 +162,70 @@ public final class Generators {
         return z; } }; }
 
   public static final Generator 
+  floatGenerator (final int n,
+                  final UniformRandomProvider urp,
+                  int eMax) {
+    return 
+      floatGenerator(
+        n,
+        urp,
+        Floats.MINIMUM_EXPONENT,
+        eMax); } 
+
+  public static final Generator 
+  floatGenerator (final int n,
+                  final UniformRandomProvider urp) {
+    return 
+      floatGenerator(
+        n,
+        urp,
+        Floats.MINIMUM_EXPONENT,
+        Floats.MAXIMUM_EXPONENT); } 
+
+  //--------------------------------------------------------------
+
+  public static final Generator 
   doubleGenerator (final UniformRandomProvider urp,
-                   final int delta) {
+                   final int eMin,
+                   final int eMax) {
     return new Generator () {
+      final int eRan = eMax-eMin;
       @Override
       public final double nextDouble () { 
-        return Doubles.makeDouble(
-          urp.nextInt(2),
-          urp.nextInt(delta),
-          urp.nextLong() & Doubles.SIGNIFICAND_MASK); } 
+        final int s = urp.nextInt(2);
+        final int d = urp.nextInt(eRan);
+        final int e = d + eMin; // unbiased exponent
+        final long t = urp.nextLong() & Doubles.SIGNIFICAND_MASK;
+        final double x = Doubles.makeDouble(s,e,t); 
+        return x;} 
       @Override
       public final Object next () {
         return Double.valueOf(nextDouble()); } }; }
 
   public static final Generator 
+  doubleGenerator (final UniformRandomProvider urp,
+                   final int eMax) {
+    return 
+      doubleGenerator(
+        urp,
+        Doubles.MINIMUM_EXPONENT,
+        eMax); } 
+
+  public static final Generator 
   doubleGenerator (final UniformRandomProvider urp) {
     return 
-      doubleGenerator(urp,1+Doubles.MAXIMUM_BIASED_EXPONENT); } 
+      doubleGenerator(
+        urp,
+        Doubles.MINIMUM_EXPONENT,
+        Doubles.MAXIMUM_EXPONENT); } 
 
   public static final Generator 
   doubleGenerator (final int n,
                    final UniformRandomProvider urp,
-                   final int delta) {
+                   final int eMin,
+                   final int eMax) {
     return new Generator () {
-      final Generator g = doubleGenerator(urp,delta);
+      final Generator g = doubleGenerator(urp,eMin,eMax);
       @Override
       public final Object next () {
         final double[] z = new double[n];
@@ -187,16 +234,31 @@ public final class Generators {
 
   public static final Generator 
   doubleGenerator (final int n,
+                   final UniformRandomProvider urp,
+                   final int eMax) {
+    return 
+      doubleGenerator(
+        n,
+        urp,
+        Doubles.MINIMUM_EXPONENT,
+        eMax); } 
+
+  public static final Generator 
+  doubleGenerator (final int n,
                    final UniformRandomProvider urp) {
     return 
-      doubleGenerator(n,urp,1+Doubles.MAXIMUM_BIASED_EXPONENT); }
+      doubleGenerator(
+        n,
+        urp,
+        Doubles.MINIMUM_EXPONENT,
+        Doubles.MAXIMUM_EXPONENT); } 
 
   //--------------------------------------------------------------
 
   public static final Generator 
   finiteFloatGenerator (final UniformRandomProvider urp,
-                        final int delta) {
-    final Generator f = floatGenerator(urp,delta);
+                        final int eMax) {
+    final Generator f = floatGenerator(urp,eMax);
     return new Generator () {
       @Override
       public final float nextFloat () {
@@ -210,8 +272,7 @@ public final class Generators {
 
   public static final Generator 
   finiteFloatGenerator (final UniformRandomProvider urp) {
-    return 
-      finiteFloatGenerator(urp,1+Floats.MAXIMUM_BIASED_EXPONENT); } 
+    return finiteFloatGenerator(urp,Floats.MAXIMUM_EXPONENT); } 
 
   public static final Generator 
   finiteFloatGenerator (final int n,
@@ -229,16 +290,15 @@ public final class Generators {
   finiteFloatGenerator (final int n,
                         final UniformRandomProvider urp) {
     return 
-      finiteFloatGenerator(
-        n,urp,1+Floats.MAXIMUM_BIASED_EXPONENT); }
+      finiteFloatGenerator(n,urp,Floats.MAXIMUM_EXPONENT); }
 
   //--------------------------------------------------------------
   // TODO: Double[] generators
 
   public static final Generator 
   finiteDoubleGenerator (final UniformRandomProvider urp,
-                         final int delta) {
-    final Generator d = doubleGenerator(urp,delta);
+                         final int eMax) {
+    final Generator d = doubleGenerator(urp,eMax);
     return new Generator () {
       @Override
       public final double nextDouble () {
@@ -254,7 +314,7 @@ public final class Generators {
   finiteDoubleGenerator (final UniformRandomProvider urp) {
     return 
       finiteDoubleGenerator(
-        urp,1+Doubles.MAXIMUM_BIASED_EXPONENT); } 
+        urp,Doubles.MAXIMUM_EXPONENT); } 
 
   public static final Generator 
   finiteDoubleGenerator (final int n,
@@ -272,14 +332,14 @@ public final class Generators {
   finiteDoubleGenerator (final int n,
                          final UniformRandomProvider urp) {
     return finiteDoubleGenerator(
-      n,urp,1+Doubles.MAXIMUM_BIASED_EXPONENT); }
+      n,urp,Doubles.MAXIMUM_EXPONENT); }
 
   //--------------------------------------------------------------
 
   public static final Generator 
   normalDoubleGenerator (final UniformRandomProvider urp,
-                         final int delta) {
-    final Generator d = doubleGenerator(urp,delta);
+                         final int eMax) {
+    final Generator d = doubleGenerator(urp,eMax);
     return new Generator () {
       @Override
       public final double nextDouble () {
@@ -295,9 +355,9 @@ public final class Generators {
   public static final Generator 
   normalDoubleGenerator (final int n,
                          final UniformRandomProvider urp,
-                         final int delta) {
+                         final int eMax) {
     return new Generator () {
-      final Generator g = normalDoubleGenerator(urp,delta);
+      final Generator g = normalDoubleGenerator(urp,eMax);
       @Override
       public final Object next () {
         final double[] z = new double[n];
@@ -308,7 +368,7 @@ public final class Generators {
   normalDoubleGenerator (final UniformRandomProvider urp) {
     return 
       normalDoubleGenerator(
-        urp,1+Doubles.MAXIMUM_BIASED_EXPONENT); } 
+        urp,Doubles.MAXIMUM_EXPONENT); } 
 
   public static final Generator 
   normalDoubleGenerator (final int n,
@@ -322,11 +382,12 @@ public final class Generators {
         return z; } }; }
 
   //--------------------------------------------------------------
-
+  // TODO: eMax doesn't make sense here
+  
   public static final Generator 
   subnormalDoubleGenerator (final UniformRandomProvider urp,
-                            final int delta) {
-    final Generator d = doubleGenerator(urp,delta);
+                            final int eMax) {
+    final Generator d = doubleGenerator(urp,eMax);
     return new Generator () {
       @Override
       public final double nextDouble () {
@@ -342,9 +403,9 @@ public final class Generators {
   public static final Generator 
   subnormalDoubleGenerator (final int n,
                             final UniformRandomProvider urp,
-                            final int delta) {
+                            final int eMax) {
     return new Generator () {
-      final Generator g = subnormalDoubleGenerator(urp,delta);
+      final Generator g = subnormalDoubleGenerator(urp,eMax);
       @Override
       public final Object next () {
         final double[] z = new double[n];
@@ -355,7 +416,7 @@ public final class Generators {
   subnormalDoubleGenerator (final UniformRandomProvider urp) {
     return 
       subnormalDoubleGenerator(
-        urp,1+Doubles.MAXIMUM_BIASED_EXPONENT); } 
+        urp,Doubles.MAXIMUM_EXPONENT); } 
 
   public static final Generator 
   subnormalDoubleGenerator (final int n,

@@ -34,7 +34,7 @@ import xfp.java.prng.Generators;
  * that can be used to represent tuples of rational numbers.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-05
+ * @version 2019-03-06
  */
 @SuppressWarnings("unchecked")
 strictfp
@@ -51,6 +51,20 @@ public final class Dn extends LinearSpaceLike {
     for (int i=0;i<x0.length;i++) { x[i] = x0[i]; }
     for (int i=0;i<x1.length;i++) { x[i+x0.length] = x1[i]; }
     return x; }
+  
+  //--------------------------------------------------------------
+
+  public static final double[] minus (final double[] x) {
+    final double[] y = new double[x.length];
+    for (int i=0;i<x.length;i++) { y[i] = -x[i]; }
+    return y; }
+  
+  //--------------------------------------------------------------
+
+  public static final double maxAbs (final double[] x) {
+    double m = 0.0;
+    for (int i=0;i<x.length;i++) { m = Math.max(m,x[i]); }
+    return m; }
   
   //--------------------------------------------------------------
 
@@ -111,9 +125,7 @@ public final class Dn extends LinearSpaceLike {
 
   public final double[] negate (final double[] x) {
     assert contains(x);
-    final double[] qq = new double[dimension()];
-    for (int i=0;i<dimension();i++) { qq[i] = - x[i]; }
-    return qq; } 
+    return minus(x); } 
 
   @Override
   public final double[] negate (final Object x) {

@@ -23,10 +23,22 @@ import xfp.java.prng.Generators;
  * <code>ERational</code>
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-05
+ * @version 2019-03-06
  */
 public final class ERationals implements Set {
 
+  //--------------------------------------------------------------
+  // missing functions
+  //--------------------------------------------------------------
+  /** Divide out gcd from numberator and denominator. */
+
+  public static final ERational reduce (final ERational q) {
+    return q; }
+//    final EInteger n = q.getNumerator();
+//    final EInteger d = q.getDenominator();
+//    final EInteger gcd = n.Gcd(d);
+//    return ERational.Create(n.Divide(gcd),d.Divide(gcd)); }
+  
   //--------------------------------------------------------------
   // convert representation to ERational[] as default.
   // higher performance methods use raw representation where

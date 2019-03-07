@@ -1,6 +1,5 @@
 package xfp.java.numbers;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Map;
 import java.util.function.BiPredicate;
@@ -30,9 +29,65 @@ public final class Ratios implements Set {
   // Ratio utils
   //--------------------------------------------------------------
 
-  public static final Ratio toRatio (final double q) {
-    return clojure.lang.Numbers.toRatio(new BigDecimal(q)); }
+  //  public static final Ratio toRatio (final double q) {
+  //    return clojure.lang.Numbers.toRatio(new BigDecimal(q)); }
 
+  /** From apache commons math4 BigFraction.
+   * <p>
+   * Create a fraction given the double value.
+   * <p>
+   * This constructor behaves <em>differently</em> from
+   * {@link #BigFraction(double, double, int)}. It converts the 
+   * double value exactly, considering its internal bits 
+   * representation. This works for all values except NaN and 
+   * infinities and does not requires any loop or convergence 
+   * threshold.
+   * </p>
+   * <p>
+   * Since this conversion is exact and since double numbers are 
+   * sometimes approximated, the fraction created may seem strange 
+   * in some cases. For example, calling 
+   * <code>new BigFraction(1.0 / 3.0)</code> does <em>not</em> 
+   * create the fraction 1/3, but the fraction 
+   * 6004799503160661 / 18014398509481984, because the double 
+   * number passed to the constructor is not exactly 1/3
+   * (this number cannot be stored exactly in IEEE754).
+   * </p>
+   * @see #BigFraction(double, double, int)
+   * @param x the double value to convert to a fraction.
+   * @exception IllegalArgumentException if value is not finite
+   */
+  
+  public static final Ratio toRatio (final double x) 
+    throws IllegalArgumentException {
+    if (! Double.isFinite(x)) {
+      throw new IllegalArgumentException(
+        x + " is not rational."); }
+
+    // compute m and k such that value = m * 2^k
+    final long bits     = Double.doubleToLongBits(x);
+    final long sign     = bits & 0x8000000000000000L;
+    final long exponent = bits & 0x7ff0000000000000L;
+    long m              = bits & 0x000fffffffffffffL;
+    if (exponent != 0) {
+      // this was a normalized number, 
+      // add the implicit most significant bit
+      m |= 0x0010000000000000L; }
+    if (sign != 0) { m = -m; }
+    int k = ((int) (exponent >> 52)) - 1075;
+    while (((m & 0x001ffffffffffffeL) != 0) && ((m & 0x1) == 0)) {
+      m >>= 1; ++k; }
+    final BigInteger numerator;
+    final BigInteger denominator;
+    if (k < 0) { 
+      numerator   = BigInteger.valueOf(m);
+      denominator = BigInteger.ZERO.flipBit(-k); } 
+    else {
+      numerator   = BigInteger.valueOf(m)
+        .multiply(BigInteger.ZERO.flipBit(k));
+      denominator = BigInteger.ONE; }
+    return new Ratio(numerator,denominator); }
+  
   //--------------------------------------------------------------
   // operations for algebraic structures over Ratios.
   //--------------------------------------------------------------
@@ -41,7 +96,7 @@ public final class Ratios implements Set {
   // worth the indirection?
 
   public final Ratio add (final Ratio q0, 
-                           final Ratio q1) {
+                          final Ratio q1) {
     assert contains(q0);
     assert contains(q1);
     return Numbers.toRatio(Numbers.add(q0,q1)); } 
@@ -84,7 +139,7 @@ public final class Ratios implements Set {
   //--------------------------------------------------------------
 
   public final Ratio multiply (final Ratio q0, 
-                                final Ratio q1) {
+                               final Ratio q1) {
     assert contains(q0);
     assert contains(q1);
     return Numbers.toRatio(Numbers.multiply(q0,q1)); } 
@@ -205,20 +260,20 @@ public final class Ratios implements Set {
   //--------------------------------------------------------------
 
   public static final OneSetOneOperation ADDITIVE_MAGMA = 
-  OneSetOneOperation.magma(get().adder(),get());
+    OneSetOneOperation.magma(get().adder(),get());
 
   public static final OneSetOneOperation MULTIPLICATIVE_MAGMA = 
-  OneSetOneOperation.magma(get().multiplier(),get());
+    OneSetOneOperation.magma(get().multiplier(),get());
 
   public static final OneSetTwoOperations FIELD = 
-  OneSetTwoOperations.field(
-    get().adder(),
-    get().additiveIdentity(),
-    get().additiveInverse(),
-    get().multiplier(),
-    get().multiplicativeIdentity(),
-    get().multiplicativeInverse(),
-    get());
+    OneSetTwoOperations.field(
+      get().adder(),
+      get().additiveIdentity(),
+      get().additiveInverse(),
+      get().multiplier(),
+      get().multiplicativeIdentity(),
+      get().multiplicativeInverse(),
+      get());
 
   //--------------------------------------------------------------
 }

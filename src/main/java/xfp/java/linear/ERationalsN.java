@@ -31,10 +31,39 @@ import xfp.java.prng.Generators;
  * that can be used to represent tuples of rational numbers.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-03
+ * @version 2019-03-06
  */
 @SuppressWarnings("unchecked")
 public final class ERationalsN extends LinearSpaceLike  {
+
+  //--------------------------------------------------------------
+  // operations on arrays 
+  // TODO: better elsewhere?
+  //--------------------------------------------------------------
+
+  public static final double naiveSum (final double[] x) {
+    final int n = x.length;
+    if (0 == n) { return 0.0; }
+    ERational sum = ERational.FromDouble(x[0]);
+    for (int i=1;i<n;i++) { 
+      sum = ERationals.reduce(sum.Add(ERational.FromDouble(x[i]))); }
+    return sum.ToDouble(); }
+
+  public static final double naiveDot (final double[] x0,
+                                       final double[] x1) {
+    final int n = x0.length;
+    assert n == x1.length;
+    if (0 == n) { return 0.0; }
+    ERational sum = 
+      ERational.FromDouble(x0[0])
+      .Multiply(
+        ERational.FromDouble(x1[0]));
+    for (int i=1;i<x0.length;i++) { 
+      sum = sum.Add(
+        ERational.FromDouble(x0[i])
+        .Multiply(
+          ERational.FromDouble(x1[i]))); }
+    return sum.ToDouble(); }
 
   //--------------------------------------------------------------
   // operations for algebraic structures over ERational arrays.

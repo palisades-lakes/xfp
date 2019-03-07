@@ -34,17 +34,48 @@ import xfp.java.prng.Generators;
  * that can be used to represent tuples of rational numbers.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-26
+ * @version 2019-03-06
  */
 @SuppressWarnings("unchecked")
 public final class Fn extends LinearSpaceLike {
+
+  //--------------------------------------------------------------
+
+  public static final double naiveSum (final double[] x) {
+    final int n = x.length;
+    if (0 == n) { return 0.0; }
+    float sum = (float) x[0];
+    for (int i=1;i<n;i++) { sum += (float) x[i]; }
+    return sum; }
+
+  //--------------------------------------------------------------
+
+  public static final double naiveDot (final double[] x0,
+                                       final double[] x1) {
+    final int n = x0.length;
+    assert n == x1.length;
+    if (0 == n) { return 0.0; }
+    float sum = (float) (x0[0] * x1[0]);
+    for (int i=1;i<x0.length;i++) { 
+      sum = sum + (float) (x0[i] * x1[i]); }
+    return sum; }
+
+  public static final double fmaDot (final double[] x0,
+                                     final double[] x1) {
+    final int n = x0.length;
+    assert n == x1.length;
+    if (0 == n) { return 0.0; }
+    double sum = x0[0] * x1[0];
+    for (int i=1;i<x0.length;i++) { 
+      sum = Math.fma(x0[i],x1[i],sum); }
+    return sum; }
 
   //--------------------------------------------------------------
   // operations for algebraic structures over float[] arrays.
   //--------------------------------------------------------------
 
   public final float[] add (final float[] x0, 
-                           final float[] x1) {
+                            final float[] x1) {
     assert contains(x0);
     assert contains(x1);
     final float[] qq = new float[dimension()];
@@ -53,9 +84,9 @@ public final class Fn extends LinearSpaceLike {
 
   @Override
   public final float[] add (final Object x0, 
-                           final Object x1) {
+                            final Object x1) {
     return add((float[]) x0, (float[]) x1); }
-  
+
   //--------------------------------------------------------------
 
   @Override
@@ -79,7 +110,7 @@ public final class Fn extends LinearSpaceLike {
   //--------------------------------------------------------------
 
   public final float[] scale (final float a, 
-                             final float[] x) {
+                              final float[] x) {
     assert contains(x);
     final float[] qq = new float[dimension()];
     for (int i=0;i<dimension();i++) { 
@@ -88,7 +119,7 @@ public final class Fn extends LinearSpaceLike {
 
   @Override
   public final float[] scale (final Object a, 
-                             final Object x) {
+                              final Object x) {
     return scale(((Number) a).floatValue(), (float[]) x); } 
 
   //--------------------------------------------------------------

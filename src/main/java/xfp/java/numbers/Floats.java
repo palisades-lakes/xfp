@@ -1,5 +1,8 @@
 package xfp.java.numbers;
 
+import static java.lang.Double.toHexString;
+import static java.lang.Float.MIN_NORMAL;
+
 import java.util.Map;
 import java.util.function.BiPredicate;
 import java.util.function.BinaryOperator;
@@ -17,7 +20,7 @@ import xfp.java.prng.Generators;
 /** Utilities for <code>float</code>, <code>float[]</code>.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-26
+ * @version 2019-03-06
  */
 public final class Floats implements Set {
 
@@ -25,41 +28,92 @@ public final class Floats implements Set {
   // private
   //--------------------------------------------------------------
 
-  //  private static final int SIGN_BITS = 1;
-  private static final int EXPONENT_BITS = 8;
-  private static final int SIGNIFICAND_BITS = 23;
+  public static final int SIGN_BITS = 1;
+  public static final int EXPONENT_BITS = 8;
+  public static final int SIGNIFICAND_BITS = 23;
 
-  //  private static final long SIGN_MASK =
-  //    1L << (EXPONENT_BITS + SIGNIFICAND_BITS);
+  public static final long SIGN_MASK =
+    1L << (EXPONENT_BITS + SIGNIFICAND_BITS);
 
-  //  private static final long EXPONENT_MASK =
-  //    ((1L << EXPONENT_BITS) - 1L) << SIGNIFICAND_BITS;
+  public static final long EXPONENT_MASK =
+    ((1L << EXPONENT_BITS) - 1L) << SIGNIFICAND_BITS;
 
   public static final int SIGNIFICAND_MASK =
     (1 << SIGNIFICAND_BITS) - 1;
 
-  //  private static final int EXPONENT_BIAS =
-  //    (1 << (EXPONENT_BITS - 1)) - 1;
+  public static final int EXPONENT_BIAS =
+    (1 << (EXPONENT_BITS - 1)) - 1;
 
   public static final int MAXIMUM_BIASED_EXPONENT =
     (1 << EXPONENT_BITS) - 1;
 
-  //  private static final int MAXIMUM_EXPONENT =
-  //    EXPONENT_BIAS;
+  public static final int MAXIMUM_EXPONENT =
+    EXPONENT_BIAS;
 
-  //  private static final int MINIMUM_NORMAL_EXPONENT =
-  //    1 - MAXIMUM_EXPONENT;
+  public static final int MINIMUM_NORMAL_EXPONENT =
+    1 - MAXIMUM_EXPONENT;
 
-  //  private static final int MINIMUM_SUBNORMAL_EXPONENT =
-  //    MINIMUM_NORMAL_EXPONENT - SIGNIFICAND_BITS;
+  public static final int MINIMUM_SUBNORMAL_EXPONENT =
+    MINIMUM_NORMAL_EXPONENT - SIGNIFICAND_BITS;
 
+  public static final int MINIMUM_EXPONENT =
+    MINIMUM_SUBNORMAL_EXPONENT;
+
+  //--------------------------------------------------------------
+
+  public static final int significand (final float x) {
+    return
+      SIGNIFICAND_MASK
+      &
+      Float.floatToRawIntBits(x); }
+
+  //--------------------------------------------------------------
+
+  public static final int biasedExponent (final float x) {
+    return
+      (int)
+      ((EXPONENT_MASK
+        &
+        Float.floatToRawIntBits(x))
+        >> SIGNIFICAND_BITS); }
+
+  //--------------------------------------------------------------
+
+  public static final int unbiasedExponent (final float x) {
+    return biasedExponent(x) - EXPONENT_BIAS; }
+
+  //--------------------------------------------------------------
+
+  public static final int signBit (final float x) {
+    return  (int)
+      ((SIGN_MASK
+        &
+        Float.floatToRawIntBits(x))
+        >> (EXPONENT_BITS + SIGNIFICAND_BITS)); }
+
+  public static final boolean nonNegative (final float x) {
+    return  0 == signBit(x); }
+
+  //--------------------------------------------------------------
+
+  //  public static final boolean isNormal (final float x) {
+  //    final int be = biasedExponent(x);
+  //    return (0.0 == x) || ((0 != be) && (0x7f != be)); }
+
+  public static final boolean isNormal (final float x) {
+    return (x <= -MIN_NORMAL) || (MIN_NORMAL <= x); }
+
+  //--------------------------------------------------------------
   // TODO: is this correct? quick change from Floats.
 
   public static final float makeFloat (final int s,
-                                       final int e,
+                                       final int ue,
                                        final int t) {
     assert ((0 == s) || (1 ==s)) : "Invalid sign bit:" + s;
-    assert (0 <= e) :
+    assert (MINIMUM_EXPONENT <= ue) && (ue <= MAXIMUM_EXPONENT) :
+      "invalid (unbiased) exponent:" + toHexString(ue);
+    final int e = ue + EXPONENT_BIAS;
+     assert (0 <= e) :
       "Negative exponent:" + Integer.toHexString(e);
     assert (e <= MAXIMUM_BIASED_EXPONENT) :
       "Exponent too large:" + Integer.toHexString(e) +

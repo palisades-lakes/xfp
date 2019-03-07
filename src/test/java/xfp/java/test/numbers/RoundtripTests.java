@@ -25,7 +25,7 @@ import xfp.java.prng.PRNG;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-05
+ * @version 2019-03-06
  */
 
 public final class RoundtripTests {
@@ -277,24 +277,24 @@ public final class RoundtripTests {
   //        return false; } } 
   //    return true; }
 
-  //  // Fails.
-  //  /** Ratio should be able to represent any double exactly.
-  //   */
-  //  public static final boolean double2Ratio () {
-  //    final Generator g = finiteDoubles();
-  //    for (int i=0;i<TRYS;i++) {
-  //      final double x = g.nextDouble();
-  //      final Ratio f = Ratios.toRatio(x);
-  //      final double xf = f.doubleValue();
-  //      if (x != xf) { 
-  //        //        System.out.println("\n" + 
-  //        //          "double2Ratio:" + i + " " + Doubles.isNormal(x) + "\n" + 
-  //        //          Double.toHexString(x) + "\n" +
-  //        //          Double.toHexString(xf) + "\n" +
-  //        //          f.numerator + "\n" +
-  //        //          f.denominator);
-  //        return false; } } 
-  //    return true; }
+//  // Fails. Off in least significant bit for small numbers.
+//  /** Ratio should be able to represent any double exactly.
+//   */
+//  public static final boolean double2Ratio () {
+//    final Generator g = finiteDoubles();
+//    for (int i=0;i<TRYS;i++) {
+//      final double x = g.nextDouble();
+//      final Ratio f = Ratios.toRatio(x);
+//      final double xf = f.doubleValue();
+//      if (x != xf) { 
+//        System.out.println("\n" + 
+//          "double2Ratio:" + i + " " + Doubles.isNormal(x) + "\n" + 
+//          Double.toHexString(x) + "\n" +
+//          Double.toHexString(xf) + "\n" +
+//          f.numerator + "\n" +
+//          f.denominator);
+//        return false; } } 
+//    return true; }
 
   //// Fails.
   //  /** Ratio should be able to represent any double exactly.
@@ -375,16 +375,18 @@ public final class RoundtripTests {
     // BigFraction should be able to represent any double exactly.
     //assertTrue(double2BigFractionJS());
 
-    // This should be true.
+    // This should be true. Last significand bit wrong for some
+    // small numbers.
     // BigFraction should be able to represent any double exactly.
     // BigFraction.doubleValue() is broken.
     //assertTrue(double2BigFraction());
 
-    // This should be true.
+    // This should be true. Last significand bit wrong for some
+    // small numbers.
     // Ratio should be able to represent any double exactly.
     // Not sure whether Ratio.doubleValue() or 
     // Ratios.toRatio(double) is broken.
-    //assertTrue(double2Ratio());
+//    assertTrue(double2Ratio());
 
     // This should be true.
     // Ratio should be able to represent any double exactly.
