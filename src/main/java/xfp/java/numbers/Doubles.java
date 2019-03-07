@@ -52,14 +52,16 @@ public final class Doubles implements Set {
 
   public static final int MAXIMUM_EXPONENT = EXPONENT_BIAS;
 
+  /** Misleading name: actually corresponds to subnormal,
+   * infinite, and NaN values.
+   */
+  public static final int MINIMUM_EXPONENT = -MAXIMUM_EXPONENT;
+  
   public static final int MINIMUM_NORMAL_EXPONENT =
     1 - MAXIMUM_EXPONENT;
 
   public static final int MINIMUM_SUBNORMAL_EXPONENT =
     MINIMUM_NORMAL_EXPONENT - SIGNIFICAND_BITS;
-
-  public static final int MINIMUM_EXPONENT =
-    MINIMUM_SUBNORMAL_EXPONENT;
 
   // eclipse validates constant expressions at build time
   //  static {

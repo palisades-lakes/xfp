@@ -117,8 +117,12 @@ public final class Generators {
   public static final Generator 
   floatGenerator (final UniformRandomProvider urp,
                   final int eMin,
-                  final int eMax) {
-    final int eRan = eMax -eMin;
+                  // exclusive
+                  final int eMax ) {
+    assert eMin >= Floats.MINIMUM_EXPONENT;
+    assert eMax <= Floats.MAXIMUM_EXPONENT + 1;
+    assert eMin < eMax;
+    final int eRan = eMax - eMin;
     return new Generator () {
       @Override
       public final float nextFloat () { 
@@ -146,7 +150,7 @@ public final class Generators {
       floatGenerator(
         urp,
         Floats.MINIMUM_EXPONENT,
-        Floats.MAXIMUM_EXPONENT); } 
+        Floats.MAXIMUM_EXPONENT+1); } 
 
   public static final Generator 
   floatGenerator (final int n,
@@ -180,14 +184,18 @@ public final class Generators {
         n,
         urp,
         Floats.MINIMUM_EXPONENT,
-        Floats.MAXIMUM_EXPONENT); } 
+        Floats.MAXIMUM_EXPONENT+1); } 
 
   //--------------------------------------------------------------
 
   public static final Generator 
   doubleGenerator (final UniformRandomProvider urp,
                    final int eMin,
+                   // exclusive
                    final int eMax) {
+    assert eMin >= Doubles.MINIMUM_EXPONENT;
+    assert eMax <= Doubles.MAXIMUM_EXPONENT + 1;
+    assert eMin < eMax;
     return new Generator () {
       final int eRan = eMax-eMin;
       @Override
@@ -217,7 +225,7 @@ public final class Generators {
       doubleGenerator(
         urp,
         Doubles.MINIMUM_EXPONENT,
-        Doubles.MAXIMUM_EXPONENT); } 
+        Doubles.MAXIMUM_EXPONENT+1); } 
 
   public static final Generator 
   doubleGenerator (final int n,
@@ -251,7 +259,7 @@ public final class Generators {
         n,
         urp,
         Doubles.MINIMUM_EXPONENT,
-        Doubles.MAXIMUM_EXPONENT); } 
+        Doubles.MAXIMUM_EXPONENT+1); } 
 
   //--------------------------------------------------------------
 

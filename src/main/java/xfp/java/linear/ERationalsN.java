@@ -55,14 +55,17 @@ public final class ERationalsN extends LinearSpaceLike  {
     assert n == x1.length;
     if (0 == n) { return 0.0; }
     ERational sum = 
-      ERational.FromDouble(x0[0])
-      .Multiply(
-        ERational.FromDouble(x1[0]));
-    for (int i=1;i<x0.length;i++) { 
-      sum = sum.Add(
-        ERational.FromDouble(x0[i])
+      ERationals.reduce(
+        ERational.FromDouble(x0[0])
         .Multiply(
-          ERational.FromDouble(x1[i]))); }
+          ERational.FromDouble(x1[0])));
+    for (int i=1;i<x0.length;i++) { 
+      sum = 
+        ERationals.reduce(
+          sum.Add(
+            ERational.FromDouble(x0[i])
+            .Multiply(
+              ERational.FromDouble(x1[i])))); }
     return sum.ToDouble(); }
 
   //--------------------------------------------------------------
