@@ -65,7 +65,7 @@ public final class SumTest {
    */
   private static final int feMax (final int dim) { 
     final int d = Floats.MAXIMUM_EXPONENT - ceilLog2(dim);
-    System.out.println("emax=" + d);
+    //System.out.println("emax=" + d);
     return d; }
 
   // exact sum is 0.0
