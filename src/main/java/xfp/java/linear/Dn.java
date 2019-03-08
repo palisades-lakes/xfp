@@ -1,5 +1,8 @@
 package xfp.java.linear;
 
+import static java.lang.Double.NEGATIVE_INFINITY;
+import static java.lang.Double.POSITIVE_INFINITY;
+
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Map;
@@ -34,7 +37,7 @@ import xfp.java.prng.Generators;
  * that can be used to represent tuples of rational numbers.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-06
+ * @version 2019-03-07
  */
 @SuppressWarnings("unchecked")
 strictfp
@@ -61,20 +64,37 @@ public final class Dn extends LinearSpaceLike {
   
   //--------------------------------------------------------------
 
+  public static final double l1Dist (final double[] x0,
+                                     final double[] x1) {
+    final int n = x0.length;
+    assert n == x1.length;
+    double m = NEGATIVE_INFINITY;
+    for (int i=0;i<n;i++) { 
+      m = Math.max(m,Math.abs(x0[i]-x1[i])); }
+    return m; }
+  
+  //--------------------------------------------------------------
+
   public static final double maxAbs (final double[] x) {
-    double m = 0.0;
+    double m = NEGATIVE_INFINITY;
+    for (int i=0;i<x.length;i++) { 
+      m = Math.max(m,Math.abs(x[i])); }
+    return m; }
+  
+  //--------------------------------------------------------------
+
+  public static final double max (final double[] x) {
+    double m = NEGATIVE_INFINITY;
     for (int i=0;i<x.length;i++) { m = Math.max(m,x[i]); }
     return m; }
   
   //--------------------------------------------------------------
 
-  public static final double naiveSum (final double[] x) {
-    final int n = x.length;
-    if (0 == n) { return 0.0; }
-    double sum = x[0];
-    for (int i=1;i<n;i++) { sum += x[i]; }
-    return sum; }
-
+  public static final double min (final double[] x) {
+    double m = POSITIVE_INFINITY;
+    for (int i=0;i<x.length;i++) { m = Math.min(m,x[i]); }
+    return m; }
+  
   //--------------------------------------------------------------
 
   public static final double naiveDot (final double[] x0,

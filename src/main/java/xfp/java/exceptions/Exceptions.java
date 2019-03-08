@@ -51,6 +51,13 @@ public final class Exceptions {
     return unsupportedOperation(
       receiver.getClass(),method,argClasses); }
 
+  @SuppressWarnings("unused")
+  public static final UnsupportedOperationException
+  unsupportedOperation (final Object receiver,
+                        final String method,
+                        final double arg) {
+    return unsupportedOperation(receiver,method,Double.TYPE); }
+
   //--------------------------------------------------------------
   // disable constructor
   //--------------------------------------------------------------

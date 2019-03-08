@@ -34,14 +34,6 @@ public final class BigDecimalsN extends LinearSpaceLike {
   // TODO: better elsewhere?
   //--------------------------------------------------------------
 
-  public static final double naiveSum (final double[] x) {
-    final int n = x.length;
-    if (0 == n) { return 0.0; }
-    BigDecimal sum = new BigDecimal(x[0]);
-    for (int i=1;i<n;i++) { 
-      sum = sum.add(new BigDecimal(x[i])); }
-    return sum.doubleValue(); }
-
   public static final double naiveDot (final double[] x0,
                                        final double[] x1) {
     final int n = x0.length;
