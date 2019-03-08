@@ -1,12 +1,25 @@
 package xfp.java.test.numbers;
 
+import static java.lang.Double.toHexString;
+
+import java.util.Arrays;
+
 import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.ListSampler;
 import org.junit.jupiter.api.Test;
 
-import xfp.java.linear.BigFractionsN;
+import xfp.java.Classes;
+import xfp.java.accumulators.Accumulator;
+import xfp.java.accumulators.BigDecimalSum;
+import xfp.java.accumulators.BigFractionSum;
+import xfp.java.accumulators.DoubleFmaSum;
+import xfp.java.accumulators.DoubleSum;
+import xfp.java.accumulators.ERationalSum;
+import xfp.java.accumulators.FloatFmaSum;
+import xfp.java.accumulators.FloatSum;
+import xfp.java.accumulators.RatioSum;
 import xfp.java.linear.Dn;
-import xfp.java.linear.Qn;
-import xfp.java.numbers.Doubles;
+import xfp.java.numbers.Floats;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
 import xfp.java.prng.PRNG;
@@ -19,69 +32,116 @@ import xfp.java.prng.PRNG;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-05
+ * @version 2019-03-07
  */
 
 //no actual tests here (yet)
 
 public final class DotTest {
 
-  private static final int DIM = 1 * 1024;
-  private static final int DELTA = 2 +
-    ((Doubles.MAXIMUM_BIASED_EXPONENT  
-    - 30 
-    + Integer.numberOfLeadingZeros(2*DIM)) / 2);
-  private static final int TRYS = 1;
-  private static final int WARMUP = 8;
-  
-  @SuppressWarnings({ "static-method" })
-  @Test
-  public final void naiveSumTest () {
+  //--------------------------------------------------------------
+  //  /** See {@link Integer#numberOfLeadingZeros(int)}. */
+  //  private static final int floorLog2 (final int k) {
+  //    return Integer.SIZE - 1- Integer.numberOfLeadingZeros(k); }
 
+  /** See {@link Integer#numberOfLeadingZeros(int)}. */
+  private static final int ceilLog2 (final int k) {
+    return Integer.SIZE - Integer.numberOfLeadingZeros(k-1); }
+
+  // TODO: more efficient via bits?
+  private static final boolean isEven (final int k) {
+    return k == 2*(k/2); }
+
+  /** Maximum exponent for double generation such that the sum 
+   * of <code>dim</code> <code>double</code>s will be finite
+   * (with high enough probability).
+   */
+//  private static final int deMax (final int dim) { 
+//    final int d = Doubles.MAXIMUM_EXPONENT - ceilLog2(dim);
+//    System.out.println("emax=" + d);
+//    return d; }
+
+  /** Maximum exponent for double generation such that a float sum 
+   * of <code>dim</code> <code>double</code>s will be finite
+   * (with high enough probability).
+   */
+  private static final int feMax (final int dim) { 
+    final int d = Floats.MAXIMUM_EXPONENT - ceilLog2(dim);
+    //System.out.println("emax=" + d);
+    return d; }
+
+  // exact sum is 0.0
+  private static double[] sampleDoubles (final Generator g,
+                                         final UniformRandomProvider urp) {
+    double[] x = (double[]) g.next();
+    x = Dn.concatenate(x,Dn.minus(x));
+    ListSampler.shuffle(urp,Arrays.asList(x));
+    return x; }
+
+
+  private static double[][] sampleDoubles (final int dim,
+                                           final int n) {
+    assert isEven(dim);
     final UniformRandomProvider urp = 
       PRNG.well44497b("seeds/Well44497b-2019-01-05.txt");
     final Generator g = 
-      Generators.finiteDoubleGenerator(DIM,urp,DELTA);
-    double[] x0 = (double[]) g.next();
-    x0 = Dn.concatenate(x0,Dn.get(DIM).negate(x0));
-    double[] x1 = (double[]) g.next();
-    x1 = Dn.concatenate(x1,x1);
-    // TODO: shuffle together...
-    double mean;
-    long t;
+      Generators.finiteDoubleGenerator(dim/2,urp,feMax(dim));
 
-    mean = 0.0;
-    for (int i=0;i<WARMUP;i++) { mean += Dn.naiveDot(x0,x1); }
-    t = System.nanoTime();
-    for (int i=0;i<TRYS;i++) { mean += Dn.naiveDot(x0,x1); }
-    t = (System.nanoTime()-t);
-    mean /= (WARMUP+TRYS);
-    System.out.println(mean + " in " + (t*1.0e-9) + " secs Dn.naiveDot");
+    final double[][] x = new double[n][];
+    for (int i=0;i<n;i++) { x[i] = sampleDoubles(g,urp); }
+    return x; }
 
-    mean = 0.0;
-    for (int i=0;i<WARMUP;i++) { mean += Dn.fmaDot(x0,x1); }
-    t = System.nanoTime();
-    for (int i=0;i<TRYS;i++) { mean += Dn.fmaDot(x0,x1); }
-    t = (System.nanoTime()-t);
-    mean /= (WARMUP+TRYS);
-    System.out.println(mean + " in " + (t*1.0e-9) + " secs Dn.fmaDot");
+  private static final int DIM = 2 * 1024;
+  private static final int N = 16;
 
-    mean = 0.0;
-    for (int i=0;i<WARMUP;i++) { mean += Qn.naiveDot(x0,x1); }
-    t = System.nanoTime();
-    for (int i=0;i<TRYS;i++) { mean += Qn.naiveDot(x0,x1); }
-    t = (System.nanoTime()-t);
-    mean /= (WARMUP+TRYS);
-    System.out.println(mean + " in " + (t*1.0e-9) + " secs Qn.naiveSum");
+  //--------------------------------------------------------------
+  
+  @SuppressWarnings({ "static-method" })
+  @Test
+  public final void dotTest () {
 
-    mean = 0.0;
-    for (int i=0;i<WARMUP;i++) { mean += BigFractionsN.naiveDot(x0,x1); }
-    t = System.nanoTime();
-    for (int i=0;i<TRYS;i++) { mean += BigFractionsN.naiveDot(x0,x1); }
-    t = (System.nanoTime()-t);
-    mean /= (WARMUP+TRYS);
-    System.out.println(mean + " in " + (t*1.0e-9) + " secs BigFractionsN.naiveSum");
-  }
+    final double[][] x0 = sampleDoubles(DIM,N);
+    final double[][] x1 = sampleDoubles(DIM,N);
+
+    // should be zero with current construction
+    final double[] truth = new double[N];
+    final double[] pred = new double[N];
+    // assuming ERational is correct!!!
+    for (int i=0;i<N;i++) { 
+      truth[i] = 
+        ERationalSum.make().addProducts(x0[i],x1[i]).doubleValue(); }
+
+    for (int i=0;i<N;i++) { 
+      System.out.println(
+        i + " : " 
+          + Double.toHexString(truth[i]) 
+          + ", " 
+          + Double.toHexString(Dn.maxAbs(x0[i])) 
+          + ", " 
+          + Double.toHexString(Dn.maxAbs(x1[i]))); }
+    System.out.println();
+    final Accumulator[] accumulators = 
+    {
+     BigDecimalSum.make(),
+     BigFractionSum.make(),
+     DoubleSum.make(),
+     DoubleFmaSum.make(),
+     ERationalSum.make(),
+     FloatSum.make(),
+     FloatFmaSum.make(),
+     RatioSum.make(),
+    };
+
+    for (final Accumulator a : accumulators) {
+      long t;
+      t = System.nanoTime();
+      for (int i=0;i<N;i++) { 
+        pred[i] = 
+          a.clear().addProducts(x0[i],x1[i]).doubleValue(); }
+      t = (System.nanoTime()-t);
+      System.out.println(toHexString(Dn.l1Dist(truth,pred)) + 
+        " in " + (t*1.0e-9) 
+        + " secs " + Classes.className(a)); } }
 
   //--------------------------------------------------------------
 }

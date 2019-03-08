@@ -41,16 +41,6 @@ public final class Fn extends LinearSpaceLike {
 
   //--------------------------------------------------------------
 
-  public static final double naiveDot (final double[] x0,
-                                       final double[] x1) {
-    final int n = x0.length;
-    assert n == x1.length;
-    if (0 == n) { return 0.0; }
-    float sum = (float) (x0[0] * x1[0]);
-    for (int i=1;i<x0.length;i++) { 
-      sum = sum + (float) (x0[i] * x1[i]); }
-    return sum; }
-
   public static final double fmaDot (final double[] x0,
                                      final double[] x1) {
     final int n = x0.length;

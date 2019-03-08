@@ -1,7 +1,5 @@
 package xfp.java.linear;
 
-import static xfp.java.numbers.Ratios.toRatio;
-
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Map;
@@ -27,26 +25,10 @@ import xfp.java.prng.Generators;
  * for sparse vectors, etc.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-06
+ * @version 2019-03-07
  */
 @SuppressWarnings("unchecked")
 public final class RatiosN extends LinearSpaceLike {
-
-  //--------------------------------------------------------------
-  // operations on arrays 
-  // TODO: better elsewhere?
-  //--------------------------------------------------------------
-
-  public static final double naiveDot (final double[] x0,
-                                       final double[] x1) {
-    final int n = x0.length;
-    assert n == x1.length;
-    if (0 == n) { return 0.0; }
-    final Ratios q = Ratios.get();
-    Ratio sum = q.multiply(toRatio(x0[0]),toRatio(x1[0]));
-    for (int i=1;i<x0.length;i++) { 
-      sum = q.add(sum,q.multiply(toRatio(x0[0]),toRatio(x1[0]))); }
-    return sum.doubleValue(); }
 
   //--------------------------------------------------------------
   // operations for algebraic structures over Ratio arrays.

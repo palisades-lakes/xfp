@@ -12,9 +12,9 @@ import xfp.java.Classes;
 import xfp.java.accumulators.Accumulator;
 import xfp.java.accumulators.BigDecimalSum;
 import xfp.java.accumulators.BigFractionSum;
-import xfp.java.accumulators.DoubleNaiveSum;
+import xfp.java.accumulators.DoubleSum;
 import xfp.java.accumulators.ERationalSum;
-import xfp.java.accumulators.FloatNaiveSum;
+import xfp.java.accumulators.FloatSum;
 import xfp.java.accumulators.RatioSum;
 import xfp.java.linear.Dn;
 import xfp.java.numbers.Floats;
@@ -54,10 +54,10 @@ public final class SumTest {
    * of <code>dim</code> <code>double</code>s will be finite
    * (with high enough probability).
    */
-//  private static final int deMax (final int dim) { 
-//    final int d = Doubles.MAXIMUM_EXPONENT - ceilLog2(dim);
-//    System.out.println("emax=" + d);
-//    return d; }
+  //  private static final int deMax (final int dim) { 
+  //    final int d = Doubles.MAXIMUM_EXPONENT - ceilLog2(dim);
+  //    System.out.println("emax=" + d);
+  //    return d; }
 
   /** Maximum exponent for double generation such that a float sum 
    * of <code>dim</code> <code>double</code>s will be finite
@@ -119,9 +119,9 @@ public final class SumTest {
     {
      BigDecimalSum.make(),
      BigFractionSum.make(),
-     DoubleNaiveSum.make(),
+     DoubleSum.make(),
      ERationalSum.make(),
-     FloatNaiveSum.make(),
+     FloatSum.make(),
      RatioSum.make(),
     };
 
@@ -129,9 +129,7 @@ public final class SumTest {
       long t;
       t = System.nanoTime();
       for (int i=0;i<N;i++) { 
-        a.clear();
-        a.addAll(x[i]);
-        pred[i] = a.doubleValue(); }
+        pred[i] = a.clear().addAll(x[i]).doubleValue(); }
       t = (System.nanoTime()-t);
       System.out.println(toHexString(Dn.l1Dist(truth,pred)) + 
         " in " + (t*1.0e-9) 

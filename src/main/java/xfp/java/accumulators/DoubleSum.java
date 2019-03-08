@@ -1,58 +1,56 @@
 package xfp.java.accumulators;
 
-import org.apache.commons.math3.fraction.BigFraction;
-
-/** Naive sum of <code>double</code> values with BigFraction 
- * accumulator (for testing).
+/** Naive sum of <code>double</code> values.
  *
  * @author palisades dot lakes at gmail dot com
  * @version 2019-03-07
  */
-public final class BigFractionSum implements Accumulator {
+public final class DoubleSum implements Accumulator {
 
-  private BigFraction _sum;
-
+  private double _sum;
+  
   //--------------------------------------------------------------
   // start with only immediate needs
+  
+  @Override
+  public final double doubleValue () { return _sum; }
 
   @Override
-  public final double doubleValue () { 
-    return _sum.doubleValue(); }
-
-  @Override
-  public final Accumulator clear () { 
-    _sum = BigFraction.ZERO;
-    return this; }
+  public final Accumulator clear () { _sum = 0.0; return this; }
 
   @Override
   public final Accumulator add (final double z) { 
-    _sum = _sum.add(new BigFraction(z));
+    _sum += z; 
     return this; }
-
+  
 //  @Override
 //  public final Accumulator addAll (final double[] z)  {
-//    for (final double zi : z) { 
-//      _sum = _sum.add(new BigFraction(zi)); }
-//    return this; } 
-
+//    for (final double zi : z) { _sum += zi; } 
+//    return this; }
+  
   @Override
   public final Accumulator addProduct (final double z0,
                                        final double z1) { 
-    _sum = _sum.add(
-      new BigFraction(z0)
-      .multiply(
-        new BigFraction(z1)));
+    _sum += z0*z1;
     return this; }
-  
+
+//  @Override
+//  public final Accumulator addProducts (final double[] z0,
+//                                          final double[] z1)  {
+//      final int n = z0.length;
+//      assert n == z1.length;
+//      for (int i=0;i<n;i++) { _sum += z0[i]*z1[i]; }
+//      return this; }
+
   //--------------------------------------------------------------
   // construction
   //--------------------------------------------------------------
-
-  private BigFractionSum () { super(); clear(); }
-
-  public static final BigFractionSum make () {
-    return new BigFractionSum(); }
-
+  
+  private DoubleSum () { super(); _sum = 0.0; }
+  
+  public static final DoubleSum make () {
+    return new DoubleSum(); }
+  
   //--------------------------------------------------------------
 }
 //--------------------------------------------------------------

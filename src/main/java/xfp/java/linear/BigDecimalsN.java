@@ -24,31 +24,10 @@ import xfp.java.prng.Generators;
  * for sparse vectors, etc.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-06
+ * @version 2019-03-07
  */
 @SuppressWarnings("unchecked")
 public final class BigDecimalsN extends LinearSpaceLike {
-
-  //--------------------------------------------------------------
-  // operations on arrays 
-  // TODO: better elsewhere?
-  //--------------------------------------------------------------
-
-  public static final double naiveDot (final double[] x0,
-                                       final double[] x1) {
-    final int n = x0.length;
-    assert n == x1.length;
-    if (0 == n) { return 0.0; }
-    BigDecimal sum = 
-      new BigDecimal(x0[0])
-      .multiply(
-        new BigDecimal(x1[0]));
-    for (int i=1;i<x0.length;i++) { 
-      sum = sum.add(
-        new BigDecimal(x0[i])
-        .multiply(
-          new BigDecimal(x1[i]))); }
-    return sum.doubleValue(); }
 
   //--------------------------------------------------------------
   // operations for algebraic structures over BigDecimal arrays.

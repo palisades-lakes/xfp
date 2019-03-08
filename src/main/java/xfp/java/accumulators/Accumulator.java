@@ -17,19 +17,30 @@ public interface Accumulator {
   //--------------------------------------------------------------
   // start with only immediate needs
 
-  // TODO: return Accumulator to handle immutable implementation?
-  public default void clear () {
-    throw Exceptions.unsupportedOperation(this,"clear"); }
-
   public default double doubleValue () {
     throw Exceptions.unsupportedOperation(this,"doubleValue"); }
 
-  // TODO: return Accumulator to handle immutable implementation?
-  public default void add (final double z) {
+  public default Accumulator clear () {
+    throw Exceptions.unsupportedOperation(this,"clear"); }
+
+  public default Accumulator add (final double z) {
     throw Exceptions.unsupportedOperation(this,"add",z); }
 
-  // TODO: return Accumulator to handle immutable implementation?
-  public default void addAll (final double[] z)  {
-    throw Exceptions.unsupportedOperation(this,"add",z); }
+  public default Accumulator addAll (final double[] z)  {
+    for (final double zi : z) { add(zi); }
+    return this; }
 
+  public default Accumulator addProduct (final double z0,
+                                         final double z1) {
+    throw Exceptions.unsupportedOperation(this,"addProduct",z0,z1); }
+
+  
+  public default Accumulator addProducts (final double[] z0,
+                                        final double[] z1)  {
+    final int n = z0.length;
+    assert n == z1.length;
+    for (int i=0;i<n;i++) { addProduct(z0[i],z1[i]); }
+    return this; }
+
+  //--------------------------------------------------------------
 }

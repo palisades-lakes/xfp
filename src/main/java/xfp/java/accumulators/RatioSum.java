@@ -73,6 +73,10 @@ public final class RatioSum implements Accumulator {
                                   final Ratio q1) {
     return Numbers.toRatio(Numbers.add(q0,q1)); } 
 
+  private static final Ratio multiply (final Ratio q0, 
+                                  final Ratio q1) {
+    return Numbers.toRatio(Numbers.multiply(q0,q1)); } 
+
   private static final Ratio ZERO = 
     new Ratio(BigInteger.ZERO,BigInteger.ONE);
 
@@ -84,22 +88,37 @@ public final class RatioSum implements Accumulator {
   // start with only immediate needs
 
   @Override
-  public final void clear () { 
-    _sum = ZERO; }
-
-  @Override
   public final double doubleValue () { 
     return _sum.doubleValue(); }
 
   @Override
-  public final void add (final double z) { 
-    _sum = add(_sum,toRatio(z)); }
+  public final Accumulator clear () { _sum = ZERO; return this; }
 
   @Override
-  public final void addAll (final double[] z)  {
-    for (final double zi : z) { 
-      _sum = add(_sum,toRatio(zi)); } }
+  public final Accumulator add (final double z) { 
+    _sum = add(_sum,toRatio(z));
+    return this; }
 
+//  @Override
+//  public final Accumulator addAll (final double[] z)  {
+//    for (final double zi : z) { 
+//      _sum = add(_sum,toRatio(zi)); }
+//    return this; }
+
+  @Override
+  public final Accumulator addProduct (final double z0,
+                                       final double z1) { 
+    _sum = add(_sum,multiply(toRatio(z0),toRatio(z1)));
+    return this; }
+
+//@Override
+//public final Accumulator addProducts (final double[] z0,
+//                                        final double[] z1)  {
+//    final int n = z0.length;
+//    assert n == z1.length;
+//    for (int i=0;i<n;i++) { 
+//      _sum = add(_sum,multiply(toRatio(z0[i]),toRatio(z1[i]))); }
+//    return this; }
   //--------------------------------------------------------------
   // construction
   //--------------------------------------------------------------

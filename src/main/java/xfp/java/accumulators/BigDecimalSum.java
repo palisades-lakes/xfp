@@ -16,21 +16,41 @@ public final class BigDecimalSum implements Accumulator {
   // start with only immediate needs
   
   @Override
-  public final void clear () { 
-    _sum = BigDecimal.ZERO; }
+  public final Accumulator clear () { 
+    _sum = BigDecimal.ZERO;
+    return this; }
 
   @Override
   public final double doubleValue () { 
     return _sum.doubleValue(); }
 
   @Override
-  public final void add (final double z) { 
-    _sum = _sum.add(new BigDecimal(z)); }
+  public final Accumulator add (final double z) { 
+    _sum = _sum.add(new BigDecimal(z));
+    return this; }
   
+//  @Override
+//  public final Accumulator addAll (final double[] z)  {
+//    for (final double zi : z) { 
+//      _sum = _sum.add(new BigDecimal(zi)); }
+//    return this; }
+
   @Override
-  public final void addAll (final double[] z)  {
-    for (final double zi : z) { 
-      _sum = _sum.add(new BigDecimal(zi)); } }
+  public final Accumulator addProduct (final double z0,
+                                       final double z1) { 
+    _sum = _sum.add(
+      new BigDecimal(z0)
+      .multiply(
+        new BigDecimal(z1)));
+    return this; }
+  
+//  @Override
+//  public final Accumulator addProducts (final double[] z0,
+//                                        final double[] z1)  {
+//    final int n = z0.length;
+//    assert n == z1.length;
+//    for (int i=0;i<n;i++) { addProduct(z0[i],z1[i]); }
+//    return this; }
 
   //--------------------------------------------------------------
   // construction
