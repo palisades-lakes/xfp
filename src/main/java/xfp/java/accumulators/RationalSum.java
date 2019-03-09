@@ -186,7 +186,7 @@ implements Accumulator<RationalSum>, Comparable<RationalSum> {
     final BigInteger n0d1 = _numerator.multiply(o._denominator);
     final BigInteger n1d0 = o._numerator.multiply(_denominator);
     return n0d1.compareTo(n1d0); }
-  
+
   //--------------------------------------------------------------
   // Object methods
   //--------------------------------------------------------------
@@ -202,17 +202,22 @@ implements Accumulator<RationalSum>, Comparable<RationalSum> {
   // construction
   //--------------------------------------------------------------
 
-  private RationalSum () { super(); clear(); }
+  private RationalSum (final BigInteger numerator,
+                       final BigInteger denominator) { 
+    super(); 
+    assert ! BigInteger.ZERO.equals(denominator);
 
-  public static final RationalSum make () {
-    return new RationalSum(); }
-
-  public static final RationalSum valueOf (final double z) {
-    return make().add(z); }
+    if (denominator.compareTo(BigInteger.ZERO) < 0) {
+      _numerator = numerator.negate();
+      _denominator = denominator.negate(); } 
+    else {
+      _numerator = numerator;
+      _denominator = denominator; } 
+    reduce(); }
 
   public static final RationalSum valueOf (final BigInteger n,
                                            final BigInteger d) {
-    return make().add(n,d); }
+    return new RationalSum(n,d); }
 
   public static final RationalSum valueOf (final long n,
                                            final long d) {
@@ -221,6 +226,12 @@ implements Accumulator<RationalSum>, Comparable<RationalSum> {
   public static final RationalSum valueOf (final int n,
                                            final int d) {
     return valueOf(BigInteger.valueOf(n),BigInteger.valueOf(d)); }
+
+  public static final RationalSum make () {
+    return valueOf(BigInteger.ZERO,BigInteger.ONE); }
+
+  public static final RationalSum valueOf (final double z) {
+    return make().add(z); }
 
   //--------------------------------------------------------------
 }

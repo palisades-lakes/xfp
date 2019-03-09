@@ -26,40 +26,67 @@ public final class RationalSumTest {
 
   //--------------------------------------------------------------
 
-  /** Conversion to and from RationalSum. 
-   */
-  private static final boolean 
-  correctRounding (final RationalSum f) {
-    // TODO: this is necessary but not sufficient to ensure 
-    // rounding was correct?
-    final double x = f.doubleValue();
-    final RationalSum fx = RationalSum.make().add(x);
-    final int r = f.compareTo(fx);
-    final boolean result;
-    if (r < 0) { // fx > f
-      final double x1o = Math.nextDown(x);
-      final RationalSum flo = RationalSum.valueOf(x1o);
-      result = flo.compareTo(f) < 0;}
-    else if (r > 0) { // fx < f
-      final double xhi = Math.nextUp(x);
-      final RationalSum fhi = RationalSum.valueOf(xhi);
-      result = f.compareTo(fhi) < 0; } 
-    else { result = true; }
-    return result; }
+  @SuppressWarnings({ "static-method" })
+  @Test
+  public final void compareToTest () {
+    final RationalSum f0 = RationalSum.valueOf(-1.0);
+    final RationalSum f1 = RationalSum.valueOf(1.0);
+    assertTrue(f0.compareTo(f1) < 0); }
 
   //--------------------------------------------------------------
 
-  private static final int TRYS = 32 * 1024;
+  /** Conversion to and from RationalSum. */
+
+  private static final boolean 
+  correctRounding (final RationalSum f) {
+    // TODO: is necessary but not sufficient to ensure 
+    // rounding was correct?
+    final double x = f.doubleValue();
+    // can't add non-finite doubles to RationalSum
+    if (! Double.isFinite(x)) { return true; }
+    final RationalSum fx = RationalSum.valueOf(x);
+    final int r = f.compareTo(fx);
+    final boolean ok;
+    if (r < 0) { // fx > f
+      final double xlo = Math.nextDown(x);
+      final RationalSum flo = RationalSum.valueOf(xlo);
+      ok = flo.compareTo(f) < 0;
+      if (! ok) {
+        System.out.println("lo");
+        System.out.println(Double.toHexString(xlo));
+        System.out.println(Double.toHexString(x));
+        System.out.println(flo);
+        System.out.println(f);
+        System.out.println(fx);
+        System.out.println(); } }
+    else if (r > 0) { // fx < f
+      final double xhi = Math.nextUp(x);
+      final RationalSum fhi = RationalSum.valueOf(xhi);
+      ok = f.compareTo(fhi) < 0; 
+      if (! ok) {
+        System.out.println("hi");
+        System.out.println(Double.toHexString(x));
+        System.out.println(Double.toHexString(xhi));
+        System.out.println(fx);
+        System.out.println(f);
+        System.out.println(fhi);
+        System.out.println(); } }
+    else { ok = true; }
+    return ok; }
+
+  //--------------------------------------------------------------
+
+  private static final int TRYS = 4 * 1024;
 
   @SuppressWarnings({ "static-method" })
   @Test
-  public final void roundingTest () {
+  public final void rounding1311Test () {
     final RationalSum f = RationalSum.valueOf(13,11);
     assertTrue(correctRounding(f)); }
 
   @SuppressWarnings({ "static-method" })
   @Test
-  public final void fromEIntegersRoundingTest () {
+  public final void fromBigIntegersRoundingTest () {
     final Generator gn = 
       Generators.bigIntegerGenerator(
         PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
