@@ -2,16 +2,11 @@ package xfp.java.test.numbers;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.math.MathContext;
-import java.math.RoundingMode;
-
-import org.apache.commons.math3.fraction.BigFraction;
 import org.junit.jupiter.api.Test;
 
 import com.upokecenter.numbers.ERational;
 
+import xfp.java.accumulators.RationalSum;
 import xfp.java.numbers.Doubles;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
@@ -25,10 +20,12 @@ import xfp.java.prng.PRNG;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-06
+ * @version 2019-03-08
  */
 
 public final class RoundtripTests {
+
+  private static final int TRYS = 128*1024;
 
   public static final Generator finiteDoubles () {
     return
@@ -38,6 +35,11 @@ public final class RoundtripTests {
   public static final Generator subnormalDoubles () {
     return
       Generators.subnormalDoubleGenerator(
+        PRNG.well44497b("seeds/Well44497b-2019-01-05.txt")); }
+
+  public static final Generator normalDoubles () {
+    return
+      Generators.normalDoubleGenerator(
         PRNG.well44497b("seeds/Well44497b-2019-01-05.txt")); }
 
   //--------------------------------------------------------------
@@ -98,55 +100,28 @@ public final class RoundtripTests {
   //    return toDouble(n,d);  }
 
   //--------------------------------------------------------------
-  // BigDecimal
+  // BigFraction
   // within an ulp, not exact...
 
-  public static final double toDouble (final BigFraction f) {
-    //final BigFraction fr = f.reduce();
-    final BigInteger n = f.getNumerator();
-    final int ns = n.signum();
-    if (0 == ns) { return 0.0; }
-    if (0 > ns) { return - toDouble(f.negate()); }
-    final BigInteger d = f.getDenominator();
-    final BigDecimal n10 = new BigDecimal(n);
-    final BigDecimal d10 = new BigDecimal(d);
-    //final MathContext mc = MathContext.DECIMAL128;
-    final MathContext mc = new MathContext(128,RoundingMode.HALF_UP);
-    final BigDecimal x10 = n10.divide(d10,mc); 
-    final double x = x10.doubleValue();
-    if (Doubles.isNormal(x)) { return x; }
-    return 2.0*x; }
-  //    return toDouble(f.multiply(2)); }
+  //  private static final double toDouble (final BigFraction f) {
+  //    //final BigFraction fr = f.reduce();
+  //    final BigInteger n = f.getNumerator();
+  //    final int ns = n.signum();
+  //    if (0 == ns) { return 0.0; }
+  //    if (0 > ns) { return - toDouble(f.negate()); }
+  //    final BigInteger d = f.getDenominator();
+  //    final BigDecimal n10 = new BigDecimal(n);
+  //    final BigDecimal d10 = new BigDecimal(d);
+  //    //final MathContext mc = MathContext.DECIMAL128;
+  //    final MathContext mc = new MathContext(128,RoundingMode.HALF_UP);
+  //    final BigDecimal x10 = n10.divide(d10,mc); 
+  //    final double x = x10.doubleValue();
+  //    if (Doubles.isNormal(x)) { return x; }
+  //    return 2.0*x; }
+  //  //    return toDouble(f.multiply(2)); }
 
   //--------------------------------------------------------------
 
-  private static final int TRYS = 32*1024;
-
-  //--------------------------------------------------------------
-  /** ERational should be able to represent any double exactly.
-   */
-
-  public static final boolean double2ERational2Double () {
-    final Generator g = 
-      //finiteDoubles();
-      subnormalDoubles();
-    for (int i=0;i<TRYS;i++) {
-      final double x = g.nextDouble();
-      final ERational f = ERational.FromDouble(x);
-      final double xf = f.ToDouble();
-      if (x != xf) { 
-        System.out.println("\n\n" + 
-          "ERational.ToDouble:" + Doubles.isNormal(x) +"\n" +
-          x + "\n" +
-          xf + "\n\n" +
-          Double.toHexString(x) + "\n" +
-          Double.toHexString(xf) + "\n\n" +
-          f.getNumerator() + "\n" +
-          f.getDenominator() + "\n\n" +
-          f.getNumerator().ToRadixString(16) + "\n" +
-          f.getDenominator().ToRadixString(16));
-        return false; } }
-    return true; }
 
   //  public static final boolean double2ERational2Double () {
   //    final double x = -0x0.19c0ba819d5c3p-1022;
@@ -277,24 +252,24 @@ public final class RoundtripTests {
   //        return false; } } 
   //    return true; }
 
-//  // Fails. Off in least significant bit for small numbers.
-//  /** Ratio should be able to represent any double exactly.
-//   */
-//  public static final boolean double2Ratio () {
-//    final Generator g = finiteDoubles();
-//    for (int i=0;i<TRYS;i++) {
-//      final double x = g.nextDouble();
-//      final Ratio f = Ratios.toRatio(x);
-//      final double xf = f.doubleValue();
-//      if (x != xf) { 
-//        System.out.println("\n" + 
-//          "double2Ratio:" + i + " " + Doubles.isNormal(x) + "\n" + 
-//          Double.toHexString(x) + "\n" +
-//          Double.toHexString(xf) + "\n" +
-//          f.numerator + "\n" +
-//          f.denominator);
-//        return false; } } 
-//    return true; }
+  //  // Fails. Off in least significant bit for small numbers.
+  //  /** Ratio should be able to represent any double exactly.
+  //   */
+  //  public static final boolean double2Ratio () {
+  //    final Generator g = finiteDoubles();
+  //    for (int i=0;i<TRYS;i++) {
+  //      final double x = g.nextDouble();
+  //      final Ratio f = Ratios.toRatio(x);
+  //      final double xf = f.doubleValue();
+  //      if (x != xf) { 
+  //        System.out.println("\n" + 
+  //          "double2Ratio:" + i + " " + Doubles.isNormal(x) + "\n" + 
+  //          Double.toHexString(x) + "\n" +
+  //          Double.toHexString(xf) + "\n" +
+  //          f.numerator + "\n" +
+  //          f.denominator);
+  //        return false; } } 
+  //    return true; }
 
   //// Fails.
   //  /** Ratio should be able to represent any double exactly.
@@ -360,6 +335,65 @@ public final class RoundtripTests {
   //    return true; }
 
   //--------------------------------------------------------------
+  /** ERational should be able to represent any double exactly.
+   */
+
+  private static final boolean double2ERational2Double () {
+    final Generator g = 
+      //finiteDoubles();
+      subnormalDoubles();
+    for (int i=0;i<TRYS;i++) {
+      final double x = g.nextDouble();
+      final ERational f = ERational.FromDouble(x);
+      final double xf = f.ToDouble();
+      if (x != xf) { 
+        System.out.println("\n\n" + 
+          "ERational.ToDouble:" + Doubles.isNormal(x) +"\n" +
+          x + "\n" +
+          xf + "\n\n" +
+          Double.toHexString(x) + "\n" +
+          Double.toHexString(xf) + "\n\n" +
+          f.getNumerator() + "\n" +
+          f.getDenominator() + "\n\n" +
+          f.getNumerator().ToRadixString(16) + "\n" +
+          f.getDenominator().ToRadixString(16));
+        return false; } }
+    return true; }
+
+  //--------------------------------------------------------------
+  /** RationalSum should be able to represent any double exactly.
+   */
+
+  private static final boolean double2RationalSum2Double () {
+    final Generator g = 
+      finiteDoubles();
+    //normalDoubles();
+    //subnormalDoubles();
+    for (int i=0;i<TRYS;i++) {
+      final double x = g.nextDouble();
+      final RationalSum f = (RationalSum) RationalSum.make().add(x);
+      final double xf = f.doubleValue();
+      final ERational xe = ERational.FromDouble(x);
+      if (x != xf) { 
+        System.out.println("\n\n" + 
+          "RationalSum: isNormal=" + Doubles.isNormal(x) +"\n" 
+          + x + "\n"
+          + xf + "\n\n"
+          + Double.toHexString(x) + "\n" 
+          + Double.toHexString(xf) + "\n\n"
+          + f.numerator().toString(16).toUpperCase() + "\n" 
+          + xe.getNumerator().ToRadixString(16) + "\n\n"
+          + f.denominator().toString(16) + "\n" 
+          + xe.getDenominator().ToRadixString(16) + "\n\n"
+//          f.getNumerator() + "\n" +
+//          f.getDenominator() + "\n\n" +
+//          f.getNumerator().ToRadixString(16) + "\n" +
+//          f.getDenominator().ToRadixString(16)
+        );
+        return false; } }
+    return true; }
+
+  //--------------------------------------------------------------
   /** check for round trip consistency:
    * double -&gt; rational -&gt; double
    * should be an identity transform.
@@ -368,6 +402,7 @@ public final class RoundtripTests {
   @Test
   public final void roundTripTest () {
 
+    assertTrue(double2RationalSum2Double());
     assertTrue(double2ERational2Double());
     //assertTrue(double2BigFraction2Double());
 
@@ -386,7 +421,7 @@ public final class RoundtripTests {
     // Ratio should be able to represent any double exactly.
     // Not sure whether Ratio.doubleValue() or 
     // Ratios.toRatio(double) is broken.
-//    assertTrue(double2Ratio());
+    //    assertTrue(double2Ratio());
 
     // This should be true.
     // Ratio should be able to represent any double exactly.

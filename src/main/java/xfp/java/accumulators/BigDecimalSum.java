@@ -6,9 +6,9 @@ import java.math.BigDecimal;
  * accumulator (for testing).
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-07
+ * @version 2019-03-08
  */
-public final class BigDecimalSum implements Accumulator {
+public final class BigDecimalSum implements Accumulator<BigDecimalSum> {
 
   private BigDecimal _sum;
   
@@ -16,7 +16,7 @@ public final class BigDecimalSum implements Accumulator {
   // start with only immediate needs
   
   @Override
-  public final Accumulator clear () { 
+  public final BigDecimalSum clear () { 
     _sum = BigDecimal.ZERO;
     return this; }
 
@@ -25,18 +25,18 @@ public final class BigDecimalSum implements Accumulator {
     return _sum.doubleValue(); }
 
   @Override
-  public final Accumulator add (final double z) { 
+  public final BigDecimalSum add (final double z) { 
     _sum = _sum.add(new BigDecimal(z));
     return this; }
   
 //  @Override
-//  public final Accumulator addAll (final double[] z)  {
+//  public final BigDecimalSum addAll (final double[] z)  {
 //    for (final double zi : z) { 
 //      _sum = _sum.add(new BigDecimal(zi)); }
 //    return this; }
 
   @Override
-  public final Accumulator addProduct (final double z0,
+  public final BigDecimalSum addProduct (final double z0,
                                        final double z1) { 
     _sum = _sum.add(
       new BigDecimal(z0)
@@ -45,7 +45,7 @@ public final class BigDecimalSum implements Accumulator {
     return this; }
   
 //  @Override
-//  public final Accumulator addProducts (final double[] z0,
+//  public final BigDecimalSum addProducts (final double[] z0,
 //                                        final double[] z1)  {
 //    final int n = z0.length;
 //    assert n == z1.length;

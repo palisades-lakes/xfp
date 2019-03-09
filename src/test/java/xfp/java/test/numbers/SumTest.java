@@ -14,8 +14,8 @@ import xfp.java.accumulators.BigDecimalSum;
 import xfp.java.accumulators.BigFractionSum;
 import xfp.java.accumulators.DoubleSum;
 import xfp.java.accumulators.ERationalSum;
-import xfp.java.accumulators.FloatSum;
 import xfp.java.accumulators.RatioSum;
+import xfp.java.accumulators.RationalSum;
 import xfp.java.linear.Dn;
 import xfp.java.numbers.Floats;
 import xfp.java.prng.Generator;
@@ -30,7 +30,7 @@ import xfp.java.prng.PRNG;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-07
+ * @version 2019-03-08
  */
 
 // no actual tests here (yet)
@@ -117,11 +117,12 @@ public final class SumTest {
 
     final Accumulator[] accumulators = 
     {
+     RationalSum.make(),
      BigDecimalSum.make(),
      BigFractionSum.make(),
      DoubleSum.make(),
      ERationalSum.make(),
-     FloatSum.make(),
+//     FloatSum.make(),
      RatioSum.make(),
     };
 

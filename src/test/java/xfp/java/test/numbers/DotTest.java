@@ -15,9 +15,8 @@ import xfp.java.accumulators.BigFractionSum;
 import xfp.java.accumulators.DoubleFmaSum;
 import xfp.java.accumulators.DoubleSum;
 import xfp.java.accumulators.ERationalSum;
-import xfp.java.accumulators.FloatFmaSum;
-import xfp.java.accumulators.FloatSum;
 import xfp.java.accumulators.RatioSum;
+import xfp.java.accumulators.RationalSum;
 import xfp.java.linear.Dn;
 import xfp.java.numbers.Floats;
 import xfp.java.prng.Generator;
@@ -32,7 +31,7 @@ import xfp.java.prng.PRNG;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-07
+ * @version 2019-03-08
  */
 
 //no actual tests here (yet)
@@ -56,10 +55,10 @@ public final class DotTest {
    * of <code>dim</code> <code>double</code>s will be finite
    * (with high enough probability).
    */
-//  private static final int deMax (final int dim) { 
-//    final int d = Doubles.MAXIMUM_EXPONENT - ceilLog2(dim);
-//    System.out.println("emax=" + d);
-//    return d; }
+  //  private static final int deMax (final int dim) { 
+  //    final int d = Doubles.MAXIMUM_EXPONENT - ceilLog2(dim);
+  //    System.out.println("emax=" + d);
+  //    return d; }
 
   /** Maximum exponent for double generation such that a float sum 
    * of <code>dim</code> <code>double</code>s will be finite
@@ -95,7 +94,7 @@ public final class DotTest {
   private static final int N = 16;
 
   //--------------------------------------------------------------
-  
+
   @SuppressWarnings({ "static-method" })
   @Test
   public final void dotTest () {
@@ -122,13 +121,14 @@ public final class DotTest {
     System.out.println();
     final Accumulator[] accumulators = 
     {
+     RationalSum.make(),
      BigDecimalSum.make(),
      BigFractionSum.make(),
      DoubleSum.make(),
      DoubleFmaSum.make(),
      ERationalSum.make(),
-     FloatSum.make(),
-     FloatFmaSum.make(),
+//     FloatSum.make(),
+//     FloatFmaSum.make(),
      RatioSum.make(),
     };
 

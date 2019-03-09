@@ -8,7 +8,7 @@ import org.apache.commons.math3.fraction.BigFraction;
  * @author palisades dot lakes at gmail dot com
  * @version 2019-03-07
  */
-public final class BigFractionSum implements Accumulator {
+public final class BigFractionSum implements Accumulator<BigFractionSum> {
 
   private BigFraction _sum;
 
@@ -20,23 +20,23 @@ public final class BigFractionSum implements Accumulator {
     return _sum.doubleValue(); }
 
   @Override
-  public final Accumulator clear () { 
+  public final BigFractionSum clear () { 
     _sum = BigFraction.ZERO;
     return this; }
 
   @Override
-  public final Accumulator add (final double z) { 
+  public final BigFractionSum add (final double z) { 
     _sum = _sum.add(new BigFraction(z));
     return this; }
 
 //  @Override
-//  public final Accumulator addAll (final double[] z)  {
+//  public final BigFractionSum addAll (final double[] z)  {
 //    for (final double zi : z) { 
 //      _sum = _sum.add(new BigFraction(zi)); }
 //    return this; } 
 
   @Override
-  public final Accumulator addProduct (final double z0,
+  public final BigFractionSum addProduct (final double z0,
                                        final double z1) { 
     _sum = _sum.add(
       new BigFraction(z0)

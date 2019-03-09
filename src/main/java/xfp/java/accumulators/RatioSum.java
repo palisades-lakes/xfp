@@ -9,9 +9,9 @@ import clojure.lang.Ratio;
  * accumulator (for testing).
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-07
+ * @version 2019-03-08
  */
-public final class RatioSum implements Accumulator {
+public final class RatioSum implements Accumulator<RatioSum> {
 
   /** From apache commons math4 BigFraction.
    * <p>
@@ -92,33 +92,34 @@ public final class RatioSum implements Accumulator {
     return _sum.doubleValue(); }
 
   @Override
-  public final Accumulator clear () { _sum = ZERO; return this; }
+  public final RatioSum clear () { _sum = ZERO; return this; }
 
   @Override
-  public final Accumulator add (final double z) { 
+  public final RatioSum add (final double z) { 
     _sum = add(_sum,toRatio(z));
     return this; }
 
 //  @Override
-//  public final Accumulator addAll (final double[] z)  {
+//  public final RatioSum addAll (final double[] z)  {
 //    for (final double zi : z) { 
 //      _sum = add(_sum,toRatio(zi)); }
 //    return this; }
 
   @Override
-  public final Accumulator addProduct (final double z0,
+  public final RatioSum addProduct (final double z0,
                                        final double z1) { 
     _sum = add(_sum,multiply(toRatio(z0),toRatio(z1)));
     return this; }
 
 //@Override
-//public final Accumulator addProducts (final double[] z0,
+//public final RatioSum addProducts (final double[] z0,
 //                                        final double[] z1)  {
 //    final int n = z0.length;
 //    assert n == z1.length;
 //    for (int i=0;i<n;i++) { 
 //      _sum = add(_sum,multiply(toRatio(z0[i]),toRatio(z1[i]))); }
 //    return this; }
+  
   //--------------------------------------------------------------
   // construction
   //--------------------------------------------------------------

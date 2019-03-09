@@ -6,9 +6,9 @@ import com.upokecenter.numbers.ERational;
  * accumulator (for testing).
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-07
+ * @version 2019-03-08
  */
-public final class ERationalSum implements Accumulator {
+public final class ERationalSum implements Accumulator<ERationalSum> {
 
   private ERational _sum;
   
@@ -20,24 +20,24 @@ public final class ERationalSum implements Accumulator {
     return _sum.ToDouble(); }
 
   @Override
-  public final Accumulator clear () { 
+  public final ERationalSum clear () { 
     _sum = ERational.Zero;
     return this; }
 
   @Override
-  public final Accumulator add (final double z) { 
+  public final ERationalSum add (final double z) { 
     _sum = _sum.Add(ERational.FromDouble(z));
     return this; }
   
 //  @Override
-//  public final Accumulator addAll (final double[] z)  {
+//  public final ERationalSum addAll (final double[] z)  {
 //    for (final double zi : z) { 
 //      _sum = _sum.Add(ERational.FromDouble(zi)); }
 //    return this; }
 
 
   @Override
-  public final Accumulator addProduct (final double z0,
+  public final ERationalSum addProduct (final double z0,
                                        final double z1) { 
     _sum = _sum.Add(
       ERational.FromDouble(z0)
@@ -46,7 +46,7 @@ public final class ERationalSum implements Accumulator {
     return this; }
   
 //@Override
-//public final Accumulator addProducts (final double[] z0,
+//public final ERationalSum addProducts (final double[] z0,
 //                                        final double[] z1)  {
 //    final int n = z0.length;
 //    assert n == z1.length;

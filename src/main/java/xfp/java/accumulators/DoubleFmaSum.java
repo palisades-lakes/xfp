@@ -3,9 +3,9 @@ package xfp.java.accumulators;
 /** Naive sum of <code>double</code> values.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-07
+ * @version 2019-03-08
  */
-public final class DoubleFmaSum implements Accumulator {
+public final class DoubleFmaSum implements Accumulator<DoubleFmaSum> {
 
   private double _sum;
   
@@ -16,20 +16,20 @@ public final class DoubleFmaSum implements Accumulator {
   public final double doubleValue () { return _sum; }
 
   @Override
-  public final Accumulator clear () { _sum = 0.0; return this; }
+  public final DoubleFmaSum clear () { _sum = 0.0; return this; }
 
   @Override
-  public final Accumulator add (final double z) { 
+  public final DoubleFmaSum add (final double z) { 
     _sum += z; 
     return this; }
   
 //  @Override
-//  public final Accumulator addAll (final double[] z)  {
+//  public final DoubleFmaSum addAll (final double[] z)  {
 //    for (final double zi : z) { _sum += zi; } 
 //    return this; }
   
   @Override
-  public final Accumulator addProduct (final double z0,
+  public final DoubleFmaSum addProduct (final double z0,
                                        final double z1) { 
     _sum = Math.fma(z0,z1,_sum);
     return this; }

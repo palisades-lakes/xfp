@@ -4,9 +4,9 @@ package xfp.java.accumulators;
  * accumulator (for testing).
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-07
+ * @version 2019-03-08
  */
-public final class FloatFmaSum implements Accumulator {
+public final class FloatFmaSum implements Accumulator<FloatFmaSum> {
 
   private float _sum;
 
@@ -17,26 +17,26 @@ public final class FloatFmaSum implements Accumulator {
   public final double doubleValue () { return _sum; }
 
   @Override
-  public final Accumulator clear () { _sum = 0.0F; return this; }
+  public final FloatFmaSum clear () { _sum = 0.0F; return this; }
 
   @Override
-  public final Accumulator add (final double z) { 
+  public final FloatFmaSum add (final double z) { 
     _sum += (float) z; 
     return this; }
 
 //  @Override
-//  public final Accumulator addAll (final double[] z)  {
+//  public final FloatFmaSum addAll (final double[] z)  {
 //    for (final double zi : z) { _sum += (float) zi; }
 //    return this; }
 
   @Override
-  public final Accumulator addProduct (final double z0,
+  public final FloatFmaSum addProduct (final double z0,
                                        final double z1) { 
     _sum = Math.fma((float) z0, (float) z1, _sum);
     return this; }
 
 //@Override
-//public final Accumulator addProducts (final double[] z0,
+//public final FloatFmaSum addProducts (final double[] z0,
 //                                        final double[] z1)  {
 //    final int n = z0.length;
 //    assert n == z1.length;
