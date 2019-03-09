@@ -86,7 +86,7 @@ public final class DoublesTest {
       public final Object next () {
         return Double.valueOf(nextDouble()); } }; }
 
-  private static final int maxExponent (final int dim) { 
+  public static final int maxExponent (final int dim) { 
     final int d =
       //Floats.MAXIMUM_BIASED_EXPONENT  
       MAXIMUM_EXPONENT  

@@ -371,7 +371,7 @@ public final class RoundtripTests {
     //subnormalDoubles();
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
-      final RationalSum f = (RationalSum) RationalSum.make().add(x);
+      final RationalSum f = RationalSum.make().add(x);
       final double xf = f.doubleValue();
       final ERational xe = ERational.FromDouble(x);
       if (x != xf) { 

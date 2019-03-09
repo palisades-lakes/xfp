@@ -13,7 +13,8 @@ import xfp.java.Classes;
  * @author palisades dot lakes at gmail dot com
  * @version 2019-03-08
  */
-public final class RationalSum implements Accumulator<RationalSum> {
+public final class RationalSum 
+implements Accumulator<RationalSum>, Comparable<RationalSum> {
 
   //--------------------------------------------------------------
   // class field and methods
@@ -177,6 +178,16 @@ public final class RationalSum implements Accumulator<RationalSum> {
   //    return this; }
 
   //--------------------------------------------------------------
+  // Comparable methods
+  //--------------------------------------------------------------
+
+  @Override
+  public final int compareTo (final RationalSum o) {
+    final BigInteger n0d1 = _numerator.multiply(o._denominator);
+    final BigInteger n1d0 = o._numerator.multiply(_denominator);
+    return n0d1.compareTo(n1d0); }
+  
+  //--------------------------------------------------------------
   // Object methods
   //--------------------------------------------------------------
 
@@ -195,6 +206,21 @@ public final class RationalSum implements Accumulator<RationalSum> {
 
   public static final RationalSum make () {
     return new RationalSum(); }
+
+  public static final RationalSum valueOf (final double z) {
+    return make().add(z); }
+
+  public static final RationalSum valueOf (final BigInteger n,
+                                           final BigInteger d) {
+    return make().add(n,d); }
+
+  public static final RationalSum valueOf (final long n,
+                                           final long d) {
+    return valueOf(BigInteger.valueOf(n),BigInteger.valueOf(d)); }
+
+  public static final RationalSum valueOf (final int n,
+                                           final int d) {
+    return valueOf(BigInteger.valueOf(n),BigInteger.valueOf(d)); }
 
   //--------------------------------------------------------------
 }
