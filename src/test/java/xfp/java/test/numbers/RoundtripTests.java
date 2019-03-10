@@ -2,10 +2,14 @@ package xfp.java.test.numbers;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.math.BigDecimal;
+
 import org.junit.jupiter.api.Test;
 
+import com.upokecenter.numbers.EFloat;
 import com.upokecenter.numbers.ERational;
 
+import xfp.java.accumulators.EFloatSum;
 import xfp.java.accumulators.RationalSum;
 import xfp.java.numbers.Doubles;
 import xfp.java.prng.Generator;
@@ -25,7 +29,7 @@ import xfp.java.prng.PRNG;
 
 public final class RoundtripTests {
 
-  private static final int TRYS = 128*1024;
+  private static final int TRYS = 32*1024;
 
   public static final Generator finiteDoubles () {
     return
@@ -335,6 +339,55 @@ public final class RoundtripTests {
   //    return true; }
 
   //--------------------------------------------------------------
+  /** EFloat should be able to represent any double exactly.
+   */
+
+  private static final boolean double2BigDecimal2Double () {
+    final Generator g = 
+      finiteDoubles();
+      //subnormalDoubles();
+    for (int i=0;i<TRYS;i++) {
+      final double x = g.nextDouble();
+      final BigDecimal f = new BigDecimal(x);
+      final double xf = f.doubleValue();
+      if (x != xf) { 
+        System.out.println("\n\n" + 
+          "BigDecimal.ToDouble:" + Doubles.isNormal(x) +"\n" +
+          x + "\n" +
+          xf + "\n\n" +
+          Double.toHexString(x) + "\n" +
+          Double.toHexString(xf) + "\n\n" +
+          f + "\n" 
+          //+ f.toHexString(f) + "\n" 
+          );
+        return false; } }
+    return true; }
+
+  //--------------------------------------------------------------
+  /** EFloat should be able to represent any double exactly.
+   */
+
+  private static final boolean double2EFloat2Double () {
+    final Generator g = 
+      finiteDoubles();
+      //subnormalDoubles();
+    for (int i=0;i<TRYS;i++) {
+      final double x = g.nextDouble();
+      final EFloat f = EFloat.FromDouble(x);
+      final double xf = f.ToDouble();
+      if (x != xf) { 
+        System.out.println("\n\n" + 
+          "EFloat.ToDouble:" + Doubles.isNormal(x) +"\n" +
+          x + "\n" +
+          xf + "\n\n" +
+          Double.toHexString(x) + "\n" +
+          Double.toHexString(xf) + "\n\n" +
+          f + "\n" +
+          EFloatSum.toHexString(f) + "\n" );
+        return false; } }
+    return true; }
+
+  //--------------------------------------------------------------
   /** ERational should be able to represent any double exactly.
    */
 
@@ -402,8 +455,10 @@ public final class RoundtripTests {
   @Test
   public final void roundTripTest () {
 
+    assertTrue(double2BigDecimal2Double());
     assertTrue(double2RationalSum2Double());
     assertTrue(double2ERational2Double());
+    assertTrue(double2EFloat2Double());
     //assertTrue(double2BigFraction2Double());
 
     // This should be true.

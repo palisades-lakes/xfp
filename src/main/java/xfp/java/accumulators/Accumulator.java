@@ -9,8 +9,10 @@ import xfp.java.exceptions.Exceptions;
  * All methods are optional.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-08
+ * @version 2019-03-09
  */
+
+@SuppressWarnings("unchecked")
 public interface Accumulator<T extends Accumulator> {
 
   //--------------------------------------------------------------

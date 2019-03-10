@@ -1,16 +1,28 @@
 package xfp.java.accumulators;
 
+import com.upokecenter.numbers.EInteger;
 import com.upokecenter.numbers.ERational;
 
 /** Naive sum of <code>double</code> values with ERational 
  * accumulator (for testing).
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-08
+ * @version 2019-03-09
  */
 public final class ERationalSum implements Accumulator<ERationalSum> {
 
   private ERational _sum;
+  
+  //--------------------------------------------------------------
+  
+  private static final ERational reduce (final ERational e) {
+    // not correct!!!
+    // ignoring flags, infinity, NaN, ..
+    final EInteger n = e.getNumerator();
+    final EInteger d = e.getDenominator();
+    final EInteger g = n.Gcd(d);
+    if (g.compareTo(EInteger.getOne()) <= 0) { return e; }
+    return ERational.Create(n.Divide(g),d.Divide(g)); }
   
   //--------------------------------------------------------------
   // start with only immediate needs
@@ -27,6 +39,7 @@ public final class ERationalSum implements Accumulator<ERationalSum> {
   @Override
   public final ERationalSum add (final double z) { 
     _sum = _sum.Add(ERational.FromDouble(z));
+//    _sum = reduce(_sum);
     return this; }
   
 //  @Override
@@ -35,7 +48,6 @@ public final class ERationalSum implements Accumulator<ERationalSum> {
 //      _sum = _sum.Add(ERational.FromDouble(zi)); }
 //    return this; }
 
-
   @Override
   public final ERationalSum addProduct (final double z0,
                                        final double z1) { 
@@ -43,6 +55,7 @@ public final class ERationalSum implements Accumulator<ERationalSum> {
       ERational.FromDouble(z0)
       .Multiply(
         ERational.FromDouble(z1)));
+//  _sum = reduce(_sum);
     return this; }
   
 //@Override

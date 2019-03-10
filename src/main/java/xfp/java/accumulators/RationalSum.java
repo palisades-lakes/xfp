@@ -2,8 +2,9 @@ package xfp.java.accumulators;
 
 import java.math.BigInteger;
 
+import com.upokecenter.numbers.EContext;
+import com.upokecenter.numbers.EFloat;
 import com.upokecenter.numbers.EInteger;
-import com.upokecenter.numbers.ERational;
 
 import xfp.java.Classes;
 
@@ -11,10 +12,12 @@ import xfp.java.Classes;
  * accumulator (for testing).
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-08
+ * @version 2019-03-09
  */
 public final class RationalSum 
-implements Accumulator<RationalSum>, Comparable<RationalSum> {
+implements 
+Accumulator<RationalSum>, 
+Comparable<RationalSum> {
 
   //--------------------------------------------------------------
   // class field and methods
@@ -126,14 +129,25 @@ implements Accumulator<RationalSum>, Comparable<RationalSum> {
   //--------------------------------------------------------------
   // start with only immediate needs
 
+  //  @Override
+  //  public final double doubleValue () { 
+  //    final EInteger n = 
+  //      EInteger.FromBytes(_numerator.toByteArray(), false);
+  //    final EInteger d = 
+  //      EInteger.FromBytes(_denominator.toByteArray(), false);
+  //    return 
+  //      ERational.Create(n,d).ToDouble(); }
+
   @Override
   public final double doubleValue () { 
-    final EInteger n = 
+    final EInteger ni = 
       EInteger.FromBytes(_numerator.toByteArray(), false);
-    final EInteger d = 
+    final EInteger di = 
       EInteger.FromBytes(_denominator.toByteArray(), false);
-    return 
-      ERational.Create(n,d).ToDouble(); }
+    final EFloat nf = EFloat.FromEInteger(ni); 
+    final EFloat df = EFloat.FromEInteger(di); 
+    final EFloat f = nf.Divide(df, EContext.Binary64);
+    return f.ToDouble(); }
 
   @Override
   public final RationalSum clear () { 

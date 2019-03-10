@@ -13,6 +13,7 @@ import xfp.java.accumulators.BigDecimalSum;
 import xfp.java.accumulators.BigFractionSum;
 import xfp.java.accumulators.DoubleFmaSum;
 import xfp.java.accumulators.DoubleSum;
+import xfp.java.accumulators.EFloatSum;
 import xfp.java.accumulators.ERationalSum;
 import xfp.java.accumulators.FloatFmaSum;
 import xfp.java.accumulators.FloatSum;
@@ -103,7 +104,7 @@ public final class Dot {
     // assuming ERational is correct!!!
     for (int i=0;i<N;i++) { 
       truth[i] = 
-        ERationalSum.make().addProducts(x0[i],x1[i]).doubleValue(); }
+        EFloatSum.make().addProducts(x0[i],x1[i]).doubleValue(); }
 
     for (int i=0;i<N;i++) { 
       System.out.println(

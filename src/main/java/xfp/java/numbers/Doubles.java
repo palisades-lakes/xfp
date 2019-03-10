@@ -1,6 +1,5 @@
 package xfp.java.numbers;
 
-import static java.lang.Double.MIN_NORMAL;
 import static java.lang.Double.MIN_VALUE;
 import static java.lang.Double.longBitsToDouble;
 import static java.lang.Double.toHexString;
@@ -107,12 +106,13 @@ public final class Doubles implements Set {
 
   //--------------------------------------------------------------
 
-//  public static final boolean isNormal (final double x) {
-//    final int be = biasedExponent(x);
-//    return (0.0 == x) || ((0 != be) && (0x7ff != be)); }
-
   public static final boolean isNormal (final double x) {
-    return (x <= -MIN_NORMAL) || (MIN_NORMAL <= x); }
+    final int be = biasedExponent(x);
+    return (0.0 == x) || ((0 != be) && (0x7ff != be)); }
+
+//  public static final boolean isNormal (final double x) {
+//    return (x <= -MIN_NORMAL) || (MIN_NORMAL <= x)
+  // || (x == 0.0); }
 
   //--------------------------------------------------------------
 

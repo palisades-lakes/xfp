@@ -14,6 +14,7 @@ import xfp.java.accumulators.BigDecimalSum;
 import xfp.java.accumulators.BigFractionSum;
 import xfp.java.accumulators.DoubleFmaSum;
 import xfp.java.accumulators.DoubleSum;
+import xfp.java.accumulators.EFloatSum;
 import xfp.java.accumulators.ERationalSum;
 import xfp.java.accumulators.RatioSum;
 import xfp.java.accumulators.RationalSum;
@@ -31,7 +32,7 @@ import xfp.java.prng.PRNG;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-08
+ * @version 2019-03-09
  */
 
 //no actual tests here (yet)
@@ -90,8 +91,8 @@ public final class DotTest {
     for (int i=0;i<n;i++) { x[i] = sampleDoubles(g,urp); }
     return x; }
 
-  private static final int DIM = 2 * 1024;
-  private static final int N = 16;
+  private static final int DIM = 1 * 1024;
+  private static final int N = 8;
 
   //--------------------------------------------------------------
 
@@ -108,7 +109,7 @@ public final class DotTest {
     // assuming ERational is correct!!!
     for (int i=0;i<N;i++) { 
       truth[i] = 
-        ERationalSum.make().addProducts(x0[i],x1[i]).doubleValue(); }
+        EFloatSum.make().addProducts(x0[i],x1[i]).doubleValue(); }
 
     for (int i=0;i<N;i++) { 
       System.out.println(
@@ -126,10 +127,12 @@ public final class DotTest {
      BigFractionSum.make(),
      DoubleSum.make(),
      DoubleFmaSum.make(),
+     EFloatSum.make(),
      ERationalSum.make(),
 //     FloatSum.make(),
 //     FloatFmaSum.make(),
      RatioSum.make(),
+     RationalSum.make(),
     };
 
     for (final Accumulator a : accumulators) {
