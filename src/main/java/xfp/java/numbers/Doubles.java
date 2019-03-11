@@ -21,7 +21,7 @@ import xfp.java.prng.Generators;
 /** Utilities for <code>double</code>, <code>double[]</code>.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-06
+ * @version 2019-03-11
  */
 public final class Doubles implements Set {
 
@@ -140,27 +140,27 @@ public final class Doubles implements Set {
   /**
    * 
    * @param s sign bit, must be 0 or 1
-   * @param ue unbiased exponent, must be in 
-   * [{@link #MINIMUM_EXPONENT},{@link #MAXIMUM_EXPONENT}]
    * @param t significand, must be in 
    * [0,{@link #SIGNIFICAND_MASK}]
+   * @param e unbiased exponent, must be in 
+   * [{@link #MINIMUM_EXPONENT},{@link #MAXIMUM_EXPONENT}]
    * @return equivalent <code>double</code> value
    */
 
   public static final double makeDouble (final int s,
-                                         final int ue,
-                                         final long t) {
+                                         final long t,
+                                         final int e) {
     assert ((0 == s) || (1 ==s)) : "Invalid sign bit:" + s;
-    assert (MINIMUM_EXPONENT <= ue) && (ue <= MAXIMUM_EXPONENT) :
-      "invalid (unbiased) exponent:" + toHexString(ue);
-    final int e = ue + EXPONENT_BIAS;
-    assert (0 <= e) :
-      "Negative exponent:" + Integer.toHexString(e) + " : " + e 
-      + "\n" + MINIMUM_EXPONENT + "<=" + ue + "<=" + MAXIMUM_EXPONENT
+    assert (MINIMUM_EXPONENT <= e) && (e <= MAXIMUM_EXPONENT) :
+      "invalid (unbiased) exponent:" + toHexString(e);
+    final int be = e + EXPONENT_BIAS;
+    assert (0 <= be) :
+      "Negative exponent:" + Integer.toHexString(be) + " : " + be 
+      + "\n" + MINIMUM_EXPONENT + "<=" + e + "<=" + MAXIMUM_EXPONENT
       + "\n" + MIN_VALUE + " " + toHexString(MIN_VALUE)
       + "\n" + EXPONENT_BIAS;
-    assert (e <= MAXIMUM_BIASED_EXPONENT) :
-      "Exponent too large:" + Integer.toHexString(e) +
+    assert (be <= MAXIMUM_BIASED_EXPONENT) :
+      "Exponent too large:" + Integer.toHexString(be) +
       ">" + Integer.toHexString(MAXIMUM_BIASED_EXPONENT);
     assert (0 <= t) :
       "Negative significand:" + Long.toHexString(t);
@@ -169,7 +169,7 @@ public final class Doubles implements Set {
       ">" + Long.toHexString(SIGNIFICAND_MASK);
 
     final long ss = ((long) s) << (EXPONENT_BITS + SIGNIFICAND_BITS);
-    final long se = ((long) e) << SIGNIFICAND_BITS;
+    final long se = ((long) be) << SIGNIFICAND_BITS;
     assert (0L == (ss & se & t));
     final double x = longBitsToDouble(ss | se | t);
     return x; }

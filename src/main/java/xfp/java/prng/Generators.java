@@ -22,7 +22,7 @@ import xfp.java.numbers.Floats;
  * that return different values on each call.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-08
+ * @version 2019-03-11
  */
 
 @SuppressWarnings("unchecked")
@@ -204,7 +204,7 @@ public final class Generators {
         final int d = urp.nextInt(eRan);
         final int e = d + eMin; // unbiased exponent
         final long t = urp.nextLong() & Doubles.SIGNIFICAND_MASK;
-        final double x = Doubles.makeDouble(s,e,t); 
+        final double x = Doubles.makeDouble(s,t,e); 
         return x;} 
       @Override
       public final Object next () {
