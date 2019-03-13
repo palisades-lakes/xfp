@@ -22,7 +22,7 @@ import xfp.java.numbers.Floats;
  * that return different values on each call.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-11
+ * @version 2019-03-12
  */
 
 @SuppressWarnings("unchecked")
@@ -106,6 +106,33 @@ public final class Generators {
                  final UniformRandomProvider urp) {
     return new Generator () {
       final Generator g = longGenerator(urp);
+      @Override
+      public final Object next () {
+        final long[] z = new long[n];
+        for (int i=0;i<n;i++) { z[i] = g.nextLong(); }
+        return z; } }; }
+
+  //--------------------------------------------------------------
+  
+  public static final Generator 
+  positiveLongGenerator (final UniformRandomProvider urp) {
+    return new Generator () {
+      @Override
+      public final long nextLong () { 
+        // TODO: fix infinite loop?
+        for (;;) {
+          final long x = urp.nextLong();
+          if (x != 0L) { return Math.abs(x); } } }
+      @Override
+      public final Object next () {
+        
+        return Long.valueOf(nextLong()); } }; }
+
+  public static final Generator 
+  positiveLongGenerator (final int n,
+                 final UniformRandomProvider urp) {
+    return new Generator () {
+      final Generator g = positiveLongGenerator(urp);
       @Override
       public final Object next () {
         final long[] z = new long[n];
@@ -508,7 +535,7 @@ public final class Generators {
         for (;;) {
           final BigInteger b =
             new BigInteger(nextBytes(urp,1024)); 
-          if (BigInteger.ZERO != b) { return b; } } } }; }
+          if (0 != b.signum()) { return b; } } } }; }
 
   public static final Generator 
   nonzeroBigIntegerGenerator (final int n,

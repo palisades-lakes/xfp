@@ -6,13 +6,11 @@ import com.upokecenter.numbers.EContext;
 import com.upokecenter.numbers.EFloat;
 import com.upokecenter.numbers.EInteger;
 
-import xfp.java.Classes;
-
 /** Naive sum of <code>double</code> values with ERational 
  * accumulator (for testing).
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-09
+ * @version 2019-03-12
  */
 public final class RationalSum 
 implements 
@@ -49,12 +47,12 @@ Comparable<RationalSum> {
    * @exception IllegalArgumentException if value is not finite
    */
 
-  public final BigInteger[] toRatio (final double x) 
+  public static final BigInteger[] toRatio (final double x) 
     throws IllegalArgumentException {
 
     if (! Double.isFinite(x)) {
       throw new IllegalArgumentException(
-        Classes.className(this)  + " cannot handle "+ x); }
+       "RationalSum"  + " cannot handle "+ x); }
 
     final BigInteger numerator;
     final BigInteger denominator;
@@ -115,7 +113,7 @@ Comparable<RationalSum> {
 
   private final RationalSum add (final BigInteger n,
                                  final BigInteger d) {
-    if (BigInteger.ZERO.equals(_numerator)) {
+    if (0 == _numerator.signum()) {
       _numerator = n;
       _denominator = d; }
     else {
@@ -219,9 +217,9 @@ Comparable<RationalSum> {
   private RationalSum (final BigInteger numerator,
                        final BigInteger denominator) { 
     super(); 
-    assert ! BigInteger.ZERO.equals(denominator);
+    assert 0 != denominator.signum();
 
-    if (denominator.compareTo(BigInteger.ZERO) < 0) {
+    if (denominator.signum() < 0) {
       _numerator = numerator.negate();
       _denominator = denominator.negate(); } 
     else {

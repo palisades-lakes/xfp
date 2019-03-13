@@ -49,16 +49,21 @@ public final class Doubles implements Set {
   public static final int MAXIMUM_BIASED_EXPONENT =
     (1 << EXPONENT_BITS) - 1;
 
+  /** inclusive upper bound. */
   public static final int MAXIMUM_EXPONENT = EXPONENT_BIAS;
 
-  /** Misleading name: actually corresponds to subnormal,
-   * infinite, and NaN values.
+  /** #MINIMUM_EXPONENT implies a subnormal number, with implied
+   * leading bit = 0.
    */
   public static final int MINIMUM_EXPONENT = -MAXIMUM_EXPONENT;
   
+  /** smallest exponent for normal numbers with implied leading 
+   * bit = 1.
+   */
   public static final int MINIMUM_NORMAL_EXPONENT =
     1 - MAXIMUM_EXPONENT;
 
+  /** Exponent of smallest non zero value. */
   public static final int MINIMUM_SUBNORMAL_EXPONENT =
     MINIMUM_NORMAL_EXPONENT - SIGNIFICAND_BITS;
 
@@ -115,28 +120,6 @@ public final class Doubles implements Set {
   // || (x == 0.0); }
 
   //--------------------------------------------------------------
-
-  //  public static final double makeDouble (final int s,
-  //                                         final int e,
-  //                                         final long t) {
-  //    assert ((0 == s) || (1 ==s)) : "Invalid sign bit:" + s;
-  //    assert (0 <= e) :
-  //      "Negative exponent:" + Integer.toHexString(e);
-  //    assert (e <= MAXIMUM_BIASED_EXPONENT) :
-  //      "Exponent too large:" + Integer.toHexString(e) +
-  //      ">" + Integer.toHexString(MAXIMUM_BIASED_EXPONENT);
-  //    assert (0 <= t) :
-  //      "Negative significand:" + Long.toHexString(t);
-  //    assert (t <= SIGNIFICAND_MASK) :
-  //      "Significand too large:" + Long.toHexString(t) +
-  //      ">" + Long.toHexString(SIGNIFICAND_MASK);
-  //
-  //    final long ss = ((long) s) << (EXPONENT_BITS + SIGNIFICAND_BITS);
-  //    final long se = ((long) e) << SIGNIFICAND_BITS;
-  //
-  //    assert (0L == (ss & se & t));
-  //    return Double.longBitsToDouble(ss | se | t); }
-
   /**
    * 
    * @param s sign bit, must be 0 or 1
@@ -152,7 +135,7 @@ public final class Doubles implements Set {
                                          final int e) {
     assert ((0 == s) || (1 ==s)) : "Invalid sign bit:" + s;
     assert (MINIMUM_EXPONENT <= e) && (e <= MAXIMUM_EXPONENT) :
-      "invalid (unbiased) exponent:" + toHexString(e);
+      "invalid (unbiased) exponent:" + e;
     final int be = e + EXPONENT_BIAS;
     assert (0 <= be) :
       "Negative exponent:" + Integer.toHexString(be) + " : " + be 

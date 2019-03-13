@@ -39,7 +39,6 @@ public final class ERationalSum implements Accumulator<ERationalSum> {
   @Override
   public final ERationalSum add (final double z) { 
     _sum = _sum.Add(ERational.FromDouble(z));
-    _sum = reduce(_sum);
     return this; }
 
   //  @Override
@@ -54,7 +53,6 @@ public final class ERationalSum implements Accumulator<ERationalSum> {
     _sum = _sum.Add(
       ERational.FromDouble(z0)
       .Multiply(ERational.FromDouble(z1)));
-    _sum = reduce(_sum);
     return this; }
 
   //@Override
