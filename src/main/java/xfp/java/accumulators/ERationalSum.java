@@ -1,6 +1,5 @@
 package xfp.java.accumulators;
 
-import com.upokecenter.numbers.EInteger;
 import com.upokecenter.numbers.ERational;
 
 /** Naive sum of <code>double</code> values with ERational 
@@ -15,14 +14,14 @@ public final class ERationalSum implements Accumulator<ERationalSum> {
 
   //--------------------------------------------------------------
 
-  private static final ERational reduce (final ERational e) {
-    // not correct!!!
-    // ignoring flags, infinity, NaN, ..
-    final EInteger n = e.getNumerator();
-    final EInteger d = e.getDenominator();
-    final EInteger g = n.Gcd(d);
-    if (g.compareTo(EInteger.getOne()) <= 0) { return e; }
-    return ERational.Create(n.Divide(g),d.Divide(g)); }
+//  private static final ERational reduce (final ERational e) {
+//    // not correct!!!
+//    // ignoring flags, infinity, NaN, ..
+//    final EInteger n = e.getNumerator();
+//    final EInteger d = e.getDenominator();
+//    final EInteger g = n.Gcd(d);
+//    if (g.compareTo(EInteger.getOne()) <= 0) { return e; }
+//    return ERational.Create(n.Divide(g),d.Divide(g)); }
 
   //--------------------------------------------------------------
   // start with only immediate needs

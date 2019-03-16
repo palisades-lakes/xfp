@@ -82,6 +82,14 @@ public final class Doubles implements Set {
       &
       Double.doubleToRawLongBits(x); }
 
+  /** add be the implicit leading bit, if there. */
+  
+  public static final long fullSignificand (final double x) {
+    final long t = significand(x);
+    // subnormal, etc.
+    if (biasedExponent(x) == 0) { return t; }
+    return t + SIGNIFICAND_MASK + 1; }
+
   //--------------------------------------------------------------
 
   public static final int biasedExponent (final double x) {
