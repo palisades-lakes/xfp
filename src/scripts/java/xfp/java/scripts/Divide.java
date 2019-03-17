@@ -6,8 +6,6 @@ import static xfp.java.numbers.Doubles.SIGNIFICAND_MASK;
 
 import java.math.BigInteger;
 
-import org.apache.commons.math3.fraction.BigFraction;
-
 import com.upokecenter.numbers.EContext;
 import com.upokecenter.numbers.EFloat;
 import com.upokecenter.numbers.EInteger;
@@ -240,8 +238,11 @@ public final class Divide {
     //    System.out.println(description("q1*d-n",q1dmn));
     //    System.out.println(r.compareTo(q1dmn));
 
-    final BigInteger r2 = r.shiftLeft(1);
-    final int c = r2.compareTo(d);
+    //final BigInteger r2 = r.shiftLeft(1);
+    final int c = 
+      q.multiply(d).subtract(n).abs()
+      .compareTo(
+        q1.multiply(d).subtract(n).abs());
 
     //    System.out.println(description("r2",r2));
     //    System.out.println("r2<=d: " + c);
@@ -252,7 +253,7 @@ public final class Divide {
 
     final BigInteger qq = (c <= 0) ? q : q.add(BigInteger.ONE);
 
-    //System.out.println(description("qq",qq));
+    System.out.println(description("qq",qq));
 
     final double z = divide6(qq,s,e);
 
@@ -287,11 +288,11 @@ public final class Divide {
     assert d.signum() == 1;
     assert (s == 0) || (s == 1);
 
-    //    System.out.println();
-    //    System.out.println("divide4(BigInteger,BigInteger,int,int)");
-    //    System.out.println(description("n",n));
-    //    System.out.println(description("d",d));
-    //    System.out.println("s= " + s + ", e= " + e);
+    System.out.println();
+    System.out.println("divide4(BigInteger,BigInteger,int,int)");
+    System.out.println(description("n",n));
+    System.out.println(description("d",d));
+    System.out.println("s= " + s + ", e= " + e);
 
     final BigInteger[] qr = n.divideAndRemainder(d);
     final BigInteger q = qr[0];
@@ -338,11 +339,10 @@ public final class Divide {
     //    System.out.println(description("d",d));
     //    System.out.println("s= " + s + ", e= " + e);
 
-    final int shift0 = Math.max(
-      0,
-      NUMERATOR_BITS + hiBit(d) - hiBit(n));
+    final int shift0 = 53;
+//      Math.max(0,NUMERATOR_BITS + hiBit(d) - hiBit(n));
 
-    //    System.out.println("shift0= " + shift0);
+        System.out.println("shift0= " + shift0);
 
     final int shift1 = Math.min(
       shift0,
@@ -351,8 +351,8 @@ public final class Divide {
     //assert e1 >= MINIMUM_EXPONENT + SIGNIFICAND_BITS;
     final BigInteger n1 = n.shiftLeft(shift1);
 
-    //    System.out.println("e1=" + e1 + "\nshift1=" + shift1);
-    //    System.out.println(description("n",n));
+        System.out.println("e1=" + e1 + "\nshift1=" + shift1);
+        System.out.println(description("n",n));
 
     if (n1.signum() == 0) { 
       if (s == 1) { return -0.0; }
@@ -617,15 +617,34 @@ public final class Divide {
     return z; } 
 
   public static final void main (final String[] args) {
+    final BigInteger q6 = BigInteger.valueOf(0x130eb6938c0156L);
+    final BigInteger q7 = BigInteger.valueOf(0x130eb6938c0157L);
+    final BigInteger q8 = BigInteger.valueOf(0x130eb6938c0158L);
+    final BigInteger n = BigInteger.valueOf(0x789f09858446ad92L).shiftLeft(52);
+    final BigInteger d = BigInteger.valueOf(0x19513ea5d70c32eL).shiftLeft(6);
+    final BigInteger dr6 = d.multiply(q6);
+    final BigInteger dr7 = d.multiply(q7);
+    final BigInteger dr8 = d.multiply(q8);
+    final BigInteger nmdr6 = n.subtract(dr6);
+    final BigInteger nmdr7 = n.subtract(dr7);
+    final BigInteger nmdr8 = n.subtract(dr8);
+    System.out.println("n: " + n.toString(0x10));
+    System.out.println("d: " + d.toString(0x10));
+    System.out.println("6: " + nmdr6.toString(0x10));
+    System.out.println("7: " + nmdr7.toString(0x10));
+    System.out.println("8: " + nmdr8.toString(0x10));
+    System.out.println(nmdr6.abs().compareTo(nmdr7.abs()));
+    System.out.println();
+    roundingTest(n.shiftRight(52),d);
     //    roundingTest(13L,3L);
     //    roundingTest(0x1.30eb6938c0156p6);
     //    roundingTest(0x1.30eb6938c0157p6);
-    roundingTest(
-      (0x789f09858446ad92L >>> 1) + 100L,
-      (0x19513ea5d70c32eL >>> 1));
-    roundingTest(
-      (0x789f09858446ad92L >>> 1) + 10L,
-      (0x19513ea5d70c32eL >>> 1));
+    //    roundingTest(
+    //      (0x789f09858446ad92L >>> 1) + 100L,
+    //      (0x19513ea5d70c32eL << 5));
+    //    roundingTest(
+    //      (0x789f09858446ad92L >>> 1) + 10L,
+    //      (0x19513ea5d70c32eL >>> 1));
     //roundingTest(0x789f09858446ad92L,0x19513ea5d70c32eL);
     //        roundingTest(0x0.0000000000001p-1022);
     //        roundingTest(0x0.1000000000001p-1022);
@@ -643,7 +662,7 @@ public final class Divide {
     //        subnormalDoubleRoundingTest();
     //        normalDoubleRoundingTest();
     //        finiteDoubleRoundingTest(); 
-//    fromLongsRoundingTest();
+    //    fromLongsRoundingTest();
     //    fromBigIntegersRoundingTest(); 
   }
 
