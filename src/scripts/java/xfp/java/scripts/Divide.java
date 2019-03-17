@@ -234,8 +234,8 @@ public final class Divide {
     System.out.println(description("q",q));
     System.out.println(description("r",r));
 
-    //    final BigInteger q1 = q.add(BigInteger.ONE);
-    //    System.out.println(description("q1",q1));
+    final BigInteger q1 = q.add(BigInteger.ONE);
+    System.out.println(description("q1",q1));
     //    final BigInteger q1dmn = q1.multiply(d).subtract(n);
     //    System.out.println(description("q1*d-n",q1dmn));
     //    System.out.println(r.compareTo(q1dmn));
@@ -252,7 +252,7 @@ public final class Divide {
 
     final BigInteger qq = (c <= 0) ? q : q.add(BigInteger.ONE);
 
-    //    System.out.println(description("qq",qq));
+    //System.out.println(description("qq",qq));
 
     final double z = divide6(qq,s,e);
 
@@ -576,8 +576,10 @@ public final class Divide {
 
   public static final double roundingTest (final BigInteger n,
                                            final BigInteger d) {
-    final double z = divide(n,d);
     final double ze = ToDouble(n,d);
+    System.out.println(Double.toHexString(ze) + " :E");
+    final double z = divide(n,d);
+    System.out.println(Double.toHexString(z) + " :D");
     assert ze == z : 
       "\n" 
       + Double.toHexString(ze) + " :E\n"
@@ -586,10 +588,10 @@ public final class Divide {
 
   public static final double roundingTest (final long n,
                                            final long d) {
-    return 
-      roundingTest(
-        BigInteger.valueOf(n),
-        BigInteger.valueOf(d)); } 
+    final double z = roundingTest(
+      BigInteger.valueOf(n),
+      BigInteger.valueOf(d));
+    return z; } 
 
   public static final double roundingTest (final double x) {
     //    System.out.println();
@@ -615,8 +617,15 @@ public final class Divide {
     return z; } 
 
   public static final void main (final String[] args) {
-    roundingTest(0x1.30eb6938c0156p6);
-    roundingTest(0x1.30eb6938c0157p6);
+    //    roundingTest(13L,3L);
+    //    roundingTest(0x1.30eb6938c0156p6);
+    //    roundingTest(0x1.30eb6938c0157p6);
+    roundingTest(
+      (0x789f09858446ad92L >>> 1) + 100L,
+      (0x19513ea5d70c32eL >>> 1));
+    roundingTest(
+      (0x789f09858446ad92L >>> 1) + 10L,
+      (0x19513ea5d70c32eL >>> 1));
     //roundingTest(0x789f09858446ad92L,0x19513ea5d70c32eL);
     //        roundingTest(0x0.0000000000001p-1022);
     //        roundingTest(0x0.1000000000001p-1022);
@@ -634,7 +643,7 @@ public final class Divide {
     //        subnormalDoubleRoundingTest();
     //        normalDoubleRoundingTest();
     //        finiteDoubleRoundingTest(); 
-    fromLongsRoundingTest();
+//    fromLongsRoundingTest();
     //    fromBigIntegersRoundingTest(); 
   }
 
