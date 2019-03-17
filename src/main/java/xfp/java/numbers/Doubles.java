@@ -129,7 +129,6 @@ public final class Doubles implements Set {
 
   //--------------------------------------------------------------
   /**
-   * 
    * @param s sign bit, must be 0 or 1
    * @param t significand, must be in 
    * [0,{@link #SIGNIFICAND_MASK}]

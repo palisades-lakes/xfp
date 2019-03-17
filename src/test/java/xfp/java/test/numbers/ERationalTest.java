@@ -59,6 +59,15 @@ public final class ERationalTest {
 
   @SuppressWarnings({ "static-method" })
   @Test
+  public final void longRoundingTest () {
+    final ERational f = 
+      ERational.Create(
+        EInteger.FromInt64(0x789f09858446ad92L),
+        EInteger.FromInt64(0x19513ea5d70c32eL));
+    assertTrue(correctRounding(f)); }
+
+  @SuppressWarnings({ "static-method" })
+  @Test
   public final void fromEIntegersRoundingTest () {
     final Generator gn = 
       Generators.eIntegerGenerator(
