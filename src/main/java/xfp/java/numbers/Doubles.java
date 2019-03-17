@@ -21,7 +21,7 @@ import xfp.java.prng.Generators;
 /** Utilities for <code>double</code>, <code>double[]</code>.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-11
+ * @version 2019-03-17
  */
 public final class Doubles implements Set {
 
@@ -163,6 +163,21 @@ public final class Doubles implements Set {
     assert (0L == (ss & se & t));
     final double x = longBitsToDouble(ss | se | t);
     return x; }
+  
+  //--------------------------------------------------------------
+  /**
+   * @param negative
+   * @param t significand, must be in 
+   * [0,{@link #SIGNIFICAND_MASK}]
+   * @param e unbiased exponent, must be in 
+   * [{@link #MINIMUM_EXPONENT},{@link #MAXIMUM_EXPONENT}]
+   * @return equivalent <code>double</code> value
+   */
+
+  public static final double makeDouble (final boolean negative,
+                                         final long t,
+                                         final int e) {
+    return makeDouble(negative ? 1 : 0,t,e); }
   
   //--------------------------------------------------------------
   /** The largest integer that can be represented exactly 
