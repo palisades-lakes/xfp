@@ -10,7 +10,7 @@ import com.upokecenter.numbers.EInteger;
  * accumulator (for testing).
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-12
+ * @version 2019-03-19
  */
 public final class RationalSum 
 implements 
@@ -57,7 +57,7 @@ Comparable<RationalSum> {
     final BigInteger numerator;
     final BigInteger denominator;
 
-    // compute m and k such that value = m * 2^k
+    // compute m and k such that x = m * 2^k
     final long bits     = Double.doubleToLongBits(x);
     final long sign     = bits & 0x8000000000000000L;
     final long exponent = bits & 0x7ff0000000000000L;

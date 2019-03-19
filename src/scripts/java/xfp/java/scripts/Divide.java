@@ -1,6 +1,5 @@
 package xfp.java.scripts;
 
-import static xfp.java.numbers.Doubles.MINIMUM_EXPONENT;
 import static xfp.java.numbers.Doubles.SIGNIFICAND_BITS;
 import static xfp.java.numbers.Doubles.SIGNIFICAND_MASK;
 
@@ -26,7 +25,7 @@ import xfp.java.prng.PRNG;
  * jy --source 11 src/scripts/java/xfp/java/scripts/Divide.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-17
+ * @version 2019-03-19
  */
 
 @SuppressWarnings("unchecked")
@@ -63,10 +62,9 @@ public final class Divide {
   private static final String description (final String name,
                                            final BigInteger i) {
 
-    return name + " = " + i.toString(0x10)
-    //+ "\n"
-    + "; lo,hi bits= [" + 
-    loBit(i) + "," + hiBit(i) + ")"; }
+    return name 
+      + "[lo,hi)=" + loBit(i) + "," + hiBit(i) + ")"
+      + " : " + i.toString(0x10); }
 
   public static final String description (final String name,
                                           final long i) {
@@ -128,6 +126,15 @@ public final class Divide {
 
   private static final int NUMERATOR_BITS = SIGNIFICAND_BITS + 1;
 
+  /** Inclusive lower bound on exponents for rounding to double.
+   */
+  private static final int MINIMUM_EXPONENT =
+    Double.MIN_EXPONENT - Doubles.SIGNIFICAND_BITS;
+
+  /** Exclusive upper bound on exponents for rounding to double.
+   */
+  private static final int MAXIMUM_EXPONENT =
+    Double.MAX_EXPONENT - Doubles.SIGNIFICAND_BITS + 1;
 
   //--------------------------------------------------------------
   /** Handle over and under flow (too many/few bits in q).
@@ -142,6 +149,8 @@ public final class Divide {
                                        final boolean negative,
                                        final int e) {
     assert q >= 1;
+    assert MINIMUM_EXPONENT <= e : Integer.toString(e);
+    assert e < MAXIMUM_EXPONENT : Integer.toString(e);
 
     //    debug();
     //    debug("divide7(long,int,int)");
@@ -180,11 +189,13 @@ public final class Divide {
                                        final boolean negative,
                                        final int e) {
     debug();
-    debug("divide6(BigInteger,int,int)");
+    debug("divide7(BigInteger,int,int)");
     debug(description("q",q));
     debug("neg=" + negative + ", e= " + e);
 
     assert q.signum() == 1;
+    assert MINIMUM_EXPONENT <= e : Integer.toString(e);
+    assert e < MAXIMUM_EXPONENT : Integer.toString(e);
     assert hiBit(q) <= NUMERATOR_BITS + 1;
 
     final BigInteger qq;
@@ -225,7 +236,7 @@ public final class Divide {
                                        final BigInteger q,
                                        final BigInteger r) {
     debug();
-    debug("divide5(BigInteger,BigInteger,int,int,BigInteger,BigInteger)");
+    debug("divide6(BigInteger,BigInteger,int,int,BigInteger,BigInteger)");
     debug(description("n",n));
     debug(description("d",d));
     debug("neg=" + negative + ", e= " + e);
@@ -234,12 +245,15 @@ public final class Divide {
 
     assert n.signum() == 1;
     assert d.signum() == 1;
+    assert MINIMUM_EXPONENT <= e : Integer.toString(e);
+    assert e < MAXIMUM_EXPONENT : Integer.toString(e);
     assert q.signum() == 1;
-    assert hiBit(q) <= NUMERATOR_BITS;
+    assert hiBit(q) <= NUMERATOR_BITS 
+      : "too many bits:" + description("q",q);
     assert r.signum() >= 0;
     assert q.compareTo(n) <= 0;
     assert r.compareTo(d) < 0;
-    
+
     final BigInteger q1 = q.add(BigInteger.ONE);
     debug(description("q1",q1));
     //    final BigInteger q1dmn = q1.multiply(d).subtract(n);
@@ -279,7 +293,7 @@ public final class Divide {
   //--------------------------------------------------------------
   /** Divide numerator by denominator to get quotient and
    * remainder.
-   *  d < n < 2d
+   *  0 < n < (d << 53)
    *  
    * @param n positive numerator
    * @param d positive denominator
@@ -294,7 +308,7 @@ public final class Divide {
                                        final boolean negative,
                                        final int e) {
     debug();
-    debug("divide4(BigInteger,BigInteger,int,int)");
+    debug("divide5(BigInteger,BigInteger,int,int)");
     debug(description("n",n));
     debug(description("d",d));
     debug("neg=" + negative + ", e= " + e);
@@ -302,18 +316,18 @@ public final class Divide {
     assert n.signum() == 1;
     assert d.signum() == 1;
     assert d.compareTo(n) <= 0;
-    assert n.compareTo(d.shiftLeft(1)) < 0;
-    
-    final BigInteger n52 = n.shiftLeft(52);
-    final int e52 = e-52;
-    final BigInteger[] qr = n52.divideAndRemainder(d);
+    //assert n.compareTo(d.shiftLeft(1)) < 0;
+    assert MINIMUM_EXPONENT <= e : Integer.toString(e);
+    assert e < MAXIMUM_EXPONENT : Integer.toString(e);
+
+    final BigInteger[] qr = n.divideAndRemainder(d);
     final BigInteger q = qr[0];
     final BigInteger r = qr[1];
 
-    final double z = divide6(n52,d,negative,e52,q,r); 
+    final double z = divide6(n,d,negative,e,q,r); 
 
     final BigInteger n1 = q.multiply(d).add(r);
-    final double ze = ToDouble(n1,d,negative,e52);
+    final double ze = ToDouble(n1,d,negative,e);
     assert ze == z :
       "\n" 
       + Double.toHexString(ze) + " :E\n"
@@ -322,8 +336,9 @@ public final class Divide {
     return z; }
 
   //--------------------------------------------------------------
-  /** Adjust n and d and e so that 1 &le; n/d &lt; 2
-   * (the range for a normal significand).
+  /** Adjust n and d and e so that n is the maximum value
+   * such that 0 &le; n/d &lt; 2^53
+   * and -1074 &le; e &lt; 972.
    * 
    * @param n positive numerator
    * @param d positive denominator
@@ -345,39 +360,47 @@ public final class Divide {
 
     assert n.signum() == 1;
     assert d.signum() == 1;
+    assert MINIMUM_EXPONENT <= e : Integer.toString(e);
+    assert e < MAXIMUM_EXPONENT : Integer.toString(e);
 
     final int nh = hiBit(n);
     final int dh = hiBit(d);
-    
-    final BigInteger n0, d0;
-    final int e0;
-    if (nh < dh) { 
-      n0  = n.shiftLeft(dh-nh); 
-      d0 = d; 
-      e0 = e - (dh-nh); }
-    else if (nh > dh) { 
-      n0 = n; 
-      d0 = d.shiftLeft(nh-dh); 
-      e0 = e - (dh-nh); }
-    else { n0 = n; d0 = d; e0 = e; }
-    
-    debug(description("n0",n0));
-    debug(description("d0",d0));
+    final int s0 = dh - nh;
+    final int s1 = 
+      Math.min(
+        Math.max(s0,e-MAXIMUM_EXPONENT+1),
+        e-MINIMUM_EXPONENT);
+    final int e0 = e - s1;
+    debug("s0=" + s0);
+    debug("s1=" + s1);
     debug("e0=" + e0);
 
-    final int c = n0.compareTo(d0);
-    final double z;
-    if (c == 0) { 
-      z = Doubles.makeDouble(negative,1L<<52,e0); }
-    else if (c > 0) { 
-      z = divide5(n0,d0,negative,e0); }
-    else { 
-      final BigInteger n1 = n0.shiftLeft(1);
-      final BigInteger d1 = d0.shiftLeft(1);
-      assert d0.compareTo(n1) <= 0;
-      assert n1.compareTo(d1) < 0;
-      z = divide5(n1,d0,negative,e0-1); }
-    
+    final BigInteger n0, d0;
+    if (nh < dh) { n0  = n.shiftLeft(s1); d0 = d; }
+    else if (nh > dh) { n0 = n; d0 = d.shiftLeft(-s1); }
+    else { n0 = n; d0 = d; }
+
+    debug(description("n0",n0));
+    debug(description("d0",d0));
+
+    final BigInteger n1;
+    final BigInteger d1;
+    final int e1;
+    // subnormal
+    if (e0 == MINIMUM_EXPONENT) { n1 = n0; d1 = d0; e1 = e0;}
+    else { // normal
+      if (d0.compareTo(d0) <= 0) { n1 = n0; d1 = d0; e1 = e0;}
+      else { 
+        n1 = n0.shiftLeft(1);
+        d1 = d0.shiftLeft(1);
+        e1 = e0 -1;
+        assert d0.compareTo(n1) <= 0;
+        assert n1.compareTo(d1) < 0; } }
+
+    debug(description("n1",n1));
+    debug(description("d1",d1));
+
+    final double z = divide5(n1,d1,negative,e1);
     final double ze = ToDouble(n0,d0,negative,e0);
     assert ze == z :
       "\n" 
@@ -407,15 +430,15 @@ public final class Divide {
 
     final int en = loBit(n);
     final int ed = loBit(d);
+    final int e = en-ed;
 
-    //    debug("ed-en= " + en + "-" + ed + "=" + e);
+    debug("ed-en= " + en + "-" + ed + "=" + e);
 
     final BigInteger n1 = n.shiftRight(en);
     final BigInteger d1 = d.shiftRight(ed);
     assert 0 == loBit(n1);
     assert 0 == loBit(n1);
-    
-    final int e = en-ed;
+
     final double z = divide3(n1,d1,negative,e); 
 
     final double ze = ToDouble(n1,d1,negative,e);
@@ -444,7 +467,7 @@ public final class Divide {
 
     assert n.signum() == 1;
     assert d.signum() == 1;
-    
+
     final BigInteger gcd = n.gcd(d);
     final BigInteger n0,d0;
     if (BigInteger.ONE.equals(gcd)) { n0 = n; d0 = d; }
@@ -511,99 +534,23 @@ public final class Divide {
 
   //--------------------------------------------------------------
 
-  private static final int TRYS = 1024 * 1024;
-
-  public static final void fromBigIntegersRoundingTest () {
-    final Generator gn = 
-      Generators.bigIntegerGenerator(
-        PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
-    final Generator gd = 
-      Generators.nonzeroBigIntegerGenerator(
-        PRNG.well44497b("seeds/Well44497b-2019-01-07.txt"));
-    for (int i=0;i<TRYS;i++) {
-      final BigInteger n = (BigInteger) gn.next();
-      final BigInteger d = (BigInteger) gd.next();
-      final double z = divide(n,d);
-      final double ze = ToDouble(n,d);
-      assert z == ze : i; } }
-
-  public static final void fromLongsRoundingTest () {
-    final Generator gn = 
-      Generators.longGenerator(
-        PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
-    final Generator gd = 
-      Generators.positiveLongGenerator(
-        PRNG.well44497b("seeds/Well44497b-2019-01-07.txt"));
-    for (int i=0;i<TRYS;i++) {
-      // some longs will not be exactly representable as doubles
-      final long n = gn.nextLong();
-      final long d = gd.nextLong();
-      final double z = divide(n,d);
-      final double ze = ToDouble(n,d);
-      assert z == ze : 
-        i + "\n"
-        + description("n",n) + "\n"
-        + description("d",d) + "\n"
-        + Double.toHexString(z)  + "\n"
-        + Double.toHexString(ze)  + " :E\n";
-    } }
-
-  public static final void finiteDoubleRoundingTest () {
-    final Generator g = 
-      Generators.finiteDoubleGenerator(
-        PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
-    for (int i=0;i<TRYS;i++) {
-      final double x = g.nextDouble();
-      final BigInteger[] nd = RationalSum.toRatio(x);
-      final BigInteger n = nd[0];
-      final BigInteger d = nd[1];
-      final double z = divide(n,d);
-      final double ze = ToDouble(n,d);
-      assert z == ze : i+ " : " + Double.toHexString(x); } }
-
-  public static final void normalDoubleRoundingTest () {
-    final Generator g = 
-      Generators.normalDoubleGenerator(
-        PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
-    for (int i=0;i<TRYS;i++) {
-      final double x = g.nextDouble();
-      final BigInteger[] nd = RationalSum.toRatio(x);
-      final BigInteger n = nd[0];
-      final BigInteger d = nd[1];
-      final double z = divide(n,d);
-      final double ze = ToDouble(n,d);
-      assert z == ze : 
-        i + "\n" 
-        + Double.toHexString(x) + "\n"
-        + Double.toHexString(ze) + "\n"
-        + Double.toHexString(z); } }
-
-  public static final void subnormalDoubleRoundingTest () {
-    final Generator g = 
-      Generators.subnormalDoubleGenerator(
-        PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
-    for (int i=0;i<TRYS;i++) {
-      final double x = g.nextDouble();
-      final BigInteger[] nd = RationalSum.toRatio(x);
-      final BigInteger n = nd[0];
-      final BigInteger d = nd[1];
-      final double z = divide(n,d);
-      final double ze = ToDouble(n,d);
-      assert z == ze : i + " : " + Double.toHexString(x); } }
-
-  //--------------------------------------------------------------
-
   public static final double roundingTest (final BigInteger n,
                                            final BigInteger d) {
     final double ze = ToDouble(n,d);
     debug(Double.toHexString(ze) + " :E");
-    final double z = divide(n,d);
-    debug(Double.toHexString(z) + " :D");
-    assert ze == z : 
-      "\n" 
-      + Double.toHexString(ze) + " :E\n"
-      + Double.toHexString(z); 
-    return z; } 
+    try {
+      final double z = divide(n,d);
+      debug(Double.toHexString(z) + " :D");
+      assert ze == z : 
+        "\n" 
+        + Double.toHexString(ze) + " :E\n"
+        + Double.toHexString(z); 
+      return z; } 
+    catch (final Throwable t) {
+      System.err.println("failed on:");
+      System.err.println(description("n",n)); 
+      System.err.println(description("d",d)); 
+      throw t; } }
 
   public static final double roundingTest (final long n,
                                            final long d) {
@@ -628,63 +575,132 @@ public final class Divide {
     final BigInteger[] nd = RationalSum.toRatio(x);
     final BigInteger n = nd[0];
     final BigInteger d = nd[1];
-    final double z = roundingTest(n,d);
-    assert z == x : 
-      "E:\n" 
-      + Double.toHexString(x) + "\n"
-      + Double.toHexString(z); 
-    return z; } 
+    try {
+      final double z = roundingTest(n,d);
+      assert z == x : 
+        "E:\n" 
+        + Double.toHexString(x) + "\n"
+        + Double.toHexString(z); 
+      return z; } 
+    catch (final Throwable t) {
+      System.err.println("failed on x= " + Double.toHexString(x)); 
+      throw t; } }
+
+  //--------------------------------------------------------------
+
+  private static final int TRYS = 1024 * 1024;
+
+  public static final void fromBigIntegersRoundingTest () {
+    final Generator gn = 
+      Generators.bigIntegerGenerator(
+        PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
+    final Generator gd = 
+      Generators.nonzeroBigIntegerGenerator(
+        PRNG.well44497b("seeds/Well44497b-2019-01-07.txt"));
+    for (int i=0;i<TRYS;i++) {
+      final BigInteger n = (BigInteger) gn.next();
+      final BigInteger d = (BigInteger) gd.next();
+      roundingTest(n,d); } }
+
+  public static final void fromLongsRoundingTest () {
+    final Generator gn = 
+      Generators.longGenerator(
+        PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
+    final Generator gd = 
+      Generators.positiveLongGenerator(
+        PRNG.well44497b("seeds/Well44497b-2019-01-07.txt"));
+    for (int i=0;i<TRYS;i++) {
+      // some longs will not be exactly representable as doubles
+      final long n = gn.nextLong();
+      final long d = gd.nextLong();
+      roundingTest(n,d); } }
+
+  public static final void finiteDoubleRoundingTest () {
+    final Generator g = 
+      Generators.finiteDoubleGenerator(
+        PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
+    for (int i=0;i<TRYS;i++) {
+      final double x = g.nextDouble();
+      roundingTest(x); } }
+
+  public static final void normalDoubleRoundingTest () {
+    final Generator g = 
+      Generators.normalDoubleGenerator(
+        PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
+    for (int i=0;i<TRYS;i++) {
+      final double x = g.nextDouble();
+      roundingTest(x); } }
+
+  public static final void subnormalDoubleRoundingTest () {
+    final Generator g = 
+      Generators.subnormalDoubleGenerator(
+        PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
+    for (int i=0;i<TRYS;i++) {
+      final double x = g.nextDouble();
+      roundingTest(x); } }
+
+  //--------------------------------------------------------------
 
   public static final void main (final String[] args) {
-    DEBUG= false;
-        final BigInteger q6 = BigInteger.valueOf(0x130eb6938c0156L);
-        final BigInteger q7 = BigInteger.valueOf(0x130eb6938c0157L);
-        final BigInteger q8 = BigInteger.valueOf(0x130eb6938c0158L);
-        final BigInteger n = BigInteger.valueOf(0x789f09858446ad92L).shiftLeft(52);
-        final BigInteger d = BigInteger.valueOf(0x19513ea5d70c32eL).shiftLeft(6);
-        final BigInteger dr6 = d.multiply(q6);
-        final BigInteger dr7 = d.multiply(q7);
-        final BigInteger dr8 = d.multiply(q8);
-        final BigInteger nmdr6 = n.subtract(dr6);
-        final BigInteger nmdr7 = n.subtract(dr7);
-        final BigInteger nmdr8 = n.subtract(dr8);
-        debug("n: " + n.toString(0x10));
-        debug("d: " + d.toString(0x10));
-        debug("6: " + nmdr6.toString(0x10));
-        debug("7: " + nmdr7.toString(0x10));
-        debug("8: " + nmdr8.toString(0x10));
-        debug("c=" + nmdr6.abs().compareTo(nmdr7.abs()));
-        debug();
-        roundingTest(n.shiftRight(52),d);
-        roundingTest(0x789f09858446ad92L,0x19513ea5d70c32eL);
-            roundingTest(13L,3L);
-        roundingTest(0x1.30eb6938c0156p6);
-        roundingTest(0x1.30eb6938c0157p6);
-            roundingTest(
-              (0x789f09858446ad92L >>> 1) + 100L,
-              (0x19513ea5d70c32eL << 5));
-            roundingTest(
-              (0x789f09858446ad92L >>> 1) + 10L,
-              (0x19513ea5d70c32eL >>> 1));
-      fromLongsRoundingTest();
-      normalDoubleRoundingTest();
-      DEBUG=true;
-            roundingTest(0x0.0000000000001p-1022);
-//            roundingTest(0x0.1000000000001p-1022);
-//            roundingTest(0x0.1000000000000p-1022);
-//            roundingTest(0x1.0000000000001p-1022);
-//            roundingTest(0x1.0000000000000p-1022);
-//            roundingTest(0x0.0000000000001p-1022);
-//            roundingTest(0x0.033878c4999b7p-1022);
-//            roundingTest(0x1.33878c4999b6ap-1022);
-//            roundingTest(-0x1.76c4ebe6d57c8p-924);
-//            roundingTest(0x1.76c4ebe6d57c8p-924);
-//            roundingTest(-0x1.76c4ebe6d57c8p924);
-//            roundingTest(0x1.76c4ebe6d57c8p924);
-//            roundingTest(1L,3L);
-    //        subnormalDoubleRoundingTest();
-    //        finiteDoubleRoundingTest(); 
-    //    fromBigIntegersRoundingTest(); 
+    DEBUG = true;
+    //final double x = 0x1.fffffffffffffp1021;
+    final double x = 0x1.fffffffffffffp1021;
+    System.out.println(Double.toHexString(x)
+      + " : " + Double.toString(x));
+    final BigInteger[] nd = RationalSum.toRatio(x);
+    System.out.println(description("n",nd[0]));
+    System.out.println(description("d",nd[1]));
+    final double z = divide(nd[0],nd[1]);
+    assert x == z;
+    //    DEBUG= false;
+    //    final BigInteger q6 = BigInteger.valueOf(0x130eb6938c0156L);
+    //    final BigInteger q7 = BigInteger.valueOf(0x130eb6938c0157L);
+    //    final BigInteger q8 = BigInteger.valueOf(0x130eb6938c0158L);
+    //    final BigInteger n = BigInteger.valueOf(0x789f09858446ad92L).shiftLeft(52);
+    //    final BigInteger d = BigInteger.valueOf(0x19513ea5d70c32eL).shiftLeft(6);
+    //    final BigInteger dr6 = d.multiply(q6);
+    //    final BigInteger dr7 = d.multiply(q7);
+    //    final BigInteger dr8 = d.multiply(q8);
+    //    final BigInteger nmdr6 = n.subtract(dr6);
+    //    final BigInteger nmdr7 = n.subtract(dr7);
+    //    final BigInteger nmdr8 = n.subtract(dr8);
+    //    debug("n: " + n.toString(0x10));
+    //    debug("d: " + d.toString(0x10));
+    //    debug("6: " + nmdr6.toString(0x10));
+    //    debug("7: " + nmdr7.toString(0x10));
+    //    debug("8: " + nmdr8.toString(0x10));
+    //    debug("c=" + nmdr6.abs().compareTo(nmdr7.abs()));
+    //    debug();
+    //    roundingTest(n.shiftRight(52),d);
+    //    roundingTest(0x789f09858446ad92L,0x19513ea5d70c32eL);
+    //    roundingTest(13L,3L);
+    //    roundingTest(0x1.30eb6938c0156p6);
+    //    roundingTest(0x1.30eb6938c0157p6);
+    //    roundingTest(
+    //      (0x789f09858446ad92L >>> 1) + 100L,
+    //      (0x19513ea5d70c32eL << 5));
+    //    roundingTest(
+    //      (0x789f09858446ad92L >>> 1) + 10L,
+    //      (0x19513ea5d70c32eL >>> 1));
+    //    fromLongsRoundingTest();
+    //    normalDoubleRoundingTest();
+    //    DEBUG=true;
+    //    roundingTest(0x0.0000000000001p-1022);
+    //    //            roundingTest(0x0.1000000000001p-1022);
+    //    //            roundingTest(0x0.1000000000000p-1022);
+    //    //            roundingTest(0x1.0000000000001p-1022);
+    //    //            roundingTest(0x1.0000000000000p-1022);
+    //    //            roundingTest(0x0.0000000000001p-1022);
+    //    //            roundingTest(0x0.033878c4999b7p-1022);
+    //    //            roundingTest(0x1.33878c4999b6ap-1022);
+    //    //            roundingTest(-0x1.76c4ebe6d57c8p-924);
+    //    //            roundingTest(0x1.76c4ebe6d57c8p-924);
+    //    //            roundingTest(-0x1.76c4ebe6d57c8p924);
+    //    //            roundingTest(0x1.76c4ebe6d57c8p924);
+    //    //            roundingTest(1L,3L);
+    //    //        subnormalDoubleRoundingTest();
+    //    //        finiteDoubleRoundingTest(); 
+    //    //    fromBigIntegersRoundingTest(); 
   }
 
   //--------------------------------------------------------------

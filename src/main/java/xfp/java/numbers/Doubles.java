@@ -141,6 +141,9 @@ public final class Doubles implements Set {
                                          final long t,
                                          final int e) {
     assert ((0 == s) || (1 ==s)) : "Invalid sign bit:" + s;
+    //assert t > 0L;
+    //assert t < (1L << 53);
+    //assert e >= MINIMUM_EXPONENT;
     assert (MINIMUM_EXPONENT <= e) && (e <= MAXIMUM_EXPONENT) :
       "invalid (unbiased) exponent:" + e;
     final int be = e + EXPONENT_BIAS;
@@ -177,6 +180,9 @@ public final class Doubles implements Set {
   public static final double makeDouble (final boolean negative,
                                          final long t,
                                          final int e) {
+    assert t > 0L;
+    //assert t < (1L << 53);
+    //assert e >= MINIMUM_EXPONENT;
     return makeDouble(negative ? 1 : 0,t,e); }
   
   //--------------------------------------------------------------
