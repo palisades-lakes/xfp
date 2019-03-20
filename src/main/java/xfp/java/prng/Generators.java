@@ -548,6 +548,45 @@ public final class Generators {
         for (int i=0;i<n;i++) { z[i] = (BigInteger) g.next(); }
         return z; } }; }
 
+  /** Intended primarily for testing. <b>
+   * Generate enough bytes to at least cover the range of 
+   * <code>double</code> values.
+   */
+
+  public static final Generator 
+  positiveBigIntegerGenerator (final UniformRandomProvider urp) {
+    final double dp = 0.99;
+    return new Generator () {
+      private final ContinuousSampler choose = 
+        new ContinuousUniformSampler(urp,0.0,1.0);
+      private final CollectionSampler edgeCases = 
+        new CollectionSampler(
+          urp,
+          List.of(
+            BigInteger.ONE,
+            BigInteger.TWO,
+            BigInteger.TEN));
+      @Override
+      public Object next () { 
+        final boolean edge = choose.sample() > dp;
+        if (edge) { return edgeCases.sample(); }
+        // TODO: bound infinite loop?
+        for (;;) {
+          final BigInteger b =
+            new BigInteger(nextBytes(urp,1024)); 
+          if (0 != b.signum()) { return b.abs(); } } } }; }
+
+  public static final Generator 
+  positiveBigIntegerGenerator (final int n,
+                            final UniformRandomProvider urp) {
+    return new Generator () {
+      final Generator g = positiveBigIntegerGenerator(urp);
+      @Override
+      public final Object next () {
+        final BigInteger[] z = new BigInteger[n];
+        for (int i=0;i<n;i++) { z[i] = (BigInteger) g.next(); }
+        return z; } }; }
+
   //--------------------------------------------------------------
   // TODO: options?
   // TODO: using a DoubleSampler: those are (?) the most likely

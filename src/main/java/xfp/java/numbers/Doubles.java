@@ -180,7 +180,8 @@ public final class Doubles implements Set {
   public static final double makeDouble (final boolean negative,
                                          final long t,
                                          final int e) {
-    assert t > 0L;
+//    assert t > 0L : 
+//      "not positive: " + t + " : " + Long.toHexString(t);
     //assert t < (1L << 53);
     //assert e >= MINIMUM_EXPONENT;
     return makeDouble(negative ? 1 : 0,t,e); }
