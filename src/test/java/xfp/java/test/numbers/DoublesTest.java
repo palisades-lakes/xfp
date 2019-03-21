@@ -6,8 +6,8 @@ import static java.lang.Double.toHexString;
 import static xfp.java.numbers.Doubles.EXPONENT_BIAS;
 import static xfp.java.numbers.Doubles.EXPONENT_BITS;
 import static xfp.java.numbers.Doubles.MAXIMUM_BIASED_EXPONENT;
-import static xfp.java.numbers.Doubles.SIGNIFICAND_BITS;
-import static xfp.java.numbers.Doubles.SIGNIFICAND_MASK;
+import static xfp.java.numbers.Doubles.STORED_SIGNIFICAND_BITS;
+import static xfp.java.numbers.Doubles.STORED_SIGNIFICAND_MASK;
 import static xfp.java.numbers.Doubles.SUBNORMAL_EXPONENT;
 import static xfp.java.numbers.Doubles.biasedExponent;
 import static xfp.java.numbers.Doubles.unbiasedExponent;
@@ -48,12 +48,12 @@ public final class DoublesTest {
       ">" + Integer.toHexString(MAXIMUM_BIASED_EXPONENT);
     assert (0 <= t) :
       "Negative significand:" + Long.toHexString(t);
-    assert (t <= SIGNIFICAND_MASK) :
+    assert (t <= STORED_SIGNIFICAND_MASK) :
       "Significand too large:" + Long.toHexString(t) +
-      ">" + Long.toHexString(SIGNIFICAND_MASK);
+      ">" + Long.toHexString(STORED_SIGNIFICAND_MASK);
 
-    final long ss = ((long) s) << (EXPONENT_BITS + SIGNIFICAND_BITS);
-    final long se = ((long) e) << SIGNIFICAND_BITS;
+    final long ss = ((long) s) << (EXPONENT_BITS + STORED_SIGNIFICAND_BITS);
+    final long se = ((long) e) << STORED_SIGNIFICAND_BITS;
     assert (0L == (ss & se & t));
     final double x = longBitsToDouble(ss | se | t);
     
@@ -79,7 +79,7 @@ public final class DoublesTest {
         final int s = urp.nextInt(2);
         final int d = urp.nextInt(eRan);
         final int e = d + eMin; // unbiased exponent
-        final long t = urp.nextLong() & SIGNIFICAND_MASK;
+        final long t = urp.nextLong() & STORED_SIGNIFICAND_MASK;
         final double x = makeDouble(s,e,t); 
       return x;} 
       @Override

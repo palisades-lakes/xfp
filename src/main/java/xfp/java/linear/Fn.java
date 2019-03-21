@@ -15,7 +15,6 @@ import xfp.java.algebra.Set;
 import xfp.java.algebra.TwoSetsOneOperation;
 import xfp.java.numbers.Floats;
 import xfp.java.prng.Generator;
-import xfp.java.prng.Generators;
 
 /** The set of arrays of some fixed length <code>n</code>,
  *  of primitive numbers, or 
@@ -134,7 +133,7 @@ public final class Fn extends LinearSpaceLike {
     return 
       new Supplier () {
       final Generator g = 
-        Generators.finiteFloatGenerator(dimension(),urp);
+        Floats.finiteGenerator(dimension(),urp);
       @Override
       public final Object get () { return g.next(); } }; }
 

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import com.upokecenter.numbers.EFloat;
 import com.upokecenter.numbers.EInteger;
 
+import xfp.java.numbers.Doubles;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
 import xfp.java.prng.PRNG;
@@ -92,7 +93,7 @@ public final class EFloatTest {
   @Test
   public final void finiteDoubleRoundingTest () {
     final Generator g = 
-      Generators.finiteDoubleGenerator(
+      Doubles.finiteGenerator(
         PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
@@ -103,7 +104,7 @@ public final class EFloatTest {
   @Test
   public final void subnormalDoubleRoundingTest () {
     final Generator g = 
-      Generators.subnormalDoubleGenerator(
+      Doubles.subnormalGenerator(
         PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();

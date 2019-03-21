@@ -18,9 +18,8 @@ import xfp.java.accumulators.ERationalSum;
 import xfp.java.accumulators.RatioSum;
 import xfp.java.accumulators.RationalSum;
 import xfp.java.linear.Dn;
-import xfp.java.numbers.Floats;
+import xfp.java.numbers.Doubles;
 import xfp.java.prng.Generator;
-import xfp.java.prng.Generators;
 import xfp.java.prng.PRNG;
 
 //----------------------------------------------------------------
@@ -31,7 +30,7 @@ import xfp.java.prng.PRNG;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-09
+ * @version 2019-03-21
  */
 
 // no actual tests here (yet)
@@ -65,7 +64,7 @@ public final class SumTest {
    * (with high enough probability).
    */
   private static final int feMax (final int dim) { 
-    final int d = Floats.MAXIMUM_EXPONENT - ceilLog2(dim);
+    final int d = Float.MAX_EXPONENT - ceilLog2(dim);
     //System.out.println("emax=" + d);
     return d; }
 
@@ -84,7 +83,7 @@ public final class SumTest {
     final UniformRandomProvider urp = 
       PRNG.well44497b("seeds/Well44497b-2019-01-05.txt");
     final Generator g = 
-      Generators.finiteDoubleGenerator(dim/2,urp,feMax(dim));
+      Doubles.finiteGenerator(dim/2,urp,feMax(dim));
 
     final double[][] x = new double[n][];
     for (int i=0;i<n;i++) { x[i] = sampleDoubles(g,urp); }

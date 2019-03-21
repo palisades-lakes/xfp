@@ -13,7 +13,6 @@ import xfp.java.accumulators.EFloatSum;
 import xfp.java.accumulators.RationalSum;
 import xfp.java.numbers.Doubles;
 import xfp.java.prng.Generator;
-import xfp.java.prng.Generators;
 import xfp.java.prng.PRNG;
 
 //----------------------------------------------------------------
@@ -33,17 +32,17 @@ public final class RoundtripTests {
 
   public static final Generator finiteDoubles () {
     return
-      Generators.finiteDoubleGenerator(
+      Doubles.finiteGenerator(
         PRNG.well44497b("seeds/Well44497b-2019-01-05.txt")); }
 
   public static final Generator subnormalDoubles () {
     return
-      Generators.subnormalDoubleGenerator(
+      Doubles.subnormalGenerator(
         PRNG.well44497b("seeds/Well44497b-2019-01-05.txt")); }
 
   public static final Generator normalDoubles () {
     return
-      Generators.normalDoubleGenerator(
+      Doubles.normalGenerator(
         PRNG.well44497b("seeds/Well44497b-2019-01-05.txt")); }
 
   //--------------------------------------------------------------

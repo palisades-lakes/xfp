@@ -18,7 +18,6 @@ import xfp.java.algebra.Set;
 import xfp.java.algebra.TwoSetsOneOperation;
 import xfp.java.numbers.Doubles;
 import xfp.java.prng.Generator;
-import xfp.java.prng.Generators;
 
 /** The set of arrays of some fixed length <code>n</code>,
  *  of primitive numbers, or 
@@ -188,7 +187,7 @@ public final class Dn extends LinearSpaceLike {
     return 
       new Supplier () {
       final Generator g = 
-        Generators.finiteDoubleGenerator(dimension(),urp);
+        Doubles.finiteGenerator(dimension(),urp);
       @Override
       public final Object get () { return g.next(); } }; }
 

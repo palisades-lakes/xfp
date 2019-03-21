@@ -113,7 +113,7 @@ public final class Generators {
         return z; } }; }
 
   //--------------------------------------------------------------
-  
+
   public static final Generator 
   positiveLongGenerator (final UniformRandomProvider urp) {
     return new Generator () {
@@ -125,342 +125,18 @@ public final class Generators {
           if (x != 0L) { return Math.abs(x); } } }
       @Override
       public final Object next () {
-        
+
         return Long.valueOf(nextLong()); } }; }
 
   public static final Generator 
   positiveLongGenerator (final int n,
-                 final UniformRandomProvider urp) {
+                         final UniformRandomProvider urp) {
     return new Generator () {
       final Generator g = positiveLongGenerator(urp);
       @Override
       public final Object next () {
         final long[] z = new long[n];
         for (int i=0;i<n;i++) { z[i] = g.nextLong(); }
-        return z; } }; }
-
-  //--------------------------------------------------------------
-
-  public static final Generator 
-  floatGenerator (final UniformRandomProvider urp,
-                  final int eMin,
-                  // exclusive
-                  final int eMax ) {
-    assert eMin >= Floats.MINIMUM_EXPONENT;
-    assert eMax <= Floats.MAXIMUM_EXPONENT + 1;
-    assert eMin < eMax;
-    final int eRan = eMax - eMin;
-    return new Generator () {
-      @Override
-      public final float nextFloat () { 
-        final int s = urp.nextInt(2);
-        final int d = urp.nextInt(eRan);
-        final int e = d + eMin; // unbiased exponent
-        final int t = urp.nextInt() & Floats.SIGNIFICAND_MASK;
-        return Floats.makeFloat(s,e,t); } 
-      @Override
-      public final Object next () {
-        return Float.valueOf(nextFloat()); } }; }
-
-  public static final Generator 
-  floatGenerator (final UniformRandomProvider urp,
-                  final int eMax) {
-    return 
-      floatGenerator(
-        urp,
-        Floats.MINIMUM_EXPONENT,
-        eMax); } 
-
-  public static final Generator 
-  floatGenerator (final UniformRandomProvider urp) {
-    return 
-      floatGenerator(
-        urp,
-        Floats.MINIMUM_EXPONENT,
-        Floats.MAXIMUM_EXPONENT+1); } 
-
-  public static final Generator 
-  floatGenerator (final int n,
-                  final UniformRandomProvider urp,
-                  final int eMin,
-                  final int eMax) {
-    return new Generator () {
-      final Generator g = floatGenerator(urp,eMin,eMax);
-      @Override
-      public final Object next () {
-        final float[] z = new float[n];
-        for (int i=0;i<n;i++) { z[i] = g.nextFloat(); }
-        return z; } }; }
-
-  public static final Generator 
-  floatGenerator (final int n,
-                  final UniformRandomProvider urp,
-                  int eMax) {
-    return 
-      floatGenerator(
-        n,
-        urp,
-        Floats.MINIMUM_EXPONENT,
-        eMax); } 
-
-  public static final Generator 
-  floatGenerator (final int n,
-                  final UniformRandomProvider urp) {
-    return 
-      floatGenerator(
-        n,
-        urp,
-        Floats.MINIMUM_EXPONENT,
-        Floats.MAXIMUM_EXPONENT+1); } 
-
-  //--------------------------------------------------------------
-
-  public static final Generator 
-  doubleGenerator (final UniformRandomProvider urp,
-                   final int eMin,
-                   // exclusive
-                   final int eMax) {
-    assert eMin >= Doubles.SUBNORMAL_EXPONENT;
-    assert eMax <= Double.MAX_EXPONENT + 1;
-    assert eMin < eMax;
-    return new Generator () {
-      final int eRan = eMax-eMin;
-      @Override
-      public final double nextDouble () { 
-        final int s = urp.nextInt(2);
-        final int d = urp.nextInt(eRan);
-        final int e = d + eMin; // unbiased exponent
-        final long t = urp.nextLong() & Doubles.SIGNIFICAND_MASK;
-        final double x = Doubles.makeDouble(s,e,t); 
-        return x;} 
-      @Override
-      public final Object next () {
-        return Double.valueOf(nextDouble()); } }; }
-
-  public static final Generator 
-  doubleGenerator (final UniformRandomProvider urp,
-                   final int eMax) {
-    return 
-      doubleGenerator(
-        urp,
-        Doubles.SUBNORMAL_EXPONENT,
-        eMax); } 
-
-  public static final Generator 
-  doubleGenerator (final UniformRandomProvider urp) {
-    return 
-      doubleGenerator(
-        urp,
-        Doubles.SUBNORMAL_EXPONENT,
-        Double.MAX_EXPONENT+1); } 
-
-  public static final Generator 
-  doubleGenerator (final int n,
-                   final UniformRandomProvider urp,
-                   final int eMin,
-                   final int eMax) {
-    return new Generator () {
-      final Generator g = doubleGenerator(urp,eMin,eMax);
-      @Override
-      public final Object next () {
-        final double[] z = new double[n];
-        for (int i=0;i<n;i++) { z[i] = g.nextDouble(); }
-        return z; } }; }
-
-  public static final Generator 
-  doubleGenerator (final int n,
-                   final UniformRandomProvider urp,
-                   final int eMax) {
-    return 
-      doubleGenerator(
-        n,
-        urp,
-        Doubles.SUBNORMAL_EXPONENT,
-        eMax); } 
-
-  public static final Generator 
-  doubleGenerator (final int n,
-                   final UniformRandomProvider urp) {
-    return 
-      doubleGenerator(
-        n,
-        urp,
-        Doubles.SUBNORMAL_EXPONENT,
-        Double.MAX_EXPONENT+1); } 
-
-  //--------------------------------------------------------------
-
-  public static final Generator 
-  finiteFloatGenerator (final UniformRandomProvider urp,
-                        final int eMax) {
-    final Generator f = floatGenerator(urp,eMax);
-    return new Generator () {
-      @Override
-      public final float nextFloat () {
-        // TODO: fix infinite loop
-        for (;;) {
-          final float x = f.nextFloat();
-          if (Float.isFinite(x)) { return x; } } } 
-      @Override
-      public final Object next () {
-        return Float.valueOf(nextFloat()); } }; }
-
-  public static final Generator 
-  finiteFloatGenerator (final UniformRandomProvider urp) {
-    return finiteFloatGenerator(urp,Floats.MAXIMUM_EXPONENT); } 
-
-  public static final Generator 
-  finiteFloatGenerator (final int n,
-                        final UniformRandomProvider urp,
-                        final int delta) {
-    return new Generator () {
-      final Generator g = finiteFloatGenerator(urp,delta);
-      @Override
-      public final Object next () {
-        final float[] z = new float[n];
-        for (int i=0;i<n;i++) { z[i] = g.nextFloat(); }
-        return z; } }; }
-
-  public static final Generator 
-  finiteFloatGenerator (final int n,
-                        final UniformRandomProvider urp) {
-    return 
-      finiteFloatGenerator(n,urp,Floats.MAXIMUM_EXPONENT); }
-
-  //--------------------------------------------------------------
-  // TODO: Double[] generators
-
-  public static final Generator 
-  finiteDoubleGenerator (final UniformRandomProvider urp,
-                         final int eMax) {
-    final Generator d = doubleGenerator(urp,eMax);
-    return new Generator () {
-      @Override
-      public final double nextDouble () {
-        // TODO: fix infinite loop
-        for (;;) {
-          final double x = d.nextDouble();
-          if (Double.isFinite(x)) { return x; } } } 
-      @Override
-      public final Object next () {
-        return Double.valueOf(nextDouble()); } }; }
-
-  public static final Generator 
-  finiteDoubleGenerator (final UniformRandomProvider urp) {
-    return 
-      finiteDoubleGenerator(
-        urp,Double.MAX_EXPONENT); } 
-
-  public static final Generator 
-  finiteDoubleGenerator (final int n,
-                         final UniformRandomProvider urp,
-                         final int delta) {
-    return new Generator () {
-      final Generator g = finiteDoubleGenerator(urp,delta);
-      @Override
-      public final Object next () {
-        final double[] z = new double[n];
-        for (int i=0;i<n;i++) { z[i] = g.nextDouble(); }
-        return z; } }; }
-
-  public static final Generator 
-  finiteDoubleGenerator (final int n,
-                         final UniformRandomProvider urp) {
-    return finiteDoubleGenerator(
-      n,urp,Double.MAX_EXPONENT); }
-
-  //--------------------------------------------------------------
-
-  public static final Generator 
-  normalDoubleGenerator (final UniformRandomProvider urp,
-                         final int eMax) {
-    final Generator d = doubleGenerator(urp,eMax);
-    return new Generator () {
-      @Override
-      public final double nextDouble () {
-        // TODO: fix infinite loop
-        for (;;) {
-          final double x = d.nextDouble();
-          if (Double.isFinite(x) && Doubles.isNormal(x)) { 
-            return x; } } } 
-      @Override
-      public final Object next () {
-        return Double.valueOf(nextDouble()); } }; }
-
-  public static final Generator 
-  normalDoubleGenerator (final int n,
-                         final UniformRandomProvider urp,
-                         final int eMax) {
-    return new Generator () {
-      final Generator g = normalDoubleGenerator(urp,eMax);
-      @Override
-      public final Object next () {
-        final double[] z = new double[n];
-        for (int i=0;i<n;i++) { z[i] = g.nextDouble(); }
-        return z; } }; }
-
-  public static final Generator 
-  normalDoubleGenerator (final UniformRandomProvider urp) {
-    return 
-      normalDoubleGenerator(
-        urp,Double.MAX_EXPONENT); } 
-
-  public static final Generator 
-  normalDoubleGenerator (final int n,
-                         final UniformRandomProvider urp) {
-    return new Generator () {
-      final Generator g = normalDoubleGenerator(urp);
-      @Override
-      public final Object next () {
-        final double[] z = new double[n];
-        for (int i=0;i<n;i++) { z[i] = g.nextDouble(); }
-        return z; } }; }
-
-  //--------------------------------------------------------------
-  // TODO: eMax doesn't make sense here
-  
-  public static final Generator 
-  subnormalDoubleGenerator (final UniformRandomProvider urp,
-                            final int eMax) {
-    final Generator d = doubleGenerator(urp,eMax);
-    return new Generator () {
-      @Override
-      public final double nextDouble () {
-        // TODO: fix infinite loop
-        for (;;) {
-          final double x = d.nextDouble();
-          if ((Double.isFinite(x)) && (! Doubles.isNormal(x))) { 
-            return x; } } } 
-      @Override
-      public final Object next () {
-        return Double.valueOf(nextDouble()); } }; }
-
-  public static final Generator 
-  subnormalDoubleGenerator (final int n,
-                            final UniformRandomProvider urp,
-                            final int eMax) {
-    return new Generator () {
-      final Generator g = subnormalDoubleGenerator(urp,eMax);
-      @Override
-      public final Object next () {
-        final double[] z = new double[n];
-        for (int i=0;i<n;i++) { z[i] = g.nextDouble(); }
-        return z; } }; }
-
-  public static final Generator 
-  subnormalDoubleGenerator (final UniformRandomProvider urp) {
-    return 
-      subnormalDoubleGenerator(urp,Double.MAX_EXPONENT); } 
-
-  public static final Generator 
-  subnormalDoubleGenerator (final int n,
-                            final UniformRandomProvider urp) {
-    return new Generator () {
-      final Generator g = subnormalDoubleGenerator(urp);
-      @Override
-      public final Object next () {
-        final double[] z = new double[n];
-        for (int i=0;i<n;i++) { z[i] = g.nextDouble(); }
         return z; } }; }
 
   //--------------------------------------------------------------
@@ -538,7 +214,7 @@ public final class Generators {
 
   public static final Generator 
   nonzeroBigIntegerGenerator (final int n,
-                            final UniformRandomProvider urp) {
+                              final UniformRandomProvider urp) {
     return new Generator () {
       final Generator g = nonzeroBigIntegerGenerator(urp);
       @Override
@@ -577,7 +253,7 @@ public final class Generators {
 
   public static final Generator 
   positiveBigIntegerGenerator (final int n,
-                            final UniformRandomProvider urp) {
+                               final UniformRandomProvider urp) {
     return new Generator () {
       final Generator g = positiveBigIntegerGenerator(urp);
       @Override
@@ -609,7 +285,7 @@ public final class Generators {
     return new Generator () {
       private final ContinuousSampler choose = 
         new ContinuousUniformSampler(urp,0.0,1.0);
-      private final Generator fdg = finiteDoubleGenerator(urp);
+      private final Generator fdg = Doubles.finiteGenerator(urp);
       private final CollectionSampler edgeCases = 
         new CollectionSampler(
           urp,
@@ -730,7 +406,7 @@ public final class Generators {
     return new Generator () {
       private final ContinuousSampler choose = 
         new ContinuousUniformSampler(urp,0.0,1.0);
-      private final Generator fdg = finiteDoubleGenerator(urp);
+      private final Generator fdg = Doubles.finiteGenerator(urp);
       private final CollectionSampler edgeCases = 
         new CollectionSampler(
           urp,
@@ -816,7 +492,7 @@ public final class Generators {
     return new Generator () {
       private final ContinuousSampler choose = 
         new ContinuousUniformSampler(urp,0.0,1.0);
-      private final Generator fdg = finiteDoubleGenerator(urp);
+      private final Generator fdg = Doubles.finiteGenerator(urp);
       private final CollectionSampler edgeCases = 
         new CollectionSampler(
           urp,
@@ -864,7 +540,7 @@ public final class Generators {
     return new Generator () {
       private final ContinuousSampler choose = 
         new ContinuousUniformSampler(urp,0.0,1.0);
-      private final Generator fdg = finiteDoubleGenerator(urp);
+      private final Generator fdg = Doubles.finiteGenerator(urp);
       private final CollectionSampler edgeCases = 
         new CollectionSampler(
           urp,
@@ -926,8 +602,8 @@ public final class Generators {
             shortGenerator(urp),
             intGenerator(urp),
             longGenerator(urp),
-            floatGenerator(urp),
-            doubleGenerator(urp),
+            Floats.generator(urp),
+            Doubles.generator(urp),
             bigIntegerGenerator(urp),
             //bigDecimalGenerator(urp),
             eIntegerGenerator(urp),
@@ -972,8 +648,8 @@ public final class Generators {
             shortGenerator(urp),
             intGenerator(urp),
             longGenerator(urp),
-            finiteFloatGenerator(urp),
-            finiteDoubleGenerator(urp),
+            Floats.finiteGenerator(urp),
+            Doubles.finiteGenerator(urp),
             bigIntegerGenerator(urp),
             //bigDecimalGenerator(urp),
             eIntegerGenerator(urp),
@@ -1017,8 +693,8 @@ public final class Generators {
             longGenerator(n,urp),
             bigIntegerGenerator(n,urp),
             //bigDecimalGenerator(n,urp),
-            finiteFloatGenerator(n,urp),
-            finiteDoubleGenerator(n,urp),
+            Floats.finiteGenerator(n,urp),
+            Doubles.finiteGenerator(n,urp),
             eIntegerGenerator(n,urp),
             eRationalFromDoubleGenerator(n,urp)
             // clojure.lang.Ratio doesn't round correctly

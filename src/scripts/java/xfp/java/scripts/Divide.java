@@ -5,7 +5,7 @@ import static java.lang.Double.MIN_EXPONENT;
 import static java.lang.Double.NEGATIVE_INFINITY;
 import static java.lang.Double.POSITIVE_INFINITY;
 import static xfp.java.numbers.Doubles.MINIMUM_SUBNORMAL_EXPONENT;
-import static xfp.java.numbers.Doubles.SIGNIFICAND_BITS;
+import static xfp.java.numbers.Doubles.STORED_SIGNIFICAND_BITS;
 
 import java.math.BigInteger;
 
@@ -128,17 +128,17 @@ public final class Divide {
 
   //--------------------------------------------------------------
 
-  private static final int NUMERATOR_BITS = SIGNIFICAND_BITS + 1;
+  private static final int NUMERATOR_BITS = STORED_SIGNIFICAND_BITS + 1;
 
   /** Inclusive lower bound on exponents for rounding to double.
    */
   private static final int MINIMUM_EXPONENT =
-    Double.MIN_EXPONENT - Doubles.SIGNIFICAND_BITS;
+    Double.MIN_EXPONENT - Doubles.STORED_SIGNIFICAND_BITS;
 
   /** Exclusive upper bound on exponents for rounding to double.
    */
   private static final int MAXIMUM_EXPONENT =
-    Double.MAX_EXPONENT - Doubles.SIGNIFICAND_BITS + 1;
+    Double.MAX_EXPONENT - Doubles.STORED_SIGNIFICAND_BITS + 1;
 
   //--------------------------------------------------------------
   /** Handle over and under flow (too many/few bits in q).
@@ -161,26 +161,24 @@ public final class Divide {
     if (subnormal) {
       assert e7 == MINIMUM_EXPONENT;
       assert 0L < q7;
-      assert q7 < (1L << SIGNIFICAND_BITS); }
+      assert q7 < (1L << STORED_SIGNIFICAND_BITS); }
     else {
       assert MINIMUM_EXPONENT <= e7 : Integer.toString(e7);
       assert e7 < MAXIMUM_EXPONENT : Integer.toString(e7);
-      assert (1L << SIGNIFICAND_BITS) <= q7 
+      assert (1L << STORED_SIGNIFICAND_BITS) <= q7 
         : description("q7",q7); 
-      assert q7 <= (1L << (SIGNIFICAND_BITS+1)); }
+      assert q7 <= (1L << (STORED_SIGNIFICAND_BITS+1)); }
 
     final int e70;
-    if (subnormal) { e70 = e7 + SIGNIFICAND_BITS - 1;}
-    else { e70 = e7 + SIGNIFICAND_BITS; }
+    if (subnormal) { e70 = e7 + STORED_SIGNIFICAND_BITS - 1;}
+    else { e70 = e7 + STORED_SIGNIFICAND_BITS; }
 
     if (subnormal) { assert e70 == MIN_EXPONENT - 1 : e70; }
     else {
       assert MIN_EXPONENT <= e70 : Integer.toString(e70);
       assert e70 <= MAX_EXPONENT : Integer.toString(e70); }
 
-    final double z = 
-      Doubles.makeDouble(
-        negative,e70,q7 & Doubles.SIGNIFICAND_MASK);
+    final double z = Doubles.makeDouble(negative,e70,q7);
 
     final double ze = ToDouble(negative,e7,q7);
     assert ze == z :
@@ -240,7 +238,7 @@ public final class Divide {
   //--------------------------------------------------------------
 
   private static final BigInteger TWO_52 = 
-    BigInteger.ONE.shiftLeft(SIGNIFICAND_BITS);
+    BigInteger.ONE.shiftLeft(STORED_SIGNIFICAND_BITS);
 
   private static final BigInteger TWO_53 = TWO_52.shiftLeft(1);
 
@@ -330,13 +328,13 @@ public final class Divide {
     if (subnormal) {
       assert e4 == MINIMUM_EXPONENT;
       assert TWO_52.compareTo(n4) <= 0; 
-      assert n4.compareTo(d4.shiftLeft(SIGNIFICAND_BITS)) < 0; }
+      assert n4.compareTo(d4.shiftLeft(STORED_SIGNIFICAND_BITS)) < 0; }
     else {
       assert MINIMUM_EXPONENT <= e4 : Integer.toString(e4);
       assert e4 < MAXIMUM_EXPONENT : Integer.toString(e4);
-      assert d4.shiftLeft(SIGNIFICAND_BITS).compareTo(n4) <= 0;
+      assert d4.shiftLeft(STORED_SIGNIFICAND_BITS).compareTo(n4) <= 0;
       // TODO: faster test!!!
-      assert n4.compareTo(d4.shiftLeft(SIGNIFICAND_BITS+1)) < 0; }
+      assert n4.compareTo(d4.shiftLeft(STORED_SIGNIFICAND_BITS+1)) < 0; }
 
     final BigInteger[] qr = n4.divideAndRemainder(d4);
     final BigInteger q4 = qr[0];
@@ -354,7 +352,7 @@ public final class Divide {
     return z; }
 
   //--------------------------------------------------------------
-  /** Shift <code>n3</code> {@link Doubles#SIGNIFICAND_BITS}
+  /** Shift <code>n3</code> {@link Doubles#STORED_SIGNIFICAND_BITS}
    * left, so the quotient will have enough bits (in the normal
    * case) for the significand ( as as many bits as possible in
    * thje subnormal case).
@@ -391,8 +389,8 @@ public final class Divide {
       assert n3.compareTo(d3.shiftLeft(1)) < 0; }
 
 
-    final BigInteger n30 = n3.shiftLeft(SIGNIFICAND_BITS);
-    final int e30 = e3 - SIGNIFICAND_BITS;
+    final BigInteger n30 = n3.shiftLeft(STORED_SIGNIFICAND_BITS);
+    final int e30 = e3 - STORED_SIGNIFICAND_BITS;
 
     debug(description("n30",n30));
     debug("e30=" + e30);
@@ -668,7 +666,7 @@ public final class Divide {
 
   //--------------------------------------------------------------
 
-  private static final int TRYS = 8 * 1024;
+  private static final int TRYS = 16 * 1024;
 
   public static final void fromBigIntegersRoundingTest () {
     final Generator gn = 
@@ -697,7 +695,7 @@ public final class Divide {
 
   public static final void finiteDoubleRoundingTest () {
     final Generator g = 
-      Generators.finiteDoubleGenerator(
+      Doubles.finiteGenerator(
         PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
@@ -705,7 +703,7 @@ public final class Divide {
 
   public static final void normalDoubleRoundingTest () {
     final Generator g = 
-      Generators.normalDoubleGenerator(
+      Doubles.normalGenerator(
         PRNG.well44497b("seeds/Well44497b-2019-01-07.txt"));
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
@@ -713,7 +711,7 @@ public final class Divide {
 
   public static final void subnormalDoubleRoundingTest () {
     final Generator g = 
-      Generators.subnormalDoubleGenerator(
+      Doubles.subnormalGenerator(
         PRNG.well44497b("seeds/Well44497b-2019-01-09.txt"));
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
