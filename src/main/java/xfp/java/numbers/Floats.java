@@ -135,7 +135,7 @@ public final class Floats implements Set {
   //--------------------------------------------------------------
   // TODO: change exponent ranges so that significand can be taken
   // as its actual value?
-  
+
   /**
    * @param sign sign bit, must be 0 or 1
    * @param exponent unbiased exponent, must be in 
@@ -147,12 +147,12 @@ public final class Floats implements Set {
    * [0,{@link #STORED_SIGNIFICAND_MASK}].
    * Treated as <code>significand * 2<sup>-52</sup></code>.
    * @return <code>(-1)<sup>sign</sup> * 2<sup>exponent</sup>
-   * * significand * 2<sup>-52</sup></code>
+   * * significand * 2<sup>-{@link #STORED_SIGNIFICAND_BITS}</sup></code>
    */
 
-  public static final float makeFloat (final int sign,
-                                         final int exponent,
-                                         final int significand) {
+  public static final float mergeBits (final int sign,
+                                       final int exponent,
+                                       final int significand) {
 
     assert ((0 == sign) || (1 ==sign)) : "Invalid sign bit:" + sign;
 
@@ -212,16 +212,17 @@ public final class Floats implements Set {
    * [{@link #MIN_NORMAL_SIGNIFICAND},{@link #MAX_NORMAL_SIGNIFICAND}]
    * if <code>exponent</code> is in 
    * [{@link Float#MIN_EXPONENT}, {@link Float#MAX_EXPONENT}].
-   * @return equivalent <code>float</code> value
+   * @return <code>(-1)<sup>sign</sup> * 2<sup>exponent</sup>
+   * * significand</code>
    */
 
   public static final float makeFloat (final boolean negative,
-                                         final int exponent,
-                                         final int significand) {
-    return makeFloat(
-      negative ? 1 : 0, 
-        exponent,
-        significand); }
+                                       final int exponent,
+                                       final int significand) {
+    return mergeBits(
+      (negative ? 1 : 0), 
+      exponent + STORED_SIGNIFICAND_BITS,
+      significand); }
 
   //--------------------------------------------------------------
   // operations for algebraic structures over Floats.
@@ -381,7 +382,7 @@ public final class Floats implements Set {
 
   public static final Generator 
   subnormalGenerator (final int n,
-                            final UniformRandomProvider urp) {
+                      final UniformRandomProvider urp) {
     return new Generator () {
       final Generator g = subnormalGenerator(urp);
       @Override
@@ -396,8 +397,8 @@ public final class Floats implements Set {
 
   public static final Generator 
   subnormalGenerator (final int n,
-                            final UniformRandomProvider urp,
-                            final int eMax) {
+                      final UniformRandomProvider urp,
+                      final int eMax) {
     return new Generator () {
       final Generator g = subnormalGenerator(urp,eMax);
       @Override
@@ -408,7 +409,7 @@ public final class Floats implements Set {
 
   public static final Generator 
   subnormalGenerator (final UniformRandomProvider urp,
-                            final int eMax) {
+                      final int eMax) {
     final Generator d = generator(urp,eMax);
     return new Generator () {
       @Override
@@ -424,7 +425,7 @@ public final class Floats implements Set {
 
   public static final Generator 
   normalGenerator (final int n,
-                         final UniformRandomProvider urp) {
+                   final UniformRandomProvider urp) {
     return new Generator () {
       final Generator g = normalGenerator(urp);
       @Override
@@ -439,8 +440,8 @@ public final class Floats implements Set {
 
   public static final Generator 
   normalGenerator (final int n,
-                         final UniformRandomProvider urp,
-                         final int eMax) {
+                   final UniformRandomProvider urp,
+                   final int eMax) {
     return new Generator () {
       final Generator g = normalGenerator(urp,eMax);
       @Override
@@ -451,7 +452,7 @@ public final class Floats implements Set {
 
   public static final Generator 
   normalGenerator (final UniformRandomProvider urp,
-                         final int eMax) {
+                   final int eMax) {
     final Generator d = generator(urp,eMax);
     return new Generator () {
       @Override
@@ -467,14 +468,14 @@ public final class Floats implements Set {
 
   public static final Generator 
   finiteGenerator (final int n,
-                         final UniformRandomProvider urp) {
+                   final UniformRandomProvider urp) {
     return finiteFloatGenerator(
       n,urp,Float.MAX_EXPONENT); }
 
   public static final Generator 
   finiteFloatGenerator (final int n,
-                         final UniformRandomProvider urp,
-                         final int delta) {
+                        final UniformRandomProvider urp,
+                        final int delta) {
     return new Generator () {
       final Generator g = finiteGenerator(urp,delta);
       @Override
@@ -489,7 +490,7 @@ public final class Floats implements Set {
 
   public static final Generator 
   finiteGenerator (final UniformRandomProvider urp,
-                         final int eMax) {
+                   final int eMax) {
     final Generator d = generator(urp,eMax);
     return new Generator () {
       @Override
@@ -504,21 +505,21 @@ public final class Floats implements Set {
 
   public static final Generator 
   generator (final int n,
-                   final UniformRandomProvider urp) {
+             final UniformRandomProvider urp) {
     return 
       generator(n,urp,SUBNORMAL_EXPONENT,Float.MAX_EXPONENT+1); }
 
   public static final Generator 
   generator (final int n,
-                   final UniformRandomProvider urp,
-                   final int eMax) {
+             final UniformRandomProvider urp,
+             final int eMax) {
     return generator(n,urp,SUBNORMAL_EXPONENT,eMax); }
 
   public static final Generator 
   generator (final int n,
-                   final UniformRandomProvider urp,
-                   final int eMin,
-                   final int eMax) {
+             final UniformRandomProvider urp,
+             final int eMin,
+             final int eMax) {
     return new Generator () {
       final Generator g = generator(urp,eMin,eMax);
       @Override
@@ -534,14 +535,14 @@ public final class Floats implements Set {
 
   public static final Generator 
   generator (final UniformRandomProvider urp,
-                   final int eMax) {
+             final int eMax) {
     return generator(urp,SUBNORMAL_EXPONENT,eMax); }
 
   public static final Generator 
   generator (final UniformRandomProvider urp,
-                   final int eMin,
-                   // exclusive
-                   final int eMax) {
+             final int eMin,
+             // exclusive
+             final int eMax) {
     assert eMin >= SUBNORMAL_EXPONENT;
     assert eMax <= INFINITE_OR_NAN_EXPONENT + 1;
     assert eMin < eMax;
@@ -560,7 +561,7 @@ public final class Floats implements Set {
           t = u; }
         else {
           t = u + MIN_NORMAL_SIGNIFICAND; }
-        final float x = makeFloat(s,e,t); 
+        final float x = mergeBits(s,e,t); 
         return x;} 
       @Override
       public final Object next () {

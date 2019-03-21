@@ -169,14 +169,12 @@ public final class Divide {
         : description("q7",q7); 
       assert q7 <= (1L << (STORED_SIGNIFICAND_BITS+1)); }
 
-    final int e70;
-    if (subnormal) { e70 = e7 + STORED_SIGNIFICAND_BITS - 1;}
-    else { e70 = e7 + STORED_SIGNIFICAND_BITS; }
+    final int e70 = subnormal ? (e7 - 1) : e7;
 
-    if (subnormal) { assert e70 == MIN_EXPONENT - 1 : e70; }
+    if (subnormal) { assert e70 == MINIMUM_EXPONENT - 1 : e70; }
     else {
-      assert MIN_EXPONENT <= e70 : Integer.toString(e70);
-      assert e70 <= MAX_EXPONENT : Integer.toString(e70); }
+      assert MINIMUM_EXPONENT <= e70 : Integer.toString(e70);
+      assert e70 < MAXIMUM_EXPONENT : Integer.toString(e70); }
 
     final double z = Doubles.makeDouble(negative,e70,q7);
 

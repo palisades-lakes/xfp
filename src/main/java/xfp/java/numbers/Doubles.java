@@ -150,12 +150,12 @@ public final class Doubles implements Set {
    * [0,{@link #STORED_SIGNIFICAND_MASK}].
    * Treated as <code>significand * 2<sup>-52</sup></code>.
    * @return <code>(-1)<sup>sign</sup> * 2<sup>exponent</sup>
-   * * significand * 2<sup>-52</sup></code>
+   * * significand * 2<sup>-{@link #STORED_SIGNIFICAND_BITS}</sup></code>
    */
 
-  public static final double makeDouble (final int sign,
-                                         final int exponent,
-                                         final long significand) {
+  public static final double mergeBits (final int sign,
+                                        final int exponent,
+                                        final long significand) {
 
     assert ((0 == sign) || (1 ==sign)) : "Invalid sign bit:" + sign;
 
@@ -215,16 +215,17 @@ public final class Doubles implements Set {
    * [{@link #MIN_NORMAL_SIGNIFICAND},{@link #MAX_NORMAL_SIGNIFICAND}]
    * if <code>exponent</code> is in 
    * [{@link Double#MIN_EXPONENT}, {@link Double#MAX_EXPONENT}].
-   * @return equivalent <code>double</code> value
+   * @return <code>(-1)<sup>sign</sup> * 2<sup>exponent</sup>
+   * * significand</code>
    */
 
   public static final double makeDouble (final boolean negative,
                                          final int exponent,
                                          final long significand) {
-    return makeDouble(
-      negative ? 1 : 0, 
-        exponent,
-        significand); }
+    return mergeBits(
+      (negative ? 1 : 0), 
+      exponent + STORED_SIGNIFICAND_BITS,
+      significand); }
 
   //--------------------------------------------------------------
   /** The largest integer that can be represented exactly 
@@ -570,7 +571,7 @@ public final class Doubles implements Set {
           t = u; }
         else {
           t = u + MIN_NORMAL_SIGNIFICAND; }
-        final double x = makeDouble(s,e,t); 
+        final double x = mergeBits(s,e,t); 
         return x;} 
       @Override
       public final Object next () {
