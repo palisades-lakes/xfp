@@ -32,14 +32,14 @@ import xfp.java.prng.PRNG;
 /** Common code for testing sets. 
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-09
+ * @version 2019-03-21
  */
 
 @SuppressWarnings("unchecked")
 public final class AlgebraicStructureTests {
 
-  private static final int TRYS = 128;
-  static final int SPACE_TRYS = 16;
+  private static final int TRYS = 64;
+  static final int SPACE_TRYS = 8;
 
   //--------------------------------------------------------------
 

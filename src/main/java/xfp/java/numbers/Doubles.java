@@ -1,6 +1,9 @@
 package xfp.java.numbers;
 
+import static java.lang.Double.MAX_EXPONENT;
+import static java.lang.Double.MIN_EXPONENT;
 import static java.lang.Double.MIN_VALUE;
+import static java.lang.Double.doubleToRawLongBits;
 import static java.lang.Double.longBitsToDouble;
 import static java.lang.Double.toHexString;
 
@@ -21,7 +24,7 @@ import xfp.java.prng.Generators;
 /** Utilities for <code>double</code>, <code>double[]</code>.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-17
+ * @version 2019-03-21
  */
 public final class Doubles implements Set {
 
@@ -43,29 +46,22 @@ public final class Doubles implements Set {
   public static final long SIGNIFICAND_MASK =
     (1L << SIGNIFICAND_BITS) - 1L;
 
-  public static final int EXPONENT_BIAS =
-    (1 << (EXPONENT_BITS - 1)) - 1;
-
+  /** inclusive */
   public static final int MAXIMUM_BIASED_EXPONENT =
     (1 << EXPONENT_BITS) - 1;
 
-  /** inclusive upper bound. */
-  public static final int MAXIMUM_EXPONENT = EXPONENT_BIAS;
+  public static final int EXPONENT_BIAS =
+    (1 << (EXPONENT_BITS - 1)) - 1;
 
-  /** #MINIMUM_EXPONENT implies a subnormal number, with implied
+  /** Unbiased exponent for subnormal numbers, with implied
    * leading bit = 0.
    */
-  public static final int MINIMUM_EXPONENT = -MAXIMUM_EXPONENT;
+  public static final int SUBNORMAL_EXPONENT = 
+    MIN_EXPONENT - 1;
   
-  /** smallest exponent for normal numbers with implied leading 
-   * bit = 1.
-   */
-  public static final int MINIMUM_NORMAL_EXPONENT =
-    1 - MAXIMUM_EXPONENT;
-
-  /** Exponent of smallest non zero value. */
+  /** Unbiased exponent of smallest non zero value. */
   public static final int MINIMUM_SUBNORMAL_EXPONENT =
-    MINIMUM_NORMAL_EXPONENT - SIGNIFICAND_BITS;
+    MIN_EXPONENT - SIGNIFICAND_BITS;
 
   // eclipse validates constant expressions at build time
   //  static {
@@ -80,7 +76,7 @@ public final class Doubles implements Set {
     return
       SIGNIFICAND_MASK
       &
-      Double.doubleToRawLongBits(x); }
+      doubleToRawLongBits(x); }
 
   /** add be the implicit leading bit, if there. */
   
@@ -95,9 +91,7 @@ public final class Doubles implements Set {
   public static final int biasedExponent (final double x) {
     return
       (int)
-      ((EXPONENT_MASK
-        &
-        Double.doubleToRawLongBits(x))
+      ((EXPONENT_MASK & doubleToRawLongBits(x))
         >> SIGNIFICAND_BITS); }
 
   //--------------------------------------------------------------
@@ -109,9 +103,7 @@ public final class Doubles implements Set {
 
   public static final int signBit (final double x) {
     return  (int)
-      ((SIGN_MASK
-        &
-        Double.doubleToRawLongBits(x))
+      ((SIGN_MASK & doubleToRawLongBits(x))
         >> (EXPONENT_BITS + SIGNIFICAND_BITS)); }
 
   public static final boolean nonNegative (final double x) {
@@ -123,33 +115,30 @@ public final class Doubles implements Set {
     final int be = biasedExponent(x);
     return (0.0 == x) || ((0 != be) && (0x7ff != be)); }
 
-//  public static final boolean isNormal (final double x) {
-//    return (x <= -MIN_NORMAL) || (MIN_NORMAL <= x)
-  // || (x == 0.0); }
-
   //--------------------------------------------------------------
   /**
    * @param s sign bit, must be 0 or 1
+   * @param e unbiased exponent, must be in 
+   * [{@link #SUBNORMAL_EXPONENT},{@link #MAXIMUM_EXPONENT}]
    * @param t significand, must be in 
    * [0,{@link #SIGNIFICAND_MASK}]
-   * @param e unbiased exponent, must be in 
-   * [{@link #MINIMUM_EXPONENT},{@link #MAXIMUM_EXPONENT}]
    * @return equivalent <code>double</code> value
    */
 
   public static final double makeDouble (final int s,
-                                         final long t,
-                                         final int e) {
+                                         final int e,
+                                         final long t) {
     assert ((0 == s) || (1 ==s)) : "Invalid sign bit:" + s;
     //assert t > 0L;
     //assert t < (1L << 53);
     //assert e >= MINIMUM_EXPONENT;
-    assert (MINIMUM_EXPONENT <= e) && (e <= MAXIMUM_EXPONENT) :
+    assert (SUBNORMAL_EXPONENT <= e) 
+    && (e <= MAX_EXPONENT) :
       "invalid (unbiased) exponent:" + e;
     final int be = e + EXPONENT_BIAS;
     assert (0 <= be) :
       "Negative exponent:" + Integer.toHexString(be) + " : " + be 
-      + "\n" + MINIMUM_EXPONENT + "<=" + e + "<=" + MAXIMUM_EXPONENT
+      + "\n" + SUBNORMAL_EXPONENT + "<=" + e + "<=" + MAX_EXPONENT
       + "\n" + MIN_VALUE + " " + toHexString(MIN_VALUE)
       + "\n" + EXPONENT_BIAS;
     assert (be <= MAXIMUM_BIASED_EXPONENT) :
@@ -170,21 +159,21 @@ public final class Doubles implements Set {
   //--------------------------------------------------------------
   /**
    * @param negative
+   * @param e unbiased exponent, must be in 
+   * [{@link #SUBNORMAL_EXPONENT},{@link #MAXIMUM_EXPONENT}]
    * @param t significand, must be in 
    * [0,{@link #SIGNIFICAND_MASK}]
-   * @param e unbiased exponent, must be in 
-   * [{@link #MINIMUM_EXPONENT},{@link #MAXIMUM_EXPONENT}]
    * @return equivalent <code>double</code> value
    */
 
   public static final double makeDouble (final boolean negative,
-                                         final long t,
-                                         final int e) {
+                                         final int e,
+                                         final long t) {
 //    assert t > 0L : 
 //      "not positive: " + t + " : " + Long.toHexString(t);
     //assert t < (1L << 53);
     //assert e >= MINIMUM_EXPONENT;
-    return makeDouble(negative ? 1 : 0,t,e); }
+    return makeDouble(negative ? 1 : 0,e,t); }
   
   //--------------------------------------------------------------
   /** The largest integer that can be represented exactly 

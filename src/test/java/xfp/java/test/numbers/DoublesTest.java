@@ -1,14 +1,14 @@
 package xfp.java.test.numbers;
 
+import static java.lang.Double.MAX_EXPONENT;
 import static java.lang.Double.longBitsToDouble;
 import static java.lang.Double.toHexString;
 import static xfp.java.numbers.Doubles.EXPONENT_BIAS;
 import static xfp.java.numbers.Doubles.EXPONENT_BITS;
 import static xfp.java.numbers.Doubles.MAXIMUM_BIASED_EXPONENT;
-import static xfp.java.numbers.Doubles.MAXIMUM_EXPONENT;
-import static xfp.java.numbers.Doubles.MINIMUM_EXPONENT;
 import static xfp.java.numbers.Doubles.SIGNIFICAND_BITS;
 import static xfp.java.numbers.Doubles.SIGNIFICAND_MASK;
+import static xfp.java.numbers.Doubles.SUBNORMAL_EXPONENT;
 import static xfp.java.numbers.Doubles.biasedExponent;
 import static xfp.java.numbers.Doubles.unbiasedExponent;
 
@@ -26,7 +26,7 @@ import xfp.java.prng.PRNG;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-06
+ * @version 2019-03-21
  */
 
 public final class DoublesTest {
@@ -38,7 +38,7 @@ public final class DoublesTest {
                                          final long t) {
     assert ((0 == s) || (1 ==s)) : "Invalid sign bit:" + s;
     System.out.println(ue);
-    assert (MINIMUM_EXPONENT <= ue) && (ue <= MAXIMUM_EXPONENT) :
+    assert (SUBNORMAL_EXPONENT <= ue) && (ue <= MAX_EXPONENT) :
       "invalid (unbiased) exponent:" + toHexString(ue);
     final int e = ue + EXPONENT_BIAS;
     assert (0 <= e) :
@@ -89,7 +89,7 @@ public final class DoublesTest {
   public static final int maxExponent (final int dim) { 
     final int d =
       //Floats.MAXIMUM_BIASED_EXPONENT  
-      MAXIMUM_EXPONENT  
+      MAX_EXPONENT  
       - 31 
       + Integer.numberOfLeadingZeros(dim); 
     System.out.println("delta=" + d);
@@ -103,7 +103,7 @@ public final class DoublesTest {
     final UniformRandomProvider urp = 
       PRNG.well44497b("seeds/Well44497b-2019-01-05.txt");
     final Generator g = doubleGenerator(
-      urp, MINIMUM_EXPONENT, MAXIMUM_EXPONENT);
+      urp, SUBNORMAL_EXPONENT, MAX_EXPONENT);
     for (int i=0;i<2;i++) { g.nextDouble(); }
   }
 

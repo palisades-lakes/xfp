@@ -22,7 +22,7 @@ import xfp.java.numbers.Floats;
  * that return different values on each call.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-12
+ * @version 2019-03-21
  */
 
 @SuppressWarnings("unchecked")
@@ -220,8 +220,8 @@ public final class Generators {
                    final int eMin,
                    // exclusive
                    final int eMax) {
-    assert eMin >= Doubles.MINIMUM_EXPONENT;
-    assert eMax <= Doubles.MAXIMUM_EXPONENT + 1;
+    assert eMin >= Doubles.SUBNORMAL_EXPONENT;
+    assert eMax <= Double.MAX_EXPONENT + 1;
     assert eMin < eMax;
     return new Generator () {
       final int eRan = eMax-eMin;
@@ -231,7 +231,7 @@ public final class Generators {
         final int d = urp.nextInt(eRan);
         final int e = d + eMin; // unbiased exponent
         final long t = urp.nextLong() & Doubles.SIGNIFICAND_MASK;
-        final double x = Doubles.makeDouble(s,t,e); 
+        final double x = Doubles.makeDouble(s,e,t); 
         return x;} 
       @Override
       public final Object next () {
@@ -243,7 +243,7 @@ public final class Generators {
     return 
       doubleGenerator(
         urp,
-        Doubles.MINIMUM_EXPONENT,
+        Doubles.SUBNORMAL_EXPONENT,
         eMax); } 
 
   public static final Generator 
@@ -251,8 +251,8 @@ public final class Generators {
     return 
       doubleGenerator(
         urp,
-        Doubles.MINIMUM_EXPONENT,
-        Doubles.MAXIMUM_EXPONENT+1); } 
+        Doubles.SUBNORMAL_EXPONENT,
+        Double.MAX_EXPONENT+1); } 
 
   public static final Generator 
   doubleGenerator (final int n,
@@ -275,7 +275,7 @@ public final class Generators {
       doubleGenerator(
         n,
         urp,
-        Doubles.MINIMUM_EXPONENT,
+        Doubles.SUBNORMAL_EXPONENT,
         eMax); } 
 
   public static final Generator 
@@ -285,8 +285,8 @@ public final class Generators {
       doubleGenerator(
         n,
         urp,
-        Doubles.MINIMUM_EXPONENT,
-        Doubles.MAXIMUM_EXPONENT+1); } 
+        Doubles.SUBNORMAL_EXPONENT,
+        Double.MAX_EXPONENT+1); } 
 
   //--------------------------------------------------------------
 
@@ -349,7 +349,7 @@ public final class Generators {
   finiteDoubleGenerator (final UniformRandomProvider urp) {
     return 
       finiteDoubleGenerator(
-        urp,Doubles.MAXIMUM_EXPONENT); } 
+        urp,Double.MAX_EXPONENT); } 
 
   public static final Generator 
   finiteDoubleGenerator (final int n,
@@ -367,7 +367,7 @@ public final class Generators {
   finiteDoubleGenerator (final int n,
                          final UniformRandomProvider urp) {
     return finiteDoubleGenerator(
-      n,urp,Doubles.MAXIMUM_EXPONENT); }
+      n,urp,Double.MAX_EXPONENT); }
 
   //--------------------------------------------------------------
 
@@ -403,7 +403,7 @@ public final class Generators {
   normalDoubleGenerator (final UniformRandomProvider urp) {
     return 
       normalDoubleGenerator(
-        urp,Doubles.MAXIMUM_EXPONENT); } 
+        urp,Double.MAX_EXPONENT); } 
 
   public static final Generator 
   normalDoubleGenerator (final int n,
@@ -450,8 +450,7 @@ public final class Generators {
   public static final Generator 
   subnormalDoubleGenerator (final UniformRandomProvider urp) {
     return 
-      subnormalDoubleGenerator(
-        urp,Doubles.MAXIMUM_EXPONENT); } 
+      subnormalDoubleGenerator(urp,Double.MAX_EXPONENT); } 
 
   public static final Generator 
   subnormalDoubleGenerator (final int n,

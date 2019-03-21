@@ -29,7 +29,7 @@ import xfp.java.prng.PRNG;
  * jy --source 11 src/scripts/java/xfp/java/scripts/Divide.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-19
+ * @version 2019-03-21
  */
 
 @SuppressWarnings("unchecked")
@@ -97,28 +97,28 @@ public final class Divide {
     //    debug("-> " + Double.toHexString(ze));
     return ze;}
 
-  private static final double ToDouble (final BigInteger n,
-                                        final BigInteger d,
-                                        final boolean negative) {
+  private static final double ToDouble (final boolean negative,
+                                        final BigInteger n,
+                                        final BigInteger d) {
     return negative ? ToDouble(n.negate(),d) : ToDouble(n,d) ; }
 
-  private static final double ToDouble (final BigInteger n,
-                                        final BigInteger d,
-                                        final boolean negative,
-                                        final int e) {
-    if (e < 0) { return ToDouble(n,d.shiftLeft(-e),negative); }
-    if (e > 0) { return ToDouble(n.shiftLeft(e),d,negative); }
-    return ToDouble(n,d,negative); }
+  private static final double ToDouble (final boolean negative,
+                                        final int e,
+                                        final BigInteger n,
+                                        final BigInteger d) {
+    if (e < 0) { return ToDouble(negative,n,d.shiftLeft(-e)); }
+    if (e > 0) { return ToDouble(negative,n.shiftLeft(e),d); }
+    return ToDouble(negative,n,d); }
 
-  private static final double ToDouble (final BigInteger q,
-                                        final boolean negative,
-                                        final int e) {
-    return ToDouble(q,BigInteger.ONE,negative,e); }
+  private static final double ToDouble (final boolean negative,
+                                        final int e,
+                                        final BigInteger q) {
+    return ToDouble(negative,e,q,BigInteger.ONE); }
 
-  public static final double ToDouble (final long q,
-                                       final boolean negative,
-                                       final int e) {
-    return ToDouble(BigInteger.valueOf(q),negative,e); }
+  public static final double ToDouble (final boolean negative,
+                                       final int e,
+                                       final long q) {
+    return ToDouble(negative,e,BigInteger.valueOf(q)); }
 
   public static final double ToDouble (final long n,
                                        final long d) {
@@ -142,17 +142,16 @@ public final class Divide {
 
   //--------------------------------------------------------------
   /** Handle over and under flow (too many/few bits in q).
-   * @param e7 exponent
    * @param subnormal 
+   * @param e7 exponent
    * @param q7 rounded(n/d)
    * @param s sign bit: 0 positive, 1 negative.
-   * 
    * @return (-1)^s * (2^e) * q.
    */
 
   private static final double divide7 (final boolean negative,
-                                       final int e7,
-                                       final boolean subnormal, 
+                                       final boolean subnormal,
+                                       final int e7, 
                                        final long q7) {
     debug();
     debug("divide7(long,int,int)");
@@ -177,13 +176,13 @@ public final class Divide {
     if (subnormal) { assert e70 == MIN_EXPONENT - 1 : e70; }
     else {
       assert MIN_EXPONENT <= e70 : Integer.toString(e70);
-      assert e70 < MAX_EXPONENT : Integer.toString(e70); }
+      assert e70 <= MAX_EXPONENT : Integer.toString(e70); }
 
     final double z = 
       Doubles.makeDouble(
-        negative,q7 & Doubles.SIGNIFICAND_MASK,e70);
+        negative,e70,q7 & Doubles.SIGNIFICAND_MASK);
 
-    final double ze = ToDouble(q7,negative,e7);
+    final double ze = ToDouble(negative,e7,q7);
     assert ze == z :
       "\n" 
       + Double.toHexString(ze) + " :E\n"
@@ -193,17 +192,16 @@ public final class Divide {
 
   //--------------------------------------------------------------
   /** Handle carry (too many bits in q).
-   * @param e6 exponent
    * @param subnormal TODO
+   * @param e6 exponent
    * @param q6 rounded(n/d)
    * @param s sign bit: 0 positive, 1 negative.
-   * 
    * @return (-1)^s * (2^e) * q.
    */
 
   private static final double divide6 (final boolean negative,
-                                       final int e6,
-                                       final boolean subnormal, 
+                                       final boolean subnormal,
+                                       final int e6, 
                                        final BigInteger q6) {
     debug();
     debug("divide6(BigInteger,boolean,int,boolean)");
@@ -229,9 +227,9 @@ public final class Divide {
     // handle carry
     else { q60 = q6.shiftRight(1); e60 = e6+1; }
     final double z = 
-      divide7(negative,e60,subnormal, q60.longValue()); 
+      divide7(negative,subnormal,e60, q60.longValueExact()); 
 
-    final double ze = ToDouble(q60,negative,e60);
+    final double ze = ToDouble(negative,e60,q60);
     assert ze == z :
       "\n" 
       + Double.toHexString(ze) + " :E\n"
@@ -247,52 +245,41 @@ public final class Divide {
   private static final BigInteger TWO_53 = TWO_52.shiftLeft(1);
 
   /** Is q or (q+1) closer to n/d?.
-   * 
-   * @param n5 positive numerator
-   * @param d5 positive denominator
    * @param negative extracted sign info.
-   * @param e exponent
    * @param subnormal is this a subnormal value?
+   * @param e5 exponent
    * @param q5 floor(n5/d5)
    * @param r5 d5*((n5/d5) - floor(n5/d5))
+   * @param d5 positive denominator
    * @return closest half-even rounded double to 
    * (-1)^s * (2^e) * (q + (r / d).
    */
 
-  private static final double divide5 (final BigInteger n5,
-                                       final BigInteger d5,
-                                       final boolean negative,
-                                       final int e,
+  private static final double divide5 (final boolean negative,
                                        final boolean subnormal,
-                                       final BigInteger q5, 
-                                       final BigInteger r5) {
+                                       final int e5,
+                                       final BigInteger q5,
+                                       final BigInteger r5,
+                                       final BigInteger d5) {
     debug();
     debug("divide6(BigInteger,BigInteger,boolean,int,boolean,BigInteger,BigInteger)");
-    debug(description("n5",n5));
     debug(description("d5",d5));
-    debug("negative= " + negative + ", e= " + e
+    debug("negative= " + negative + ", e= " + e5
       + ", subnormal=" + subnormal);
     debug(description("q5",q5));
     debug(description("r5",r5));
 
-    assert n5.signum() == 1;
     assert d5.signum() == 1;
     assert q5.signum() == 1;
     assert r5.signum() >= 0;
     assert r5.compareTo(d5) < 0;
     if (subnormal) {
-      assert e == MINIMUM_EXPONENT;
-      assert TWO_52.compareTo(n5) <= 0; 
-      assert n5.compareTo(d5.shiftLeft(SIGNIFICAND_BITS)) < 0; 
-      //      assert hiBit(q) <= NUMERATOR_BITS 
-      //        : "too many bits:" + description("q",q);
+      assert e5 == MINIMUM_EXPONENT;
       assert q5.compareTo(TWO_52) < 0; }
     else {
-      assert MINIMUM_EXPONENT <= e : Integer.toString(e);
-      assert e < MAXIMUM_EXPONENT : Integer.toString(e);
-      assert d5.shiftLeft(SIGNIFICAND_BITS).compareTo(n5) <= 0;
+      assert MINIMUM_EXPONENT <= e5 : Integer.toString(e5);
+      assert e5 < MAXIMUM_EXPONENT : Integer.toString(e5);
       // TODO: faster test!!!
-      assert n5.compareTo(d5.shiftLeft(SIGNIFICAND_BITS+1)) < 0; 
       assert TWO_52.compareTo(q5) <= 0;
       assert q5.compareTo(TWO_53) < 0; }
 
@@ -304,9 +291,9 @@ public final class Divide {
 
     debug(description("q50",q50));
 
-    final double z = divide6(negative,e,subnormal,q50);
+    final double z = divide6(negative,subnormal,e5,q50);
 
-    final double ze = ToDouble(q50,negative,e);
+    final double ze = ToDouble(negative,e5,q50);
     assert ze == z :
       "\n" 
       + Double.toHexString(ze) + " :E0\n"
@@ -318,20 +305,19 @@ public final class Divide {
 
   /** Divide numerator by denominator to get quotient and
    * remainder.
-   *  
+   * @param e4 initial exponent
    * @param n4 positive numerator
    * @param d4 positive denominator
    * @param s sign bit: 0 positive, 1 negative.
-   * @param e4 initial exponent
    * @return closest half-even rounded double to 
    * (-1)^s * (2^e4) * n4 / d4.
    */
 
-  private static final double divide4 (final BigInteger n4,
-                                       final BigInteger d4,
-                                       final boolean negative,
+  private static final double divide4 (final boolean negative,
+                                       final boolean subnormal,
                                        final int e4,
-                                       final boolean subnormal) {
+                                       final BigInteger n4,
+                                       final BigInteger d4) {
     debug();
     debug("divide5(BigInteger,BigInteger,boolean,int,boolean)");
     debug(description("n4",n4));
@@ -356,10 +342,10 @@ public final class Divide {
     final BigInteger q4 = qr[0];
     final BigInteger r4 = qr[1];
 
-    final double z = divide5(n4,d4,negative,e4,subnormal,q4,r4); 
+    final double z = divide5(negative,subnormal,e4,q4,r4,d4); 
 
-    final BigInteger n1 = q4.multiply(d4).add(r4);
-    final double ze = ToDouble(n1,d4,negative,e4);
+    final BigInteger n41 = q4.multiply(d4).add(r4);
+    final double ze = ToDouble(negative,e4,n41,d4);
     assert ze == z :
       "\n" 
       + Double.toHexString(ze) + " :E\n"
@@ -372,20 +358,19 @@ public final class Divide {
    * left, so the quotient will have enough bits (in the normal
    * case) for the significand ( as as many bits as possible in
    * thje subnormal case).
-   * 
+   * @param e3 exponent
    * @param n3 positive numerator
    * @param d3 positive denominator
    * @param s sign bit: 0 positive, 1 negative.
-   * @param e3 exponent
    * @return closest half-even rounded double to 
    * (-1)^s * (2^e) * n / d.
    */
 
-  private static final double divide3 (final BigInteger n3,
-                                       final BigInteger d3,
-                                       final boolean negative,
+  private static final double divide3 (final boolean negative,
+                                       final boolean subnormal,
                                        final int e3,
-                                       final boolean subnormal) {
+                                       final BigInteger n3,
+                                       final BigInteger d3) {
     debug();
     debug("divide3(BigInteger,BigInteger,boolean,int,boolean)");
     debug(description("n",n3));
@@ -400,7 +385,7 @@ public final class Divide {
       assert n3.compareTo(d3) < 0; }
     else {
       assert MIN_EXPONENT <= e3 : Integer.toString(e3);
-      assert e3 < MAX_EXPONENT : Integer.toString(e3);
+      assert e3 <= MAX_EXPONENT : Integer.toString(e3);
       assert d3.compareTo(n3) <= 0;
       // TODO: faster test!!!
       assert n3.compareTo(d3.shiftLeft(1)) < 0; }
@@ -412,9 +397,9 @@ public final class Divide {
     debug(description("n30",n30));
     debug("e30=" + e30);
 
-    final double z = divide4(n30,d3,negative,e30,subnormal);
+    final double z = divide4(negative,subnormal,e30,n30,d3);
 
-    final double ze = ToDouble(n30,d3,negative,e30);
+    final double ze = ToDouble(negative,e30,n30,d3);
     assert ze == z :
       "\n" 
       + Double.toHexString(ze) + " :E\n"
@@ -432,10 +417,10 @@ public final class Divide {
    * -1^s * 2<sup>e2</sup> * n / d.
    */
 
-  private static final double divide2 (final BigInteger n2,
-                                       final BigInteger d2,
-                                       final boolean negative,
-                                       final int e2) {
+  private static final double divide2 (final boolean negative,
+                                       final int e2,
+                                       final BigInteger n2,
+                                       final BigInteger d2) {
     debug();
     debug("divide2(BigInteger,BigInteger,boolean,int)");
     debug(description("n2",n2));
@@ -456,13 +441,13 @@ public final class Divide {
       z = negative ? -0.0 : 0.0; }
     else if (e2 < MIN_EXPONENT) {
       z = divide3(
-        n2,d2.shiftLeft(MIN_EXPONENT-e2),
-        negative,MIN_EXPONENT,true); }
+        negative,true,
+        MIN_EXPONENT,n2,d2.shiftLeft(MIN_EXPONENT-e2)); }
     else {
-      z = divide3(n2,d2,negative,e2,false); }
+      z = divide3(negative,false,e2,n2,d2); }
 
 
-    final double ze = ToDouble(n2,d2,negative,e2);
+    final double ze = ToDouble(negative,e2,n2,d2);
     assert ze == z :
       "\n" 
       + Double.toHexString(ze) + " :E\n"
@@ -474,16 +459,16 @@ public final class Divide {
   /** Extract exponent <code>e</code> so that
    * <code> n1 / d1 == 2<sup>e11</sup> * n11 / d12</code>
    * and <code>d12 &le; n11 &lt; 2*d12</code>.
-   * 
+   * @param negative flag
    * @param n1 positive numerator
    * @param d1 positive denominator
-   * @param negative flag
+   * 
    * @return closest half-even rounded double to -1^s * n / d.
    */
 
-  private static final double divide1 (final BigInteger n1,
-                                       final BigInteger d1,
-                                       final boolean negative) {
+  private static final double divide1 (final boolean negative,
+                                       final BigInteger n1,
+                                       final BigInteger d1) {
     debug();
     debug("divide1(BigInteger,BigInteger,boolean)");
     debug(description("n1",n1));
@@ -523,9 +508,9 @@ public final class Divide {
     debug(description("d12",d12));
     debug("e11=" + e11);
 
-    final double z = divide2(n10,d12,negative,e11);
+    final double z = divide2(negative,e11,n10,d12);
 
-    final double ze = ToDouble(n10,d12,negative,e11);
+    final double ze = ToDouble(negative,e11,n10,d12);
     assert ze == z :
       "\n" 
       + Double.toHexString(ze) + " :E\n"
@@ -581,9 +566,9 @@ public final class Divide {
     debug(description("n01",n01));
     debug(description("d01",d01));
 
-    final double z = divide1(n01,d01,negative);
+    final double z = divide1(negative,n01,d01);
 
-    final double ze = ToDouble(n01,d01,negative);
+    final double ze = ToDouble(negative,n01,d01);
 
     assert ze == z :
       "\n" 
@@ -683,7 +668,7 @@ public final class Divide {
 
   //--------------------------------------------------------------
 
-  private static final int TRYS = 1024 * 1024;
+  private static final int TRYS = 8 * 1024;
 
   public static final void fromBigIntegersRoundingTest () {
     final Generator gn = 
@@ -737,66 +722,49 @@ public final class Divide {
   //--------------------------------------------------------------
 
   public static final void main (final String[] args) {
-    //final double x = 0x1.fffffffffffffp1021;
-    //    final double x = 0x1.fffffffffffffp1021;
-    //    System.out.println(Double.toHexString(x)
-    //      + " : " + Double.toString(x));
-    //    final BigInteger[] nd = RationalSum.toRatio(x);
-    //    System.out.println(description("n",nd[0]));
-    //    System.out.println(description("d",nd[1]));
-    //    final double z = divide(nd[0],nd[1]);
-    //    assert x == z;
-    DEBUG= false;
-    //    final BigInteger q6 = BigInteger.valueOf(0x130eb6938c0156L);
-    //    final BigInteger q7 = BigInteger.valueOf(0x130eb6938c0157L);
-    //    final BigInteger q8 = BigInteger.valueOf(0x130eb6938c0158L);
-    //    final BigInteger n = BigInteger.valueOf(0x789f09858446ad92L).shiftLeft(52);
-    //    final BigInteger d = BigInteger.valueOf(0x19513ea5d70c32eL).shiftLeft(6);
-    //    final BigInteger dr6 = d.multiply(q6);
-    //    final BigInteger dr7 = d.multiply(q7);
-    //    final BigInteger dr8 = d.multiply(q8);
-    //    final BigInteger nmdr6 = n.subtract(dr6);
-    //    final BigInteger nmdr7 = n.subtract(dr7);
-    //    final BigInteger nmdr8 = n.subtract(dr8);
-    //    debug("n: " + n.toString(0x10));
-    //    debug("d: " + d.toString(0x10));
-    //    debug("6: " + nmdr6.toString(0x10));
-    //    debug("7: " + nmdr7.toString(0x10));
-    //    debug("8: " + nmdr8.toString(0x10));
-    //    debug("c=" + nmdr6.abs().compareTo(nmdr7.abs()));
-    //    debug();
-    //    roundingTest(n.shiftRight(52),d);
-    //    roundingTest(0x789f09858446ad92L,0x19513ea5d70c32eL);
-    //    roundingTest(13L,3L);
-    //    roundingTest(0x1.30eb6938c0156p6);
-    //    roundingTest(0x1.30eb6938c0157p6);
-    //    roundingTest(
-    //      (0x789f09858446ad92L >>> 1) + 100L,
-    //      (0x19513ea5d70c32eL << 5));
-    //    roundingTest(
-    //      (0x789f09858446ad92L >>> 1) + 10L,
-    //      (0x19513ea5d70c32eL >>> 1));
-    //    DEBUG=true;
-//    roundingTest(0x0.0000000000001p-1022);
-//    roundingTest(0x0.1000000000001p-1022);
-//    roundingTest(0x0.1000000000000p-1022);
-//    roundingTest(0x1.0000000000001p-1022);
-//    roundingTest(0x1.0000000000000p-1022);
-//    roundingTest(0x0.0000000000001p-1022);
-//    roundingTest(0x0.033878c4999b7p-1022);
-//    roundingTest(0x1.33878c4999b6ap-1022);
-//    roundingTest(-0x1.76c4ebe6d57c8p-924);
-//    roundingTest(0x1.76c4ebe6d57c8p-924);
-//    roundingTest(-0x1.76c4ebe6d57c8p924);
-//    roundingTest(0x1.76c4ebe6d57c8p924);
-//    roundingTest(1L,3L);
-//    DEBUG= false;
-//    fromLongsRoundingTest();
-//    normalDoubleRoundingTest();
-//    subnormalDoubleRoundingTest();
-//    finiteDoubleRoundingTest(); 
+    final long t = System.nanoTime();
+    DEBUG = false;
+    // test numbers outside double range
+    final BigInteger[] nd = 
+      RationalSum.toRatio(Double.MAX_VALUE);
+    final BigInteger a = nd[0].multiply(BigInteger.TEN);
+    final BigInteger b = nd[1];
+    roundingTest(a,b);
+    roundingTest(a.negate(),b);
+    roundingTest(b,a);
+    roundingTest(b.negate(),a);
+    final BigInteger a2 = a.multiply(BigInteger.TWO);
+    roundingTest(a2,b);
+    roundingTest(a2.negate(),b);
+    roundingTest(b,a2);
+    roundingTest(b.negate(),a2);
+    final BigInteger a10 = a.multiply(BigInteger.TEN);
+    roundingTest(a10,b);
+    roundingTest(a10.negate(),b);
+    roundingTest(b,a10);
+    roundingTest(b.negate(),a10);
+    //DEBUG=true;
+    roundingTest(0x0.0000000000001p-1022);
+    roundingTest(0x0.1000000000001p-1022);
+    roundingTest(0x0.1000000000000p-1022);
+    roundingTest(0x1.0000000000001p-1022);
+    roundingTest(0x1.0000000000000p-1022);
+    roundingTest(0x0.0000000000001p-1022);
+    roundingTest(0x0.033878c4999b7p-1022);
+    roundingTest(0x1.33878c4999b6ap-1022);
+    roundingTest(-0x1.76c4ebe6d57c8p-924);
+    roundingTest(0x1.76c4ebe6d57c8p-924);
+    roundingTest(-0x1.76c4ebe6d57c8p924);
+    roundingTest(0x1.76c4ebe6d57c8p924);
+    roundingTest(1L,3L);
+    fromLongsRoundingTest();
+    normalDoubleRoundingTest();
+    subnormalDoubleRoundingTest();
+    //finiteDoubleRoundingTest(); 
     fromBigIntegersRoundingTest(); 
-  }
+    System.out.printf("total secs: %8.2f\n",
+      Double.valueOf((System.nanoTime()-t)*1.0e-9)); 
+   }
 
   //--------------------------------------------------------------
 }
