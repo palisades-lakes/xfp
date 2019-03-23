@@ -1,0 +1,427 @@
+package xfp.java.numbers;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.MathContext;
+import java.util.List;
+import java.util.Map;
+import java.util.function.BiPredicate;
+import java.util.function.BinaryOperator;
+import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
+
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.CollectionSampler;
+import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
+import org.apache.commons.rng.sampling.distribution.ContinuousUniformSampler;
+
+import xfp.java.algebra.OneSetOneOperation;
+import xfp.java.algebra.OneSetTwoOperations;
+import xfp.java.algebra.Set;
+import xfp.java.exceptions.Exceptions;
+import xfp.java.prng.Generator;
+import xfp.java.prng.Generators;
+
+/** The set of rational numbers represented by 
+ * <code>Rational</code>
+ * 
+ * @author palisades dot lakes at gmail dot com
+ * @version 2019-03-22
+ */
+public final class Rationals implements Set {
+
+  //--------------------------------------------------------------
+  // convert representation to Rational[] as default.
+  // higher performance methods use raw representation where
+  // computations are exact.
+  //--------------------------------------------------------------
+
+  public static final Rational toRational (final double x) {
+    return Rational.valueOf(x); }
+
+  public static final Rational toRational (final float x) {
+    return Rational.valueOf(x); }
+
+  public static final Rational toRational (final long x) {
+    return Rational.valueOf(x); }
+
+  public static final Rational toRational (final int x) {
+    return Rational.valueOf(x); }
+
+  public static final Rational toRational (final short x) {
+    return Rational.valueOf(x); }
+
+  public static final Rational toRational (final byte x) {
+    return Rational.valueOf(x); }
+
+  public static final Rational toRational (final Number x) {
+    if (x instanceof Rational) { return (Rational) x; }
+    if (x instanceof Double) { 
+      return Rational.valueOf(((Double) x).doubleValue()); }
+    if (x instanceof Integer) {
+      return Rational.valueOf(((Integer) x).intValue()); }
+    if (x instanceof Long) { 
+      final BigInteger bi = BigInteger.valueOf(((Long) x).longValue());
+      return Rational.valueOf(bi); }
+    //    return Rational.valueOf(((Long) x).longValue()); }
+    if (x instanceof Float) {
+      return Rational.valueOf(((Float) x).floatValue()); }
+    if (x instanceof Short) {
+      return Rational.valueOf(((Short) x).intValue()); }
+    if (x instanceof Byte) {
+      return Rational.valueOf(((Byte) x).intValue()); }
+    if (x instanceof BigInteger) {
+      return Rational.valueOf(((BigInteger) x)); }
+    throw Exceptions.unsupportedOperation(
+      Rationals.class,"toRational",x); } 
+
+  //--------------------------------------------------------------
+
+  public static final Rational[] toRational (final Number[] x) {
+    final int n = x.length;
+    final Rational[] y = new Rational[n];
+    for (int i=0;i<n;i++) { y[i] = toRational(x[i]); }
+    return y; }
+
+  public static final Rational[]
+    toRational (final double[] x) {
+    final int n = x.length;
+    final Rational[] y = new Rational[n];
+    for (int i=0;i<n;i++) { y[i] = toRational(x[i]); }
+    return y; }
+
+  public static final Rational[]
+    toRational (final float[] x) {
+    final int n = x.length;
+    final Rational[] y = new Rational[n];
+    for (int i=0;i<n;i++) { y[i] = toRational(x[i]); }
+    return y; }
+
+  public static final Rational[]
+    toRational (final long[] x) {
+    final int n = x.length;
+    final Rational[] y = new Rational[n];
+    for (int i=0;i<n;i++) { y[i] = toRational(x[i]); }
+    return y; }
+
+  public static final Rational[]
+    toRational (final int[] x) {
+    final int n = x.length;
+    final Rational[] y = new Rational[n];
+    for (int i=0;i<n;i++) { y[i] = toRational(x[i]); }
+    return y; }
+
+  public static final Rational[]
+    toRational (final short[] x) {
+    final int n = x.length;
+    final Rational[] y = new Rational[n];
+    for (int i=0;i<n;i++) { y[i] = toRational(x[i]); }
+    return y; }
+
+  public static final Rational[] 
+    toRational (final byte[] x) {
+    final int n = x.length;
+    final Rational[] y = new Rational[n];
+    for (int i=0;i<n;i++) { y[i] = toRational(x[i]); }
+    return y; }
+
+  //--------------------------------------------------------------
+
+  public static final Object toRational (final Object x) {
+
+    if (x instanceof Rational) { return x; }
+    if (x instanceof Number) { 
+      return toRational(((Number) x)); }
+
+    if (x instanceof Rational[]) { return x; }
+
+    if (x instanceof byte[]) { 
+      return toRational((byte[]) x); }
+
+    if (x instanceof short[]) { 
+      return toRational((short[]) x); }
+
+    if (x instanceof int[]) { 
+      return toRational((int[]) x); }
+
+    if (x instanceof long[]) { 
+      return toRational((long[]) x); }
+
+    if (x instanceof float[]) { 
+      return toRational((float[]) x); }
+
+    if (x instanceof double[]) { 
+      return toRational((double[]) x); }
+
+    if (x instanceof Number[]) { 
+      return toRational((Number[]) x); }
+
+    throw Exceptions.unsupportedOperation(
+      Rationals.class,"toRational",x); }
+
+  //--------------------------------------------------------------
+  // from Rational to other numbers
+  // adapted from clojure.lang.Ratio
+  //--------------------------------------------------------------
+
+  public static final BigInteger 
+  bigIntegerValue (final Rational f){
+    return f.numerator().divide(f.denominator()); }
+
+  public static final BigDecimal 
+  decimalValue (final Rational f,
+                final MathContext mc) {
+    final BigDecimal numerator = 
+      new BigDecimal(f.numerator());
+    final BigDecimal denominator = 
+      new BigDecimal(f.denominator());
+    return numerator.divide(denominator, mc); }
+
+  public static final BigDecimal 
+  decimalValue (final Rational f) {
+    return decimalValue(f,MathContext.UNLIMITED); }
+
+  public static final double doubleValue (final Rational f) {
+    return decimalValue(f,MathContext.DECIMAL64).doubleValue(); }
+
+  public static final int intValue (final Rational f) {
+    return (int) doubleValue(f); }
+
+  public static final long longValue (final Rational f) {
+    return bigIntegerValue(f).longValue(); }
+
+  public static final float floatValue (final Rational f) {
+    return (float)doubleValue(f); }
+
+  //--------------------------------------------------------------
+  // operations for algebraic structures over Rationals.
+  //--------------------------------------------------------------
+
+  // TODO: is consistency with other algebraic structure classes
+  // worth the indirection?
+
+  private final Rational add (final Rational q0, 
+                              final Rational q1) {
+    assert contains(q0);
+    assert contains(q1);
+    return q0.add(q1); } 
+
+  public final BinaryOperator<Rational> adder () {
+    return new BinaryOperator<Rational> () {
+      @Override
+      public final String toString () { return "BF.add()"; }
+      @Override
+      public final Rational apply (final Rational q0, 
+                                   final Rational q1) {
+        return Rationals.this.add(q0,q1); } }; }
+
+  //--------------------------------------------------------------
+
+  @SuppressWarnings("static-method")
+  public final Rational additiveIdentity () {
+    return Rational.ZERO; }
+
+  //--------------------------------------------------------------
+
+  // TODO: is consistency with other algebraic structure classes
+  // worth the indirection?
+
+  private final Rational negate (final Rational q) {
+    assert contains(q);
+    return q.negate(); } 
+
+  public final UnaryOperator<Rational> additiveInverse () {
+    return new UnaryOperator<Rational> () {
+      @Override
+      public final String toString () { return "BF.negate()"; }
+      @Override
+      public final Rational apply (final Rational q) {
+        return Rationals.this.negate(q); } }; }
+
+  //--------------------------------------------------------------
+
+  private final Rational multiply (final Rational q0, 
+                                   final Rational q1) {
+    assert contains(q0);
+    assert contains(q1);
+    return q0.multiply(q1); } 
+
+  public final BinaryOperator<Rational> multiplier () {
+    return new BinaryOperator<Rational>() {
+      @Override
+      public final String toString () { return "BF.multiply()"; }
+      @Override
+      public final Rational apply (final Rational q0, 
+                                   final Rational q1) {
+        return Rationals.this.multiply(q0,q1); } }; }
+
+  //--------------------------------------------------------------
+
+  @SuppressWarnings("static-method")
+  public final Rational multiplicativeIdentity () {
+    return Rational.ONE; }
+
+  //--------------------------------------------------------------
+
+  private final Rational reciprocal (final Rational q) {
+    assert contains(q);
+    // only a partial inverse
+    if (q.isZero()) { return null; }
+    return q.reciprocal();  } 
+
+  public final UnaryOperator<Rational> multiplicativeInverse () {
+    return new UnaryOperator<Rational> () {
+      @Override
+      public final String toString () { return "BF.inverse()"; }
+      @Override
+      public final Rational apply (final Rational q) {
+        return Rationals.this.reciprocal(q); } }; }
+
+  //--------------------------------------------------------------
+  // Set methods
+  //--------------------------------------------------------------
+
+  @Override
+  public final boolean contains (final Object element) {
+    return element instanceof Rational; }
+
+  //--------------------------------------------------------------
+
+  @Override
+  public final BiPredicate equivalence () {
+    return new BiPredicate<Rational,Rational>() {
+      @Override
+      public final boolean test (final Rational q0, 
+                                 final Rational q1) {
+        return q0.equals(q1); } }; }
+
+  //--------------------------------------------------------------
+
+  /** Intended primarily for testing. Sample a random double
+   * (see {@link xfp.java.prng.DoubleSampler})
+   * and convert to <code></code>
+   * with {@link #DOUBLE_P} probability;
+   * otherwise return {@link #ZERO} or 
+   * {@link #ONE}, {@link #MINUS_ONE},  
+   * with equal probability (these are potential edge cases).
+   */
+
+  public static final Generator 
+  fromBigIntegerGenerator (final UniformRandomProvider urp) {
+    final double dp = 0.9;
+    return new Generator () {
+      private final ContinuousSampler choose = 
+        new ContinuousUniformSampler(urp,0.0,1.0);
+      private final Generator g0 = 
+        Generators.bigIntegerGenerator(urp);
+      private final Generator g1 = 
+        Generators.positiveBigIntegerGenerator(urp);
+      private final CollectionSampler edgeCases = 
+        new CollectionSampler(
+          urp,
+          List.of(
+            Rational.ZERO,
+            Rational.ONE,
+            Rational.TWO,
+            Rational.TEN,
+            Rational.MINUS_ONE));
+      @Override
+      public Object next () { 
+        final boolean edge = choose.sample() > dp;
+        if (edge) { return edgeCases.sample(); }
+        return Rational.valueOf(
+          (BigInteger) g0.next(),
+          (BigInteger) g1.next()); } }; }
+
+  // Is this characteristic of most inputs?
+  public static final Generator 
+  generator (final UniformRandomProvider urp) {
+    final double dp = 0.9;
+    return new Generator () {
+      private final ContinuousSampler choose = 
+        new ContinuousUniformSampler(urp,0.0,1.0);
+      private final Generator g = Doubles.finiteGenerator(urp);
+      private final CollectionSampler edgeCases = 
+        new CollectionSampler(
+          urp,
+          List.of(
+            Rational.ZERO,
+            Rational.ONE,
+            Rational.TWO,
+            Rational.TEN,
+            Rational.MINUS_ONE));
+      @Override
+      public Object next () { 
+        final boolean edge = choose.sample() > dp;
+        if (edge) { return edgeCases.sample(); }
+        return Rational.valueOf(g.nextDouble()); } }; }
+
+  public static final Generator 
+  generator (final int n,
+             final UniformRandomProvider urp) {
+    return new Generator () {
+      final Generator g = generator(urp);
+      @Override
+      public final Object next () {
+        final Rational[] z = new Rational[n];
+        for (int i=0;i<n;i++) { z[i] = (Rational) g.next(); }
+        return z; } }; }
+
+  // TODO: determine which generator from options.
+  @Override
+  public final Supplier generator (final Map options) {
+    final UniformRandomProvider urp = Set.urp(options);
+    final Generator g = generator(urp);
+    return 
+      new Supplier () {
+      @Override
+      public final Object get () { return g.next(); } }; }
+
+  //--------------------------------------------------------------
+  // Object methods
+  //--------------------------------------------------------------
+
+  @Override
+  public final int hashCode () { return 0; }
+
+  // singleton
+  @Override
+  public final boolean equals (final Object that) {
+    return that instanceof Rationals; }
+
+  @Override
+  public final String toString () { return "BF"; }
+
+  //--------------------------------------------------------------
+  // construction
+  //--------------------------------------------------------------
+
+
+  private Rationals () { }
+
+  private static final Rationals SINGLETON = new Rationals();
+
+  public static final Rationals get () { return SINGLETON; } 
+
+  //--------------------------------------------------------------
+
+  public static final OneSetOneOperation ADDITIVE_MAGMA = 
+    OneSetOneOperation.magma(get().adder(),get());
+
+  public static final OneSetOneOperation MULTIPLICATIVE_MAGMA = 
+    OneSetOneOperation.magma(get().multiplier(),get());
+
+  public static final OneSetTwoOperations FIELD = 
+    OneSetTwoOperations.field(
+      get().adder(),
+      get().additiveIdentity(),
+      get().additiveInverse(),
+      get().multiplier(),
+      get().multiplicativeIdentity(),
+      get().multiplicativeInverse(),
+      get());
+
+  //--------------------------------------------------------------
+}
+//--------------------------------------------------------------
+

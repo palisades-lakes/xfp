@@ -6,74 +6,51 @@ import java.math.BigInteger;
 
 import org.junit.jupiter.api.Test;
 
-import xfp.java.accumulators.MutableRationalSum;
 import xfp.java.numbers.Doubles;
+import xfp.java.numbers.Rational;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
 import xfp.java.prng.PRNG;
 
 //----------------------------------------------------------------
-/** Test desired properties of RationalSum. 
+/** Test desired properties of Rational. 
  * <p>
  * <pre>
- * mvn -Dtest=xfp/java/test/numbers/RationalSumTest test > RationalSumTest.txt
+ * mvn -Dtest=xfp/java/test/numbers/RationalTest test > RationalTest.txt
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-08
+ * @version 2019-03-22
  */
 
-public final class RationalSumTest {
+public final class RationalTest {
 
   //--------------------------------------------------------------
 
-  @SuppressWarnings({ "static-method" })
-  @Test
-  public final void compareToTest () {
-    final MutableRationalSum f0 = MutableRationalSum.valueOf(-1.0);
-    final MutableRationalSum f1 = MutableRationalSum.valueOf(1.0);
-    assertTrue(f0.compareTo(f1) < 0); }
-
-  //--------------------------------------------------------------
-
-  /** Conversion to and from RationalSum. */
-
-  private static final boolean 
-  correctRounding (final MutableRationalSum f) {
-    // TODO: is necessary but not sufficient to ensure 
+  private static final boolean correctRounding (final Rational f) {
+    // TODO: this is necessary but not sufficient to ensure 
     // rounding was correct?
     final double x = f.doubleValue();
-    // can't add non-finite doubles to RationalSum
-    if (! Double.isFinite(x)) { return true; }
-    final MutableRationalSum fx = MutableRationalSum.valueOf(x);
+    // not really true, but can't check easily
+    // TODO: compare with ERational?
+    // TODO: compare with 
+    // f.numerator().divide(f.denominator()).doubleValue?
+    if (! Double.isFinite(x)) { 
+      final BigInteger q = f.numerator().divide(f.denominator());
+      return ! Double.isFinite(q.doubleValue()); }
+    final Rational fx = Rational.valueOf(x);
     final int r = f.compareTo(fx);
-    final boolean ok;
+    final boolean result;
     if (r < 0) { // fx > f
-      final double xlo = Math.nextDown(x);
-      final MutableRationalSum flo = MutableRationalSum.valueOf(xlo);
-      ok = flo.compareTo(f) < 0;
-      if (! ok) {
-        System.out.println("lo");
-        System.out.println(Double.toHexString(xlo));
-        System.out.println(Double.toHexString(x));
-        System.out.println(flo);
-        System.out.println(f);
-        System.out.println(fx);
-        System.out.println(); } }
+      final double x1o = Math.nextDown(x);
+      final Rational flo = Rational.valueOf(x1o);
+      result = flo.compareTo(f) < 0;}
     else if (r > 0) { // fx < f
       final double xhi = Math.nextUp(x);
-      final MutableRationalSum fhi = MutableRationalSum.valueOf(xhi);
-      ok = f.compareTo(fhi) < 0; 
-      if (! ok) {
-        System.out.println("hi");
-        System.out.println(Double.toHexString(x));
-        System.out.println(Double.toHexString(xhi));
-        System.out.println(fx);
-        System.out.println(f);
-        System.out.println(fhi);
-        System.out.println(); } }
-    else { ok = true; }
-    return ok; }
+      final Rational fhi = Rational.valueOf(xhi);
+      result = f.compareTo(fhi) < 0; } 
+    else { result = true; }
+    return result; }
 
   //--------------------------------------------------------------
 
@@ -81,8 +58,17 @@ public final class RationalSumTest {
 
   @SuppressWarnings({ "static-method" })
   @Test
-  public final void rounding1311Test () {
-    final MutableRationalSum f = MutableRationalSum.valueOf(13,11);
+  public final void roundingTest () {
+    final Rational f = Rational.valueOf(13,11);
+    assertTrue(correctRounding(f)); }
+
+  @SuppressWarnings({ "static-method" })
+  @Test
+  public final void longRoundingTest () {
+    final Rational f = 
+      Rational.valueOf(
+        BigInteger.valueOf(0x789f09858446ad92L),
+        BigInteger.valueOf(0x19513ea5d70c32eL));
     assertTrue(correctRounding(f)); }
 
   @SuppressWarnings({ "static-method" })
@@ -92,26 +78,31 @@ public final class RationalSumTest {
       Generators.bigIntegerGenerator(
         PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
     final Generator gd = 
-      Generators.nonzeroBigIntegerGenerator(
+      Generators.positiveBigIntegerGenerator(
         PRNG.well44497b("seeds/Well44497b-2019-01-07.txt"));
     for (int i=0;i<TRYS;i++) {
       // some longs will not be exactly representable as doubles
       final BigInteger n = (BigInteger) gn.next();
       final BigInteger d = (BigInteger) gd.next();
-      final MutableRationalSum f = MutableRationalSum.valueOf(n,d);
+      final Rational f = Rational.valueOf(n,d);
       assertTrue(correctRounding(f)); } }
 
   @SuppressWarnings({ "static-method" })
   @Test
   public final void fromLongsRoundingTest () {
-    final Generator g = 
+    final Generator g0 = 
       Generators.longGenerator(
         PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
+    final Generator g1 = 
+      Generators.positiveLongGenerator(
+        PRNG.well44497b("seeds/Well44497b-2019-01-07.txt"));
     for (int i=0;i<TRYS;i++) {
       // some longs will not be exactly representable as doubles
-      final long n = g.nextLong();
-      final long d = g.nextLong();
-      final MutableRationalSum f = MutableRationalSum.valueOf(n,d);
+      final long n = g0.nextLong();
+      final long d = g1.nextLong();
+      final Rational f = Rational.valueOf(
+        BigInteger.valueOf(n),
+        BigInteger.valueOf(d));
       assertTrue(correctRounding(f)); } }
 
   @SuppressWarnings({ "static-method" })
@@ -122,7 +113,7 @@ public final class RationalSumTest {
         PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
-      final MutableRationalSum f = MutableRationalSum.valueOf(x);
+      final Rational f = Rational.valueOf(x);
       assertTrue(correctRounding(f)); } }
 
   @SuppressWarnings({ "static-method" })
@@ -133,7 +124,7 @@ public final class RationalSumTest {
         PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
-      final MutableRationalSum f = MutableRationalSum.valueOf(x);
+      final Rational f = Rational.valueOf(x);
       assertTrue(correctRounding(f)); } }
 
   //--------------------------------------------------------------

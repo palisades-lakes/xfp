@@ -10,8 +10,9 @@ import com.upokecenter.numbers.EFloat;
 import com.upokecenter.numbers.ERational;
 
 import xfp.java.accumulators.EFloatSum;
-import xfp.java.accumulators.RationalSum;
+import xfp.java.accumulators.MutableRationalSum;
 import xfp.java.numbers.Doubles;
+import xfp.java.numbers.Rational;
 import xfp.java.prng.Generator;
 import xfp.java.prng.PRNG;
 
@@ -23,7 +24,7 @@ import xfp.java.prng.PRNG;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-08
+ * @version 2019-03-22
  */
 
 public final class RoundtripTests {
@@ -338,7 +339,7 @@ public final class RoundtripTests {
   //    return true; }
 
   //--------------------------------------------------------------
-  /** EFloat should be able to represent any double exactly.
+  /** BigDecimal should be able to represent any double exactly.
    */
 
   private static final boolean double2BigDecimal2Double () {
@@ -390,10 +391,36 @@ public final class RoundtripTests {
   /** ERational should be able to represent any double exactly.
    */
 
+  private static final boolean double2Rational2Double () {
+    final Generator g = 
+      finiteDoubles();
+      //subnormalDoubles();
+    for (int i=0;i<TRYS;i++) {
+      final double x = g.nextDouble();
+      final Rational f = Rational.valueOf(x);
+      final double xf = f.doubleValue();
+      if (x != xf) { 
+        System.out.println("\n\n" + 
+          "Rational.doubleValue:" + Doubles.isNormal(x) +"\n" +
+          x + "\n" +
+          xf + "\n\n" +
+          Double.toHexString(x) + "\n" +
+          Double.toHexString(xf) + "\n\n" +
+          f.numerator() + "\n" +
+          f.denominator() + "\n\n" +
+          f.numerator().toString(0x10) + "\n" +
+          f.denominator().toString(0x10));
+        return false; } }
+    return true; }
+
+  //--------------------------------------------------------------
+  /** ERational should be able to represent any double exactly.
+   */
+
   private static final boolean double2ERational2Double () {
     final Generator g = 
-      //finiteDoubles();
-      subnormalDoubles();
+      finiteDoubles();
+      //subnormalDoubles();
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
       final ERational f = ERational.FromDouble(x);
@@ -423,7 +450,7 @@ public final class RoundtripTests {
     //subnormalDoubles();
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
-      final RationalSum f = RationalSum.make().add(x);
+      final MutableRationalSum f = MutableRationalSum.make().add(x);
       final double xf = f.doubleValue();
       final ERational xe = ERational.FromDouble(x);
       if (x != xf) { 
@@ -454,6 +481,7 @@ public final class RoundtripTests {
   @Test
   public final void roundTripTest () {
 
+    assertTrue(double2Rational2Double());
     assertTrue(double2BigDecimal2Double());
     assertTrue(double2RationalSum2Double());
     assertTrue(double2ERational2Double());

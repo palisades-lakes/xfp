@@ -7,6 +7,7 @@ import static java.lang.Double.doubleToRawLongBits;
 import static java.lang.Double.longBitsToDouble;
 import static java.lang.Double.toHexString;
 
+import java.math.BigInteger;
 import java.util.Map;
 import java.util.function.BiPredicate;
 import java.util.function.BinaryOperator;
@@ -23,7 +24,7 @@ import xfp.java.prng.Generator;
 /** Utilities for <code>double</code>, <code>double[]</code>.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-21
+ * @version 2019-03-22
  */
 public final class Doubles implements Set {
 
@@ -389,6 +390,74 @@ public final class Doubles implements Set {
   //--------------------------------------------------------------
   // generators
   //--------------------------------------------------------------
+
+  /** From apache commons math4 BigFraction.
+   * <p>
+   * Create a fraction given the double value.
+   * <p>
+   * This constructor behaves <em>differently</em> from
+   * {@link #BigFraction(double, double, int)}. It converts the 
+   * double value exactly, considering its internal bits 
+   * representation. This works for all values except NaN and 
+   * infinities and does not requires any loop or convergence 
+   * threshold.
+   * </p>
+   * <p>
+   * Since this conversion is exact and since double numbers are 
+   * sometimes approximated, the fraction created may seem strange 
+   * in some cases. For example, calling 
+   * <code>new BigFraction(1.0 / 3.0)</code> does <em>not</em> 
+   * create the fraction 1/3, but the fraction 
+   * 6004799503160661 / 18014398509481984, because the double 
+   * number passed to the constructor is not exactly 1/3
+   * (this number cannot be stored exactly in IEEE754).
+   * </p>
+   * @see #BigFraction(double, double, int)
+   * @param x the double value to convert to a fraction.
+   * @exception IllegalArgumentException if value is not finite
+   */
+  
+  public static final BigInteger[] toRatio (final double x) {
+  
+    if (! Double.isFinite(x)) {
+      throw new IllegalArgumentException(
+       "RationalSum"  + " cannot handle "+ x); }
+  
+    final BigInteger numerator;
+    final BigInteger denominator;
+  
+    // compute m and k such that x = m * 2^k
+    final long bits     = Double.doubleToLongBits(x);
+    final long sign     = bits & 0x8000000000000000L;
+    final long exponent = bits & 0x7ff0000000000000L;
+    long m              = bits & 0x000fffffffffffffL;
+    if (exponent == 0) { // subnormal
+      if (0L == m) {
+        numerator   = BigInteger.ZERO;
+        denominator = BigInteger.ONE; }
+      else {
+        if (sign != 0L) { m = -m; }
+        numerator   = BigInteger.valueOf(m);
+        denominator = BigInteger.ZERO.flipBit(1074); } }
+    else { // normal
+      // add the implicit most significant bit
+      m |= 0x0010000000000000L; 
+      if (sign != 0L) { m = -m; }
+      int k = ((int) (exponent >> 52)) - 1075;
+      while (((m & 0x001ffffffffffffeL) != 0L) 
+        &&
+        ((m & 0x1L) == 0L)) {
+        m >>= 1; 
+        ++k; }
+      if (k < 0) { 
+        numerator   = BigInteger.valueOf(m);
+        denominator = BigInteger.ZERO.flipBit(-k); } 
+      else {
+        numerator   = BigInteger.valueOf(m)
+          .multiply(BigInteger.ZERO.flipBit(k));
+        denominator = BigInteger.ONE; } } 
+  
+    return new BigInteger[]{ numerator, denominator}; }
 
   public static final Generator 
   subnormalGenerator (final int n,

@@ -14,6 +14,7 @@ import xfp.java.algebra.Sets;
 import xfp.java.numbers.BigDecimals;
 import xfp.java.numbers.BigFractions;
 import xfp.java.numbers.ERationals;
+import xfp.java.numbers.Rationals;
 import xfp.java.numbers.Ratios;
 import xfp.java.prng.PRNG;
 
@@ -21,7 +22,7 @@ import xfp.java.prng.PRNG;
 /** Common code for testing sets. 
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-03
+ * @version 2019-03-22
  */
 
 @SuppressWarnings("unchecked")
@@ -60,6 +61,11 @@ public final class SetTests {
     testEquivalence(set); }
 
   //--------------------------------------------------------------
+
+  @SuppressWarnings({ "static-method" })
+  @Test
+  public final void Rationals () { 
+    SetTests.tests(Rationals.get()); }
 
   @SuppressWarnings({ "static-method" })
   @Test
