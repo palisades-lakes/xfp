@@ -2,16 +2,23 @@ package xfp.java.numbers;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.List;
 import java.util.function.BiPredicate;
+
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.CollectionSampler;
 
 import xfp.java.algebra.Set;
 import xfp.java.exceptions.Exceptions;
+import xfp.java.prng.Generator;
+import xfp.java.prng.Generators;
 
 /** Utilities for Object and primitive numbers.
  * 
  * @author palisades dot lakes at gmail dot com
  * @version 2019-03-25
  */
+@SuppressWarnings("unchecked")
 public final class Numbers implements Set {
 
   //--------------------------------------------------------------
@@ -186,6 +193,78 @@ public final class Numbers implements Set {
   //--------------------------------------------------------------
   // construction
   //--------------------------------------------------------------
+
+  public static final Generator 
+  finiteNumberGenerator (final int n,
+                         final UniformRandomProvider urp) {
+    return new Generator () {
+      final Generator g = finiteNumberGenerator(urp);
+      @Override
+      public final Object next () {
+        final Object[] z = new Object[n];
+        for (int i=0;i<n;i++) { z[i] = g.next(); }
+        return z; } }; }
+
+  /** Intended primarily for testing. Sample a random double
+   * (see {@link xfp.java.prng.DoubleSampler})
+   * and convert to <code>BigFraction</code>
+   * with {@link #DOUBLE_P} probability;
+   * otherwise return {@link BigFraction#ZERO} or 
+   * {@link BigFractrion#ONE}, {@link BigFractrion#MINUS_ONE},  
+   * with equal probability (these are potential edge cases).
+   */
+  
+  public static final Generator 
+  finiteNumberGenerator (final UniformRandomProvider urp) {
+    return new Generator () {
+      private final CollectionSampler<Generator> generators = 
+        new CollectionSampler(
+          urp,
+          List.of(
+            Generators.byteGenerator(urp),
+            Generators.shortGenerator(urp),
+            Generators.intGenerator(urp),
+            Generators.longGenerator(urp),
+            Floats.finiteGenerator(urp),
+            Doubles.finiteGenerator(urp),
+            Generators.bigIntegerGenerator(urp),
+            //bigDecimalGenerator(urp),
+            Rationals.generator(urp)));
+      @Override
+      public final Object next () {
+        return generators.sample().next(); } }; }
+
+  public static final Generator 
+  numberGenerator (final int n,
+                   final UniformRandomProvider urp) {
+    return new Generator () {
+      final Generator g = numberGenerator(urp);
+      @Override
+      public final Object next () {
+        final Number[] z = new Number[n];
+        for (int i=0;i<n;i++) { z[i] = (Number) g.next(); }
+        return z; } }; }
+
+  public static final Generator 
+  numberGenerator (final UniformRandomProvider urp) {
+    return new Generator () {
+      private final CollectionSampler<Generator> generators = 
+        new CollectionSampler(
+          urp,
+          List.of(
+            Generators.byteGenerator(urp),
+            Generators.shortGenerator(urp),
+            Generators.intGenerator(urp),
+            Generators.longGenerator(urp),
+            Floats.generator(urp),
+            Doubles.generator(urp),
+            Generators.bigIntegerGenerator(urp),
+            //bigDecimalGenerator(urp),
+            Rationals.generator(urp)
+            ));
+      @Override
+      public final Object next () {
+        return generators.sample().next(); } }; }
 
   private Numbers () { }
 

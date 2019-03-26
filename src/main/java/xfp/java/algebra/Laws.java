@@ -31,7 +31,7 @@ import com.google.common.collect.ImmutableList;
  * no instance state or methods.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-25
+ * @version 2019-03-25
  */
 
 @SuppressWarnings("unchecked")
@@ -483,7 +483,6 @@ public final class Laws {
       public final String toString () { return elements + " X " + scalars + " associative"; }
       @Override
       public final boolean test (final Map<Set,Supplier> generators) {
-//        try {
           final Supplier scalarSamples = generators.get(scalars);
           assert null != scalarSamples :
             generators.toString() + "\n" + scalars;
@@ -498,31 +497,7 @@ public final class Laws {
           final BiPredicate equal = elements.equivalence();
           final Object right = scale.apply(a,scale.apply(b,c));
           final Object left = scale.apply(multiply.apply(a,b),c);
-          final boolean pass = equal.test(right,left);
-//          if (! pass) {
-//            System.out.println();
-//            System.out.println(multiply);
-//            System.out.println(scale);
-//            System.out.println(Classes.className(a) + ":" + a);
-//            System.out.println(BigFractions.toBigFraction(a));
-//            System.out.println(Classes.className(b) + ":" + b);
-//            System.out.println("toBigFraction:" + BigFractions.toBigFraction(b));
-//            final BigInteger bi = BigInteger.valueOf(((Long) b).longValue());
-//            System.out.println("BigInteger:" + bi);
-//            System.out.println("BigFraction(bi):" + new BigFraction(bi));
-//            System.out.println("BigFraction(bi,1):" + new BigFraction(bi,BigInteger.ONE));
-//            System.out.println();
-//            System.out.println(elements.toString(c));
-//            System.out.println(elements.toString(BigFractions.toBigFraction(c)));
-//            System.out.println(elements.toString(right));
-//            System.out.println(elements.toString(left)); }
-          return pass; 
-//          }
-//        catch (final Throwable t) {
-//          System.out.println(elements);
-//          System.out.println(scalars);
-//          throw t; } 
-} }
+          return equal.test(right,left); } }
     return new AssociativeScaling(); }
 
   //--------------------------------------------------------------

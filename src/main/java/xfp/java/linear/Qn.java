@@ -2,10 +2,12 @@ package xfp.java.linear;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
 import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.CollectionSampler;
 
 import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
@@ -13,10 +15,14 @@ import com.carrotsearch.hppc.IntObjectMap;
 import xfp.java.algebra.OneSetOneOperation;
 import xfp.java.algebra.Set;
 import xfp.java.algebra.TwoSetsOneOperation;
+import xfp.java.numbers.Doubles;
+import xfp.java.numbers.Floats;
+import xfp.java.numbers.Numbers;
 import xfp.java.numbers.Q;
 import xfp.java.numbers.Rational;
 import xfp.java.numbers.Rationals;
 import xfp.java.prng.Generator;
+import xfp.java.prng.Generators;
 
 /** The set of arrays of some fixed length <code>n</code>,
  *  of primitive numbers, or 
@@ -143,6 +149,39 @@ public final class Qn extends LinearSpaceLike {
   // construction
   //--------------------------------------------------------------
   // TODO: support zero-dimensional space?
+
+  //--------------------------------------------------------------
+  /** Generate arrays representing vectors in an n-dimensional
+   * rational linear space, returning all possible number array 
+   * types.
+   */
+  
+  public static final Generator 
+  qnGenerator (final int n,
+               final UniformRandomProvider urp) {
+    return new Generator () {
+      private final CollectionSampler<Generator> generators = 
+        new CollectionSampler(
+          urp,
+          List.of(
+            Generators.byteGenerator(n,urp),
+            Generators.shortGenerator(n,urp),
+            Generators.intGenerator(n,urp),
+            Generators.longGenerator(n,urp),
+            Generators.bigIntegerGenerator(n,urp),
+            //bigDecimalGenerator(n,urp),
+            Floats.finiteGenerator(n,urp),
+            Doubles.finiteGenerator(n,urp),
+            Rationals.generator(urp)
+            //            ERationals.eIntegerGenerator(n,urp),
+            //            ERationals.eRationalFromDoubleGenerator(n,urp)
+            // clojure.lang.Ratio doesn't round correctly
+            // BigFraction.doubleValue() doesn't round correctly.
+            //,bigFractionGenerator(n,urp),
+            ,Numbers.finiteNumberGenerator(n,urp)));
+      @Override
+      public final Object next () {
+        return generators.sample().next(); } }; }
 
   private Qn (final int dimension) { super(dimension); }
 

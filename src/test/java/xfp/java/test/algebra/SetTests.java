@@ -12,10 +12,8 @@ import xfp.java.Classes;
 import xfp.java.algebra.Set;
 import xfp.java.algebra.Sets;
 import xfp.java.numbers.BigDecimals;
-import xfp.java.numbers.BigFractions;
-import xfp.java.numbers.ERationals;
+import xfp.java.numbers.Q;
 import xfp.java.numbers.Rationals;
-import xfp.java.numbers.Ratios;
 import xfp.java.prng.PRNG;
 
 //----------------------------------------------------------------
@@ -64,28 +62,18 @@ public final class SetTests {
 
   @SuppressWarnings({ "static-method" })
   @Test
+  public final void Q () { 
+    SetTests.tests(Q.get()); }
+
+  @SuppressWarnings({ "static-method" })
+  @Test
   public final void Rationals () { 
     SetTests.tests(Rationals.get()); }
 
   @SuppressWarnings({ "static-method" })
   @Test
-  public final void eRationals () { 
-    SetTests.tests(ERationals.get()); }
-
-  @SuppressWarnings({ "static-method" })
-  @Test
   public final void bigDecimals () { 
     SetTests.tests(BigDecimals.get()); }
-
-  @SuppressWarnings({ "static-method" })
-  @Test
-  public final void bigFractions () { 
-    SetTests.tests(BigFractions.get()); }
-
-  @SuppressWarnings({ "static-method" })
-  @Test
-  public final void ratios () { 
-    SetTests.tests(Ratios.get()); }
 
   //--------------------------------------------------------------
 }

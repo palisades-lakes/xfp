@@ -22,8 +22,9 @@ import xfp.java.prng.Generator;
  * <code>BigDecimal</code>.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-26
+ * @version 2019-03-25
  */
+@SuppressWarnings("unchecked")
 public final class BigDecimals implements Set {
 
   //--------------------------------------------------------------

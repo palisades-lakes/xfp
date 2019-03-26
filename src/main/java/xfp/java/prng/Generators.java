@@ -3,21 +3,16 @@ package xfp.java.prng;
 import java.math.BigInteger;
 import java.util.List;
 
-import org.apache.commons.math3.fraction.BigFraction;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.CollectionSampler;
 import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
 import org.apache.commons.rng.sampling.distribution.ContinuousUniformSampler;
 
-import xfp.java.numbers.Doubles;
-import xfp.java.numbers.Floats;
-import xfp.java.numbers.Rationals;
-
 /** Generators of primitives or Objects as zero-arity 'functions'
  * that return different values on each call.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-22
+ * @version 2019-03-25
  */
 
 @SuppressWarnings("unchecked")
@@ -289,125 +284,8 @@ public final class Generators {
         return z; } }; }
 
   //--------------------------------------------------------------
-  // TODO: options?
-  // TODO: using a DoubleSampler: those are (?) the most likely
-  // values to see, but could do something to extend the 
-  // range to values not representable as double.
 
-  /** Intended primarily for testing. Sample a random double
-   * (see {@link xfp.java.prng.DoubleSampler})
-   * and convert to <code>BigFraction</code>
-   * with {@link #DOUBLE_P} probability;
-   * otherwise return {@link BigFraction#ZERO} or 
-   * {@link BigFractrion#ONE}, {@link BigFractrion#MINUS_ONE},  
-   * with equal probability (these are potential edge cases).
-   */
-
-  public static final Generator 
-  numberGenerator (final UniformRandomProvider urp) {
-    return new Generator () {
-      private final CollectionSampler<Generator> generators = 
-        new CollectionSampler(
-          urp,
-          List.of(
-            byteGenerator(urp),
-            shortGenerator(urp),
-            intGenerator(urp),
-            longGenerator(urp),
-            Floats.generator(urp),
-            Doubles.generator(urp),
-            bigIntegerGenerator(urp),
-            //bigDecimalGenerator(urp),
-            Rationals.generator(urp)
-            ));
-      @Override
-      public final Object next () {
-        return generators.sample().next(); } }; }
-
-  public static final Generator 
-  numberGenerator (final int n,
-                   final UniformRandomProvider urp) {
-    return new Generator () {
-      final Generator g = numberGenerator(urp);
-      @Override
-      public final Object next () {
-        final Number[] z = new Number[n];
-        for (int i=0;i<n;i++) { z[i] = (Number) g.next(); }
-        return z; } }; }
-
-
-  /** Intended primarily for testing. Sample a random double
-   * (see {@link xfp.java.prng.DoubleSampler})
-   * and convert to <code>BigFraction</code>
-   * with {@link #DOUBLE_P} probability;
-   * otherwise return {@link BigFraction#ZERO} or 
-   * {@link BigFractrion#ONE}, {@link BigFractrion#MINUS_ONE},  
-   * with equal probability (these are potential edge cases).
-   */
-
-  public static final Generator 
-  finiteNumberGenerator (final UniformRandomProvider urp) {
-    return new Generator () {
-      private final CollectionSampler<Generator> generators = 
-        new CollectionSampler(
-          urp,
-          List.of(
-            byteGenerator(urp),
-            shortGenerator(urp),
-            intGenerator(urp),
-            longGenerator(urp),
-            Floats.finiteGenerator(urp),
-            Doubles.finiteGenerator(urp),
-            bigIntegerGenerator(urp),
-            //bigDecimalGenerator(urp),
-            Rationals.generator(urp)));
-      @Override
-      public final Object next () {
-        return generators.sample().next(); } }; }
-
-  public static final Generator 
-  finiteNumberGenerator (final int n,
-                         final UniformRandomProvider urp) {
-    return new Generator () {
-      final Generator g = finiteNumberGenerator(urp);
-      @Override
-      public final Object next () {
-        final Object[] z = new Object[n];
-        for (int i=0;i<n;i++) { z[i] = g.next(); }
-        return z; } }; }
-
-  //--------------------------------------------------------------
-  /** Generate arrays representing vectors in an n-dimensional
-   * rational linear space, returning all possible number array 
-   * types.
-   */
-
-  public static final Generator 
-  qnGenerator (final int n,
-               final UniformRandomProvider urp) {
-    return new Generator () {
-      private final CollectionSampler<Generator> generators = 
-        new CollectionSampler(
-          urp,
-          List.of(
-            byteGenerator(n,urp),
-            shortGenerator(n,urp),
-            intGenerator(n,urp),
-            longGenerator(n,urp),
-            bigIntegerGenerator(n,urp),
-            //bigDecimalGenerator(n,urp),
-            Floats.finiteGenerator(n,urp),
-            Doubles.finiteGenerator(n,urp),
-            Rationals.generator(urp)
-            //            ERationals.eIntegerGenerator(n,urp),
-            //            ERationals.eRationalFromDoubleGenerator(n,urp)
-            // clojure.lang.Ratio doesn't round correctly
-            // BigFraction.doubleValue() doesn't round correctly.
-            //,bigFractionGenerator(n,urp),
-            ,finiteNumberGenerator(n,urp)));
-      @Override
-      public final Object next () {
-        return generators.sample().next(); } }; }
+  
 
   //--------------------------------------------------------------
   // disable constructor

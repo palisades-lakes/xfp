@@ -13,7 +13,6 @@ import xfp.java.algebra.OneSetOneOperation;
 import xfp.java.algebra.OneSetTwoOperations;
 import xfp.java.algebra.Set;
 import xfp.java.prng.Generator;
-import xfp.java.prng.Generators;
 
 /** The set of rational numbers, accepting any 'reasonable' 
  * representation. Calculation converts to Number where
@@ -202,7 +201,7 @@ public final class Q implements Set {
   @Override
   public final Supplier generator (final Map options) {
     final UniformRandomProvider urp = Set.urp(options);
-    final Generator g = Generators.finiteNumberGenerator(urp); 
+    final Generator g = Numbers.finiteNumberGenerator(urp); 
     //final Generator g = Rationals.generator(urp); 
     return 
       new Supplier () {

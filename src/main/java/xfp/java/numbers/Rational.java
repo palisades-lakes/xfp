@@ -163,12 +163,6 @@ implements Comparable<Rational> {
 
     final float z = Floats.makeFloat(negative,e70,q7);
 
-    final float ze = Debug.ToFloat(negative,e7,q7);
-    assert ze == z :
-      "\n" 
-      + Float.toHexString(ze) + " :E\n"
-      + Float.toHexString(z); 
-
     return z; }
 
   //--------------------------------------------------------------
@@ -212,12 +206,6 @@ implements Comparable<Rational> {
     else { q60 = q6.shiftRight(1); e60 = e6+1; }
     final float z = 
       floatValue7(negative,subnormal,e60, q60.intValueExact()); 
-
-    final float ze = Debug.ToFloat(negative,e60,q60);
-    assert ze == z :
-      "\n" 
-      + Float.toHexString(ze) + " :E\n"
-      + Float.toHexString(z); 
 
     return z; }
 
@@ -279,12 +267,6 @@ implements Comparable<Rational> {
 
     final float z = floatValue6(negative,subnormal,e5,q50);
 
-    final float ze = Debug.ToFloat(negative,e5,q50);
-    assert ze == z :
-      "\n" 
-      + Float.toHexString(ze) + " :E0\n"
-      + Float.toHexString(z); 
-
     return z; }
 
   //--------------------------------------------------------------
@@ -331,13 +313,6 @@ implements Comparable<Rational> {
     final BigInteger r4 = qr[1];
 
     final float z = floatValue5(negative,subnormal,e4,q4,r4,d4); 
-
-    final BigInteger n41 = q4.multiply(d4).add(r4);
-    final float ze = Debug.ToFloat(negative,e4,n41,d4);
-    assert ze == z :
-      "\n" 
-      + Float.toHexString(ze) + " :E\n"
-      + Float.toHexString(z); 
 
     return z; }
 
@@ -387,12 +362,6 @@ implements Comparable<Rational> {
 
     final float z = floatValue4(negative,subnormal,e30,n30,d3);
 
-    final float ze = Debug.ToFloat(negative,e30,n30,d3);
-    assert ze == z :
-      "\n" 
-      + Float.toHexString(ze) + " :E\n"
-      + Float.toHexString(z); 
-
     return z; }
 
   //--------------------------------------------------------------
@@ -433,13 +402,6 @@ implements Comparable<Rational> {
         Float.MIN_EXPONENT,n2,d2.shiftLeft(Float.MIN_EXPONENT-e2)); }
     else {
       z = floatValue3(negative,false,e2,n2,d2); }
-
-
-    final float ze = Debug.ToFloat(negative,e2,n2,d2);
-    assert ze == z :
-      "\n" 
-      + Float.toHexString(ze) + " :E\n"
-      + Float.toHexString(z); 
 
     return z; }
 
@@ -498,12 +460,6 @@ implements Comparable<Rational> {
 
     final float z = floatValue2(negative,e11,n10,d12);
 
-    final float ze = Debug.ToFloat(negative,e11,n10,d12);
-    assert ze == z :
-      "\n" 
-      + Float.toHexString(ze) + " :E\n"
-      + Float.toHexString(z); 
-
     return z; }
 
   //--------------------------------------------------------------
@@ -556,13 +512,6 @@ implements Comparable<Rational> {
 
     final float z = floatValue1(negative,n01,d01);
 
-    final float ze = Debug.ToFloat(negative,n01,d01);
-
-    assert ze == z :
-      "\n" 
-      + Float.toHexString(ze) + " :E\n"
-      + Float.toHexString(z); 
-
     return z; }
 
   //--------------------------------------------------------------
@@ -580,12 +529,6 @@ implements Comparable<Rational> {
       + d.toString(0x10);
 
     final float z = floatValue0(n,d);
-
-    final float ze = Debug.ToFloat(n,d);
-    assert ze == z :
-      "\n" 
-      + Float.toHexString(ze) + " :E\n"
-      + Float.toHexString(z); 
 
     return z; }
 
@@ -646,13 +589,6 @@ implements Comparable<Rational> {
 
     final double z = doubleValue5(negative,subnormal,e4,q4,r4,d4); 
 
-    final BigInteger n41 = q4.multiply(d4).add(r4);
-    final double ze = Debug.ToDouble(negative,e4,n41,d4);
-    assert ze == z :
-      "\n" 
-      + Double.toHexString(ze) + " :E\n"
-      + Double.toHexString(z); 
-
     return z; }
 
   //--------------------------------------------------------------
@@ -699,12 +635,6 @@ implements Comparable<Rational> {
 
     final double z = Doubles.makeDouble(negative,e70,q7);
 
-    final double ze = Debug.ToDouble(negative,e7,q7);
-    assert ze == z :
-      "\n" 
-      + Double.toHexString(ze) + " :E\n"
-      + Double.toHexString(z); 
-
     return z; }
 
   //--------------------------------------------------------------
@@ -746,12 +676,6 @@ implements Comparable<Rational> {
     else { q60 = q6.shiftRight(1); e60 = e6+1; }
     final double z = 
       doubleValue7(negative,subnormal,e60, q60.longValueExact()); 
-
-    final double ze = Debug.ToDouble(negative,e60,q60);
-    assert ze == z :
-      "\n" 
-      + Double.toHexString(ze) + " :E\n"
-      + Double.toHexString(z); 
 
     return z; }
 
@@ -807,12 +731,6 @@ implements Comparable<Rational> {
 
     final double z = doubleValue6(negative,subnormal,e5,q50);
 
-    final double ze = Debug.ToDouble(negative,e5,q50);
-    assert ze == z :
-      "\n" 
-      + Double.toHexString(ze) + " :E0\n"
-      + Double.toHexString(z); 
-
     return z; }
 
   //--------------------------------------------------------------
@@ -860,13 +778,6 @@ implements Comparable<Rational> {
     Debug.println("e30=" + e30);
 
     final double z = doubleValue4(negative,subnormal,e30,n30,d3);
-
-    final double ze = Debug.ToDouble(negative,e30,n30,d3);
-    assert ze == z :
-      "\n" 
-      + Double.toHexString(ze) + " :E\n"
-      + Double.toHexString(z); 
-
     return z; }
 
   //--------------------------------------------------------------
@@ -907,13 +818,6 @@ implements Comparable<Rational> {
         Double.MIN_EXPONENT,n2,d2.shiftLeft(Double.MIN_EXPONENT-e2)); }
     else {
       z = doubleValue3(negative,false,e2,n2,d2); }
-
-
-    final double ze = Debug.ToDouble(negative,e2,n2,d2);
-    assert ze == z :
-      "\n" 
-      + Double.toHexString(ze) + " :E\n"
-      + Double.toHexString(z); 
 
     return z; }
 
@@ -972,12 +876,6 @@ implements Comparable<Rational> {
 
     final double z = doubleValue2(negative,e11,n10,d12);
 
-    final double ze = Debug.ToDouble(negative,e11,n10,d12);
-    assert ze == z :
-      "\n" 
-      + Double.toHexString(ze) + " :E\n"
-      + Double.toHexString(z); 
-
     return z; }
 
   //--------------------------------------------------------------
@@ -1030,13 +928,6 @@ implements Comparable<Rational> {
 
     final double z = doubleValue1(negative,n01,d01);
 
-    final double ze = Debug.ToDouble(negative,n01,d01);
-
-    assert ze == z :
-      "\n" 
-      + Double.toHexString(ze) + " :E\n"
-      + Double.toHexString(z); 
-
     return z; }
 
   //--------------------------------------------------------------
@@ -1055,12 +946,6 @@ implements Comparable<Rational> {
 
     final double z = doubleValue0(n,d);
 
-    final double ze = Debug.ToDouble(n,d);
-    assert ze == z :
-      "\n" 
-      + Double.toHexString(ze) + " :E\n"
-      + Double.toHexString(z); 
-
     return z; }
 
   //--------------------------------------------------------------
@@ -1068,17 +953,6 @@ implements Comparable<Rational> {
   @Override
   public final double doubleValue () { 
     return doubleValue(numerator(),denominator()); }
-
-  //  @Override
-  //  public final double doubleValue () { 
-  //    final EInteger ni = 
-  //      EInteger.FromBytes(numerator().toByteArray(), false);
-  //    final EInteger di = 
-  //      EInteger.FromBytes(denominator().toByteArray(), false);
-  //    final EFloat nf = EFloat.FromEInteger(ni); 
-  //    final EFloat df = EFloat.FromEInteger(di); 
-  //    final EFloat f = nf.Divide(df, EContext.Binary64);
-  //    return f.ToDouble(); }
 
   //--------------------------------------------------------------
   // Comparable methods

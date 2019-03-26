@@ -11,12 +11,8 @@ import org.junit.jupiter.api.Test;
 import xfp.java.Classes;
 import xfp.java.accumulators.Accumulator;
 import xfp.java.accumulators.BigDecimalSum;
-import xfp.java.accumulators.BigFractionSum;
 import xfp.java.accumulators.DoubleSum;
-import xfp.java.accumulators.EFloatSum;
-import xfp.java.accumulators.ERationalSum;
 import xfp.java.accumulators.MutableRationalSum;
-import xfp.java.accumulators.RatioSum;
 import xfp.java.accumulators.RationalSum;
 import xfp.java.linear.Dn;
 import xfp.java.numbers.Doubles;
@@ -31,7 +27,7 @@ import xfp.java.prng.PRNG;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-22
+ * @version 2019-03-25
  */
 
 // no actual tests here (yet)
@@ -102,9 +98,8 @@ public final class SumTest {
     // should be zero with current construction
     final double[] truth = new double[N];
     final double[] pred = new double[N];
-    // assuming ERational is correct!!!
     for (int i=0;i<N;i++) { 
-      truth[i] =  EFloatSum.make().addAll(x[i]).doubleValue(); }
+      truth[i] =  RationalSum.make().addAll(x[i]).doubleValue(); }
 
     for (int i=0;i<N;i++) { 
       System.out.println(
@@ -117,12 +112,8 @@ public final class SumTest {
     final Accumulator[] accumulators = 
     {
      BigDecimalSum.make(),
-     BigFractionSum.make(),
      DoubleSum.make(),
-     EFloatSum.make(),
-     ERationalSum.make(),
 //     FloatSum.make(),
-     RatioSum.make(),
      MutableRationalSum.make(),
      RationalSum.make(),
     };
