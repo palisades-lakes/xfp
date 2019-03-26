@@ -3,6 +3,7 @@ package xfp.java.numbers;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiPredicate;
 import java.util.function.BinaryOperator;
@@ -11,13 +12,15 @@ import java.util.function.UnaryOperator;
 
 import org.apache.commons.math3.fraction.BigFraction;
 import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.CollectionSampler;
+import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
+import org.apache.commons.rng.sampling.distribution.ContinuousUniformSampler;
 
 import xfp.java.algebra.OneSetOneOperation;
 import xfp.java.algebra.OneSetTwoOperations;
 import xfp.java.algebra.Set;
 import xfp.java.exceptions.Exceptions;
 import xfp.java.prng.Generator;
-import xfp.java.prng.Generators;
 
 /** The set of rational numbers represented by 
  * <code>BigFraction</code>
@@ -317,7 +320,7 @@ public final class BigFractions implements Set {
   @Override
   public final Supplier generator (final Map options) {
     final UniformRandomProvider urp = Set.urp(options);
-    final Generator bfs = Generators.bigFractionGenerator(urp);
+    final Generator bfs = BigFractions.bigFractionGenerator(urp);
     return 
       new Supplier () {
       @Override
@@ -342,6 +345,46 @@ public final class BigFractions implements Set {
   // construction
   //--------------------------------------------------------------
 
+
+  public static final Generator 
+  bigFractionGenerator (final int n,
+                        final UniformRandomProvider urp) {
+    return new Generator () {
+      final Generator g = bigFractionGenerator(urp);
+      @Override
+      public final Object next () {
+        final BigFraction[] z = new BigFraction[n];
+        for (int i=0;i<n;i++) { z[i] = (BigFraction) g.next(); }
+        return z; } }; }
+
+  /** Intended primarily for testing. Sample a random double
+   * (see {@link xfp.java.prng.DoubleSampler})
+   * and convert to <code>BigFraction</code>
+   * with {@link #DOUBLE_P} probability;
+   * otherwise return {@link BigFraction#ZERO} or 
+   * {@link BigFraction#ONE}, {@link BigFraction#MINUS_ONE},  
+   * with equal probability (these are potential edge cases).
+   */
+  
+  public static final Generator 
+  bigFractionGenerator (final UniformRandomProvider urp) {
+    final double dp = 0.9;
+    return new Generator () {
+      private final ContinuousSampler choose = 
+        new ContinuousUniformSampler(urp,0.0,1.0);
+      private final Generator fdg = Doubles.finiteGenerator(urp);
+      private final CollectionSampler edgeCases = 
+        new CollectionSampler(
+          urp,
+          List.of(
+            BigFraction.ZERO,
+            BigFraction.ONE,
+            BigFraction.MINUS_ONE));
+      @Override
+      public Object next () { 
+        final boolean edge = choose.sample() > dp;
+        if (edge) { return edgeCases.sample(); }
+        return new BigFraction(fdg.nextDouble()); } }; }
 
   private BigFractions () { }
 

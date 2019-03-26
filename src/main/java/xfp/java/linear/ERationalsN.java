@@ -15,7 +15,6 @@ import xfp.java.algebra.Set;
 import xfp.java.algebra.TwoSetsOneOperation;
 import xfp.java.numbers.ERationals;
 import xfp.java.prng.Generator;
-import xfp.java.prng.Generators;
 
 /** The set of instances of <code>ERational[dimension]</code>).
  * 
@@ -120,7 +119,7 @@ public final class ERationalsN extends LinearSpaceLike  {
     return 
       new Supplier () {
       final Generator g =
-        Generators.eRationalFromDoubleGenerator(dimension(),urp);
+        ERationals.eRationalFromDoubleGenerator(dimension(),urp);
       @Override
       public final Object get () { return g.next(); } }; }
 

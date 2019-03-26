@@ -1,8 +1,6 @@
 package xfp.java.numbers;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.math.MathContext;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiPredicate;
@@ -26,114 +24,59 @@ import xfp.java.prng.Generators;
  * <code>Rational</code>
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-22
+ * @version 2019-03-25
  */
 public final class Rationals implements Set {
 
-  //--------------------------------------------------------------
-  // convert representation to Rational[] as default.
-  // higher performance methods use raw representation where
-  // computations are exact.
-  //--------------------------------------------------------------
-
-  public static final Rational toRational (final double x) {
-    return Rational.valueOf(x); }
-
-  public static final Rational toRational (final float x) {
-    return Rational.valueOf(x); }
-
-  public static final Rational toRational (final long x) {
-    return Rational.valueOf(x); }
-
-  public static final Rational toRational (final int x) {
-    return Rational.valueOf(x); }
-
-  public static final Rational toRational (final short x) {
-    return Rational.valueOf(x); }
-
-  public static final Rational toRational (final byte x) {
-    return Rational.valueOf(x); }
-
-  public static final Rational toRational (final Number x) {
-    if (x instanceof Rational) { return (Rational) x; }
-    if (x instanceof Double) { 
-      return Rational.valueOf(((Double) x).doubleValue()); }
-    if (x instanceof Integer) {
-      return Rational.valueOf(((Integer) x).intValue()); }
-    if (x instanceof Long) { 
-      final BigInteger bi = BigInteger.valueOf(((Long) x).longValue());
-      return Rational.valueOf(bi); }
-    //    return Rational.valueOf(((Long) x).longValue()); }
-    if (x instanceof Float) {
-      return Rational.valueOf(((Float) x).floatValue()); }
-    if (x instanceof Short) {
-      return Rational.valueOf(((Short) x).intValue()); }
-    if (x instanceof Byte) {
-      return Rational.valueOf(((Byte) x).intValue()); }
-    if (x instanceof BigInteger) {
-      return Rational.valueOf(((BigInteger) x)); }
-    throw Exceptions.unsupportedOperation(
-      Rationals.class,"toRational",x); } 
-
-  //--------------------------------------------------------------
+   //--------------------------------------------------------------
 
   public static final Rational[] toRational (final Number[] x) {
     final int n = x.length;
     final Rational[] y = new Rational[n];
-    for (int i=0;i<n;i++) { y[i] = toRational(x[i]); }
+    for (int i=0;i<n;i++) { y[i] = Rational.valueOf(x[i]); }
     return y; }
 
-  public static final Rational[]
-    toRational (final double[] x) {
+  public static final Rational[] toRational (final double[] x) {
     final int n = x.length;
     final Rational[] y = new Rational[n];
-    for (int i=0;i<n;i++) { y[i] = toRational(x[i]); }
+    for (int i=0;i<n;i++) { y[i] = Rational.valueOf(x[i]); }
     return y; }
 
-  public static final Rational[]
-    toRational (final float[] x) {
+  public static final Rational[] toRational (final float[] x) {
     final int n = x.length;
     final Rational[] y = new Rational[n];
-    for (int i=0;i<n;i++) { y[i] = toRational(x[i]); }
+    for (int i=0;i<n;i++) { y[i] = Rational.valueOf(x[i]); }
     return y; }
 
-  public static final Rational[]
-    toRational (final long[] x) {
+  public static final Rational[] toRational (final long[] x) {
     final int n = x.length;
     final Rational[] y = new Rational[n];
-    for (int i=0;i<n;i++) { y[i] = toRational(x[i]); }
+    for (int i=0;i<n;i++) { y[i] = Rational.valueOf(x[i]); }
     return y; }
 
-  public static final Rational[]
-    toRational (final int[] x) {
+  public static final Rational[] toRational (final int[] x) {
     final int n = x.length;
     final Rational[] y = new Rational[n];
-    for (int i=0;i<n;i++) { y[i] = toRational(x[i]); }
+    for (int i=0;i<n;i++) { y[i] = Rational.valueOf(x[i]); }
     return y; }
 
-  public static final Rational[]
-    toRational (final short[] x) {
+  public static final Rational[] toRational (final short[] x) {
     final int n = x.length;
     final Rational[] y = new Rational[n];
-    for (int i=0;i<n;i++) { y[i] = toRational(x[i]); }
+    for (int i=0;i<n;i++) { y[i] = Rational.valueOf(x[i]); }
     return y; }
 
-  public static final Rational[] 
-    toRational (final byte[] x) {
+  public static final Rational[] toRational (final byte[] x) {
     final int n = x.length;
     final Rational[] y = new Rational[n];
-    for (int i=0;i<n;i++) { y[i] = toRational(x[i]); }
+    for (int i=0;i<n;i++) { y[i] = Rational.valueOf(x[i]); }
     return y; }
 
   //--------------------------------------------------------------
 
-  public static final Object toRational (final Object x) {
+  public static final Rational[] toRational (final Object x) {
 
-    if (x instanceof Rational) { return x; }
-    if (x instanceof Number) { 
-      return toRational(((Number) x)); }
-
-    if (x instanceof Rational[]) { return x; }
+    if (x instanceof Rational[]) { return (Rational[]) x; }
 
     if (x instanceof byte[]) { 
       return toRational((byte[]) x); }
@@ -158,40 +101,6 @@ public final class Rationals implements Set {
 
     throw Exceptions.unsupportedOperation(
       Rationals.class,"toRational",x); }
-
-  //--------------------------------------------------------------
-  // from Rational to other numbers
-  // adapted from clojure.lang.Ratio
-  //--------------------------------------------------------------
-
-  public static final BigInteger 
-  bigIntegerValue (final Rational f){
-    return f.numerator().divide(f.denominator()); }
-
-  public static final BigDecimal 
-  decimalValue (final Rational f,
-                final MathContext mc) {
-    final BigDecimal numerator = 
-      new BigDecimal(f.numerator());
-    final BigDecimal denominator = 
-      new BigDecimal(f.denominator());
-    return numerator.divide(denominator, mc); }
-
-  public static final BigDecimal 
-  decimalValue (final Rational f) {
-    return decimalValue(f,MathContext.UNLIMITED); }
-
-  public static final double doubleValue (final Rational f) {
-    return decimalValue(f,MathContext.DECIMAL64).doubleValue(); }
-
-  public static final int intValue (final Rational f) {
-    return (int) doubleValue(f); }
-
-  public static final long longValue (final Rational f) {
-    return bigIntegerValue(f).longValue(); }
-
-  public static final float floatValue (final Rational f) {
-    return (float)doubleValue(f); }
 
   //--------------------------------------------------------------
   // operations for algebraic structures over Rationals.
@@ -335,7 +244,7 @@ public final class Rationals implements Set {
 
   // Is this characteristic of most inputs?
   public static final Generator 
-  generator (final UniformRandomProvider urp) {
+  fromDoubleGenerator (final UniformRandomProvider urp) {
     final double dp = 0.9;
     return new Generator () {
       private final ContinuousSampler choose = 
@@ -355,6 +264,22 @@ public final class Rationals implements Set {
         final boolean edge = choose.sample() > dp;
         if (edge) { return edgeCases.sample(); }
         return Rational.valueOf(g.nextDouble()); } }; }
+
+  // Is this characteristic of most inputs?
+  public static final Generator 
+  generator (final UniformRandomProvider urp) {
+    return fromDoubleGenerator(urp); }
+
+  public static final Generator 
+  fromDoubleGenerator (final int n,
+             final UniformRandomProvider urp) {
+    return new Generator () {
+      final Generator g = fromDoubleGenerator(urp);
+      @Override
+      public final Object next () {
+        final Rational[] z = new Rational[n];
+        for (int i=0;i<n;i++) { z[i] = (Rational) g.next(); }
+        return z; } }; }
 
   public static final Generator 
   generator (final int n,

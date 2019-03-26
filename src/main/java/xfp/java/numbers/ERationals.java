@@ -1,6 +1,7 @@
 package xfp.java.numbers;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiPredicate;
 import java.util.function.BinaryOperator;
@@ -8,6 +9,9 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.CollectionSampler;
+import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
+import org.apache.commons.rng.sampling.distribution.ContinuousUniformSampler;
 
 import com.upokecenter.numbers.EInteger;
 import com.upokecenter.numbers.ERational;
@@ -334,7 +338,7 @@ public final class ERationals implements Set {
   public final Supplier generator (final Map options) {
     final UniformRandomProvider urp = Set.urp(options);
     final Generator g = 
-      Generators.eRationalFromEIntegerGenerator(urp);
+      ERationals.eRationalFromEIntegerGenerator(urp);
     //    Generators.eRationalFromDoubleGenerator(urp);
     return 
       new Supplier () {
@@ -360,6 +364,154 @@ public final class ERationals implements Set {
   // construction
   //--------------------------------------------------------------
 
+
+  public static final Generator 
+  eRationalFromEintegerGenerator (final int n,
+                                  final UniformRandomProvider urp) {
+    return new Generator () {
+      final Generator g = eRationalFromEIntegerGenerator(urp);
+      @Override
+      public final Object next () {
+        final ERational[] z = new ERational[n];
+        for (int i=0;i<n;i++) { z[i] = (ERational) g.next(); }
+        return z; } }; }
+
+  public static final Generator 
+  eRationalFromEIntegerGenerator (final UniformRandomProvider urp) {
+    final double dp = 0.9;
+    return new Generator () {
+      private final ContinuousSampler choose = 
+        new ContinuousUniformSampler(urp,0.0,1.0);
+      final Generator gn = eIntegerGenerator(urp);
+      final Generator gd = nonzeroEIntegerGenerator(urp);
+      private final CollectionSampler edgeCases = 
+        new CollectionSampler(
+          urp,
+          List.of(
+            ERational.Zero,
+            ERational.One,
+            ERational.One.Negate()));
+      @Override
+      public Object next () { 
+        final boolean edge = choose.sample() > dp;
+        if (edge) { return edgeCases.sample(); }
+        final EInteger n = (EInteger) gn.next();
+        final EInteger d = (EInteger) gd.next();
+        final ERational f = ERational.Create(n,d);
+        return f; } }; }
+
+  public static final Generator 
+  eRationalFromDoubleGenerator (final int n,
+                                final UniformRandomProvider urp) {
+    return new Generator () {
+      final Generator g = eRationalFromDoubleGenerator(urp);
+      @Override
+      public final Object next () {
+        final ERational[] z = new ERational[n];
+        for (int i=0;i<n;i++) { z[i] = (ERational) g.next(); }
+        return z; } }; }
+
+  /** Intended primarily for testing. Sample a random double
+   * (see {@link xfp.java.prng.DoubleSampler})
+   * and convert to <code>ERational</code>
+   * with {@link #DOUBLE_P} probability;
+   * otherwise return {@link ERational#ZERO} or 
+   * {@link ERational#ONE}, {@link ERational#MINUS_ONE},  
+   * with equal probability (these are potential edge cases).
+   */
+  
+  public static final Generator 
+  eRationalFromDoubleGenerator (final UniformRandomProvider urp) {
+    final double dp = 0.9;
+    return new Generator () {
+      private final ContinuousSampler choose = 
+        new ContinuousUniformSampler(urp,0.0,1.0);
+      private final Generator fdg = Doubles.finiteGenerator(urp);
+      private final CollectionSampler edgeCases = 
+        new CollectionSampler(
+          urp,
+          List.of(
+            ERational.Zero,
+            ERational.One,
+            ERational.One.Negate()));
+      @Override
+      public Object next () { 
+        final boolean edge = choose.sample() > dp;
+        if (edge) { return edgeCases.sample(); }
+        return ERational.FromDouble(fdg.nextDouble()); } }; }
+
+  public static final Generator 
+  nonzeroEIntegerGenerator (final int n,
+                            final UniformRandomProvider urp) {
+    return new Generator () {
+      final Generator g = nonzeroEIntegerGenerator(urp);
+      @Override
+      public final Object next () {
+        final EInteger[] z = new EInteger[n];
+        for (int i=0;i<n;i++) { z[i] = (EInteger) g.next(); }
+        return z; } }; }
+
+  /** Intended primarily for testing. <b>
+   * Generate enough bytes to at least cover the range of 
+   * <code>double</code> values.
+   */
+  
+  public static final Generator 
+  nonzeroEIntegerGenerator (final UniformRandomProvider urp) {
+    final double dp = 0.99;
+    return new Generator () {
+      private final ContinuousSampler choose = 
+        new ContinuousUniformSampler(urp,0.0,1.0);
+      private final CollectionSampler edgeCases = 
+        new CollectionSampler(
+          urp,
+          List.of(
+            EInteger.getOne(),
+            EInteger.getTen()));
+      @Override
+      public Object next () { 
+        final boolean edge = choose.sample() > dp;
+        if (edge) { return edgeCases.sample(); }
+        // TODO: bound infinite loop?
+        for (;;) {
+          final EInteger e =
+            EInteger.FromBytes(Generators.nextBytes(urp,1024),false); 
+          if (! e.isZero()) { return e; } } } }; }
+
+  public static final Generator 
+  eIntegerGenerator (final int n,
+                     final UniformRandomProvider urp) {
+    return new Generator () {
+      final Generator g = eIntegerGenerator(urp);
+      @Override
+      public final Object next () {
+        final EInteger[] z = new EInteger[n];
+        for (int i=0;i<n;i++) { z[i] = (EInteger) g.next(); }
+        return z; } }; }
+
+  /** Intended primarily for testing. <b>
+   * Generate enough bytes to at least cover the range of 
+   * <code>double</code> values.
+   */
+  
+  public static final Generator 
+  eIntegerGenerator (final UniformRandomProvider urp) {
+    final double dp = 0.99;
+    return new Generator () {
+      private final ContinuousSampler choose = 
+        new ContinuousUniformSampler(urp,0.0,1.0);
+      private final CollectionSampler edgeCases = 
+        new CollectionSampler(
+          urp,
+          List.of(
+            EInteger.getZero(),
+            EInteger.getOne(),
+            EInteger.getTen()));
+      @Override
+      public Object next () { 
+        final boolean edge = choose.sample() > dp;
+        if (edge) { return edgeCases.sample(); }
+        return EInteger.FromBytes(Generators.nextBytes(urp,1024),false); } }; }
 
   private ERationals () { }
 

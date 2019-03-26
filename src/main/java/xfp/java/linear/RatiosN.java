@@ -16,7 +16,6 @@ import xfp.java.algebra.Set;
 import xfp.java.algebra.TwoSetsOneOperation;
 import xfp.java.numbers.Ratios;
 import xfp.java.prng.Generator;
-import xfp.java.prng.Generators;
 
 /** The set of instances of <code>Ratio[dimension]</code>).
  * 
@@ -128,7 +127,7 @@ public final class RatiosN extends LinearSpaceLike {
     final UniformRandomProvider urp = Set.urp(options);
     return 
       new Supplier () {
-      final Generator g = Generators.ratioGenerator(dimension(),urp);
+      final Generator g = Ratios.ratioGenerator(dimension(),urp);
       @Override
       public final Object get () { return g.next(); } }; }
 

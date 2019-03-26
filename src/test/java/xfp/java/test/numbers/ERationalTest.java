@@ -8,6 +8,7 @@ import com.upokecenter.numbers.EInteger;
 import com.upokecenter.numbers.ERational;
 
 import xfp.java.numbers.Doubles;
+import xfp.java.numbers.ERationals;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
 import xfp.java.prng.PRNG;
@@ -71,10 +72,10 @@ public final class ERationalTest {
   @Test
   public final void fromEIntegersRoundingTest () {
     final Generator gn = 
-      Generators.eIntegerGenerator(
+      ERationals.eIntegerGenerator(
         PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
     final Generator gd = 
-      Generators.nonzeroEIntegerGenerator(
+      ERationals.nonzeroEIntegerGenerator(
         PRNG.well44497b("seeds/Well44497b-2019-01-07.txt"));
     for (int i=0;i<TRYS;i++) {
       // some longs will not be exactly representable as doubles

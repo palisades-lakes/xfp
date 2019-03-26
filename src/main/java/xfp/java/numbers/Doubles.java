@@ -24,9 +24,20 @@ import xfp.java.prng.Generator;
 /** Utilities for <code>double</code>, <code>double[]</code>.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-22
+ * @version 2019-03-25
  */
 public final class Doubles implements Set {
+
+  //--------------------------------------------------------------
+  // TODO: cleanly separate stuff treating significant as 
+  // 53 bit integer from stuff treating is as a binary fraction
+  // iwth one digit before the 'deciaml' point.
+  // In other words:
+  // Most descriptions of floating point formats refer to the
+  // significand as 1.xxx...xxx (with 52 x's). 
+  // It's often more convenient to treat it as an integer, which
+  // requires us to subtract 52 from the exponent to get the same 
+  // value.
 
   //--------------------------------------------------------------
 
@@ -64,7 +75,8 @@ public final class Doubles implements Set {
   public static final int EXPONENT_BIAS =
     (1 << (EXPONENT_BITS - 1)) - 1;
 
-  /** Unbiased exponent for subnormal numbers, with implied
+  /** Unbiased exponent for subnormal numbers with fractional
+   * significand, with implied
    * leading bit = 0.
    */
   public static final int SUBNORMAL_EXPONENT = 
@@ -80,6 +92,18 @@ public final class Doubles implements Set {
    */
   public static final int INFINITE_OR_NAN_EXPONENT = 
     MAX_EXPONENT + 1;
+
+  /** Inclusive lower bound on exponents for rounding to double,
+   * treating the significand as an integer.
+   */
+  public static final int MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND =
+    Double.MIN_EXPONENT - STORED_SIGNIFICAND_BITS;
+
+  /** Exclusive upper bound on exponents for rounding to double
+   * treating the significand as an integer.
+   */
+  public static final int MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND =
+    Double.MAX_EXPONENT - STORED_SIGNIFICAND_BITS + 1;
 
   //    static {
   //      assert ((~0L) == (SIGN_MASK | EXPONENT_MASK | SIGNIFICAND_MASK));
@@ -366,7 +390,7 @@ public final class Doubles implements Set {
   @Override
   public final Supplier generator (final Map options) {
     final UniformRandomProvider urp = Set.urp(options);
-    final Generator g = Doubles.finiteGenerator(urp);
+    final Generator g = finiteGenerator(urp);
     return 
       new Supplier () {
       @Override

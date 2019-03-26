@@ -23,7 +23,7 @@ import xfp.java.prng.Generator;
 /** Utilities for <code>float</code>, <code>float[]</code>.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-21
+ * @version 2019-03-25
  */
 public final class Floats implements Set {
 
@@ -80,6 +80,20 @@ public final class Floats implements Set {
   public static final int INFINITE_OR_NAN_EXPONENT = 
     MAX_EXPONENT + 1;
 
+  //--------------------------------------------------------------
+  /** Inclusive lower bound on exponents for rounding to float.
+   */
+
+  public static final int MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND =
+    Float.MIN_EXPONENT - Floats.STORED_SIGNIFICAND_BITS;
+
+  /** Exclusive upper bound on exponents for rounding to float.
+   */
+  
+  public static final int MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND =
+    Float.MAX_EXPONENT - Floats.STORED_SIGNIFICAND_BITS + 1;
+
+  //--------------------------------------------------------------
   //    static {
   //      assert ((~0L) == (SIGN_MASK | EXPONENT_MASK | SIGNIFICAND_MASK));
   //      assert (0L == (SIGN_MASK & EXPONENT_MASK));
@@ -96,7 +110,6 @@ public final class Floats implements Set {
     return  0 == signBit(x); }
 
   //--------------------------------------------------------------
-
   /** Actual 52 stored bits, without the implied leading 1 bit
    * for normal numbers.
    */

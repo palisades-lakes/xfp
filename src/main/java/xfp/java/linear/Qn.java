@@ -9,15 +9,14 @@ import org.apache.commons.rng.UniformRandomProvider;
 
 import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
-import com.upokecenter.numbers.ERational;
 
 import xfp.java.algebra.OneSetOneOperation;
 import xfp.java.algebra.Set;
 import xfp.java.algebra.TwoSetsOneOperation;
-import xfp.java.numbers.ERationals;
 import xfp.java.numbers.Q;
+import xfp.java.numbers.Rational;
+import xfp.java.numbers.Rationals;
 import xfp.java.prng.Generator;
-import xfp.java.prng.Generators;
 
 /** The set of arrays of some fixed length <code>n</code>,
  *  of primitive numbers, or 
@@ -36,7 +35,7 @@ import xfp.java.prng.Generators;
  * that can be used to represent tuples of rational numbers.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-07
+ * @version 2019-03-25
  */
 @SuppressWarnings("unchecked")
 public final class Qn extends LinearSpaceLike {
@@ -45,7 +44,7 @@ public final class Qn extends LinearSpaceLike {
   // operations for algebraic structures over rational arrays.
   //--------------------------------------------------------------
   /** A <code>BinaryOperator</code> that adds elementwise
-   * <code>ERational[]</code> instances of length 
+   * <code>Rational[]</code> instances of length 
    * <code>dimension</code>.
    */
 
@@ -54,42 +53,40 @@ public final class Qn extends LinearSpaceLike {
                            final Object x1) {
     assert contains(x0);
     assert contains(x1);
-    final ERational[] q0 = ERationals.toERationalArray(x0);
-    final ERational[] q1 = ERationals.toERationalArray(x1);
-    final ERational[] qq = new ERational[dimension()];
-    for (int i=0;i<dimension();i++) { qq[i] = q0[i].Add(q1[i]); }
+    final Rational[] q0 = Rationals.toRational(x0);
+    final Rational[] q1 = Rationals.toRational(x1);
+    final Rational[] qq = new Rational[dimension()];
+    for (int i=0;i<dimension();i++) { qq[i] = q0[i].add(q1[i]); }
     return qq; }
 
   //--------------------------------------------------------------
 
   @Override
-  public final ERational[] zero (final int n) {
-    final ERational[] z = new ERational[n];
-    Arrays.fill(z,ERational.Zero);
+  public final Rational[] zero (final int n) {
+    final Rational[] z = new Rational[n];
+    Arrays.fill(z,Rational.ZERO);
     return z; }
 
   //--------------------------------------------------------------
 
   @Override
-  public final ERational[] negate (final Object x) {
+  public final Rational[] negate (final Object x) {
     assert contains(x);
-    final ERational[] q = 
-      ERationals.toERationalArray(x);
-    final ERational[] qq = new ERational[dimension()];
-    for (int i=0;i<dimension();i++) { qq[i] = q[i].Negate(); }
+    final Rational[] q = Rationals.toRational(x);
+    final Rational[] qq = new Rational[dimension()];
+    for (int i=0;i<dimension();i++) { qq[i] = q[i].negate(); }
     return qq; } 
 
   //--------------------------------------------------------------
 
   @Override
-  public final ERational[] scale (final Object a, 
+  public final Rational[] scale (final Object a, 
                                   final Object x) {
     assert contains(x);
-    final ERational b = 
-      ERationals.toERational(a);
-    final ERational[] q = ERationals.toERationalArray(x);
-    final ERational[] qq = new ERational[dimension()];
-    for (int i=0;i<dimension();i++) { qq[i] = q[i].Multiply(b); }
+    final Rational b = Rational.valueOf(a);
+    final Rational[] q = Rationals.toRational(x);
+    final Rational[] qq = new Rational[dimension()];
+    for (int i=0;i<dimension();i++) { qq[i] = q[i].multiply(b); }
     return qq; } 
 
   //--------------------------------------------------------------
@@ -101,11 +98,10 @@ public final class Qn extends LinearSpaceLike {
                                final Object x1) {
     assert contains(x0);
     assert contains(x1);
-    final ERational[] q0 = ERationals.toERationalArray(x0);
-    final ERational[] q1 = ERationals.toERationalArray(x1);
+    final Rational[] q0 = Rationals.toRational(x0);
+    final Rational[] q1 = Rationals.toRational(x1);
     for (int i=0;i<dimension();i++) {
-      if (! ERationals.get().equals(q0[i],q1[i])) {
-        return false; } }
+      if (! q0[i].equals(q1[i])) { return false; } }
     return true; }
 
   //--------------------------------------------------------------
@@ -132,9 +128,7 @@ public final class Qn extends LinearSpaceLike {
     final UniformRandomProvider urp = Set.urp(options);
     return 
       new Supplier () {
-      final Generator g =
-        Generators.eRationalFromDoubleGenerator(dimension(),urp);
-      //Generators.qnGenerator(dimension(),urp);
+      final Generator g = Rationals.generator(dimension(),urp);
       @Override
       public final Object get () { return g.next(); } }; }
 
@@ -189,7 +183,7 @@ public final class Qn extends LinearSpaceLike {
   _spaceCache = new IntObjectHashMap();
 
   /** n-dimensional rational vector space, implemented with
-   * <code>ERational[]</code>.
+   * <code>Rational[]</code>.
    */
   public static final TwoSetsOneOperation 
   space (final int dimension) {

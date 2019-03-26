@@ -8,9 +8,6 @@ import java.util.function.UnaryOperator;
 
 import org.apache.commons.rng.UniformRandomProvider;
 
-import com.upokecenter.numbers.EInteger;
-import com.upokecenter.numbers.ERational;
-
 import xfp.java.Classes;
 import xfp.java.algebra.OneSetOneOperation;
 import xfp.java.algebra.OneSetTwoOperations;
@@ -23,13 +20,15 @@ import xfp.java.prng.Generators;
  * necessary.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-05
+ * @version 2019-03-25
  */
+
+// TODO: change name to 'QQ', imitating tex font?
 
 public final class Q implements Set {
 
   //--------------------------------------------------------------
-  // operations for algebraic structures over (rational) NUubers.
+  // operations for algebraic structures over (rational) Numbers.
   //--------------------------------------------------------------
 
   // TODO: is consistency with other algebraic structure classes
@@ -39,9 +38,9 @@ public final class Q implements Set {
                             final Object x1) {
     assert(contains(x0));
     assert(contains(x1));
-    final ERational q0 = ERationals.toERational(x0);
-    final ERational q1 = ERationals.toERational(x1);
-    return q0.Add(q1); } 
+    final Rational q0 = Rational.valueOf(x0);
+    final Rational q1 = Rational.valueOf(x1);
+    return q0.add(q1); } 
 
   public final BinaryOperator adder () {
     return new BinaryOperator () {
@@ -56,16 +55,16 @@ public final class Q implements Set {
 
   @SuppressWarnings("static-method")
   public final Object additiveIdentity () { 
-    return ERational.Zero; }
+    return Rational.ZERO; }
 
   //--------------------------------------------------------------
 
   // TODO: is consistency with other algebraic structure classes
   // worth the indirection?
 
-  private final ERational negate (final Object x) {
+  private final Rational negate (final Object x) {
     assert contains(x);
-    return ERationals.toERational(x).Negate(); } 
+    return Rational.valueOf(x).negate(); } 
 
   public final UnaryOperator additiveInverse () {
     return new UnaryOperator () {
@@ -77,15 +76,15 @@ public final class Q implements Set {
 
   //--------------------------------------------------------------
 
-  private final ERational multiply (final Object x0, 
-                                    final Object x1) {
+  private final Rational multiply (final Object x0, 
+                                   final Object x1) {
     assert contains(x0) : 
       "x0 " + Classes.className(x0) + ":" + x0 + " not in " + this;
     assert contains(x1)  : 
       "x1 " + Classes.className(x1) + ":" + x1 + " not in " + this;
-    final ERational q0 = ERationals.toERational(x0);
-    final ERational q1 = ERationals.toERational(x1);
-    return q0.Multiply(q1); } 
+    final Rational q0 = Rational.valueOf(x0);
+    final Rational q1 = Rational.valueOf(x1);
+    return q0.multiply(q1); } 
 
   public final BinaryOperator multiplier () {
     return new BinaryOperator () {
@@ -100,16 +99,17 @@ public final class Q implements Set {
 
   @SuppressWarnings("static-method")
   public final Object multiplicativeIdentity () {
-    return ERational.One; }
+    return Rational.ONE; }
 
   //--------------------------------------------------------------
 
-  private final ERational reciprocal (final Object x) {
+  private final Rational reciprocal (final Object x) {
     assert contains(x);
-    final ERational q = ERationals.toERational(x);
     // only a partial inverse
-    if (q.getNumerator().isZero()) { return null; }
-    return ERationals.reciprocal(q);  } 
+    // TODO: throw exception
+    if (Numbers.isZero((Number) x)) { return null; }
+    final Rational q = Rational.valueOf(x);
+    return q.reciprocal();  } 
 
   public final UnaryOperator multiplicativeInverse () {
     return new UnaryOperator () {
@@ -132,14 +132,10 @@ public final class Q implements Set {
 
   public static final boolean knownRational (final Object x) {
     if (x instanceof Number) { return true; }
-    if (x instanceof ERational){ return true; }
-    if (x instanceof EInteger){ return true; }
     return false; }
 
   public static final boolean knownRational (final Class c) {
     if (Number.class.isAssignableFrom(c)) { return true; }
-    if (ERational.class.equals(c)) { return true; }
-    if (EInteger.class.equals(c)) { return true; }
     if (Byte.TYPE.equals(c)) { return true; }
     if (Short.TYPE.equals(c)) { return true; }
     if (Integer.TYPE.equals(c)) { return true; }
@@ -188,9 +184,9 @@ public final class Q implements Set {
                                 final Object x1) {
     assert(contains(x0));
     assert(contains(x1));
-    final ERational q0 = ERationals.toERational(x0);
-    final ERational q1 = ERationals.toERational(x1);
-    return ERationals.get().equals(q0,q1); } 
+    final Rational q0 = Rational.valueOf(x0);
+    final Rational q1 = Rational.valueOf(x1);
+    return q0.equals(q1); } 
 
   @Override
   public final BiPredicate equivalence () { 
@@ -207,7 +203,7 @@ public final class Q implements Set {
   public final Supplier generator (final Map options) {
     final UniformRandomProvider urp = Set.urp(options);
     final Generator g = Generators.finiteNumberGenerator(urp); 
-    //final Generator g = Generators.eRationalFromDoubleGenerator(urp); 
+    //final Generator g = Rationals.generator(urp); 
     return 
       new Supplier () {
       @Override

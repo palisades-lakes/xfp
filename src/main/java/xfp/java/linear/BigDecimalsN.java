@@ -15,7 +15,6 @@ import xfp.java.algebra.Set;
 import xfp.java.algebra.TwoSetsOneOperation;
 import xfp.java.numbers.BigDecimals;
 import xfp.java.prng.Generator;
-import xfp.java.prng.Generators;
 
 /** The set of instances of <code>BigDecimal[dimension]</code>).
  * 
@@ -122,7 +121,7 @@ public final class BigDecimalsN extends LinearSpaceLike {
     return 
       new Supplier () {
       final Generator bf = 
-        Generators.bigDecimalGenerator(dimension(),urp);
+        BigDecimals.bigDecimalGenerator(dimension(),urp);
       @Override
       public final Object get () { return bf.next(); } }; }
 

@@ -1,6 +1,8 @@
 package xfp.java.numbers;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiPredicate;
 import java.util.function.BinaryOperator;
@@ -8,6 +10,9 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.CollectionSampler;
+import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
+import org.apache.commons.rng.sampling.distribution.ContinuousUniformSampler;
 
 import clojure.lang.Numbers;
 import clojure.lang.Ratio;
@@ -15,7 +20,6 @@ import xfp.java.algebra.OneSetOneOperation;
 import xfp.java.algebra.OneSetTwoOperations;
 import xfp.java.algebra.Set;
 import xfp.java.prng.Generator;
-import xfp.java.prng.Generators;
 
 /** The set of rational numbers represented by 
  * <code>Ratio</code>.
@@ -226,7 +230,7 @@ public final class Ratios implements Set {
   @Override
   public final Supplier generator (final Map options) {
     final UniformRandomProvider urp = Set.urp(options);
-    final Generator bfs = Generators.ratioGenerator(urp);
+    final Generator bfs = Ratios.ratioGenerator(urp);
     return 
       new Supplier () {
       @Override
@@ -250,6 +254,59 @@ public final class Ratios implements Set {
   //--------------------------------------------------------------
   // construction
   //--------------------------------------------------------------
+
+  public static final Generator 
+  ratioGenerator (final int n,
+                  final UniformRandomProvider urp) {
+    return new Generator () {
+      final Generator g = ratioGenerator(urp);
+      @Override
+      public final Object next () {
+        final Ratio[] z = new Ratio[n];
+        for (int i=0;i<n;i++) { z[i] = (Ratio) g.next(); }
+        return z; } }; }
+
+  /** Intended primarily for testing. Sample a random double
+   * (see {@link xfp.java.prng.DoubleSampler})
+   * and convert to <code>BigDecimal</code>
+   * with {@link #DOUBLE_P} probability;
+   * otherwise return {@link Ratio#ZERO} or 
+   * {@link Ratio#ONE}, {@link Ratio#TEN},  
+   * with equal probability (these are potential edge cases).
+   * 
+   * TODO: sample rounding modes?
+   */
+  
+  public static final Generator 
+  ratioGenerator (final UniformRandomProvider urp) {
+    final double dp = 0.9;
+    return new Generator () {
+      private final ContinuousSampler choose = 
+        new ContinuousUniformSampler(urp,0.0,1.0);
+      private final Generator fdg = Doubles.finiteGenerator(urp);
+      private final CollectionSampler edgeCases = 
+        new CollectionSampler(
+          urp,
+          List.of(
+            new Ratio(BigInteger.ZERO,BigInteger.ONE),
+            new Ratio(BigInteger.ONE,BigInteger.ONE),
+            new Ratio(BigInteger.TWO,BigInteger.TWO),
+            new Ratio(BigInteger.TEN,BigInteger.TEN),
+            new Ratio(BigInteger.ONE,BigInteger.ONE),
+            new Ratio(BigInteger.TWO,BigInteger.ONE),
+            new Ratio(BigInteger.TEN,BigInteger.ONE),
+            new Ratio(BigInteger.ONE,BigInteger.TWO),
+            new Ratio(BigInteger.TWO,BigInteger.TWO),
+            new Ratio(BigInteger.TEN,BigInteger.TWO),
+            new Ratio(BigInteger.ONE,BigInteger.TEN),
+            new Ratio(BigInteger.TWO,BigInteger.TEN),
+            new Ratio(BigInteger.TEN,BigInteger.TEN)));
+      @Override
+      public Object next () { 
+        final boolean edge = choose.sample() > dp;
+        if (edge) { return edgeCases.sample(); }
+        return Numbers.toRatio(
+          new BigDecimal(fdg.nextDouble())); } }; }
 
   private Ratios () { }
 

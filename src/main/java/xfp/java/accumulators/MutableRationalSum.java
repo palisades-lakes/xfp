@@ -2,28 +2,19 @@ package xfp.java.accumulators;
 
 import java.math.BigInteger;
 
-import com.upokecenter.numbers.EContext;
-import com.upokecenter.numbers.EFloat;
-import com.upokecenter.numbers.EInteger;
-
 import xfp.java.numbers.Doubles;
+import xfp.java.numbers.Rational;
 
-/** Naive sum of <code>double</code> values with ERational 
+/** Naive sum of <code>double</code> values with BigInteger pair 
  * accumulator (for testing).
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-22
+ * @version 2019-03-25
  */
 public final class MutableRationalSum 
 implements 
 Accumulator<MutableRationalSum>, 
 Comparable<MutableRationalSum> {
-
-  //--------------------------------------------------------------
-  // class field and methods
-  //--------------------------------------------------------------
-
-  
 
   //--------------------------------------------------------------
   // instance fields and methods
@@ -62,25 +53,10 @@ Comparable<MutableRationalSum> {
   //--------------------------------------------------------------
   // start with only immediate needs
 
-  //  @Override
-  //  public final double doubleValue () { 
-  //    final EInteger n = 
-  //      EInteger.FromBytes(_numerator.toByteArray(), false);
-  //    final EInteger d = 
-  //      EInteger.FromBytes(_denominator.toByteArray(), false);
-  //    return 
-  //      ERational.Create(n,d).ToDouble(); }
-
   @Override
   public final double doubleValue () { 
-    final EInteger ni = 
-      EInteger.FromBytes(_numerator.toByteArray(), false);
-    final EInteger di = 
-      EInteger.FromBytes(_denominator.toByteArray(), false);
-    final EFloat nf = EFloat.FromEInteger(ni); 
-    final EFloat df = EFloat.FromEInteger(di); 
-    final EFloat f = nf.Divide(df, EContext.Binary64);
-    return f.ToDouble(); }
+    return 
+      Rational.valueOf(numerator(),denominator()).doubleValue(); }
 
   @Override
   public final MutableRationalSum clear () { 
@@ -99,7 +75,7 @@ Comparable<MutableRationalSum> {
   //  @Override
   //  public final RationalSum addAll (final double[] z)  {
   //    for (final double zi : z) { 
-  //      _sum = _sum.Add(ERational.FromDouble(zi)); }
+  //      _sum = _sum.add(Rational.valueOf(zi)); }
   //    return this; }
 
   @Override
@@ -120,8 +96,8 @@ Comparable<MutableRationalSum> {
   //    assert n == z1.length;
   //    for (int i=0;i<n;i++) { 
   //      sum = _sum.Add(
-  //        ERational.FromDouble(z0[i])
-  //        .Multiply(ERational.FromDouble(z1[i])));}
+  //        Rational.valueOf(z0[i])
+  //        .multiply(Rational.valueOf(z1[i])));}
   //    return this; }
 
   //--------------------------------------------------------------

@@ -1,6 +1,5 @@
 package xfp.java.prng;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 
@@ -10,13 +9,9 @@ import org.apache.commons.rng.sampling.CollectionSampler;
 import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
 import org.apache.commons.rng.sampling.distribution.ContinuousUniformSampler;
 
-import com.upokecenter.numbers.EInteger;
-import com.upokecenter.numbers.ERational;
-
-import clojure.lang.Numbers;
-import clojure.lang.Ratio;
 import xfp.java.numbers.Doubles;
 import xfp.java.numbers.Floats;
+import xfp.java.numbers.Rationals;
 
 /** Generators of primitives or Objects as zero-arity 'functions'
  * that return different values on each call.
@@ -112,7 +107,7 @@ public final class Generators {
 
   public static final Generator 
   positiveIntGenerator (final int n,
-                         final UniformRandomProvider urp) {
+                        final UniformRandomProvider urp) {
     return new Generator () {
       final Generator g = positiveLongGenerator(urp);
       @Override
@@ -121,7 +116,7 @@ public final class Generators {
         for (int i=0;i<n;i++) { z[i] = g.nextInt(); }
         return z; } }; }
 
-//--------------------------------------------------------------
+  //--------------------------------------------------------------
 
   public static final Generator 
   longGenerator (final UniformRandomProvider urp) {
@@ -172,7 +167,7 @@ public final class Generators {
 
   //--------------------------------------------------------------
 
-  private static final byte[] 
+  public static final byte[] 
     nextBytes (final UniformRandomProvider urp,
                final int n) {
     final byte[] b = new byte[n];
@@ -301,320 +296,6 @@ public final class Generators {
 
   /** Intended primarily for testing. Sample a random double
    * (see {@link xfp.java.prng.DoubleSampler})
-   * and convert to <code>BigDecimal</code>
-   * with {@link #DOUBLE_P} probability;
-   * otherwise return {@link BigDecimal#ZERO} or 
-   * {@link BigDecimal#ONE}, {@link BigDecimal#TEN},  
-   * with equal probability (these are potential edge cases).
-   * 
-   * TODO: sample rounding modes?
-   */
-
-  public static final Generator 
-  bigDecimalGenerator (final UniformRandomProvider urp) {
-    final double dp = 0.9;
-    return new Generator () {
-      private final ContinuousSampler choose = 
-        new ContinuousUniformSampler(urp,0.0,1.0);
-      private final Generator fdg = Doubles.finiteGenerator(urp);
-      private final CollectionSampler edgeCases = 
-        new CollectionSampler(
-          urp,
-          List.of(
-            BigDecimal.ZERO,
-            BigDecimal.ONE,
-            BigDecimal.TEN));
-      @Override
-      public Object next () { 
-        final boolean edge = choose.sample() > dp;
-        if (edge) { return edgeCases.sample(); }
-        return new BigDecimal(fdg.nextDouble()); } }; }
-
-  public static final Generator 
-  bigDecimalGenerator (final int n,
-                       final UniformRandomProvider urp) {
-    return new Generator () {
-      final Generator g = bigDecimalGenerator(urp);
-      @Override
-      public final Object next () {
-        final BigDecimal[] z = new BigDecimal[n];
-        for (int i=0;i<n;i++) { z[i] = (BigDecimal) g.next(); }
-        return z; } }; }
-
-  /** Intended primarily for testing. <b>
-   * Generate enough bytes to at least cover the range of 
-   * <code>double</code> values.
-   */
-
-  public static final Generator 
-  eIntegerGenerator (final UniformRandomProvider urp) {
-    final double dp = 0.99;
-    return new Generator () {
-      private final ContinuousSampler choose = 
-        new ContinuousUniformSampler(urp,0.0,1.0);
-      private final CollectionSampler edgeCases = 
-        new CollectionSampler(
-          urp,
-          List.of(
-            EInteger.getZero(),
-            EInteger.getOne(),
-            EInteger.getTen()));
-      @Override
-      public Object next () { 
-        final boolean edge = choose.sample() > dp;
-        if (edge) { return edgeCases.sample(); }
-        return EInteger.FromBytes(nextBytes(urp,1024),false); } }; }
-
-  public static final Generator 
-  eIntegerGenerator (final int n,
-                     final UniformRandomProvider urp) {
-    return new Generator () {
-      final Generator g = eIntegerGenerator(urp);
-      @Override
-      public final Object next () {
-        final EInteger[] z = new EInteger[n];
-        for (int i=0;i<n;i++) { z[i] = (EInteger) g.next(); }
-        return z; } }; }
-
-  /** Intended primarily for testing. <b>
-   * Generate enough bytes to at least cover the range of 
-   * <code>double</code> values.
-   */
-
-  public static final Generator 
-  nonzeroEIntegerGenerator (final UniformRandomProvider urp) {
-    final double dp = 0.99;
-    return new Generator () {
-      private final ContinuousSampler choose = 
-        new ContinuousUniformSampler(urp,0.0,1.0);
-      private final CollectionSampler edgeCases = 
-        new CollectionSampler(
-          urp,
-          List.of(
-            EInteger.getOne(),
-            EInteger.getTen()));
-      @Override
-      public Object next () { 
-        final boolean edge = choose.sample() > dp;
-        if (edge) { return edgeCases.sample(); }
-        // TODO: bound infinite loop?
-        for (;;) {
-          final EInteger e =
-            EInteger.FromBytes(nextBytes(urp,1024),false); 
-          if (! e.isZero()) { return e; } } } }; }
-
-  public static final Generator 
-  nonzeroEIntegerGenerator (final int n,
-                            final UniformRandomProvider urp) {
-    return new Generator () {
-      final Generator g = nonzeroEIntegerGenerator(urp);
-      @Override
-      public final Object next () {
-        final EInteger[] z = new EInteger[n];
-        for (int i=0;i<n;i++) { z[i] = (EInteger) g.next(); }
-        return z; } }; }
-
-  //--------------------------------------------------------------
-  // TODO: options?
-  // TODO: generator from big integers that cover more than 
-  // double range
-  // TODO: using a DoubleSampler: those are (?) the most likely
-  // values to see, but could do something to extend the 
-  // range to values not representable as double.
-
-  /** Intended primarily for testing. Sample a random double
-   * (see {@link xfp.java.prng.DoubleSampler})
-   * and convert to <code>ERational</code>
-   * with {@link #DOUBLE_P} probability;
-   * otherwise return {@link ERational#ZERO} or 
-   * {@link ERational#ONE}, {@link ERational#MINUS_ONE},  
-   * with equal probability (these are potential edge cases).
-   */
-
-  public static final Generator 
-  eRationalFromDoubleGenerator (final UniformRandomProvider urp) {
-    final double dp = 0.9;
-    return new Generator () {
-      private final ContinuousSampler choose = 
-        new ContinuousUniformSampler(urp,0.0,1.0);
-      private final Generator fdg = Doubles.finiteGenerator(urp);
-      private final CollectionSampler edgeCases = 
-        new CollectionSampler(
-          urp,
-          List.of(
-            ERational.Zero,
-            ERational.One,
-            ERational.One.Negate()));
-      @Override
-      public Object next () { 
-        final boolean edge = choose.sample() > dp;
-        if (edge) { return edgeCases.sample(); }
-        return ERational.FromDouble(fdg.nextDouble()); } }; }
-
-  public static final Generator 
-  eRationalFromDoubleGenerator (final int n,
-                                final UniformRandomProvider urp) {
-    return new Generator () {
-      final Generator g = eRationalFromDoubleGenerator(urp);
-      @Override
-      public final Object next () {
-        final ERational[] z = new ERational[n];
-        for (int i=0;i<n;i++) { z[i] = (ERational) g.next(); }
-        return z; } }; }
-
-  //--------------------------------------------------------------
-  // ratio of EIntegers uniformly (?) sampled from a range 
-  // greater than doubles.
-  //--------------------------------------------------------------
-
-  public static final Generator 
-  eRationalFromEIntegerGenerator (final UniformRandomProvider urp) {
-    final double dp = 0.9;
-    return new Generator () {
-      private final ContinuousSampler choose = 
-        new ContinuousUniformSampler(urp,0.0,1.0);
-      final Generator gn = Generators.eIntegerGenerator(urp);
-      final Generator gd = Generators.nonzeroEIntegerGenerator(urp);
-      private final CollectionSampler edgeCases = 
-        new CollectionSampler(
-          urp,
-          List.of(
-            ERational.Zero,
-            ERational.One,
-            ERational.One.Negate()));
-      @Override
-      public Object next () { 
-        final boolean edge = choose.sample() > dp;
-        if (edge) { return edgeCases.sample(); }
-        final EInteger n = (EInteger) gn.next();
-        final EInteger d = (EInteger) gd.next();
-        final ERational f = ERational.Create(n,d);
-        return f; } }; }
-
-  public static final Generator 
-  eRationalFromEintegerGenerator (final int n,
-                                  final UniformRandomProvider urp) {
-    return new Generator () {
-      final Generator g = eRationalFromEIntegerGenerator(urp);
-      @Override
-      public final Object next () {
-        final ERational[] z = new ERational[n];
-        for (int i=0;i<n;i++) { z[i] = (ERational) g.next(); }
-        return z; } }; }
-
-  //--------------------------------------------------------------
-  // TODO: options?
-  // TODO: using a DoubleSampler: those are (?) the most likely
-  // values to see, but could do something to extend the 
-  // range to values not representable as double.
-
-  /** Intended primarily for testing. Sample a random double
-   * (see {@link xfp.java.prng.DoubleSampler})
-   * and convert to <code>BigFraction</code>
-   * with {@link #DOUBLE_P} probability;
-   * otherwise return {@link BigFraction#ZERO} or 
-   * {@link BigFraction#ONE}, {@link BigFraction#MINUS_ONE},  
-   * with equal probability (these are potential edge cases).
-   */
-
-  public static final Generator 
-  bigFractionGenerator (final UniformRandomProvider urp) {
-    final double dp = 0.9;
-    return new Generator () {
-      private final ContinuousSampler choose = 
-        new ContinuousUniformSampler(urp,0.0,1.0);
-      private final Generator fdg = Doubles.finiteGenerator(urp);
-      private final CollectionSampler edgeCases = 
-        new CollectionSampler(
-          urp,
-          List.of(
-            BigFraction.ZERO,
-            BigFraction.ONE,
-            BigFraction.MINUS_ONE));
-      @Override
-      public Object next () { 
-        final boolean edge = choose.sample() > dp;
-        if (edge) { return edgeCases.sample(); }
-        return new BigFraction(fdg.nextDouble()); } }; }
-
-  public static final Generator 
-  bigFractionGenerator (final int n,
-                        final UniformRandomProvider urp) {
-    return new Generator () {
-      final Generator g = bigFractionGenerator(urp);
-      @Override
-      public final Object next () {
-        final BigFraction[] z = new BigFraction[n];
-        for (int i=0;i<n;i++) { z[i] = (BigFraction) g.next(); }
-        return z; } }; }
-
-  //--------------------------------------------------------------
-  // TODO: options?
-  // TODO: using a DoubleSampler: those are (?) the most likely
-  // values to see, but could do something to extend the 
-  // range to values not representable as double.
-
-  /** Intended primarily for testing. Sample a random double
-   * (see {@link xfp.java.prng.DoubleSampler})
-   * and convert to <code>BigDecimal</code>
-   * with {@link #DOUBLE_P} probability;
-   * otherwise return {@link Ratio#ZERO} or 
-   * {@link Ratio#ONE}, {@link Ratio#TEN},  
-   * with equal probability (these are potential edge cases).
-   * 
-   * TODO: sample rounding modes?
-   */
-
-  public static final Generator 
-  ratioGenerator (final UniformRandomProvider urp) {
-    final double dp = 0.9;
-    return new Generator () {
-      private final ContinuousSampler choose = 
-        new ContinuousUniformSampler(urp,0.0,1.0);
-      private final Generator fdg = Doubles.finiteGenerator(urp);
-      private final CollectionSampler edgeCases = 
-        new CollectionSampler(
-          urp,
-          List.of(
-            new Ratio(BigInteger.ZERO,BigInteger.ONE),
-            new Ratio(BigInteger.ONE,BigInteger.ONE),
-            new Ratio(BigInteger.TWO,BigInteger.TWO),
-            new Ratio(BigInteger.TEN,BigInteger.TEN),
-            new Ratio(BigInteger.ONE,BigInteger.ONE),
-            new Ratio(BigInteger.TWO,BigInteger.ONE),
-            new Ratio(BigInteger.TEN,BigInteger.ONE),
-            new Ratio(BigInteger.ONE,BigInteger.TWO),
-            new Ratio(BigInteger.TWO,BigInteger.TWO),
-            new Ratio(BigInteger.TEN,BigInteger.TWO),
-            new Ratio(BigInteger.ONE,BigInteger.TEN),
-            new Ratio(BigInteger.TWO,BigInteger.TEN),
-            new Ratio(BigInteger.TEN,BigInteger.TEN)));
-      @Override
-      public Object next () { 
-        final boolean edge = choose.sample() > dp;
-        if (edge) { return edgeCases.sample(); }
-        return Numbers.toRatio(
-          new BigDecimal(fdg.nextDouble())); } }; }
-
-  public static final Generator 
-  ratioGenerator (final int n,
-                  final UniformRandomProvider urp) {
-    return new Generator () {
-      final Generator g = ratioGenerator(urp);
-      @Override
-      public final Object next () {
-        final Ratio[] z = new Ratio[n];
-        for (int i=0;i<n;i++) { z[i] = (Ratio) g.next(); }
-        return z; } }; }
-
-  //--------------------------------------------------------------
-  // TODO: options?
-  // TODO: using a DoubleSampler: those are (?) the most likely
-  // values to see, but could do something to extend the 
-  // range to values not representable as double.
-
-  /** Intended primarily for testing. Sample a random double
-   * (see {@link xfp.java.prng.DoubleSampler})
    * and convert to <code>BigFraction</code>
    * with {@link #DOUBLE_P} probability;
    * otherwise return {@link BigFraction#ZERO} or 
@@ -637,11 +318,7 @@ public final class Generators {
             Doubles.generator(urp),
             bigIntegerGenerator(urp),
             //bigDecimalGenerator(urp),
-            eIntegerGenerator(urp),
-            eRationalFromDoubleGenerator(urp)
-            // clojure.lang.Ratio doesn't round correctly
-            // BigFraction.doubleValue() doesn't round correctly.
-            //,bigFractionGenerator(urp)
+            Rationals.generator(urp)
             ));
       @Override
       public final Object next () {
@@ -683,12 +360,7 @@ public final class Generators {
             Doubles.finiteGenerator(urp),
             bigIntegerGenerator(urp),
             //bigDecimalGenerator(urp),
-            eIntegerGenerator(urp),
-            eRationalFromDoubleGenerator(urp)
-            // clojure.lang.Ratio doesn't round correctly
-            // BigFraction.doubleValue() doesn't round correctly.
-            //,bigFractionGenerator(urp)
-            ));
+            Rationals.generator(urp)));
       @Override
       public final Object next () {
         return generators.sample().next(); } }; }
@@ -726,8 +398,9 @@ public final class Generators {
             //bigDecimalGenerator(n,urp),
             Floats.finiteGenerator(n,urp),
             Doubles.finiteGenerator(n,urp),
-            eIntegerGenerator(n,urp),
-            eRationalFromDoubleGenerator(n,urp)
+            Rationals.generator(urp)
+            //            ERationals.eIntegerGenerator(n,urp),
+            //            ERationals.eRationalFromDoubleGenerator(n,urp)
             // clojure.lang.Ratio doesn't round correctly
             // BigFraction.doubleValue() doesn't round correctly.
             //,bigFractionGenerator(n,urp),

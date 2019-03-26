@@ -15,7 +15,6 @@ import xfp.java.algebra.Set;
 import xfp.java.algebra.TwoSetsOneOperation;
 import xfp.java.numbers.BigFractions;
 import xfp.java.prng.Generator;
-import xfp.java.prng.Generators;
 
 /** The set of instances of <code>BigFraction[dimension]</code>).
  * 
@@ -120,7 +119,7 @@ public final class BigFractionsN extends LinearSpaceLike  {
     return 
       new Supplier () {
       final Generator g =
-        Generators.bigFractionGenerator(dimension(),urp);
+        BigFractions.bigFractionGenerator(dimension(),urp);
       @Override
       public final Object get () { return g.next(); } }; }
 
