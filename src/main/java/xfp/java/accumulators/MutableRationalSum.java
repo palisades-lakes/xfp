@@ -38,7 +38,7 @@ Comparable<MutableRationalSum> {
     return this; }
 
   private final MutableRationalSum add (final BigInteger n,
-                                 final BigInteger d) {
+                                        final BigInteger d) {
     if (0 == _numerator.signum()) {
       _numerator = n;
       _denominator = d; }
@@ -80,7 +80,7 @@ Comparable<MutableRationalSum> {
 
   @Override
   public final MutableRationalSum addProduct (final double z0,
-                                       final double z1) { 
+                                              final double z1) { 
     final BigInteger[] nd0 = Doubles.toRatio(z0);
     final BigInteger[] nd1 = Doubles.toRatio(z1);
     return add(
@@ -126,7 +126,7 @@ Comparable<MutableRationalSum> {
   //--------------------------------------------------------------
 
   private MutableRationalSum (final BigInteger numerator,
-                       final BigInteger denominator) { 
+                              final BigInteger denominator) { 
     super(); 
     assert 0 != denominator.signum();
 
@@ -139,15 +139,15 @@ Comparable<MutableRationalSum> {
     reduce(); }
 
   public static final MutableRationalSum valueOf (final BigInteger n,
-                                           final BigInteger d) {
+                                                  final BigInteger d) {
     return new MutableRationalSum(n,d); }
 
   public static final MutableRationalSum valueOf (final long n,
-                                           final long d) {
+                                                  final long d) {
     return valueOf(BigInteger.valueOf(n),BigInteger.valueOf(d)); }
 
   public static final MutableRationalSum valueOf (final int n,
-                                           final int d) {
+                                                  final int d) {
     return valueOf(BigInteger.valueOf(n),BigInteger.valueOf(d)); }
 
   public static final MutableRationalSum make () {
