@@ -1,4 +1,4 @@
-package xfp.java.test.numbers;
+package xfp.java.test.accumulators;
 
 import static java.lang.Double.toHexString;
 

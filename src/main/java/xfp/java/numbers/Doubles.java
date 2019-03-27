@@ -24,7 +24,7 @@ import xfp.java.prng.Generator;
 /** Utilities for <code>double</code>, <code>double[]</code>.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-25
+ * @version 2019-03-26
  */
 public final class Doubles implements Set {
 
@@ -118,6 +118,7 @@ public final class Doubles implements Set {
       ((SIGN_MASK & doubleToRawLongBits(x))
         >> (EXPONENT_BITS + STORED_SIGNIFICAND_BITS)); }
 
+  /** Remember 0.0 can be negative. */
   public static final boolean nonNegative (final double x) {
     return  0 == signBit(x); }
 
@@ -153,6 +154,19 @@ public final class Doubles implements Set {
 
   public static final int unbiasedExponent (final double x) {
     return biasedExponent(x) - EXPONENT_BIAS; }
+
+  //--------------------------------------------------------------
+  /** Exponent if significand is treated as an integer, not a
+   * binary fraction.
+   */
+  public static final int exponent (final double x) {
+    // subnormal numbers have an exponent one less that what it
+    // should really be, as a way of coding the initial zero bit
+    // in the significand
+    return 
+      Math.max(
+        unbiasedExponent(x) - STORED_SIGNIFICAND_BITS,
+        MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND); }
 
   //--------------------------------------------------------------
 
@@ -445,7 +459,7 @@ public final class Doubles implements Set {
   
     if (! Double.isFinite(x)) {
       throw new IllegalArgumentException(
-       "RationalSum"  + " cannot handle "+ x); }
+       "toRatio"  + " cannot handle "+ x); }
   
     final BigInteger numerator;
     final BigInteger denominator;
@@ -455,7 +469,8 @@ public final class Doubles implements Set {
     final long sign     = bits & 0x8000000000000000L;
     final long exponent = bits & 0x7ff0000000000000L;
     long m              = bits & 0x000fffffffffffffL;
-    if (exponent == 0) { // subnormal
+
+    if (exponent == 0) { // subnormal or zero
       if (0L == m) {
         numerator   = BigInteger.ZERO;
         denominator = BigInteger.ONE; }

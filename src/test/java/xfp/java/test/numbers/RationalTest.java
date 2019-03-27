@@ -20,7 +20,7 @@ import xfp.java.prng.PRNG;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-22
+ * @version 2019-03-26
  */
 
 public final class RationalTest {
@@ -54,7 +54,7 @@ public final class RationalTest {
 
   //--------------------------------------------------------------
 
-  private static final int TRYS = 4 * 1024;
+  private static final int TRYS = 1 * 1024;
 
   @SuppressWarnings({ "static-method" })
   @Test

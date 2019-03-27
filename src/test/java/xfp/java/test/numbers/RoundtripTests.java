@@ -80,11 +80,13 @@ public final class RoundtripTests {
       final double xf = f.doubleValue();
       if (x != xf) { 
         System.out.println("\n\n" + 
-          "Rational.doubleValue:" + Doubles.isNormal(x) +"\n" +
-          x + "\n" +
-          xf + "\n\n" +
-          Double.toHexString(x) + "\n" +
-          Double.toHexString(xf) + "\n\n" +
+          "Rational.doubleValue:" + Doubles.isNormal(x) + "\n"
+          + "exponent: " + Doubles.exponent(x) + "\n" 
+          + "significand: " 
+          + Long.toHexString(Doubles.significand(x)) + "\nn" 
+          + x + " :x\n" + xf + " : xf\n\n" +
+          Double.toHexString(x) + " :x\n" +
+          Double.toHexString(xf) + " :xf\n\n" +
           f.numerator() + "\n" +
           f.denominator() + "\n\n" +
           f.numerator().toString(0x10) + "\n" +

@@ -9,14 +9,10 @@ import static xfp.java.numbers.Doubles.MAXIMUM_BIASED_EXPONENT;
 import static xfp.java.numbers.Doubles.STORED_SIGNIFICAND_BITS;
 import static xfp.java.numbers.Doubles.STORED_SIGNIFICAND_MASK;
 import static xfp.java.numbers.Doubles.SUBNORMAL_EXPONENT;
-import static xfp.java.numbers.Doubles.biasedExponent;
-import static xfp.java.numbers.Doubles.unbiasedExponent;
 
 import org.apache.commons.rng.UniformRandomProvider;
-import org.junit.jupiter.api.Test;
 
 import xfp.java.prng.Generator;
-import xfp.java.prng.PRNG;
 
 //----------------------------------------------------------------
 /** Test desired properties of doubles. 
@@ -26,7 +22,7 @@ import xfp.java.prng.PRNG;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-21
+ * @version 2019-03-26
  */
 
 public final class DoublesTest {
@@ -57,14 +53,14 @@ public final class DoublesTest {
     assert (0L == (ss & se & t));
     final double x = longBitsToDouble(ss | se | t);
     
-    System.out.println("-1^" + s + "*" + Long.toHexString(t) 
-    + "*2^" + ue);
-    System.out.println(toHexString(x));
-    System.out.println(
-      Integer.toHexString(biasedExponent(x)));
-    System.out.println(
-      Integer.toHexString(unbiasedExponent(x)));
-    System.out.println();
+//    System.out.println("-1^" + s + "*" + Long.toHexString(t) 
+//    + "*2^" + ue);
+//    System.out.println(toHexString(x));
+//    System.out.println(
+//      Integer.toHexString(biasedExponent(x)));
+//    System.out.println(
+//      Integer.toHexString(unbiasedExponent(x)));
+//    System.out.println();
 
     return x; }
 
@@ -97,15 +93,15 @@ public final class DoublesTest {
 
   //--------------------------------------------------------------
 
-  @SuppressWarnings({ "static-method" })
-  @Test
-  public final void finiteGeneratorTest () {
-    final UniformRandomProvider urp = 
-      PRNG.well44497b("seeds/Well44497b-2019-01-05.txt");
-    final Generator g = doubleGenerator(
-      urp, SUBNORMAL_EXPONENT, MAX_EXPONENT);
-    for (int i=0;i<2;i++) { g.nextDouble(); }
-  }
+//  @SuppressWarnings({ "static-method" })
+//  @Test
+//  public final void finiteGeneratorTest () {
+//    final UniformRandomProvider urp = 
+//      PRNG.well44497b("seeds/Well44497b-2019-01-05.txt");
+//    final Generator g = doubleGenerator(
+//      urp, SUBNORMAL_EXPONENT, MAX_EXPONENT);
+//    for (int i=0;i<2;i++) { g.nextDouble(); }
+//  }
 
   //--------------------------------------------------------------
   //  @SuppressWarnings({ "static-method" })

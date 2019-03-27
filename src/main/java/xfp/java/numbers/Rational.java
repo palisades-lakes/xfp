@@ -1,19 +1,17 @@
 package xfp.java.numbers;
 
-import static xfp.java.numbers.Numbers.description;
 import static xfp.java.numbers.Numbers.hiBit;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Objects;
 
-import xfp.java.Debug;
 import xfp.java.exceptions.Exceptions;
 
 /** Ratios of {@link BigInteger}.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-25
+ * @version 2019-03-26
  */
 
 public final class Rational 
@@ -33,6 +31,9 @@ implements Comparable<Rational> {
 
   //--------------------------------------------------------------
 
+  private static final boolean isNegative (final BigInteger i) {
+    return 0 > i.signum(); }
+
   private static final boolean isZero (final BigInteger i) {
     return 0 == i.signum(); }
 
@@ -49,7 +50,39 @@ implements Comparable<Rational> {
     return isOne(numerator(),denominator()); }
 
   //--------------------------------------------------------------
-  // TODO: does BigInteger optimize multiply by ONE?
+
+  private static final Rational reduced (final BigInteger n,
+                                         final BigInteger d) {
+
+    if (d.signum() < 0) { return reduced(n.negate(),d.negate()); }
+
+    if (n == BigInteger.ZERO) { return ZERO; }
+
+    // TODO: any value in this test?
+    if ((n == BigInteger.ONE) || (d == BigInteger.ONE)) {
+      return new Rational(n,d); }
+
+    final BigInteger gcd = n.gcd(d);
+    // TODO: any value in this test?
+    if (gcd.compareTo(BigInteger.ONE) > 0) {
+      return new Rational(n.divide(gcd),d.divide(gcd)); } 
+
+    return new Rational(n,d); }
+
+  //  public final Rational reduce () {
+  //    return reduced(numerator(),denominator()); }
+
+  //--------------------------------------------------------------
+
+  public final Rational negate () {
+    if (isZero()) { return this; }
+    return valueOf(numerator().negate(),denominator()); }
+
+  public final Rational reciprocal () {
+    assert !isZero(numerator());
+    return valueOf(denominator(),numerator()); }
+
+  //--------------------------------------------------------------
 
   private final Rational add (final BigInteger n,
                               final BigInteger d) {
@@ -59,6 +92,16 @@ implements Comparable<Rational> {
     return valueOf(
       numerator().multiply(d).add(n.multiply(denominator())),
       denominator().multiply(d)); }
+
+  public final Rational add (final Rational q) {
+    return add(q.numerator(),q.denominator()); }
+
+  // Add directly, without 2 new BigIntegers
+  public final Rational add (final double q) {
+    final BigInteger[] nd = Doubles.toRatio(q);
+    return add(nd[0],nd[1]); }
+
+  //--------------------------------------------------------------
 
   private final Rational multiply (final BigInteger n,
                                    final BigInteger d) {
@@ -72,35 +115,43 @@ implements Comparable<Rational> {
         numerator().multiply(n), 
         denominator().multiply(d)); }
 
-  //--------------------------------------------------------------
-
-  public final Rational negate () {
-    if (isZero()) { return this; }
-    return valueOf(numerator().negate(),denominator()); }
-
-  public final Rational reciprocal () {
-    assert !isZero(numerator());
-    return valueOf(denominator(),numerator()); }
-
-  public final Rational add (final Rational q) {
-    return add(q.numerator(),q.denominator()); }
-
   public final Rational multiply (final Rational q) {
     return multiply(q.numerator(),q.denominator()); }
 
   //--------------------------------------------------------------
 
-  public final Rational add (final double q) {
-    final BigInteger[] nd = Doubles.toRatio(q);
-    return add(nd[0],nd[1]); }
+    public final Rational addProduct (final double z0,
+                                      final double z1) { 
+  
+      final boolean s0 = Doubles.nonNegative(z0);
+      final int e0 = Doubles.exponent(z0);
+      final long t0 = Doubles.significand(z0);
+      final boolean s1 = Doubles.nonNegative(z1);
+      final int e1 = Doubles.exponent(z1);
+      final long t1 = Doubles.significand(z1);
+      final boolean s = ! (s0 ^ s1);
+      final int e = e0 + e1;
+      final BigInteger t = 
+        BigInteger.valueOf(t0).multiply(BigInteger.valueOf(t1));
+      final BigInteger n0 = s ? t : t.negate();
+      if (0 <= e) { // d0 = 1
+        return valueOf(
+          numerator().add(n0.shiftLeft(e).multiply(denominator())),
+          denominator()); }
+      // d0 = 2**-e
+      return valueOf(
+        numerator().shiftLeft(-e).add(n0.multiply(denominator())),
+        denominator().shiftLeft(-e)); }
 
-  public final Rational addProduct (final double z0,
-                                    final double z1) { 
-    final BigInteger[] nd0 = Doubles.toRatio(z0);
-    final BigInteger[] nd1 = Doubles.toRatio(z1);
-    return add(
-      nd0[0].multiply(nd1[0]),
-      nd0[1].multiply(nd1[1])); }
+//  public final Rational addProduct (final double z0,
+//                                    final double z1) { 
+//    final BigInteger[] nd0 = Doubles.toRatio(z0);
+//    final BigInteger[] nd1 = Doubles.toRatio(z1);
+//    final BigInteger nn = nd0[0].multiply(nd1[0]);
+//    final BigInteger dd = nd0[1].multiply(nd1[1]);
+//    return valueOf(
+//      numerator().multiply(dd).add(denominator().multiply(nn)),
+//      denominator().multiply(dd)); }
 
   //--------------------------------------------------------------
   // Number methods
@@ -132,34 +183,34 @@ implements Comparable<Rational> {
                                           final boolean subnormal,
                                           final int e7, 
                                           final int q7) {
-    Debug.println();
-    Debug.println("floatValue7(long,int,int)");
-    Debug.println(description("q7",q7));
-    Debug.println("negative= " + negative + ", e7= " + e7
-      + ", subnormal=" + subnormal);
-    if (subnormal) {
-      assert e7 == Floats.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND;
-      assert 0 < q7;
-      assert q7 < (1 << Floats.STORED_SIGNIFICAND_BITS); }
-    else {
-      assert Floats.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND <= e7 : 
-        Integer.toString(e7);
-      assert e7 < Floats.MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND : 
-        Integer.toString(e7);
-      assert (1 << Floats.STORED_SIGNIFICAND_BITS) <= q7 
-        : description("q7",q7); 
-      assert q7 <= (1 << (Floats.STORED_SIGNIFICAND_BITS+1)); }
+    //    Debug.println();
+    //    Debug.println("floatValue7(long,int,int)");
+    //    Debug.println(description("q7",q7));
+    //    Debug.println("negative= " + negative + ", e7= " + e7
+    //      + ", subnormal=" + subnormal);
+    //    if (subnormal) {
+    //      assert e7 == Floats.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND;
+    //      assert 0 < q7;
+    //      assert q7 < (1 << Floats.STORED_SIGNIFICAND_BITS); }
+    //    else {
+    //      assert Floats.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND <= e7 : 
+    //        Integer.toString(e7);
+    //      assert e7 < Floats.MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND : 
+    //        Integer.toString(e7);
+    //      assert (1 << Floats.STORED_SIGNIFICAND_BITS) <= q7 
+    //        : description("q7",q7); 
+    //      assert q7 <= (1 << (Floats.STORED_SIGNIFICAND_BITS+1)); }
 
     final int e70 = subnormal ? (e7 - 1) : e7;
 
-    if (subnormal) { 
-      assert e70 == Floats.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND - 1 : 
-        e70; }
-    else {
-      assert Floats.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND <= e70 :
-        Integer.toString(e70);
-      assert e70 < Floats.MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND : 
-        Integer.toString(e70); }
+    //    if (subnormal) { 
+    //      assert e70 == Floats.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND - 1 : 
+    //        e70; }
+    //    else {
+    //      assert Floats.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND <= e70 :
+    //        Integer.toString(e70);
+    //      assert e70 < Floats.MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND : 
+    //        Integer.toString(e70); }
 
     final float z = Floats.makeFloat(negative,e70,q7);
 
@@ -178,25 +229,25 @@ implements Comparable<Rational> {
                                           final boolean subnormal,
                                           final int e6, 
                                           final BigInteger q6) {
-    Debug.println();
-    Debug.println("floatValue6(BigInteger,boolean,int,boolean)");
-    Debug.println("negative= " + negative + ", e= " + e6
-      + ", subnormal=" + subnormal);
-    Debug.println(description("q6",q6));
-
-    assert q6.signum() == 1;
-    if (subnormal) {
-      assert e6 == Floats.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND;
-      //      assert hiBit(q) <= NUMERATOR_BITS 
-      //        : "too many bits:" + description("q",q);
-      assert q6.compareTo(TWO_23) <= 0; }
-    else {
-      assert Floats.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND <= e6 : 
-        Integer.toString(e6);
-      assert e6 < Floats.MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND : 
-        Integer.toString(e6);
-      assert TWO_23.compareTo(q6) <= 0;
-      assert q6.compareTo(TWO_24) < 0; }
+    //    Debug.println();
+    //    Debug.println("floatValue6(BigInteger,boolean,int,boolean)");
+    //    Debug.println("negative= " + negative + ", e= " + e6
+    //      + ", subnormal=" + subnormal);
+    //    Debug.println(description("q6",q6));
+    //
+    //    assert q6.signum() == 1;
+    //    if (subnormal) {
+    //      assert e6 == Floats.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND;
+    //      //      assert hiBit(q) <= NUMERATOR_BITS 
+    //      //        : "too many bits:" + description("q",q);
+    //      assert q6.compareTo(TWO_23) <= 0; }
+    //    else {
+    //      assert Floats.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND <= e6 : 
+    //        Integer.toString(e6);
+    //      assert e6 < Floats.MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND : 
+    //        Integer.toString(e6);
+    //      assert TWO_23.compareTo(q6) <= 0;
+    //      assert q6.compareTo(TWO_24) < 0; }
 
     final BigInteger q60;
     final int e60;
@@ -211,10 +262,10 @@ implements Comparable<Rational> {
 
   //--------------------------------------------------------------
 
-  private static final BigInteger TWO_23 = 
-    BigInteger.ONE.shiftLeft(Floats.STORED_SIGNIFICAND_BITS);
+  //  private static final BigInteger TWO_23 = 
+  //    BigInteger.ONE.shiftLeft(Floats.STORED_SIGNIFICAND_BITS);
 
-  private static final BigInteger TWO_24 = TWO_23.shiftLeft(1);
+  //  private static final BigInteger TWO_24 = TWO_23.shiftLeft(1);
 
   /** Is q or (q+1) closer to n/d?.
    * @param negative extracted sign info.
@@ -233,37 +284,36 @@ implements Comparable<Rational> {
                                           final BigInteger q5,
                                           final BigInteger r5,
                                           final BigInteger d5) {
-    Debug.println();
-    Debug.println("floatValue6(BigInteger,BigInteger,boolean,int,boolean,BigInteger,BigInteger)");
-    Debug.println(description("d5",d5));
-    Debug.println("negative= " + negative + ", e= " + e5
-      + ", subnormal=" + subnormal);
-    Debug.println(description("q5",q5));
-    Debug.println(description("r5",r5));
-
-    assert d5.signum() == 1;
-    assert q5.signum() == 1;
-    assert r5.signum() >= 0;
-    assert r5.compareTo(d5) < 0;
-    if (subnormal) {
-      assert e5 == Floats.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND;
-      assert q5.compareTo(TWO_23) < 0; }
-    else {
-      assert Floats.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND <= e5 :
-        Integer.toString(e5);
-      assert e5 < Floats.MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND : 
-        Integer.toString(e5);
-      // TODO: faster test!!!
-      assert TWO_23.compareTo(q5) <= 0;
-      assert q5.compareTo(TWO_24) < 0; }
+    //    Debug.println();
+    //    Debug.println("floatValue6(BigInteger,BigInteger,boolean,int,boolean,BigInteger,BigInteger)");
+    //    Debug.println(description("d5",d5));
+    //    Debug.println("negative= " + negative + ", e= " + e5
+    //      + ", subnormal=" + subnormal);
+    //    Debug.println(description("q5",q5));
+    //    Debug.println(description("r5",r5));
+    //
+    //    assert d5.signum() == 1;
+    //    assert q5.signum() == 1;
+    //    assert r5.signum() >= 0;
+    //    assert r5.compareTo(d5) < 0;
+    //    if (subnormal) {
+    //      assert e5 == Floats.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND;
+    //      assert q5.compareTo(TWO_23) < 0; }
+    //    else {
+    //      assert Floats.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND <= e5 :
+    //        Integer.toString(e5);
+    //      assert e5 < Floats.MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND : 
+    //        Integer.toString(e5);
+    //      // TODO: faster test!!!
+    //      assert TWO_23.compareTo(q5) <= 0;
+    //      assert q5.compareTo(TWO_24) < 0; }
 
     final BigInteger q50;
     final BigInteger r50 = r5.shiftLeft(1);
     if (r50.compareTo(d5) <= 0) { q50 = q5;  }
     else { q50 = q5.add(BigInteger.ONE); }
-    Debug.println(description("q50",q50));
 
-    Debug.println(description("q50",q50));
+    //    Debug.println(description("q50",q50));
 
     final float z = floatValue6(negative,subnormal,e5,q50);
 
@@ -286,35 +336,33 @@ implements Comparable<Rational> {
                                           final int e4,
                                           final BigInteger n4,
                                           final BigInteger d4) {
-    Debug.println();
-    Debug.println("floatValue5(BigInteger,BigInteger,boolean,int,boolean)");
-    Debug.println(description("n4",n4));
-    Debug.println(description("d4",d4));
-    Debug.println("negative= " + negative + ", e= " + e4
-      + ", subnormal=" + subnormal);
-
-    assert n4.signum() == 1;
-    assert d4.signum() == 1;
-    if (subnormal) {
-      assert e4 == Floats.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND;
-      assert TWO_23.compareTo(n4) <= 0; 
-      assert n4.compareTo(d4.shiftLeft(Floats.STORED_SIGNIFICAND_BITS)) < 0; }
-    else {
-      assert Floats.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND <= e4 : 
-        Integer.toString(e4);
-      assert e4 < Floats.MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND :
-        Integer.toString(e4);
-      assert d4.shiftLeft(Floats.STORED_SIGNIFICAND_BITS).compareTo(n4) <= 0;
-      // TODO: faster test!!!
-      assert n4.compareTo(d4.shiftLeft(Floats.STORED_SIGNIFICAND_BITS+1)) < 0; }
+    //    Debug.println();
+    //    Debug.println("floatValue5(BigInteger,BigInteger,boolean,int,boolean)");
+    //    Debug.println(description("n4",n4));
+    //    Debug.println(description("d4",d4));
+    //    Debug.println("negative= " + negative + ", e= " + e4
+    //      + ", subnormal=" + subnormal);
+    //
+    //    assert n4.signum() == 1;
+    //    assert d4.signum() == 1;
+    //    if (subnormal) {
+    //      assert e4 == Floats.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND;
+    //      assert TWO_23.compareTo(n4) <= 0; 
+    //      assert n4.compareTo(d4.shiftLeft(Floats.STORED_SIGNIFICAND_BITS)) < 0; }
+    //    else {
+    //      assert Floats.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND <= e4 : 
+    //        Integer.toString(e4);
+    //      assert e4 < Floats.MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND :
+    //        Integer.toString(e4);
+    //      assert d4.shiftLeft(Floats.STORED_SIGNIFICAND_BITS).compareTo(n4) <= 0;
+    //      // TODO: faster test!!!
+    //      assert n4.compareTo(d4.shiftLeft(Floats.STORED_SIGNIFICAND_BITS+1)) < 0; }
 
     final BigInteger[] qr = n4.divideAndRemainder(d4);
     final BigInteger q4 = qr[0];
     final BigInteger r4 = qr[1];
 
-    final float z = floatValue5(negative,subnormal,e4,q4,r4,d4); 
-
-    return z; }
+    return floatValue5(negative,subnormal,e4,q4,r4,d4); }
 
   //--------------------------------------------------------------
   /** Shift <code>n3</code> {@link Floats#STORED_SIGNIFICAND_BITS}
@@ -334,63 +382,74 @@ implements Comparable<Rational> {
                                           final int e3,
                                           final BigInteger n3,
                                           final BigInteger d3) {
-    Debug.println();
-    Debug.println("floatValue3(BigInteger,BigInteger,boolean,int,boolean)");
-    Debug.println(description("n",n3));
-    Debug.println(description("d",d3));
-    Debug.println("negative= " + negative + ", e= " + e3
-      + ", subnormal=" + subnormal);
-
-    assert n3.signum() == 1;
-    assert d3.signum() == 1;
-    if (subnormal) {
-      assert e3 == Float.MIN_EXPONENT;
-      assert n3.compareTo(d3) < 0; }
-    else {
-      assert Float.MIN_EXPONENT <= e3 : Integer.toString(e3);
-      assert e3 <= Float.MAX_EXPONENT : Integer.toString(e3);
-      assert d3.compareTo(n3) <= 0;
-      // TODO: faster test!!!
-      assert n3.compareTo(d3.shiftLeft(1)) < 0; }
-
+    //    Debug.println();
+    //    Debug.println("floatValue3(BigInteger,BigInteger,boolean,int,boolean)");
+    //    Debug.println(description("n",n3));
+    //    Debug.println(description("d",d3));
+    //    Debug.println("negative= " + negative + ", e= " + e3
+    //      + ", subnormal=" + subnormal);
+    //
+    //    assert n3.signum() == 1;
+    //    assert d3.signum() == 1;
+    //    if (subnormal) {
+    //      assert e3 == Float.MIN_EXPONENT;
+    //      assert n3.compareTo(d3) < 0; }
+    //    else {
+    //      assert Float.MIN_EXPONENT <= e3 : Integer.toString(e3);
+    //      assert e3 <= Float.MAX_EXPONENT : Integer.toString(e3);
+    //      assert d3.compareTo(n3) <= 0;
+    //      // TODO: faster test!!!
+    //      assert n3.compareTo(d3.shiftLeft(1)) < 0; }
 
     final BigInteger n30 = n3.shiftLeft(Floats.STORED_SIGNIFICAND_BITS);
     final int e30 = e3 - Floats.STORED_SIGNIFICAND_BITS;
 
-    Debug.println(description("n30",n30));
-    Debug.println("e30=" + e30);
+    //    Debug.println(description("n30",n30));
+    //    Debug.println("e30=" + e30);
 
-    final float z = floatValue4(negative,subnormal,e30,n30,d3);
-
-    return z; }
+    return floatValue4(negative,subnormal,e30,n30,d3); }
 
   //--------------------------------------------------------------
-  /** Detect zero, subnormal, normal, and infinite values.
-   * .
-   * @param n2 positive numerator
-   * @param d2 positive denominator
-   * @param s sign bit: 0 positive, 1 negative.
-   * @return closest half-even rounded float to 
-   * -1^s * 2<sup>e2</sup> * n / d.
+  /** Extract sign bit, so numerator and denominator are both
+   * positive. 
+   * Extract exponent <code>e</code> so that
+   * <code> n1 / d1 == 2<sup>e11</sup> * n11 / d12</code>
+   * and <code>d12 &le; n11 &lt; 2*d12</code>.
+   * @param negative flag
+   * @param n1 positive numerator
+   * @param d1 positive denominator
+   * 
+   * @return closest half-even rounded float to -1^s * n / d.
    */
 
-  private static final float floatValue2 (final boolean negative,
-                                          final int e2,
-                                          final BigInteger n2,
-                                          final BigInteger d2) {
-    Debug.println();
-    Debug.println("floatValue2(BigInteger,BigInteger,boolean,int)");
-    Debug.println(description("n2",n2));
-    Debug.println(description("d2",d2));
-    Debug.println("e2=" + e2);
-    Debug.println("neg=" + negative);
+  private static final float floatValue0 (final BigInteger n0,
+                                          final BigInteger d0) {
+    final int n0s = n0.signum();
+    if (n0s == 0) { return 0.0F; }
+    final boolean negative = (n0s < 0);
+    final BigInteger n1 = negative ? n0.negate() : n0;
+    final BigInteger d1 = d0;
 
-    assert n2.signum() == 1;
-    assert d2.signum() == 1;
-    assert d2.compareTo(n2) <= 0;
-    // TODO: faster test!!!
-    assert n2.compareTo(d2.shiftLeft(1)) < 0;
+    final int n1h = hiBit(n1);
+    final int d1h = hiBit(d1);
+    final int e10 = n1h - d1h - 1;
+    final BigInteger n10, d10;
+    if (e10 > 0) { n10 = n1; d10 = d1.shiftLeft(e10); }
+    else if (e10 == 0) { n10 = n1; d10 = d1; }
+    else if (e10 < 0) { n10 = n1.shiftLeft(-e10); d10 = d1; }
+    else { throw new RuntimeException("can't get here"); }
 
+    // TODO: more efficient test!!!
+    final BigInteger d11 = d10.shiftLeft(1);
+    final BigInteger d12;
+    final int e11;
+    if (n10.compareTo(d11) < 0) { d12 = d10; e11 = e10;}
+    else { d12 = d11; e11 = e10 + 1; }
+
+    //    return floatValue2(negative,e11,n10,d12); }
+    final int e2 = e11;
+    final BigInteger n2 = n10;
+    final BigInteger d2 = d12;
     final float z;
     if (e2 > Float.MAX_EXPONENT) {
       z = negative ? Float.NEGATIVE_INFINITY : Float.POSITIVE_INFINITY; }
@@ -406,190 +465,24 @@ implements Comparable<Rational> {
     return z; }
 
   //--------------------------------------------------------------
-  /** Extract exponent <code>e</code> so that
-   * <code> n1 / d1 == 2<sup>e11</sup> * n11 / d12</code>
-   * and <code>d12 &le; n11 &lt; 2*d12</code>.
-   * @param negative flag
-   * @param n1 positive numerator
-   * @param d1 positive denominator
-   * 
-   * @return closest half-even rounded float to -1^s * n / d.
-   */
-
-  private static final float floatValue1 (final boolean negative,
-                                          final BigInteger n1,
-                                          final BigInteger d1) {
-    Debug.println();
-    Debug.println("floatValue1(BigInteger,BigInteger,boolean)");
-    Debug.println(description("n1",n1));
-    Debug.println(description("d1",d1));
-    Debug.println("neg=" + negative);
-
-    assert n1.signum() == 1  : 
-      "numernator not strictly positive: " 
-      + n1.toString(0x10);
-    assert d1.signum() == 1 : 
-      "denominator not strictly positive: " 
-      + d1.toString(0x10);
-
-    final int n1h = hiBit(n1);
-    final int d1h = hiBit(d1);
-    final int e10 = n1h - d1h - 1;
-
-    Debug.println("n1h,d1h,e10=" + n1h + "," + d1h + "," + e10);
-
-    final BigInteger n10, d10;
-    if (e10 > 0) { n10 = n1; d10 = d1.shiftLeft(e10); }
-    else if (e10 == 0) { n10 = n1; d10 = d1; }
-    else if (e10 < 0) { n10 = n1.shiftLeft(-e10); d10 = d1; }
-    else { throw new RuntimeException("can't get here"); }
-
-    Debug.println(description("n10",n10));
-    Debug.println(description("d10",d10));
-
-    // TODO: more efficient test!!!
-    final BigInteger d11 = d10.shiftLeft(1);
-    final BigInteger d12;
-    final int e11;
-    if (n10.compareTo(d11) < 0) { d12 = d10; e11 = e10;}
-    else { d12 = d11; e11 = e10 + 1; }
-
-    Debug.println(description("n10",n10));
-    Debug.println(description("d12",d12));
-    Debug.println("e11=" + e11);
-
-    final float z = floatValue2(negative,e11,n10,d12);
-
-    return z; }
-
-  //--------------------------------------------------------------
-  /** Extract sign bit, so numerator and denominator are both
-   * positive. Also reduce by gcd.
-   * <p>
-   * <em>TODO:</em> measure performance effect of reducing/not
-   * reducing?
-   * 
-   * @param n0 numerator
-   * @param d0 positive denominator
-   * @return closest half-even rounded <code>float</code> to 
-   * exact value of <code>n0 / d0</code>.
-   */
-
-  private static final float floatValue0 (final BigInteger n0,
-                                          final BigInteger d0) {
-    Debug.println();
-    Debug.println("floatValue0(BigInteger,BigInteger)");
-    Debug.println(description("n0",n0));
-    Debug.println(description("d0",d0));
-
-    assert d0.signum() == 1 : 
-      "denominator not strictly positive: " 
-      + d0.toString(0x10);
-
-    // extract sign
-    final int n0s = n0.signum();
-
-    Debug.println("n0.signum= " + n0s);
-
-    if (n0s == 0) { return 0.0F; }
-    final boolean negative = (n0s < 0);
-    final BigInteger n00 = negative ? n0.negate() : n0;
-
-    Debug.println(description("n00",n00));
-
-    // reduce fraction (optional step)
-    // TODO: test performance effect
-    final BigInteger gcd = n00.gcd(d0);
-
-    Debug.println("gcd=" + gcd);
-
-    final BigInteger n01,d01;
-    if (BigInteger.ONE.equals(gcd)) { n01 = n00; d01 = d0; }
-    else { n01 = n00.divide(gcd); d01 = d0.divide(gcd); }
-
-    Debug.println(description("n01",n01));
-    Debug.println(description("d01",d01));
-
-    final float z = floatValue1(negative,n01,d01);
-
-    return z; }
-
-  //--------------------------------------------------------------
   /** Half-even rounding from {@link BigInteger} ratio to 
    * <code>float</code>.
    * @param n numerator
    * @param d positive denominator
-   * @return closest half-even rounded float to n / d.
+   * @return closest half-even rounded <code>float</code> to n / d.
    */
-
-  public static final float floatValue (final BigInteger n,
-                                        final BigInteger d) {
-    assert d.signum() == 1 : 
-      "denominator not strictly positive: " 
-      + d.toString(0x10);
-
-    final float z = floatValue0(n,d);
-
-    return z; }
-
   @Override
   public final float floatValue () {
-     return floatValue(numerator(),denominator()); }
+    return floatValue0(numerator(),denominator()); }
 
   //--------------------------------------------------------------
   // Half-even rounding to double
   //--------------------------------------------------------------
 
-  public static final BigInteger TWO_52 = 
-    BigInteger.ONE.shiftLeft(Doubles.STORED_SIGNIFICAND_BITS);
+  //  private static final BigInteger TWO_52 = 
+  //    BigInteger.ONE.shiftLeft(Doubles.STORED_SIGNIFICAND_BITS);
 
-  public static final BigInteger TWO_53 = TWO_52.shiftLeft(1);
-
-  //--------------------------------------------------------------
-  /** Divide numerator by denominator to get quotient and
-   * remainder.
-   * @param e4 initial exponent
-   * @param n4 positive numerator
-   * @param d4 positive denominator
-   * @param s sign bit: 0 positive, 1 negative.
-   * @return closest half-even rounded double to 
-   * (-1)^s * (2^e4) * n4 / d4.
-   */
-
-  public static final double doubleValue4 (final boolean negative,
-                                           final boolean subnormal,
-                                           final int e4,
-                                           final BigInteger n4,
-                                           final BigInteger d4) {
-    Debug.println();
-    Debug.println("doubleValue5(BigInteger,BigInteger,boolean,int,boolean)");
-    Debug.println(description("n4",n4));
-    Debug.println(description("d4",d4));
-    Debug.println("negative= " + negative + ", e= " + e4
-      + ", subnormal=" + subnormal);
-
-    assert n4.signum() == 1;
-    assert d4.signum() == 1;
-    if (subnormal) {
-      assert e4 == Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND;
-      assert TWO_52.compareTo(n4) <= 0; 
-      assert n4.compareTo(d4.shiftLeft(Doubles.STORED_SIGNIFICAND_BITS)) < 0; }
-    else {
-      assert Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND <= e4 : 
-        Integer.toString(e4);
-      assert e4 < Doubles.MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND : 
-        Integer.toString(e4);
-      assert d4.shiftLeft(Doubles.STORED_SIGNIFICAND_BITS).compareTo(n4) <= 0;
-      // TODO: faster test!!!
-      assert n4.compareTo(d4.shiftLeft(Doubles.STORED_SIGNIFICAND_BITS+1)) < 0; }
-
-    final BigInteger[] qr = n4.divideAndRemainder(d4);
-    final BigInteger q4 = qr[0];
-    final BigInteger r4 = qr[1];
-
-    final double z = doubleValue5(negative,subnormal,e4,q4,r4,d4); 
-
-    return z; }
+  //  private static final BigInteger TWO_53 = TWO_52.shiftLeft(1);
 
   //--------------------------------------------------------------
   /** Handle over and under flow (too many/few bits in q).
@@ -600,42 +493,40 @@ implements Comparable<Rational> {
    * @return (-1)^s * (2^e) * q.
    */
 
-  public static final double doubleValue7 (final boolean negative,
-                                           final boolean subnormal,
-                                           final int e7, 
-                                           final long q7) {
-    Debug.println();
-    Debug.println("doubleValue7(long,int,int)");
-    Debug.println(description("q7",q7));
-    Debug.println("negative= " + negative + ", e7= " + e7
-      + ", subnormal=" + subnormal);
-    if (subnormal) {
-      assert e7 == Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND;
-      assert 0L < q7;
-      assert q7 < (1L << Doubles.STORED_SIGNIFICAND_BITS); }
-    else {
-      assert Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND <= e7 : 
-        Integer.toString(e7);
-      assert e7 < Doubles.MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND : 
-        Integer.toString(e7);
-      assert (1L << Doubles.STORED_SIGNIFICAND_BITS) <= q7 
-        : description("q7",q7); 
-      assert q7 <= (1L << (Doubles.STORED_SIGNIFICAND_BITS+1)); }
+  private static final double doubleValue7 (final boolean negative,
+                                            final boolean subnormal,
+                                            final int e7, 
+                                            final long q7) {
+    //    Debug.println();
+    //    Debug.println("doubleValue7(long,int,int)");
+    //    Debug.println(description("q7",q7));
+    //    Debug.println("negative= " + negative + ", e7= " + e7
+    //      + ", subnormal=" + subnormal);
+    //    if (subnormal) {
+    //      assert e7 == Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND;
+    //      assert 0L < q7;
+    //      assert q7 < (1L << Doubles.STORED_SIGNIFICAND_BITS); }
+    //    else {
+    //      assert Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND <= e7 : 
+    //        Integer.toString(e7);
+    //      assert e7 < Doubles.MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND : 
+    //        Integer.toString(e7);
+    //      assert (1L << Doubles.STORED_SIGNIFICAND_BITS) <= q7 
+    //        : description("q7",q7); 
+    //      assert q7 <= (1L << (Doubles.STORED_SIGNIFICAND_BITS+1)); }
 
     final int e70 = subnormal ? (e7 - 1) : e7;
 
-    if (subnormal) { 
-      assert e70 == Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND - 1 : 
-        Integer.toString(e70); }
-    else {
-      assert Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND <= e70 : 
-        Integer.toString(e70);
-      assert e70 < Doubles.MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND : 
-        Integer.toString(e70); }
+    //    if (subnormal) { 
+    //      assert e70 == Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND - 1 : 
+    //        Integer.toString(e70); }
+    //    else {
+    //      assert Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND <= e70 : 
+    //        Integer.toString(e70);
+    //      assert e70 < Doubles.MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND : 
+    //        Integer.toString(e70); }
 
-    final double z = Doubles.makeDouble(negative,e70,q7);
-
-    return z; }
+    return Doubles.makeDouble(negative,e70,q7); }
 
   //--------------------------------------------------------------
   /** Handle carry (too many bits in q).
@@ -646,27 +537,27 @@ implements Comparable<Rational> {
    * @return (-1)^s * (2^e) * q.
    */
 
-  public static final double doubleValue6 (final boolean negative,
-                                           final boolean subnormal,
-                                           final int e6, 
-                                           final BigInteger q6) {
-    Debug.println();
-    Debug.println("doubleValue6(BigInteger,boolean,int,boolean)");
-    Debug.println("negative= " + negative + ", e= " + e6
-      + ", subnormal=" + subnormal);
-    Debug.println(description("q6",q6));
-
-    assert q6.signum() == 1;
-    if (subnormal) {
-      assert e6 == Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND;
-      //      assert hiBit(q) <= NUMERATOR_BITS 
-      //        : "too many bits:" + description("q",q);
-      assert q6.compareTo(Rational.TWO_52) <= 0; }
-    else {
-      assert Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND <= e6 : Integer.toString(e6);
-      assert e6 < Doubles.MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND : Integer.toString(e6);
-      assert TWO_52.compareTo(q6) <= 0;
-      assert q6.compareTo(TWO_53) < 0; }
+  private static final double doubleValue6 (final boolean negative,
+                                            final boolean subnormal,
+                                            final int e6, 
+                                            final BigInteger q6) {
+    //    Debug.println();
+    //    Debug.println("doubleValue6(BigInteger,boolean,int,boolean)");
+    //    Debug.println("negative= " + negative + ", e= " + e6
+    //      + ", subnormal=" + subnormal);
+    //    Debug.println(description("q6",q6));
+    //
+    //    assert q6.signum() == 1;
+    //    if (subnormal) {
+    //      assert e6 == Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND;
+    //      //      assert hiBit(q) <= NUMERATOR_BITS 
+    //      //        : "too many bits:" + description("q",q);
+    //      assert q6.compareTo(Rational.TWO_52) <= 0; }
+    //    else {
+    //      assert Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND <= e6 : Integer.toString(e6);
+    //      assert e6 < Doubles.MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND : Integer.toString(e6);
+    //      assert TWO_52.compareTo(q6) <= 0;
+    //      assert q6.compareTo(TWO_53) < 0; }
 
     final BigInteger q60;
     final int e60;
@@ -674,10 +565,8 @@ implements Comparable<Rational> {
       q60 = q6; e60 = e6; }
     // handle carry
     else { q60 = q6.shiftRight(1); e60 = e6+1; }
-    final double z = 
-      doubleValue7(negative,subnormal,e60, q60.longValueExact()); 
-
-    return z; }
+    return 
+      doubleValue7(negative,subnormal,e60, q60.longValueExact()); }
 
   //--------------------------------------------------------------
   /** Is q or (q+1) closer to n/d?.
@@ -691,47 +580,88 @@ implements Comparable<Rational> {
    * (-1)^s * (2^e) * (q + (r / d).
    */
 
-  public static final double doubleValue5 (final boolean negative,
-                                           final boolean subnormal,
-                                           final int e5,
-                                           final BigInteger q5,
-                                           final BigInteger r5,
-                                           final BigInteger d5) {
-    Debug.println();
-    Debug.println("doubleValue6(BigInteger,BigInteger,boolean,int,boolean,BigInteger,BigInteger)");
-    Debug.println(description("d5",d5));
-    Debug.println("negative= " + negative + ", e= " + e5
-      + ", subnormal=" + subnormal);
-    Debug.println(description("q5",q5));
-    Debug.println(description("r5",r5));
-
-    assert d5.signum() == 1;
-    assert q5.signum() == 1;
-    assert r5.signum() >= 0;
-    assert r5.compareTo(d5) < 0;
-    if (subnormal) {
-      assert e5 == Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND;
-      assert q5.compareTo(TWO_52) < 0; }
-    else {
-      assert Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND <= e5 : 
-        Integer.toString(e5);
-      assert e5 < Doubles.MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND : 
-        Integer.toString(e5);
-      // TODO: faster test!!!
-      assert TWO_52.compareTo(q5) <= 0;
-      assert q5.compareTo(TWO_53) < 0; }
+  private static final double doubleValue5 (final boolean negative,
+                                            final boolean subnormal,
+                                            final int e5,
+                                            final BigInteger q5,
+                                            final BigInteger r5,
+                                            final BigInteger d5) {
+    //    Debug.println();
+    //    Debug.println("doubleValue6(BigInteger,BigInteger,boolean,int,boolean,BigInteger,BigInteger)");
+    //    Debug.println(description("d5",d5));
+    //    Debug.println("negative= " + negative + ", e= " + e5
+    //      + ", subnormal=" + subnormal);
+    //    Debug.println(description("q5",q5));
+    //    Debug.println(description("r5",r5));
+    //
+    //    assert d5.signum() == 1;
+    //    assert q5.signum() == 1;
+    //    assert r5.signum() >= 0;
+    //    assert r5.compareTo(d5) < 0;
+    //    if (subnormal) {
+    //      assert e5 == Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND;
+    //      assert q5.compareTo(TWO_52) < 0; }
+    //    else {
+    //      assert Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND <= e5 : 
+    //        Integer.toString(e5);
+    //      assert e5 < Doubles.MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND : 
+    //        Integer.toString(e5);
+    //      // TODO: faster test!!!
+    //      assert TWO_52.compareTo(q5) <= 0;
+    //      assert q5.compareTo(TWO_53) < 0; }
 
     final BigInteger q50;
     final BigInteger r50 = r5.shiftLeft(1);
     if (r50.compareTo(d5) <= 0) { q50 = q5;  }
     else { q50 = q5.add(BigInteger.ONE); }
-    Debug.println(description("q50",q50));
 
-    Debug.println(description("q50",q50));
+    //    Debug.println(description("q50",q50));
 
-    final double z = doubleValue6(negative,subnormal,e5,q50);
+    return doubleValue6(negative,subnormal,e5,q50); }
 
-    return z; }
+  //--------------------------------------------------------------
+  /** Divide numerator by denominator to get quotient and
+   * remainder.
+   * @param e4 initial exponent
+   * @param n4 positive numerator
+   * @param d4 positive denominator
+   * @param s sign bit: 0 positive, 1 negative.
+   * @return closest half-even rounded double to 
+   * (-1)^s * (2^e4) * n4 / d4.
+   */
+
+  private static final double doubleValue4 (final boolean negative,
+                                            final boolean subnormal,
+                                            final int e4,
+                                            final BigInteger n4,
+                                            final BigInteger d4) {
+    //    Debug.println();
+    //    Debug.println("doubleValue5(BigInteger,BigInteger,boolean,int,boolean)");
+    //    Debug.println(description("n4",n4));
+    //    Debug.println(description("d4",d4));
+    //    Debug.println("negative= " + negative + ", e= " + e4
+    //      + ", subnormal=" + subnormal);
+    //
+    //    assert n4.signum() == 1;
+    //    assert d4.signum() == 1;
+    //    if (subnormal) {
+    //      assert e4 == Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND;
+    //      assert TWO_52.compareTo(n4) <= 0; 
+    //      assert n4.compareTo(d4.shiftLeft(Doubles.STORED_SIGNIFICAND_BITS)) < 0; }
+    //    else {
+    //      assert Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND <= e4 : 
+    //        Integer.toString(e4);
+    //      assert e4 < Doubles.MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND : 
+    //        Integer.toString(e4);
+    //      assert d4.shiftLeft(Doubles.STORED_SIGNIFICAND_BITS).compareTo(n4) <= 0;
+    //      // TODO: faster test!!!
+    //      assert n4.compareTo(d4.shiftLeft(Doubles.STORED_SIGNIFICAND_BITS+1)) < 0; }
+
+    final BigInteger[] qr = n4.divideAndRemainder(d4);
+    final BigInteger q4 = qr[0];
+    final BigInteger r4 = qr[1];
+
+    return doubleValue5(negative,subnormal,e4,q4,r4,d4); }
 
   //--------------------------------------------------------------
   /** Shift <code>n3</code> {@link Doubles#STORED_SIGNIFICAND_BITS}
@@ -746,67 +676,76 @@ implements Comparable<Rational> {
    * (-1)^s * (2^e) * n / d.
    */
 
-  public static final double doubleValue3 (final boolean negative,
-                                           final boolean subnormal,
-                                           final int e3,
-                                           final BigInteger n3,
-                                           final BigInteger d3) {
-    Debug.println();
-    Debug.println("doubleValue3(BigInteger,BigInteger,boolean,int,boolean)");
-    Debug.println(description("n",n3));
-    Debug.println(description("d",d3));
-    Debug.println("negative= " + negative + ", e= " + e3
-      + ", subnormal=" + subnormal);
-
-    assert n3.signum() == 1;
-    assert d3.signum() == 1;
-    if (subnormal) {
-      assert e3 == Double.MIN_EXPONENT;
-      assert n3.compareTo(d3) < 0; }
-    else {
-      assert Double.MIN_EXPONENT <= e3 : Integer.toString(e3);
-      assert e3 <= Double.MAX_EXPONENT : Integer.toString(e3);
-      assert d3.compareTo(n3) <= 0;
-      // TODO: faster test!!!
-      assert n3.compareTo(d3.shiftLeft(1)) < 0; }
-
+  private static final double doubleValue3 (final boolean negative,
+                                            final boolean subnormal,
+                                            final int e3,
+                                            final BigInteger n3,
+                                            final BigInteger d3) {
+    //    Debug.println();
+    //    Debug.println("doubleValue3(BigInteger,BigInteger,boolean,int,boolean)");
+    //    Debug.println(description("n",n3));
+    //    Debug.println(description("d",d3));
+    //    Debug.println("negative= " + negative + ", e= " + e3
+    //      + ", subnormal=" + subnormal);
+    //
+    //    assert n3.signum() == 1;
+    //    assert d3.signum() == 1;
+    //    if (subnormal) {
+    //      assert e3 == Double.MIN_EXPONENT;
+    //      assert n3.compareTo(d3) < 0; }
+    //    else {
+    //      assert Double.MIN_EXPONENT <= e3 : Integer.toString(e3);
+    //      assert e3 <= Double.MAX_EXPONENT : Integer.toString(e3);
+    //      assert d3.compareTo(n3) <= 0;
+    //      // TODO: faster test!!!
+    //      assert n3.compareTo(d3.shiftLeft(1)) < 0; }
 
     final BigInteger n30 = n3.shiftLeft(Doubles.STORED_SIGNIFICAND_BITS);
     final int e30 = e3 - Doubles.STORED_SIGNIFICAND_BITS;
 
-    Debug.println(description("n30",n30));
-    Debug.println("e30=" + e30);
+    //    Debug.println(description("n30",n30));
+    //    Debug.println("e30=" + e30);
 
-    final double z = doubleValue4(negative,subnormal,e30,n30,d3);
-    return z; }
+    return doubleValue4(negative,subnormal,e30,n30,d3); }
 
   //--------------------------------------------------------------
-  /** Detect zero, subnormal, normal, and infinite values.
-   * .
-   * @param n2 positive numerator
-   * @param d2 positive denominator
-   * @param s sign bit: 0 positive, 1 negative.
-   * @return closest half-even rounded double to 
-   * -1^s * 2<sup>e2</sup> * n / d.
+  /** Extract sign bit, so numerator and denominator are both
+   * positive.
+   * Extract exponent <code>e</code> so that
+   * <code> n0 / d0 == 2<sup>e11</sup> * n11 / d12</code>
+   * and <code>d12 &le; n11 &lt; 2*d12</code>.
+   * @param n0 numerator
+   * @param d0 positive denominator
+   * @return closest half-even rounded double to -1^s * n / d.
    */
 
-  public static final double doubleValue2 (final boolean negative,
-                                           final int e2,
-                                           final BigInteger n2,
-                                           final BigInteger d2) {
-    Debug.println();
-    Debug.println("doubleValue2(BigInteger,BigInteger,boolean,int)");
-    Debug.println(description("n2",n2));
-    Debug.println(description("d2",d2));
-    Debug.println("e2=" + e2);
-    Debug.println("neg=" + negative);
+  private static final double doubleValue0 (final BigInteger n0,
+                                            final BigInteger d0) {
+    final int n0s = n0.signum();
+    if (n0s == 0) { return 0.0; }
+    final boolean negative = (n0s < 0);
+    final BigInteger n1 = negative ? n0.negate() : n0;
+    final BigInteger d1 = d0;
+    final int n1h = hiBit(n1);
+    final int d1h = hiBit(d1);
+    final int e10 = n1h - d1h - 1;
+    final BigInteger n10, d10;
+    if (e10 > 0) { n10 = n1; d10 = d1.shiftLeft(e10); }
+    else if (e10 == 0) { n10 = n1; d10 = d1; }
+    else if (e10 < 0) { n10 = n1.shiftLeft(-e10); d10 = d1; }
+    else { throw new RuntimeException("can't get here"); }
 
-    assert n2.signum() == 1;
-    assert d2.signum() == 1;
-    assert d2.compareTo(n2) <= 0;
-    // TODO: faster test!!!
-    assert n2.compareTo(d2.shiftLeft(1)) < 0;
+    // TODO: more efficient test!!!
+    final BigInteger d11 = d10.shiftLeft(1);
+    final BigInteger d12;
+    final int e11;
+    if (n10.compareTo(d11) < 0) { d12 = d10; e11 = e10;}
+    else { d12 = d11; e11 = e10 + 1; }
 
+    //    final double z = doubleValue2(negative,e11,n10,d12);
+    final int e2 = e11;
+    final BigInteger n2 = n10;
+    final BigInteger d2 = d12;
     final double z;
     if (e2 > Double.MAX_EXPONENT) {
       z = negative ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY; }
@@ -822,137 +761,15 @@ implements Comparable<Rational> {
     return z; }
 
   //--------------------------------------------------------------
-  /** Extract exponent <code>e</code> so that
-   * <code> n1 / d1 == 2<sup>e11</sup> * n11 / d12</code>
-   * and <code>d12 &le; n11 &lt; 2*d12</code>.
-   * @param negative flag
-   * @param n1 positive numerator
-   * @param d1 positive denominator
-   * 
-   * @return closest half-even rounded double to -1^s * n / d.
-   */
-
-  public static final double doubleValue1 (final boolean negative,
-                                           final BigInteger n1,
-                                           final BigInteger d1) {
-    Debug.println();
-    Debug.println("doubleValue1(BigInteger,BigInteger,boolean)");
-    Debug.println(description("n1",n1));
-    Debug.println(description("d1",d1));
-    Debug.println("neg=" + negative);
-
-    assert n1.signum() == 1  : 
-      "numernator not strictly positive: " 
-      + n1.toString(0x10);
-    assert d1.signum() == 1 : 
-      "denominator not strictly positive: " 
-      + d1.toString(0x10);
-
-    final int n1h = hiBit(n1);
-    final int d1h = hiBit(d1);
-    final int e10 = n1h - d1h - 1;
-
-    Debug.println("n1h,d1h,e10=" + n1h + "," + d1h + "," + e10);
-
-    final BigInteger n10, d10;
-    if (e10 > 0) { n10 = n1; d10 = d1.shiftLeft(e10); }
-    else if (e10 == 0) { n10 = n1; d10 = d1; }
-    else if (e10 < 0) { n10 = n1.shiftLeft(-e10); d10 = d1; }
-    else { throw new RuntimeException("can't get here"); }
-
-    Debug.println(description("n10",n10));
-    Debug.println(description("d10",d10));
-
-    // TODO: more efficient test!!!
-    final BigInteger d11 = d10.shiftLeft(1);
-    final BigInteger d12;
-    final int e11;
-    if (n10.compareTo(d11) < 0) { d12 = d10; e11 = e10;}
-    else { d12 = d11; e11 = e10 + 1; }
-
-    Debug.println(description("n10",n10));
-    Debug.println(description("d12",d12));
-    Debug.println("e11=" + e11);
-
-    final double z = doubleValue2(negative,e11,n10,d12);
-
-    return z; }
-
-  //--------------------------------------------------------------
-  /** Extract sign bit, so numerator and denominator are both
-   * positive. Also reduce by gcd.
-   * <p>
-   * <em>TODO:</em> measure performance effect of reducing/not
-   * reducing?
-   * 
-   * @param n0 numerator
-   * @param d0 positive denominator
-   * @return closest half-even rounded <code>double</code> to 
-   * exact value of <code>n0 / d0</code>.
-   */
-
-  public static final double doubleValue0 (final BigInteger n0,
-                                           final BigInteger d0) {
-    Debug.println();
-    Debug.println("doubleValue0(BigInteger,BigInteger)");
-    Debug.println(description("n0",n0));
-    Debug.println(description("d0",d0));
-
-    assert d0.signum() == 1 : 
-      "denominator not strictly positive: " 
-      + d0.toString(0x10);
-
-    // extract sign
-    final int n0s = n0.signum();
-
-    Debug.println("n0.signum= " + n0s);
-
-    if (n0s == 0) { return 0.0; }
-    final boolean negative = (n0s < 0);
-    final BigInteger n00 = negative ? n0.negate() : n0;
-
-    Debug.println(description("n00",n00));
-
-    // reduce fraction (optional step)
-    // TODO: test performance effect
-    final BigInteger gcd = n00.gcd(d0);
-
-    Debug.println("gcd=" + gcd);
-
-    final BigInteger n01,d01;
-    if (BigInteger.ONE.equals(gcd)) { n01 = n00; d01 = d0; }
-    else { n01 = n00.divide(gcd); d01 = d0.divide(gcd); }
-
-    Debug.println(description("n01",n01));
-    Debug.println(description("d01",d01));
-
-    final double z = doubleValue1(negative,n01,d01);
-
-    return z; }
-
-  //--------------------------------------------------------------
   /** Half-even rounding from {@link BigInteger} ratio to 
    * <code>double</code>.
    * @param n numerator
    * @param d positive denominator
-   * @return closest half-even rounded double to n / d.
+   * @return closest half-even rounded <code>double</code> to n / d.
    */
-
-  public static final double doubleValue (final BigInteger n,
-                                          final BigInteger d) {
-    assert d.signum() == 1 : 
-      "denominator not strictly positive: " 
-      + d.toString(0x10);
-
-    final double z = doubleValue0(n,d);
-
-    return z; }
-
-  //--------------------------------------------------------------
-
   @Override
   public final double doubleValue () { 
-    return doubleValue(numerator(),denominator()); }
+    return doubleValue0(numerator(),denominator()); }
 
   //--------------------------------------------------------------
   // Comparable methods
@@ -1000,37 +817,23 @@ implements Comparable<Rational> {
   private Rational (final BigInteger numerator,
                     final BigInteger denominator) {
     super();
-    assert 1 == denominator.signum();
+    assert 1 == denominator.signum() :
+      numerator.toString(0x10) 
+      + "\n"
+      + denominator.toString(0x10);
     _numerator = numerator;
     _denominator = denominator; }
 
   //--------------------------------------------------------------
 
-  private static final Rational reduced (final BigInteger n,
-                                         final BigInteger d) {
-
-    if (d.signum() < 0) { return reduced(n.negate(),d.negate()); }
-
-    if (n == BigInteger.ZERO) { 
-      return new Rational(n,BigInteger.ONE); }
-
-    // TODO: any value in this test?
-    if ((n == BigInteger.ZERO) || (d == BigInteger.ZERO)) {
-      return new Rational(n,d); }
-
-    final BigInteger gcd = n.gcd(d);
-    // TODO: any value in this test?
-    if (gcd.compareTo(BigInteger.ONE) > 0) {
-      return new Rational(n.divide(gcd),d.divide(gcd)); } 
-
-    return new Rational(n,d); }
-
-  //--------------------------------------------------------------
-
   public static final Rational valueOf (final BigInteger n,
                                         final BigInteger d) {
+    if (isNegative(d)) {
+      return valueOf(n.negate(),d.negate()); }
+
     // TODO: is it better to keep ratio in reduced form or not?
-    // return new Rational(n,d); }
+    //return new Rational(n,d); } // ~200x slower in dot product
+
     return reduced(n,d); }
 
   public static final Rational valueOf (final long n,
@@ -1043,9 +846,48 @@ implements Comparable<Rational> {
 
   //--------------------------------------------------------------
 
+  //    public static final Rational valueOf (final double x)  {
+  //      final BigInteger[] nd = Doubles.toRatio(x);
+  //      return valueOf(nd[0], nd[1]); }
+
+  private static final Rational valueOf (final boolean nonNegative,
+                                         final int e,
+                                         final long t)  {
+    if (0L == t) { return ZERO; }
+    final BigInteger n0 = BigInteger.valueOf(t);
+    final BigInteger n1 = nonNegative ? n0 : n0.negate();
+    if (0 == e) {  return valueOf(n1); }
+    if (0 < e) { return valueOf(n1.shiftLeft(e)); }
+    return valueOf(n1,BigInteger.ZERO.setBit(-e)); } 
+
   public static final Rational valueOf (final double x)  {
-    final BigInteger[] nd = Doubles.toRatio(x);
-    return valueOf(nd[0], nd[1]); }
+    return valueOf(
+      Doubles.nonNegative(x),
+      Doubles.exponent(x),
+      Doubles.significand(x)); } 
+
+  //  public static final Rational valueOf (final double x)  {
+  //    if (0.0 == x) { return ZERO; }
+  //
+  //    final boolean negative = Doubles.nonNegative(x)
+  //      final int e = Doubles.exponent(x);
+  //    final long t = Doubles.significand(x);
+  //
+  //    if (0.0 < x) {
+  //      if (0 == e) { return valueOf(t); }
+  //      if (0 < e) { 
+  //        return valueOf(BigInteger.valueOf(t).shiftLeft(e)); }
+  //      return valueOf(
+  //        BigInteger.valueOf(t), 
+  //        // TODO: cache powers of 2?
+  //        BigInteger.ONE.shiftLeft(-e)); } 
+  //
+  //    if (0 == e) { return valueOf(-t); }
+  //    if (0 < e) { 
+  //      return valueOf(BigInteger.valueOf(t).shiftLeft(e).negate()); }
+  //    return valueOf(
+  //      BigInteger.valueOf(-t), 
+  //      BigInteger.ONE.shiftLeft(-e)); } 
 
   public static final Rational valueOf (final float x)  {
     final BigInteger[] nd = Floats.toRatio(x);
@@ -1108,19 +950,18 @@ implements Comparable<Rational> {
   //--------------------------------------------------------------
 
   public static final Rational ZERO = 
-    Rational.valueOf(BigInteger.ZERO,BigInteger.ONE);
+    new Rational(BigInteger.ZERO,BigInteger.ONE);
 
   public static final Rational ONE = 
-    Rational.valueOf(BigInteger.ONE,BigInteger.ONE);
+    new Rational(BigInteger.ONE,BigInteger.ONE);
 
   public static final Rational TWO = 
-    Rational.valueOf(BigInteger.TWO,BigInteger.ONE);
+    new Rational(BigInteger.TWO,BigInteger.ONE);
 
   public static final Rational TEN = 
-    Rational.valueOf(BigInteger.TEN,BigInteger.ONE);
+    new Rational(BigInteger.TEN,BigInteger.ONE);
 
-  public static final Rational MINUS_ONE = 
-    Rational.valueOf(BigInteger.ONE.negate(),BigInteger.ONE);
+  public static final Rational MINUS_ONE = ONE.negate();
 
   //--------------------------------------------------------------
 }

@@ -23,7 +23,7 @@ import xfp.java.prng.Generator;
 /** Utilities for <code>float</code>, <code>float[]</code>.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-25
+ * @version 2019-03-26
  */
 public final class Floats implements Set {
 
@@ -139,6 +139,13 @@ public final class Floats implements Set {
 
   public static final int unbiasedExponent (final float x) {
     return biasedExponent(x) - EXPONENT_BIAS; }
+
+  //--------------------------------------------------------------
+  /** Exponent if significand is treated as an integer, not a
+   * binary fraction.
+   */
+  public static final int exponent (final float x) {
+    return unbiasedExponent(x) - STORED_SIGNIFICAND_BITS; }
 
   //--------------------------------------------------------------
 
