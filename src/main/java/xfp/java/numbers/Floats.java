@@ -3,8 +3,11 @@ package xfp.java.numbers;
 import static java.lang.Float.MAX_EXPONENT;
 import static java.lang.Float.MIN_EXPONENT;
 import static java.lang.Float.MIN_VALUE;
+import static java.lang.Float.floatToIntBits;
 import static java.lang.Float.floatToRawIntBits;
+import static java.lang.Float.isFinite;
 import static java.lang.Float.toHexString;
+import static java.lang.Float.valueOf;
 
 import java.math.BigInteger;
 import java.util.Map;
@@ -23,10 +26,20 @@ import xfp.java.prng.Generator;
 /** Utilities for <code>float</code>, <code>float[]</code>.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-26
+ * @version 2019-03-27
  */
 public final class Floats implements Set {
 
+  //--------------------------------------------------------------
+  // TODO: cleanly separate stuff treating significand as 
+  // integer from stuff treating is as a binary fraction
+  // with one digit before the 'decimal' point.
+  // In other words:
+  // Most descriptions of floating point formats refer to the
+  // significand as 1.xxx...xxx 
+  // It's often more convenient to treat it as an integer, which
+  // requires us to subtract 23 from the exponent to get the same 
+  // value.
   //--------------------------------------------------------------
 
   public static final int SIGN_BITS = 1;
@@ -85,13 +98,13 @@ public final class Floats implements Set {
    */
 
   public static final int MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND =
-    Float.MIN_EXPONENT - Floats.STORED_SIGNIFICAND_BITS;
+    MIN_EXPONENT - STORED_SIGNIFICAND_BITS;
 
   /** Exclusive upper bound on exponents for rounding to float.
    */
   
   public static final int MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND =
-    Float.MAX_EXPONENT - Floats.STORED_SIGNIFICAND_BITS + 1;
+    MAX_EXPONENT - STORED_SIGNIFICAND_BITS + 1;
 
   //--------------------------------------------------------------
   //    static {
@@ -110,14 +123,14 @@ public final class Floats implements Set {
     return  0 == signBit(x); }
 
   //--------------------------------------------------------------
-  /** Actual 52 stored bits, without the implied leading 1 bit
+  /** Actual 23 stored bits, without the implied leading 1 bit
    * for normal numbers.
    */
 
   public static final int significandLowBits (final float x) {
     return STORED_SIGNIFICAND_MASK & floatToRawIntBits(x); }
 
-  /** 53 bit significand.
+  /** 24 bit significand.
    * Adds the implicit leading bit to the stored bits, 
    * if there is one. 
    */
@@ -145,13 +158,19 @@ public final class Floats implements Set {
    * binary fraction.
    */
   public static final int exponent (final float x) {
-    return unbiasedExponent(x) - STORED_SIGNIFICAND_BITS; }
+    // subnormal numbers have an exponent one less that what it
+    // should really be, as a way of coding the initial zero bit
+    // in the significand
+    return 
+      Math.max(
+        unbiasedExponent(x) - STORED_SIGNIFICAND_BITS,
+        MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND); }
 
   //--------------------------------------------------------------
 
   public static final boolean isNormal (final float x) {
     final int be = biasedExponent(x);
-    return (0.0 == x) || ((0 != be) && (0x7ff != be)); }
+    return (0.0 == x) || ((0 != be) && (0xFF != be)); }
 
   //--------------------------------------------------------------
   // TODO: change exponent ranges so that significand can be taken
@@ -246,7 +265,7 @@ public final class Floats implements Set {
       significand); }
 
   //--------------------------------------------------------------
-  // operations for algebraic structures over Floats.
+  // operations for algebraic structures over 
   //--------------------------------------------------------------
 
   // TODO: is consistency with other algebraic structure classes
@@ -398,10 +417,6 @@ public final class Floats implements Set {
   public final String toString () { return "D"; }
 
   //--------------------------------------------------------------
-  // generators
-  //--------------------------------------------------------------
-
-  //--------------------------------------------------------------
   /** From apache commons math4 BigFraction.
    * <p>
    * Create a fraction given the double value.
@@ -432,32 +447,35 @@ public final class Floats implements Set {
   
     if (! Float.isFinite(x)) {
       throw new IllegalArgumentException(
-       "RationalSum"  + " cannot handle "+ x); }
+       "toRatio"  + " cannot handle "+ x); }
   
     final BigInteger numerator;
     final BigInteger denominator;
   
     // compute m and k such that x = m * 2^k
-    final long bits     = Double.doubleToLongBits(x);
-    final long sign     = bits & 0x8000000000000000L;
-    final long exponent = bits & 0x7ff0000000000000L;
-    long m              = bits & 0x000fffffffffffffL;
+    final int bits     = floatToIntBits(x);
+    final int sign     = bits & SIGN_MASK;
+    final int exponent = bits & EXPONENT_MASK;
+    int m              = bits & STORED_SIGNIFICAND_MASK;
     if (exponent == 0) { // subnormal
-      if (0L == m) {
+      if (0 == m) {
         numerator   = BigInteger.ZERO;
         denominator = BigInteger.ONE; }
       else {
-        if (sign != 0L) { m = -m; }
+        if (sign != 0) { m = -m; }
         numerator   = BigInteger.valueOf(m);
-        denominator = BigInteger.ZERO.flipBit(1074); } }
+        denominator = 
+          BigInteger.ZERO.setBit(-MINIMUM_SUBNORMAL_EXPONENT); } }
     else { // normal
       // add the implicit most significant bit
-      m |= 0x0010000000000000L; 
-      if (sign != 0L) { m = -m; }
-      int k = ((int) (exponent >> 52)) - 1075;
-      while (((m & 0x001ffffffffffffeL) != 0L) 
+      m |= (1L << STORED_SIGNIFICAND_BITS); 
+      if (sign != 0) { m = -m; }
+      int k = 
+        (exponent >> STORED_SIGNIFICAND_BITS) 
+        + MINIMUM_SUBNORMAL_EXPONENT - 1;
+      while (((m & (STORED_SIGNIFICAND_MASK - 1)) != 0) 
         &&
-        ((m & 0x1L) == 0L)) {
+        ((m & 0x1) == 0)) {
         m >>= 1; 
         ++k; }
       if (k < 0) { 
@@ -469,6 +487,10 @@ public final class Floats implements Set {
         denominator = BigInteger.ONE; } } 
   
     return new BigInteger[]{ numerator, denominator}; }
+
+  //--------------------------------------------------------------
+  // generators
+  //--------------------------------------------------------------
 
   public static final Generator 
   subnormalGenerator (final int n,
@@ -483,7 +505,7 @@ public final class Floats implements Set {
 
   public static final Generator 
   subnormalGenerator (final UniformRandomProvider urp) {
-    return subnormalGenerator(urp,Float.MAX_EXPONENT); }
+    return subnormalGenerator(urp,MAX_EXPONENT); }
 
   public static final Generator 
   subnormalGenerator (final int n,
@@ -507,11 +529,11 @@ public final class Floats implements Set {
         // TODO: fix infinite loop
         for (;;) {
           final float x = d.nextFloat();
-          if ((Float.isFinite(x)) && (! isNormal(x))) { 
+          if ((isFinite(x)) && (! isNormal(x))) { 
             return x; } } } 
       @Override
       public final Object next () {
-        return Float.valueOf(nextFloat()); } }; }
+        return valueOf(nextFloat()); } }; }
 
   public static final Generator 
   normalGenerator (final int n,
@@ -526,7 +548,7 @@ public final class Floats implements Set {
 
   public static final Generator 
   normalGenerator (final UniformRandomProvider urp) {
-    return normalGenerator(urp,Float.MAX_EXPONENT); }
+    return normalGenerator(urp,MAX_EXPONENT); }
 
   public static final Generator 
   normalGenerator (final int n,
@@ -550,8 +572,7 @@ public final class Floats implements Set {
         // TODO: fix infinite loop
         for (;;) {
           final float x = d.nextFloat();
-          if (Float.isFinite(x) && isNormal(x)) { 
-            return x; } } } 
+          if (isFinite(x) && isNormal(x)) { return x; } } } 
       @Override
       public final Object next () {
         return Float.valueOf(nextFloat()); } }; }
@@ -559,8 +580,7 @@ public final class Floats implements Set {
   public static final Generator 
   finiteGenerator (final int n,
                    final UniformRandomProvider urp) {
-    return finiteFloatGenerator(
-      n,urp,Float.MAX_EXPONENT); }
+    return finiteFloatGenerator(n,urp,MAX_EXPONENT); }
 
   public static final Generator 
   finiteFloatGenerator (final int n,
@@ -576,7 +596,7 @@ public final class Floats implements Set {
 
   public static final Generator 
   finiteGenerator (final UniformRandomProvider urp) {
-    return finiteGenerator(urp,Float.MAX_EXPONENT); }
+    return finiteGenerator(urp,MAX_EXPONENT); }
 
   public static final Generator 
   finiteGenerator (final UniformRandomProvider urp,
@@ -597,7 +617,7 @@ public final class Floats implements Set {
   generator (final int n,
              final UniformRandomProvider urp) {
     return 
-      generator(n,urp,SUBNORMAL_EXPONENT,Float.MAX_EXPONENT+1); }
+      generator(n,urp,SUBNORMAL_EXPONENT,MAX_EXPONENT+1); }
 
   public static final Generator 
   generator (final int n,
@@ -621,7 +641,7 @@ public final class Floats implements Set {
   public static final Generator 
   generator (final UniformRandomProvider urp) {
     return 
-      generator(urp,SUBNORMAL_EXPONENT,Float.MAX_EXPONENT+1); }
+      generator(urp,SUBNORMAL_EXPONENT,MAX_EXPONENT+1); }
 
   public static final Generator 
   generator (final UniformRandomProvider urp,
@@ -654,8 +674,8 @@ public final class Floats implements Set {
         final float x = mergeBits(s,e,t); 
         return x;} 
       @Override
-      public final Object next () {
-        return Float.valueOf(nextFloat()); } }; }
+      public final Object next () { 
+        return valueOf(nextFloat()); } }; }
 
   //--------------------------------------------------------------
   // construction

@@ -9,7 +9,7 @@ import xfp.java.numbers.Rational;
  * accumulator (for testing).
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-25
+ * @version 2019-03-27
  */
 public final class MutableRationalSum 
 implements 
@@ -57,6 +57,11 @@ Comparable<MutableRationalSum> {
   public final double doubleValue () { 
     return 
       Rational.valueOf(numerator(),denominator()).doubleValue(); }
+
+  @Override
+  public final float floatValue () { 
+    return 
+      Rational.valueOf(numerator(),denominator()).floatValue(); }
 
   @Override
   public final MutableRationalSum clear () { 

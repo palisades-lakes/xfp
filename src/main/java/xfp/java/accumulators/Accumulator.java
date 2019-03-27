@@ -9,7 +9,7 @@ import xfp.java.exceptions.Exceptions;
  * All methods are optional.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-09
+ * @version 2019-03-27
  */
 
 @SuppressWarnings("unchecked")
@@ -18,9 +18,15 @@ public interface Accumulator<T extends Accumulator> {
   //--------------------------------------------------------------
   // start with only immediate needs
 
+  /** Half-even rounding to nearest <code>double</code>. */
   public default double doubleValue () {
     throw 
     Exceptions.unsupportedOperation(this,"doubleValue"); }
+
+  /** Half-even rounding to nearest <code>float</code>. */
+  public default float floatValue () {
+    throw 
+    Exceptions.unsupportedOperation(this,"floatValue"); }
 
   public default T clear () {
     throw 

@@ -4,6 +4,7 @@ import static java.lang.Double.MAX_EXPONENT;
 import static java.lang.Double.MIN_EXPONENT;
 import static java.lang.Double.MIN_VALUE;
 import static java.lang.Double.doubleToRawLongBits;
+import static java.lang.Double.isFinite;
 import static java.lang.Double.longBitsToDouble;
 import static java.lang.Double.toHexString;
 
@@ -24,21 +25,20 @@ import xfp.java.prng.Generator;
 /** Utilities for <code>double</code>, <code>double[]</code>.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-26
+ * @version 2019-03-27
  */
 public final class Doubles implements Set {
 
   //--------------------------------------------------------------
-  // TODO: cleanly separate stuff treating significant as 
+  // TODO: cleanly separate stuff treating significand as 
   // 53 bit integer from stuff treating is as a binary fraction
-  // iwth one digit before the 'deciaml' point.
+  // with one digit before the 'decimal' point.
   // In other words:
   // Most descriptions of floating point formats refer to the
-  // significand as 1.xxx...xxx (with 52 x's). 
+  // significand as 1.xxx...xxx (with STORED_SIGNIFICAND_BITS x's). 
   // It's often more convenient to treat it as an integer, which
-  // requires us to subtract 52 from the exponent to get the same 
+  // requires us to subtract STORED_SIGNIFICAND_BITS from the exponent to get the same 
   // value.
-
   //--------------------------------------------------------------
 
   public static final int SIGN_BITS = 1;
@@ -124,8 +124,8 @@ public final class Doubles implements Set {
 
   //--------------------------------------------------------------
 
-  /** Actual 52 stored bits, without the implied leading 1 bit
-   * for normal numbers.
+  /** Actual STORED_SIGNIFICAND_BITS stored bits, without the 
+   * implied leading 1 bit for normal numbers.
    */
 
   public static final long significandLowBits (final double x) {
@@ -172,7 +172,7 @@ public final class Doubles implements Set {
 
   public static final boolean isNormal (final double x) {
     final int be = biasedExponent(x);
-    return (0.0 == x) || ((0 != be) && (0x7ff != be)); }
+    return (0.0 == x) || ((0 != be) && (0x7FF != be)); }
 
   //--------------------------------------------------------------
   // TODO: change exponent ranges so that significand can be taken
@@ -187,7 +187,8 @@ public final class Doubles implements Set {
    * number.
    * @param significand Must be in 
    * [0,{@link #STORED_SIGNIFICAND_MASK}].
-   * Treated as <code>significand * 2<sup>-52</sup></code>.
+   * Treated as <code>significand * 
+   * 2<sup>-STORED_SIGNIFICAND_BITS</sup></code>.
    * @return <code>(-1)<sup>sign</sup> * 2<sup>exponent</sup>
    * * significand * 2<sup>-{@link #STORED_SIGNIFICAND_BITS}</sup></code>
    */
@@ -205,7 +206,8 @@ public final class Doubles implements Set {
     final int be = exponent + EXPONENT_BIAS;
     assert (0 <= be) :
       "Negative exponent:" + Integer.toHexString(be) + " : " + be 
-      + "\n" + SUBNORMAL_EXPONENT + "<=" + exponent + "<=" + MAX_EXPONENT
+      + "\n" + SUBNORMAL_EXPONENT + "<=" + exponent + "<=" 
+      + MAX_EXPONENT
       + "\n" + MIN_VALUE + " " + toHexString(MIN_VALUE)
       + "\n" + EXPONENT_BIAS;
     assert (be <= MAXIMUM_BIASED_EXPONENT) :
@@ -233,7 +235,8 @@ public final class Doubles implements Set {
         "Normal significand too large:" 
         + Long.toHexString(significand); }
 
-    final long s = ((long) sign) << (EXPONENT_BITS + STORED_SIGNIFICAND_BITS);
+    final long s = ((long) sign) << 
+      (EXPONENT_BITS + STORED_SIGNIFICAND_BITS);
     final long e = ((long) be) << STORED_SIGNIFICAND_BITS;
     final long t = significand & STORED_SIGNIFICAND_MASK;
     assert (0L == (s & e & t));
@@ -426,9 +429,6 @@ public final class Doubles implements Set {
   public final String toString () { return "D"; }
 
   //--------------------------------------------------------------
-  // generators
-  //--------------------------------------------------------------
-
   /** From apache commons math4 BigFraction.
    * <p>
    * Create a fraction given the double value.
@@ -456,8 +456,7 @@ public final class Doubles implements Set {
    */
   
   public static final BigInteger[] toRatio (final double x) {
-  
-    if (! Double.isFinite(x)) {
+    if (! isFinite(x)) {
       throw new IllegalArgumentException(
        "toRatio"  + " cannot handle "+ x); }
   
@@ -466,9 +465,9 @@ public final class Doubles implements Set {
   
     // compute m and k such that x = m * 2^k
     final long bits     = Double.doubleToLongBits(x);
-    final long sign     = bits & 0x8000000000000000L;
-    final long exponent = bits & 0x7ff0000000000000L;
-    long m              = bits & 0x000fffffffffffffL;
+    final long sign     = bits & SIGN_MASK;
+    final long exponent = bits & EXPONENT_MASK;
+    long m              = bits & STORED_SIGNIFICAND_MASK;
 
     if (exponent == 0) { // subnormal or zero
       if (0L == m) {
@@ -477,13 +476,16 @@ public final class Doubles implements Set {
       else {
         if (sign != 0L) { m = -m; }
         numerator   = BigInteger.valueOf(m);
-        denominator = BigInteger.ZERO.flipBit(1074); } }
+        denominator = 
+          BigInteger.ZERO.setBit(-MINIMUM_SUBNORMAL_EXPONENT); } }
     else { // normal
       // add the implicit most significant bit
-      m |= 0x0010000000000000L; 
+      m |= (1L << STORED_SIGNIFICAND_BITS); 
       if (sign != 0L) { m = -m; }
-      int k = ((int) (exponent >> 52)) - 1075;
-      while (((m & 0x001ffffffffffffeL) != 0L) 
+      int k = 
+        ((int) (exponent >> STORED_SIGNIFICAND_BITS)) 
+        + MINIMUM_SUBNORMAL_EXPONENT - 1;
+      while (((m & (STORED_SIGNIFICAND_MASK - 1L)) != 0L) 
         &&
         ((m & 0x1L) == 0L)) {
         m >>= 1; 
@@ -497,6 +499,10 @@ public final class Doubles implements Set {
         denominator = BigInteger.ONE; } } 
   
     return new BigInteger[]{ numerator, denominator}; }
+
+  //--------------------------------------------------------------
+  // generators
+  //--------------------------------------------------------------
 
   public static final Generator 
   subnormalGenerator (final int n,
