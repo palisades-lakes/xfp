@@ -6,7 +6,7 @@ import xfp.java.numbers.Rational0;
  * accumulator (for testing).
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-22
+ * @version 2019-03-26
  */
 public final class Rational0Sum implements Accumulator<Rational0Sum> {
 
