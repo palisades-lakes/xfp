@@ -140,8 +140,7 @@ implements Comparable<Rational> {
       final boolean s = 
         ! (Doubles.nonNegative(z0) ^ Doubles.nonNegative(z1));
       final int e = Doubles.exponent(z0) + Doubles.exponent(z1);
-      final long t0 = 
-        s ? Doubles.significand(z0) : -Doubles.significand(z0);
+      final long t0 = (s ? 1L : -1L) * Doubles.significand(z0);
       final long t1 = Doubles.significand(z1);
       final BigInteger n = 
         BigInteger.valueOf(t0).multiply(BigInteger.valueOf(t1));
