@@ -96,10 +96,25 @@ implements Comparable<Rational> {
   public final Rational add (final Rational q) {
     return add(q.numerator(),q.denominator()); }
 
-  // Add directly, without 2 new BigIntegers
   public final Rational add (final double q) {
-    final BigInteger[] nd = Doubles.toRatio(q);
-    return add(nd[0],nd[1]); }
+    final boolean s = Doubles.nonNegative(q);
+    final int e = Doubles.exponent(q);
+    final long t = Doubles.significand(q);
+    final BigInteger u = BigInteger.valueOf(s ? t : -t);
+    final BigInteger du = denominator().multiply(u);
+    if (0 <= e) {
+      return 
+        valueOf(
+        numerator().add(du.shiftLeft(e)),
+        denominator()); }
+    return 
+      valueOf(
+      numerator().shiftLeft(-e).add(du),
+      denominator().shiftLeft(-e)); }
+
+//  public final Rational add (final double q) {
+//    final BigInteger[] nd = Doubles.toRatio(q);
+//    return add(nd[0],nd[1]); }
 
   //--------------------------------------------------------------
 
@@ -122,25 +137,21 @@ implements Comparable<Rational> {
 
     public final Rational addProduct (final double z0,
                                       final double z1) { 
-  
-      final boolean s0 = Doubles.nonNegative(z0);
-      final int e0 = Doubles.exponent(z0);
-      final long t0 = Doubles.significand(z0);
-      final boolean s1 = Doubles.nonNegative(z1);
-      final int e1 = Doubles.exponent(z1);
+      final boolean s = 
+        ! (Doubles.nonNegative(z0) ^ Doubles.nonNegative(z1));
+      final int e = Doubles.exponent(z0) + Doubles.exponent(z1);
+      final long t0 = 
+        s ? Doubles.significand(z0) : -Doubles.significand(z0);
       final long t1 = Doubles.significand(z1);
-      final boolean s = ! (s0 ^ s1);
-      final int e = e0 + e1;
-      final BigInteger t = 
+      final BigInteger n = 
         BigInteger.valueOf(t0).multiply(BigInteger.valueOf(t1));
-      final BigInteger n0 = s ? t : t.negate();
-      if (0 <= e) { // d0 = 1
+      final BigInteger dn = denominator().multiply(n);
+      if (0 <= e) {
         return valueOf(
-          numerator().add(n0.shiftLeft(e).multiply(denominator())),
+          numerator().add(dn.shiftLeft(e)),
           denominator()); }
-      // d0 = 2**-e
       return valueOf(
-        numerator().shiftLeft(-e).add(n0.multiply(denominator())),
+        numerator().shiftLeft(-e).add(dn),
         denominator().shiftLeft(-e)); }
 
 //  public final Rational addProduct (final double z0,
@@ -156,17 +167,32 @@ implements Comparable<Rational> {
   //--------------------------------------------------------------
   // Number methods
   //--------------------------------------------------------------
-
-  @Override
+  
+    /** Returns the low order bits of the truncated quotient.
+     * 
+     * TODO: should it really truncate or round instead? Or
+     * should there be more explicit round, floor, ceil, etc.?
+     */
+    @Override
   public final int intValue () {
     return numerator().divide(denominator()).intValue(); }
 
+    /** Returns the low order bits of the truncated quotient.
+     * 
+     * TODO: should it really truncate or round instead? Or
+     * should there be more explicit round, floor, ceil, etc.?
+     */
   @Override
   public final long longValue () {
     return numerator().divide(denominator()).longValue(); }
 
-  public final BigInteger 
-  bigIntegerValue () { return numerator().divide(denominator()); }
+  /** Returns the truncated quotient.
+   * 
+   * TODO: should it round instead? Or
+   * should there be more explicit round, floor, ceil, etc.?
+   */
+  public final BigInteger bigIntegerValue () { 
+    return numerator().divide(denominator()); }
 
   //--------------------------------------------------------------
   // Half-even rounding to float.
