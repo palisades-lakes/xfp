@@ -7,47 +7,45 @@ import java.math.BigInteger;
 import org.junit.jupiter.api.Test;
 
 import xfp.java.numbers.Doubles;
-import xfp.java.numbers.Rational;
+import xfp.java.numbers.RationalBinaryFloat;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
 import xfp.java.prng.PRNG;
 
 //----------------------------------------------------------------
-/** Test desired properties of Rational. 
+/** Test desired properties of RationalBinaryFloat. 
  * <p>
  * <pre>
- * mvn -Dtest=xfp/java/test/numbers/RationalTest test > RationalTest.txt
+ * mvn -Dtest=xfp/java/test/numbers/RationalBinaryFloatTest test > RationalBinaryFloatTest.txt
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
  * @version 2019-03-27
  */
 
-public final class RationalTest {
+public final class RationalBinaryFloatTest {
 
   //--------------------------------------------------------------
 
-  private static final boolean correctRounding (final Rational f) {
+  private static final boolean correctRounding (final RationalBinaryFloat f) {
     // TODO: this is necessary but not sufficient to ensure 
     // rounding was correct?
     final double x = f.doubleValue();
     // not really true, but can't check easily
-    // TODO: compare with ERational?
-    // TODO: compare with 
     // f.numerator().divide(f.denominator()).doubleValue?
     if (! Double.isFinite(x)) { 
-      final BigInteger q = f.numerator().divide(f.denominator());
+      final BigInteger q = f.numerator().divide(f.denominator()).shiftLeft(f.exponent());
       return ! Double.isFinite(q.doubleValue()); }
-    final Rational fx = Rational.valueOf(x);
+    final RationalBinaryFloat fx = RationalBinaryFloat.valueOf(x);
     final int r = f.compareTo(fx);
     final boolean result;
     if (r < 0) { // fx > f
       final double x1o = Math.nextDown(x);
-      final Rational flo = Rational.valueOf(x1o);
+      final RationalBinaryFloat flo = RationalBinaryFloat.valueOf(x1o);
       result = flo.compareTo(f) < 0;}
     else if (r > 0) { // fx < f
       final double xhi = Math.nextUp(x);
-      final Rational fhi = Rational.valueOf(xhi);
+      final RationalBinaryFloat fhi = RationalBinaryFloat.valueOf(xhi);
       result = f.compareTo(fhi) < 0; } 
     else { result = true; }
     return result; }
@@ -59,16 +57,18 @@ public final class RationalTest {
   @SuppressWarnings({ "static-method" })
   @Test
   public final void roundingTest () {
-    final Rational f = Rational.valueOf(13,11);
+    final RationalBinaryFloat f = 
+      RationalBinaryFloat.valueOf(13,11,0);
     assertTrue(correctRounding(f)); }
 
   @SuppressWarnings({ "static-method" })
   @Test
   public final void longRoundingTest () {
-    final Rational f = 
-      Rational.valueOf(
+    final RationalBinaryFloat f = 
+      RationalBinaryFloat.valueOf(
         BigInteger.valueOf(0x789f09858446ad92L),
-        BigInteger.valueOf(0x19513ea5d70c32eL));
+        BigInteger.valueOf(0x19513ea5d70c32eL),
+        0);
     assertTrue(correctRounding(f)); }
 
   @SuppressWarnings({ "static-method" })
@@ -81,11 +81,16 @@ public final class RationalTest {
       Generators.positiveBigIntegerGenerator(
         PRNG.well44497b("seeds/Well44497b-2019-01-07.txt"));
     for (int i=0;i<TRYS;i++) {
-      // some longs will not be exactly representable as doubles
       final BigInteger n = (BigInteger) gn.next();
       final BigInteger d = (BigInteger) gd.next();
-      final Rational f = Rational.valueOf(n,d);
-      assertTrue(correctRounding(f)); } }
+      final RationalBinaryFloat f = 
+        RationalBinaryFloat.valueOf(n,d,0);
+      assertTrue(correctRounding(f),
+        () -> 
+      "\nn= " + n.toString(0x10) 
+      + "\nd= " + d.toString(0x10) 
+      + "\n\nf= " + f.toString()
+      + "\n\nxf= " + Double.toHexString(f.doubleValue())); } }
 
   @SuppressWarnings({ "static-method" })
   @Test
@@ -97,12 +102,12 @@ public final class RationalTest {
       Generators.positiveLongGenerator(
         PRNG.well44497b("seeds/Well44497b-2019-01-07.txt"));
     for (int i=0;i<TRYS;i++) {
-      // some longs will not be exactly representable as doubles
       final long n = g0.nextLong();
       final long d = g1.nextLong();
-      final Rational f = Rational.valueOf(
+      final RationalBinaryFloat f = RationalBinaryFloat.valueOf(
         BigInteger.valueOf(n),
-        BigInteger.valueOf(d));
+        BigInteger.valueOf(d),
+        0);
       assertTrue(correctRounding(f)); } }
 
   @SuppressWarnings({ "static-method" })
@@ -113,8 +118,12 @@ public final class RationalTest {
         PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
-      final Rational f = Rational.valueOf(x);
-      assertTrue(correctRounding(f)); } }
+      final RationalBinaryFloat f = RationalBinaryFloat.valueOf(x);
+      assertTrue(correctRounding(f),
+        () -> 
+      "\n" + Double.toHexString(x) 
+      + "\n" + f.toString()
+      + "\n" + Double.toHexString(f.doubleValue())); } }
 
   @SuppressWarnings({ "static-method" })
   @Test
@@ -124,7 +133,7 @@ public final class RationalTest {
         PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
-      final Rational f = Rational.valueOf(x);
+      final RationalBinaryFloat f = RationalBinaryFloat.valueOf(x);
       assertTrue(correctRounding(f)); } }
 
   //--------------------------------------------------------------

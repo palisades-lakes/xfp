@@ -23,7 +23,7 @@ import xfp.java.prng.PRNG;
  * @version 2019-03-26
  */
 
-public final class RationalSumTest {
+public final class MutableRationalSumTest {
 
   //--------------------------------------------------------------
 

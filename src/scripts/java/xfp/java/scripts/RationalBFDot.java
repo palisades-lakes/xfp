@@ -1,4 +1,4 @@
-package xfp.java.test.accumulators;
+package xfp.java.scripts;
 
 import static java.lang.Double.toHexString;
 
@@ -6,36 +6,25 @@ import java.util.Arrays;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.ListSampler;
-import org.junit.jupiter.api.Test;
 
 import xfp.java.Classes;
 import xfp.java.accumulators.Accumulator;
-import xfp.java.accumulators.BigDecimalSum;
-import xfp.java.accumulators.DoubleFmaSum;
-import xfp.java.accumulators.DoubleSum;
-import xfp.java.accumulators.MutableRationalSum;
-import xfp.java.accumulators.Rational0Sum;
 import xfp.java.accumulators.RationalBinaryFloatSum;
-import xfp.java.accumulators.RationalSum;
 import xfp.java.linear.Dn;
 import xfp.java.numbers.Doubles;
 import xfp.java.prng.Generator;
 import xfp.java.prng.PRNG;
 
-//----------------------------------------------------------------
-/** Test summation algorithms. 
- * <p>
+/** Benchmark rational dot products.
+ * 
  * <pre>
- * mvn -q -Dtest=xfp/java/test/numbers/DotTest test > DotTest.txt
+ * jy --source 11 src/scripts/java/xfp/java/scripts/RationalDot.java
  * </pre>
- *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-27
+ * @version 2019-03-26
  */
-
-//no actual tests here (yet)
-
-public final class DotTest {
+@SuppressWarnings("unchecked")
+public final class RationalBFDot {
 
   //--------------------------------------------------------------
   //  /** See {@link Integer#numberOfLeadingZeros(int)}. */
@@ -89,14 +78,13 @@ public final class DotTest {
     for (int i=0;i<n;i++) { x[i] = sampleDoubles(g,urp); }
     return x; }
 
-  private static final int DIM = 1 * 1024;
-  private static final int N = 8;
+  private static final int DIM = 1024 * 1024;
+  private static final int N = 128;
 
   //--------------------------------------------------------------
 
-  @SuppressWarnings({ "static-method" })
-  @Test
-  public final void dotTest () {
+  public static final void main (final String[] args) 
+    throws InterruptedException {
 
     final double[][] x0 = sampleDoubles(DIM,N);
     final double[][] x1 = sampleDoubles(DIM,N);
@@ -104,10 +92,9 @@ public final class DotTest {
     // should be zero with current construction
     final double[] truth = new double[N];
     final double[] pred = new double[N];
-    // assuming ERational is correct!!!
     for (int i=0;i<N;i++) { 
       truth[i] = 
-        RationalSum.make().addProducts(x0[i],x1[i]).doubleValue(); }
+        RationalBinaryFloatSum.make().addProducts(x0[i],x1[i]).doubleValue(); }
 
     for (int i=0;i<N;i++) { 
       System.out.println(
@@ -120,17 +107,10 @@ public final class DotTest {
     System.out.println();
     final Accumulator[] accumulators = 
     {
-     BigDecimalSum.make(),
-     DoubleSum.make(),
-     DoubleFmaSum.make(),
-//     FloatSum.make(),
-//     FloatFmaSum.make(),
-     MutableRationalSum.make(),
-     Rational0Sum.make(),
-     RationalSum.make(),
      RationalBinaryFloatSum.make(),
     };
 
+    Thread.sleep(16*1024);
     for (final Accumulator a : accumulators) {
       long t;
       t = System.nanoTime();
@@ -138,9 +118,12 @@ public final class DotTest {
         pred[i] = 
           a.clear().addProducts(x0[i],x1[i]).doubleValue(); }
       t = (System.nanoTime()-t);
+
       System.out.println(toHexString(Dn.l1Dist(truth,pred)) + 
         " in " + (t*1.0e-9) 
-        + " secs " + Classes.className(a)); } }
+        + " secs " + Classes.className(a)); } 
+
+    Thread.sleep(16*1024); }
 
   //--------------------------------------------------------------
 }
