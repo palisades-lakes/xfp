@@ -24,25 +24,12 @@ public final class FloatFmaSum implements Accumulator<FloatFmaSum> {
     _sum += (float) z; 
     return this; }
 
-//  @Override
-//  public final FloatFmaSum addAll (final double[] z)  {
-//    for (final double zi : z) { _sum += (float) zi; }
-//    return this; }
-
   @Override
   public final FloatFmaSum addProduct (final double z0,
                                        final double z1) { 
     _sum = Math.fma((float) z0, (float) z1, _sum);
     return this; }
 
-//@Override
-//public final FloatFmaSum addProducts (final double[] z0,
-//                                        final double[] z1)  {
-//    final int n = z0.length;
-//    assert n == z1.length;
-//    for (int i=0;i<n;i++) { 
-//      _sum += ((float) z0[i])*((float) z1[i]); }
-//    return this; }
   //--------------------------------------------------------------
   // construction
   //--------------------------------------------------------------

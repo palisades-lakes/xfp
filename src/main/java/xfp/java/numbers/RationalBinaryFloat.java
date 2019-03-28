@@ -67,19 +67,43 @@ implements Comparable<RationalBinaryFloat> {
 
     if (d.signum() < 0) { 
       return reduced(n.negate(),d.negate(),e); }
+
     if (n == BigInteger.ZERO) { return ZERO; }
 
     final int en = Numbers.loBit(n);
     final int ed = Numbers.loBit(d);
-    final BigInteger n0 = n.shiftRight(en-1);
-    final BigInteger d0 = d.shiftRight(ed-1);
+    final BigInteger n0 = (en != 0) ? n.shiftRight(en) : n;
+    final BigInteger d0 = (ed != 0) ? d.shiftRight(ed) : d;
     final int e0 = e + en - ed;
 
-    final BigInteger gcd = n.gcd(d);
+//    assert d0.signum() == 1;
+    
+    if (BigInteger.ONE.equals(d0)) {
+      return new RationalBinaryFloat(n0,d0,e0); } 
+     
+    final BigInteger gcd = n0.gcd(d0);
     // TODO: any value in this test?
     if (gcd.compareTo(BigInteger.ONE) > 0) {
-      return 
-        new RationalBinaryFloat(n0.divide(gcd),d0.divide(gcd),e0); } 
+      final BigInteger n1 = n0.divide(gcd);
+      final BigInteger d1 = d0.divide(gcd);
+//      assert d1.signum() == 1 :
+//        "non positive denominator:"
+//        + "\nn= " + n.toString(0x10)
+//        + "\nd= " + d.toString(0x10)
+//        + "\ne= " + e 
+//        + "\n"
+//        + "\nn0= " + n0.toString(0x10)
+//        + "\nd0= " + d0.toString(0x10)
+//        + "\ne0= " + e0 
+//        + "\n"
+//        + "\ngcd= " + gcd.toString(0x10)
+//        + "\n"
+//        + "\nn1= " + n1.toString(0x10)
+//        + "\nd1= " + d1.toString(0x10)
+//        + "\ne1= " + e0 
+//        + "\n"
+//        ;
+      return new RationalBinaryFloat(n1,d1,e0); } 
 
     return new RationalBinaryFloat(n0,d0,e0); }
 
@@ -99,11 +123,15 @@ implements Comparable<RationalBinaryFloat> {
   private final RationalBinaryFloat add (final BigInteger n1,
                                          final BigInteger d1,
                                          final int e1) {
-    final BigInteger n0d1 = numerator().multiply(d1);
-    final BigInteger n1d0 = n1.multiply(denominator());
-    final BigInteger d0d1 = denominator().multiply(d1);
+    final BigInteger n0 = numerator();
+    final BigInteger d0 = denominator();
     final int e0 = exponent();
-    if (e0 >= e1) {
+    final BigInteger n0d1 = n0.multiply(d1);
+    final BigInteger n1d0 = n1.multiply(d0);
+    final BigInteger d0d1 = d0.multiply(d1);
+    if (e0 == e1) {
+      return valueOf(n0d1.add(n1d0),d0d1,e1); }
+    if (e0 > e1) {
       return valueOf(n0d1.shiftLeft(e0-e1).add(n1d0),d0d1,e1); }
     return valueOf(n0d1.add(n1d0.shiftLeft(e1-e0)),d0d1,e0); }
 
@@ -113,6 +141,8 @@ implements Comparable<RationalBinaryFloat> {
     return add(q.numerator(),q.denominator(),q.exponent()); }
 
   public final RationalBinaryFloat add (final double q) {
+    assert BigInteger.ONE.equals(denominator()) :
+      this.toString();
     final boolean s = Doubles.nonNegative(q);
     final int e1 = Doubles.exponent(q);
     final long t = Doubles.significand(q);
@@ -120,7 +150,8 @@ implements Comparable<RationalBinaryFloat> {
     final BigInteger n0 = numerator();
     final BigInteger d0 = denominator();
     final int e0 = exponent();
-    final BigInteger n1d0 = n1.multiply(denominator());
+    final BigInteger n1d0 = 
+      BigInteger.ONE.equals(d0) ? n1 : n1.multiply(d0);
     if (e0 >= e1) {
       return valueOf(n0.shiftLeft(e0-e1).add(n1d0),d0,e1); }
     return valueOf(n0.add(n1d0.shiftLeft(e1-e0)),d0,e0); }
@@ -147,24 +178,29 @@ implements Comparable<RationalBinaryFloat> {
 
   public final RationalBinaryFloat addProduct (final double z0,
                                                final double z1) { 
+    final BigInteger n = numerator();
+    final BigInteger d = denominator();
+    final int e = exponent();
+
     final boolean s = 
       ! (Doubles.nonNegative(z0) ^ Doubles.nonNegative(z1));
-    final int e1 = Doubles.exponent(z0) + Doubles.exponent(z1);
     final long t0 = (s ? 1L : -1L) * Doubles.significand(z0);
     final long t1 = Doubles.significand(z1);
-    final BigInteger n = 
+    final int e01 = Doubles.exponent(z0) + Doubles.exponent(z1);
+    final int de = e - e01;
+
+    final BigInteger n0 = 
       BigInteger.valueOf(t0).multiply(BigInteger.valueOf(t1));
-    final BigInteger n1d0 = n.multiply(denominator());
-    final int e0 = exponent();
-    if (e0 >= e1) {
-      return valueOf(
-        numerator().shiftLeft(e0-e1).add(n1d0),
-        denominator(),
-        e1); }
-    return valueOf(
-      numerator().add(n1d0.shiftLeft(e1-e0)),
-      denominator(),
-      e0); }
+    final BigInteger n1 = 
+      (BigInteger.ONE.equals(d) ? n0 : n0.multiply(d));
+    final int e2;
+    final BigInteger n2;
+    if (0 == de) { e2 = e; n2 = n.add(n1); }
+    else if (0 < de) {
+      e2 = e01; n2 = n.shiftLeft(de).add(n1); }
+    else { e2 = e; n2 = n.add(n1.shiftRight(de)); }
+    
+    return valueOf(n2,d,e2); }
 
   //--------------------------------------------------------------
   // Number methods
@@ -391,6 +427,16 @@ implements Comparable<RationalBinaryFloat> {
   public static final RationalBinaryFloat valueOf (final BigInteger n,
                                                    final BigInteger d,
                                                    final int e) {
+    assert 1 == d.signum() :
+      "\nn= " + n.toString(0x10) 
+      + "\nd= " + d.toString(0x10)
+      + "\ne= " + e;
+//    assert BigInteger.ONE.equals(d) :
+//      "denominator not 1!"
+//      + "\nn= " + n.toString(0x10)
+//      + "\nd= " + d.toString(0x10)
+//      + "\ne= " + e;
+      
     return reduced(n,d,e); }
 
   public static final RationalBinaryFloat valueOf (final long n,
@@ -411,9 +457,9 @@ implements Comparable<RationalBinaryFloat> {
                                                     final int e,
                                                     final long t)  {
     if (0L == t) { return ZERO; }
-    final BigInteger n0 = BigInteger.valueOf(t);
-    final BigInteger n1 = nonNegative ? n0 : n0.negate();
-    return valueOf(n1,BigInteger.ONE,e); } 
+    final long tt = nonNegative ? t : -t;
+    final BigInteger n = BigInteger.valueOf(tt);
+    return valueOf(n,BigInteger.ONE,e); } 
 
   public static final RationalBinaryFloat valueOf (final double x)  {
     return valueOf(

@@ -268,8 +268,7 @@ public final class Generators {
         if (edge) { return edgeCases.sample(); }
         // TODO: bound infinite loop?
         for (;;) {
-          final BigInteger b =
-            new BigInteger(nextBytes(urp,1024)); 
+          final BigInteger b = new BigInteger(nextBytes(urp,1024)); 
           if (0 != b.signum()) { return b.abs(); } } } }; }
 
   public static final Generator 

@@ -15,13 +15,13 @@ import xfp.java.numbers.Doubles;
 import xfp.java.prng.Generator;
 import xfp.java.prng.PRNG;
 
-/** Benchmark rational dot products.
+/** Benchmark rational binary float dot products.
  * 
  * <pre>
- * jy --source 11 src/scripts/java/xfp/java/scripts/RationalDot.java
+ * jy --source 11 src/scripts/java/xfp/java/scripts/RationalBFDot.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-26
+ * @version 2019-03-28
  */
 @SuppressWarnings("unchecked")
 public final class RationalBFDot {
@@ -78,13 +78,12 @@ public final class RationalBFDot {
     for (int i=0;i<n;i++) { x[i] = sampleDoubles(g,urp); }
     return x; }
 
-  private static final int DIM = 1024 * 1024;
-  private static final int N = 128;
+  private static final int DIM = 16 * 1024 * 1024;
+  private static final int N = 16;
 
   //--------------------------------------------------------------
 
-  public static final void main (final String[] args) 
-    throws InterruptedException {
+  public static final void main (final String[] args) throws InterruptedException  {
 
     final double[][] x0 = sampleDoubles(DIM,N);
     final double[][] x1 = sampleDoubles(DIM,N);
@@ -116,14 +115,16 @@ public final class RationalBFDot {
       t = System.nanoTime();
       for (int i=0;i<N;i++) { 
         pred[i] = 
-          a.clear().addProducts(x0[i],x1[i]).doubleValue(); }
+          a.clear().addProducts(x0[i],x1[i]).doubleValue(); 
+        assert pred[i] == truth[i]; }
       t = (System.nanoTime()-t);
 
       System.out.println(toHexString(Dn.l1Dist(truth,pred)) + 
         " in " + (t*1.0e-9) 
         + " secs " + Classes.className(a)); } 
 
-    Thread.sleep(16*1024); }
+//    Thread.sleep(16*1024); 
+    }
 
   //--------------------------------------------------------------
 }

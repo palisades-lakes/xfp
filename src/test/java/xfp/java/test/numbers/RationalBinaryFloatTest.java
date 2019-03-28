@@ -1,5 +1,6 @@
 package xfp.java.test.numbers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigInteger;
@@ -20,7 +21,7 @@ import xfp.java.prng.PRNG;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-27
+ * @version 2019-03-28
  */
 
 public final class RationalBinaryFloatTest {
@@ -83,6 +84,7 @@ public final class RationalBinaryFloatTest {
     for (int i=0;i<TRYS;i++) {
       final BigInteger n = (BigInteger) gn.next();
       final BigInteger d = (BigInteger) gd.next();
+      assertEquals(d.signum(),1);
       final RationalBinaryFloat f = 
         RationalBinaryFloat.valueOf(n,d,0);
       assertTrue(correctRounding(f),

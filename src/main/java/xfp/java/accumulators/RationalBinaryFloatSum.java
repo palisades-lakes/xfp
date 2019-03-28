@@ -1,16 +1,16 @@
 package xfp.java.accumulators;
 
-import xfp.java.numbers.Rational;
+import xfp.java.numbers.RationalBinaryFloat;
 
 /** Naive sum of <code>double</code> values with a Rational-valued 
  * accumulator (for testing).
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-27
+ * @version 2019-03-28
  */
 public final class RationalBinaryFloatSum implements Accumulator<RationalBinaryFloatSum> {
 
-  private Rational _sum;
+  private RationalBinaryFloat _sum;
 
   //--------------------------------------------------------------
   // start with only immediate needs
@@ -25,7 +25,7 @@ public final class RationalBinaryFloatSum implements Accumulator<RationalBinaryF
 
   @Override
   public final RationalBinaryFloatSum clear () { 
-    _sum = Rational.ZERO;
+    _sum = RationalBinaryFloat.ZERO;
     return this; }
 
   @Override

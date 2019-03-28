@@ -13,7 +13,6 @@ import xfp.java.accumulators.Accumulator;
 import xfp.java.accumulators.BigDecimalSum;
 import xfp.java.accumulators.DoubleSum;
 import xfp.java.accumulators.MutableRationalSum;
-import xfp.java.accumulators.Rational0Sum;
 import xfp.java.accumulators.RationalBinaryFloatSum;
 import xfp.java.accumulators.RationalSum;
 import xfp.java.linear.Dn;
@@ -117,7 +116,6 @@ public final class SumTest {
      DoubleSum.make(),
 //     FloatSum.make(),
      MutableRationalSum.make(),
-     Rational0Sum.make(),
      RationalSum.make(),
      RationalBinaryFloatSum.make(),
     };
