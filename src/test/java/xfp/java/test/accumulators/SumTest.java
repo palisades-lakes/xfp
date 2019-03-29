@@ -10,11 +10,11 @@ import org.junit.jupiter.api.Test;
 
 import xfp.java.Classes;
 import xfp.java.accumulators.Accumulator;
-import xfp.java.accumulators.BigDecimalSum;
-import xfp.java.accumulators.DoubleSum;
-import xfp.java.accumulators.MutableRationalSum;
-import xfp.java.accumulators.RationalBinaryFloatSum;
-import xfp.java.accumulators.RationalSum;
+import xfp.java.accumulators.BigDecimalAccumulator;
+import xfp.java.accumulators.DoubleAccumulator;
+import xfp.java.accumulators.MutableRationalAccumulator;
+import xfp.java.accumulators.RBFAccumulator;
+import xfp.java.accumulators.RationalAccumulator;
 import xfp.java.linear.Dn;
 import xfp.java.numbers.Doubles;
 import xfp.java.prng.Generator;
@@ -100,7 +100,7 @@ public final class SumTest {
     final double[] truth = new double[N];
     final double[] pred = new double[N];
     for (int i=0;i<N;i++) { 
-      truth[i] =  RationalSum.make().addAll(x[i]).doubleValue(); }
+      truth[i] =  RationalAccumulator.make().addAll(x[i]).doubleValue(); }
 
     for (int i=0;i<N;i++) { 
       System.out.println(
@@ -112,12 +112,12 @@ public final class SumTest {
 
     final Accumulator[] accumulators = 
     {
-     BigDecimalSum.make(),
-     DoubleSum.make(),
-//     FloatSum.make(),
-     MutableRationalSum.make(),
-     RationalSum.make(),
-     RationalBinaryFloatSum.make(),
+     BigDecimalAccumulator.make(),
+     DoubleAccumulator.make(),
+//     FloatAccumulator.make(),
+     MutableRationalAccumulator.make(),
+     RationalAccumulator.make(),
+     RBFAccumulator.make(),
     };
 
     for (final Accumulator a : accumulators) {

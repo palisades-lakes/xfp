@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 
 import org.junit.jupiter.api.Test;
 
-import xfp.java.accumulators.MutableRationalSum;
+import xfp.java.accumulators.MutableRationalAccumulator;
 import xfp.java.numbers.Doubles;
 import xfp.java.numbers.Floats;
 import xfp.java.numbers.Rational;
@@ -98,7 +98,7 @@ public final class RoundtripTests {
     return true; }
 
   //--------------------------------------------------------------
-  /** RationalSum should be able to represent any double exactly.
+  /** RationalAccumulator should be able to represent any double exactly.
    */
 
   private static final boolean double2RationalSum2Double () {
@@ -108,12 +108,12 @@ public final class RoundtripTests {
     //subnormalDoubles();
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
-      final MutableRationalSum f = MutableRationalSum.make().add(x);
+      final MutableRationalAccumulator f = MutableRationalAccumulator.make().add(x);
       final double xf = f.doubleValue();
       final Rational xe = Rational.valueOf(x);
       if (x != xf) { 
         System.out.println("\n\n" + 
-          "RationalSum: isNormal=" + Doubles.isNormal(x) +"\n" 
+          "RationalAccumulator: isNormal=" + Doubles.isNormal(x) +"\n" 
           + x + "\n"
           + xf + "\n\n"
           + Double.toHexString(x) + "\n" 
@@ -213,7 +213,7 @@ public final class RoundtripTests {
     return true; }
 
   //--------------------------------------------------------------
-  /** RationalSum should be able to represent any float exactly.
+  /** RationalAccumulator should be able to represent any float exactly.
    */
 
   private static final boolean float2RationalSum2Float () {
@@ -223,12 +223,12 @@ public final class RoundtripTests {
     //subnormalFloats();
     for (int i=0;i<TRYS;i++) {
       final float x = g.nextFloat();
-      final MutableRationalSum f = MutableRationalSum.make().add(x);
+      final MutableRationalAccumulator f = MutableRationalAccumulator.make().add(x);
       final float xf = f.floatValue();
       final Rational xe = Rational.valueOf(x);
       if (x != xf) { 
         System.out.println("\n\n" + 
-          "RationalSum: isNormal=" + Floats.isNormal(x) +"\n" 
+          "RationalAccumulator: isNormal=" + Floats.isNormal(x) +"\n" 
           + x + "\n"
           + xf + "\n\n"
           + Float.toHexString(x) + "\n" 

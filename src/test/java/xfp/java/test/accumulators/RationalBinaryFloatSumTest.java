@@ -11,8 +11,8 @@ import org.junit.jupiter.api.Test;
 
 import xfp.java.Classes;
 import xfp.java.accumulators.Accumulator;
-import xfp.java.accumulators.RationalBinaryFloatSum;
-import xfp.java.accumulators.RationalSum;
+import xfp.java.accumulators.RBFAccumulator;
+import xfp.java.accumulators.RationalAccumulator;
 import xfp.java.linear.Dn;
 import xfp.java.numbers.Doubles;
 import xfp.java.prng.Generator;
@@ -96,7 +96,7 @@ public final class RationalBinaryFloatSumTest {
     final double[] truth = new double[N];
     final double[] pred = new double[N];
     for (int i=0;i<N;i++) { 
-      truth[i] =  RationalSum.make().addAll(x[i]).doubleValue(); }
+      truth[i] =  RationalAccumulator.make().addAll(x[i]).doubleValue(); }
 
     for (int i=0;i<N;i++) { 
       System.out.println(
@@ -108,7 +108,7 @@ public final class RationalBinaryFloatSumTest {
 
     final Accumulator[] accumulators = 
     {
-     RationalBinaryFloatSum.make(),
+     RBFAccumulator.make(),
     };
 
     for (final Accumulator a : accumulators) {

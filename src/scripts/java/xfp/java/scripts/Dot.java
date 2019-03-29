@@ -9,13 +9,13 @@ import org.apache.commons.rng.sampling.ListSampler;
 
 import xfp.java.Classes;
 import xfp.java.accumulators.Accumulator;
-import xfp.java.accumulators.BigDecimalSum;
-import xfp.java.accumulators.DoubleFmaSum;
-import xfp.java.accumulators.DoubleSum;
-import xfp.java.accumulators.FloatFmaSum;
-import xfp.java.accumulators.FloatSum;
-import xfp.java.accumulators.MutableRationalSum;
-import xfp.java.accumulators.RationalSum;
+import xfp.java.accumulators.BigDecimalAccumulator;
+import xfp.java.accumulators.DoubleFmaAccumulator;
+import xfp.java.accumulators.DoubleAccumulator;
+import xfp.java.accumulators.FloatFmaAccumulator;
+import xfp.java.accumulators.FloatAccumulator;
+import xfp.java.accumulators.MutableRationalAccumulator;
+import xfp.java.accumulators.RationalAccumulator;
 import xfp.java.linear.Dn;
 import xfp.java.numbers.Doubles;
 import xfp.java.prng.Generator;
@@ -101,7 +101,7 @@ public final class Dot {
     // assuming ERational is correct!!!
     for (int i=0;i<N;i++) { 
       truth[i] = 
-        RationalSum.make().addProducts(x0[i],x1[i]).doubleValue(); }
+        RationalAccumulator.make().addProducts(x0[i],x1[i]).doubleValue(); }
 
     for (int i=0;i<N;i++) { 
       System.out.println(
@@ -114,13 +114,13 @@ public final class Dot {
     System.out.println();
     final Accumulator[] accumulators = 
     {
-     BigDecimalSum.make(),
-     DoubleSum.make(),
-     DoubleFmaSum.make(),
-     FloatSum.make(),
-     FloatFmaSum.make(),
-     MutableRationalSum.make(),
-     RationalSum.make(),
+     BigDecimalAccumulator.make(),
+     DoubleAccumulator.make(),
+     DoubleFmaAccumulator.make(),
+     FloatAccumulator.make(),
+     FloatFmaAccumulator.make(),
+     MutableRationalAccumulator.make(),
+     RationalAccumulator.make(),
     };
 
     Thread.sleep(16*1024);

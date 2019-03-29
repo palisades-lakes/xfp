@@ -6,14 +6,14 @@ import java.math.BigInteger;
 
 import org.junit.jupiter.api.Test;
 
-import xfp.java.accumulators.MutableRationalSum;
+import xfp.java.accumulators.MutableRationalAccumulator;
 import xfp.java.numbers.Doubles;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
 import xfp.java.prng.PRNG;
 
 //----------------------------------------------------------------
-/** Test desired properties of RationalSum. 
+/** Test desired properties of RationalAccumulator. 
  * <p>
  * <pre>
  * mvn -Dtest=xfp/java/test/numbers/RationalSumTest test > RationalSumTest.txt
@@ -30,27 +30,27 @@ public final class MutableRationalSumTest {
   @SuppressWarnings({ "static-method" })
   @Test
   public final void compareToTest () {
-    final MutableRationalSum f0 = MutableRationalSum.valueOf(-1.0);
-    final MutableRationalSum f1 = MutableRationalSum.valueOf(1.0);
+    final MutableRationalAccumulator f0 = MutableRationalAccumulator.valueOf(-1.0);
+    final MutableRationalAccumulator f1 = MutableRationalAccumulator.valueOf(1.0);
     assertTrue(f0.compareTo(f1) < 0); }
 
   //--------------------------------------------------------------
 
-  /** Conversion to and from RationalSum. */
+  /** Conversion to and from RationalAccumulator. */
 
   private static final boolean 
-  correctRounding (final MutableRationalSum f) {
+  correctRounding (final MutableRationalAccumulator f) {
     // TODO: is necessary but not sufficient to ensure 
     // rounding was correct?
     final double x = f.doubleValue();
-    // can't add non-finite doubles to RationalSum
+    // can't add non-finite doubles to RationalAccumulator
     if (! Double.isFinite(x)) { return true; }
-    final MutableRationalSum fx = MutableRationalSum.valueOf(x);
+    final MutableRationalAccumulator fx = MutableRationalAccumulator.valueOf(x);
     final int r = f.compareTo(fx);
     final boolean ok;
     if (r < 0) { // fx > f
       final double xlo = Math.nextDown(x);
-      final MutableRationalSum flo = MutableRationalSum.valueOf(xlo);
+      final MutableRationalAccumulator flo = MutableRationalAccumulator.valueOf(xlo);
       ok = flo.compareTo(f) < 0;
       if (! ok) {
         System.out.println("lo");
@@ -62,7 +62,7 @@ public final class MutableRationalSumTest {
         System.out.println(); } }
     else if (r > 0) { // fx < f
       final double xhi = Math.nextUp(x);
-      final MutableRationalSum fhi = MutableRationalSum.valueOf(xhi);
+      final MutableRationalAccumulator fhi = MutableRationalAccumulator.valueOf(xhi);
       ok = f.compareTo(fhi) < 0; 
       if (! ok) {
         System.out.println("hi");
@@ -82,7 +82,7 @@ public final class MutableRationalSumTest {
   @SuppressWarnings({ "static-method" })
   @Test
   public final void rounding1311Test () {
-    final MutableRationalSum f = MutableRationalSum.valueOf(13,11);
+    final MutableRationalAccumulator f = MutableRationalAccumulator.valueOf(13,11);
     assertTrue(correctRounding(f)); }
 
   @SuppressWarnings({ "static-method" })
@@ -98,7 +98,7 @@ public final class MutableRationalSumTest {
       // some longs will not be exactly representable as doubles
       final BigInteger n = (BigInteger) gn.next();
       final BigInteger d = (BigInteger) gd.next();
-      final MutableRationalSum f = MutableRationalSum.valueOf(n,d);
+      final MutableRationalAccumulator f = MutableRationalAccumulator.valueOf(n,d);
       assertTrue(correctRounding(f)); } }
 
   @SuppressWarnings({ "static-method" })
@@ -111,7 +111,7 @@ public final class MutableRationalSumTest {
       // some longs will not be exactly representable as doubles
       final long n = g.nextLong();
       final long d = g.nextLong();
-      final MutableRationalSum f = MutableRationalSum.valueOf(n,d);
+      final MutableRationalAccumulator f = MutableRationalAccumulator.valueOf(n,d);
       assertTrue(correctRounding(f)); } }
 
   @SuppressWarnings({ "static-method" })
@@ -122,7 +122,7 @@ public final class MutableRationalSumTest {
         PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
-      final MutableRationalSum f = MutableRationalSum.valueOf(x);
+      final MutableRationalAccumulator f = MutableRationalAccumulator.valueOf(x);
       assertTrue(correctRounding(f)); } }
 
   @SuppressWarnings({ "static-method" })
@@ -133,7 +133,7 @@ public final class MutableRationalSumTest {
         PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
-      final MutableRationalSum f = MutableRationalSum.valueOf(x);
+      final MutableRationalAccumulator f = MutableRationalAccumulator.valueOf(x);
       assertTrue(correctRounding(f)); } }
 
   //--------------------------------------------------------------

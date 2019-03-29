@@ -6,9 +6,11 @@ import xfp.java.numbers.Rational;
  * accumulator (for testing).
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-27
+ * @version 2019-03-29
  */
-public final class RationalSum implements Accumulator<RationalSum> {
+public final class RationalAccumulator 
+
+implements Accumulator<RationalAccumulator> {
 
   private Rational _sum;
 
@@ -24,18 +26,18 @@ public final class RationalSum implements Accumulator<RationalSum> {
     return _sum.floatValue(); }
 
   @Override
-  public final RationalSum clear () { 
+  public final RationalAccumulator clear () { 
     _sum = Rational.ZERO;
     return this; }
 
   @Override
-  public final RationalSum add (final double z) { 
+  public final RationalAccumulator add (final double z) { 
     _sum = _sum.add(z);
     return this; }
 
   @Override
-  public final RationalSum addProduct (final double z0,
-                                       final double z1) { 
+  public final RationalAccumulator addProduct (final double z0,
+                                               final double z1) { 
     _sum = _sum.addProduct(z0,z1);
     return this; }
 
@@ -43,10 +45,10 @@ public final class RationalSum implements Accumulator<RationalSum> {
   // construction
   //--------------------------------------------------------------
 
-  private RationalSum () { super(); clear(); }
+  private RationalAccumulator () { super(); clear(); }
 
-  public static final RationalSum make () {
-    return new RationalSum(); }
+  public static final RationalAccumulator make () {
+    return new RationalAccumulator(); }
 
   //--------------------------------------------------------------
 }

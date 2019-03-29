@@ -6,7 +6,7 @@ import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.ListSampler;
 
 import xfp.java.accumulators.Accumulator;
-import xfp.java.accumulators.RationalSum;
+import xfp.java.accumulators.RationalAccumulator;
 import xfp.java.linear.Dn;
 import xfp.java.numbers.Doubles;
 import xfp.java.prng.Generator;
@@ -84,7 +84,7 @@ public final class Sum {
     throws InterruptedException {
     final double[] x0 = sampleDoubles(DIM,1)[0];
  
-    final Accumulator a = RationalSum.make();
+    final Accumulator a = RationalAccumulator.make();
       Thread.sleep(16*1024);
   final long t = System.nanoTime();
   for (int i=0;i<TRYS;i++) {

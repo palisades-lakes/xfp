@@ -6,9 +6,11 @@ import xfp.java.numbers.RationalBinaryFloat;
  * accumulator (for testing).
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-28
+ * @version 2019-03-29
  */
-public final class RationalBinaryFloatSum implements Accumulator<RationalBinaryFloatSum> {
+public final class RBFAccumulator 
+
+implements Accumulator<RBFAccumulator> {
 
   private RationalBinaryFloat _sum;
 
@@ -24,18 +26,18 @@ public final class RationalBinaryFloatSum implements Accumulator<RationalBinaryF
     return _sum.floatValue(); }
 
   @Override
-  public final RationalBinaryFloatSum clear () { 
+  public final RBFAccumulator clear () { 
     _sum = RationalBinaryFloat.ZERO;
     return this; }
 
   @Override
-  public final RationalBinaryFloatSum add (final double z) { 
+  public final RBFAccumulator add (final double z) { 
     _sum = _sum.add(z);
     return this; }
 
   @Override
-  public final RationalBinaryFloatSum addProduct (final double z0,
-                                                  final double z1) { 
+  public final RBFAccumulator addProduct (final double z0,
+                                          final double z1) { 
     _sum = _sum.addProduct(z0,z1);
     return this; }
 
@@ -43,10 +45,10 @@ public final class RationalBinaryFloatSum implements Accumulator<RationalBinaryF
   // construction
   //--------------------------------------------------------------
 
-  private RationalBinaryFloatSum () { super(); clear(); }
+  private RBFAccumulator () { super(); clear(); }
 
-  public static final RationalBinaryFloatSum make () {
-    return new RationalBinaryFloatSum(); }
+  public static final RBFAccumulator make () {
+    return new RBFAccumulator(); }
 
   //--------------------------------------------------------------
 }
