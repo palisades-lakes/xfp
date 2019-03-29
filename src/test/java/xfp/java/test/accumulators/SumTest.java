@@ -10,9 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import xfp.java.Classes;
 import xfp.java.accumulators.Accumulator;
-import xfp.java.accumulators.BigDecimalAccumulator;
 import xfp.java.accumulators.DoubleAccumulator;
-import xfp.java.accumulators.MutableRationalAccumulator;
 import xfp.java.accumulators.RBFAccumulator;
 import xfp.java.accumulators.RationalAccumulator;
 import xfp.java.linear.Dn;
@@ -28,7 +26,7 @@ import xfp.java.prng.PRNG;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-27
+ * @version 2019-03-29
  */
 
 // no actual tests here (yet)
@@ -87,8 +85,8 @@ public final class SumTest {
     for (int i=0;i<n;i++) { x[i] = sampleDoubles(g,urp); }
     return x; }
 
-  private static final int DIM = 1 * 1024;
-  private static final int N = 8;
+  private static final int DIM = 32 * 1024;
+  private static final int N = 2;
 
   @SuppressWarnings({ "static-method" })
   @Test
@@ -112,10 +110,8 @@ public final class SumTest {
 
     final Accumulator[] accumulators = 
     {
-     BigDecimalAccumulator.make(),
      DoubleAccumulator.make(),
 //     FloatAccumulator.make(),
-     MutableRationalAccumulator.make(),
      RationalAccumulator.make(),
      RBFAccumulator.make(),
     };

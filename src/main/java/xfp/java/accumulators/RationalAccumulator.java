@@ -14,6 +14,8 @@ implements Accumulator<RationalAccumulator> {
 
   private Rational _sum;
 
+  public final Rational value () { return _sum; }
+  
   //--------------------------------------------------------------
   // start with only immediate needs
 

@@ -14,6 +14,8 @@ implements Accumulator<RBFAccumulator> {
 
   private RationalBinaryFloat _sum;
 
+  public final RationalBinaryFloat value () { return _sum; }
+
   //--------------------------------------------------------------
   // start with only immediate needs
 

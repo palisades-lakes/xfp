@@ -22,14 +22,14 @@ import xfp.java.prng.PRNG;
 /** Test summation algorithms. 
  * <p>
  * <pre>
- * mvn test -Dtest=xfp/java/test/accumulators/RationalBinaryFloatSumTest > RationalBinaryFloatSumTest.txt
+ * mvn test -Dtest=xfp/java/test/accumulators/RBFAccumulatorTest > RBFAccumulatorTest.txt
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-28
+ * @version 2019-03-29
  */
 
-public final class RationalBinaryFloatSumTest {
+public final class RBFAccumulatorTest {
 
   //--------------------------------------------------------------
   //  /** See {@link Integer#numberOfLeadingZeros(int)}. */
@@ -83,8 +83,8 @@ public final class RationalBinaryFloatSumTest {
     for (int i=0;i<n;i++) { x[i] = sampleDoubles(g,urp); }
     return x; }
 
-  private static final int DIM = 1 * 1024;
-  private static final int N = 8;
+  private static final int DIM = 16 * 1024;
+  private static final int N = 2;
 
   @SuppressWarnings({ "static-method" })
   @Test

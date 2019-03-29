@@ -9,12 +9,11 @@ import org.apache.commons.rng.sampling.ListSampler;
 
 import xfp.java.Classes;
 import xfp.java.accumulators.Accumulator;
-import xfp.java.accumulators.BigDecimalAccumulator;
 import xfp.java.accumulators.DoubleFmaAccumulator;
 import xfp.java.accumulators.DoubleAccumulator;
 import xfp.java.accumulators.FloatFmaAccumulator;
+import xfp.java.accumulators.RBFAccumulator;
 import xfp.java.accumulators.FloatAccumulator;
-import xfp.java.accumulators.MutableRationalAccumulator;
 import xfp.java.accumulators.RationalAccumulator;
 import xfp.java.linear.Dn;
 import xfp.java.numbers.Doubles;
@@ -27,7 +26,7 @@ import xfp.java.prng.PRNG;
  * java -ea -jar target\benchmarks.jar Dot
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-25
+ * @version 2019-03-29
  */
 @SuppressWarnings("unchecked")
 public final class Dot {
@@ -101,7 +100,10 @@ public final class Dot {
     // assuming ERational is correct!!!
     for (int i=0;i<N;i++) { 
       truth[i] = 
-        RationalAccumulator.make().addProducts(x0[i],x1[i]).doubleValue(); }
+        RationalAccumulator
+        .make()
+        .addProducts(x0[i],x1[i])
+        .doubleValue(); }
 
     for (int i=0;i<N;i++) { 
       System.out.println(
@@ -114,13 +116,12 @@ public final class Dot {
     System.out.println();
     final Accumulator[] accumulators = 
     {
-     BigDecimalAccumulator.make(),
      DoubleAccumulator.make(),
      DoubleFmaAccumulator.make(),
      FloatAccumulator.make(),
      FloatFmaAccumulator.make(),
-     MutableRationalAccumulator.make(),
      RationalAccumulator.make(),
+     RBFAccumulator.make(),
     };
 
     Thread.sleep(16*1024);

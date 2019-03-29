@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 
 import org.junit.jupiter.api.Test;
 
-import xfp.java.accumulators.MutableRationalAccumulator;
+import xfp.java.accumulators.RationalAccumulator;
 import xfp.java.numbers.Doubles;
 import xfp.java.numbers.Floats;
 import xfp.java.numbers.Rational;
@@ -108,7 +108,7 @@ public final class RoundtripTests {
     //subnormalDoubles();
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
-      final MutableRationalAccumulator f = MutableRationalAccumulator.make().add(x);
+      final RationalAccumulator f = RationalAccumulator.make().add(x);
       final double xf = f.doubleValue();
       final Rational xe = Rational.valueOf(x);
       if (x != xf) { 
@@ -118,9 +118,9 @@ public final class RoundtripTests {
           + xf + "\n\n"
           + Double.toHexString(x) + "\n" 
           + Double.toHexString(xf) + "\n\n"
-          + f.numerator().toString(0x10).toUpperCase() + "\n" 
+          + f.value().numerator().toString(0x10).toUpperCase() + "\n" 
           + xe.numerator().toString(0x10) + "\n\n"
-          + f.denominator().toString(0x10) + "\n" 
+          + f.value().denominator().toString(0x10) + "\n" 
           + xe.denominator().toString(0x10) + "\n\n"
 //          f.getNumerator() + "\n" +
 //          f.getDenominator() + "\n\n" +
@@ -223,7 +223,7 @@ public final class RoundtripTests {
     //subnormalFloats();
     for (int i=0;i<TRYS;i++) {
       final float x = g.nextFloat();
-      final MutableRationalAccumulator f = MutableRationalAccumulator.make().add(x);
+      final RationalAccumulator f = RationalAccumulator.make().add(x);
       final float xf = f.floatValue();
       final Rational xe = Rational.valueOf(x);
       if (x != xf) { 
@@ -233,9 +233,9 @@ public final class RoundtripTests {
           + xf + "\n\n"
           + Float.toHexString(x) + "\n" 
           + Float.toHexString(xf) + "\n\n"
-          + f.numerator().toString(0x10).toUpperCase() + "\n" 
+          + f.value().numerator().toString(0x10).toUpperCase() + "\n" 
           + xe.numerator().toString(0x10) + "\n\n"
-          + f.denominator().toString(0x10) + "\n" 
+          + f.value().denominator().toString(0x10) + "\n" 
           + xe.denominator().toString(0x10) + "\n\n"
 //          f.getNumerator() + "\n" +
 //          f.getDenominator() + "\n\n" +
