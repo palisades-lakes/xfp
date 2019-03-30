@@ -4,11 +4,9 @@ import static java.lang.Double.MAX_EXPONENT;
 import static java.lang.Double.MIN_EXPONENT;
 import static java.lang.Double.MIN_VALUE;
 import static java.lang.Double.doubleToRawLongBits;
-import static java.lang.Double.isFinite;
 import static java.lang.Double.longBitsToDouble;
 import static java.lang.Double.toHexString;
 
-import java.math.BigInteger;
 import java.util.Map;
 import java.util.function.BiPredicate;
 import java.util.function.BinaryOperator;
@@ -16,6 +14,14 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.distribution.AhrensDieterExponentialSampler;
+import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
+import org.apache.commons.rng.sampling.distribution.ContinuousUniformSampler;
+import org.apache.commons.rng.sampling.distribution.DiscreteSampler;
+import org.apache.commons.rng.sampling.distribution.DiscreteUniformSampler;
+import org.apache.commons.rng.sampling.distribution.GaussianSampler;
+import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
+import org.apache.commons.rng.sampling.distribution.ZigguratNormalizedGaussianSampler;
 
 import xfp.java.algebra.OneSetOneOperation;
 import xfp.java.algebra.OneSetTwoOperations;
@@ -25,7 +31,7 @@ import xfp.java.prng.Generator;
 /** Utilities for <code>double</code>, <code>double[]</code>.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-29
+ * @version 2019-03-30
  */
 public final class Doubles implements Set {
 
@@ -37,7 +43,8 @@ public final class Doubles implements Set {
   // Most descriptions of floating point formats refer to the
   // significand as 1.xxx...xxx (with STORED_SIGNIFICAND_BITS x's). 
   // It's often more convenient to treat it as an integer, which
-  // requires us to subtract STORED_SIGNIFICAND_BITS from the exponent to get the same 
+  // requires us to subtract STORED_SIGNIFICAND_BITS from the 
+  // exponent to get the same 
   // value.
   //--------------------------------------------------------------
 
@@ -197,7 +204,8 @@ public final class Doubles implements Set {
                                         final int exponent,
                                         final long significand) {
 
-    assert ((0 == sign) || (1 ==sign)) : "Invalid sign bit:" + sign;
+    assert ((0 == sign) || (1 ==sign)) : 
+      "Invalid sign bit:" + sign;
 
     assert (SUBNORMAL_EXPONENT <= exponent)  : 
       "(unbiased) exponent too small: " + exponent;
@@ -216,9 +224,11 @@ public final class Doubles implements Set {
 
     if (SUBNORMAL_EXPONENT == exponent) {
       assert (0 <= significand) :
-        "subnormal significand too small:" + Long.toHexString(significand);
+        "subnormal significand too small:" 
+        + Long.toHexString(significand);
       assert significand <= MAX_SUBNORMAL_SIGNIFICAND :
-        "subnormal significand too large:" + Long.toHexString(significand); }
+        "subnormal significand too large:" 
+        + Long.toHexString(significand); }
     else if (INFINITE_OR_NAN_EXPONENT == exponent) {
       // no leading 1 bit for infinity or NaN
       assert (0 <= significand) :
@@ -254,7 +264,8 @@ public final class Doubles implements Set {
    * if <code>exponent</code> is {@link #SUBNORMAL_EXPONENT} or
    * {@link #INFINITE_OR_NAN_EXPONENT}].
    * Must be in 
-   * [{@link #MIN_NORMAL_SIGNIFICAND},{@link #MAX_NORMAL_SIGNIFICAND}]
+   * [{@link #MIN_NORMAL_SIGNIFICAND},
+   * {@link #MAX_NORMAL_SIGNIFICAND}]
    * if <code>exponent</code> is in 
    * [{@link Double#MIN_EXPONENT}, {@link Double#MAX_EXPONENT}].
    * @return <code>(-1)<sup>sign</sup> * 2<sup>exponent</sup>
@@ -294,7 +305,7 @@ public final class Doubles implements Set {
   //--------------------------------------------------------------
   /** Return correctly rounded sum of 3 non-overlapping doubles.
    * <p>
-   * See <a href="https://github.com/Jeffrey-Sarnoff/IFastSum.jl" >
+   * See <a href="https://github.com/Jeffrey-Sarnoff/IFastSum.jl">
    * IFastSum.jl</a> (visited 2017-05-01, MIT License)
    */
 
@@ -347,7 +358,6 @@ public final class Doubles implements Set {
   public final Double additiveIdentity () { return ZERO; }
 
   //--------------------------------------------------------------
-
   // TODO: is consistency with other algebraic structure classes
   // worth the indirection?
 
@@ -469,107 +479,156 @@ public final class Doubles implements Set {
   public final String toString () { return "D"; }
 
   //--------------------------------------------------------------
-  /** From apache commons math4 BigFraction.
-   * <p>
-   * Create a fraction given the double value.
-   * <p>
-   * This constructor behaves <em>differently</em> from
-   * {@link #BigFraction(double, double, int)}. It converts the 
-   * double value exactly, considering its internal bits 
-   * representation. This works for all values except NaN and 
-   * infinities and does not requires any loop or convergence 
-   * threshold.
-   * </p>
-   * <p>
-   * Since this conversion is exact and since double numbers are 
-   * sometimes approximated, the fraction created may seem strange 
-   * in some cases. For example, calling 
-   * <code>new BigFraction(1.0 / 3.0)</code> does <em>not</em> 
-   * create the fraction 1/3, but the fraction 
-   * 6004799503160661 / 18014398509481984, because the double 
-   * number passed to the constructor is not exactly 1/3
-   * (this number cannot be stored exactly in IEEE754).
-   * </p>
-   * @see #BigFraction(double, double, int)
-   * @param x the double value to convert to a fraction.
-   * @exception IllegalArgumentException if value is not finite
-   */
-
-  public static final BigInteger[] toRatio (final double x) {
-    if (! isFinite(x)) {
-      throw new IllegalArgumentException(
-        "toRatio"  + " cannot handle "+ x); }
-
-    final BigInteger numerator;
-    final BigInteger denominator;
-
-    // compute m and k such that x = m * 2^k
-    final long bits     = Double.doubleToLongBits(x);
-    final long sign     = bits & SIGN_MASK;
-    final long exponent = bits & EXPONENT_MASK;
-    long m              = bits & STORED_SIGNIFICAND_MASK;
-
-    if (exponent == 0) { // subnormal or zero
-      if (0L == m) {
-        numerator   = BigInteger.ZERO;
-        denominator = BigInteger.ONE; }
-      else {
-        if (sign != 0L) { m = -m; }
-        numerator   = BigInteger.valueOf(m);
-        denominator = 
-          BigInteger.ZERO.setBit(-MINIMUM_SUBNORMAL_EXPONENT); } }
-    else { // normal
-      // add the implicit most significant bit
-      m |= (1L << STORED_SIGNIFICAND_BITS); 
-      if (sign != 0L) { m = -m; }
-      int k = 
-        ((int) (exponent >> STORED_SIGNIFICAND_BITS)) 
-        + MINIMUM_SUBNORMAL_EXPONENT - 1;
-      while (((m & (STORED_SIGNIFICAND_MASK - 1L)) != 0L) 
-        &&
-        ((m & 0x1L) == 0L)) {
-        m >>= 1; 
-    ++k; }
-      if (k < 0) { 
-        numerator   = BigInteger.valueOf(m);
-        denominator = BigInteger.ZERO.flipBit(-k); } 
-      else {
-        numerator   = BigInteger.valueOf(m)
-          .multiply(BigInteger.ZERO.flipBit(k));
-        denominator = BigInteger.ONE; } } 
-
-    return new BigInteger[]{ numerator, denominator}; }
-
-  //--------------------------------------------------------------
   // generators
   //--------------------------------------------------------------
 
-  public static final Generator 
-  subnormalGenerator (final int n,
-                      final UniformRandomProvider urp) {
+  private static final Generator 
+  arrayGenerator (final int n,
+                  final Generator g) {
     return new Generator () {
-      final Generator g = subnormalGenerator(urp);
       @Override
       public final Object next () {
         final double[] z = new double[n];
         for (int i=0;i<n;i++) { z[i] = g.nextDouble(); }
         return z; } }; }
 
-  public static final Generator 
-  subnormalGenerator (final UniformRandomProvider urp) {
-    return subnormalGenerator(urp,Double.MAX_EXPONENT); }
-
-  public static final Generator 
-  subnormalGenerator (final int n,
-                      final UniformRandomProvider urp,
-                      final int eMax) {
+  private static final Generator 
+  arrayGenerator (final int m,
+                  final int n,
+                  final Generator g) {
     return new Generator () {
-      final Generator g = subnormalGenerator(urp,eMax);
       @Override
       public final Object next () {
-        final double[] z = new double[n];
-        for (int i=0;i<n;i++) { z[i] = g.nextDouble(); }
+        final double[][] z = new double[m][n];
+        for (int i=0;i<m;i++) { 
+          for (int j=0;j<n;j++) { z[i][j] = g.nextDouble(); } }
         return z; } }; }
+
+  //--------------------------------------------------------------
+  /** Conventional 'uniform' distribution sampler, as 'uniform' 
+   * as it can be projected on <code>double</code>.
+   * @param urp source of randomness
+   * @param zmin inclusive min or generated numbers
+   * @param zmax inclusive max of generated numbers
+   * (TODO: should this be exclusive? commons rng doesn't
+   * actually specify.)
+   */
+  public static final Generator 
+  uniformGenerator (final UniformRandomProvider urp,
+                    final double zmin,
+                    final double zmax) {
+    return new Generator () {
+      private final ContinuousSampler s = 
+        new ContinuousUniformSampler(urp,zmin,zmax);
+      @Override
+      public final double nextDouble () { 
+        return s.sample(); } }; }
+
+  /** Conventional 'uniform' distribution sampler, as 'uniform' 
+   * as it can be projected on <code>double</code>.
+   * @param urp source of randomness
+   * @param zmin inclusive min or generated numbers
+   * @param zmax inclusive max of generated numbers
+   * (TODO: should this be exclusive? commons rng doesn't
+   * actually specify.)
+   */
+  public static final Generator 
+  uniformGenerator (final int n,
+                    final UniformRandomProvider urp,
+                    final double zmin,
+                    final double zmax) {
+    return arrayGenerator(n,uniformGenerator(urp,zmin,zmax)); }
+
+  /** Conventional 'uniform' distribution sampler, as 'uniform' 
+   * as it can be projected on <code>double</code>.
+   * @param urp source of randomness
+   * @param zmin inclusive min or generated numbers
+   * @param zmax inclusive max of generated numbers
+   * (TODO: should this be exclusive? commons rng doesn't
+   * actually specify.)
+   */
+  public static final Generator 
+  uniformGenerator (final int m,
+                    final int n,
+                    final UniformRandomProvider urp,
+                    final double zmin,
+                    final double zmax) {
+    return arrayGenerator(m,n,uniformGenerator(urp,zmin,zmax)); }
+
+  //--------------------------------------------------------------
+
+  public static final Generator 
+  gaussianGenerator (final NormalizedGaussianSampler ngs,
+                     final double mu,
+                     final double sigma) {
+    return new Generator () {
+      private final ContinuousSampler s = 
+        new GaussianSampler(ngs,mu,sigma);
+      @Override
+      public final double nextDouble () { 
+        return s.sample(); } }; }
+
+  public static final Generator 
+  gaussianGenerator (final UniformRandomProvider urp,
+                     final double mu,
+                     final double sigma) {
+    return gaussianGenerator(
+      //new BoxMullerNormalizedGaussianSampler(urp),
+      //new MarsagliaNormalizedGaussianSampler(urp),​
+      new ZigguratNormalizedGaussianSampler(urp),
+      mu,sigma); }
+
+  public static final Generator 
+  gaussianGenerator (final int n,
+                     final UniformRandomProvider urp,
+                     final double mu,
+                     final double sigma) {
+    return arrayGenerator(n,gaussianGenerator(urp,mu,sigma)); }
+
+  public static final Generator 
+  gaussianGenerator (final int m,
+                     final int n,
+                     final UniformRandomProvider urp,
+                     final double mu,
+                     final double sigma) {
+    return arrayGenerator(m,n,gaussianGenerator(urp,mu,sigma)); }
+
+  //--------------------------------------------------------------
+
+  public static final Generator 
+  laplaceGenerator (final UniformRandomProvider urp,
+                    final double mu,
+                    final double sigma) {
+    return new Generator () {
+      private final DiscreteSampler b = 
+        new DiscreteUniformSampler(urp,0,1);
+      private final ContinuousSampler e = 
+        new AhrensDieterExponentialSampler(urp,sigma);
+      @Override
+      public final double nextDouble () { 
+        final int sign = 2*b.sample() - 1;
+        return mu + sign*e.sample(); } }; }
+
+
+  public static final Generator 
+  laplaceGenerator (final int n,
+                    final UniformRandomProvider urp,
+                    final double mu,
+                    final double sigma) {
+    return arrayGenerator(n,laplaceGenerator(urp,mu,sigma)); }
+
+  public static final Generator 
+  laplaceGenerator (final int m,
+                    final int n,
+                    final UniformRandomProvider urp,
+                    final double mu,
+                    final double sigma) {
+    return arrayGenerator(m,n,laplaceGenerator(urp,mu,sigma)); }
+
+  //--------------------------------------------------------------
+  // These treat (a subset of) doubles as a finite set, and sample
+  // uniformly from the discrete elements of that set.
+  //--------------------------------------------------------------
 
   public static final Generator 
   subnormalGenerator (final UniformRandomProvider urp,
@@ -588,31 +647,28 @@ public final class Doubles implements Set {
         return Double.valueOf(nextDouble()); } }; }
 
   public static final Generator 
-  normalGenerator (final int n,
-                   final UniformRandomProvider urp) {
-    return new Generator () {
-      final Generator g = normalGenerator(urp);
-      @Override
-      public final Object next () {
-        final double[] z = new double[n];
-        for (int i=0;i<n;i++) { z[i] = g.nextDouble(); }
-        return z; } }; }
+  subnormalGenerator (final UniformRandomProvider urp) {
+    return subnormalGenerator(urp,Double.MAX_EXPONENT); }
 
   public static final Generator 
-  normalGenerator (final UniformRandomProvider urp) {
-    return normalGenerator(urp,Double.MAX_EXPONENT); }
+  subnormalGenerator (final int n,
+                      final UniformRandomProvider urp,
+                      final int eMax) {
+    return arrayGenerator(n,subnormalGenerator(urp,eMax)); }
 
   public static final Generator 
-  normalGenerator (final int n,
-                   final UniformRandomProvider urp,
-                   final int eMax) {
-    return new Generator () {
-      final Generator g = normalGenerator(urp,eMax);
-      @Override
-      public final Object next () {
-        final double[] z = new double[n];
-        for (int i=0;i<n;i++) { z[i] = g.nextDouble(); }
-        return z; } }; }
+  subnormalGenerator (final int n,
+                      final UniformRandomProvider urp) {
+    return arrayGenerator(n,subnormalGenerator(urp)); }
+
+  //--------------------------------------------------------------
+  /** Discretely uniform over 'normal' doubles,
+   *  as opposed to 'subnormal' doubles. <
+   *  em>Not gaussian!</em>
+   * @param urp
+   * @param eMax
+   * @return
+   */
 
   public static final Generator 
   normalGenerator (final UniformRandomProvider urp,
@@ -631,25 +687,21 @@ public final class Doubles implements Set {
         return Double.valueOf(nextDouble()); } }; }
 
   public static final Generator 
-  finiteGenerator (final int n,
+  normalGenerator (final UniformRandomProvider urp) {
+    return normalGenerator(urp,Double.MAX_EXPONENT); }
+
+  public static final Generator 
+  normalGenerator (final int n,
                    final UniformRandomProvider urp) {
-    return finiteGenerator(n,urp,Double.MAX_EXPONENT); }
+    return arrayGenerator(n,normalGenerator(urp)); }
 
   public static final Generator 
-  finiteGenerator (final int n,
+  normalGenerator (final int n,
                    final UniformRandomProvider urp,
-                   final int delta) {
-    return new Generator () {
-      final Generator g = finiteGenerator(urp,delta);
-      @Override
-      public final Object next () {
-        final double[] z = new double[n];
-        for (int i=0;i<n;i++) { z[i] = g.nextDouble(); }
-        return z; } }; }
+                   final int eMax) {
+    return arrayGenerator(n,normalGenerator(urp,eMax)); }
 
-  public static final Generator 
-  finiteGenerator (final UniformRandomProvider urp) {
-    return finiteGenerator(urp,Double.MAX_EXPONENT); }
+  //--------------------------------------------------------------
 
   public static final Generator 
   finiteGenerator (final UniformRandomProvider urp,
@@ -667,39 +719,34 @@ public final class Doubles implements Set {
         return Double.valueOf(nextDouble()); } }; }
 
   public static final Generator 
-  generator (final int n,
-             final UniformRandomProvider urp) {
-    return 
-      generator(n,urp,SUBNORMAL_EXPONENT,Double.MAX_EXPONENT+1); }
+  finiteGenerator (final UniformRandomProvider urp) {
+    return finiteGenerator(urp,Double.MAX_EXPONENT); }
 
   public static final Generator 
-  generator (final int n,
-             final UniformRandomProvider urp,
-             final int eMax) {
-    return generator(n,urp,SUBNORMAL_EXPONENT,eMax); }
+  finiteGenerator (final int n,
+                   final UniformRandomProvider urp,
+                   final int eMax) {
+    return arrayGenerator(n,normalGenerator(urp,eMax)); }
 
   public static final Generator 
-  generator (final int n,
-             final UniformRandomProvider urp,
-             final int eMin,
-             final int eMax) {
-    return new Generator () {
-      final Generator g = generator(urp,eMin,eMax);
-      @Override
-      public final Object next () {
-        final double[] z = new double[n];
-        for (int i=0;i<n;i++) { z[i] = g.nextDouble(); }
-        return z; } }; }
+  finiteGenerator (final int n,
+                   final UniformRandomProvider urp) {
+    return arrayGenerator(n,normalGenerator(urp)); }
 
   public static final Generator 
-  generator (final UniformRandomProvider urp) {
-    return 
-      generator(urp,SUBNORMAL_EXPONENT,Double.MAX_EXPONENT+1); }
+  finiteGenerator (final int m,
+                   final int n,
+                   final UniformRandomProvider urp,
+                   final int eMax) {
+    return arrayGenerator(m,n,normalGenerator(urp,eMax)); }
 
   public static final Generator 
-  generator (final UniformRandomProvider urp,
-             final int eMax) {
-    return generator(urp,SUBNORMAL_EXPONENT,eMax); }
+  finiteGenerator (final int m,
+                   final int n,
+                   final UniformRandomProvider urp) {
+    return arrayGenerator(m,n,normalGenerator(urp)); }
+
+  //--------------------------------------------------------------
 
   public static final Generator 
   generator (final UniformRandomProvider urp,
@@ -730,6 +777,34 @@ public final class Doubles implements Set {
       @Override
       public final Object next () {
         return Double.valueOf(nextDouble()); } }; }
+
+  public static final Generator 
+  generator (final UniformRandomProvider urp,
+             final int eMax) {
+    return generator(urp,SUBNORMAL_EXPONENT,eMax); }
+
+  public static final Generator 
+  generator (final UniformRandomProvider urp) {
+    return 
+      generator(urp,SUBNORMAL_EXPONENT,Double.MAX_EXPONENT+1); }
+
+  public static final Generator 
+  generator (final int n,
+             final UniformRandomProvider urp,
+             final int eMin,
+             final int eMax) {
+    return arrayGenerator(n,generator(urp,eMin,eMax)); }
+
+  public static final Generator 
+  generator (final int n,
+             final UniformRandomProvider urp,
+             final int eMax) {
+    return arrayGenerator(n,generator(urp,eMax)); }
+
+  public static final Generator 
+  generator (final int n,
+             final UniformRandomProvider urp) {
+    return arrayGenerator(n,generator(urp)); }
 
   //--------------------------------------------------------------
   // construction

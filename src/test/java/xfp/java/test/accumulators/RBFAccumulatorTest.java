@@ -26,7 +26,7 @@ import xfp.java.prng.PRNG;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-29
+ * @version 2019-03-30
  */
 
 public final class RBFAccumulatorTest {
@@ -86,7 +86,6 @@ public final class RBFAccumulatorTest {
   private static final int DIM = 16 * 1024;
   private static final int N = 2;
 
-  @SuppressWarnings({ "static-method" })
   @Test
   public final void sumTest () {
 
@@ -98,12 +97,14 @@ public final class RBFAccumulatorTest {
     for (int i=0;i<N;i++) { 
       truth[i] =  RationalAccumulator.make().addAll(x[i]).doubleValue(); }
 
-    for (int i=0;i<N;i++) { 
-      System.out.println(
-        i + " : " 
-          + Double.toHexString(truth[i]) 
-          + ", " 
-          + Double.toHexString(Dn.maxAbs(x[i]))); }
+    System.out.println();
+    System.out.println(Classes.className(this));
+//    for (int i=0;i<N;i++) { 
+//      System.out.println(
+//        i + " : " 
+//          + Double.toHexString(truth[i]) 
+//          + ", " 
+//          + Double.toHexString(Dn.maxAbs(x[i]))); }
     System.out.println();
 
     final Accumulator[] accumulators = 

@@ -21,7 +21,7 @@ import xfp.java.prng.PRNG;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-28
+ * @version 2019-03-30
  */
 
 public final class RationalBinaryFloatTest {
@@ -111,6 +111,38 @@ public final class RationalBinaryFloatTest {
         BigInteger.valueOf(d),
         0);
       assertTrue(correctRounding(f)); } }
+
+  @SuppressWarnings({ "static-method" })
+  @Test
+  public final void uniformDoubleRoundingTest () {
+    final Generator g = 
+      Doubles.uniformGenerator(
+        PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"),
+        -Double.MAX_VALUE, Double.MAX_VALUE);
+    for (int i=0;i<TRYS;i++) {
+      final double x = g.nextDouble();
+      final RationalBinaryFloat f = RationalBinaryFloat.valueOf(x);
+      assertTrue(correctRounding(f),
+        () -> 
+      "\n" + Double.toHexString(x) 
+      + "\n" + f.toString()
+      + "\n" + Double.toHexString(f.doubleValue())); } }
+
+  @SuppressWarnings({ "static-method" })
+  @Test
+  public final void gaussianDoubleRoundingTest () {
+    final Generator g = 
+      Doubles.gaussianGenerator(
+        PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"),
+        0.0, Double.MAX_VALUE/1000.0);
+    for (int i=0;i<TRYS;i++) {
+      final double x = g.nextDouble();
+      final RationalBinaryFloat f = RationalBinaryFloat.valueOf(x);
+      assertTrue(correctRounding(f),
+        () -> 
+      "\n" + Double.toHexString(x) 
+      + "\n" + f.toString()
+      + "\n" + Double.toHexString(f.doubleValue())); } }
 
   @SuppressWarnings({ "static-method" })
   @Test

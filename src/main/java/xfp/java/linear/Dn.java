@@ -14,7 +14,6 @@ import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 
 import xfp.java.accumulators.Accumulator;
-import xfp.java.accumulators.DoubleAccumulator;
 import xfp.java.accumulators.RBFAccumulator;
 import xfp.java.algebra.OneSetOneOperation;
 import xfp.java.algebra.Set;
@@ -39,7 +38,7 @@ import xfp.java.prng.Generator;
  * that can be used to represent tuples of rational numbers.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-29
+ * @version 2019-03-30
  */
 @SuppressWarnings("unchecked")
 strictfp
@@ -72,6 +71,14 @@ public final class Dn extends LinearSpaceLike {
     assert n == x1.length;
     final Accumulator a = RBFAccumulator.make();
     for (int i=0;i<n;i++) { a.add(Math.abs(x0[i]-x1[i])); }
+    return a.doubleValue(); }
+  
+  //--------------------------------------------------------------
+
+  public static final double l1Norm (final double[] x) {
+    final int n = x.length;
+    final Accumulator a = RBFAccumulator.make();
+    for (int i=0;i<n;i++) { a.add(Math.abs(x[i])); }
     return a.doubleValue(); }
   
   //--------------------------------------------------------------
