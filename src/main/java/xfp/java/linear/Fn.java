@@ -1,5 +1,8 @@
 package xfp.java.linear;
 
+import static java.lang.Float.NEGATIVE_INFINITY;
+import static java.lang.Float.POSITIVE_INFINITY;
+
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Map;
@@ -10,6 +13,8 @@ import org.apache.commons.rng.UniformRandomProvider;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 
+import xfp.java.accumulators.Accumulator;
+import xfp.java.accumulators.DoubleAccumulator;
 import xfp.java.algebra.OneSetOneOperation;
 import xfp.java.algebra.Set;
 import xfp.java.algebra.TwoSetsOneOperation;
@@ -33,22 +38,61 @@ import xfp.java.prng.Generator;
  * that can be used to represent tuples of rational numbers.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-06
+ * @version 2019-03-29
  */
 @SuppressWarnings("unchecked")
 public final class Fn extends LinearSpaceLike {
 
   //--------------------------------------------------------------
+  // operations on arrays of float
+  // TODO: better elsewhere?
+  //--------------------------------------------------------------
 
-  public static final double fmaDot (final double[] x0,
-                                     final double[] x1) {
+  public static final float[] concatenate (final float[] x0,
+                                           final float[] x1) {
+    final float[] x = new float[x0.length + x1.length];
+    for (int i=0;i<x0.length;i++) { x[i] = x0[i]; }
+    for (int i=0;i<x1.length;i++) { x[i+x0.length] = x1[i]; }
+    return x; }
+
+  //--------------------------------------------------------------
+
+  public static final float[] minus (final float[] x) {
+    final float[] y = new float[x.length];
+    for (int i=0;i<x.length;i++) { y[i] = -x[i]; }
+    return y; }
+
+  //--------------------------------------------------------------
+
+  public static final float l1Dist (final float[] x0,
+                                    final float[] x1) {
     final int n = x0.length;
     assert n == x1.length;
-    if (0 == n) { return 0.0; }
-    double sum = x0[0] * x1[0];
-    for (int i=1;i<x0.length;i++) { 
-      sum = Math.fma(x0[i],x1[i],sum); }
-    return sum; }
+    final Accumulator a = DoubleAccumulator.make();
+    for (int i=0;i<n;i++) { a.add(Math.abs(x0[i]-x1[i])); }
+    return a.floatValue(); }
+
+  //--------------------------------------------------------------
+
+  public static final float maxAbs (final float[] x) {
+    float m = NEGATIVE_INFINITY;
+    for (int i=0;i<x.length;i++) { 
+      m = Math.max(m,Math.abs(x[i])); }
+    return m; }
+
+  //--------------------------------------------------------------
+
+  public static final float max (final float[] x) {
+    float m = NEGATIVE_INFINITY;
+    for (int i=0;i<x.length;i++) { m = Math.max(m,x[i]); }
+    return m; }
+
+  //--------------------------------------------------------------
+
+  public static final float min (final float[] x) {
+    float m = POSITIVE_INFINITY;
+    for (int i=0;i<x.length;i++) { m = Math.min(m,x[i]); }
+    return m; }
 
   //--------------------------------------------------------------
   // operations for algebraic structures over float[] arrays.

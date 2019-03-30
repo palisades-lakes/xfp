@@ -5,6 +5,7 @@ package xfp.java.accumulators;
  * @author palisades dot lakes at gmail dot com
  * @version 2019-03-29
  */
+strictfp
 public final class DoubleFmaAccumulator 
 implements Accumulator<DoubleFmaAccumulator> {
 
@@ -28,7 +29,7 @@ implements Accumulator<DoubleFmaAccumulator> {
 
   @Override
   public final DoubleFmaAccumulator addProduct (final double z0,
-                                        final double z1) { 
+                                                final double z1) { 
     _sum = Math.fma(z0,z1,_sum);
     return this; }
 

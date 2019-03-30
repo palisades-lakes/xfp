@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import xfp.java.Classes;
 import xfp.java.accumulators.Accumulator;
 import xfp.java.accumulators.DoubleAccumulator;
+import xfp.java.accumulators.DoubleFmaAccumulator;
 import xfp.java.accumulators.RBFAccumulator;
 import xfp.java.accumulators.RationalAccumulator;
 import xfp.java.linear.Dn;
@@ -100,6 +101,7 @@ public final class SumTest {
     for (int i=0;i<N;i++) { 
       truth[i] =  RationalAccumulator.make().addAll(x[i]).doubleValue(); }
 
+    System.out.println();
     for (int i=0;i<N;i++) { 
       System.out.println(
         i + " : " 
@@ -110,8 +112,9 @@ public final class SumTest {
 
     final Accumulator[] accumulators = 
     {
-     DoubleAccumulator.make(),
-//     FloatAccumulator.make(),
+      DoubleAccumulator.make(),
+      DoubleFmaAccumulator.make(),
+     // FloatAccumulator.make(),
      RationalAccumulator.make(),
      RBFAccumulator.make(),
     };
