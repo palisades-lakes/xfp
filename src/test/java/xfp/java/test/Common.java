@@ -74,8 +74,8 @@ public final class Common {
     final UniformRandomProvider urp4 = 
       PRNG.well44497b("seeds/Well44497b-2019-04-01.txt");
 
-    // as large as will still have finite l2 norm squared
-    final int emax = deMax(dim)/2;
+    // as large as will still have finite float l2 norm squared
+    final int emax = feMax(dim)/2;
     final double dmax = (1<<emax);
     final List<Generator> gs0 =
       List.of(
