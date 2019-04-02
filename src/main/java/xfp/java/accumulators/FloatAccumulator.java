@@ -4,7 +4,7 @@ package xfp.java.accumulators;
  * accumulator (for testing).
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-29
+ * @version 2019-04-02
  */
 public final class FloatAccumulator 
 
@@ -13,7 +13,9 @@ implements Accumulator<FloatAccumulator> {
   private float _sum;
 
   //--------------------------------------------------------------
-  // start with only immediate needs
+  @Override
+  public final boolean isExact () { return false; }
+
 
   @Override
   public final double doubleValue () { return _sum; }
@@ -26,10 +28,10 @@ implements Accumulator<FloatAccumulator> {
     _sum += (float) z; 
     return this; }
 
-  //  @Override
-  //  public final FloatAccumulator addAll (final double[] z)  {
-  //    for (final double zi : z) { _sum += (float) zi; }
-  //    return this; }
+  @Override
+  public final FloatAccumulator add2 (final double z) { 
+    _sum += ((float) z)*((float) z);
+    return this; }
 
   @Override
   public final FloatAccumulator addProduct (final double z0,
@@ -37,14 +39,6 @@ implements Accumulator<FloatAccumulator> {
     _sum += ((float) z0)*((float) z1);
     return this; }
 
-  //@Override
-  //public final FloatAccumulator addProducts (final double[] z0,
-  //                                        final double[] z1)  {
-  //    final int n = z0.length;
-  //    assert n == z1.length;
-  //    for (int i=0;i<n;i++) { 
-  //      _sum += ((float) z0[i])*((float) z1[i]); }
-  //    return this; }
   //--------------------------------------------------------------
   // construction
   //--------------------------------------------------------------

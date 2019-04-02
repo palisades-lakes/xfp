@@ -3,7 +3,7 @@ package xfp.java.accumulators;
 /** Naive sum of <code>double</code> values.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-01
+ * @version 2019-04-02
  */
 
 public final class DoubleAccumulator 
@@ -12,7 +12,9 @@ implements Accumulator<DoubleAccumulator> {
   private double _sum;
 
   //--------------------------------------------------------------
-  // start with only immediate needs
+
+  @Override
+  public final boolean isExact () { return false; }
 
   @Override
   public final double doubleValue () { return _sum; }
@@ -26,13 +28,18 @@ implements Accumulator<DoubleAccumulator> {
     _sum += z; 
     return this; }
 
-   @Override
+  @Override
+  public final DoubleAccumulator add2 (final double z) { 
+    _sum += z*z;
+    return this; }
+
+  @Override
   public final DoubleAccumulator addProduct (final double z0,
                                              final double z1) { 
     _sum += z0*z1;
     return this; }
 
-   //--------------------------------------------------------------
+  //--------------------------------------------------------------
   // construction
   //--------------------------------------------------------------
 

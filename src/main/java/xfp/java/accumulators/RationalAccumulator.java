@@ -6,7 +6,7 @@ import xfp.java.numbers.Rational;
  * accumulator (for testing).
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-29
+ * @version 2019-04-02
  */
 public final class RationalAccumulator 
 
@@ -17,7 +17,9 @@ implements Accumulator<RationalAccumulator> {
   public final Rational value () { return _sum; }
   
   //--------------------------------------------------------------
-  // start with only immediate needs
+  @Override
+  public final boolean isExact () { return true; }
+
 
   @Override
   public final double doubleValue () { 
@@ -35,6 +37,11 @@ implements Accumulator<RationalAccumulator> {
   @Override
   public final RationalAccumulator add (final double z) { 
     _sum = _sum.add(z);
+    return this; }
+
+  @Override
+  public final RationalAccumulator add2 (final double z) { 
+    _sum = _sum.add2(z);
     return this; }
 
   @Override

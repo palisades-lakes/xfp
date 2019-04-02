@@ -11,7 +11,7 @@ import xfp.java.exceptions.Exceptions;
 /** Ratios of {@link BigInteger}.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-27
+ * @version 2019-04-02
  */
 
 public final class Rational 
@@ -126,6 +126,23 @@ implements Comparable<Rational> {
     if (q.isOne()) { return this; }
     if (isOne()) { return q; }
     return multiply(q.numerator(),q.denominator()); }
+
+  //--------------------------------------------------------------
+
+  public final Rational add2 (final double z) { 
+    final boolean s = Doubles.nonNegative(z);
+    final int e = 2*Doubles.exponent(z);
+    final long t = (s ? 1L : -1L) * Doubles.significand(z);
+    final BigInteger tt = BigInteger.valueOf(t);
+    final BigInteger n = tt.multiply(tt);
+    final BigInteger dn = denominator().multiply(n);
+    if (0 <= e) {
+      return valueOf(
+        numerator().add(dn.shiftLeft(e)),
+        denominator()); }
+    return valueOf(
+      numerator().shiftLeft(-e).add(dn),
+      denominator().shiftLeft(-e)); }
 
   //--------------------------------------------------------------
 

@@ -3,7 +3,7 @@ package xfp.java.accumulators;
 /** Naive sum of <code>double</code> values, using fma.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-01
+ * @version 2019-04-02
  */
 
 public final class DoubleFmaAccumulator 
@@ -12,7 +12,9 @@ implements Accumulator<DoubleFmaAccumulator> {
   private double _sum;
 
   //--------------------------------------------------------------
-  // start with only immediate needs
+
+  @Override
+  public final boolean isExact () { return false; }
 
   @Override
   public final double doubleValue () { return _sum; }
@@ -25,6 +27,12 @@ implements Accumulator<DoubleFmaAccumulator> {
   @Override
   public final DoubleFmaAccumulator add (final double z) { 
     _sum += z; 
+    return this; }
+
+  @Override
+  public final DoubleFmaAccumulator 
+  add2 (final double z) { 
+    _sum = Math.fma(z,z,_sum);
     return this; }
 
   @Override

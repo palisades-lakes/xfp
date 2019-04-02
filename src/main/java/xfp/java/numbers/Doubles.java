@@ -651,6 +651,35 @@ public final class Doubles implements Set {
   //--------------------------------------------------------------
 
   public static final Generator 
+  exponentialGenerator (final UniformRandomProvider urp,
+                    final double mu,
+                    final double sigma) {
+    return new GeneratorBase (
+      "exponentialGenerator(" + mu + "," + sigma + ")") {
+      private final ContinuousSampler e = 
+        new AhrensDieterExponentialSampler(urp,sigma);
+      @Override
+      public final double nextDouble () { 
+        return mu - sigma + e.sample(); } }; }
+
+  public static final Generator 
+  exponentialGenerator (final int n,
+                    final UniformRandomProvider urp,
+                    final double mu,
+                    final double sigma) {
+    return arrayGenerator(n,exponentialGenerator(urp,mu,sigma)); }
+
+  public static final Generator 
+  exponentialGenerator (final int m,
+                    final int n,
+                    final UniformRandomProvider urp,
+                    final double mu,
+                    final double sigma) {
+    return arrayGenerator(m,n,exponentialGenerator(urp,mu,sigma)); }
+
+  //--------------------------------------------------------------
+
+  public static final Generator 
   laplaceGenerator (final UniformRandomProvider urp,
                     final double mu,
                     final double sigma) {
@@ -664,7 +693,6 @@ public final class Doubles implements Set {
       public final double nextDouble () { 
         final int sign = 2*b.sample() - 1;
         return mu + sign*e.sample(); } }; }
-
 
   public static final Generator 
   laplaceGenerator (final int n,

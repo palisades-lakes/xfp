@@ -17,7 +17,7 @@ import xfp.java.exceptions.Exceptions;
  * arithmetic on them faster.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-27
+ * @version 2019-04-02
  */
 
 public final class RationalBinaryFloat 
@@ -173,6 +173,31 @@ implements Comparable<RationalBinaryFloat> {
     if (q.isOne()) { return this; }
     if (isOne()) { return q; }
     return multiply(q.numerator(),q.denominator(),q.exponent()); }
+
+  //--------------------------------------------------------------
+
+  public final RationalBinaryFloat add2 (final double z) { 
+    final BigInteger n = numerator();
+    final BigInteger d = denominator();
+    final int e = exponent();
+
+    final boolean s = Doubles.nonNegative(z);
+    final long t = (s ? 1L : -1L) * Doubles.significand(z);
+    final int e01 = 2*Doubles.exponent(z);
+    final int de = e - e01;
+
+    final BigInteger tt = BigInteger.valueOf(t);
+    final BigInteger n0 = tt.multiply(tt);
+    final BigInteger n1 = 
+      (BigInteger.ONE.equals(d) ? n0 : n0.multiply(d));
+    final int e2;
+    final BigInteger n2;
+    if (0 == de) { e2 = e; n2 = n.add(n1); }
+    else if (0 < de) {
+      e2 = e01; n2 = n.shiftLeft(de).add(n1); }
+    else { e2 = e; n2 = n.add(n1.shiftRight(de)); }
+    
+    return valueOf(n2,d,e2); }
 
   //--------------------------------------------------------------
 
