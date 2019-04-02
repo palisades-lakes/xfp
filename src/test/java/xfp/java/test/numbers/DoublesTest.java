@@ -10,7 +10,7 @@ import static java.lang.Double.MAX_EXPONENT;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-26
+ * @version 2019-04-01
  */
 
 public final class DoublesTest {
@@ -51,24 +51,6 @@ public final class DoublesTest {
 ////    System.out.println();
 //
 //    return x; }
-
-//  private static final Generator 
-//  doubleGenerator (final UniformRandomProvider urp,
-//                   final int eMin,
-//                   final int eMax) {
-//    return new Generator () {
-//      private final int eRan = eMax - eMin; 
-//      @Override
-//      public final double nextDouble () { 
-//        final int s = urp.nextInt(2);
-//        final int d = urp.nextInt(eRan);
-//        final int e = d + eMin; // unbiased exponent
-//        final long t = urp.nextLong() & STORED_SIGNIFICAND_MASK;
-//        final double x = makeDouble(s,e,t); 
-//      return x;} 
-//      @Override
-//      public final Object next () {
-//        return Double.valueOf(nextDouble()); } }; }
 
   public static final int maxExponent (final int dim) { 
     final int d =

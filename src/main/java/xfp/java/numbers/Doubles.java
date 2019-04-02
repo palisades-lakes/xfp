@@ -7,6 +7,7 @@ import static java.lang.Double.doubleToRawLongBits;
 import static java.lang.Double.longBitsToDouble;
 import static java.lang.Double.toHexString;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.function.BiPredicate;
 import java.util.function.BinaryOperator;
@@ -14,6 +15,7 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.ListSampler;
 import org.apache.commons.rng.sampling.distribution.AhrensDieterExponentialSampler;
 import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
 import org.apache.commons.rng.sampling.distribution.ContinuousUniformSampler;
@@ -27,11 +29,12 @@ import xfp.java.algebra.OneSetOneOperation;
 import xfp.java.algebra.OneSetTwoOperations;
 import xfp.java.algebra.Set;
 import xfp.java.prng.Generator;
+import xfp.java.prng.GeneratorBase;
 
 /** Utilities for <code>double</code>, <code>double[]</code>.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-30
+ * @version 2019-04-01
  */
 public final class Doubles implements Set {
 
@@ -482,10 +485,12 @@ public final class Doubles implements Set {
   // generators
   //--------------------------------------------------------------
 
+  // TODO: extend generators using function composition!!!
+  
   private static final Generator 
   arrayGenerator (final int n,
                   final Generator g) {
-    return new Generator () {
+    return new GeneratorBase (g.name() + ":" + n) {
       @Override
       public final Object next () {
         final double[] z = new double[n];
@@ -496,13 +501,62 @@ public final class Doubles implements Set {
   arrayGenerator (final int m,
                   final int n,
                   final Generator g) {
-    return new Generator () {
+    return new GeneratorBase (g.name() + ":" + m + "x" + n) {
       @Override
       public final Object next () {
         final double[][] z = new double[m][n];
         for (int i=0;i<m;i++) { 
           for (int j=0;j<n;j++) { z[i][j] = g.nextDouble(); } }
         return z; } }; }
+
+  //--------------------------------------------------------------
+  
+  private static final double[] concatenate (final double[] x0,
+                                            final double[] x1) {
+    final double[] x = new double[x0.length + x1.length];
+    for (int i=0;i<x0.length;i++) { x[i] = x0[i]; }
+    for (int i=0;i<x1.length;i++) { x[i+x0.length] = x1[i]; }
+    return x; }
+  
+  private static final double[] minus (final double[] x) {
+    final double[] y = new double[x.length];
+    for (int i=0;i<x.length;i++) { y[i] = -x[i]; }
+    return y; }
+  
+  /** exact sum of returned arrays is 0.0.
+   * @param g must be a generator that returns 
+   * <code>double[]</code>.
+   */
+  
+  public static final Generator 
+  zeroSumGenerator (final Generator g) {
+    return new GeneratorBase ("zeroSum(" + g.name() + ")") {
+      @Override
+      public final Object next () {
+        final double[] z = (double[]) g.next();
+        return concatenate(z,minus(z)); } }; }
+
+  //--------------------------------------------------------------
+
+  private static double[] shuffle (final double[] x,
+                                   final UniformRandomProvider urp) {
+    final double[] y = Arrays.copyOf(x,x.length);
+    ListSampler.shuffle(urp,Arrays.asList(y));
+    return y; }
+
+  /** Shuffles the output of <code.g</code>.
+   * @param g must be a generator that returns 
+   * <code>double[]</code>.
+   */
+  
+  public static final Generator 
+  shuffledGenerator (final Generator g,
+                     final UniformRandomProvider urp) {
+    return new GeneratorBase ("shuffled(" + g.name() + ")") {
+      @Override
+      public final Object next () {
+        final double[] z = (double[]) g.next();
+        return shuffle(z,urp); } }; }
 
   //--------------------------------------------------------------
   /** Conventional 'uniform' distribution sampler, as 'uniform' 
@@ -517,7 +571,8 @@ public final class Doubles implements Set {
   uniformGenerator (final UniformRandomProvider urp,
                     final double zmin,
                     final double zmax) {
-    return new Generator () {
+    return new GeneratorBase (
+      "uniformGenerator[" + zmin + "," + zmax + "]") {
       private final ContinuousSampler s = 
         new ContinuousUniformSampler(urp,zmin,zmax);
       @Override
@@ -561,12 +616,12 @@ public final class Doubles implements Set {
   gaussianGenerator (final NormalizedGaussianSampler ngs,
                      final double mu,
                      final double sigma) {
-    return new Generator () {
+    return new GeneratorBase (
+      "gaussianGenerator(" + mu + "," + sigma + ")") {
       private final ContinuousSampler s = 
         new GaussianSampler(ngs,mu,sigma);
       @Override
-      public final double nextDouble () { 
-        return s.sample(); } }; }
+      public final double nextDouble () { return s.sample(); } }; }
 
   public static final Generator 
   gaussianGenerator (final UniformRandomProvider urp,
@@ -599,7 +654,8 @@ public final class Doubles implements Set {
   laplaceGenerator (final UniformRandomProvider urp,
                     final double mu,
                     final double sigma) {
-    return new Generator () {
+    return new GeneratorBase (
+      "laplaceGenerator(" + mu + "," + sigma + ")") {
       private final DiscreteSampler b = 
         new DiscreteUniformSampler(urp,0,1);
       private final ContinuousSampler e = 
@@ -634,7 +690,7 @@ public final class Doubles implements Set {
   subnormalGenerator (final UniformRandomProvider urp,
                       final int eMax) {
     final Generator d = generator(urp,eMax);
-    return new Generator () {
+    return new GeneratorBase ("subnormalGenerator(" + eMax + ")") {
       @Override
       public final double nextDouble () {
         // TODO: fix infinite loop
@@ -674,7 +730,7 @@ public final class Doubles implements Set {
   normalGenerator (final UniformRandomProvider urp,
                    final int eMax) {
     final Generator d = generator(urp,eMax);
-    return new Generator () {
+    return new GeneratorBase ("normalGenerator(" + eMax + ")") {
       @Override
       public final double nextDouble () {
         // TODO: fix infinite loop
@@ -707,7 +763,7 @@ public final class Doubles implements Set {
   finiteGenerator (final UniformRandomProvider urp,
                    final int eMax) {
     final Generator d = generator(urp,eMax);
-    return new Generator () {
+    return new GeneratorBase ("finiteGenerator(" + eMax + ")") {
       @Override
       public final double nextDouble () {
         // TODO: fix infinite loop
@@ -726,25 +782,25 @@ public final class Doubles implements Set {
   finiteGenerator (final int n,
                    final UniformRandomProvider urp,
                    final int eMax) {
-    return arrayGenerator(n,normalGenerator(urp,eMax)); }
+    return arrayGenerator(n,finiteGenerator(urp,eMax)); }
 
   public static final Generator 
   finiteGenerator (final int n,
                    final UniformRandomProvider urp) {
-    return arrayGenerator(n,normalGenerator(urp)); }
+    return arrayGenerator(n,finiteGenerator(urp)); }
 
   public static final Generator 
   finiteGenerator (final int m,
                    final int n,
                    final UniformRandomProvider urp,
                    final int eMax) {
-    return arrayGenerator(m,n,normalGenerator(urp,eMax)); }
+    return arrayGenerator(m,n,finiteGenerator(urp,eMax)); }
 
   public static final Generator 
   finiteGenerator (final int m,
                    final int n,
                    final UniformRandomProvider urp) {
-    return arrayGenerator(m,n,normalGenerator(urp)); }
+    return arrayGenerator(m,n,finiteGenerator(urp)); }
 
   //--------------------------------------------------------------
 
@@ -756,7 +812,8 @@ public final class Doubles implements Set {
     assert eMin >= SUBNORMAL_EXPONENT;
     assert eMax <= INFINITE_OR_NAN_EXPONENT + 1;
     assert eMin < eMax;
-    return new Generator () {
+    return new GeneratorBase (
+      "doubleGenerator(" + eMin + "," + eMax + ")") {
       final int eRan = eMax-eMin;
       @Override
       public final double nextDouble () { 

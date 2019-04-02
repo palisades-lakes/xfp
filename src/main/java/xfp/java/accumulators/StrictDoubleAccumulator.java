@@ -6,8 +6,9 @@ package xfp.java.accumulators;
  * @version 2019-04-01
  */
 
-public final class DoubleAccumulator 
-implements Accumulator<DoubleAccumulator> {
+strictfp
+public final class StrictDoubleAccumulator 
+implements Accumulator<StrictDoubleAccumulator> {
 
   private double _sum;
 
@@ -18,28 +19,28 @@ implements Accumulator<DoubleAccumulator> {
   public final double doubleValue () { return _sum; }
 
   @Override
-  public final DoubleAccumulator clear () { 
+  public final StrictDoubleAccumulator clear () { 
     _sum = 0.0; return this; }
 
   @Override
-  public final DoubleAccumulator add (final double z) { 
+  public final StrictDoubleAccumulator add (final double z) { 
     _sum += z; 
     return this; }
 
-   @Override
-  public final DoubleAccumulator addProduct (final double z0,
-                                             final double z1) { 
+  @Override
+  public final StrictDoubleAccumulator addProduct (final double z0,
+                                                   final double z1) { 
     _sum += z0*z1;
     return this; }
 
-   //--------------------------------------------------------------
+  //--------------------------------------------------------------
   // construction
   //--------------------------------------------------------------
 
-  private DoubleAccumulator () { super(); _sum = 0.0; }
+  private StrictDoubleAccumulator () { super(); _sum = 0.0; }
 
-  public static final DoubleAccumulator make () {
-    return new DoubleAccumulator(); }
+  public static final StrictDoubleAccumulator make () {
+    return new StrictDoubleAccumulator(); }
 
   //--------------------------------------------------------------
 }

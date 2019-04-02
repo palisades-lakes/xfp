@@ -5,9 +5,7 @@ import static java.lang.Float.MIN_EXPONENT;
 import static java.lang.Float.MIN_VALUE;
 import static java.lang.Float.floatToIntBits;
 import static java.lang.Float.floatToRawIntBits;
-import static java.lang.Float.isFinite;
 import static java.lang.Float.toHexString;
-import static java.lang.Float.valueOf;
 
 import java.math.BigInteger;
 import java.util.Map;
@@ -17,11 +15,20 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.distribution.AhrensDieterExponentialSampler;
+import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
+import org.apache.commons.rng.sampling.distribution.ContinuousUniformSampler;
+import org.apache.commons.rng.sampling.distribution.DiscreteSampler;
+import org.apache.commons.rng.sampling.distribution.DiscreteUniformSampler;
+import org.apache.commons.rng.sampling.distribution.GaussianSampler;
+import org.apache.commons.rng.sampling.distribution.NormalizedGaussianSampler;
+import org.apache.commons.rng.sampling.distribution.ZigguratNormalizedGaussianSampler;
 
 import xfp.java.algebra.OneSetOneOperation;
 import xfp.java.algebra.OneSetTwoOperations;
 import xfp.java.algebra.Set;
 import xfp.java.prng.Generator;
+import xfp.java.prng.GeneratorBase;
 
 /** Utilities for <code>float</code>, <code>float[]</code>.
  * 
@@ -419,27 +426,17 @@ public final class Floats implements Set {
   //--------------------------------------------------------------
   /** From apache commons math4 BigFraction.
    * <p>
-   * Create a fraction given the double value.
+   * Create a fraction given the float value.
    * <p>
    * This constructor behaves <em>differently</em> from
    * {@link #BigFraction(double, double, int)}. It converts the 
-   * double value exactly, considering its internal bits 
+   * float value exactly, considering its internal bits 
    * representation. This works for all values except NaN and 
    * infinities and does not requires any loop or convergence 
    * threshold.
    * </p>
-   * <p>
-   * Since this conversion is exact and since double numbers are 
-   * sometimes approximated, the fraction created may seem strange 
-   * in some cases. For example, calling 
-   * <code>new BigFraction(1.0 / 3.0)</code> does <em>not</em> 
-   * create the fraction 1/3, but the fraction 
-   * 6004799503160661 / 18014398509481984, because the double 
-   * number passed to the constructor is not exactly 1/3
-   * (this number cannot be stored exactly in IEEE754).
-   * </p>
    * @see #BigFraction(double, double, int)
-   * @param x the double value to convert to a fraction.
+   * @param x the float value to convert to a fraction.
    * @exception IllegalArgumentException if value is not finite
    */
   
@@ -492,117 +489,235 @@ public final class Floats implements Set {
   // generators
   //--------------------------------------------------------------
 
-  public static final Generator 
-  subnormalGenerator (final int n,
-                      final UniformRandomProvider urp) {
-    return new Generator () {
-      final Generator g = subnormalGenerator(urp);
+  private static final Generator 
+  arrayGenerator (final int n,
+                  final Generator g) {
+    return new GeneratorBase (g.name() + ":" + n) {
       @Override
       public final Object next () {
         final float[] z = new float[n];
         for (int i=0;i<n;i++) { z[i] = g.nextFloat(); }
         return z; } }; }
 
-  public static final Generator 
-  subnormalGenerator (final UniformRandomProvider urp) {
-    return subnormalGenerator(urp,MAX_EXPONENT); }
-
-  public static final Generator 
-  subnormalGenerator (final int n,
-                      final UniformRandomProvider urp,
-                      final int eMax) {
-    return new Generator () {
-      final Generator g = subnormalGenerator(urp,eMax);
+  private static final Generator 
+  arrayGenerator (final int m,
+                  final int n,
+                  final Generator g) {
+    return new GeneratorBase (g.name() + ":" + m + "x" + n) {
       @Override
       public final Object next () {
-        final float[] z = new float[n];
-        for (int i=0;i<n;i++) { z[i] = g.nextFloat(); }
+        final float[][] z = new float[m][n];
+        for (int i=0;i<m;i++) { 
+          for (int j=0;j<n;j++) { z[i][j] = g.nextFloat(); } }
         return z; } }; }
+
+  //--------------------------------------------------------------
+  /** Conventional 'uniform' distribution sampler, as 'uniform' 
+   * as it can be projected on <code>float</code>.
+   * @param urp source of randomness
+   * @param zmin inclusive min or generated numbers
+   * @param zmax inclusive max of generated numbers
+   * (TODO: should this be exclusive? commons rng doesn't
+   * actually specify.)
+   */
+  public static final Generator 
+  uniformGenerator (final UniformRandomProvider urp,
+                    final float zmin,
+                    final float zmax) {
+    return new GeneratorBase (
+      "uniformGenerator[" + zmin + "," + zmax + "]") {
+      private final ContinuousSampler s = 
+        new ContinuousUniformSampler(urp,zmin,zmax);
+      @Override
+      public final float nextFloat () { 
+        return (float) s.sample(); } }; }
+
+  /** Conventional 'uniform' distribution sampler, as 'uniform' 
+   * as it can be projected on <code>float</code>.
+   * @param urp source of randomness
+   * @param zmin inclusive min or generated numbers
+   * @param zmax inclusive max of generated numbers
+   * (TODO: should this be exclusive? commons rng doesn't
+   * actually specify.)
+   */
+  public static final Generator 
+  uniformGenerator (final int n,
+                    final UniformRandomProvider urp,
+                    final float zmin,
+                    final float zmax) {
+    return arrayGenerator(n,uniformGenerator(urp,zmin,zmax)); }
+
+  /** Conventional 'uniform' distribution sampler, as 'uniform' 
+   * as it can be projected on <code>float</code>.
+   * @param urp source of randomness
+   * @param zmin inclusive min or generated numbers
+   * @param zmax inclusive max of generated numbers
+   * (TODO: should this be exclusive? commons rng doesn't
+   * actually specify.)
+   */
+  public static final Generator 
+  uniformGenerator (final int m,
+                    final int n,
+                    final UniformRandomProvider urp,
+                    final float zmin,
+                    final float zmax) {
+    return arrayGenerator(m,n,uniformGenerator(urp,zmin,zmax)); }
+
+  //--------------------------------------------------------------
+
+  public static final Generator 
+  gaussianGenerator (final NormalizedGaussianSampler ngs,
+                     final float mu,
+                     final float sigma) {
+    return new GeneratorBase (
+      "gaussianGenerator(" + mu + "," + sigma + ")") {
+      private final ContinuousSampler s = 
+        new GaussianSampler(ngs,mu,sigma);
+      @Override
+      public final float nextFloat () { 
+        return (float) s.sample(); } }; }
+
+  public static final Generator 
+  gaussianGenerator (final UniformRandomProvider urp,
+                     final float mu,
+                     final float sigma) {
+    return gaussianGenerator(
+      //new BoxMullerNormalizedGaussianSampler(urp),
+      //new MarsagliaNormalizedGaussianSampler(urp),​
+      new ZigguratNormalizedGaussianSampler(urp),
+      mu,sigma); }
+
+  public static final Generator 
+  gaussianGenerator (final int n,
+                     final UniformRandomProvider urp,
+                     final float mu,
+                     final float sigma) {
+    return arrayGenerator(n,gaussianGenerator(urp,mu,sigma)); }
+
+  public static final Generator 
+  gaussianGenerator (final int m,
+                     final int n,
+                     final UniformRandomProvider urp,
+                     final float mu,
+                     final float sigma) {
+    return arrayGenerator(m,n,gaussianGenerator(urp,mu,sigma)); }
+
+  //--------------------------------------------------------------
+
+  public static final Generator 
+  laplaceGenerator (final UniformRandomProvider urp,
+                    final float mu,
+                    final float sigma) {
+    return new GeneratorBase (
+      "laplaceGenerator(" + mu + "," + sigma + ")") {
+      private final DiscreteSampler b = 
+        new DiscreteUniformSampler(urp,0,1);
+      private final ContinuousSampler e = 
+        new AhrensDieterExponentialSampler(urp,sigma);
+      @Override
+      public final float nextFloat () { 
+        final int sign = 2*b.sample() - 1;
+        return mu + sign*((float) e.sample()); } }; }
+
+
+  public static final Generator 
+  laplaceGenerator (final int n,
+                    final UniformRandomProvider urp,
+                    final float mu,
+                    final float sigma) {
+    return arrayGenerator(n,laplaceGenerator(urp,mu,sigma)); }
+
+  public static final Generator 
+  laplaceGenerator (final int m,
+                    final int n,
+                    final UniformRandomProvider urp,
+                    final float mu,
+                    final float sigma) {
+    return arrayGenerator(m,n,laplaceGenerator(urp,mu,sigma)); }
+
+  //--------------------------------------------------------------
+  // These treat (a subset of) floats as a finite set, and sample
+  // uniformly from the discrete elements of that set.
+  //--------------------------------------------------------------
 
   public static final Generator 
   subnormalGenerator (final UniformRandomProvider urp,
                       final int eMax) {
     final Generator d = generator(urp,eMax);
-    return new Generator () {
+    return new GeneratorBase ("subnormalGenerator:" + eMax) {
       @Override
       public final float nextFloat () {
         // TODO: fix infinite loop
         for (;;) {
           final float x = d.nextFloat();
-          if ((isFinite(x)) && (! isNormal(x))) { 
+          if ((Float.isFinite(x)) && (! isNormal(x))) { 
             return x; } } } 
-      @Override
-      public final Object next () {
-        return valueOf(nextFloat()); } }; }
-
-  public static final Generator 
-  normalGenerator (final int n,
-                   final UniformRandomProvider urp) {
-    return new Generator () {
-      final Generator g = normalGenerator(urp);
-      @Override
-      public final Object next () {
-        final float[] z = new float[n];
-        for (int i=0;i<n;i++) { z[i] = g.nextFloat(); }
-        return z; } }; }
-
-  public static final Generator 
-  normalGenerator (final UniformRandomProvider urp) {
-    return normalGenerator(urp,MAX_EXPONENT); }
-
-  public static final Generator 
-  normalGenerator (final int n,
-                   final UniformRandomProvider urp,
-                   final int eMax) {
-    return new Generator () {
-      final Generator g = normalGenerator(urp,eMax);
-      @Override
-      public final Object next () {
-        final float[] z = new float[n];
-        for (int i=0;i<n;i++) { z[i] = g.nextFloat(); }
-        return z; } }; }
-
-  public static final Generator 
-  normalGenerator (final UniformRandomProvider urp,
-                   final int eMax) {
-    final Generator d = generator(urp,eMax);
-    return new Generator () {
-      @Override
-      public final float nextFloat () {
-        // TODO: fix infinite loop
-        for (;;) {
-          final float x = d.nextFloat();
-          if (isFinite(x) && isNormal(x)) { return x; } } } 
       @Override
       public final Object next () {
         return Float.valueOf(nextFloat()); } }; }
 
   public static final Generator 
-  finiteGenerator (final int n,
-                   final UniformRandomProvider urp) {
-    return finiteFloatGenerator(n,urp,MAX_EXPONENT); }
+  subnormalGenerator (final UniformRandomProvider urp) {
+    return subnormalGenerator(urp,Float.MAX_EXPONENT); }
 
   public static final Generator 
-  finiteFloatGenerator (final int n,
-                        final UniformRandomProvider urp,
-                        final int delta) {
-    return new Generator () {
-      final Generator g = finiteGenerator(urp,delta);
+  subnormalGenerator (final int n,
+                      final UniformRandomProvider urp,
+                      final int eMax) {
+    return arrayGenerator(n,subnormalGenerator(urp,eMax)); }
+
+  public static final Generator 
+  subnormalGenerator (final int n,
+                      final UniformRandomProvider urp) {
+    return arrayGenerator(n,subnormalGenerator(urp)); }
+
+  //--------------------------------------------------------------
+  /** Discretely uniform over 'normal' floats,
+   *  as opposed to 'subnormal' floats. <
+   *  em>Not gaussian!</em>
+   * @param urp
+   * @param eMax
+   * @return
+   */
+
+  public static final Generator 
+  normalGenerator (final UniformRandomProvider urp,
+                   final int eMax) {
+    final Generator d = generator(urp,eMax);
+    return new GeneratorBase ("normalGenerator:" + eMax) {
+      @Override
+      public final float nextFloat () {
+        // TODO: fix infinite loop
+        for (;;) {
+          final float x = d.nextFloat();
+          if (Float.isFinite(x) && isNormal(x)) { 
+            return x; } } } 
       @Override
       public final Object next () {
-        final float[] z = new float[n];
-        for (int i=0;i<n;i++) { z[i] = g.nextFloat(); }
-        return z; } }; }
+        return Float.valueOf(nextFloat()); } }; }
 
   public static final Generator 
-  finiteGenerator (final UniformRandomProvider urp) {
-    return finiteGenerator(urp,MAX_EXPONENT); }
+  normalGenerator (final UniformRandomProvider urp) {
+    return normalGenerator(urp,Float.MAX_EXPONENT); }
+
+  public static final Generator 
+  normalGenerator (final int n,
+                   final UniformRandomProvider urp) {
+    return arrayGenerator(n,normalGenerator(urp)); }
+
+  public static final Generator 
+  normalGenerator (final int n,
+                   final UniformRandomProvider urp,
+                   final int eMax) {
+    return arrayGenerator(n,normalGenerator(urp,eMax)); }
+
+  //--------------------------------------------------------------
 
   public static final Generator 
   finiteGenerator (final UniformRandomProvider urp,
                    final int eMax) {
     final Generator d = generator(urp,eMax);
-    return new Generator () {
+    return new GeneratorBase ("finiteGenerator:" + eMax) {
       @Override
       public final float nextFloat () {
         // TODO: fix infinite loop
@@ -614,39 +729,34 @@ public final class Floats implements Set {
         return Float.valueOf(nextFloat()); } }; }
 
   public static final Generator 
-  generator (final int n,
-             final UniformRandomProvider urp) {
-    return 
-      generator(n,urp,SUBNORMAL_EXPONENT,MAX_EXPONENT+1); }
+  finiteGenerator (final UniformRandomProvider urp) {
+    return finiteGenerator(urp,Float.MAX_EXPONENT); }
 
   public static final Generator 
-  generator (final int n,
-             final UniformRandomProvider urp,
-             final int eMax) {
-    return generator(n,urp,SUBNORMAL_EXPONENT,eMax); }
+  finiteGenerator (final int n,
+                   final UniformRandomProvider urp,
+                   final int eMax) {
+    return arrayGenerator(n,normalGenerator(urp,eMax)); }
 
   public static final Generator 
-  generator (final int n,
-             final UniformRandomProvider urp,
-             final int eMin,
-             final int eMax) {
-    return new Generator () {
-      final Generator g = generator(urp,eMin,eMax);
-      @Override
-      public final Object next () {
-        final float[] z = new float[n];
-        for (int i=0;i<n;i++) { z[i] = g.nextFloat(); }
-        return z; } }; }
+  finiteGenerator (final int n,
+                   final UniformRandomProvider urp) {
+    return arrayGenerator(n,normalGenerator(urp)); }
 
   public static final Generator 
-  generator (final UniformRandomProvider urp) {
-    return 
-      generator(urp,SUBNORMAL_EXPONENT,MAX_EXPONENT+1); }
+  finiteGenerator (final int m,
+                   final int n,
+                   final UniformRandomProvider urp,
+                   final int eMax) {
+    return arrayGenerator(m,n,normalGenerator(urp,eMax)); }
 
   public static final Generator 
-  generator (final UniformRandomProvider urp,
-             final int eMax) {
-    return generator(urp,SUBNORMAL_EXPONENT,eMax); }
+  finiteGenerator (final int m,
+                   final int n,
+                   final UniformRandomProvider urp) {
+    return arrayGenerator(m,n,normalGenerator(urp)); }
+
+  //--------------------------------------------------------------
 
   public static final Generator 
   generator (final UniformRandomProvider urp,
@@ -656,7 +766,8 @@ public final class Floats implements Set {
     assert eMin >= SUBNORMAL_EXPONENT;
     assert eMax <= INFINITE_OR_NAN_EXPONENT + 1;
     assert eMin < eMax;
-    return new Generator () {
+    return new GeneratorBase (
+      "floatGenerator(" + eMin + "," + eMax + ")") {
       final int eRan = eMax-eMin;
       @Override
       public final float nextFloat () { 
@@ -664,7 +775,8 @@ public final class Floats implements Set {
         final int d = urp.nextInt(eRan);
         final int e = d + eMin; // unbiased exponent
         assert (eMin <= e) && (e < eMax); 
-        final int u = urp.nextInt() & STORED_SIGNIFICAND_MASK;
+        final int u = urp.nextInt() 
+          & STORED_SIGNIFICAND_MASK;
         final int t; 
         if ((e == SUBNORMAL_EXPONENT)
           || (e == INFINITE_OR_NAN_EXPONENT)) {
@@ -674,8 +786,36 @@ public final class Floats implements Set {
         final float x = mergeBits(s,e,t); 
         return x;} 
       @Override
-      public final Object next () { 
-        return valueOf(nextFloat()); } }; }
+      public final Object next () {
+        return Float.valueOf(nextFloat()); } }; }
+
+  public static final Generator 
+  generator (final UniformRandomProvider urp,
+             final int eMax) {
+    return generator(urp,SUBNORMAL_EXPONENT,eMax); }
+
+  public static final Generator 
+  generator (final UniformRandomProvider urp) {
+    return 
+      generator(urp,SUBNORMAL_EXPONENT,MAX_EXPONENT+1); }
+
+  public static final Generator 
+  generator (final int n,
+             final UniformRandomProvider urp,
+             final int eMin,
+             final int eMax) {
+    return arrayGenerator(n,generator(urp,eMin,eMax)); }
+
+  public static final Generator 
+  generator (final int n,
+             final UniformRandomProvider urp,
+             final int eMax) {
+    return arrayGenerator(n,generator(urp,eMax)); }
+
+  public static final Generator 
+  generator (final int n,
+             final UniformRandomProvider urp) {
+    return arrayGenerator(n,generator(urp)); }
 
   //--------------------------------------------------------------
   // construction

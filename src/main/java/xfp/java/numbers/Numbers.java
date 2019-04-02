@@ -11,6 +11,7 @@ import org.apache.commons.rng.sampling.CollectionSampler;
 import xfp.java.algebra.Set;
 import xfp.java.exceptions.Exceptions;
 import xfp.java.prng.Generator;
+import xfp.java.prng.GeneratorBase;
 import xfp.java.prng.Generators;
 
 /** Utilities for Object and primitive numbers.
@@ -197,7 +198,7 @@ public final class Numbers implements Set {
   public static final Generator 
   finiteNumberGenerator (final int n,
                          final UniformRandomProvider urp) {
-    return new Generator () {
+    return new GeneratorBase ("finiteNumberGenerator:" + n) {
       final Generator g = finiteNumberGenerator(urp);
       @Override
       public final Object next () {
@@ -216,7 +217,7 @@ public final class Numbers implements Set {
   
   public static final Generator 
   finiteNumberGenerator (final UniformRandomProvider urp) {
-    return new Generator () {
+    return new GeneratorBase ("finiteNumberGenerator") {
       private final CollectionSampler<Generator> generators = 
         new CollectionSampler(
           urp,
@@ -237,7 +238,7 @@ public final class Numbers implements Set {
   public static final Generator 
   numberGenerator (final int n,
                    final UniformRandomProvider urp) {
-    return new Generator () {
+    return new GeneratorBase ("numberGenerator:" + n) {
       final Generator g = numberGenerator(urp);
       @Override
       public final Object next () {
@@ -247,7 +248,7 @@ public final class Numbers implements Set {
 
   public static final Generator 
   numberGenerator (final UniformRandomProvider urp) {
-    return new Generator () {
+    return new GeneratorBase ("numberGenerator") {
       private final CollectionSampler<Generator> generators = 
         new CollectionSampler(
           urp,

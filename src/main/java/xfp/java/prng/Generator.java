@@ -6,7 +6,7 @@ import xfp.java.exceptions.Exceptions;
  * that return different values on each call.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-01-29
+ * @version 2019-04-01
  */
 
 @SuppressWarnings("unchecked")
@@ -14,6 +14,9 @@ public interface Generator {
 
   // default methods throw UnsupportetOperationException.
 
+  public default String name () {
+    throw Exceptions.unsupportedOperation(this,"name"); }
+  
   public default Object next () {
     throw Exceptions.unsupportedOperation(this,"next"); }
 

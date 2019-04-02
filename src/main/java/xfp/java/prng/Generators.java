@@ -12,7 +12,7 @@ import org.apache.commons.rng.sampling.distribution.ContinuousUniformSampler;
  * that return different values on each call.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-25
+ * @version 2019-04-01
  */
 
 @SuppressWarnings("unchecked")
@@ -24,7 +24,7 @@ public final class Generators {
 
   public static final Generator 
   byteGenerator (final UniformRandomProvider urp) {
-    return new Generator () {
+    return new GeneratorBase ("byteGenerator") {
       @Override
       public final byte nextByte () { return (byte) urp.nextInt(); } 
       @Override
@@ -34,7 +34,7 @@ public final class Generators {
   public static final Generator 
   byteGenerator (final int n,
                  final UniformRandomProvider urp) {
-    return new Generator () {
+    return new GeneratorBase ("byteGenerator:" + n) {
       final Generator g = byteGenerator(urp);
       @Override
       public final Object next () {
@@ -44,7 +44,7 @@ public final class Generators {
 
   public static final Generator 
   shortGenerator (final UniformRandomProvider urp) {
-    return new Generator () {
+    return new GeneratorBase ("shortGenerator") {
       @Override
       public final short nextShort () { return (short) urp.nextInt(); } 
       @Override
@@ -54,7 +54,7 @@ public final class Generators {
   public static final Generator 
   shortGenerator (final int n,
                   final UniformRandomProvider urp) {
-    return new Generator () {
+    return new GeneratorBase ("shortGenerator:" + n) {
       final Generator g = shortGenerator(urp);
       @Override
       public final Object next () {
@@ -66,7 +66,7 @@ public final class Generators {
 
   public static final Generator 
   intGenerator (final UniformRandomProvider urp) {
-    return new Generator () {
+    return new GeneratorBase ("intGenerator") {
       @Override
       public final int nextInt () { return urp.nextInt(); } 
       @Override
@@ -76,7 +76,7 @@ public final class Generators {
   public static final Generator 
   intGenerator (final int n,
                 final UniformRandomProvider urp) {
-    return new Generator () {
+    return new GeneratorBase ("intGenerator:" + n) {
       final Generator g = intGenerator(urp);
       @Override
       public final Object next () {
@@ -88,7 +88,7 @@ public final class Generators {
 
   public static final Generator 
   positiveIntGenerator (final UniformRandomProvider urp) {
-    return new Generator () {
+    return new GeneratorBase ("positiveIntGenerator") {
       @Override
       public final int nextInt () { 
         // TODO: fix infinite loop?
@@ -103,7 +103,7 @@ public final class Generators {
   public static final Generator 
   positiveIntGenerator (final int n,
                         final UniformRandomProvider urp) {
-    return new Generator () {
+    return new GeneratorBase ("positiveIntGenerator:" + n) {
       final Generator g = positiveLongGenerator(urp);
       @Override
       public final Object next () {
@@ -115,7 +115,7 @@ public final class Generators {
 
   public static final Generator 
   longGenerator (final UniformRandomProvider urp) {
-    return new Generator () {
+    return new GeneratorBase ("longGenerator") {
       @Override
       public final long nextLong () { return urp.nextLong(); } 
       @Override
@@ -125,7 +125,7 @@ public final class Generators {
   public static final Generator 
   longGenerator (final int n,
                  final UniformRandomProvider urp) {
-    return new Generator () {
+    return new GeneratorBase ("longGenerator:" + n) {
       final Generator g = longGenerator(urp);
       @Override
       public final Object next () {
@@ -137,7 +137,7 @@ public final class Generators {
 
   public static final Generator 
   positiveLongGenerator (final UniformRandomProvider urp) {
-    return new Generator () {
+    return new GeneratorBase ("positiveLongGenerator") {
       @Override
       public final long nextLong () { 
         // TODO: fix infinite loop?
@@ -152,7 +152,7 @@ public final class Generators {
   public static final Generator 
   positiveLongGenerator (final int n,
                          final UniformRandomProvider urp) {
-    return new Generator () {
+    return new GeneratorBase ("positiveLongGenerator:" + n) {
       final Generator g = positiveLongGenerator(urp);
       @Override
       public final Object next () {
@@ -177,7 +177,7 @@ public final class Generators {
   public static final Generator 
   bigIntegerGenerator (final UniformRandomProvider urp) {
     final double dp = 0.99;
-    return new Generator () {
+    return new GeneratorBase ("bigIntegerGenerator") {
       private final ContinuousSampler choose = 
         new ContinuousUniformSampler(urp,0.0,1.0);
       private final CollectionSampler edgeCases = 
@@ -197,7 +197,7 @@ public final class Generators {
   public static final Generator 
   bigIntegerGenerator (final int n,
                        final UniformRandomProvider urp) {
-    return new Generator () {
+    return new GeneratorBase ("bigIntegerGenerator:" + n) {
       final Generator g = bigIntegerGenerator(urp);
       @Override
       public final Object next () {
@@ -213,7 +213,7 @@ public final class Generators {
   public static final Generator 
   nonzeroBigIntegerGenerator (final UniformRandomProvider urp) {
     final double dp = 0.99;
-    return new Generator () {
+    return new GeneratorBase ("nonzeroBigIntegerGenerator") {
       private final ContinuousSampler choose = 
         new ContinuousUniformSampler(urp,0.0,1.0);
       private final CollectionSampler edgeCases = 
@@ -236,7 +236,7 @@ public final class Generators {
   public static final Generator 
   nonzeroBigIntegerGenerator (final int n,
                               final UniformRandomProvider urp) {
-    return new Generator () {
+    return new GeneratorBase ("nonzeroBigIntegerGenerator:" + n) {
       final Generator g = nonzeroBigIntegerGenerator(urp);
       @Override
       public final Object next () {
@@ -252,7 +252,7 @@ public final class Generators {
   public static final Generator 
   positiveBigIntegerGenerator (final UniformRandomProvider urp) {
     final double dp = 0.99;
-    return new Generator () {
+    return new GeneratorBase ("positiveBigIntegerGenerator") {
       private final ContinuousSampler choose = 
         new ContinuousUniformSampler(urp,0.0,1.0);
       private final CollectionSampler edgeCases = 
@@ -274,7 +274,7 @@ public final class Generators {
   public static final Generator 
   positiveBigIntegerGenerator (final int n,
                                final UniformRandomProvider urp) {
-    return new Generator () {
+    return new GeneratorBase ("positiveBigIntegerGenerator:" + n) {
       final Generator g = positiveBigIntegerGenerator(urp);
       @Override
       public final Object next () {

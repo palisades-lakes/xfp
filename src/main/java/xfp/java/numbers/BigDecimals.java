@@ -17,6 +17,7 @@ import xfp.java.algebra.OneSetOneOperation;
 import xfp.java.algebra.OneSetTwoOperations;
 import xfp.java.algebra.Set;
 import xfp.java.prng.Generator;
+import xfp.java.prng.GeneratorBase;
 
 /** The set of rational numbers represented by 
  * <code>BigDecimal</code>.
@@ -190,7 +191,7 @@ public final class BigDecimals implements Set {
   public static final Generator 
   bigDecimalGenerator (final UniformRandomProvider urp) {
     final double dp = 0.9;
-    return new Generator () {
+    return new GeneratorBase ("bigDecimalGenerator") {
       private final ContinuousSampler choose = 
         new ContinuousUniformSampler(urp,0.0,1.0);
       private final Generator fdg = Doubles.finiteGenerator(urp);
@@ -210,7 +211,7 @@ public final class BigDecimals implements Set {
   public static final Generator 
   bigDecimalGenerator (final int n,
                        final UniformRandomProvider urp) {
-    return new Generator () {
+    return new GeneratorBase ("bigDecimalGenerator:" + n) {
       final Generator g = BigDecimals.bigDecimalGenerator(urp);
       @Override
       public final Object next () {

@@ -18,13 +18,14 @@ import xfp.java.algebra.OneSetTwoOperations;
 import xfp.java.algebra.Set;
 import xfp.java.exceptions.Exceptions;
 import xfp.java.prng.Generator;
+import xfp.java.prng.GeneratorBase;
 import xfp.java.prng.Generators;
 
 /** The set of rational numbers represented by 
  * <code>Rational</code>
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-25
+ * @version 2019-04-01
  */
 @SuppressWarnings("unchecked")
 public final class Rationals implements Set {
@@ -219,7 +220,7 @@ public final class Rationals implements Set {
   public static final Generator 
   fromBigIntegerGenerator (final UniformRandomProvider urp) {
     final double dp = 0.9;
-    return new Generator () {
+    return new GeneratorBase ("fromBigIntegerGenerator") {
       private final ContinuousSampler choose = 
         new ContinuousUniformSampler(urp,0.0,1.0);
       private final Generator g0 = 
@@ -247,7 +248,7 @@ public final class Rationals implements Set {
   public static final Generator 
   fromDoubleGenerator (final UniformRandomProvider urp) {
     final double dp = 0.9;
-    return new Generator () {
+    return new GeneratorBase ("fromDoubleGenerator") {
       private final ContinuousSampler choose = 
         new ContinuousUniformSampler(urp,0.0,1.0);
       private final Generator g = Doubles.finiteGenerator(urp);
@@ -274,7 +275,7 @@ public final class Rationals implements Set {
   public static final Generator 
   fromDoubleGenerator (final int n,
              final UniformRandomProvider urp) {
-    return new Generator () {
+    return new GeneratorBase ("fromDoubleGenerator:" + n) {
       final Generator g = fromDoubleGenerator(urp);
       @Override
       public final Object next () {
@@ -285,7 +286,7 @@ public final class Rationals implements Set {
   public static final Generator 
   generator (final int n,
              final UniformRandomProvider urp) {
-    return new Generator () {
+    return new GeneratorBase ("rationalGenerator:" + n) {
       final Generator g = generator(urp);
       @Override
       public final Object next () {

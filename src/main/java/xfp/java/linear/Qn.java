@@ -22,6 +22,7 @@ import xfp.java.numbers.Q;
 import xfp.java.numbers.Rational;
 import xfp.java.numbers.Rationals;
 import xfp.java.prng.Generator;
+import xfp.java.prng.GeneratorBase;
 import xfp.java.prng.Generators;
 
 /** The set of arrays of some fixed length <code>n</code>,
@@ -159,7 +160,7 @@ public final class Qn extends LinearSpaceLike {
   public static final Generator 
   qnGenerator (final int n,
                final UniformRandomProvider urp) {
-    return new Generator () {
+    return new GeneratorBase ("qnGenerator:" + n) {
       private final CollectionSampler<Generator> generators = 
         new CollectionSampler(
           urp,
@@ -173,8 +174,9 @@ public final class Qn extends LinearSpaceLike {
             Floats.finiteGenerator(n,urp),
             Doubles.finiteGenerator(n,urp),
             Rationals.generator(urp)
-            //            ERationals.eIntegerGenerator(n,urp),
-            //            ERationals.eRationalFromDoubleGenerator(n,urp)
+            // ERational correct, but slow
+            //ERationals.eIntegerGenerator(n,urp),
+            //ERationals.eRationalFromDoubleGenerator(n,urp)
             // clojure.lang.Ratio doesn't round correctly
             // BigFraction.doubleValue() doesn't round correctly.
             //,bigFractionGenerator(n,urp),
