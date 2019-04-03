@@ -30,9 +30,19 @@ implements Accumulator<DoubleFmaAccumulator> {
     return this; }
 
   @Override
+  public final DoubleFmaAccumulator addAll (final double[] z) { 
+    for (final double zi : z) { _sum += zi; } 
+    return this; }
+
+  @Override
   public final DoubleFmaAccumulator 
   add2 (final double z) { 
     _sum = Math.fma(z,z,_sum);
+    return this; }
+
+  @Override
+  public final DoubleFmaAccumulator add2All (final double[] z) { 
+    for (final double zi : z) { _sum = Math.fma(zi,zi,_sum); } 
     return this; }
 
   @Override
@@ -40,6 +50,14 @@ implements Accumulator<DoubleFmaAccumulator> {
   addProduct (final double z0,
               final double z1) { 
     _sum = Math.fma(z0,z1,_sum);
+    return this; }
+
+  @Override
+  public final DoubleFmaAccumulator addProducts (final double[] z0,
+                                             final double[] z1) { 
+    final int n = z0.length;
+    assert n == z1.length;
+    for (int i=0;i<n;i++) { _sum = Math.fma(z0[i],z1[i],_sum); }
     return this; }
 
   //--------------------------------------------------------------
