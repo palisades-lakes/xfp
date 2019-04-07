@@ -3,58 +3,91 @@ package xfp.java.numbers;
 import static java.lang.Math.fma;
 
 //----------------------------------------------------------------
-/*** Mutable! Not thread safe!
-*      
-* @author palisades dot lakes at gmail dot com
-* @version 2019-03-29
-*/
+/** Mutable! Not thread safe!
+ * 
+ * TODO: test impact of immutable version.
+ * 
+ * @author palisades dot lakes at gmail dot com
+ * @version 2019-04-06
+ */
 public final class Double2 {
 
   public double z0 = 0.0;
   public double z1 = 0.0;
 
-  public final void noBranch (final double a, 
-                              final double b) {
-//    assert Double.isFinite(a) && Double.isFinite(b) :
-//      Double.toHexString(a) + " + " + Double.toHexString(b);
-    final double x = a + b;
-    final double z = x - a;
-    z1 = (a - (x - z)) + (b - z);
-    z0 = x;
-//    assert Double.isFinite(z0) && Double.isFinite(z1) :
-//      Double.toHexString(z0) + " + " + Double.toHexString(z1); 
-    }
+  //--------------------------------------------------------------
+  
+  public final void zhuHayesNoBranch (final double x0, 
+                                      final double x1) {
+    assert Double.isFinite(x0) && Double.isFinite(x1) :
+      Double.toHexString(x0) + " + " + Double.toHexString(x1);
 
-  public final void branch (final double a, 
-                            final double b) {
-//    assert Double.isFinite(a) && Double.isFinite(b) :
-//      Double.toHexString(a) + " + " + Double.toHexString(b);
-    final double x = a + b;
+    final double x = x0 + x1;
+    final double z = x - x0;
+    z1 = (x0 - (x - z)) + (x1 - z);
     z0 = x;
-    if (Doubles.biasedExponent(a) > Doubles.biasedExponent(b)) {
-      z1 = b - (x - a); }
+    
+    assert Double.isFinite(z0) && Double.isFinite(z1) :
+      Double.toHexString(z0) + " + " + Double.toHexString(z1); 
+  }
+
+  //--------------------------------------------------------------
+
+  public final void zhuHayesBranch (final double x0, 
+                                    final double x1) {
+    assert Double.isFinite(x0) && Double.isFinite(x1) :
+      Double.toHexString(x0) + " + " + Double.toHexString(x1);
+
+    final double x = x0 + x1;
+    z0 = x;
+    if (Doubles.biasedExponent(x0) > Doubles.biasedExponent(x1)) {
+      z1 = x1 - (x - x0); }
     else {
-      z1 = a - (x - b); }
-//    assert Double.isFinite(z0) && Double.isFinite(z1) :
-//      Double.toHexString(z0) + " + " + Double.toHexString(z1); 
-    }
+      z1 = x0 - (x - x1); }
+ 
+    assert Double.isFinite(z0) && Double.isFinite(z1) :
+      Double.toHexString(z0) + " + " + Double.toHexString(z1); 
+  }
 
-  /** Muller et al 2010 Algorithm 4.4 */
+  //--------------------------------------------------------------
+/** Muller et al 2010 Algorithm 4.4 */
 
-  public final void twoSum (final double p,
-                            final double s) {
-    final double s1 = p+s;
-    final double ds1 = s1 - s;
+  public final void mullerTwoSum (final double x0,
+                                  final double x1) {
+    assert Double.isFinite(x0) && Double.isFinite(x1) :
+      Double.toHexString(x0) + " + " + Double.toHexString(x1);
+
+    final double s1 = x0+x1;
+    final double ds1 = s1 - x1;
     final double ds2 = s1 - ds1;
-    final double dp1 = p - ds1;
-    final double dp2 = s - ds2;
+    final double dp1 = x0 - ds1;
+    final double dp2 = x1 - ds2;
     z0 = s1;
-    z1 = dp1+dp2; }
+    z1 = dp1+dp2; 
+    
+    assert Double.isFinite(z0) && Double.isFinite(z1) :
+      Double.toHexString(z0) + " + " + Double.toHexString(z1); 
+  }
+
+  //--------------------------------------------------------------
 
   public final void twoProductFMA (final double x0,
                                    final double x1) {
+    assert Double.isFinite(x0) && Double.isFinite(x1) :
+      Double.toHexString(x0) + " + " + Double.toHexString(x1);
+
     final double z = x0 * x1;
     z0 = z;
-    z1 = fma(x0,x1,-z); }
+    z1 = fma(x0,x1,-z); 
+    
+    assert Double.isFinite(z0) && Double.isFinite(z1) :
+      Double.toHexString(z0) + " + " + Double.toHexString(z1); 
+  }
 
-  public Double2 () {} }
+  //--------------------------------------------------------------
+  
+  public Double2 () {}
+  
+  //--------------------------------------------------------------
+}
+//--------------------------------------------------------------

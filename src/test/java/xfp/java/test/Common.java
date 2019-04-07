@@ -25,7 +25,7 @@ import xfp.java.prng.PRNG;
  * java -ea -jar target\benchmarks.jar Dot
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-01
+ * @version 2019-04-06
  */
 @SuppressWarnings("unchecked")
 public final class Common {
@@ -152,7 +152,10 @@ public final class Common {
       final long t0 = System.nanoTime();
       final double pred = a.clear().addAll(x).doubleValue(); 
       final long t1 = (System.nanoTime()-t0);
-      if (a.isExact()) { Assertions.assertEquals(truth,pred); }
+      if (a.isExact()) { 
+        Assertions.assertEquals(truth,pred,
+          "\ntruth=" + Double.toHexString(truth)
+          + "\npred=" + Double.toHexString(pred) + "\n"); }
       final double l1d = Math.abs(truth-pred);
       final double l1n = Math.max(1.0,Math.abs(truth));
       Debug.println(
