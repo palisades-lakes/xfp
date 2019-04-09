@@ -8,7 +8,7 @@ import static java.lang.Math.fma;
  * TODO: test impact of immutable version.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-06
+ * @version 2019-04-09
  */
 public final class Double2 {
 
@@ -19,13 +19,13 @@ public final class Double2 {
   
   public final void zhuHayesNoBranch (final double x0, 
                                       final double x1) {
+    
     assert Double.isFinite(x0) && Double.isFinite(x1) :
       Double.toHexString(x0) + " + " + Double.toHexString(x1);
 
-    final double x = x0 + x1;
-    final double z = x - x0;
-    z1 = (x0 - (x - z)) + (x1 - z);
-    z0 = x;
+    z0 = x0 + x1;
+    final double z = z0 - x0;
+    z1 = (x0 - (z0 - z)) + (x1 - z);
     
     assert Double.isFinite(z0) && Double.isFinite(z1) :
       Double.toHexString(z0) + " + " + Double.toHexString(z1); 
@@ -35,15 +35,15 @@ public final class Double2 {
 
   public final void zhuHayesBranch (final double x0, 
                                     final double x1) {
+
     assert Double.isFinite(x0) && Double.isFinite(x1) :
       Double.toHexString(x0) + " + " + Double.toHexString(x1);
 
-    final double x = x0 + x1;
-    z0 = x;
+    z0 = x0 + x1;
     if (Doubles.biasedExponent(x0) > Doubles.biasedExponent(x1)) {
-      z1 = x1 - (x - x0); }
+      z1 = x1 - (z0 - x0); }
     else {
-      z1 = x0 - (x - x1); }
+      z1 = x0 - (z0 - x1); }
  
     assert Double.isFinite(z0) && Double.isFinite(z1) :
       Double.toHexString(z0) + " + " + Double.toHexString(z1); 

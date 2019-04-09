@@ -17,7 +17,7 @@ import xfp.java.exceptions.Exceptions;
  * arithmetic on them faster.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-02
+ * @version 2019-04-09
  */
 
 public final class RationalBinaryFloat 
@@ -140,12 +140,11 @@ implements Comparable<RationalBinaryFloat> {
     if (q.isZero()) { return this; }
     return add(q.numerator(),q.denominator(),q.exponent()); }
 
-  public final RationalBinaryFloat add (final double q) {
-    assert BigInteger.ONE.equals(denominator()) :
-      this.toString();
-    final boolean s = Doubles.nonNegative(q);
-    final int e1 = Doubles.exponent(q);
-    final long t = Doubles.significand(q);
+  public final RationalBinaryFloat add (final double z) {
+    assert ! Double.isNaN(z);
+    final boolean s = Doubles.nonNegative(z);
+    final int e1 = Doubles.exponent(z);
+    final long t = Doubles.significand(z);
     final BigInteger n1 = BigInteger.valueOf(s ? t : -t);
     final BigInteger n0 = numerator();
     final BigInteger d0 = denominator();
@@ -177,6 +176,7 @@ implements Comparable<RationalBinaryFloat> {
   //--------------------------------------------------------------
 
   public final RationalBinaryFloat add2 (final double z) { 
+    assert ! Double.isNaN(z);
     final BigInteger n = numerator();
     final BigInteger d = denominator();
     final int e = exponent();
@@ -203,6 +203,8 @@ implements Comparable<RationalBinaryFloat> {
 
   public final RationalBinaryFloat addProduct (final double z0,
                                                final double z1) { 
+    assert ! Double.isNaN(z0);
+    assert ! Double.isNaN(z1);
     final BigInteger n = numerator();
     final BigInteger d = denominator();
     final int e = exponent();
@@ -379,7 +381,9 @@ implements Comparable<RationalBinaryFloat> {
     // handle carry if needed after round up
     final boolean carry = (hiBit(q4) > Doubles.SIGNIFICAND_BITS);
     final long q = carry ? q4 >>> 1 : q4;
-    final int e = (sub ? (carry ? e4 : e4 - 1) : (carry ? e4 + 1 : e4));
+    final int e = 
+      (sub ? (carry ? e4 : e4 - 1) : (carry ? e4 + 1 : e4));
+ 
     return Doubles.makeDouble(neg,e,q); }
 
   //--------------------------------------------------------------

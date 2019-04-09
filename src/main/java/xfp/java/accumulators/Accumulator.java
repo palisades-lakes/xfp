@@ -9,7 +9,7 @@ import xfp.java.exceptions.Exceptions;
  * All methods are optional.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-02
+ * @version 2019-04-09
  */
 
 @SuppressWarnings("unchecked")
@@ -29,6 +29,13 @@ public interface Accumulator<T extends Accumulator> {
    */
   public default boolean isExact () {
     throw Exceptions.unsupportedOperation(this,"isExact"); }
+  
+  /** Intermediate results will never silently <em>overflow</em> 
+   * to an absorbing 'infinity' state. They may fail due to 
+   * implementation bounds on memory, etc.
+   */
+  public default boolean noOverflow () {
+    throw Exceptions.unsupportedOperation(this,"noOverflow"); }
   
   /** Half-even rounding to nearest <code>double</code>. */
   public default double doubleValue () {

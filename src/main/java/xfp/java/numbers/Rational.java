@@ -11,7 +11,7 @@ import xfp.java.exceptions.Exceptions;
 /** Ratios of {@link BigInteger}.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-02
+ * @version 2019-04-09
  */
 
 public final class Rational 
@@ -95,10 +95,11 @@ implements Comparable<Rational> {
     if (q.isZero()) { return this; }
     return add(q.numerator(),q.denominator()); }
 
-  public final Rational add (final double q) {
-    final boolean s = Doubles.nonNegative(q);
-    final int e = Doubles.exponent(q);
-    final long t = Doubles.significand(q);
+  public final Rational add (final double z) {
+    assert ! Double.isNaN(z);
+    final boolean s = Doubles.nonNegative(z);
+    final int e = Doubles.exponent(z);
+    final long t = Doubles.significand(z);
     final BigInteger u = BigInteger.valueOf(s ? t : -t);
     final BigInteger du = denominator().multiply(u);
     if (0 <= e) {
@@ -130,6 +131,7 @@ implements Comparable<Rational> {
   //--------------------------------------------------------------
 
   public final Rational add2 (final double z) { 
+    assert ! Double.isNaN(z);
     final boolean s = Doubles.nonNegative(z);
     final int e = 2*Doubles.exponent(z);
     final long t = (s ? 1L : -1L) * Doubles.significand(z);
@@ -148,6 +150,8 @@ implements Comparable<Rational> {
 
   public final Rational addProduct (final double z0,
                                     final double z1) { 
+    assert ! Double.isNaN(z0);
+    assert ! Double.isNaN(z1);
     final boolean s = 
       ! (Doubles.nonNegative(z0) ^ Doubles.nonNegative(z1));
     final int e = Doubles.exponent(z0) + Doubles.exponent(z1);

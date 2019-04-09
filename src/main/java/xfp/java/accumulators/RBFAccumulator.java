@@ -6,7 +6,7 @@ import xfp.java.numbers.RationalBinaryFloat;
  * accumulator (for testing).
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-02
+ * @version 2019-04-09
  */
 public final class RBFAccumulator 
 
@@ -17,9 +17,12 @@ implements Accumulator<RBFAccumulator> {
   public final RationalBinaryFloat value () { return _sum; }
 
   //--------------------------------------------------------------
+  
   @Override
   public final boolean isExact () { return true; }
 
+  @Override
+  public final boolean noOverflow () { return true; }
 
   @Override
   public final double doubleValue () { 
@@ -36,17 +39,21 @@ implements Accumulator<RBFAccumulator> {
 
   @Override
   public final RBFAccumulator add (final double z) { 
+    assert ! Double.isNaN(z);
     _sum = _sum.add(z);
     return this; }
 
   @Override
   public final RBFAccumulator add2 (final double z) { 
+    assert ! Double.isNaN(z);
     _sum = _sum.add2(z);
     return this; }
 
   @Override
   public final RBFAccumulator addProduct (final double z0,
                                           final double z1) { 
+    assert ! Double.isNaN(z0);
+    assert ! Double.isNaN(z1);
     _sum = _sum.addProduct(z0,z1);
     return this; }
 
