@@ -14,6 +14,7 @@ import xfp.java.linear.Dn;
 import xfp.java.numbers.Doubles;
 import xfp.java.prng.Generator;
 import xfp.java.prng.PRNG;
+import xfp.java.test.Common;
 
 /** Benchmark rational binary float dot products.
  * 
@@ -27,35 +28,9 @@ import xfp.java.prng.PRNG;
 public final class RationalBFDot {
 
   //--------------------------------------------------------------
-  //  /** See {@link Integer#numberOfLeadingZeros(int)}. */
-  //  private static final int floorLog2 (final int k) {
-  //    return Integer.SIZE - 1- Integer.numberOfLeadingZeros(k); }
-
-  /** See {@link Integer#numberOfLeadingZeros(int)}. */
-  private static final int ceilLog2 (final int k) {
-    return Integer.SIZE - Integer.numberOfLeadingZeros(k-1); }
-
   // TODO: more efficient via bits?
   private static final boolean isEven (final int k) {
     return k == 2*(k/2); }
-
-  /** Maximum exponent for double generation such that the sum 
-   * of <code>dim</code> <code>double</code>s will be finite
-   * (with high enough probability).
-   */
-  //  private static final int deMax (final int dim) { 
-  //    final int d = Doubles.MAXIMUM_EXPONENT - ceilLog2(dim);
-  //    System.out.println("emax=" + d);
-  //    return d; }
-
-  /** Maximum exponent for double generation such that a float sum 
-   * of <code>dim</code> <code>double</code>s will be finite
-   * (with high enough probability).
-   */
-  private static final int feMax (final int dim) { 
-    final int d = Float.MAX_EXPONENT - ceilLog2(dim);
-    //System.out.println("emax=" + d);
-    return d; }
 
   // exact sum is 0.0
   private static double[] sampleDoubles (final Generator g,
@@ -72,7 +47,7 @@ public final class RationalBFDot {
     final UniformRandomProvider urp = 
       PRNG.well44497b("seeds/Well44497b-2019-01-05.txt");
     final Generator g = 
-      Doubles.finiteGenerator(dim/2,urp,feMax(dim));
+      Doubles.finiteGenerator(dim/2,urp,Common.deMax(dim));
 
     final double[][] x = new double[n][];
     for (int i=0;i<n;i++) { x[i] = sampleDoubles(g,urp); }

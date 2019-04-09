@@ -25,7 +25,7 @@ import xfp.java.prng.PRNG;
  * java -ea -jar target\benchmarks.jar Dot
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-06
+ * @version 2019-04-08
  */
 @SuppressWarnings("unchecked")
 public final class Common {
@@ -44,9 +44,9 @@ public final class Common {
    * sum of <code>dim</code> <code>double</code>s will be finite
    * (with high enough probability).
    */
-  public static final int feMax (final int dim) { 
-    final int d = Float.MAX_EXPONENT - ceilLog2(dim);
-    return d; }
+//  public static final int feMax (final int dim) { 
+//    final int d = Float.MAX_EXPONENT - ceilLog2(dim);
+//    return d; }
 
   /** Maximum exponent for double generation such that a double 
    * sum of <code>dim</code> <code>double</code>s will be finite
@@ -75,7 +75,7 @@ public final class Common {
       PRNG.well44497b("seeds/Well44497b-2019-04-01.txt");
 
     // as large as will still have finite float l2 norm squared
-    final int emax = feMax(dim)/2;
+    final int emax = deMax(dim)/2;
     final double dmax = (1<<emax);
     final List<Generator> gs0 =
       List.of(
@@ -92,7 +92,7 @@ public final class Common {
       .collect(Collectors.toUnmodifiableList());
     return
       Streams.concat(
-        gs0.stream(),
+        //gs0.stream(),
         gs1.stream(), 
         gs2.stream())
       .collect(Collectors.toUnmodifiableList()); }
@@ -103,8 +103,6 @@ public final class Common {
     return List.of(
       //"xfp.java.accumulators.DoubleAccumulator",
       "xfp.java.accumulators.DoubleFmaAccumulator",
-      //"xfp.java.accumulators.FloatAccumulator",
-      //"xfp.java.accumulators.FloatFmaAccumulator",
       //"xfp.java.accumulators.RationalAccumulator",
       "xfp.java.accumulators.RBFAccumulator"); }
 
@@ -146,20 +144,28 @@ public final class Common {
            final Accumulator exact) {
     Assertions.assertTrue(exact.isExact());
     final double[] x = (double[]) g.next();
-    final double truth = exact.clear().addAll(x).doubleValue(); 
+    final double truth = exact.clear().addAll(x).doubleValue();
+    Assertions.assertEquals(0.0,truth,
+      "exact sum not zero: " + Double.toHexString(truth));
     Debug.println(g.name());
     for (final Accumulator a : accumulators) {
       final long t0 = System.nanoTime();
       final double pred = a.clear().addAll(x).doubleValue(); 
       final long t1 = (System.nanoTime()-t0);
       if (a.isExact()) { 
+        Assertions.assertEquals(0.0,pred,
+          "sum not zero: " + Classes.className(a) 
+          + " = " + Double.toHexString(pred) + "\n"); 
         Assertions.assertEquals(truth,pred,
-          "\ntruth=" + Double.toHexString(truth)
-          + "\npred=" + Double.toHexString(pred) + "\n"); }
+          "\nexact: " + Classes.className(exact) 
+          + " = " + Double.toHexString(truth)
+          + "\npred: " + Classes.className(a) 
+          + " = " + Double.toHexString(pred) + "\n"); }
       final double l1d = Math.abs(truth-pred);
       final double l1n = Math.max(1.0,Math.abs(truth));
       Debug.println(
-        String.format("%32s %8.2fms ",Classes.className(a),Double.valueOf(t1*1.0e-6)) 
+        String.format("%32s %8.2fms ",Classes.className(a),
+          Double.valueOf(t1*1.0e-6)) 
         + toHexString(l1d) 
         + " / " + toHexString(l1n) + " = " 
         + String.format("%8.2e",Double.valueOf(l1d/l1n))); } }
