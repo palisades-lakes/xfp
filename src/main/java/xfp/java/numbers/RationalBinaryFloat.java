@@ -141,7 +141,7 @@ implements Comparable<RationalBinaryFloat> {
     return add(q.numerator(),q.denominator(),q.exponent()); }
 
   public final RationalBinaryFloat add (final double z) {
-    assert ! Double.isNaN(z);
+    assert Double.isFinite(z);
     final boolean s = Doubles.nonNegative(z);
     final int e1 = Doubles.exponent(z);
     final long t = Doubles.significand(z);
@@ -176,7 +176,7 @@ implements Comparable<RationalBinaryFloat> {
   //--------------------------------------------------------------
 
   public final RationalBinaryFloat add2 (final double z) { 
-    assert ! Double.isNaN(z);
+    assert Double.isFinite(z);
     final BigInteger n = numerator();
     final BigInteger d = denominator();
     final int e = exponent();
@@ -203,8 +203,8 @@ implements Comparable<RationalBinaryFloat> {
 
   public final RationalBinaryFloat addProduct (final double z0,
                                                final double z1) { 
-    assert ! Double.isNaN(z0);
-    assert ! Double.isNaN(z1);
+    assert Double.isFinite(z0);
+    assert Double.isFinite(z1);
     final BigInteger n = numerator();
     final BigInteger d = denominator();
     final int e = exponent();

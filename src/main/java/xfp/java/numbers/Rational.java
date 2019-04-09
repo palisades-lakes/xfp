@@ -96,7 +96,7 @@ implements Comparable<Rational> {
     return add(q.numerator(),q.denominator()); }
 
   public final Rational add (final double z) {
-    assert ! Double.isNaN(z);
+    assert Double.isFinite(z);
     final boolean s = Doubles.nonNegative(z);
     final int e = Doubles.exponent(z);
     final long t = Doubles.significand(z);
@@ -131,7 +131,7 @@ implements Comparable<Rational> {
   //--------------------------------------------------------------
 
   public final Rational add2 (final double z) { 
-    assert ! Double.isNaN(z);
+    assert Double.isFinite(z);
     final boolean s = Doubles.nonNegative(z);
     final int e = 2*Doubles.exponent(z);
     final long t = (s ? 1L : -1L) * Doubles.significand(z);
@@ -150,8 +150,8 @@ implements Comparable<Rational> {
 
   public final Rational addProduct (final double z0,
                                     final double z1) { 
-    assert ! Double.isNaN(z0);
-    assert ! Double.isNaN(z1);
+    assert Double.isFinite(z0);
+    assert Double.isFinite(z1);
     final boolean s = 
       ! (Doubles.nonNegative(z0) ^ Doubles.nonNegative(z1));
     final int e = Doubles.exponent(z0) + Doubles.exponent(z1);

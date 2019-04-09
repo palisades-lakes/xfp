@@ -35,7 +35,7 @@ public final class SumTest {
     Debug.DEBUG=false;
     Debug.println();
     Debug.println("infinite");
-    Common.nanTests(
+    Common.nonFiniteTests(
       Common.makeAccumulators(accumulators())); }
 
   @SuppressWarnings("static-method")

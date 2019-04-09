@@ -194,7 +194,18 @@ public final class Common {
   //--------------------------------------------------------------
 
   public static final void 
-  nanTest (final Accumulator a) {
+  nonFiniteTest (final Accumulator a) {
+
+    Assertions.assertThrows(
+      AssertionError.class, 
+      () -> {
+        final double s0 = 
+          a.clear()
+          .addAll(new double[] {-1.0, Double.POSITIVE_INFINITY, })
+          .doubleValue();
+        Assertions.assertEquals(Double.POSITIVE_INFINITY,s0,
+          Classes.className(a)); },
+      Classes.className(a)); 
 
     Assertions.assertThrows(
       AssertionError.class, 
@@ -205,12 +216,13 @@ public final class Common {
           .doubleValue();
         Assertions.assertEquals(
           Double.NaN,s2,Classes.className(a));},
-      Classes.className(a)); }
+      Classes.className(a)); 
+  }
 
   public static final void 
-  nanTests (final List<Accumulator> accumulators) {
+  nonFiniteTests (final List<Accumulator> accumulators) {
     for (final Accumulator a : accumulators) {
-      nanTest(a); } }
+      nonFiniteTest(a); } }
 
   //--------------------------------------------------------------
 
@@ -231,12 +243,6 @@ public final class Common {
     Assertions.assertEquals(Double.NEGATIVE_INFINITY,s1,
       Classes.className(a)); 
 
-    final double s2 = 
-      a.clear()
-      .addAll(new double[] {-1.0, Double.POSITIVE_INFINITY, })
-      .doubleValue();
-    Assertions.assertEquals(Double.POSITIVE_INFINITY,s2,
-      Classes.className(a)); 
   }
 
   public static final void 
@@ -260,13 +266,13 @@ public final class Common {
       if (a.isExact()) { 
         Assertions.assertEquals(0.0,pred,
           "sum not zero: " + Classes.className(a) 
-          + " = " + Double.toHexString(pred) + "\n"); 
-        final double l1d = Math.abs(pred);
-        Debug.println(
-          String.format("%32s %8.2fms ",Classes.className(a),
-            Double.valueOf(t1*1.0e-6)) 
-          + toHexString(l1d) + " = " 
-          + String.format("%8.2e",Double.valueOf(l1d))); } } }
+          + " = " + Double.toHexString(pred) + "\n");  }
+      final double l1d = Math.abs(pred);
+      Debug.println(
+        String.format("%32s %8.2fms ",Classes.className(a),
+          Double.valueOf(t1*1.0e-6)) 
+        + toHexString(l1d) + " = " 
+        + String.format("%8.2e",Double.valueOf(l1d))); } } 
 
   /** Assumes the generators create arrays whose exact sum is 0.0
    */

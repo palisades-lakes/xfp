@@ -29,28 +29,28 @@ implements Accumulator<DoubleFmaAccumulator> {
 
   @Override
   public final DoubleFmaAccumulator add (final double z) { 
-    assert ! Double.isNaN(z);
+    assert Double.isFinite(z);
     _sum += z; 
     return this; }
 
   @Override
   public final DoubleFmaAccumulator addAll (final double[] z) { 
     for (final double zi : z) { 
-      assert ! Double.isNaN(zi);
+      assert Double.isFinite(zi);
       _sum += zi; } 
     return this; }
 
   @Override
   public final DoubleFmaAccumulator 
   add2 (final double z) { 
-    assert ! Double.isNaN(z);
+    assert Double.isFinite(z);
     _sum = Math.fma(z,z,_sum);
     return this; }
 
   @Override
   public final DoubleFmaAccumulator add2All (final double[] z) { 
     for (final double zi : z) { 
-      assert ! Double.isNaN(zi);
+      assert Double.isFinite(zi);
       _sum = Math.fma(zi,zi,_sum); } 
     return this; }
 
@@ -58,8 +58,8 @@ implements Accumulator<DoubleFmaAccumulator> {
   public final DoubleFmaAccumulator 
   addProduct (final double z0,
               final double z1) { 
-    assert ! Double.isNaN(z0);
-    assert ! Double.isNaN(z1);
+    assert Double.isFinite(z0);
+    assert Double.isFinite(z1);
     _sum = Math.fma(z0,z1,_sum);
     return this; }
 
@@ -69,8 +69,8 @@ implements Accumulator<DoubleFmaAccumulator> {
     final int n = z0.length;
     assert n == z1.length;
     for (int i=0;i<n;i++) { 
-      assert ! Double.isNaN(z0[i]);
-      assert ! Double.isNaN(z1[i]);
+      assert Double.isFinite(z0[i]);
+      assert Double.isFinite(z1[i]);
       _sum = Math.fma(z0[i],z1[i],_sum); }
     return this; }
 
