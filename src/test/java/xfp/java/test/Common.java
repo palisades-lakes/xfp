@@ -79,11 +79,14 @@ public final class Common {
     final double dmax = (1<<emax);
     final List<Generator> gs0 =
       List.of(
-        Doubles.finiteGenerator(dim,urp0,emax),
-        Doubles.gaussianGenerator(dim,urp1,0.0,dmax),
-        Doubles.exponentialGenerator(dim,urp2,0.0,dmax),
-        Doubles.laplaceGenerator(dim,urp2,0.0,dmax),
-        Doubles.uniformGenerator(dim,urp3,-dmax,dmax));
+        Doubles.gaussianGenerator(dim,urp1,0.0,dmax)
+        //,
+//        Doubles.exponentialGenerator(dim,urp2,0.0,dmax),
+//        Doubles.laplaceGenerator(dim,urp2,0.0,dmax),
+//        Doubles.uniformGenerator(dim,urp3,-dmax,dmax)
+//        ,
+//        Doubles.finiteGenerator(dim,urp0,emax)
+        );
     final List<Generator> gs1 =
       gs0.stream().map(Doubles::zeroSumGenerator)
       .collect(Collectors.toUnmodifiableList());
@@ -93,8 +96,10 @@ public final class Common {
     return
       Streams.concat(
         //gs0.stream(),
-        gs1.stream(), 
-        gs2.stream())
+        gs1.stream()
+        //, 
+        //gs2.stream()
+        )
       .collect(Collectors.toUnmodifiableList()); }
 
   //--------------------------------------------------------------
