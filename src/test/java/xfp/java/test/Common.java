@@ -61,8 +61,8 @@ public final class Common {
   private static final List<Generator> baseGenerators (final int dim) {
     final UniformRandomProvider urp0 = 
       PRNG.well44497b("seeds/Well44497b-2019-01-05.txt");
-    //    final UniformRandomProvider urp1 = 
-    //      PRNG.well44497b("seeds/Well44497b-2019-01-07.txt");
+    final UniformRandomProvider urp1 = 
+      PRNG.well44497b("seeds/Well44497b-2019-01-07.txt");
     final UniformRandomProvider urp2 = 
       PRNG.well44497b("seeds/Well44497b-2019-01-09.txt");
     final UniformRandomProvider urp3 = 
@@ -74,7 +74,7 @@ public final class Common {
     final int emax = deMax(dim)/2;
     final double dmax = (1<<emax);
     return List.of(
-      //Doubles.gaussianGenerator(dim,urp1,0.0,dmax),
+      Doubles.gaussianGenerator(dim,urp1,0.0,dmax),
       Doubles.exponentialGenerator(dim,urp2,0.0,dmax),
       Doubles.laplaceGenerator(dim,urp3,0.0,dmax),
       Doubles.uniformGenerator(dim,urp4,-dmax,dmax),
