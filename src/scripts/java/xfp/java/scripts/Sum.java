@@ -21,7 +21,7 @@ import xfp.java.test.Common;
  * jy --source 11 src/scripts/java/xfp/java/scripts/Sum.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-25
+ * @version 2019-04-10
  */
 @SuppressWarnings("unchecked")
 public final class Sum {
@@ -30,10 +30,6 @@ public final class Sum {
   //  /** See {@link Integer#numberOfLeadingZeros(int)}. */
   //  private static final int floorLog2 (final int k) {
   //    return Integer.SIZE - 1- Integer.numberOfLeadingZeros(k); }
-
-  /** See {@link Integer#numberOfLeadingZeros(int)}. */
-  private static final int ceilLog2 (final int k) {
-    return Integer.SIZE - Integer.numberOfLeadingZeros(k-1); }
 
   // TODO: more efficient via bits?
   private static final boolean isEven (final int k) {

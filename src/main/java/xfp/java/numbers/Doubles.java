@@ -34,7 +34,7 @@ import xfp.java.prng.GeneratorBase;
 /** Utilities for <code>double</code>, <code>double[]</code>.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-09
+ * @version 2019-04-10
  */
 public final class Doubles implements Set {
 
@@ -169,6 +169,7 @@ public final class Doubles implements Set {
   /** Exponent if significand is treated as an integer, not a
    * binary fraction.
    */
+
   public static final int exponent (final double x) {
     // subnormal numbers have an exponent one less that what it
     // should really be, as a way of coding the initial zero bit
@@ -298,47 +299,7 @@ public final class Doubles implements Set {
 
   public static final double MAX_INTEGER = 9007199254740992D;
 
-  //--------------------------------------------------------------
-
-  public static final boolean isHalfUlp (final double x) {
-    // TODO: do we need to check for NaN and infinity?
-    return (0.0 != x) && (0L == significand(x)); }
-
-  //--------------------------------------------------------------
-
-  public static final double halfUlp (final double x) {
-    // TODO: do we need to check for NaN and infinity?
-    // TODO: compare to c++ implementation
-    // TODO: return zero when x is zero?
-    if (0.0 == x) { return 0.0; }
-    return 0.5 * Math.ulp(x); }
-
-  //--------------------------------------------------------------
-  /** Return correctly rounded sum of 3 non-overlapping doubles.
-   * <p>
-   * See <a href="https://github.com/Jeffrey-Sarnoff/IFastSum.jl">
-   * IFastSum.jl</a> (visited 2017-05-01, MIT License)
-   */
-
-  public static final double round3 (final double s0,
-                                     final double s1,
-                                     final double s2) {
-
-    // non-overlapping here means:
-    //    assert Math.abs(s0) > Math.abs(s1);
-    //    assert Math.abs(s1) > Math.abs(s2) :
-    //      Double.toHexString(s1) + " <= " + Double.toHexString(s2);
-    assert s0 == (s0 + s1) :
-      Double.toHexString(s0) + " + " + Double.toHexString(s1) +
-      " -> " + Double.toHexString(s0+s1);
-    assert s1 == (s1 + s2);
-
-    if ((isHalfUlp(s1)) &&
-      (Math.signum(s1) == Math.signum(s2))) {
-      return s0 + Math.nextUp(s1); }
-    return s0; }
-
-  //--------------------------------------------------------------
+   //--------------------------------------------------------------
   // operations for algebraic structures over Doubles.
   //--------------------------------------------------------------
 
