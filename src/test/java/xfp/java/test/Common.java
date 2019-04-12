@@ -6,11 +6,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
-
-import com.google.common.collect.Streams;
 
 import xfp.java.Classes;
 import xfp.java.Debug;
@@ -19,13 +18,10 @@ import xfp.java.numbers.Doubles;
 import xfp.java.prng.Generator;
 import xfp.java.prng.PRNG;
 
-/** Teat utilities
- * 
- * <pre>
- * java -ea -jar target\benchmarks.jar Dot
- * </pre>
+/** Test utilities
+ *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-08
+ * @version 2019-04-11
  */
 @SuppressWarnings("unchecked")
 public final class Common {
@@ -90,7 +86,7 @@ public final class Common {
       gs1.stream().map((g) -> Doubles.shuffledGenerator(g,urp))
       .collect(Collectors.toUnmodifiableList());
     return
-      Streams
+      Stream
       .concat(gs1.stream(),gs2.stream())
       .collect(Collectors.toUnmodifiableList()); }
 
@@ -113,7 +109,7 @@ public final class Common {
     final List<Generator> gs0 = baseGenerators(dim);
     final List<Generator> gs1 = zeroSumGenerators(gs0);
     return
-      Streams
+      Stream
       .concat(gs0.stream(),gs1.stream())
       .collect(Collectors.toUnmodifiableList()); }
 
@@ -122,6 +118,8 @@ public final class Common {
   public static final List<String> accumulators () { 
     return List.of(
       "xfp.java.accumulators.DoubleAccumulator",
+      "xfp.java.accumulators.ZhuHayesNoGCAccumulator",
+      "xfp.java.accumulators.ZhuHayesGCAccumulator",
       //"xfp.java.accumulators.DoubleFmaAccumulator",
       //"xfp.java.accumulators.RationalAccumulator",
       "xfp.java.accumulators.RBFAccumulator"); }
