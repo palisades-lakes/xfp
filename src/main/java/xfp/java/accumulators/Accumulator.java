@@ -7,9 +7,13 @@ import xfp.java.exceptions.Exceptions;
  * typically online. 
  * <p>
  * All methods are optional.
+ * <p>
+ * Must throw an AssertionError for non-finite
+ * input data, either on add or doubleValue.
+ * TODO: tighten this requirement.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-09
+ * @version 2019-04-12
  */
 
 @SuppressWarnings("unchecked")
