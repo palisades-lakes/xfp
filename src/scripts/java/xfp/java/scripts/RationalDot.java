@@ -9,7 +9,7 @@ import org.apache.commons.rng.sampling.ListSampler;
 
 import xfp.java.Classes;
 import xfp.java.accumulators.Accumulator;
-import xfp.java.accumulators.RationalAccumulator;
+import xfp.java.accumulators.RBFAccumulator;
 import xfp.java.linear.Dn;
 import xfp.java.numbers.Doubles;
 import xfp.java.prng.Generator;
@@ -22,7 +22,7 @@ import xfp.java.test.Common;
  * jy --source 11 src/scripts/java/xfp/java/scripts/RationalDot.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-26
+ * @version 2019-04-14
  */
 @SuppressWarnings("unchecked")
 public final class RationalDot {
@@ -69,7 +69,7 @@ public final class RationalDot {
     final double[] pred = new double[N];
     for (int i=0;i<N;i++) { 
       truth[i] = 
-        RationalAccumulator.make().addProducts(x0[i],x1[i]).doubleValue(); }
+        RBFAccumulator.make().addProducts(x0[i],x1[i]).doubleValue(); }
 
     for (int i=0;i<N;i++) { 
       System.out.println(
@@ -82,7 +82,7 @@ public final class RationalDot {
     System.out.println();
     final Accumulator[] accumulators = 
     {
-     RationalAccumulator.make(),
+     RBFAccumulator.make(),
     };
 
     Thread.sleep(16*1024);

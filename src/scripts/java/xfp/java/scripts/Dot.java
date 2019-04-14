@@ -10,9 +10,7 @@ import org.apache.commons.rng.sampling.ListSampler;
 import xfp.java.Classes;
 import xfp.java.accumulators.Accumulator;
 import xfp.java.accumulators.DoubleAccumulator;
-import xfp.java.accumulators.DoubleFmaAccumulator;
 import xfp.java.accumulators.RBFAccumulator;
-import xfp.java.accumulators.RationalAccumulator;
 import xfp.java.linear.Dn;
 import xfp.java.numbers.Doubles;
 import xfp.java.prng.Generator;
@@ -25,7 +23,7 @@ import xfp.java.test.Common;
  * java -ea -jar target\benchmarks.jar Dot
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-08
+ * @version 2019-04-14
  */
 @SuppressWarnings("unchecked")
 public final class Dot {
@@ -73,7 +71,7 @@ public final class Dot {
     // assuming ERational is correct!!!
     for (int i=0;i<N;i++) { 
       truth[i] = 
-        RationalAccumulator
+        RBFAccumulator
         .make()
         .addProducts(x0[i],x1[i])
         .doubleValue(); }
@@ -90,8 +88,6 @@ public final class Dot {
     final Accumulator[] accumulators = 
     {
      DoubleAccumulator.make(),
-     DoubleFmaAccumulator.make(),
-     RationalAccumulator.make(),
      RBFAccumulator.make(),
     };
 

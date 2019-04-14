@@ -120,8 +120,6 @@ public final class Common {
       "xfp.java.accumulators.DoubleAccumulator",
       "xfp.java.accumulators.ZhuHayesNoGCAccumulator",
       "xfp.java.accumulators.ZhuHayesGCAccumulator",
-      //"xfp.java.accumulators.DoubleFmaAccumulator",
-      //"xfp.java.accumulators.RationalAccumulator",
       "xfp.java.accumulators.RBFAccumulator"); }
 
   //--------------------------------------------------------------
