@@ -34,7 +34,7 @@ import xfp.java.prng.GeneratorBase;
 /** Utilities for <code>double</code>, <code>double[]</code>.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-10
+ * @version 2019-04-16
  */
 public final class Doubles implements Set {
 
@@ -285,9 +285,9 @@ public final class Doubles implements Set {
       return
         (negative 
           ? Double.NEGATIVE_INFINITY 
-          : Double.POSITIVE_INFINITY); }
-    
-   return mergeBits(
+            : Double.POSITIVE_INFINITY); }
+
+    return mergeBits(
       (negative ? 1 : 0), 
       e,
       significand); }
@@ -299,7 +299,7 @@ public final class Doubles implements Set {
 
   public static final double MAX_INTEGER = 9007199254740992D;
 
-   //--------------------------------------------------------------
+  //--------------------------------------------------------------
   // operations for algebraic structures over Doubles.
   //--------------------------------------------------------------
 
@@ -455,7 +455,7 @@ public final class Doubles implements Set {
   //--------------------------------------------------------------
 
   // TODO: extend generators using function composition!!!
-  
+
   private static final Generator 
   arrayGenerator (final int n,
                   final Generator g) {
@@ -479,24 +479,24 @@ public final class Doubles implements Set {
         return z; } }; }
 
   //--------------------------------------------------------------
-  
+
   private static final double[] concatenate (final double[] x0,
-                                            final double[] x1) {
+                                             final double[] x1) {
     final double[] x = new double[x0.length + x1.length];
     for (int i=0;i<x0.length;i++) { x[i] = x0[i]; }
     for (int i=0;i<x1.length;i++) { x[i+x0.length] = x1[i]; }
     return x; }
-  
+
   private static final double[] minus (final double[] x) {
     final double[] y = new double[x.length];
     for (int i=0;i<x.length;i++) { y[i] = -x[i]; }
     return y; }
-  
+
   /** exact sum of returned arrays is 0.0.
    * @param g must be a generator that returns 
    * <code>double[]</code>.
    */
-  
+
   public static final Generator 
   zeroSumGenerator (final Generator g) {
     return new GeneratorBase ("zeroSum-" + g.name()) {
@@ -517,7 +517,7 @@ public final class Doubles implements Set {
    * @param g must be a generator that returns 
    * <code>double[]</code>.
    */
-  
+
   public static final Generator 
   shuffledGenerator (final Generator g,
                      final UniformRandomProvider urp) {
@@ -526,6 +526,21 @@ public final class Doubles implements Set {
       public final Object next () {
         final double[] z = (double[]) g.next();
         return shuffle(z,urp); } }; }
+
+  //--------------------------------------------------------------
+  /** Sorts the output of <code.g</code>.
+   * @param g must be a generator that returns 
+   * <code>double[]</code>.
+   */
+
+  public static final Generator 
+  sortedGenerator (final Generator g) {
+    return new GeneratorBase ("sorted-" + g.name()) {
+      @Override
+      public final Object next () {
+        final double[] z = (double[]) g.next();
+        Arrays.sort(z); 
+        return z; } }; }
 
   //--------------------------------------------------------------
   /** Conventional 'uniform' distribution sampler, as 'uniform' 
@@ -621,8 +636,8 @@ public final class Doubles implements Set {
 
   public static final Generator 
   exponentialGenerator (final UniformRandomProvider urp,
-                    final double mu,
-                    final double sigma) {
+                        final double mu,
+                        final double sigma) {
     return new GeneratorBase (
       "exponential-" + mu + "-" + sigma) {
       private final ContinuousSampler e = 
@@ -633,17 +648,17 @@ public final class Doubles implements Set {
 
   public static final Generator 
   exponentialGenerator (final int n,
-                    final UniformRandomProvider urp,
-                    final double mu,
-                    final double sigma) {
+                        final UniformRandomProvider urp,
+                        final double mu,
+                        final double sigma) {
     return arrayGenerator(n,exponentialGenerator(urp,mu,sigma)); }
 
   public static final Generator 
   exponentialGenerator (final int m,
-                    final int n,
-                    final UniformRandomProvider urp,
-                    final double mu,
-                    final double sigma) {
+                        final int n,
+                        final UniformRandomProvider urp,
+                        final double mu,
+                        final double sigma) {
     return arrayGenerator(m,n,exponentialGenerator(urp,mu,sigma)); }
 
   //--------------------------------------------------------------

@@ -11,7 +11,7 @@ import static xfp.java.test.Common.zeroSumGenerators;
 import org.junit.jupiter.api.Test;
 
 import xfp.java.Debug;
-import xfp.java.accumulators.RBFAccumulator;
+import xfp.java.accumulators.RationalFloatAccumulator;
 import xfp.java.test.Common;
 
 //----------------------------------------------------------------
@@ -75,7 +75,7 @@ public final class SumTest {
     sumTests(
       generators(DIM),
       makeAccumulators(accumulators()),
-      RBFAccumulator.make()); }
+      RationalFloatAccumulator.make()); }
 
   @SuppressWarnings("static-method")
   @Test
@@ -86,7 +86,7 @@ public final class SumTest {
     l2Tests(
       generators(DIM),
       makeAccumulators(accumulators()),
-      RBFAccumulator.make()); }
+      RationalFloatAccumulator.make()); }
 
   @SuppressWarnings("static-method")
   @Test
@@ -97,7 +97,7 @@ public final class SumTest {
     dotTests(
       generators(DIM),
       makeAccumulators(accumulators()),
-      RBFAccumulator.make()); }
+      RationalFloatAccumulator.make()); }
 
   //--------------------------------------------------------------
 }

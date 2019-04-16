@@ -8,27 +8,27 @@ import java.math.BigInteger;
 import org.junit.jupiter.api.Test;
 
 import xfp.java.numbers.Doubles;
-import xfp.java.numbers.RationalBinaryFloat;
+import xfp.java.numbers.RationalFloat;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
 import xfp.java.prng.PRNG;
 
 //----------------------------------------------------------------
-/** Test desired properties of RationalBinaryFloat. 
+/** Test desired properties of RationalFloat. 
  * <p>
  * <pre>
- * mvn -Dtest=xfp/java/test/numbers/RationalBinaryFloatTest test > RationalBinaryFloatTest.txt
+ * mvn -Dtest=xfp/java/test/numbers/RationalFloatTest test > RationalFloatTest.txt
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
  * @version 2019-03-30
  */
 
-public final class RationalBinaryFloatTest {
+public final class RationalFloatTest {
 
   //--------------------------------------------------------------
 
-  private static final boolean correctRounding (final RationalBinaryFloat f) {
+  private static final boolean correctRounding (final RationalFloat f) {
     // TODO: this is necessary but not sufficient to ensure 
     // rounding was correct?
     final double x = f.doubleValue();
@@ -37,16 +37,16 @@ public final class RationalBinaryFloatTest {
     if (! Double.isFinite(x)) { 
       final BigInteger q = f.numerator().divide(f.denominator()).shiftLeft(f.exponent());
       return ! Double.isFinite(q.doubleValue()); }
-    final RationalBinaryFloat fx = RationalBinaryFloat.valueOf(x);
+    final RationalFloat fx = RationalFloat.valueOf(x);
     final int r = f.compareTo(fx);
     final boolean result;
     if (r < 0) { // fx > f
       final double x1o = Math.nextDown(x);
-      final RationalBinaryFloat flo = RationalBinaryFloat.valueOf(x1o);
+      final RationalFloat flo = RationalFloat.valueOf(x1o);
       result = flo.compareTo(f) < 0;}
     else if (r > 0) { // fx < f
       final double xhi = Math.nextUp(x);
-      final RationalBinaryFloat fhi = RationalBinaryFloat.valueOf(xhi);
+      final RationalFloat fhi = RationalFloat.valueOf(xhi);
       result = f.compareTo(fhi) < 0; } 
     else { result = true; }
     return result; }
@@ -58,15 +58,15 @@ public final class RationalBinaryFloatTest {
   @SuppressWarnings({ "static-method" })
   @Test
   public final void roundingTest () {
-    final RationalBinaryFloat f = 
-      RationalBinaryFloat.valueOf(13,11,0);
+    final RationalFloat f = 
+      RationalFloat.valueOf(13,11,0);
     assertTrue(correctRounding(f)); }
 
   @SuppressWarnings({ "static-method" })
   @Test
   public final void longRoundingTest () {
-    final RationalBinaryFloat f = 
-      RationalBinaryFloat.valueOf(
+    final RationalFloat f = 
+      RationalFloat.valueOf(
         BigInteger.valueOf(0x789f09858446ad92L),
         BigInteger.valueOf(0x19513ea5d70c32eL),
         0);
@@ -85,8 +85,8 @@ public final class RationalBinaryFloatTest {
       final BigInteger n = (BigInteger) gn.next();
       final BigInteger d = (BigInteger) gd.next();
       assertEquals(d.signum(),1);
-      final RationalBinaryFloat f = 
-        RationalBinaryFloat.valueOf(n,d,0);
+      final RationalFloat f = 
+        RationalFloat.valueOf(n,d,0);
       assertTrue(correctRounding(f),
         () -> 
       "\nn= " + n.toString(0x10) 
@@ -106,7 +106,7 @@ public final class RationalBinaryFloatTest {
     for (int i=0;i<TRYS;i++) {
       final long n = g0.nextLong();
       final long d = g1.nextLong();
-      final RationalBinaryFloat f = RationalBinaryFloat.valueOf(
+      final RationalFloat f = RationalFloat.valueOf(
         BigInteger.valueOf(n),
         BigInteger.valueOf(d),
         0);
@@ -121,7 +121,7 @@ public final class RationalBinaryFloatTest {
         -Double.MAX_VALUE, Double.MAX_VALUE);
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
-      final RationalBinaryFloat f = RationalBinaryFloat.valueOf(x);
+      final RationalFloat f = RationalFloat.valueOf(x);
       assertTrue(correctRounding(f),
         () -> 
       "\n" + Double.toHexString(x) 
@@ -137,7 +137,7 @@ public final class RationalBinaryFloatTest {
         0.0, Double.MAX_VALUE/1000.0);
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
-      final RationalBinaryFloat f = RationalBinaryFloat.valueOf(x);
+      final RationalFloat f = RationalFloat.valueOf(x);
       assertTrue(correctRounding(f),
         () -> 
       "\n" + Double.toHexString(x) 
@@ -152,7 +152,7 @@ public final class RationalBinaryFloatTest {
         PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
-      final RationalBinaryFloat f = RationalBinaryFloat.valueOf(x);
+      final RationalFloat f = RationalFloat.valueOf(x);
       assertTrue(correctRounding(f),
         () -> 
       "\n" + Double.toHexString(x) 
@@ -167,7 +167,7 @@ public final class RationalBinaryFloatTest {
         PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
-      final RationalBinaryFloat f = RationalBinaryFloat.valueOf(x);
+      final RationalFloat f = RationalFloat.valueOf(x);
       assertTrue(correctRounding(f)); } }
 
   //--------------------------------------------------------------

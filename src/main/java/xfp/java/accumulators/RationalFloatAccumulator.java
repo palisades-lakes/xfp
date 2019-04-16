@@ -1,6 +1,6 @@
 package xfp.java.accumulators;
 
-import xfp.java.numbers.RationalBinaryFloat;
+import xfp.java.numbers.RationalFloat;
 
 /** Naive sum of <code>double</code> values with a Rational-valued 
  * accumulator (for testing).
@@ -8,13 +8,13 @@ import xfp.java.numbers.RationalBinaryFloat;
  * @author palisades dot lakes at gmail dot com
  * @version 2019-04-09
  */
-public final class RBFAccumulator 
+public final class RationalFloatAccumulator 
 
-implements Accumulator<RBFAccumulator> {
+implements Accumulator<RationalFloatAccumulator> {
 
-  private RationalBinaryFloat _sum;
+  private RationalFloat _sum;
 
-  public final RationalBinaryFloat value () { return _sum; }
+  public final RationalFloat value () { return _sum; }
 
   //--------------------------------------------------------------
   
@@ -33,24 +33,24 @@ implements Accumulator<RBFAccumulator> {
     return _sum.floatValue(); }
 
   @Override
-  public final RBFAccumulator clear () { 
-    _sum = RationalBinaryFloat.ZERO;
+  public final RationalFloatAccumulator clear () { 
+    _sum = RationalFloat.ZERO;
     return this; }
 
   @Override
-  public final RBFAccumulator add (final double z) { 
+  public final RationalFloatAccumulator add (final double z) { 
     assert Double.isFinite(z);
     _sum = _sum.add(z);
     return this; }
 
   @Override
-  public final RBFAccumulator add2 (final double z) { 
+  public final RationalFloatAccumulator add2 (final double z) { 
     assert Double.isFinite(z);
     _sum = _sum.add2(z);
     return this; }
 
   @Override
-  public final RBFAccumulator addProduct (final double z0,
+  public final RationalFloatAccumulator addProduct (final double z0,
                                           final double z1) { 
     assert Double.isFinite(z0);
     assert Double.isFinite(z1);
@@ -61,10 +61,10 @@ implements Accumulator<RBFAccumulator> {
   // construction
   //--------------------------------------------------------------
 
-  private RBFAccumulator () { super(); clear(); }
+  private RationalFloatAccumulator () { super(); clear(); }
 
-  public static final RBFAccumulator make () {
-    return new RBFAccumulator(); }
+  public static final RationalFloatAccumulator make () {
+    return new RationalFloatAccumulator(); }
 
   //--------------------------------------------------------------
 }

@@ -5,7 +5,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import xfp.java.Debug;
-import xfp.java.accumulators.RBFAccumulator;
+import xfp.java.accumulators.RationalFloatAccumulator;
 import xfp.java.test.Common;
 
 //----------------------------------------------------------------
@@ -23,8 +23,7 @@ public final class ZhuHayesTest {
 
   private static final List<String> accumulators =
     List.of(
-    "xfp.java.accumulators.ZhuHayesAccumulator",
-    "xfp.java.accumulators.ZhuHayesGCAccumulator");
+    "xfp.java.accumulators.ZhuHayesAccumulator");
   
   private static final int TEST_DIM = (1 * 512 * 1024) + 1; 
 
@@ -47,7 +46,7 @@ public final class ZhuHayesTest {
     Common.sumTests(
       Common.generators(TEST_DIM),
       Common.makeAccumulators(accumulators),
-      RBFAccumulator.make()); }
+      RationalFloatAccumulator.make()); }
 
   @SuppressWarnings("static-method")
   @Test
@@ -58,7 +57,7 @@ public final class ZhuHayesTest {
     Common.l2Tests(
       Common.generators(TEST_DIM),
       Common.makeAccumulators(accumulators),
-      RBFAccumulator.make()); }
+      RationalFloatAccumulator.make()); }
 
   @SuppressWarnings("static-method")
   @Test
@@ -69,7 +68,7 @@ public final class ZhuHayesTest {
     Common.dotTests(
       Common.generators(TEST_DIM),
       Common.makeAccumulators(accumulators),
-      RBFAccumulator.make()); }
+      RationalFloatAccumulator.make()); }
 
   @SuppressWarnings("static-method")
   @Test

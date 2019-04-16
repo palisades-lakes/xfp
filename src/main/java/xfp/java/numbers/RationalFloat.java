@@ -20,9 +20,9 @@ import xfp.java.exceptions.Exceptions;
  * @version 2019-04-09
  */
 
-public final class RationalBinaryFloat 
+public final class RationalFloat 
 extends Number
-implements Comparable<RationalBinaryFloat> {
+implements Comparable<RationalFloat> {
 
   private static final long serialVersionUID = 1L;
 
@@ -60,7 +60,7 @@ implements Comparable<RationalBinaryFloat> {
 
   //--------------------------------------------------------------
 
-  private static final RationalBinaryFloat 
+  private static final RationalFloat 
   reduced (final BigInteger n,
            final BigInteger d,
            final int e) {
@@ -79,7 +79,7 @@ implements Comparable<RationalBinaryFloat> {
 //    assert d0.signum() == 1;
     
     if (BigInteger.ONE.equals(d0)) {
-      return new RationalBinaryFloat(n0,d0,e0); } 
+      return new RationalFloat(n0,d0,e0); } 
      
     final BigInteger gcd = n0.gcd(d0);
     // TODO: any value in this test?
@@ -103,24 +103,24 @@ implements Comparable<RationalBinaryFloat> {
 //        + "\ne1= " + e0 
 //        + "\n"
 //        ;
-      return new RationalBinaryFloat(n1,d1,e0); } 
+      return new RationalFloat(n1,d1,e0); } 
 
-    return new RationalBinaryFloat(n0,d0,e0); }
+    return new RationalFloat(n0,d0,e0); }
 
   //--------------------------------------------------------------
 
-  public final RationalBinaryFloat negate () {
+  public final RationalFloat negate () {
     if (isZero()) { return this; }
     return valueOf(numerator().negate(),denominator(),exponent()); }
 
-  public final RationalBinaryFloat reciprocal () {
+  public final RationalFloat reciprocal () {
     assert !isZero(numerator());
     return valueOf(denominator(),numerator(),-exponent()); }
 
   //--------------------------------------------------------------
   // TODO: optimize denominator == 1 cases.
 
-  private final RationalBinaryFloat add (final BigInteger n1,
+  private final RationalFloat add (final BigInteger n1,
                                          final BigInteger d1,
                                          final int e1) {
     final BigInteger n0 = numerator();
@@ -135,12 +135,12 @@ implements Comparable<RationalBinaryFloat> {
       return valueOf(n0d1.shiftLeft(e0-e1).add(n1d0),d0d1,e1); }
     return valueOf(n0d1.add(n1d0.shiftLeft(e1-e0)),d0d1,e0); }
 
-  public final RationalBinaryFloat add (final RationalBinaryFloat q) {
+  public final RationalFloat add (final RationalFloat q) {
     if (isZero()) { return q; }
     if (q.isZero()) { return this; }
     return add(q.numerator(),q.denominator(),q.exponent()); }
 
-  public final RationalBinaryFloat add (final double z) {
+  public final RationalFloat add (final double z) {
     assert Double.isFinite(z);
     final boolean s = Doubles.nonNegative(z);
     final int e1 = Doubles.exponent(z);
@@ -157,7 +157,7 @@ implements Comparable<RationalBinaryFloat> {
 
   //--------------------------------------------------------------
 
-  private final RationalBinaryFloat multiply (final BigInteger n,
+  private final RationalFloat multiply (final BigInteger n,
                                               final BigInteger d,
                                               final int e) {
     return 
@@ -166,7 +166,7 @@ implements Comparable<RationalBinaryFloat> {
         denominator().multiply(d),
         exponent() + e); }
 
-  public final RationalBinaryFloat multiply (final RationalBinaryFloat q) {
+  public final RationalFloat multiply (final RationalFloat q) {
     if (isZero() ) { return ZERO; }
     if (q.isZero()) { return ZERO; }
     if (q.isOne()) { return this; }
@@ -175,7 +175,7 @@ implements Comparable<RationalBinaryFloat> {
 
   //--------------------------------------------------------------
 
-  public final RationalBinaryFloat add2 (final double z) { 
+  public final RationalFloat add2 (final double z) { 
     assert Double.isFinite(z);
     final BigInteger n = numerator();
     final BigInteger d = denominator();
@@ -201,7 +201,7 @@ implements Comparable<RationalBinaryFloat> {
 
   //--------------------------------------------------------------
 
-  public final RationalBinaryFloat addProduct (final double z0,
+  public final RationalFloat addProduct (final double z0,
                                                final double z1) { 
     assert Double.isFinite(z0);
     assert Double.isFinite(z1);
@@ -391,7 +391,7 @@ implements Comparable<RationalBinaryFloat> {
   //--------------------------------------------------------------
 
   @Override
-  public final int compareTo (final RationalBinaryFloat q) {
+  public final int compareTo (final RationalFloat q) {
     final BigInteger n0d1 = numerator().multiply(q.denominator());
     final BigInteger n1d0 = q.numerator().multiply(denominator());
     final int e0 = exponent();
@@ -403,7 +403,7 @@ implements Comparable<RationalBinaryFloat> {
   // Object methods
   //--------------------------------------------------------------
 
-  public final boolean equals (final RationalBinaryFloat q) {
+  public final boolean equals (final RationalFloat q) {
     if (this == q) { return true; }
     if (null == q) { return false; }
     // assuming reduced
@@ -416,8 +416,8 @@ implements Comparable<RationalBinaryFloat> {
 
   @Override
   public boolean equals (final Object o) {
-    if (!(o instanceof RationalBinaryFloat)) { return false; }
-    return equals((RationalBinaryFloat) o); }
+    if (!(o instanceof RationalFloat)) { return false; }
+    return equals((RationalFloat) o); }
 
   @Override
   public int hashCode () {
@@ -439,7 +439,7 @@ implements Comparable<RationalBinaryFloat> {
   // construction
   //--------------------------------------------------------------
 
-  private RationalBinaryFloat (final BigInteger numerator,
+  private RationalFloat (final BigInteger numerator,
                                final BigInteger denominator,
                                final int exponent) {
     super();
@@ -453,7 +453,7 @@ implements Comparable<RationalBinaryFloat> {
 
   //--------------------------------------------------------------
 
-  public static final RationalBinaryFloat valueOf (final BigInteger n,
+  public static final RationalFloat valueOf (final BigInteger n,
                                                    final BigInteger d,
                                                    final int e) {
     assert 1 == d.signum() :
@@ -468,13 +468,13 @@ implements Comparable<RationalBinaryFloat> {
       
     return reduced(n,d,e); }
 
-  public static final RationalBinaryFloat valueOf (final long n,
+  public static final RationalFloat valueOf (final long n,
                                                    final long d,
                                                    final int e) {
     return 
       valueOf(BigInteger.valueOf(n),BigInteger.valueOf(d),e); }
 
-  public static final RationalBinaryFloat valueOf (final int n,
+  public static final RationalFloat valueOf (final int n,
                                                    final int d, 
                                                    final int e) {
     return 
@@ -482,7 +482,7 @@ implements Comparable<RationalBinaryFloat> {
 
   //--------------------------------------------------------------
 
-  private static final RationalBinaryFloat valueOf (final boolean nonNegative,
+  private static final RationalFloat valueOf (final boolean nonNegative,
                                                     final int e,
                                                     final long t)  {
     if (0L == t) { return ZERO; }
@@ -490,7 +490,7 @@ implements Comparable<RationalBinaryFloat> {
     final BigInteger n = BigInteger.valueOf(tt);
     return valueOf(n,BigInteger.ONE,e); } 
 
-  public static final RationalBinaryFloat valueOf (final double x)  {
+  public static final RationalFloat valueOf (final double x)  {
     return valueOf(
       Doubles.nonNegative(x),
       Doubles.exponent(x),
@@ -498,7 +498,7 @@ implements Comparable<RationalBinaryFloat> {
 
   //--------------------------------------------------------------
 
-  private static final RationalBinaryFloat valueOf (final boolean nonNegative,
+  private static final RationalFloat valueOf (final boolean nonNegative,
                                                     final int e,
                                                     final int t)  {
     if (0 == t) { return ZERO; }
@@ -506,7 +506,7 @@ implements Comparable<RationalBinaryFloat> {
     final BigInteger n1 = nonNegative ? n0 : n0.negate();
     return valueOf(n1,BigInteger.ONE,e); } 
 
-  public static final RationalBinaryFloat valueOf (final float x)  {
+  public static final RationalFloat valueOf (final float x)  {
     return valueOf(
       Floats.nonNegative(x),
       Floats.exponent(x),
@@ -514,47 +514,47 @@ implements Comparable<RationalBinaryFloat> {
 
   //--------------------------------------------------------------
 
-  public static final RationalBinaryFloat valueOf (final byte x)  {
+  public static final RationalFloat valueOf (final byte x)  {
     return valueOf(BigInteger.valueOf(x), BigInteger.ONE,0); }
 
-  public static final RationalBinaryFloat valueOf (final short x)  {
+  public static final RationalFloat valueOf (final short x)  {
     return valueOf(BigInteger.valueOf(x), BigInteger.ONE,0); }
 
-  public static final RationalBinaryFloat valueOf (final int x)  {
+  public static final RationalFloat valueOf (final int x)  {
     return valueOf(BigInteger.valueOf(x), BigInteger.ONE,0); }
 
-  public static final RationalBinaryFloat valueOf (final long x)  {
+  public static final RationalFloat valueOf (final long x)  {
     return valueOf(BigInteger.valueOf(x), BigInteger.ONE,0); }
 
   //--------------------------------------------------------------
 
-  public static final RationalBinaryFloat valueOf (final Double x)  {
+  public static final RationalFloat valueOf (final Double x)  {
     return valueOf(x.doubleValue()); }
 
-  public static final RationalBinaryFloat valueOf (final Float x)  {
+  public static final RationalFloat valueOf (final Float x)  {
     return valueOf(x.floatValue()); }
 
-  public static final RationalBinaryFloat valueOf (final Byte x)  {
+  public static final RationalFloat valueOf (final Byte x)  {
     return valueOf(x.byteValue()); }
 
-  public static final RationalBinaryFloat valueOf (final Short x)  {
+  public static final RationalFloat valueOf (final Short x)  {
     return valueOf(x.shortValue()); }
 
-  public static final RationalBinaryFloat valueOf (final Integer x)  {
+  public static final RationalFloat valueOf (final Integer x)  {
     return valueOf(x.intValue()); }
 
-  public static final RationalBinaryFloat valueOf (final Long x)  {
+  public static final RationalFloat valueOf (final Long x)  {
     return valueOf(x.longValue()); }
 
-  public static final RationalBinaryFloat valueOf (final BigDecimal x)  {
+  public static final RationalFloat valueOf (final BigDecimal x)  {
     throw Exceptions.unsupportedOperation(null,"valueOf",x); }
   //    return valueOf(x, BigInteger.ONE); }
 
-  public static final RationalBinaryFloat valueOf (final BigInteger x)  {
+  public static final RationalFloat valueOf (final BigInteger x)  {
     return valueOf(x, BigInteger.ONE,0); }
 
-  public static final RationalBinaryFloat valueOf (final Number x)  {
-    if (x instanceof RationalBinaryFloat) { return (RationalBinaryFloat) x; }
+  public static final RationalFloat valueOf (final Number x)  {
+    if (x instanceof RationalFloat) { return (RationalFloat) x; }
     if (x instanceof Double) { return valueOf((Double) x); }
     if (x instanceof Float) { return valueOf((Float) x); }
     if (x instanceof Byte) { return valueOf((Byte) x); }
@@ -565,24 +565,24 @@ implements Comparable<RationalBinaryFloat> {
     if (x instanceof BigDecimal) { return valueOf((BigDecimal) x); }
     throw Exceptions.unsupportedOperation(null,"valueOf",x); }
 
-  public static final RationalBinaryFloat valueOf (final Object x)  {
+  public static final RationalFloat valueOf (final Object x)  {
     return valueOf((Number) x); }
 
   //--------------------------------------------------------------
 
-  public static final RationalBinaryFloat ZERO = 
-    new RationalBinaryFloat(BigInteger.ZERO,BigInteger.ONE,0);
+  public static final RationalFloat ZERO = 
+    new RationalFloat(BigInteger.ZERO,BigInteger.ONE,0);
 
-  public static final RationalBinaryFloat ONE = 
-    new RationalBinaryFloat(BigInteger.ONE,BigInteger.ONE,0);
+  public static final RationalFloat ONE = 
+    new RationalFloat(BigInteger.ONE,BigInteger.ONE,0);
 
-  public static final RationalBinaryFloat TWO = 
-    new RationalBinaryFloat(BigInteger.ONE,BigInteger.ONE,1);
+  public static final RationalFloat TWO = 
+    new RationalFloat(BigInteger.ONE,BigInteger.ONE,1);
 
-  public static final RationalBinaryFloat TEN = 
-    new RationalBinaryFloat(BigInteger.TEN,BigInteger.ONE,0);
+  public static final RationalFloat TEN = 
+    new RationalFloat(BigInteger.TEN,BigInteger.ONE,0);
 
-  public static final RationalBinaryFloat MINUS_ONE = 
+  public static final RationalFloat MINUS_ONE = 
     ONE.negate();
 
   //--------------------------------------------------------------

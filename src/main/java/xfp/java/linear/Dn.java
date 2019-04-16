@@ -14,7 +14,7 @@ import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 
 import xfp.java.accumulators.Accumulator;
-import xfp.java.accumulators.RBFAccumulator;
+import xfp.java.accumulators.RationalFloatAccumulator;
 import xfp.java.algebra.OneSetOneOperation;
 import xfp.java.algebra.Set;
 import xfp.java.algebra.TwoSetsOneOperation;
@@ -69,7 +69,7 @@ public final class Dn extends LinearSpaceLike {
                                      final double[] x1) {
     final int n = x0.length;
     assert n == x1.length;
-    final Accumulator a = RBFAccumulator.make();
+    final Accumulator a = RationalFloatAccumulator.make();
     for (int i=0;i<n;i++) { a.add(Math.abs(x0[i]-x1[i])); }
     return a.doubleValue(); }
   
@@ -77,7 +77,7 @@ public final class Dn extends LinearSpaceLike {
 
   public static final double l1Norm (final double[] x) {
     final int n = x.length;
-    final Accumulator a = RBFAccumulator.make();
+    final Accumulator a = RationalFloatAccumulator.make();
     for (int i=0;i<n;i++) { a.add(Math.abs(x[i])); }
     return a.doubleValue(); }
   

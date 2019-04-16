@@ -1,7 +1,7 @@
 package xfp.java.scripts;
 
 import xfp.java.accumulators.Accumulator;
-import xfp.java.accumulators.ZhuHayesGCAccumulator;
+import xfp.java.accumulators.ZhuHayesAccumulator;
 import xfp.java.prng.Generator;
 import xfp.java.test.Common;
 
@@ -11,7 +11,7 @@ import xfp.java.test.Common;
  * jy --source 11 src/scripts/java/xfp/java/scripts/ZhuHayesProfile.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-11
+ * @version 2019-04-16
  */
 @SuppressWarnings("unchecked")
 public final class ZhuHayesProfile {
@@ -21,7 +21,7 @@ public final class ZhuHayesProfile {
   public static final void main (final String[] args) {
     final int dim = (64*1024*1024) + 1;
     final int trys = 128;
-    final Accumulator a = ZhuHayesGCAccumulator.make();
+    final Accumulator a = ZhuHayesAccumulator.make();
     assert a.isExact();
     for (final Generator g : Common.zeroSumGenerators(dim)) {
       System.out.println();

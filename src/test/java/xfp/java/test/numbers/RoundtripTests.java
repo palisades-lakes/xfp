@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import xfp.java.numbers.Doubles;
 import xfp.java.numbers.Floats;
 import xfp.java.numbers.Rational;
-import xfp.java.numbers.RationalBinaryFloat;
+import xfp.java.numbers.RationalFloat;
 import xfp.java.prng.Generator;
 import xfp.java.prng.PRNG;
 
@@ -107,7 +107,7 @@ public final class RoundtripTests {
       //subnormalDoubles();
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
-      final RationalBinaryFloat f = RationalBinaryFloat.valueOf(x);
+      final RationalFloat f = RationalFloat.valueOf(x);
       final double xf = f.doubleValue();
       if (x != xf) { 
         System.out.println("\n\n" + 
@@ -189,7 +189,7 @@ public final class RoundtripTests {
       //subnormalFloats();
     for (int i=0;i<TRYS;i++) {
       final float x = g.nextFloat();
-      final RationalBinaryFloat f = RationalBinaryFloat.valueOf(x);
+      final RationalFloat f = RationalFloat.valueOf(x);
       final float xf = f.floatValue();
       if (x != xf) { 
         System.out.println("\n\n" + 

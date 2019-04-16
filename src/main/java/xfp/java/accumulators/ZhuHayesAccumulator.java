@@ -304,7 +304,7 @@ implements Accumulator<ZhuHayesAccumulator> {
     System.arraycopy(a2,0,x,a1.length,a2.length);
     // Step 6
     // for checking IFastSum
-    //return RBFAccumulator.make().addAll(x).doubleValue(); }
+    //return RationalFloatAccumulator.make().addAll(x).doubleValue(); }
     final int[] n = new int[1];
     n[0] = x.length;
     return iFastSum(x,n,true); }
