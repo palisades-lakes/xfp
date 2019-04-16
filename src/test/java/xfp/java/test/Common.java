@@ -21,7 +21,7 @@ import xfp.java.prng.PRNG;
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-11
+ * @version 2019-04-16
  */
 @SuppressWarnings("unchecked")
 public final class Common {
@@ -118,7 +118,7 @@ public final class Common {
   public static final List<String> accumulators () { 
     return List.of(
       "xfp.java.accumulators.DoubleAccumulator",
-      "xfp.java.accumulators.ZhuHayesNoGCAccumulator",
+      "xfp.java.accumulators.ZhuHayesAccumulator",
       "xfp.java.accumulators.ZhuHayesGCAccumulator",
       "xfp.java.accumulators.RBFAccumulator"); }
 

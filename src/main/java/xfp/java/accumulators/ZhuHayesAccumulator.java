@@ -43,8 +43,8 @@ import xfp.java.numbers.Doubles;
  * @version 2019-04-11
  */
 
-public final class ZhuHayesNoGCAccumulator
-implements Accumulator<ZhuHayesNoGCAccumulator> {
+public final class ZhuHayesAccumulator
+implements Accumulator<ZhuHayesAccumulator> {
 
   //--------------------------------------------------------------
 
@@ -288,7 +288,7 @@ implements Accumulator<ZhuHayesNoGCAccumulator> {
   // aka zero()
 
   @Override
-  public final ZhuHayesNoGCAccumulator clear () {
+  public final ZhuHayesAccumulator clear () {
     i = 0;
     Arrays.fill(a1,0.0);
     Arrays.fill(a2,0.0);
@@ -312,7 +312,7 @@ implements Accumulator<ZhuHayesNoGCAccumulator> {
   //--------------------------------------------------------------
 
   @Override
-  public final ZhuHayesNoGCAccumulator add (final double x) {
+  public final ZhuHayesAccumulator add (final double x) {
     assert Double.isFinite(x);
     // Step 4(2)
     // Step 4(3)
@@ -327,7 +327,7 @@ implements Accumulator<ZhuHayesNoGCAccumulator> {
   //--------------------------------------------------------------
 
   @Override
-  public final ZhuHayesNoGCAccumulator add2 (final double x) {
+  public final ZhuHayesAccumulator add2 (final double x) {
     assert Double.isFinite(x);
 
     final double x2 = x*x;
@@ -339,7 +339,7 @@ implements Accumulator<ZhuHayesNoGCAccumulator> {
   //--------------------------------------------------------------
 
   @Override
-  public final ZhuHayesNoGCAccumulator addProduct (final double x0,
+  public final ZhuHayesAccumulator addProduct (final double x0,
                                                    final double x1) {
     assert Double.isFinite(x0);
     assert Double.isFinite(x1);
@@ -354,7 +354,7 @@ implements Accumulator<ZhuHayesNoGCAccumulator> {
   // construction
   //--------------------------------------------------------------
 
-  private ZhuHayesNoGCAccumulator () {
+  private ZhuHayesAccumulator () {
     i = 0;
     a1 = new double[NACCUMULATORS];
     a2 = new double[NACCUMULATORS];
@@ -362,8 +362,8 @@ implements Accumulator<ZhuHayesNoGCAccumulator> {
     b2 = new double[NACCUMULATORS]; }
 
 
-  public static final ZhuHayesNoGCAccumulator make () {
-    return new ZhuHayesNoGCAccumulator(); }
+  public static final ZhuHayesAccumulator make () {
+    return new ZhuHayesAccumulator(); }
 
   //--------------------------------------------------------------
 } // end of class
