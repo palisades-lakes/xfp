@@ -4,7 +4,6 @@ import static xfp.java.numbers.Doubles.biasedExponent;
 
 import java.util.Arrays;
 
-import xfp.java.accumulators.Accumulator;
 import xfp.java.numbers.Doubles;
 
 //----------------------------------------------------------------

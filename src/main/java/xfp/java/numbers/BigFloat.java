@@ -8,15 +8,21 @@ import java.util.Objects;
 
 import xfp.java.exceptions.Exceptions;
 
-/** Ratios of {@link BigInteger}.
+/** A {@link BigInteger} significand times 2 to a 
+ * <code>int</code> exponent.
+ * 
+ * The idea is that most data will start as <code>double</code>;
+ * extracting the resulting powers of 2 from the significand and
+ * denominator should keep the BigIntegers smaller, and make
+ * arithmetic on them faster.
  *
  * @author palisades dot lakes at gmail dot com
  * @version 2019-04-16
  */
 
-public final class Rational 
+public final class BigFloat 
 extends Number
-implements Comparable<Rational> {
+implements Comparable<BigFloat> {
 
   private static final long serialVersionUID = 1L;
 
@@ -24,154 +30,145 @@ implements Comparable<Rational> {
   // instance fields and methods
   //--------------------------------------------------------------
 
-  private final BigInteger _numerator;
-  public final BigInteger numerator () { return _numerator; }
-  private final BigInteger _denominator;
-  public final BigInteger denominator () { return _denominator; }
+  private final BigInteger _significand;
+  public final BigInteger significand () { return _significand; }
+
+  private final int _exponent;
+  public final int exponent () { return _exponent; }
 
   //--------------------------------------------------------------
 
-  private static final boolean isNegative (final BigInteger i) {
-    return 0 > i.signum(); }
+  //  private static final boolean isNegative (final BigInteger i) {
+  //    return 0 > i.signum(); }
 
   private static final boolean isZero (final BigInteger i) {
     return 0 == i.signum(); }
 
-  public final boolean isZero () { return isZero(numerator()); }
-
-  //  private static final boolean isOne (final BigInteger i) {
-  //    return BigInteger.ONE.equals(i); }
-
-  private static final boolean isOne (final BigInteger n,
-                                      final BigInteger d) {
-    return n.equals(d); }
+  public final boolean isZero () { return isZero(significand()); }
 
   public final boolean isOne () { 
-    return isOne(numerator(),denominator()); }
+    return BigFloat.ONE.equals(this); }
 
   //--------------------------------------------------------------
 
-  private static final Rational reduced (final BigInteger n,
-                                         final BigInteger d) {
-
-    if (d.signum() < 0) { return reduced(n.negate(),d.negate()); }
+  private static final BigFloat 
+  reduced (final BigInteger n,
+           final int e) {
 
     if (n == BigInteger.ZERO) { return ZERO; }
 
-    // TODO: any value in this test?
-    if ((n == BigInteger.ONE) || (d == BigInteger.ONE)) {
-      return new Rational(n,d); }
+    final int en = Numbers.loBit(n);
+    final BigInteger n0 = (en != 0) ? n.shiftRight(en) : n;
+    final int e0 = e + en;
 
-    final BigInteger gcd = n.gcd(d);
-    // TODO: any value in this test?
-    if (gcd.compareTo(BigInteger.ONE) > 0) {
-      return new Rational(n.divide(gcd),d.divide(gcd)); } 
-
-    return new Rational(n,d); }
-
-  //  public final Rational reduce () {
-  //    return reduced(numerator(),denominator()); }
+    return new BigFloat(n0,e0); } 
 
   //--------------------------------------------------------------
 
-  public final Rational negate () {
+  public final BigFloat negate () {
     if (isZero()) { return this; }
-    return valueOf(numerator().negate(),denominator()); }
-
-  public final Rational reciprocal () {
-    assert !isZero(numerator());
-    return valueOf(denominator(),numerator()); }
+    return valueOf(significand().negate(),exponent()); }
 
   //--------------------------------------------------------------
+  // TODO: optimize denominator == 1 cases.
 
-  private final Rational add (final BigInteger n,
-                              final BigInteger d) {
-    return valueOf(
-      numerator().multiply(d).add(n.multiply(denominator())),
-      denominator().multiply(d)); }
+  private final BigFloat add (final BigInteger n1,
+                              final int e1) {
+    final BigInteger n0 = significand();
+    final int e0 = exponent();
+    if (e0 == e1) {
+      return valueOf(n0.add(n1),e1); }
+    if (e0 > e1) {
+      return valueOf(n0.shiftLeft(e0-e1).add(n1),e1); }
+    return valueOf(n0.add(n1.shiftLeft(e1-e0)),e0); }
 
-  public final Rational add (final Rational q) {
+  public final BigFloat add (final BigFloat q) {
     if (isZero()) { return q; }
     if (q.isZero()) { return this; }
-    return add(q.numerator(),q.denominator()); }
+    return add(q.significand(),q.exponent()); }
 
-  public final Rational add (final double z) {
+  public final BigFloat add (final double z) {
     assert Double.isFinite(z);
     final boolean s = Doubles.nonNegative(z);
-    final int e = Doubles.exponent(z);
+    final int e1 = Doubles.exponent(z);
     final long t = Doubles.significand(z);
-    final BigInteger u = BigInteger.valueOf(s ? t : -t);
-    final BigInteger du = denominator().multiply(u);
-    if (0 <= e) {
-      return 
-        valueOf(
-          numerator().add(du.shiftLeft(e)),
-          denominator()); }
-    return 
-      valueOf(
-        numerator().shiftLeft(-e).add(du),
-        denominator().shiftLeft(-e)); }
+    final BigInteger n1 = BigInteger.valueOf(s ? t : -t);
+    final BigInteger n0 = significand();
+    final int e0 = exponent();
+    if (e0 >= e1) {
+      return valueOf(n0.shiftLeft(e0-e1).add(n1),e1); }
+    return valueOf(n0.add(n1.shiftLeft(e1-e0)),e0); }
 
   //--------------------------------------------------------------
 
-  private final Rational multiply (final BigInteger n,
-                                   final BigInteger d) {
+  private final BigFloat multiply (final BigInteger n,
+                                   final int e) {
     return 
       valueOf(
-        numerator().multiply(n), 
-        denominator().multiply(d)); }
+        significand().multiply(n), 
+        exponent() + e); }
 
-  public final Rational multiply (final Rational q) {
+  public final BigFloat multiply (final BigFloat q) {
     if (isZero() ) { return ZERO; }
     if (q.isZero()) { return ZERO; }
     if (q.isOne()) { return this; }
     if (isOne()) { return q; }
-    return multiply(q.numerator(),q.denominator()); }
+    return multiply(q.significand(),q.exponent()); }
 
   //--------------------------------------------------------------
 
-  public final Rational add2 (final double z) { 
+  public final BigFloat add2 (final double z) { 
     assert Double.isFinite(z);
+    final BigInteger n = significand();
+    final int e = exponent();
+
     final boolean s = Doubles.nonNegative(z);
-    final int e = 2*Doubles.exponent(z);
     final long t = (s ? 1L : -1L) * Doubles.significand(z);
+    final int e01 = 2*Doubles.exponent(z);
+    final int de = e - e01;
+
     final BigInteger tt = BigInteger.valueOf(t);
-    final BigInteger n = tt.multiply(tt);
-    final BigInteger dn = denominator().multiply(n);
-    if (0 <= e) {
-      return valueOf(
-        numerator().add(dn.shiftLeft(e)),
-        denominator()); }
-    return valueOf(
-      numerator().shiftLeft(-e).add(dn),
-      denominator().shiftLeft(-e)); }
+    final BigInteger n0 = tt.multiply(tt);
+
+    final int e2;
+    final BigInteger n2;
+    if (0 == de) { e2 = e; n2 = n.add(n0); }
+    else if (0 < de) {
+      e2 = e01; n2 = n.shiftLeft(de).add(n0); }
+    else { e2 = e; n2 = n.add(n0.shiftRight(de)); }
+
+    return valueOf(n2,e2); }
 
   //--------------------------------------------------------------
 
-  public final Rational addProduct (final double z0,
+  public final BigFloat addProduct (final double z0,
                                     final double z1) { 
     assert Double.isFinite(z0);
     assert Double.isFinite(z1);
+    final BigInteger n = significand();
+    final int e = exponent();
+
     final boolean s = 
       ! (Doubles.nonNegative(z0) ^ Doubles.nonNegative(z1));
-    final int e = Doubles.exponent(z0) + Doubles.exponent(z1);
     final long t0 = (s ? 1L : -1L) * Doubles.significand(z0);
     final long t1 = Doubles.significand(z1);
-    final BigInteger n = 
+    final int e01 = Doubles.exponent(z0) + Doubles.exponent(z1);
+    final int de = e - e01;
+
+    final BigInteger n0 = 
       BigInteger.valueOf(t0).multiply(BigInteger.valueOf(t1));
-    final BigInteger dn = denominator().multiply(n);
-    if (0 <= e) {
-      return valueOf(
-        numerator().add(dn.shiftLeft(e)),
-        denominator()); }
-    return valueOf(
-      numerator().shiftLeft(-e).add(dn),
-      denominator().shiftLeft(-e)); }
+    final int e2;
+    final BigInteger n2;
+    if (0 == de) { e2 = e; n2 = n.add(n0); }
+    else if (0 < de) {
+      e2 = e01; n2 = n.shiftLeft(de).add(n0); }
+    else { e2 = e; n2 = n.add(n0.shiftRight(de)); }
+
+    return valueOf(n2,e2); }
 
   //--------------------------------------------------------------
   // Number methods
   //--------------------------------------------------------------
-
   /** Returns the low order bits of the truncated quotient.
    * 
    * TODO: should it really truncate or round instead? Or
@@ -196,32 +193,44 @@ implements Comparable<Rational> {
    * should there be more explicit round, floor, ceil, etc.?
    */
   public final BigInteger bigIntegerValue () { 
-    return numerator().divide(denominator()); }
+    return significand().shiftLeft(exponent()); }
+
+  public final Rational rationalValue () { 
+    if (0 <= exponent()) {
+      return Rational.valueOf(
+        significand().shiftLeft(exponent()),BigInteger.ONE); }
+    return Rational.valueOf(
+      significand(),BigInteger.ONE.shiftLeft(-exponent())); }
 
   //--------------------------------------------------------------
   /** Half-even rounding from {@link BigInteger} ratio to 
    * <code>float</code>.
-   * @param n numerator
+   * @param n significand
    * @param d positive denominator
    * @return closest half-even rounded <code>float</code> to n / d.
    */
 
   @Override
   public final float floatValue () { 
-    final int s = numerator().signum();
+    final int s = significand().signum();
     if (s == 0) { return 0.0F; }
     final boolean neg = (s < 0);
-    final BigInteger n0 = (neg ? numerator().negate() : numerator());
-    final BigInteger d0 = denominator();
+    final BigInteger n0 = (neg ? significand().negate() : significand());
+    final BigInteger d0 = BigInteger.ONE;
+    
+    // TODO: fix this hack
+    final boolean large = (exponent() >= 0);
+    final BigInteger n00 = large ? n0.shiftLeft(exponent()) : n0;
+    final BigInteger d00 = large ? d0 : d0.shiftLeft(-exponent());
 
-    // choose exponent, and shift numerator and denominator so
+    // choose exponent, and shift significand and denominator so
     // quotient has the right number of bits.
-    final int e0 = hiBit(n0) - hiBit(d0) - 1;
+    final int e0 = hiBit(n00) - hiBit(d00) - 1;
     final boolean small = (e0 > 0);
-    final BigInteger n1 = small ? n0 : n0.shiftLeft(-e0);
-    final BigInteger d1 = small ? d0.shiftLeft(e0) : d0;
+    final BigInteger n1 = small ? n00 : n00.shiftLeft(-e0);
+    final BigInteger d1 = small ? d00.shiftLeft(e0) : d00;
 
-    // ensure numerator is less than 2x denominator
+    // ensure significand is less than 2x denominator
     final BigInteger d11 = d1.shiftLeft(1);
     final BigInteger d2;
     final int e2;
@@ -255,27 +264,30 @@ implements Comparable<Rational> {
   //--------------------------------------------------------------
   /** Half-even rounding from {@link BigInteger} ratio to 
    * <code>double</code>.
-   * @param n numerator
-   * @param d positive denominator
-   * @return closest half-even rounded <code>double</code> to n / d.
+   * @return closest half-even rounded <code>double</code> 
    */
 
   @Override
   public final double doubleValue () { 
-    final int s = numerator().signum();
+    final int s = significand().signum();
     if (s == 0) { return 0.0; }
     final boolean neg = (s < 0);
-    final BigInteger n0 = (neg ? numerator().negate() : numerator());
-    final BigInteger d0 = denominator();
+    final BigInteger n0 = (neg ? significand().negate() : significand());
+    final BigInteger d0 = BigInteger.ONE;
 
-    // choose exponent, and shift numerator and denominator so
+    // TODO: fix this hack
+    final boolean large = (exponent() >= 0);
+    final BigInteger n00 = large ? n0.shiftLeft(exponent()) : n0;
+    final BigInteger d00 = large ? d0 : d0.shiftLeft(-exponent());
+
+    // choose exponent, and shift significand and denominator so
     // quotient has the right number of bits.
-    final int e0 = hiBit(n0) - hiBit(d0) - 1;
+    final int e0 = hiBit(n00) - hiBit(d00) - 1;
     final boolean small = (e0 > 0);
-    final BigInteger n1 = small ? n0 : n0.shiftLeft(-e0);
-    final BigInteger d1 = small ? d0.shiftLeft(e0) : d0;
+    final BigInteger n1 = small ? n00 : n00.shiftLeft(-e0);
+    final BigInteger d1 = small ? d00.shiftLeft(e0) : d00;
 
-    // ensure numerator is less than 2x denominator
+    // ensure significand is less than 2x denominator
     final BigInteger d11 = d1.shiftLeft(1);
     final BigInteger d2;
     final int e2;
@@ -303,7 +315,9 @@ implements Comparable<Rational> {
     // handle carry if needed after round up
     final boolean carry = (hiBit(q4) > Doubles.SIGNIFICAND_BITS);
     final long q = carry ? q4 >>> 1 : q4;
-    final int e = (sub ? (carry ? e4 : e4 - 1) : (carry ? e4 + 1 : e4));
+    final int e = 
+      (sub ? (carry ? e4 : e4 - 1) : (carry ? e4 + 1 : e4));
+
     return Doubles.makeDouble(neg,e,q); }
 
   //--------------------------------------------------------------
@@ -311,87 +325,84 @@ implements Comparable<Rational> {
   //--------------------------------------------------------------
 
   @Override
-  public final int compareTo (final Rational o) {
-    final BigInteger n0d1 = numerator().multiply(o.denominator());
-    final BigInteger n1d0 = o.numerator().multiply(denominator());
-    return n0d1.compareTo(n1d0); }
+  public final int compareTo (final BigFloat q) {
+    final BigInteger n0 = significand();
+    final BigInteger n1 = q.significand();
+    final int e0 = exponent();
+    final int e1 = q.exponent();
+    if (e0 <= e1) { return n0.compareTo(n1.shiftLeft(e1-e0)); }
+    return n0.shiftLeft(e0-e1).compareTo(n1); }
 
   //--------------------------------------------------------------
   // Object methods
   //--------------------------------------------------------------
 
-  public final boolean equals (final Rational q) {
+  public final boolean equals (final BigFloat q) {
     if (this == q) { return true; }
     if (null == q) { return false; }
-    final BigInteger n0 = numerator(); 
-    final BigInteger d0 = denominator(); 
-    final BigInteger n1 = q.numerator(); 
-    final BigInteger d1 = q.denominator(); 
-    return n0.multiply(d1).equals(n1.multiply(d0)); }
+    // assuming reduced
+    return 
+      exponent() == q.exponent()
+      &&
+      significand().equals(q._significand); }
 
   @Override
   public boolean equals (final Object o) {
-    if (!(o instanceof Rational)) { return false; }
-    return equals((Rational) o); }
+    if (!(o instanceof BigFloat)) { return false; }
+    return equals((BigFloat) o); }
 
   @Override
   public int hashCode () {
-    return Objects.hash(numerator(),denominator()); }
+    int h = 17;
+    h = 31*h + exponent();
+    h = 31*h + Objects.hash(significand());
+    return h; }
 
   @Override
   public final String toString () {
     return 
-      "(" + numerator().toString(0x10) 
-      + " / " + denominator().toString(0x10) 
-      + ")"; }
+      "2^" + exponent() 
+      + "\n * "
+      + "\n" + significand().toString(0x10) 
+      + "\n"; }
 
   //--------------------------------------------------------------
   // construction
   //--------------------------------------------------------------
 
-  private Rational (final BigInteger numerator,
-                    final BigInteger denominator) {
+  private BigFloat (final BigInteger significand,
+                    final int exponent) {
     super();
-    assert 1 == denominator.signum() :
-      numerator.toString(0x10) 
-      + "\n"
-      + denominator.toString(0x10);
-    _numerator = numerator;
-    _denominator = denominator; }
+    _significand = significand;
+    _exponent = exponent; }
 
   //--------------------------------------------------------------
 
-  public static final Rational valueOf (final BigInteger n,
-                                        final BigInteger d) {
-    if (isNegative(d)) {
-      return valueOf(n.negate(),d.negate()); }
+  public static final BigFloat valueOf (final BigInteger n,
+                                        final int e) {
+    return reduced(n,e); }
 
-    // TODO: is it better to keep ratio in reduced form or not?
-    //return new Rational(n,d); } // ~200x slower in dot product
+  public static final BigFloat valueOf (final long n,
+                                        final int e) {
+    return 
+      valueOf(BigInteger.valueOf(n),e); }
 
-    return reduced(n,d); }
-
-  public static final Rational valueOf (final long n,
-                                        final long d) {
-    return valueOf(BigInteger.valueOf(n),BigInteger.valueOf(d)); }
-
-  public static final Rational valueOf (final int n,
-                                        final int d) {
-    return valueOf(BigInteger.valueOf(n),BigInteger.valueOf(d)); }
+  public static final BigFloat valueOf (final int n,
+                                        final int e) {
+    return 
+      valueOf(BigInteger.valueOf(n),e); }
 
   //--------------------------------------------------------------
 
-  private static final Rational valueOf (final boolean nonNegative,
+  private static final BigFloat valueOf (final boolean nonNegative,
                                          final int e,
                                          final long t)  {
     if (0L == t) { return ZERO; }
-    final BigInteger n0 = BigInteger.valueOf(t);
-    final BigInteger n1 = nonNegative ? n0 : n0.negate();
-    if (0 == e) {  return valueOf(n1); }
-    if (0 < e) { return valueOf(n1.shiftLeft(e)); }
-    return valueOf(n1,BigInteger.ZERO.setBit(-e)); } 
+    final long tt = nonNegative ? t : -t;
+    final BigInteger n = BigInteger.valueOf(tt);
+    return valueOf(n,e); } 
 
-  public static final Rational valueOf (final double x)  {
+  public static final BigFloat valueOf (final double x)  {
     return valueOf(
       Doubles.nonNegative(x),
       Doubles.exponent(x),
@@ -399,17 +410,15 @@ implements Comparable<Rational> {
 
   //--------------------------------------------------------------
 
-  private static final Rational valueOf (final boolean nonNegative,
+  private static final BigFloat valueOf (final boolean nonNegative,
                                          final int e,
                                          final int t)  {
     if (0 == t) { return ZERO; }
     final BigInteger n0 = BigInteger.valueOf(t);
     final BigInteger n1 = nonNegative ? n0 : n0.negate();
-    if (0 == e) {  return valueOf(n1); }
-    if (0 < e) { return valueOf(n1.shiftLeft(e)); }
-    return valueOf(n1,BigInteger.ZERO.setBit(-e)); } 
+    return valueOf(n1,e); } 
 
-  public static final Rational valueOf (final float x)  {
+  public static final BigFloat valueOf (final float x)  {
     return valueOf(
       Floats.nonNegative(x),
       Floats.exponent(x),
@@ -417,47 +426,47 @@ implements Comparable<Rational> {
 
   //--------------------------------------------------------------
 
-  public static final Rational valueOf (final byte x)  {
-    return valueOf(BigInteger.valueOf(x), BigInteger.ONE); }
+  public static final BigFloat valueOf (final byte x)  {
+    return valueOf(BigInteger.valueOf(x),0); }
 
-  public static final Rational valueOf (final short x)  {
-    return valueOf(BigInteger.valueOf(x), BigInteger.ONE); }
+  public static final BigFloat valueOf (final short x)  {
+    return valueOf(BigInteger.valueOf(x),0); }
 
-  public static final Rational valueOf (final int x)  {
-    return valueOf(BigInteger.valueOf(x), BigInteger.ONE); }
+  public static final BigFloat valueOf (final int x)  {
+    return valueOf(BigInteger.valueOf(x),0); }
 
-  public static final Rational valueOf (final long x)  {
-    return valueOf(BigInteger.valueOf(x), BigInteger.ONE); }
+  public static final BigFloat valueOf (final long x)  {
+    return valueOf(BigInteger.valueOf(x),0); }
 
   //--------------------------------------------------------------
 
-  public static final Rational valueOf (final Double x)  {
+  public static final BigFloat valueOf (final Double x)  {
     return valueOf(x.doubleValue()); }
 
-  public static final Rational valueOf (final Float x)  {
+  public static final BigFloat valueOf (final Float x)  {
     return valueOf(x.floatValue()); }
 
-  public static final Rational valueOf (final Byte x)  {
+  public static final BigFloat valueOf (final Byte x)  {
     return valueOf(x.byteValue()); }
 
-  public static final Rational valueOf (final Short x)  {
+  public static final BigFloat valueOf (final Short x)  {
     return valueOf(x.shortValue()); }
 
-  public static final Rational valueOf (final Integer x)  {
+  public static final BigFloat valueOf (final Integer x)  {
     return valueOf(x.intValue()); }
 
-  public static final Rational valueOf (final Long x)  {
+  public static final BigFloat valueOf (final Long x)  {
     return valueOf(x.longValue()); }
 
-  public static final Rational valueOf (final BigDecimal x)  {
+  public static final BigFloat valueOf (final BigDecimal x)  {
     throw Exceptions.unsupportedOperation(null,"valueOf",x); }
   //    return valueOf(x, BigInteger.ONE); }
 
-  public static final Rational valueOf (final BigInteger x)  {
-    return valueOf(x, BigInteger.ONE); }
+  public static final BigFloat valueOf (final BigInteger x)  {
+    return valueOf(x,0); }
 
-  public static final Rational valueOf (final Number x)  {
-    if (x instanceof Rational) { return (Rational) x; }
+  public static final BigFloat valueOf (final Number x)  {
+    if (x instanceof BigFloat) { return (BigFloat) x; }
     if (x instanceof Double) { return valueOf((Double) x); }
     if (x instanceof Float) { return valueOf((Float) x); }
     if (x instanceof Byte) { return valueOf((Byte) x); }
@@ -468,24 +477,24 @@ implements Comparable<Rational> {
     if (x instanceof BigDecimal) { return valueOf((BigDecimal) x); }
     throw Exceptions.unsupportedOperation(null,"valueOf",x); }
 
-  public static final Rational valueOf (final Object x)  {
+  public static final BigFloat valueOf (final Object x)  {
     return valueOf((Number) x); }
 
   //--------------------------------------------------------------
 
-  public static final Rational ZERO = 
-    new Rational(BigInteger.ZERO,BigInteger.ONE);
+  public static final BigFloat ZERO = 
+    new BigFloat(BigInteger.ZERO,0);
 
-  public static final Rational ONE = 
-    new Rational(BigInteger.ONE,BigInteger.ONE);
+  public static final BigFloat ONE = 
+    new BigFloat(BigInteger.ONE,0);
 
-  public static final Rational TWO = 
-    new Rational(BigInteger.TWO,BigInteger.ONE);
+  public static final BigFloat TWO = 
+    new BigFloat(BigInteger.ONE,1);
 
-  public static final Rational TEN = 
-    new Rational(BigInteger.TEN,BigInteger.ONE);
+  public static final BigFloat TEN = 
+    new BigFloat(BigInteger.TEN,0);
 
-  public static final Rational MINUS_ONE = ONE.negate();
+  public static final BigFloat MINUS_ONE = ONE.negate();
 
   //--------------------------------------------------------------
 }
