@@ -169,22 +169,36 @@ public final class OneSetTwoOperations extends Structure {
   //--------------------------------------------------------------
 
   public static final OneSetTwoOperations 
+  ring (final BinaryOperator add,
+        final Object additiveIdentity,
+        final UnaryOperator additiveInverse,
+        final BinaryOperator multiply,
+        final Object multiplicativeIdentity,
+        final Set elements) {
+    return make(
+      add,additiveIdentity,additiveInverse,
+      multiply,multiplicativeIdentity,null,
+      elements,
+      Laws.ring(
+        add,additiveIdentity,additiveInverse,
+        multiply,multiplicativeIdentity,elements)); }
+
+  //--------------------------------------------------------------
+
+  public static final OneSetTwoOperations 
   commutativeRing (final BinaryOperator add,
                    final Object additiveIdentity,
                    final UnaryOperator additiveInverse,
                    final BinaryOperator multiply,
                    final Object multiplicativeIdentity,
-                   final UnaryOperator multiplicativeInverse,
                    final Set elements) {
     return make(
       add,additiveIdentity,additiveInverse,
-      multiply,multiplicativeIdentity,multiplicativeInverse,
+      multiply,multiplicativeIdentity,null,
       elements,
       Laws.commutativeRing(
         add,additiveIdentity,additiveInverse,
         multiply,multiplicativeIdentity,elements)); }
-
-
 
   //--------------------------------------------------------------
 

@@ -23,7 +23,7 @@ import xfp.java.prng.GeneratorBase;
  * <code>BigDecimal</code>.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-25
+ * @version 2019-04-17
  */
 @SuppressWarnings("unchecked")
 public final class BigDecimals implements Set {
@@ -243,9 +243,6 @@ public final class BigDecimals implements Set {
     get().additiveInverse(),
     get().multiplier(),
     get().multiplicativeIdentity(),
-    // no multiplicative inverse for BigDecimal
-    // divide can result in non-terminating decimal expansion
-    null, 
     get());
 
 

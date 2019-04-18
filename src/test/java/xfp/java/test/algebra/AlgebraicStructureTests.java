@@ -18,17 +18,22 @@ import xfp.java.linear.Fn;
 import xfp.java.linear.Qn;
 import xfp.java.linear.RationalsN;
 import xfp.java.numbers.BigDecimals;
+import xfp.java.numbers.BigFloats;
 import xfp.java.numbers.Doubles;
 import xfp.java.numbers.Floats;
 import xfp.java.numbers.Q;
+import xfp.java.numbers.RationalFloats;
 import xfp.java.numbers.Rationals;
 import xfp.java.prng.PRNG;
 
 //----------------------------------------------------------------
 /** Common code for testing sets. 
  *
+ * <pre>
+ * mvn -Dtest=xfp/java/test/algebra/AlgebraicStructureTests test
+ * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-25
+ * @version 2019-04-17
  */
 
 @SuppressWarnings("unchecked")
@@ -51,13 +56,22 @@ public final class AlgebraicStructureTests {
     for(final Predicate law : s.laws()) {
       for (int i=0; i<n; i++) {
         final boolean result = law.test(generators);
-        assertTrue(result); } } }
+        assertTrue(result,
+          s.toString() + " : " + law.toString()); } } }
 
   //--------------------------------------------------------------
 
   @SuppressWarnings({ "static-method" })
   @Test
   public final void tests () {
+
+    structureTests(BigFloats.ADDITIVE_MAGMA,TRYS);
+    structureTests(BigFloats.MULTIPLICATIVE_MAGMA,TRYS); 
+    structureTests(BigFloats.RING,TRYS);  
+
+    structureTests(RationalFloats.ADDITIVE_MAGMA,TRYS);
+    structureTests(RationalFloats.MULTIPLICATIVE_MAGMA,TRYS); 
+    structureTests(RationalFloats.FIELD,TRYS); 
 
     structureTests(BigDecimals.ADDITIVE_MAGMA,TRYS);
     structureTests(BigDecimals.MULTIPLICATIVE_MAGMA,TRYS); 

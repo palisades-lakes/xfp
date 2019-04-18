@@ -11,13 +11,8 @@ import xfp.java.exceptions.Exceptions;
 /** A {@link BigInteger} significand times 2 to a 
  * <code>int</code> exponent.
  * 
- * The idea is that most data will start as <code>double</code>;
- * extracting the resulting powers of 2 from the significand and
- * denominator should keep the BigIntegers smaller, and make
- * arithmetic on them faster.
- *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-16
+ * @version 2019-04-17
  */
 
 public final class BigFloat 
@@ -48,20 +43,6 @@ implements Comparable<BigFloat> {
 
   public final boolean isOne () { 
     return BigFloat.ONE.equals(this); }
-
-  //--------------------------------------------------------------
-
-  private static final BigFloat 
-  reduced (final BigInteger n,
-           final int e) {
-
-    if (n == BigInteger.ZERO) { return ZERO; }
-
-    final int en = Numbers.loBit(n);
-    final BigInteger n0 = (en != 0) ? n.shiftRight(en) : n;
-    final int e0 = e + en;
-
-    return new BigFloat(n0,e0); } 
 
   //--------------------------------------------------------------
 
@@ -217,7 +198,7 @@ implements Comparable<BigFloat> {
     final boolean neg = (s < 0);
     final BigInteger n0 = (neg ? significand().negate() : significand());
     final BigInteger d0 = BigInteger.ONE;
-    
+
     // TODO: fix this hack
     final boolean large = (exponent() >= 0);
     final BigInteger n00 = large ? n0.shiftLeft(exponent()) : n0;
@@ -380,17 +361,19 @@ implements Comparable<BigFloat> {
 
   public static final BigFloat valueOf (final BigInteger n,
                                         final int e) {
-    return reduced(n,e); }
+    if (n == BigInteger.ZERO) { return ZERO; }
+    final int en = Numbers.loBit(n);
+    final BigInteger n0 = (en != 0) ? n.shiftRight(en) : n;
+    final int e0 = e + en;
+    return new BigFloat(n0,e0); } 
 
   public static final BigFloat valueOf (final long n,
                                         final int e) {
-    return 
-      valueOf(BigInteger.valueOf(n),e); }
+    return valueOf(BigInteger.valueOf(n),e); }
 
   public static final BigFloat valueOf (final int n,
                                         final int e) {
-    return 
-      valueOf(BigInteger.valueOf(n),e); }
+    return valueOf(BigInteger.valueOf(n),e); }
 
   //--------------------------------------------------------------
 

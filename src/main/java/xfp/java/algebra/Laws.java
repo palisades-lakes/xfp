@@ -31,7 +31,7 @@ import com.google.common.collect.ImmutableList;
  * no instance state or methods.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-25
+ * @version 2019-04-17
  */
 
 @SuppressWarnings("unchecked")
@@ -114,7 +114,8 @@ public final class Laws {
     class Identity implements Predicate<Map<Set,Supplier>> {
       @Override
       public final String toString () { 
-        return elements + " identity:" + identity.toString(); }
+        return elements + " identity: " + identity.toString() 
+        + "\nis not an identity for " + operation; }
       //      public final String toString () { 
       //        return identity + " is not an identity for " + 
       //          operation + " on " + elements + "\n" +
@@ -133,11 +134,20 @@ public final class Laws {
         final BiPredicate eq = elements.equivalence();
         for (final Object x : excluded) {
           if (eq.test(x,a)) { return true; } }
-        assert elements.contains(a);
-        assert elements.contains(identity);
-        final Object r = operation.apply(a,identity);
+        assert elements.contains(a) : a + " not in " + elements;
+        assert elements.contains(identity) : 
+          "identity:" + identity + " not in " + elements;
         final Object l = operation.apply(identity,a);
-        return eq.test(a,r) && eq.test(a,l); } }
+        final boolean ll = eq.test(a,l);
+        assert ll : 
+          "(" + operation + " " + identity + " " + a + ")"
+          + " -> " + l;
+        final Object r = operation.apply(a,identity);
+        final boolean rr = eq.test(a,r);
+        assert ll : 
+          "(" + operation + " " + identity + " " + a + ")"
+          + " -> " + l;
+        return ll && rr; } }
     return new Identity(); }
 
   /** Does <code>(operation a identity) == 
