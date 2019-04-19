@@ -95,22 +95,35 @@ implements Comparable<Rational> {
     if (q.isZero()) { return this; }
     return add(q.numerator(),q.denominator()); }
 
+  //--------------------------------------------------------------
+
+  private final Rational add (final boolean s,
+                              final BigInteger u,
+                              final int e) {
+
+    final BigInteger du = denominator().multiply(u);
+    if (0 == e) {
+      return valueOf(
+        (s ? numerator().add(du) : numerator().subtract(du)),
+        denominator()); }
+
+    if (0 < e) {
+      final BigInteger due = du.shiftLeft(e);
+      return valueOf(
+        (s ? numerator().add(due) : numerator().subtract(due)),
+        denominator()); }
+
+    final BigInteger ne = numerator().shiftLeft(-e);
+    return valueOf(
+      (s ? ne.add(du) : ne.subtract(du)),
+      denominator().shiftLeft(-e)); }
+
   public final Rational add (final double z) {
     assert Double.isFinite(z);
     final boolean s = Doubles.nonNegative(z);
     final int e = Doubles.exponent(z);
     final long t = Doubles.significand(z);
-    final BigInteger u = BigInteger.valueOf(s ? t : -t);
-    final BigInteger du = denominator().multiply(u);
-    if (0 <= e) {
-      return 
-        valueOf(
-          numerator().add(du.shiftLeft(e)),
-          denominator()); }
-    return 
-      valueOf(
-        numerator().shiftLeft(-e).add(du),
-        denominator().shiftLeft(-e)); }
+    return add(s,BigInteger.valueOf(t),e); }
 
   //--------------------------------------------------------------
 
@@ -132,19 +145,10 @@ implements Comparable<Rational> {
 
   public final Rational add2 (final double z) { 
     assert Double.isFinite(z);
-    final boolean s = Doubles.nonNegative(z);
-    final int e = 2*Doubles.exponent(z);
-    final long t = (s ? 1L : -1L) * Doubles.significand(z);
-    final BigInteger tt = BigInteger.valueOf(t);
-    final BigInteger n = tt.multiply(tt);
-    final BigInteger dn = denominator().multiply(n);
-    if (0 <= e) {
-      return valueOf(
-        numerator().add(dn.shiftLeft(e)),
-        denominator()); }
-    return valueOf(
-      numerator().shiftLeft(-e).add(dn),
-      denominator().shiftLeft(-e)); }
+    final int e = Doubles.exponent(z);
+    final long t0 = Doubles.significand(z);
+    final BigInteger t1 = BigInteger.valueOf(t0);
+    return add(true,t1.multiply(t1),2*e); }
 
   //--------------------------------------------------------------
 
@@ -155,18 +159,11 @@ implements Comparable<Rational> {
     final boolean s = 
       ! (Doubles.nonNegative(z0) ^ Doubles.nonNegative(z1));
     final int e = Doubles.exponent(z0) + Doubles.exponent(z1);
-    final long t0 = (s ? 1L : -1L) * Doubles.significand(z0);
+    final long t0 = Doubles.significand(z0);
     final long t1 = Doubles.significand(z1);
-    final BigInteger n = 
+    final BigInteger u = 
       BigInteger.valueOf(t0).multiply(BigInteger.valueOf(t1));
-    final BigInteger dn = denominator().multiply(n);
-    if (0 <= e) {
-      return valueOf(
-        numerator().add(dn.shiftLeft(e)),
-        denominator()); }
-    return valueOf(
-      numerator().shiftLeft(-e).add(dn),
-      denominator().shiftLeft(-e)); }
+    return add(s,u,e); }
 
   //--------------------------------------------------------------
   // Number methods

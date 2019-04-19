@@ -85,7 +85,7 @@ public final class BigFloats implements Set {
   public final BinaryOperator<BigFloat> multiplier () {
     return new BinaryOperator<BigFloat>() {
       @Override
-      public final String toString () { return "BF.multiply()"; }
+      public final String toString () { return "BF.multiply"; }
       @Override
       public final BigFloat apply (final BigFloat q0, 
                                    final BigFloat q1) {
@@ -150,8 +150,7 @@ public final class BigFloats implements Set {
         final boolean edge = choose.sample() > dp;
         if (edge) { return edgeCases.sample(); }
         return BigFloat.valueOf(
-          (BigInteger) g0.next(),
-          g2.nextInt()); } }; }
+          (BigInteger) g0.next(),g2.nextInt()); } }; }
 
   // Is this characteristic of most inputs?
   public static final Generator 
@@ -231,7 +230,6 @@ public final class BigFloats implements Set {
   //--------------------------------------------------------------
   // construction
   //--------------------------------------------------------------
-
 
   private BigFloats () { }
 

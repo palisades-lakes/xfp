@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Objects;
 
+import xfp.java.Classes;
 import xfp.java.exceptions.Exceptions;
 
 /** A {@link BigInteger} significand times 2 to a 
@@ -82,18 +83,15 @@ implements Comparable<BigFloat> {
 
   //--------------------------------------------------------------
 
-  private final BigFloat multiply (final BigInteger n,
+  private final BigFloat multiply (final BigInteger t,
                                    final int e) {
-    return 
-      valueOf(
-        significand().multiply(n), 
-        exponent() + e); }
+    return valueOf(significand().multiply(t), exponent() + e); }
 
   public final BigFloat multiply (final BigFloat q) {
-    if (isZero() ) { return ZERO; }
-    if (q.isZero()) { return ZERO; }
-    if (q.isOne()) { return this; }
-    if (isOne()) { return q; }
+    //    if (isZero() ) { return ZERO; }
+    //    if (q.isZero()) { return ZERO; }
+    //    if (q.isOne()) { return this; }
+    //    if (isOne()) { return q; }
     return multiply(q.significand(),q.exponent()); }
 
   //--------------------------------------------------------------
@@ -252,54 +250,45 @@ implements Comparable<BigFloat> {
   public final double doubleValue () { 
     final int s = significand().signum();
     if (s == 0) { return 0.0; }
-    final boolean neg = (s < 0);
-    final BigInteger n0 = (neg ? significand().negate() : significand());
-    final BigInteger d0 = BigInteger.ONE;
+    final boolean nonNegative = (s > 0);
+    final BigInteger s0 = 
+      (nonNegative ? significand() : significand().negate());
+    final int e0 = exponent();
+    final int e1 = Numbers.hiBit(s0)-Doubles.SIGNIFICAND_BITS;
+    final int e2 = e0 + e1;
 
-    // TODO: fix this hack
-    final boolean large = (exponent() >= 0);
-    final BigInteger n00 = large ? n0.shiftLeft(exponent()) : n0;
-    final BigInteger d00 = large ? d0 : d0.shiftLeft(-exponent());
+    if (e2 >= Doubles.MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND) {
+      return (nonNegative 
+        ? Double.POSITIVE_INFINITY : Double.NEGATIVE_INFINITY); }
 
-    // choose exponent, and shift significand and denominator so
-    // quotient has the right number of bits.
-    final int e0 = hiBit(n00) - hiBit(d00) - 1;
-    final boolean small = (e0 > 0);
-    final BigInteger n1 = small ? n00 : n00.shiftLeft(-e0);
-    final BigInteger d1 = small ? d00.shiftLeft(e0) : d00;
+    if (e2 < Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND) {
+      return (nonNegative ? 0.0 : -0.0); }
 
-    // ensure significand is less than 2x denominator
-    final BigInteger d11 = d1.shiftLeft(1);
-    final BigInteger d2;
-    final int e2;
-    if (n1.compareTo(d11) < 0) { d2 = d1; e2 = e0;}
-    else { d2 = d11; e2 = e0 + 1; }
+    final long s1;
+    final int e3;
+    // subnormal
+    if (e2 == Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND) {
+      s1 = s0.shiftRight(e1+1).longValue(); 
+      e3 = e2-1; }
+    // normal
+    else { 
+      s1 = s0.shiftRight(e1).longValue();   
+      e3 = e2; }
 
-    // check for out of range
-    if (e2 > Double.MAX_EXPONENT) {
-      return neg ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY; }
-    if (e2 < Doubles.MINIMUM_SUBNORMAL_EXPONENT) {
-      return neg ? -0.0 : 0.0; }
-
-    // subnormal numbers need slightly different handling
-    final boolean sub = (e2 < Double.MIN_EXPONENT);
-    final int e3 = sub ? Double.MIN_EXPONENT : e2;
-    final BigInteger d3 = sub ? d2.shiftLeft(e3-e2) : d2;
-    final BigInteger n3 = n1.shiftLeft(Doubles.STORED_SIGNIFICAND_BITS);
-    final int e4 = e3 - Doubles.STORED_SIGNIFICAND_BITS;
-    final BigInteger[] qr = n3.divideAndRemainder(d3);
-
-    // round down or up? <= implies half-even (?)
-    final boolean down = (qr[1].shiftLeft(1).compareTo(d3) <= 0);
-    final long q4 = qr[0].longValueExact() + (down ? 0L : 1L );
-
-    // handle carry if needed after round up
-    final boolean carry = (hiBit(q4) > Doubles.SIGNIFICAND_BITS);
-    final long q = carry ? q4 >>> 1 : q4;
-    final int e = 
-      (sub ? (carry ? e4 : e4 - 1) : (carry ? e4 + 1 : e4));
-
-    return Doubles.makeDouble(neg,e,q); }
+    try {
+      return Doubles.makeDouble(! nonNegative,e3,s1); }
+    catch (final Throwable t) {
+      System.err.println(
+        Classes.className(this) + ".doubleValue() failed on\n"
+          + this  
+          + "\ns0=" + s0.toString(0x10)
+          + "\ne0=" + e0
+          + "\ne1=" + e1
+          + "\ne2=" + e2
+          + "\ne3=" + e3
+          + "\ns1=" + Long.toHexString(s1)
+          + "\nhiBit(s1)=" + Numbers.hiBit(s1));
+      throw t; } }
 
   //--------------------------------------------------------------
   // Comparable methods
@@ -342,30 +331,31 @@ implements Comparable<BigFloat> {
   @Override
   public final String toString () {
     return 
-      "2^" + exponent() 
-      + "\n * "
-      + "\n" + significand().toString(0x10) 
-      + "\n"; }
+      significand().toString(0x10)  
+      //+ "\n " 
+      + "*"
+      //+ "\n" 
+      + "2^" + exponent()
+      //+ "\n"
+      ; }
 
   //--------------------------------------------------------------
   // construction
   //--------------------------------------------------------------
 
-  private BigFloat (final BigInteger significand,
-                    final int exponent) {
+  private BigFloat (final BigInteger t0,
+                    final int e0) {
     super();
-    _significand = significand;
-    _exponent = exponent; }
+    final int e1 = Numbers.loBit(t0);
+    _significand = (e1 != 0) ? t0.shiftRight(e1) : t0;
+    _exponent = Math.addExact(e0,e1); }
 
   //--------------------------------------------------------------
 
   public static final BigFloat valueOf (final BigInteger n,
                                         final int e) {
     if (n == BigInteger.ZERO) { return ZERO; }
-    final int en = Numbers.loBit(n);
-    final BigInteger n0 = (en != 0) ? n.shiftRight(en) : n;
-    final int e0 = e + en;
-    return new BigFloat(n0,e0); } 
+    return new BigFloat(n,e); } 
 
   public static final BigFloat valueOf (final long n,
                                         final int e) {
@@ -475,7 +465,7 @@ implements Comparable<BigFloat> {
     new BigFloat(BigInteger.ONE,1);
 
   public static final BigFloat TEN = 
-    new BigFloat(BigInteger.TEN,0);
+    new BigFloat(BigInteger.valueOf(5),1);
 
   public static final BigFloat MINUS_ONE = ONE.negate();
 

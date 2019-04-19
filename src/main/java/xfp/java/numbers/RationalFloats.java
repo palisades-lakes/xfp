@@ -245,7 +245,7 @@ public final class RationalFloats implements Set {
     return that instanceof RationalFloats; }
 
   @Override
-  public final String toString () { return "BF"; }
+  public final String toString () { return "RF"; }
 
   //--------------------------------------------------------------
   // construction
@@ -254,7 +254,8 @@ public final class RationalFloats implements Set {
 
   private RationalFloats () { }
 
-  private static final RationalFloats SINGLETON = new RationalFloats();
+  private static final RationalFloats SINGLETON = 
+    new RationalFloats();
 
   public static final RationalFloats get () { return SINGLETON; } 
 

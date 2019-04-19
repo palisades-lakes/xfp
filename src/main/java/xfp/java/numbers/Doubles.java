@@ -34,7 +34,7 @@ import xfp.java.prng.GeneratorBase;
 /** Utilities for <code>double</code>, <code>double[]</code>.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-16
+ * @version 2019-04-18
  */
 public final class Doubles implements Set {
 
@@ -243,11 +243,13 @@ public final class Doubles implements Set {
         + Long.toHexString(significand); }
     else { // normal numbers
       assert (MIN_NORMAL_SIGNIFICAND <= significand) :
-        "Normal significand too small:" 
-        + Long.toHexString(significand);
+        "Normal significand too small: 0x" 
+        + Long.toHexString(significand) 
+        + "p" + exponent;
       assert (significand <= MAX_NORMAL_SIGNIFICAND) :
         "Normal significand too large:" 
-        + Long.toHexString(significand); }
+        + Long.toHexString(significand) 
+        + "p" + exponent; }
 
     final long s = ((long) sign) << 
       (EXPONENT_BITS + STORED_SIGNIFICAND_BITS);

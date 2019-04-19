@@ -27,13 +27,11 @@ import xfp.java.numbers.Rationals;
 import xfp.java.prng.PRNG;
 
 //----------------------------------------------------------------
-/** Common code for testing sets. 
- *
- * <pre>
+/** <pre>
  * mvn -Dtest=xfp/java/test/algebra/AlgebraicStructureTests test
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-17
+ * @version 2019-04-18
  */
 
 @SuppressWarnings("unchecked")
@@ -73,15 +71,15 @@ public final class AlgebraicStructureTests {
     structureTests(RationalFloats.MULTIPLICATIVE_MAGMA,TRYS); 
     structureTests(RationalFloats.FIELD,TRYS); 
 
-    structureTests(BigDecimals.ADDITIVE_MAGMA,TRYS);
-    structureTests(BigDecimals.MULTIPLICATIVE_MAGMA,TRYS); 
-    structureTests(BigDecimals.RING,TRYS);  
-
     structureTests(Rationals.ADDITIVE_MAGMA,TRYS);
     structureTests(Rationals.MULTIPLICATIVE_MAGMA,TRYS); 
     structureTests(Rationals.FIELD,TRYS); 
 
     structureTests(Q.FIELD,TRYS); 
+
+    structureTests(BigDecimals.ADDITIVE_MAGMA,TRYS);
+    structureTests(BigDecimals.MULTIPLICATIVE_MAGMA,TRYS); 
+    structureTests(BigDecimals.RING,TRYS);  
 
     structureTests(Floats.ADDITIVE_MAGMA,TRYS);
     structureTests(Floats.MULTIPLICATIVE_MAGMA,TRYS); 
@@ -106,7 +104,8 @@ public final class AlgebraicStructureTests {
 
       structureTests(Dn.magma(n),SPACE_TRYS); 
       structureTests(Dn.space(n),SPACE_TRYS); 
-    } }
+    } 
+    }
 
 
   //--------------------------------------------------------------
