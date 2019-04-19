@@ -281,7 +281,9 @@ implements Comparable<Rational> {
 
     // check for out of range
     if (e2 > Double.MAX_EXPONENT) {
-      return neg ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY; }
+      return (neg 
+        ? Double.NEGATIVE_INFINITY 
+          : Double.POSITIVE_INFINITY); }
     if (e2 < Doubles.MINIMUM_SUBNORMAL_EXPONENT) {
       return neg ? -0.0 : 0.0; }
 
@@ -300,7 +302,8 @@ implements Comparable<Rational> {
     // handle carry if needed after round up
     final boolean carry = (hiBit(q4) > Doubles.SIGNIFICAND_BITS);
     final long q = carry ? q4 >>> 1 : q4;
-    final int e = (sub ? (carry ? e4 : e4 - 1) : (carry ? e4 + 1 : e4));
+    final int e = 
+      (sub ? (carry ? e4 : e4 - 1) : (carry ? e4 + 1 : e4));
     return Doubles.makeDouble(neg,e,q); }
 
   //--------------------------------------------------------------

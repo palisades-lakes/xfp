@@ -1,12 +1,9 @@
 package xfp.java.numbers;
 
-import static xfp.java.numbers.Numbers.hiBit;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Objects;
 
-import xfp.java.Classes;
 import xfp.java.exceptions.Exceptions;
 
 /** A {@link BigInteger} significand times 2 to a 
@@ -71,15 +68,19 @@ implements Comparable<BigFloat> {
 
   public final BigFloat add (final double z) {
     assert Double.isFinite(z);
-    final boolean s = Doubles.nonNegative(z);
-    final int e1 = Doubles.exponent(z);
-    final long t = Doubles.significand(z);
-    final BigInteger n1 = BigInteger.valueOf(s ? t : -t);
-    final BigInteger n0 = significand();
-    final int e0 = exponent();
-    if (e0 >= e1) {
-      return valueOf(n0.shiftLeft(e0-e1).add(n1),e1); }
-    return valueOf(n0.add(n1.shiftLeft(e1-e0)),e0); }
+    return add(valueOf(z)); }
+
+//  public final BigFloat add (final double z) {
+//    assert Double.isFinite(z);
+//    final boolean s = Doubles.nonNegative(z);
+//    final int e1 = Doubles.exponent(z);
+//    final long t = Doubles.significand(z);
+//    final BigInteger n1 = BigInteger.valueOf(s ? t : -t);
+//    final BigInteger n0 = significand();
+//    final int e0 = exponent();
+//    if (e0 >= e1) {
+//      return valueOf(n0.shiftLeft(e0-e1).add(n1),e1); }
+//    return valueOf(n0.add(n1.shiftLeft(e1-e0)),e0); }
 
   //--------------------------------------------------------------
 
@@ -182,113 +183,155 @@ implements Comparable<BigFloat> {
       significand(),BigInteger.ONE.shiftLeft(-exponent())); }
 
   //--------------------------------------------------------------
-  /** Half-even rounding from {@link BigInteger} ratio to 
-   * <code>float</code>.
-   * @param n significand
-   * @param d positive denominator
-   * @return closest half-even rounded <code>float</code> to n / d.
+  /** Adjust exponent from viewing signifcand as an integer
+   * to significand as a binary 'decimal'.
+   * <p>
+   * TODO: make integer/fractional significand consistent
+   * across all classes. Probably convert to integer 
+   * interpretation everywhere.
+   */
+
+  private static final float floatMergeBits (final int sign,
+                                             final int exponent,
+                                             final int significand) { 
+    assert Numbers.hiBit(significand) <= Floats.SIGNIFICAND_BITS;
+    if (Numbers.hiBit(significand) < Floats.SIGNIFICAND_BITS) {
+      return Floats.mergeBits(
+        sign, 
+        Floats.SUBNORMAL_EXPONENT, 
+        significand); }
+    return Floats.mergeBits(
+      sign, 
+      exponent + Floats.STORED_SIGNIFICAND_BITS, 
+      significand); }
+
+  /** Half-even rounding to nearest double, treating significand
+   * as an integer, rather the usual decimal fraction.
+   */
+
+  private static final float toFloat (final boolean nonNegative,
+                                      final BigInteger significand,
+                                      final int exponent) { 
+    final int sign = (nonNegative ? 0 : 1);
+    final BigInteger s0 = significand;
+    final int e0 = exponent;
+    final int eh = Numbers.hiBit(s0);
+    final int es = 
+      Math.max(Floats.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND - e0,
+        Math.min(
+          Floats.MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND - e0 -1,
+          eh - Floats.SIGNIFICAND_BITS));
+    if (0 == es) {
+      return floatMergeBits(sign,e0,s0.intValue()); }
+    if (0 > es) {
+      final int e1 = e0 + es;
+      final int s1 = (s0.intValue() << -es);
+      return floatMergeBits(sign,e1,s1); }
+    if (eh <= es) { return (nonNegative ? 0.0F : -0.0F); }
+    // eh > es > 0
+    final boolean up = s0.testBit(es); 
+    // TODO: faster way to select the right bits as a long?
+    final int s1 = s0.shiftRight(es).intValue();
+    final int e1 = e0 + es;
+    if (up) {
+      final int s2 = s1 + 1;
+      if (Numbers.hiBit(s2) > 53) { // carry
+        // lost bit has to be zero, since there was just a carry
+        // so no more rounding
+        final int s3 = s2 >> 1;
+      final int e3 = e1 + 1;
+      return floatMergeBits(sign,e3,s3); }
+      // no carry
+      return floatMergeBits(sign,e1,s2); }
+    // round down
+    return floatMergeBits(sign,e1,s1); }
+
+  /** @return closest half-even rounded <code>float</code> 
    */
 
   @Override
   public final float floatValue () { 
-    final int s = significand().signum();
-    if (s == 0) { return 0.0F; }
-    final boolean neg = (s < 0);
-    final BigInteger n0 = (neg ? significand().negate() : significand());
-    final BigInteger d0 = BigInteger.ONE;
-
-    // TODO: fix this hack
-    final boolean large = (exponent() >= 0);
-    final BigInteger n00 = large ? n0.shiftLeft(exponent()) : n0;
-    final BigInteger d00 = large ? d0 : d0.shiftLeft(-exponent());
-
-    // choose exponent, and shift significand and denominator so
-    // quotient has the right number of bits.
-    final int e0 = hiBit(n00) - hiBit(d00) - 1;
-    final boolean small = (e0 > 0);
-    final BigInteger n1 = small ? n00 : n00.shiftLeft(-e0);
-    final BigInteger d1 = small ? d00.shiftLeft(e0) : d00;
-
-    // ensure significand is less than 2x denominator
-    final BigInteger d11 = d1.shiftLeft(1);
-    final BigInteger d2;
-    final int e2;
-    if (n1.compareTo(d11) < 0) { d2 = d1; e2 = e0;}
-    else { d2 = d11; e2 = e0 + 1; }
-
-    // check for out of range
-    if (e2 > Float.MAX_EXPONENT) {
-      return neg ? Float.NEGATIVE_INFINITY : Float.POSITIVE_INFINITY; }
-    if (e2 < Floats.MINIMUM_SUBNORMAL_EXPONENT) {
-      return neg ? -0.0F : 0.0F; }
-
-    // subnormal numbers need slightly different handling
-    final boolean sub = (e2 < Float.MIN_EXPONENT);
-    final int e3 = sub ? Float.MIN_EXPONENT : e2;
-    final BigInteger d3 = sub ? d2.shiftLeft(e3-e2) : d2;
-    final BigInteger n3 = n1.shiftLeft(Floats.STORED_SIGNIFICAND_BITS);
-    final int e4 = e3 - Floats.STORED_SIGNIFICAND_BITS;
-    final BigInteger[] qr = n3.divideAndRemainder(d3);
-
-    // round down or up? <= implies half-even (?)
-    final boolean down = (qr[1].shiftLeft(1).compareTo(d3) <= 0);
-    final int q4 = qr[0].intValueExact() + (down ? 0 : 1 );
-
-    // handle carry if needed after round up
-    final boolean carry = (hiBit(q4) > Floats.SIGNIFICAND_BITS);
-    final int q = carry ? q4 >>> 1 : q4;
-    final int e = (sub ? (carry ? e4 : e4 - 1) : (carry ? e4 + 1 : e4));
-    return Floats.makeFloat(neg,e,q); }
+    final int sign = significand().signum();
+    if (sign == 0) { return 0.0F; }
+    final boolean nonNegative = (sign > 0);
+    final BigInteger s = 
+      (nonNegative ? significand() : significand().negate());
+    return toFloat(nonNegative,s,exponent()); }
 
   //--------------------------------------------------------------
-  /** Half-even rounding from {@link BigInteger} ratio to 
-   * <code>double</code>.
-   * @return closest half-even rounded <code>double</code> 
+  /** Adjust exponent from viewing signifcand as an integer
+   * to significand as a binary 'decimal'.
+   * <p>
+   * TODO: make integer/fractional significand consistent
+   * across all classes. Probably convert to integer 
+   * interpretation everywhere.
+   */
+
+  private static final double doubleMergeBits (final int sign,
+                                               final int exponent,
+                                               final long significand) { 
+    assert Numbers.hiBit(significand) <= Doubles.SIGNIFICAND_BITS;
+    if (Numbers.hiBit(significand) < Doubles.SIGNIFICAND_BITS) {
+      return Doubles.mergeBits(
+        sign, 
+        Doubles.SUBNORMAL_EXPONENT, 
+        significand); }
+    return Doubles.mergeBits(
+      sign, 
+      exponent + Doubles.STORED_SIGNIFICAND_BITS, 
+      significand); }
+
+  /** Half-even rounding to nearest double, treating significand
+   * as an integer, rather the usual decimal fraction.
+   */
+
+  private static final double toDouble (final boolean nonNegative,
+                                        final BigInteger significand,
+                                        final int exponent) { 
+    final int sign = (nonNegative ? 0 : 1);
+    final BigInteger s0 = significand;
+    final int e0 = exponent;
+    final int eh = Numbers.hiBit(s0);
+    final int es = 
+      Math.max(Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND - e0,
+        Math.min(
+          Doubles.MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND - e0 -1,
+          eh - Doubles.SIGNIFICAND_BITS));
+    if (0 == es) {
+      return doubleMergeBits(sign,e0,s0.longValue()); }
+    if (0 > es) {
+      final int e1 = e0 + es;
+      final long s1 = (s0.longValue() << -es);
+      return doubleMergeBits(sign,e1,s1); }
+    if (eh <= es) { return (nonNegative ? 0.0 : -0.0); }
+    // eh > es > 0
+    final boolean up = s0.testBit(es); 
+    // TODO: faster way to select the right bits as a long?
+    final long s1 = s0.shiftRight(es).longValue();
+    final int e1 = e0 + es;
+    if (up) {
+      final long s2 = s1 + 1L;
+      if (Numbers.hiBit(s2) > 53) { // carry
+        // lost bit has to be zero, since there was just a carry
+        final long s3 = (s2 >> 1);
+        final int e3 = e1 + 1;
+        return doubleMergeBits(sign,e3,s3); }
+      // no carry
+      return doubleMergeBits(sign,e1,s2); }
+    // round down
+    return doubleMergeBits(sign,e1,s1); }
+
+  /** @return closest half-even rounded <code>double</code> 
    */
 
   @Override
   public final double doubleValue () { 
-    final int s = significand().signum();
-    if (s == 0) { return 0.0; }
-    final boolean nonNegative = (s > 0);
-    final BigInteger s0 = 
+    final int sign = significand().signum();
+    if (sign == 0) { return 0.0; }
+    final boolean nonNegative = (sign > 0);
+    final BigInteger s = 
       (nonNegative ? significand() : significand().negate());
-    final int e0 = exponent();
-    final int e1 = Numbers.hiBit(s0)-Doubles.SIGNIFICAND_BITS;
-    final int e2 = e0 + e1;
-
-    if (e2 >= Doubles.MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND) {
-      return (nonNegative 
-        ? Double.POSITIVE_INFINITY : Double.NEGATIVE_INFINITY); }
-
-    if (e2 < Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND) {
-      return (nonNegative ? 0.0 : -0.0); }
-
-    final long s1;
-    final int e3;
-    // subnormal
-    if (e2 == Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND) {
-      s1 = s0.shiftRight(e1+1).longValue(); 
-      e3 = e2-1; }
-    // normal
-    else { 
-      s1 = s0.shiftRight(e1).longValue();   
-      e3 = e2; }
-
-    try {
-      return Doubles.makeDouble(! nonNegative,e3,s1); }
-    catch (final Throwable t) {
-      System.err.println(
-        Classes.className(this) + ".doubleValue() failed on\n"
-          + this  
-          + "\ns0=" + s0.toString(0x10)
-          + "\ne0=" + e0
-          + "\ne1=" + e1
-          + "\ne2=" + e2
-          + "\ne3=" + e3
-          + "\ns1=" + Long.toHexString(s1)
-          + "\nhiBit(s1)=" + Numbers.hiBit(s1));
-      throw t; } }
+    return toDouble(nonNegative,s,exponent()); }
 
   //--------------------------------------------------------------
   // Comparable methods
@@ -331,12 +374,9 @@ implements Comparable<BigFloat> {
   @Override
   public final String toString () {
     return 
-      significand().toString(0x10)  
-      //+ "\n " 
-      + "*"
-      //+ "\n" 
-      + "2^" + exponent()
-      //+ "\n"
+      significand().toString(0x10) //+ "\n " 
+      + "*" //+ "\n" 
+      + "2^" + exponent() //+ "\n"
       ; }
 
   //--------------------------------------------------------------
@@ -368,12 +408,13 @@ implements Comparable<BigFloat> {
   //--------------------------------------------------------------
 
   private static final BigFloat valueOf (final boolean nonNegative,
-                                         final int e,
-                                         final long t)  {
-    if (0L == t) { return ZERO; }
-    final long tt = nonNegative ? t : -t;
-    final BigInteger n = BigInteger.valueOf(tt);
-    return valueOf(n,e); } 
+                                         final int e0,
+                                         final long t0)  {
+    if (0L == t0) { return ZERO; }
+    final int e1 = Numbers.loBit(t0);
+    final long t1 = (t0 >> e1);
+    final long t2 = nonNegative ? t1 : -t1;
+    return valueOf(BigInteger.valueOf(t2),e0+e1); } 
 
   public static final BigFloat valueOf (final double x)  {
     return valueOf(

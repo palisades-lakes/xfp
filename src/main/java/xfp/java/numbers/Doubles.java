@@ -213,15 +213,19 @@ public final class Doubles implements Set {
 
     assert (SUBNORMAL_EXPONENT <= exponent)  : 
       "(unbiased) exponent too small: " + exponent;
+
     assert (exponent <= MAX_EXPONENT) :
       "(unbiased) exponent too large: " + exponent;
+    
     final int be = exponent + EXPONENT_BIAS;
+    
     assert (0 <= be) :
       "Negative exponent:" + Integer.toHexString(be) + " : " + be 
       + "\n" + SUBNORMAL_EXPONENT + "<=" + exponent + "<=" 
       + MAX_EXPONENT
       + "\n" + MIN_VALUE + " " + toHexString(MIN_VALUE)
       + "\n" + EXPONENT_BIAS;
+    
     assert (be <= MAXIMUM_BIASED_EXPONENT) :
       "Exponent too large:" + Integer.toHexString(be) +
       ">" + Integer.toHexString(MAXIMUM_BIASED_EXPONENT);
