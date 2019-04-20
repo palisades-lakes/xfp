@@ -16,7 +16,7 @@ import xfp.java.test.Common;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-16
+ * @version 2019-04-20
  */
 
 public final class ZhuHayesTest {
@@ -25,7 +25,7 @@ public final class ZhuHayesTest {
     List.of(
     "xfp.java.accumulators.ZhuHayesAccumulator");
   
-  private static final int TEST_DIM = (1 * 512 * 1024) + 1; 
+  private static final int TEST_DIM = (1 * 64 * 1024) - 1; 
 
   @SuppressWarnings("static-method")
   @Test
