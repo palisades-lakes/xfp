@@ -35,13 +35,11 @@ public final class RationalTest {
     final double x = f.doubleValue();
     Debug.println("f=" + f.toString());
     Debug.println("x=" + Double.toHexString(x));
-    // not really true, but can't check easily
-    // TODO: compare with ERational?
-    // TODO: compare with 
-    // f.numerator().divide(f.denominator()).doubleValue?
+
     if (! Double.isFinite(x)) { 
       final BigInteger q = f.numerator().divide(f.denominator());
       return ! Double.isFinite(q.doubleValue()); }
+
     final Rational fx = Rational.valueOf(x);
     Debug.println("fx=" + fx.toString());
     final int r = f.compareTo(fx);
