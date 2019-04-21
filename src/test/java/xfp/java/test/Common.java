@@ -4,6 +4,7 @@ import static java.lang.Double.toHexString;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -69,12 +70,14 @@ public final class Common {
     // as large as will still have finite float l2 norm squared
     final int emax = deMax(dim)/2;
     final double dmax = (1<<emax);
-    return List.of(
-      Doubles.gaussianGenerator(dim,urp1,0.0,dmax),
-      Doubles.exponentialGenerator(dim,urp2,0.0,dmax),
-      Doubles.laplaceGenerator(dim,urp3,0.0,dmax),
+    return Arrays.asList(
+      new Generator[] {
+//      Doubles.gaussianGenerator(dim,urp1,0.0,dmax),
+//      Doubles.exponentialGenerator(dim,urp2,0.0,dmax),
+//      Doubles.laplaceGenerator(dim,urp3,0.0,dmax),
       Doubles.uniformGenerator(dim,urp4,-dmax,dmax),
-      Doubles.finiteGenerator(dim,urp0,emax)); }
+//      Doubles.finiteGenerator(dim,urp0,emax),
+      }); }
 
   private static final List<Generator> zeroSumGenerators (final List<Generator> gs0) {
     final List<Generator> gs1 =
@@ -289,11 +292,17 @@ public final class Common {
            final Accumulator exact) {
     Assertions.assertTrue(exact.isExact());
     final double[] x = (double[]) g.next();
-    final double truth = exact.clear().addAll(x).doubleValue();
+    final Accumulator efinal = exact.clear().addAll(x);
+    Debug.println(Classes.className(exact));
+    Debug.println(exact.toString());
+    final double truth = efinal.doubleValue();
     Debug.println(g.name());
     for (final Accumulator a : accumulators) {
       final long t0 = System.nanoTime();
-      final double pred = a.clear().addAll(x).doubleValue(); 
+      final Accumulator pfinal = a.clear().addAll(x);
+      Debug.println(Classes.className(a));
+      Debug.println(pfinal.value().toString());
+      final double pred = pfinal.doubleValue(); 
       final long t1 = (System.nanoTime()-t0);
       if (a.isExact()) { 
         Assertions.assertEquals(truth,pred,

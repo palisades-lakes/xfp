@@ -39,7 +39,7 @@ import xfp.java.numbers.Doubles;
  * <em>NOT</em> thread safe!
  * <p>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-11
+ * @version 2019-04-20
  */
 
 public final class ZhuHayesAccumulator
@@ -294,6 +294,10 @@ implements Accumulator<ZhuHayesAccumulator> {
     return this; }
 
   //--------------------------------------------------------------
+
+  @Override
+  public final Object value () { 
+    return Double.valueOf(doubleValue()); }
 
   @Override
   public final double doubleValue () {

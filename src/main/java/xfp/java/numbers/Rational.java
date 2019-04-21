@@ -14,8 +14,7 @@ import xfp.java.exceptions.Exceptions;
  * @version 2019-04-16
  */
 
-public final class Rational 
-extends Number
+public final class Rational extends Number
 implements Comparable<Rational> {
 
   private static final long serialVersionUID = 1L;
@@ -95,35 +94,22 @@ implements Comparable<Rational> {
     if (q.isZero()) { return this; }
     return add(q.numerator(),q.denominator()); }
 
-  //--------------------------------------------------------------
-
-  private final Rational add (final boolean s,
-                              final BigInteger u,
-                              final int e) {
-
-    final BigInteger du = denominator().multiply(u);
-    if (0 == e) {
-      return valueOf(
-        (s ? numerator().add(du) : numerator().subtract(du)),
-        denominator()); }
-
-    if (0 < e) {
-      final BigInteger due = du.shiftLeft(e);
-      return valueOf(
-        (s ? numerator().add(due) : numerator().subtract(due)),
-        denominator()); }
-
-    final BigInteger ne = numerator().shiftLeft(-e);
-    return valueOf(
-      (s ? ne.add(du) : ne.subtract(du)),
-      denominator().shiftLeft(-e)); }
-
   public final Rational add (final double z) {
     assert Double.isFinite(z);
     final boolean s = Doubles.nonNegative(z);
     final int e = Doubles.exponent(z);
     final long t = Doubles.significand(z);
-    return add(s,BigInteger.valueOf(t),e); }
+    final BigInteger u = BigInteger.valueOf(s ? t : -t);
+    final BigInteger du = denominator().multiply(u);
+    if (0 <= e) {
+      return 
+        valueOf(
+          numerator().add(du.shiftLeft(e)),
+          denominator()); }
+    return 
+      valueOf(
+        numerator().shiftLeft(-e).add(du),
+        denominator().shiftLeft(-e)); }
 
   //--------------------------------------------------------------
 
@@ -145,10 +131,19 @@ implements Comparable<Rational> {
 
   public final Rational add2 (final double z) { 
     assert Double.isFinite(z);
-    final int e = Doubles.exponent(z);
-    final long t0 = Doubles.significand(z);
-    final BigInteger t1 = BigInteger.valueOf(t0);
-    return add(true,t1.multiply(t1),2*e); }
+    final boolean s = Doubles.nonNegative(z);
+    final int e = 2*Doubles.exponent(z);
+    final long t = (s ? 1L : -1L) * Doubles.significand(z);
+    final BigInteger tt = BigInteger.valueOf(t);
+    final BigInteger n = tt.multiply(tt);
+    final BigInteger dn = denominator().multiply(n);
+    if (0 <= e) {
+      return valueOf(
+        numerator().add(dn.shiftLeft(e)),
+        denominator()); }
+    return valueOf(
+      numerator().shiftLeft(-e).add(dn),
+      denominator().shiftLeft(-e)); }
 
   //--------------------------------------------------------------
 
@@ -159,11 +154,18 @@ implements Comparable<Rational> {
     final boolean s = 
       ! (Doubles.nonNegative(z0) ^ Doubles.nonNegative(z1));
     final int e = Doubles.exponent(z0) + Doubles.exponent(z1);
-    final long t0 = Doubles.significand(z0);
+    final long t0 = (s ? 1L : -1L) * Doubles.significand(z0);
     final long t1 = Doubles.significand(z1);
-    final BigInteger u = 
+    final BigInteger n = 
       BigInteger.valueOf(t0).multiply(BigInteger.valueOf(t1));
-    return add(s,u,e); }
+    final BigInteger dn = denominator().multiply(n);
+    if (0 <= e) {
+      return valueOf(
+        numerator().add(dn.shiftLeft(e)),
+        denominator()); }
+    return valueOf(
+      numerator().shiftLeft(-e).add(dn),
+      denominator().shiftLeft(-e)); }
 
   //--------------------------------------------------------------
   // Number methods
@@ -281,9 +283,7 @@ implements Comparable<Rational> {
 
     // check for out of range
     if (e2 > Double.MAX_EXPONENT) {
-      return (neg 
-        ? Double.NEGATIVE_INFINITY 
-          : Double.POSITIVE_INFINITY); }
+      return neg ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY; }
     if (e2 < Doubles.MINIMUM_SUBNORMAL_EXPONENT) {
       return neg ? -0.0 : 0.0; }
 
@@ -302,8 +302,7 @@ implements Comparable<Rational> {
     // handle carry if needed after round up
     final boolean carry = (hiBit(q4) > Doubles.SIGNIFICAND_BITS);
     final long q = carry ? q4 >>> 1 : q4;
-    final int e = 
-      (sub ? (carry ? e4 : e4 - 1) : (carry ? e4 + 1 : e4));
+    final int e = (sub ? (carry ? e4 : e4 - 1) : (carry ? e4 + 1 : e4));
     return Doubles.makeDouble(neg,e,q); }
 
   //--------------------------------------------------------------

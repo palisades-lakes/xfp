@@ -13,7 +13,7 @@ import xfp.java.exceptions.Exceptions;
  * TODO: tighten this requirement.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-12
+ * @version 2019-04-20
  */
 
 @SuppressWarnings("unchecked")
@@ -41,6 +41,11 @@ public interface Accumulator<T extends Accumulator> {
   public default boolean noOverflow () {
     throw Exceptions.unsupportedOperation(this,"noOverflow"); }
   
+  /** General accumulators provide this. */
+  public default Object value () {
+    throw 
+    Exceptions.unsupportedOperation(this,"value"); }
+
   /** Half-even rounding to nearest <code>double</code>. */
   public default double doubleValue () {
     throw 
