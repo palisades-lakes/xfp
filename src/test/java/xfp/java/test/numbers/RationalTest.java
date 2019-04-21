@@ -6,6 +6,7 @@ import java.math.BigInteger;
 
 import org.junit.jupiter.api.Test;
 
+import xfp.java.Debug;
 import xfp.java.numbers.Doubles;
 import xfp.java.numbers.Rational;
 import xfp.java.prng.Generator;
@@ -16,21 +17,24 @@ import xfp.java.prng.PRNG;
 /** Test desired properties of Rational. 
  * <p>
  * <pre>
- * mvn -Dtest=xfp/java/test/numbers/RationalTest test > RationalTest.txt
+ * mvn -q -Dtest=xfp/java/test/numbers/RationalTest test > RationalTest.txt
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-27
+ * @version 2019-04-20
  */
 
 public final class RationalTest {
 
   //--------------------------------------------------------------
 
-  private static final boolean correctRounding (final Rational f) {
+  private static final boolean 
+  correctRounding (final Rational f) {
     // TODO: this is necessary but not sufficient to ensure 
     // rounding was correct?
     final double x = f.doubleValue();
+    Debug.println("f=" + f.toString());
+    Debug.println("x=" + Double.toHexString(x));
     // not really true, but can't check easily
     // TODO: compare with ERational?
     // TODO: compare with 
@@ -39,13 +43,17 @@ public final class RationalTest {
       final BigInteger q = f.numerator().divide(f.denominator());
       return ! Double.isFinite(q.doubleValue()); }
     final Rational fx = Rational.valueOf(x);
+    Debug.println("fx=" + fx.toString());
     final int r = f.compareTo(fx);
+    Debug.println("r=" + r);
     final boolean result;
-    if (r < 0) { // fx > f
+    if (r < 0) { // f < fx
       final double x1o = Math.nextDown(x);
+      Debug.println("xlo=" + Double.toHexString(x1o));
       final Rational flo = Rational.valueOf(x1o);
+      Debug.println("flo=" + flo.toString());
       result = flo.compareTo(f) < 0;}
-    else if (r > 0) { // fx < f
+    else if (r > 0) { // f > fx
       final double xhi = Math.nextUp(x);
       final Rational fhi = Rational.valueOf(xhi);
       result = f.compareTo(fhi) < 0; } 
@@ -61,6 +69,17 @@ public final class RationalTest {
   public final void roundingTest () {
     final Rational f = Rational.valueOf(13,11);
     assertTrue(correctRounding(f)); }
+
+  @SuppressWarnings({ "static-method" })
+  @Test
+  public final void anotherRoundingTest () {
+    Debug.DEBUG = true;
+    final Rational f = 
+      Rational.valueOf(
+        BigInteger.valueOf(-0x331c0c32d0072fL),
+        BigInteger.valueOf(0x1000000L));
+    assertTrue(correctRounding(f)); 
+    Debug.DEBUG = false; }
 
   @SuppressWarnings({ "static-method" })
   @Test
