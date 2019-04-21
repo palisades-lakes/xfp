@@ -51,7 +51,7 @@ implements Comparable<Rational> {
   //--------------------------------------------------------------
 
   private static final Rational reduced (final BigInteger n,
-                                         final BigInteger d) {
+                                          final BigInteger d) {
 
     if (d.signum() < 0) { return reduced(n.negate(),d.negate()); }
 
@@ -84,7 +84,7 @@ implements Comparable<Rational> {
   //--------------------------------------------------------------
 
   private final Rational add (final BigInteger n,
-                              final BigInteger d) {
+                               final BigInteger d) {
     return valueOf(
       numerator().multiply(d).add(n.multiply(denominator())),
       denominator().multiply(d)); }
@@ -114,7 +114,7 @@ implements Comparable<Rational> {
   //--------------------------------------------------------------
 
   private final Rational multiply (final BigInteger n,
-                                   final BigInteger d) {
+                                    final BigInteger d) {
     return 
       valueOf(
         numerator().multiply(n), 
@@ -148,7 +148,7 @@ implements Comparable<Rational> {
   //--------------------------------------------------------------
 
   public final Rational addProduct (final double z0,
-                                    final double z1) { 
+                                     final double z1) { 
     assert Double.isFinite(z0);
     assert Double.isFinite(z1);
     final boolean s = 
@@ -349,7 +349,7 @@ implements Comparable<Rational> {
   //--------------------------------------------------------------
 
   private Rational (final BigInteger numerator,
-                    final BigInteger denominator) {
+                     final BigInteger denominator) {
     super();
     assert 1 == denominator.signum() :
       numerator.toString(0x10) 
@@ -361,7 +361,7 @@ implements Comparable<Rational> {
   //--------------------------------------------------------------
 
   public static final Rational valueOf (final BigInteger n,
-                                        final BigInteger d) {
+                                         final BigInteger d) {
     if (isNegative(d)) {
       return valueOf(n.negate(),d.negate()); }
 
@@ -371,18 +371,18 @@ implements Comparable<Rational> {
     return reduced(n,d); }
 
   public static final Rational valueOf (final long n,
-                                        final long d) {
+                                         final long d) {
     return valueOf(BigInteger.valueOf(n),BigInteger.valueOf(d)); }
 
   public static final Rational valueOf (final int n,
-                                        final int d) {
+                                         final int d) {
     return valueOf(BigInteger.valueOf(n),BigInteger.valueOf(d)); }
 
   //--------------------------------------------------------------
 
   private static final Rational valueOf (final boolean nonNegative,
-                                         final int e,
-                                         final long t)  {
+                                          final int e,
+                                          final long t)  {
     if (0L == t) { return ZERO; }
     final BigInteger n0 = BigInteger.valueOf(t);
     final BigInteger n1 = nonNegative ? n0 : n0.negate();
@@ -399,8 +399,8 @@ implements Comparable<Rational> {
   //--------------------------------------------------------------
 
   private static final Rational valueOf (final boolean nonNegative,
-                                         final int e,
-                                         final int t)  {
+                                          final int e,
+                                          final int t)  {
     if (0 == t) { return ZERO; }
     final BigInteger n0 = BigInteger.valueOf(t);
     final BigInteger n1 = nonNegative ? n0 : n0.negate();

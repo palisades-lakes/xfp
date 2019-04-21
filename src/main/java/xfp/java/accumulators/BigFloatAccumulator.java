@@ -6,15 +6,13 @@ import xfp.java.numbers.BigFloat;
  * accumulator (for testing).
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-17
+ * @version 2019-04-20
  */
 public final class BigFloatAccumulator 
 
 implements Accumulator<BigFloatAccumulator> {
 
   private BigFloat _sum;
-
-  public final BigFloat value () { return _sum; }
 
   //--------------------------------------------------------------
   
@@ -23,6 +21,9 @@ implements Accumulator<BigFloatAccumulator> {
 
   @Override
   public final boolean noOverflow () { return true; }
+
+  @Override
+  public final Object value () { return _sum; }
 
   @Override
   public final double doubleValue () { 
