@@ -1,17 +1,18 @@
 package xfp.java.test.numbers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigInteger;
 
 import org.junit.jupiter.api.Test;
 
 import xfp.java.numbers.Doubles;
+import xfp.java.numbers.Numbers;
 import xfp.java.numbers.RationalFloat;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
 import xfp.java.prng.PRNG;
+import xfp.java.test.Common;
 
 //----------------------------------------------------------------
 /** Test desired properties of RationalFloat. 
@@ -21,35 +22,18 @@ import xfp.java.prng.PRNG;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-30
+ * @version 2019-04-21
  */
 
 public final class RationalFloatTest {
 
   //--------------------------------------------------------------
 
-  private static final boolean correctRounding (final RationalFloat f) {
-    // TODO: this is necessary but not sufficient to ensure 
-    // rounding was correct?
-    final double x = f.doubleValue();
-    // not really true, but can't check easily
-    // f.numerator().divide(f.denominator()).doubleValue?
-    if (! Double.isFinite(x)) { 
-      final BigInteger q = f.numerator().divide(f.denominator()).shiftLeft(f.exponent());
-      return ! Double.isFinite(q.doubleValue()); }
-    final RationalFloat fx = RationalFloat.valueOf(x);
-    final int r = f.compareTo(fx);
-    final boolean result;
-    if (r < 0) { // fx > f
-      final double x1o = Math.nextDown(x);
-      final RationalFloat flo = RationalFloat.valueOf(x1o);
-      result = flo.compareTo(f) < 0;}
-    else if (r > 0) { // fx < f
-      final double xhi = Math.nextUp(x);
-      final RationalFloat fhi = RationalFloat.valueOf(xhi);
-      result = f.compareTo(fhi) < 0; } 
-    else { result = true; }
-    return result; }
+  private static final void correctRounding (final RationalFloat f) {
+    Common.doubleRoundingTest(
+      RationalFloat::valueOf,
+      Numbers::doubleValue,
+      f); }
 
   //--------------------------------------------------------------
 
@@ -60,7 +44,7 @@ public final class RationalFloatTest {
   public final void roundingTest () {
     final RationalFloat f = 
       RationalFloat.valueOf(13,11,0);
-    assertTrue(correctRounding(f)); }
+    correctRounding(f); }
 
   @SuppressWarnings({ "static-method" })
   @Test
@@ -70,7 +54,7 @@ public final class RationalFloatTest {
         BigInteger.valueOf(0x789f09858446ad92L),
         BigInteger.valueOf(0x19513ea5d70c32eL),
         0);
-    assertTrue(correctRounding(f)); }
+    correctRounding(f); }
 
   @SuppressWarnings({ "static-method" })
   @Test
@@ -87,12 +71,7 @@ public final class RationalFloatTest {
       assertEquals(d.signum(),1);
       final RationalFloat f = 
         RationalFloat.valueOf(n,d,0);
-      assertTrue(correctRounding(f),
-        () -> 
-      "\nn= " + n.toString(0x10) 
-      + "\nd= " + d.toString(0x10) 
-      + "\n\nf= " + f.toString()
-      + "\n\nxf= " + Double.toHexString(f.doubleValue())); } }
+      correctRounding(f); } }
 
   @SuppressWarnings({ "static-method" })
   @Test
@@ -110,7 +89,7 @@ public final class RationalFloatTest {
         BigInteger.valueOf(n),
         BigInteger.valueOf(d),
         0);
-      assertTrue(correctRounding(f)); } }
+      correctRounding(f); } }
 
   @SuppressWarnings({ "static-method" })
   @Test
@@ -122,11 +101,7 @@ public final class RationalFloatTest {
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
       final RationalFloat f = RationalFloat.valueOf(x);
-      assertTrue(correctRounding(f),
-        () -> 
-      "\n" + Double.toHexString(x) 
-      + "\n" + f.toString()
-      + "\n" + Double.toHexString(f.doubleValue())); } }
+      correctRounding(f); } }
 
   @SuppressWarnings({ "static-method" })
   @Test
@@ -138,11 +113,7 @@ public final class RationalFloatTest {
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
       final RationalFloat f = RationalFloat.valueOf(x);
-      assertTrue(correctRounding(f),
-        () -> 
-      "\n" + Double.toHexString(x) 
-      + "\n" + f.toString()
-      + "\n" + Double.toHexString(f.doubleValue())); } }
+      correctRounding(f); } }
 
   @SuppressWarnings({ "static-method" })
   @Test
@@ -153,11 +124,7 @@ public final class RationalFloatTest {
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
       final RationalFloat f = RationalFloat.valueOf(x);
-      assertTrue(correctRounding(f),
-        () -> 
-      "\n" + Double.toHexString(x) 
-      + "\n" + f.toString()
-      + "\n" + Double.toHexString(f.doubleValue())); } }
+      correctRounding(f); } }
 
   @SuppressWarnings({ "static-method" })
   @Test
@@ -168,7 +135,7 @@ public final class RationalFloatTest {
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
       final RationalFloat f = RationalFloat.valueOf(x);
-      assertTrue(correctRounding(f)); } }
+      correctRounding(f); } }
 
   //--------------------------------------------------------------
 }

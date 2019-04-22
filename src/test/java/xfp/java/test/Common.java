@@ -6,6 +6,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.DoubleFunction;
+import java.util.function.Function;
+import java.util.function.ToDoubleFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -22,10 +25,70 @@ import xfp.java.prng.PRNG;
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-17
+ * @version 2019-04-21
  */
 @SuppressWarnings("unchecked")
 public final class Common {
+
+  //--------------------------------------------------------------
+  // TODO: java missing corresponding FloatFunction, etc.
+
+  public static final void 
+  doubleRoundTripTest (final DoubleFunction<Number> fromDouble,
+                       final ToDoubleFunction<Number> toDouble,
+                       final double x0) {
+    final Number f = fromDouble.apply(x0);
+    final double x1 = toDouble.applyAsDouble(f);
+    // differentiate -0.0, 0.0 and handle NaN
+    Assertions.assertEquals(0,Double.compare(x0,x1),
+      () -> 
+    Double.toHexString(x0)
+    + "\n->" + f.toString()
+    + "\n->" + Double.toHexString(x1)); }
+
+  //--------------------------------------------------------------
+
+  public static final void 
+  doubleRoundingTest (final DoubleFunction<Comparable> fromDouble,
+                      final ToDoubleFunction toDouble,
+                      final Comparable f,
+                      final Function<Comparable,String> toString) {
+
+    Debug.println("f=" + toString.apply(f));
+
+    final double x = toDouble.applyAsDouble(f);
+    Debug.println("x=" + Double.toHexString(x));
+
+    // only check finite numbers for now
+    if (Double.isFinite(x)) {
+      final Comparable fx = fromDouble.apply(x);
+      Debug.println("fx=" + toString.apply(fx));
+      final int r = f.compareTo(fx);
+
+      final double x1o = Math.nextDown(x);
+      final double xhi = Math.nextUp(x);
+      Debug.println("xlo=" + Double.toHexString(x1o));
+      Debug.println("xhi=" + Double.toHexString(xhi));
+
+      final Comparable flo = fromDouble.apply(x1o);
+      final Comparable fhi = fromDouble.apply(xhi);
+      Debug.println("flo=" + toString.apply(flo));
+      Debug.println("fhi=" + toString.apply(fhi));
+
+      Debug.println("r=" + r);
+      //if (r < 0) { // f < fx
+      Assertions.assertTrue(flo.compareTo(f) < 0); 
+      //}
+      //if (r > 0) { // f > fx
+      Assertions.assertTrue(f.compareTo(fhi) < 0); 
+      // } 
+    } }
+
+  public static final void 
+  doubleRoundingTest (final DoubleFunction<Comparable> fromDouble,
+                      final ToDoubleFunction toDouble,
+                      final Comparable f) {
+    doubleRoundingTest(fromDouble,toDouble,f,Object::toString); }
 
   //--------------------------------------------------------------
   /** See {@link Integer#numberOfLeadingZeros(int)}. */
@@ -75,7 +138,7 @@ public final class Common {
 //      Doubles.gaussianGenerator(dim,urp1,0.0,dmax),
 //      Doubles.exponentialGenerator(dim,urp2,0.0,dmax),
 //      Doubles.laplaceGenerator(dim,urp3,0.0,dmax),
-      Doubles.uniformGenerator(dim,urp4,-dmax,dmax),
+Doubles.uniformGenerator(dim,urp4,-dmax,dmax),
 //      Doubles.finiteGenerator(dim,urp0,emax),
       }); }
 
@@ -122,8 +185,8 @@ public final class Common {
     return List.of(
       "xfp.java.accumulators.DoubleAccumulator",
       "xfp.java.accumulators.ZhuHayesAccumulator",
-//      "xfp.java.accumulators.BigFloatAccumulator"
-//      ,
+      //      "xfp.java.accumulators.BigFloatAccumulator"
+      //      ,
       "xfp.java.accumulators.RationalFloatAccumulator"
       ); }
 

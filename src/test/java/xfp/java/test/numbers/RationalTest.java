@@ -1,17 +1,17 @@
 package xfp.java.test.numbers;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.math.BigInteger;
 
 import org.junit.jupiter.api.Test;
 
 import xfp.java.Debug;
 import xfp.java.numbers.Doubles;
+import xfp.java.numbers.Numbers;
 import xfp.java.numbers.Rational;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
 import xfp.java.prng.PRNG;
+import xfp.java.test.Common;
 
 //----------------------------------------------------------------
 /** Test desired properties of Rational. 
@@ -21,42 +21,18 @@ import xfp.java.prng.PRNG;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-20
+ * @version 2019-04-21
  */
 
 public final class RationalTest {
 
   //--------------------------------------------------------------
 
-  private static final boolean 
-  correctRounding (final Rational f) {
-    // TODO: this is necessary but not sufficient to ensure 
-    // rounding was correct?
-    final double x = f.doubleValue();
-    Debug.println("f=" + f.toString());
-    Debug.println("x=" + Double.toHexString(x));
-
-    if (! Double.isFinite(x)) { 
-      final BigInteger q = f.numerator().divide(f.denominator());
-      return ! Double.isFinite(q.doubleValue()); }
-
-    final Rational fx = Rational.valueOf(x);
-    Debug.println("fx=" + fx.toString());
-    final int r = f.compareTo(fx);
-    Debug.println("r=" + r);
-    final boolean result;
-    if (r < 0) { // f < fx
-      final double x1o = Math.nextDown(x);
-      Debug.println("xlo=" + Double.toHexString(x1o));
-      final Rational flo = Rational.valueOf(x1o);
-      Debug.println("flo=" + flo.toString());
-      result = flo.compareTo(f) < 0;}
-    else if (r > 0) { // f > fx
-      final double xhi = Math.nextUp(x);
-      final Rational fhi = Rational.valueOf(xhi);
-      result = f.compareTo(fhi) < 0; } 
-    else { result = true; }
-    return result; }
+  private static final void correctRounding (final Rational f) {
+    Common.doubleRoundingTest(
+      Rational::valueOf,
+      Numbers::doubleValue,
+      f); }
 
   //--------------------------------------------------------------
 
@@ -65,8 +41,7 @@ public final class RationalTest {
   @SuppressWarnings({ "static-method" })
   @Test
   public final void roundingTest () {
-    final Rational f = Rational.valueOf(13,11);
-    assertTrue(correctRounding(f)); }
+    correctRounding(Rational.valueOf(13,11)); }
 
   @SuppressWarnings({ "static-method" })
   @Test
@@ -76,7 +51,7 @@ public final class RationalTest {
       Rational.valueOf(
         BigInteger.valueOf(-0x331c0c32d0072fL),
         BigInteger.valueOf(0x1000000L));
-    assertTrue(correctRounding(f)); 
+    correctRounding(f); 
     Debug.DEBUG = false; }
 
   @SuppressWarnings({ "static-method" })
@@ -86,7 +61,7 @@ public final class RationalTest {
       Rational.valueOf(
         BigInteger.valueOf(0x789f09858446ad92L),
         BigInteger.valueOf(0x19513ea5d70c32eL));
-    assertTrue(correctRounding(f)); }
+    correctRounding(f); }
 
   @SuppressWarnings({ "static-method" })
   @Test
@@ -102,7 +77,7 @@ public final class RationalTest {
       final BigInteger n = (BigInteger) gn.next();
       final BigInteger d = (BigInteger) gd.next();
       final Rational f = Rational.valueOf(n,d);
-      assertTrue(correctRounding(f)); } }
+      correctRounding(f); } }
 
   @SuppressWarnings({ "static-method" })
   @Test
@@ -120,7 +95,7 @@ public final class RationalTest {
       final Rational f = Rational.valueOf(
         BigInteger.valueOf(n),
         BigInteger.valueOf(d));
-      assertTrue(correctRounding(f)); } }
+      correctRounding(f); } }
 
   @SuppressWarnings({ "static-method" })
   @Test
@@ -131,7 +106,7 @@ public final class RationalTest {
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
       final Rational f = Rational.valueOf(x);
-      assertTrue(correctRounding(f)); } }
+      correctRounding(f); } }
 
   @SuppressWarnings({ "static-method" })
   @Test
@@ -142,7 +117,7 @@ public final class RationalTest {
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
       final Rational f = Rational.valueOf(x);
-      assertTrue(correctRounding(f)); } }
+      correctRounding(f); } }
 
   //--------------------------------------------------------------
 }

@@ -17,13 +17,22 @@ import xfp.java.prng.Generators;
 /** Utilities for Object and primitive numbers.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-25
+ * @version 2019-04-21
  */
 @SuppressWarnings("unchecked")
 public final class Numbers implements Set {
 
   //--------------------------------------------------------------
   // useful class methods
+  //--------------------------------------------------------------
+  // Useful for passing as a Function method reference
+  
+  public static final double doubleValue (final Number x) {
+    return x.doubleValue(); }
+
+  public static final double doubleValue (final Object x) {
+    return doubleValue((Number) x); }
+
   //--------------------------------------------------------------
 
   /** inclusive */

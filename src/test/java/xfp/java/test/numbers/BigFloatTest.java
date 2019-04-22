@@ -2,14 +2,15 @@ package xfp.java.test.numbers;
 
 import java.math.BigInteger;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import xfp.java.Debug;
 import xfp.java.numbers.BigFloat;
 import xfp.java.numbers.Doubles;
+import xfp.java.numbers.Numbers;
 import xfp.java.prng.Generator;
 import xfp.java.prng.PRNG;
+import xfp.java.test.Common;
 
 //----------------------------------------------------------------
 /** Test desired properties of BigFloat. 
@@ -19,35 +20,18 @@ import xfp.java.prng.PRNG;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-19
+ * @version 2019-04-21
  */
 
 public final class BigFloatTest {
 
   //--------------------------------------------------------------
 
-  private static final boolean correctRounding (final BigFloat f) {
-    // TODO: this is necessary but not sufficient to ensure 
-    // rounding was correct?
-    final double x = f.doubleValue();
-    // not really true, but can't check easily
-    // f.numerator().divide(f.denominator()).doubleValue?
-    if (! Double.isFinite(x)) { 
-      final BigInteger q = f.significand().shiftLeft(f.exponent());
-      return ! Double.isFinite(q.doubleValue()); }
-    final BigFloat fx = BigFloat.valueOf(x);
-    final int r = f.compareTo(fx);
-    final boolean result;
-    if (r < 0) { // fx > f
-      final double x1o = Math.nextDown(x);
-      final BigFloat flo = BigFloat.valueOf(x1o);
-      result = flo.compareTo(f) < 0;}
-    else if (r > 0) { // fx < f
-      final double xhi = Math.nextUp(x);
-      final BigFloat fhi = BigFloat.valueOf(xhi);
-      result = f.compareTo(fhi) < 0; } 
-    else { result = true; }
-    return result; }
+  private static final void correctRounding (final BigFloat f) {
+    Common.doubleRoundingTest(
+      BigFloat::valueOf,
+      Numbers::doubleValue,
+      f); }
 
   //--------------------------------------------------------------
 
@@ -63,7 +47,7 @@ public final class BigFloatTest {
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
       final BigFloat f = BigFloat.valueOf(x);
-      Assertions.assertTrue(correctRounding(f)); } }
+      correctRounding(f); } }
 
   @SuppressWarnings({ "static-method" })
   @Test
@@ -74,11 +58,7 @@ public final class BigFloatTest {
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
       final BigFloat f = BigFloat.valueOf(x);
-      Assertions.assertTrue(correctRounding(f),
-        () -> 
-      "\n" + Double.toHexString(x) 
-      + "\n" + f.toString()
-      + "\n" + Double.toHexString(f.doubleValue())); } }
+      correctRounding(f); } }
 
   @SuppressWarnings({ "static-method" })
   @Test
@@ -90,11 +70,8 @@ public final class BigFloatTest {
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
       final BigFloat f = BigFloat.valueOf(x);
-      Assertions.assertTrue(correctRounding(f),
-        () -> 
-      "\n" + Double.toHexString(x) 
-      + "\n" + f.toString()
-      + "\n" + Double.toHexString(f.doubleValue())); } }
+      correctRounding(f); } }
+  
   @SuppressWarnings({ "static-method" })
   @Test
   public final void uniformDoubleRoundingTest () {
@@ -105,12 +82,7 @@ public final class BigFloatTest {
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
       final BigFloat f = BigFloat.valueOf(x);
-      try {
-        Assertions.assertTrue(correctRounding(f),
-          () -> 
-        "\n" + Double.toHexString(x) 
-        + "\n" + f.toString()
-        + "\n" + Double.toHexString(f.doubleValue())); }
+      try { correctRounding(f); }
       catch (final Throwable t) {
         System.err.println("failed:" + Double.toHexString(x));
         throw t; }
@@ -122,11 +94,7 @@ public final class BigFloatTest {
     Debug.DEBUG=false;
     final double x = 0x1.0p-1;
     final BigFloat f = BigFloat.valueOf(x);
-    Assertions.assertTrue(correctRounding(f),
-      () -> 
-    "\n" + Double.toHexString(x) 
-    + "\n" + f.toString()
-    + "\n" + Double.toHexString(f.doubleValue())); } 
+    correctRounding(f); } 
 
   @SuppressWarnings({ "static-method" })
   @Test
@@ -135,7 +103,7 @@ public final class BigFloatTest {
       BigFloat.valueOf(
         BigInteger.valueOf(0x789f09858446ad92L),
         0);
-    Assertions.assertTrue(correctRounding(f)); }
+    correctRounding(f); }
 
   //  @SuppressWarnings({ "static-method" })
   //  @Test
@@ -170,7 +138,7 @@ public final class BigFloatTest {
   //      final long n = g0.nextLong();
   //      final int e = g1.nextInt();
   //      final BigFloat f = BigFloat.valueOf(n,e);
-  //      Assertions.assertTrue(correctRounding(f)); } }
+  //      correctRounding(f); } }
 
 
 
