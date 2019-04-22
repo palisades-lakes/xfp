@@ -17,7 +17,7 @@ import xfp.java.prng.Generators;
 /** Utilities for Object and primitive numbers.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-21
+ * @version 2019-04-22
  */
 @SuppressWarnings("unchecked")
 public final class Numbers implements Set {
@@ -32,6 +32,12 @@ public final class Numbers implements Set {
 
   public static final double doubleValue (final Object x) {
     return doubleValue((Number) x); }
+
+  public static final float floatValue (final Number x) {
+    return x.floatValue(); }
+
+  public static float floatValue (final Object x) {
+    return floatValue((Number) x); }
 
   //--------------------------------------------------------------
 

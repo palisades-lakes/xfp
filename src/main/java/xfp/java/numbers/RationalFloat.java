@@ -75,8 +75,8 @@ implements Comparable<RationalFloat> {
     final BigInteger d0 = (ed != 0) ? d.shiftRight(ed) : d;
     final int e0 = e + en - ed;
 
-//    if (BigInteger.ONE.equals(d0)) {
-//      return new RationalFloat(n0,d0,e0); } 
+    //    if (BigInteger.ONE.equals(d0)) {
+    //      return new RationalFloat(n0,d0,e0); } 
 
     final BigInteger gcd = n0.gcd(d0);
     // TODO: any value in this test?
@@ -177,10 +177,10 @@ implements Comparable<RationalFloat> {
         exponent() + e); }
 
   public final RationalFloat multiply (final RationalFloat q) {
-//    if (isZero() ) { return ZERO; }
-//    if (q.isZero()) { return ZERO; }
-//    if (q.isOne()) { return this; }
-//    if (isOne()) { return q; }
+    //    if (isZero() ) { return ZERO; }
+    //    if (q.isZero()) { return ZERO; }
+    //    if (q.isOne()) { return this; }
+    //    if (isOne()) { return q; }
     return multiply(q.numerator(),q.denominator(),q.exponent()); }
 
   //--------------------------------------------------------------
@@ -326,7 +326,7 @@ implements Comparable<RationalFloat> {
     final BigInteger[] qr = n3.divideAndRemainder(d3);
 
     // round down or up? <= implies half-even (?)
-    final boolean down = (qr[1].shiftLeft(1).compareTo(d3) <= 0);
+    final boolean down = (qr[1].shiftLeft(1).compareTo(d3) < 0);
     final int q4 = qr[0].intValueExact() + (down ? 0 : 1 );
 
     // handle carry if needed after round up
@@ -385,7 +385,7 @@ implements Comparable<RationalFloat> {
     final BigInteger[] qr = n3.divideAndRemainder(d3);
 
     // round down or up? <= implies half-even (?)
-    final boolean down = (qr[1].shiftLeft(1).compareTo(d3) <= 0);
+    final boolean down = (qr[1].shiftLeft(1).compareTo(d3) < 0);
     final long q4 = qr[0].longValueExact() + (down ? 0L : 1L );
 
     // handle carry if needed after round up
@@ -580,7 +580,7 @@ implements Comparable<RationalFloat> {
 
   //--------------------------------------------------------------
   // Note: these need to be reduced.
-  
+
   public static final RationalFloat ZERO = 
     new RationalFloat(BigInteger.ZERO,BigInteger.ONE,0);
 

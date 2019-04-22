@@ -33,7 +33,7 @@ import xfp.java.prng.GeneratorBase;
 /** Utilities for <code>float</code>, <code>float[]</code>.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-27
+ * @version 2019-04-22
  */
 public final class Floats implements Set {
 
@@ -172,6 +172,16 @@ public final class Floats implements Set {
       Math.max(
         unbiasedExponent(x) - STORED_SIGNIFICAND_BITS,
         MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND); }
+
+  //--------------------------------------------------------------
+
+  public static final boolean isEven (final float x) {
+    return 
+      // TODO: is excluding non-finite right? 
+      // otherwise infinities are even, NaN odd
+      Float.isFinite(x) 
+      &&
+      (0 == (significand(x) & 0x1)); }
 
   //--------------------------------------------------------------
 

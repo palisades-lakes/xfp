@@ -22,10 +22,18 @@ public final class RationalTest {
   @SuppressWarnings({ "static-method" })
   @Test
   public final void testRounding () {
+
     Common.doubleRoundingTests(
       Rational::valueOf,
       Rational::valueOf,
       Numbers::doubleValue,
+      (q0,q1) -> ((Rational) q0).subtract((Rational) q1).abs(),
+      Object::toString); 
+
+    Common.floatRoundingTests(
+      Rational::valueOf,
+      Rational::valueOf,
+      Numbers::floatValue,
       (q0,q1) -> ((Rational) q0).subtract((Rational) q1).abs(),
       Object::toString); }
 

@@ -21,7 +21,10 @@ import org.junit.jupiter.api.Assertions;
 import xfp.java.Classes;
 import xfp.java.Debug;
 import xfp.java.accumulators.Accumulator;
+import xfp.java.function.FloatFunction;
+import xfp.java.function.ToFloatFunction;
 import xfp.java.numbers.Doubles;
+import xfp.java.numbers.Floats;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
 import xfp.java.prng.PRNG;
@@ -33,6 +36,192 @@ import xfp.java.prng.PRNG;
  */
 @SuppressWarnings("unchecked")
 public final class Common {
+
+  private static final int TRYS = 1 * 256;
+
+  //--------------------------------------------------------------
+  // TODO: java missing corresponding FloatFunction, etc.
+
+  public static final void 
+  floatRoundTripTest (final FloatFunction fromFloat,
+                      final ToFloatFunction toFloat,
+                      final float x0) {
+    final Object f = fromFloat.apply(x0);
+    final float x1 = toFloat.applyAsFloat(f);
+    // differentiate -0.0, 0.0 and handle NaN
+    Assertions.assertEquals(0,Float.compare(x0,x1),
+      () -> 
+    Float.toHexString(x0)
+    + "\n->" + f.toString()
+    + "\n->" + Float.toHexString(x1)); }
+
+  //--------------------------------------------------------------
+
+  public static final void 
+  floatRoundingTest (final FloatFunction<Comparable> fromFloat,
+                     final ToFloatFunction toFloat,
+                     final BinaryOperator<Comparable> dist,
+                     final Function<Comparable,String> toString,
+                     final Comparable f) {
+
+    Debug.println("f=" + toString.apply(f));
+
+    final float x = toFloat.applyAsFloat(f);
+    Debug.println("x=" + Float.toHexString(x));
+
+    // only check finite numbers for now
+    if (Float.isFinite(x)) {
+      final Comparable fx = fromFloat.apply(x);
+      Debug.println("fx=" + toString.apply(fx));
+      final int r = f.compareTo(fx);
+
+      final float x1o = Math.nextDown(x);
+      final float xhi = Math.nextUp(x);
+      Debug.println("xlo=" + Float.toHexString(x1o));
+      Debug.println("xhi=" + Float.toHexString(xhi));
+
+      final Comparable flo = fromFloat.apply(x1o);
+      final Comparable fhi = fromFloat.apply(xhi);
+      Debug.println("flo=" + toString.apply(flo));
+      Debug.println("fhi=" + toString.apply(fhi));
+
+      Debug.println("r=" + r);
+      //if (r < 0) { // f < fx
+      Assertions.assertTrue(flo.compareTo(f) < 0); 
+      //}
+      //if (r > 0) { // f > fx
+      Assertions.assertTrue(f.compareTo(fhi) < 0); 
+      // } 
+
+      final Comparable dlo = dist.apply(f,flo);
+      final Comparable dx = dist.apply(f,fx);
+      final Comparable dhi = dist.apply(f,fhi);
+      Debug.println("|f-flo|= " + toString.apply(dlo));
+      Debug.println("|f-fx |= " + toString.apply(dx));
+      Debug.println("|f-fhi|= " + toString.apply(dhi));
+      Assertions.assertTrue(dx.compareTo(dlo) <= 0);
+      Assertions.assertTrue(dx.compareTo(dhi) <= 0);
+      if (dx.equals(dlo) || dx.equals(dhi)) {
+        Assertions.assertTrue(Floats.isEven(x)); } } }
+
+  //--------------------------------------------------------------
+
+  private static final void 
+  floatRoundingTest (final BiFunction<BigInteger,BigInteger,Comparable> fromBigIntegers,
+                     final FloatFunction<Comparable> fromFloat,
+                     final ToFloatFunction toFloat,
+                     final BinaryOperator<Comparable> dist,
+                     final Function<Comparable,String> string) {
+
+    floatRoundingTest(fromFloat,toFloat,dist,string,
+      fromBigIntegers.apply(
+        BigInteger.valueOf(13),
+        BigInteger.valueOf(11))); 
+
+    // Debug.DEBUG = true;
+
+    floatRoundingTest(fromFloat,toFloat,dist,string,
+      fromBigIntegers.apply(
+        BigInteger.valueOf(-0x331c0c32d0072fL),
+        BigInteger.valueOf(0x1000000L))); 
+
+    floatRoundingTest(fromFloat,toFloat,dist,string,
+      fromBigIntegers.apply(
+        BigInteger.valueOf(0x331c0c32d0072fL),
+        BigInteger.valueOf(0x1000000L))); 
+
+    //Debug.DEBUG = false; 
+
+    floatRoundingTest(fromFloat,toFloat,dist,string,
+      fromBigIntegers.apply(
+        BigInteger.valueOf(0x789f09858446ad92L),
+        BigInteger.valueOf(0x19513ea5d70c32eL))); }
+
+  private static final void 
+  fromBigIntegersRoundingTest (final BiFunction<BigInteger,BigInteger,Comparable> fromBigIntegers,
+                               final FloatFunction<Comparable> fromFloat,
+                               final ToFloatFunction toFloat,
+                               final BinaryOperator<Comparable> dist,
+                               final Function<Comparable,String> string) {
+    final Generator gn = 
+      Generators.bigIntegerGenerator(
+        PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
+    final Generator gd = 
+      Generators.positiveBigIntegerGenerator(
+        PRNG.well44497b("seeds/Well44497b-2019-01-07.txt"));
+    for (int i=0;i<TRYS;i++) {
+      // some longs will not be exactly representable as floats
+      final BigInteger n = (BigInteger) gn.next();
+      final BigInteger d = (BigInteger) gd.next();
+      floatRoundingTest(fromFloat,toFloat,dist,string,
+        fromBigIntegers.apply(n,d)); } }
+
+  private static final void 
+  fromLongsRoundingTest (final BiFunction<BigInteger,BigInteger,Comparable> fromBigIntegers,
+                         final FloatFunction<Comparable> fromFloat,
+                         final ToFloatFunction toFloat,
+                         final BinaryOperator<Comparable> dist,
+                         final Function<Comparable,String> string) {
+    final Generator g0 = 
+      Generators.longGenerator(
+        PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
+    final Generator g1 = 
+      Generators.positiveLongGenerator(
+        PRNG.well44497b("seeds/Well44497b-2019-01-07.txt"));
+    for (int i=0;i<TRYS;i++) {
+      // some longs will not be exactly representable as floats
+      final long n = g0.nextLong();
+      final long d = g1.nextLong();
+      floatRoundingTest(fromFloat,toFloat,dist,string,
+        fromBigIntegers.apply(
+          BigInteger.valueOf(n),
+          BigInteger.valueOf(d))); } }
+
+  private static final void 
+  finiteFloatRoundingTest (final FloatFunction<Comparable> fromFloat,
+                           final ToFloatFunction toFloat,
+                           final BinaryOperator<Comparable> dist,
+                           final Function<Comparable,String> string) {
+    final Generator g = 
+      Floats.finiteGenerator(
+        PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
+    for (int i=0;i<TRYS;i++) {
+      final float x = g.nextFloat();
+      floatRoundTripTest(fromFloat,toFloat,x);
+      final Comparable f = fromFloat.apply(x);
+      floatRoundingTest(fromFloat,toFloat,dist,string,f); } }
+
+  private static final void 
+  subnormalFloatRoundingTest (final FloatFunction<Comparable> fromFloat,
+                              final ToFloatFunction toFloat,
+                              final BinaryOperator<Comparable> dist,
+                              final Function<Comparable,String> string) {
+    final Generator g = 
+      Floats.subnormalGenerator(
+        PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
+    for (int i=0;i<TRYS;i++) {
+      final float x = g.nextFloat();
+      floatRoundTripTest(fromFloat,toFloat,x);
+      final Comparable f = fromFloat.apply(x);
+      floatRoundingTest(fromFloat,toFloat,dist,string,f); } }
+
+  public static final void 
+  floatRoundingTests (final BiFunction<BigInteger,BigInteger,Comparable> fromBigIntegers,
+                      final FloatFunction<Comparable> fromFloat,
+                      final ToFloatFunction toFloat,
+                      final BinaryOperator<Comparable> dist,
+                      final Function<Comparable,String> string) {
+
+    if (null != fromBigIntegers) {
+      floatRoundingTest(
+        fromBigIntegers,fromFloat,toFloat,dist,string);
+      fromBigIntegersRoundingTest(
+        fromBigIntegers,fromFloat,toFloat,dist,string);
+      fromLongsRoundingTest(
+        fromBigIntegers,fromFloat,toFloat,dist,string); }
+    finiteFloatRoundingTest(fromFloat,toFloat,dist,string);
+    subnormalFloatRoundingTest(fromFloat,toFloat,dist,string);
+  }
 
   //--------------------------------------------------------------
   // TODO: java missing corresponding FloatFunction, etc.
@@ -101,21 +290,19 @@ public final class Common {
 
   //--------------------------------------------------------------
 
-  private static final int TRYS = 1 * 1024;
-
   private static final void 
-  roundingTest (final BiFunction<BigInteger,BigInteger,Comparable> fromBigIntegers,
-                final DoubleFunction<Comparable> fromDouble,
-                final ToDoubleFunction toDouble,
-                final BinaryOperator<Comparable> dist,
-                final Function<Comparable,String> string) {
+  doubleRoundingTest (final BiFunction<BigInteger,BigInteger,Comparable> fromBigIntegers,
+                      final DoubleFunction<Comparable> fromDouble,
+                      final ToDoubleFunction toDouble,
+                      final BinaryOperator<Comparable> dist,
+                      final Function<Comparable,String> string) {
 
     doubleRoundingTest(fromDouble,toDouble,dist,string,
       fromBigIntegers.apply(
         BigInteger.valueOf(13),
         BigInteger.valueOf(11))); 
 
-    Debug.DEBUG = true;
+    // Debug.DEBUG = true;
 
     doubleRoundingTest(fromDouble,toDouble,dist,string,
       fromBigIntegers.apply(
@@ -127,7 +314,7 @@ public final class Common {
         BigInteger.valueOf(0x331c0c32d0072fL),
         BigInteger.valueOf(0x1000000L))); 
 
-    Debug.DEBUG = false; 
+    //Debug.DEBUG = false; 
 
     doubleRoundingTest(fromDouble,toDouble,dist,string,
       fromBigIntegers.apply(
@@ -210,7 +397,7 @@ public final class Common {
                        final Function<Comparable,String> string) {
 
     if (null != fromBigIntegers) {
-      roundingTest(
+      doubleRoundingTest(
         fromBigIntegers,fromDouble,toDouble,dist,string);
       fromBigIntegersRoundingTest(
         fromBigIntegers,fromDouble,toDouble,dist,string);

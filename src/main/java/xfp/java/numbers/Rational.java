@@ -11,7 +11,7 @@ import xfp.java.exceptions.Exceptions;
 /** Ratios of {@link BigInteger}.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-16
+ * @version 2019-04-22
  */
 
 public final class Rational extends Number
@@ -255,7 +255,7 @@ implements Comparable<Rational> {
     final BigInteger[] qr = n3.divideAndRemainder(d3);
 
     // round down or up? <= implies half-even (?)
-    final boolean down = (qr[1].shiftLeft(1).compareTo(d3) <= 0);
+    final boolean down = (qr[1].shiftLeft(1).compareTo(d3) < 0);
     final int q4 = qr[0].intValueExact() + (down ? 0 : 1 );
 
     // handle carry if needed after round up
@@ -309,7 +309,7 @@ implements Comparable<Rational> {
     final BigInteger[] qr = n3.divideAndRemainder(d3);
 
     // round down or up? <= implies half-even (?)
-    final boolean down = (qr[1].shiftLeft(1).compareTo(d3) <= 0);
+    final boolean down = (qr[1].shiftLeft(1).compareTo(d3) < 0);
     final long q4 = qr[0].longValueExact() + (down ? 0L : 1L );
 
     // handle carry if needed after round up

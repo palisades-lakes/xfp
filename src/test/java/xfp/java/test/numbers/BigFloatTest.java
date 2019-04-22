@@ -29,7 +29,15 @@ public final class BigFloatTest {
       BigFloat::valueOf,
       Numbers::doubleValue,
       (q0,q1) -> ((BigFloat) q0).subtract((BigFloat) q1).abs(),
-      Object::toString); }
+      Object::toString); 
+
+    Common.floatRoundingTests(
+      null,
+      BigFloat::valueOf,
+      Numbers::floatValue,
+      (q0,q1) -> ((BigFloat) q0).subtract((BigFloat) q1).abs(),
+      Object::toString); 
+  }
 
   //--------------------------------------------------------------
 }
