@@ -32,6 +32,7 @@ public final class RationalTest {
     Common.doubleRoundingTest(
       Rational::valueOf,
       Numbers::doubleValue,
+      (q0,q1) -> ((Rational) q0).subtract((Rational) q1).abs(),
       f); }
 
   //--------------------------------------------------------------

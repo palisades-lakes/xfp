@@ -31,6 +31,7 @@ public final class BigFloatTest {
     Common.doubleRoundingTest(
       BigFloat::valueOf,
       Numbers::doubleValue,
+      (q0,q1) -> ((BigFloat) q0).subtract((BigFloat) q1).abs(),
       f); }
 
   //--------------------------------------------------------------
@@ -71,7 +72,7 @@ public final class BigFloatTest {
       final double x = g.nextDouble();
       final BigFloat f = BigFloat.valueOf(x);
       correctRounding(f); } }
-  
+
   @SuppressWarnings({ "static-method" })
   @Test
   public final void uniformDoubleRoundingTest () {

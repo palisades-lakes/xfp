@@ -33,7 +33,8 @@ public final class RationalFloatTest {
     Common.doubleRoundingTest(
       RationalFloat::valueOf,
       Numbers::doubleValue,
-      f); }
+      (q0,q1) -> ((RationalFloat) q0).subtract((RationalFloat) q1).abs(),
+            f); }
 
   //--------------------------------------------------------------
 

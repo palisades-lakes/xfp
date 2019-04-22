@@ -6,6 +6,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
 import java.util.function.DoubleFunction;
 import java.util.function.Function;
 import java.util.function.ToDoubleFunction;
@@ -51,6 +53,7 @@ public final class Common {
   public static final void 
   doubleRoundingTest (final DoubleFunction<Comparable> fromDouble,
                       final ToDoubleFunction toDouble,
+                      final BinaryOperator<Comparable> absDiff,
                       final Comparable f,
                       final Function<Comparable,String> toString) {
 
@@ -82,13 +85,20 @@ public final class Common {
       //if (r > 0) { // f > fx
       Assertions.assertTrue(f.compareTo(fhi) < 0); 
       // } 
+      
+      Debug.println("|f-flo|= " + toString.apply(absDiff.apply(f,flo)));
+      Debug.println("|f-fx |= " + toString.apply(absDiff.apply(f,fx)));
+      Debug.println("|f-fhi|= " + toString.apply(absDiff.apply(f,fhi)));
+      
     } }
 
   public static final void 
   doubleRoundingTest (final DoubleFunction<Comparable> fromDouble,
                       final ToDoubleFunction toDouble,
+                      final BinaryOperator<Comparable> absDiff,
                       final Comparable f) {
-    doubleRoundingTest(fromDouble,toDouble,f,Object::toString); }
+    doubleRoundingTest(
+      fromDouble,toDouble,absDiff,f,Object::toString); }
 
   //--------------------------------------------------------------
   /** See {@link Integer#numberOfLeadingZeros(int)}. */

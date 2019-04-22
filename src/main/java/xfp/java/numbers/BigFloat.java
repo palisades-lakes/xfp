@@ -10,7 +10,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-17
+ * @version 2019-04-21
  */
 
 public final class BigFloat 
@@ -81,6 +81,19 @@ implements Comparable<BigFloat> {
 //    if (e0 >= e1) {
 //      return valueOf(n0.shiftLeft(e0-e1).add(n1),e1); }
 //    return valueOf(n0.add(n1.shiftLeft(e1-e0)),e0); }
+
+  //--------------------------------------------------------------
+
+  public final BigFloat subtract (final BigFloat q) {
+    if (isZero()) { return q.negate(); }
+    if (q.isZero()) { return this; }
+    return add(q.significand().negate(),q.exponent()); }
+
+  public final BigFloat abs () {
+    // TODO: direct signum
+    final int s = significand().signum();
+    if (0<=s) { return this; }
+    return negate(); }
 
   //--------------------------------------------------------------
 
