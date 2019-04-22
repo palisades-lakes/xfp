@@ -17,7 +17,7 @@ import xfp.java.exceptions.Exceptions;
  * arithmetic on them faster.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-21
+ * @version 2019-04-22
  */
 
 public final class RationalFloat extends Number
@@ -471,6 +471,10 @@ implements Comparable<RationalFloat> {
                                              final BigInteger d,
                                              final int e) {
     return reduced(n,d,e); }
+
+  public static final RationalFloat valueOf (final BigInteger n,
+                                             final BigInteger d) {
+    return valueOf(n,d,0); }
 
   public static final RationalFloat valueOf (final long n,
                                              final long d,

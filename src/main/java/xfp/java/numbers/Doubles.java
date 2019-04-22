@@ -181,6 +181,16 @@ public final class Doubles implements Set {
 
   //--------------------------------------------------------------
 
+  public static final boolean isEven (final double x) {
+    return 
+      // TODO: is excluding non-finite right? 
+      // otherwise infinities are even, NaN odd
+      Double.isFinite(x) 
+      &&
+      (0L == (significand(x) & 0x1L)); }
+
+  //--------------------------------------------------------------
+
   public static final boolean isNormal (final double x) {
     final int be = biasedExponent(x);
     return (0.0 == x) || ((0 != be) && (0x7FF != be)); }

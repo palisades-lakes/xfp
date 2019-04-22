@@ -4,6 +4,7 @@ import static java.lang.Double.toHexString;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -22,12 +23,13 @@ import xfp.java.Debug;
 import xfp.java.accumulators.Accumulator;
 import xfp.java.numbers.Doubles;
 import xfp.java.prng.Generator;
+import xfp.java.prng.Generators;
 import xfp.java.prng.PRNG;
 
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-21
+ * @version 2019-04-22
  */
 @SuppressWarnings("unchecked")
 public final class Common {
@@ -36,10 +38,10 @@ public final class Common {
   // TODO: java missing corresponding FloatFunction, etc.
 
   public static final void 
-  doubleRoundTripTest (final DoubleFunction<Number> fromDouble,
-                       final ToDoubleFunction<Number> toDouble,
+  doubleRoundTripTest (final DoubleFunction fromDouble,
+                       final ToDoubleFunction toDouble,
                        final double x0) {
-    final Number f = fromDouble.apply(x0);
+    final Object f = fromDouble.apply(x0);
     final double x1 = toDouble.applyAsDouble(f);
     // differentiate -0.0, 0.0 and handle NaN
     Assertions.assertEquals(0,Double.compare(x0,x1),
@@ -53,9 +55,9 @@ public final class Common {
   public static final void 
   doubleRoundingTest (final DoubleFunction<Comparable> fromDouble,
                       final ToDoubleFunction toDouble,
-                      final BinaryOperator<Comparable> absDiff,
-                      final Comparable f,
-                      final Function<Comparable,String> toString) {
+                      final BinaryOperator<Comparable> dist,
+                      final Function<Comparable,String> toString,
+                      final Comparable f) {
 
     Debug.println("f=" + toString.apply(f));
 
@@ -85,20 +87,138 @@ public final class Common {
       //if (r > 0) { // f > fx
       Assertions.assertTrue(f.compareTo(fhi) < 0); 
       // } 
-      
-      Debug.println("|f-flo|= " + toString.apply(absDiff.apply(f,flo)));
-      Debug.println("|f-fx |= " + toString.apply(absDiff.apply(f,fx)));
-      Debug.println("|f-fhi|= " + toString.apply(absDiff.apply(f,fhi)));
-      
-    } }
+
+      final Comparable dlo = dist.apply(f,flo);
+      final Comparable dx = dist.apply(f,fx);
+      final Comparable dhi = dist.apply(f,fhi);
+      Debug.println("|f-flo|= " + toString.apply(dlo));
+      Debug.println("|f-fx |= " + toString.apply(dx));
+      Debug.println("|f-fhi|= " + toString.apply(dhi));
+      Assertions.assertTrue(dx.compareTo(dlo) <= 0);
+      Assertions.assertTrue(dx.compareTo(dhi) <= 0);
+      if (dx.equals(dlo) || dx.equals(dhi)) {
+        Assertions.assertTrue(Doubles.isEven(x)); } } }
+
+  //--------------------------------------------------------------
+
+  private static final int TRYS = 1 * 1024;
+
+  private static final void 
+  roundingTest (final BiFunction<BigInteger,BigInteger,Comparable> fromBigIntegers,
+                final DoubleFunction<Comparable> fromDouble,
+                final ToDoubleFunction toDouble,
+                final BinaryOperator<Comparable> dist,
+                final Function<Comparable,String> string) {
+
+    doubleRoundingTest(fromDouble,toDouble,dist,string,
+      fromBigIntegers.apply(
+        BigInteger.valueOf(13),
+        BigInteger.valueOf(11))); 
+
+    Debug.DEBUG = true;
+
+    doubleRoundingTest(fromDouble,toDouble,dist,string,
+      fromBigIntegers.apply(
+        BigInteger.valueOf(-0x331c0c32d0072fL),
+        BigInteger.valueOf(0x1000000L))); 
+
+    doubleRoundingTest(fromDouble,toDouble,dist,string,
+      fromBigIntegers.apply(
+        BigInteger.valueOf(0x331c0c32d0072fL),
+        BigInteger.valueOf(0x1000000L))); 
+
+    Debug.DEBUG = false; 
+
+    doubleRoundingTest(fromDouble,toDouble,dist,string,
+      fromBigIntegers.apply(
+        BigInteger.valueOf(0x789f09858446ad92L),
+        BigInteger.valueOf(0x19513ea5d70c32eL))); }
+
+  private static final void 
+  fromBigIntegersRoundingTest (final BiFunction<BigInteger,BigInteger,Comparable> fromBigIntegers,
+                               final DoubleFunction<Comparable> fromDouble,
+                               final ToDoubleFunction toDouble,
+                               final BinaryOperator<Comparable> dist,
+                               final Function<Comparable,String> string) {
+    final Generator gn = 
+      Generators.bigIntegerGenerator(
+        PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
+    final Generator gd = 
+      Generators.positiveBigIntegerGenerator(
+        PRNG.well44497b("seeds/Well44497b-2019-01-07.txt"));
+    for (int i=0;i<TRYS;i++) {
+      // some longs will not be exactly representable as doubles
+      final BigInteger n = (BigInteger) gn.next();
+      final BigInteger d = (BigInteger) gd.next();
+      doubleRoundingTest(fromDouble,toDouble,dist,string,
+        fromBigIntegers.apply(n,d)); } }
+
+  private static final void 
+  fromLongsRoundingTest (final BiFunction<BigInteger,BigInteger,Comparable> fromBigIntegers,
+                         final DoubleFunction<Comparable> fromDouble,
+                         final ToDoubleFunction toDouble,
+                         final BinaryOperator<Comparable> dist,
+                         final Function<Comparable,String> string) {
+    final Generator g0 = 
+      Generators.longGenerator(
+        PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
+    final Generator g1 = 
+      Generators.positiveLongGenerator(
+        PRNG.well44497b("seeds/Well44497b-2019-01-07.txt"));
+    for (int i=0;i<TRYS;i++) {
+      // some longs will not be exactly representable as doubles
+      final long n = g0.nextLong();
+      final long d = g1.nextLong();
+      doubleRoundingTest(fromDouble,toDouble,dist,string,
+        fromBigIntegers.apply(
+          BigInteger.valueOf(n),
+          BigInteger.valueOf(d))); } }
+
+  private static final void 
+  finiteDoubleRoundingTest (final DoubleFunction<Comparable> fromDouble,
+                            final ToDoubleFunction toDouble,
+                            final BinaryOperator<Comparable> dist,
+                            final Function<Comparable,String> string) {
+    final Generator g = 
+      Doubles.finiteGenerator(
+        PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
+    for (int i=0;i<TRYS;i++) {
+      final double x = g.nextDouble();
+      doubleRoundTripTest(fromDouble,toDouble,x);
+      final Comparable f = fromDouble.apply(x);
+      doubleRoundingTest(fromDouble,toDouble,dist,string,f); } }
+
+  private static final void 
+  subnormalDoubleRoundingTest (final DoubleFunction<Comparable> fromDouble,
+                               final ToDoubleFunction toDouble,
+                               final BinaryOperator<Comparable> dist,
+                               final Function<Comparable,String> string) {
+    final Generator g = 
+      Doubles.subnormalGenerator(
+        PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
+    for (int i=0;i<TRYS;i++) {
+      final double x = g.nextDouble();
+      doubleRoundTripTest(fromDouble,toDouble,x);
+      final Comparable f = fromDouble.apply(x);
+      doubleRoundingTest(fromDouble,toDouble,dist,string,f); } }
 
   public static final void 
-  doubleRoundingTest (final DoubleFunction<Comparable> fromDouble,
-                      final ToDoubleFunction toDouble,
-                      final BinaryOperator<Comparable> absDiff,
-                      final Comparable f) {
-    doubleRoundingTest(
-      fromDouble,toDouble,absDiff,f,Object::toString); }
+  doubleRoundingTests (final BiFunction<BigInteger,BigInteger,Comparable> fromBigIntegers,
+                       final DoubleFunction<Comparable> fromDouble,
+                       final ToDoubleFunction toDouble,
+                       final BinaryOperator<Comparable> dist,
+                       final Function<Comparable,String> string) {
+
+    if (null != fromBigIntegers) {
+      roundingTest(
+        fromBigIntegers,fromDouble,toDouble,dist,string);
+      fromBigIntegersRoundingTest(
+        fromBigIntegers,fromDouble,toDouble,dist,string);
+      fromLongsRoundingTest(
+        fromBigIntegers,fromDouble,toDouble,dist,string); }
+    finiteDoubleRoundingTest(fromDouble,toDouble,dist,string);
+    subnormalDoubleRoundingTest(fromDouble,toDouble,dist,string);
+  }
 
   //--------------------------------------------------------------
   /** See {@link Integer#numberOfLeadingZeros(int)}. */
