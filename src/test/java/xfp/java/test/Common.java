@@ -149,12 +149,15 @@ public final class Common {
     final Generator gd = 
       Generators.positiveBigIntegerGenerator(
         PRNG.well44497b("seeds/Well44497b-2019-01-07.txt"));
+    //Debug.DEBUG = true;
     for (int i=0;i<TRYS;i++) {
       // some longs will not be exactly representable as floats
       final BigInteger n = (BigInteger) gn.next();
       final BigInteger d = (BigInteger) gd.next();
       floatRoundingTest(fromFloat,toFloat,dist,string,
-        fromBigIntegers.apply(n,d)); } }
+        fromBigIntegers.apply(n,d)); } 
+    //Debug.DEBUG = false;
+  }
 
   private static final void 
   fromLongsRoundingTest (final BiFunction<BigInteger,BigInteger,Comparable> fromBigIntegers,
@@ -452,11 +455,11 @@ public final class Common {
     final double dmax = (1<<emax);
     return Arrays.asList(
       new Generator[] {
-//      Doubles.gaussianGenerator(dim,urp1,0.0,dmax),
-//      Doubles.exponentialGenerator(dim,urp2,0.0,dmax),
-//      Doubles.laplaceGenerator(dim,urp3,0.0,dmax),
-Doubles.uniformGenerator(dim,urp4,-dmax,dmax),
-//      Doubles.finiteGenerator(dim,urp0,emax),
+                       Doubles.gaussianGenerator(dim,urp1,0.0,dmax),
+                       Doubles.exponentialGenerator(dim,urp2,0.0,dmax),
+                       Doubles.laplaceGenerator(dim,urp3,0.0,dmax),
+                       Doubles.uniformGenerator(dim,urp4,-dmax,dmax),
+                       Doubles.finiteGenerator(dim,urp0,emax),
       }); }
 
   private static final List<Generator> zeroSumGenerators (final List<Generator> gs0) {
