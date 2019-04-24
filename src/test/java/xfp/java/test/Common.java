@@ -505,8 +505,7 @@ public final class Common {
     return List.of(
       "xfp.java.accumulators.DoubleAccumulator",
       "xfp.java.accumulators.ZhuHayesAccumulator",
-      //      "xfp.java.accumulators.BigFloatAccumulator"
-      //      ,
+      "xfp.java.accumulators.BigFloatAccumulator",
       "xfp.java.accumulators.RationalFloatAccumulator"
       ); }
 

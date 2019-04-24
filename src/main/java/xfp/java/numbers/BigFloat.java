@@ -10,7 +10,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-21
+ * @version 2019-04-23
  */
 
 public final class BigFloat 

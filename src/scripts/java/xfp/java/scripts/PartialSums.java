@@ -11,7 +11,7 @@ import xfp.java.test.Common;
  * jy --source 11 src/scripts/java/xfp/java/scripts/PartialSums.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-18
+ * @version 2019-04-23
  */
 @SuppressWarnings("unchecked")
 public final class PartialSums {
@@ -29,12 +29,12 @@ public final class PartialSums {
     return s; }
 
   public static final void main (final String[] args) {
-    final int n = (64*1024*1024) - 1;
+    final int n = (8*1024*1024) - 1;
     final Accumulator a = BigFloatAccumulator.make();
     //assert a.isExact();
     final double[] s = new double[2*n];  
     final long t = System.nanoTime();
-    for (final Generator g : Common.zeroSumGenerators(n)) {
+    for (final Generator g : Common.generators(n)) {
       System.out.println();
       System.out.println(g.name());
       final double[] x = (double[]) g.next();
