@@ -17,7 +17,7 @@ import xfp.java.exceptions.Exceptions;
  * arithmetic on them faster.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-22
+ * @version 2019-04-23
  */
 
 public final class RationalFloat extends Number
@@ -439,14 +439,10 @@ implements Comparable<RationalFloat> {
   @Override
   public final String toString () {
     return 
-      "2^" + exponent() 
-      //+ "\n" 
-      + "*"
-      //+ "\n" 
+      "0x"
       + numerator().toString(0x10) 
-      //+ "\n"
-      + "/"
-      //+ "\n" 
+      + "p" + exponent() 
+      + " / "
       + denominator().toString(0x10); }
 
   //--------------------------------------------------------------

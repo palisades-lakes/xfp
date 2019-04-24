@@ -22,7 +22,7 @@ import xfp.java.test.Common;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-20
+ * @version 2019-04-23
  */
 
 public final class SumTest {

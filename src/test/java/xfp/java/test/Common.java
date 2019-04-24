@@ -259,26 +259,22 @@ public final class Common {
     // only check finite numbers for now
     if (Double.isFinite(x)) {
       final Comparable fx = fromDouble.apply(x);
-      Debug.println("fx=" + toString.apply(fx));
-      final int r = f.compareTo(fx);
 
       final double x1o = Math.nextDown(x);
       final double xhi = Math.nextUp(x);
       Debug.println("xlo=" + Double.toHexString(x1o));
+      Debug.println("x  =" + Double.toHexString(x));
       Debug.println("xhi=" + Double.toHexString(xhi));
 
       final Comparable flo = fromDouble.apply(x1o);
       final Comparable fhi = fromDouble.apply(xhi);
       Debug.println("flo=" + toString.apply(flo));
+      Debug.println("f  =" + toString.apply(f));
+      Debug.println("fx =" + toString.apply(fx));
       Debug.println("fhi=" + toString.apply(fhi));
 
+      final int r = f.compareTo(fx);
       Debug.println("r=" + r);
-      //if (r < 0) { // f < fx
-      Assertions.assertTrue(flo.compareTo(f) < 0); 
-      //}
-      //if (r > 0) { // f > fx
-      Assertions.assertTrue(f.compareTo(fhi) < 0); 
-      // } 
 
       final Comparable dlo = dist.apply(f,flo);
       final Comparable dx = dist.apply(f,fx);
@@ -286,6 +282,10 @@ public final class Common {
       Debug.println("|f-flo|= " + toString.apply(dlo));
       Debug.println("|f-fx |= " + toString.apply(dx));
       Debug.println("|f-fhi|= " + toString.apply(dhi));
+      Assertions.assertTrue(flo.compareTo(f) < 0); 
+      Assertions.assertTrue(f.compareTo(fhi) < 0); 
+      Assertions.assertTrue(flo.compareTo(fx) <= 0); 
+      Assertions.assertTrue(fx.compareTo(fhi) <= 0); 
       Assertions.assertTrue(dx.compareTo(dlo) <= 0);
       Assertions.assertTrue(dx.compareTo(dhi) <= 0);
       if (dx.equals(dlo) || dx.equals(dhi)) {
@@ -502,12 +502,13 @@ public final class Common {
   //--------------------------------------------------------------
 
   public static final List<String> accumulators () { 
-    return List.of(
+    return Arrays.asList(
+      new String[] {
       "xfp.java.accumulators.DoubleAccumulator",
       "xfp.java.accumulators.ZhuHayesAccumulator",
       "xfp.java.accumulators.BigFloatAccumulator",
-      "xfp.java.accumulators.RationalFloatAccumulator"
-      ); }
+      "xfp.java.accumulators.RationalFloatAccumulator",
+      }); }
 
   //--------------------------------------------------------------
 
@@ -690,8 +691,11 @@ public final class Common {
         Assertions.assertEquals(truth,pred,
           "\nexact: " + Classes.className(exact) 
           + " = " + Double.toHexString(truth)
+          + "\n= " + exact.value()
           + "\npred: " + Classes.className(a) 
-          + " = " + Double.toHexString(pred) + "\n"); }
+          + " = " + Double.toHexString(pred) 
+          + "\n= " + a.value()
+          + "\n"); }
       final double l1d = Math.abs(truth-pred);
       final double l1n = Math.max(1.0,Math.abs(truth));
       Debug.println(

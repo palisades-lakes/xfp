@@ -280,17 +280,21 @@ implements Comparable<BigFloat> {
    * interpretation everywhere.
    */
 
-  private static final double doubleMergeBits (final int sign,
+  private static final double doubleMergeBits (final boolean nonNegative,
                                                final int exponent,
                                                final long significand) { 
-    assert Numbers.hiBit(significand) <= Doubles.SIGNIFICAND_BITS;
+    if (Numbers.hiBit(significand) > Doubles.SIGNIFICAND_BITS) {
+      return 
+        (nonNegative 
+          ? Double.POSITIVE_INFINITY 
+            : Double.NEGATIVE_INFINITY); }
     if (Numbers.hiBit(significand) < Doubles.SIGNIFICAND_BITS) {
       return Doubles.mergeBits(
-        sign, 
+        nonNegative ? 0 : 1, 
         Doubles.SUBNORMAL_EXPONENT, 
         significand); }
     return Doubles.mergeBits(
-      sign, 
+      nonNegative ? 0 : 1, 
       exponent + Doubles.STORED_SIGNIFICAND_BITS, 
       significand); }
 
@@ -301,24 +305,29 @@ implements Comparable<BigFloat> {
   private static final double toDouble (final boolean nonNegative,
                                         final BigInteger significand,
                                         final int exponent) { 
-    final int sign = (nonNegative ? 0 : 1);
     final BigInteger s0 = significand;
     final int e0 = exponent;
+//    Debug.println("toDouble: " 
+//    + nonNegative + ":0x" + significand.toString(0x10)
+//    + "p" + exponent);
     final int eh = Numbers.hiBit(s0);
+//    Debug.println("eh=" + eh);
     final int es = 
       Math.max(Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND - e0,
         Math.min(
           Doubles.MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND - e0 -1,
           eh - Doubles.SIGNIFICAND_BITS));
+//    Debug.println("es=" + es);
     if (0 == es) {
-      return doubleMergeBits(sign,e0,s0.longValue()); }
+      return doubleMergeBits(nonNegative,e0,s0.longValue()); }
     if (0 > es) {
       final int e1 = e0 + es;
       final long s1 = (s0.longValue() << -es);
-      return doubleMergeBits(sign,e1,s1); }
+      return doubleMergeBits(nonNegative,e1,s1); }
     if (eh <= es) { return (nonNegative ? 0.0 : -0.0); }
     // eh > es > 0
-    final boolean up = s0.testBit(es); 
+    final boolean up = s0.testBit(es-1); 
+//    Debug.println("up=" + up);
     // TODO: faster way to select the right bits as a long?
     final long s1 = s0.shiftRight(es).longValue();
     final int e1 = e0 + es;
@@ -328,11 +337,11 @@ implements Comparable<BigFloat> {
         // lost bit has to be zero, since there was just a carry
         final long s3 = (s2 >> 1);
         final int e3 = e1 + 1;
-        return doubleMergeBits(sign,e3,s3); }
+        return doubleMergeBits(nonNegative,e3,s3); }
       // no carry
-      return doubleMergeBits(sign,e1,s2); }
+      return doubleMergeBits(nonNegative,e1,s2); }
     // round down
-    return doubleMergeBits(sign,e1,s1); }
+    return doubleMergeBits(nonNegative,e1,s1); }
 
   /** @return closest half-even rounded <code>double</code> 
    */
@@ -387,10 +396,8 @@ implements Comparable<BigFloat> {
   @Override
   public final String toString () {
     return 
-      significand().toString(0x10) //+ "\n " 
-      + "*" //+ "\n" 
-      + "2^" + exponent() //+ "\n"
-      ; }
+      "0x" + significand().toString(0x10) 
+      + "p" + exponent(); }
 
   //--------------------------------------------------------------
   // construction
