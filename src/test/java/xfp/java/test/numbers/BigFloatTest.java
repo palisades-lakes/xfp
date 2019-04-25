@@ -16,7 +16,7 @@ import xfp.java.test.Common;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-23
+ * @version 2019-04-24
  */
 
 public final class BigFloatTest {
@@ -31,6 +31,14 @@ public final class BigFloatTest {
     Common.doubleRoundingTest(
       BigFloat::valueOf,
       Numbers::doubleValue,
+      (q0,q1) -> ((BigFloat) q0).subtract((BigFloat) q1).abs(),
+      Object::toString,
+      BigFloat.valueOf(
+        new BigInteger("2c94d1dcb123a56b9c1",0x10),
+        -43)); 
+    Common.floatRoundingTest(
+      BigFloat::valueOf,
+      Numbers::floatValue,
       (q0,q1) -> ((BigFloat) q0).subtract((BigFloat) q1).abs(),
       Object::toString,
       BigFloat.valueOf(

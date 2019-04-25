@@ -32,7 +32,7 @@ import xfp.java.prng.PRNG;
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-22
+ * @version 2019-04-24
  */
 @SuppressWarnings("unchecked")
 public final class Common {
@@ -282,11 +282,13 @@ public final class Common {
       Debug.println("|f-flo|= " + toString.apply(dlo));
       Debug.println("|f-fx |= " + toString.apply(dx));
       Debug.println("|f-fhi|= " + toString.apply(dhi));
-      Assertions.assertTrue(flo.compareTo(f) < 0); 
+      Assertions.assertTrue(flo.compareTo(f) < 0, 
+        "f=" + f + " > flo=" + flo);
       Assertions.assertTrue(f.compareTo(fhi) < 0); 
       Assertions.assertTrue(flo.compareTo(fx) <= 0); 
       Assertions.assertTrue(fx.compareTo(fhi) <= 0); 
-      Assertions.assertTrue(dx.compareTo(dlo) <= 0);
+      Assertions.assertTrue(dx.compareTo(dlo) <= 0,
+        "dx=" + dx + " > dlo=" + dlo);
       Assertions.assertTrue(dx.compareTo(dhi) <= 0);
       if (dx.equals(dlo) || dx.equals(dhi)) {
         Assertions.assertTrue(Doubles.isEven(x)); } } }
@@ -504,10 +506,10 @@ public final class Common {
   public static final List<String> accumulators () { 
     return Arrays.asList(
       new String[] {
-      "xfp.java.accumulators.DoubleAccumulator",
-      "xfp.java.accumulators.ZhuHayesAccumulator",
-      "xfp.java.accumulators.BigFloatAccumulator",
-      "xfp.java.accumulators.RationalFloatAccumulator",
+                    "xfp.java.accumulators.DoubleAccumulator",
+                    "xfp.java.accumulators.ZhuHayesAccumulator",
+                    "xfp.java.accumulators.BigFloatAccumulator",
+                    "xfp.java.accumulators.RationalFloatAccumulator",
       }); }
 
   //--------------------------------------------------------------

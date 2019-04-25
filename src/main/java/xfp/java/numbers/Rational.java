@@ -52,7 +52,8 @@ implements Comparable<Rational> {
 
   private static final Rational reduced (final BigInteger n,
                                          final BigInteger d) {
-
+    assert 0 != d.signum();
+    
     if (d.signum() < 0) { return reduced(n.negate(),d.negate()); }
 
     if (n == BigInteger.ZERO) { return ZERO; }
@@ -62,14 +63,10 @@ implements Comparable<Rational> {
       return new Rational(n,d); }
 
     final BigInteger gcd = n.gcd(d);
-    // TODO: any value in this test?
     if (gcd.compareTo(BigInteger.ONE) > 0) {
       return new Rational(n.divide(gcd),d.divide(gcd)); } 
 
     return new Rational(n,d); }
-
-  //  public final Rational reduce () {
-  //    return reduced(numerator(),denominator()); }
 
   //--------------------------------------------------------------
 
@@ -375,20 +372,22 @@ implements Comparable<Rational> {
 
   public static final Rational valueOf (final BigInteger n,
                                         final BigInteger d) {
+    assert 0 != d.signum();
     if (isNegative(d)) {
       return valueOf(n.negate(),d.negate()); }
-
-    // TODO: is it better to keep ratio in reduced form or not?
-    //return new Rational(n,d); } // ~200x slower in dot product
-
     return reduced(n,d); }
 
   public static final Rational valueOf (final long n,
                                         final long d) {
-    return valueOf(BigInteger.valueOf(n),BigInteger.valueOf(d)); }
+    assert 0L != d;
+    if (0L > d) { return valueOf(-n,-d); }
+    return valueOf(
+      BigInteger.valueOf(n),BigInteger.valueOf(d)); }
 
   public static final Rational valueOf (final int n,
                                         final int d) {
+    assert 0 != d;
+    if (0 > d) { return valueOf(-n,-d); }
     return valueOf(BigInteger.valueOf(n),BigInteger.valueOf(d)); }
 
   //--------------------------------------------------------------
