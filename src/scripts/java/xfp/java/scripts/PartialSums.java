@@ -3,7 +3,6 @@ package xfp.java.scripts;
 import xfp.java.accumulators.Accumulator;
 import xfp.java.accumulators.BigFloatAccumulator;
 import xfp.java.numbers.BigFloat;
-import xfp.java.numbers.Numbers;
 import xfp.java.prng.Generator;
 import xfp.java.test.Common;
 
@@ -13,7 +12,7 @@ import xfp.java.test.Common;
  * jy --source 11 src/scripts/java/xfp/java/scripts/PartialSums.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-24
+ * @version 2019-04-25
  */
 @SuppressWarnings("unchecked")
 public final class PartialSums {
@@ -27,14 +26,14 @@ public final class PartialSums {
     final int n = x.length;
     assert 1 < n;
     acc.clear(); 
-    int longOverflows = 0;
+//    int longOverflows = 0;
     for (int i=0;i<n;i++) { 
       final BigFloat sum = (BigFloat) acc.add(x[i]).value();
-      if (Numbers.hiBit(sum.significand()) > 64) { 
-        longOverflows++; }
+//      if (Numbers.hiBit(sum.significand()) > 64) { 
+//        longOverflows++; }
       s[i] = sum.doubleValue(); }
-    System.out.print("overflows=" + longOverflows + "/" + n
-      + " = " + ((double) longOverflows)/n);
+//    System.out.print("overflows=" + longOverflows + "/" + n
+//      + " = " + ((double) longOverflows)/n);
     return s; }
 
   public static final void main (final String[] args) {
