@@ -15,30 +15,18 @@ import com.carrotsearch.hppc.IntObjectMap;
 
 import xfp.java.accumulators.Accumulator;
 import xfp.java.accumulators.RationalFloatAccumulator;
+import xfp.java.accumulators.ZhuHayesAccumulator;
 import xfp.java.algebra.OneSetOneOperation;
 import xfp.java.algebra.Set;
 import xfp.java.algebra.TwoSetsOneOperation;
 import xfp.java.numbers.Doubles;
 import xfp.java.prng.Generator;
 
-/** The set of arrays of some fixed length <code>n</code>,
- *  of primitive numbers, or 
- * of certain subclasses of <code>Number</code>,
- * interpreted as tuples of rational numbers.
- * 
- * This is primarily intended to support implementing the standard
- * <em>rational</em> linear space <b>Q</b><sup>n</sup>.
- * (Essentially <b>R</b><sup>n</sup> except over the rational
- * numbers rather than the reals.)
-
- * TODO: generalize to tuples 
- * implemented with lists, <code>int</code> indexed maps
- * for sparse vectors, etc.
- * Long term goal is to support any useful data structures
- * that can be used to represent tuples of rational numbers.
+/** The set of instances of <code>double[n]</code>, for some given 
+ * <code>n</code>.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-30
+ * @version 2019-04-26
  */
 @SuppressWarnings("unchecked")
 strictfp
@@ -102,6 +90,31 @@ public final class Dn extends LinearSpaceLike {
     double m = POSITIVE_INFINITY;
     for (int i=0;i<x.length;i++) { m = Math.min(m,x[i]); }
     return m; }
+  
+  //--------------------------------------------------------------
+  /** Return the condition number for summing the elements
+   * (might be {@link Double#POSITIVE_INFINITY}). */
+  
+  public static final double conditionSum (final double[] x) {
+    // TODO: choose accumulator based on array length??
+    final Accumulator numerator = ZhuHayesAccumulator.make();
+    final Accumulator denominator = ZhuHayesAccumulator.make();
+    for (final double xi : x) {
+      numerator.add(Math.abs(xi));
+      denominator.add(xi); }
+    return 
+      numerator.doubleValue() 
+      / 
+      Math.abs(denominator.doubleValue()); }
+  
+//  public static final double conditionSum (final double[] x) {
+//    // TODO: use an accurate summation algorithm?
+//    double numerator = 0.0;
+//    double denominator = 0.0;
+//    for (final double xi : x) {
+//      numerator += Math.abs(xi);
+//      denominator += xi; }
+//    return numerator / Math.abs(denominator); }
   
   //--------------------------------------------------------------
   // operations for algebraic structures over double[] arrays.
