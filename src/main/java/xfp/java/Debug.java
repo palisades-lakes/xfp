@@ -11,7 +11,7 @@ import java.io.PrintStream;
  * Static methods only; no state.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-25
+ * @version 2019-04-27
  */
 
 public final class Debug {
@@ -39,6 +39,12 @@ public final class Debug {
     if (DEBUG) { OUT.println(); } }
 
   public static final void println (final String msg) {
+    if (DEBUG) { OUT.println(msg); } }
+
+  public static final void println (final boolean msg) {
+    if (DEBUG) { OUT.println(msg); } }
+
+  public static final void println (final int msg) {
     if (DEBUG) { OUT.println(msg); } }
 
   //--------------------------------------------------------------

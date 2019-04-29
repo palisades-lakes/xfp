@@ -32,7 +32,7 @@ import xfp.java.prng.PRNG;
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-24
+ * @version 2019-04-27
  */
 @SuppressWarnings("unchecked")
 public final class Common {
@@ -291,7 +291,8 @@ public final class Common {
         "dx=" + dx + " > dlo=" + dlo);
       Assertions.assertTrue(dx.compareTo(dhi) <= 0);
       if (dx.equals(dlo) || dx.equals(dhi)) {
-        Assertions.assertTrue(Doubles.isEven(x)); } } }
+        Assertions.assertTrue(Doubles.isEven(x),
+          () -> Double.toHexString(x)); } } }
 
   //--------------------------------------------------------------
 
@@ -479,7 +480,7 @@ public final class Common {
       .collect(Collectors.toUnmodifiableList()); }
 
   //--------------------------------------------------------------
-  /** Generate <code>doubl[dim]</code> such that the sum of the
+  /** Generate <code>double[dim]</code> such that the sum of the
    * squares (and the sum of the elements) is very likely to be 
    * finite.
    */
@@ -488,7 +489,7 @@ public final class Common {
     return zeroSumGenerators(baseGenerators(dim)); }
 
   //--------------------------------------------------------------
-  /** Generate <code>doubl[dim]</code> such that the sum of the
+  /** Generate <code>double[dim]</code> such that the sum of the
    * squares (and the sum of the elements) is very likely to be 
    * finite.
    */

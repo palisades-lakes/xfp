@@ -10,7 +10,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-25
+ * @version 2019-04-28
  */
 
 public final class BigFloat 
@@ -57,7 +57,7 @@ implements Comparable<BigFloat> {
   private final BigFloat add (final boolean n1,
                               final BigInteger t1,
                               final int e1) {
-    
+
     if (0 == t1.signum()) { return this; }
     //assert 0 < t1.signum();
 
@@ -259,7 +259,7 @@ implements Comparable<BigFloat> {
     final int e1 = e0 + es;
     if (up) {
       final int s2 = s1 + 1;
-      if (Numbers.hiBit(s2) > 53) { // carry
+      if (Numbers.hiBit(s2) > Floats.SIGNIFICAND_BITS) { // carry
         // lost bit has to be zero, since there was just a carry
         final int s3 = (s2 >> 1);
         final int e3 = e1 + 1;
@@ -295,6 +295,13 @@ implements Comparable<BigFloat> {
     return 
       Doubles.mergeBits((nonNegative ? 0 : 1),e,significand); }
 
+  private static final boolean roundUp (final BigInteger s,
+                                        final int e) {
+    if (! s.testBit(e-1)) { return false; }
+    for (int i=e-2;i>=0;i--) {
+      if (s.testBit(i)) { return true; } }
+    return false; }
+    
   /** @return closest half-even rounded <code>double</code> 
    */
 
@@ -303,6 +310,10 @@ implements Comparable<BigFloat> {
     final boolean nn = nonNegative();
     final BigInteger s0 = significand();
     final int e0 = exponent();
+//    Debug.println();
+//    Debug.println("nn= " + nn);
+//    Debug.println("s0= " + s0.toString(0x10));
+//    Debug.println("e0= " + e0);
     if (0 == s0.signum()) { return (nn ? 0.0 : -0.0); }
     //assert (0 < s0.signum());
 
@@ -312,6 +323,8 @@ implements Comparable<BigFloat> {
         Math.min(
           Doubles.MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND - e0 -1,
           eh - Doubles.SIGNIFICAND_BITS));
+//    Debug.println("eh=" + eh);
+//    Debug.println("es=" + es);
     if (0 == es) {
       return doubleMergeBits(nn,e0,s0.longValue()); }
     if (0 > es) {
@@ -320,16 +333,25 @@ implements Comparable<BigFloat> {
       return doubleMergeBits(nn,e1,s1); }
     if (eh <= es) { return (nn ? 0.0 : -0.0); }
     // eh > es > 0
-    final boolean up = s0.testBit(es-1); 
+    final boolean up = roundUp(s0,es); 
+//    Debug.println("up=" + up);
     // TODO: faster way to select the right bits as a long?
+//    Debug.println("s1=" + s0.shiftRight(es).toString(0x10));
     final long s1 = s0.shiftRight(es).longValue();
+//    Debug.println("s1=" + Long.toHexString(s1) + " (long)");
     final int e1 = e0 + es;
+//    Debug.println("e1=" + e1);
     if (up) {
       final long s2 = s1 + 1L;
-      if (Numbers.hiBit(s2) > 53) { // carry
+//      Debug.println("s2=" + Long.toHexString(s2));
+//      Debug.println("hiBit(s1)=" + Numbers.hiBit(s1));
+//      Debug.println("hiBit(s2)=" + Numbers.hiBit(s2));
+      if (Numbers.hiBit(s2) > Doubles.SIGNIFICAND_BITS) { // carry
         // lost bit has to be zero, since there was just a carry
         final long s3 = (s2 >> 1);
         final int e3 = e1 + 1;
+//        Debug.println("s3=" + Long.toHexString(s3));
+//        Debug.println("hiBit(s3)=" + Numbers.hiBit(s3));
         return doubleMergeBits(nn,e3,s3); }
       // no carry
       return doubleMergeBits(nn,e1,s2); }
@@ -385,6 +407,10 @@ implements Comparable<BigFloat> {
 
   @Override
   public final String toString () {
+    assert (0 == Numbers.loBit(significand()))
+    || (0 == significand().signum()):
+      significand().toString(0x10) 
+      + "\nlo= " + Numbers.loBit(significand());
     return 
       (nonNegative() ? "" : "-")
       + "0x" + significand().toString(0x10) 
@@ -398,15 +424,23 @@ implements Comparable<BigFloat> {
                     final BigInteger t0,
                     final int e0) {
     //super();
-    //assert 0 <= t0.signum();
-    final int e1 = Numbers.loBit(t0);
-    _nonNegative = nonNegative;
-    if (e1 != 0) {
-      _significand = t0;
-      _exponent = e0;  }
+    if (0 == t0.signum()) {
+      _nonNegative = true;
+      _significand = BigInteger.ZERO;
+      _exponent = 0; }
     else {
-      _significand = t0.shiftRight(e1);
-      _exponent = Math.addExact(e0,e1);  } }
+      assert 0 < t0.signum();
+      final int e1 = Math.max(0,Numbers.loBit(t0));
+      _nonNegative = nonNegative;
+      if (e1 == 0) {
+        _significand = t0;
+        _exponent = e0;  }
+      else {
+        _significand = t0.shiftRight(e1);
+        _exponent = Math.addExact(e0,e1);  } 
+      assert 0 == Numbers.loBit(_significand)
+        : "lowBit= " + Numbers.loBit(_significand)
+        +"; rightShift= " + e1; } }
 
   //--------------------------------------------------------------
 

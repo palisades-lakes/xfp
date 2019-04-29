@@ -26,7 +26,7 @@ import xfp.java.prng.Generator;
  * <code>n</code>.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-26
+ * @version 2019-04-27
  */
 @SuppressWarnings("unchecked")
 strictfp
@@ -102,10 +102,13 @@ public final class Dn extends LinearSpaceLike {
     for (final double xi : x) {
       numerator.add(Math.abs(xi));
       denominator.add(xi); }
-    return 
-      numerator.doubleValue() 
-      / 
-      Math.abs(denominator.doubleValue()); }
+    final double n = numerator.doubleValue();
+    final double d = Math.abs(denominator.doubleValue());
+    if (0.0 == d) {
+   // TODO: is this right? NaN or infinity better?
+      if (0.0 == n) { return 1.0; } 
+      return Double.POSITIVE_INFINITY; }
+    return n / d; }
   
 //  public static final double conditionSum (final double[] x) {
 //    // TODO: use an accurate summation algorithm?
@@ -115,6 +118,20 @@ public final class Dn extends LinearSpaceLike {
 //      numerator += Math.abs(xi);
 //      denominator += xi; }
 //    return numerator / Math.abs(denominator); }
+
+  
+  //--------------------------------------------------------------
+  /** Like {@link Arrays#toString(double[])}. */
+  
+  public static final String toHexString (final double[] x) {
+    if (null == x) { return "null"; }
+    final StringBuilder b = new StringBuilder("[");
+    if (x.length > 0) { b.append(Double.toHexString(x[0])); }
+    for (int i=1;i<x.length;i++) { 
+      // Arrays.toString wastes space with commas
+      // b.append(",");  
+      b.append(" "); b.append(Double.toHexString(x[i])); }
+    return b.append("]").toString(); }
   
   //--------------------------------------------------------------
   // operations for algebraic structures over double[] arrays.
