@@ -17,7 +17,7 @@ import xfp.java.exceptions.Exceptions;
  * arithmetic on them faster.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-28
+ * @version 2019-04-29
  */
 
 public final class RationalFloat extends Number
@@ -287,6 +287,7 @@ implements Comparable<RationalFloat> {
 
   @Override
   public final float floatValue () { 
+    // TODO: keep sign 'bit' separate; num and den both nonNegative.
     final int s = numerator().signum();
     if (s == 0) { return 0.0F; }
     final boolean neg = (s < 0);
@@ -323,17 +324,37 @@ implements Comparable<RationalFloat> {
     final int e3 = sub ? Float.MIN_EXPONENT : e2;
     final BigInteger d3 = sub ? d2.shiftLeft(e3-e2) : d2;
     final BigInteger n3 = n1.shiftLeft(Floats.STORED_SIGNIFICAND_BITS);
+    
     final int e4 = e3 - Floats.STORED_SIGNIFICAND_BITS;
+    
+    //Debug.println("num=" + n3.toString(0x10));
+    //Debug.println("den=" + d3.toString(0x10));
+    
     final BigInteger[] qr = n3.divideAndRemainder(d3);
+    
+    //Debug.println("quo=" + qr[0].toString(0x10));
+    //Debug.println("quo=" + Long.toHexString(qr[0].longValueExact()));
+    //Debug.println("rem=" + qr[1].toString(0x10));
 
-    // round down or up? <= implies half-even (?)
-    final boolean down = (qr[1].shiftLeft(1).compareTo(d3) < 0);
-    final int q4 = qr[0].intValueExact() + (down ? 0 : 1 );
-
-    // handle carry if needed after round up
-    final boolean carry = (hiBit(q4) > Floats.SIGNIFICAND_BITS);
-    final int q = carry ? q4 >>> 1 : q4;
-    final int e = (sub ? (carry ? e4 : e4 - 1) : (carry ? e4 + 1 : e4));
+    // round down or up? 
+    // want to know if remainder/denominator is more or less than 1/2
+    // comparing 2*remainder to denominator
+    // TODO: faster way to do this?
+    final int c = qr[1].shiftLeft(1).compareTo(d3);
+    final int q4 = qr[0].intValueExact(); 
+    final boolean even = (0x0 == (q4 & 0x1));
+    final boolean down = (c < 0) || ((c == 0) && even);
+    final int q;
+    final int e;
+    if (down) { 
+      q = q4; 
+      e = (sub ? e4 - 1 : e4); }
+    else { 
+      final int q5 = q4 + 1; 
+      // handle carry if needed after round up
+      final boolean carry = (hiBit(q5) > Floats.SIGNIFICAND_BITS);
+      q = carry ? q5 >>> 1 : q5;
+      e = (sub ? (carry ? e4 : e4 - 1) : (carry ? e4 + 1 : e4)); }
     return Floats.makeFloat(neg,e,q); }
 
   //--------------------------------------------------------------
@@ -346,6 +367,7 @@ implements Comparable<RationalFloat> {
 
   @Override
   public final double doubleValue () { 
+    // TODO: keep sign 'bit' separate; num and den both nonNegative.
     final int s = numerator().signum();
     if (s == 0) { return 0.0; }
     final boolean neg = (s < 0);
@@ -382,19 +404,37 @@ implements Comparable<RationalFloat> {
     final int e3 = sub ? Double.MIN_EXPONENT : e2;
     final BigInteger d3 = sub ? d2.shiftLeft(e3-e2) : d2;
     final BigInteger n3 = n1.shiftLeft(Doubles.STORED_SIGNIFICAND_BITS);
+    
     final int e4 = e3 - Doubles.STORED_SIGNIFICAND_BITS;
+    
+    //Debug.println("num=" + n3.toString(0x10));
+    //Debug.println("den=" + d3.toString(0x10));
+    
     final BigInteger[] qr = n3.divideAndRemainder(d3);
+    
+    //Debug.println("quo=" + qr[0].toString(0x10));
+    //Debug.println("quo=" + Long.toHexString(qr[0].longValueExact()));
+    //Debug.println("rem=" + qr[1].toString(0x10));
 
-    // round down or up? <= implies half-even (?)
-    final boolean down = (qr[1].shiftLeft(1).compareTo(d3) < 0);
-    final long q4 = qr[0].longValueExact() + (down ? 0L : 1L );
-
-    // handle carry if needed after round up
-    final boolean carry = (hiBit(q4) > Doubles.SIGNIFICAND_BITS);
-    final long q = carry ? q4 >>> 1 : q4;
-    final int e = 
-      (sub ? (carry ? e4 : e4 - 1) : (carry ? e4 + 1 : e4));
-
+    // round down or up? 
+    // want to know if remainder/denominator is more or less than 1/2
+    // comparing 2*remainder to denominator
+    // TODO: faster way to do this?
+    final int c = qr[1].shiftLeft(1).compareTo(d3);
+    final long q4 = qr[0].longValueExact(); 
+    final boolean even = (0x0L == (q4 & 0x1L));
+    final boolean down = (c < 0) || ((c == 0) && even);
+    final long q;
+    final int e;
+    if (down) { 
+      q = q4; 
+      e = (sub ? e4 - 1 : e4); }
+    else { 
+      final long q5 = q4 + 1; 
+      // handle carry if needed after round up
+      final boolean carry = (hiBit(q5) > Doubles.SIGNIFICAND_BITS);
+      q = carry ? q5 >>> 1 : q5;
+      e = (sub ? (carry ? e4 : e4 - 1) : (carry ? e4 + 1 : e4)); }
     return Doubles.makeDouble(neg,e,q); }
 
   //--------------------------------------------------------------
@@ -439,12 +479,14 @@ implements Comparable<RationalFloat> {
 
   @Override
   public final String toString () {
+    final boolean neg = (numerator().signum() < 0);
+    final String n = numerator().toString(0x10).toUpperCase();
     return 
-      "0x"
-      + numerator().toString(0x10) 
+      (neg ? "-" : "") + "0x"
+      + (neg ? n.substring(1) : n) 
       + "p" + exponent() 
       + " / "
-      + denominator().toString(0x10); }
+      + denominator().toString(0x10).toUpperCase(); }
 
   //--------------------------------------------------------------
   // construction
@@ -453,11 +495,11 @@ implements Comparable<RationalFloat> {
   private RationalFloat (final BigInteger numerator,
                          final BigInteger denominator,
                          final int exponent) {
-    super();
-    assert 1 == denominator.signum() :
-      "\nn= " + numerator.toString(0x10) 
-      + "\nd= " + denominator.toString(0x10)
-      + "\ne= " + exponent;
+//    super();
+//    assert 1 == denominator.signum() :
+//      "\nn= " + numerator.toString(0x10) 
+//      + "\nd= " + denominator.toString(0x10)
+//      + "\ne= " + exponent;
     _numerator = numerator;
     _denominator = denominator;
     _exponent = exponent; }
@@ -468,6 +510,10 @@ implements Comparable<RationalFloat> {
                                              final BigInteger d,
                                              final int e) {
     return reduced(n,d,e); }
+
+  public static final RationalFloat valueOf (final BigInteger n,
+                                             final int e) {
+    return reduced(n,BigInteger.ONE,e); }
 
   public static final RationalFloat valueOf (final BigInteger n,
                                              final BigInteger d) {
@@ -495,7 +541,7 @@ implements Comparable<RationalFloat> {
     if (0L == t) { return ZERO; }
     final long tt = nonNegative ? t : -t;
     final BigInteger n = BigInteger.valueOf(tt);
-    return valueOf(n,BigInteger.ONE,e); } 
+    return valueOf(n,e); } 
 
   public static final RationalFloat valueOf (final double x)  {
     return valueOf(
@@ -511,7 +557,7 @@ implements Comparable<RationalFloat> {
     if (0 == t) { return ZERO; }
     final BigInteger n0 = BigInteger.valueOf(t);
     final BigInteger n1 = nonNegative ? n0 : n0.negate();
-    return valueOf(n1,BigInteger.ONE,e); } 
+    return valueOf(n1,e); } 
 
   public static final RationalFloat valueOf (final float x)  {
     return valueOf(
@@ -522,16 +568,16 @@ implements Comparable<RationalFloat> {
   //--------------------------------------------------------------
 
   public static final RationalFloat valueOf (final byte x)  {
-    return valueOf(BigInteger.valueOf(x), BigInteger.ONE,0); }
+    return valueOf(BigInteger.valueOf(x)); }
 
   public static final RationalFloat valueOf (final short x)  {
-    return valueOf(BigInteger.valueOf(x), BigInteger.ONE,0); }
+    return valueOf(BigInteger.valueOf(x)); }
 
   public static final RationalFloat valueOf (final int x)  {
-    return valueOf(BigInteger.valueOf(x), BigInteger.ONE,0); }
+    return valueOf(BigInteger.valueOf(x)); }
 
   public static final RationalFloat valueOf (final long x)  {
-    return valueOf(BigInteger.valueOf(x), BigInteger.ONE,0); }
+    return valueOf(BigInteger.valueOf(x)); }
 
   //--------------------------------------------------------------
 

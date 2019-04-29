@@ -1,6 +1,7 @@
 package xfp.java.test.numbers;
 
 import java.math.BigInteger;
+import java.util.function.BinaryOperator;
 
 import org.junit.jupiter.api.Test;
 
@@ -16,59 +17,47 @@ import xfp.java.test.Common;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-28
+ * @version 2019-04-29
  */
 
 public final class BigFloatTest {
 
-  //--------------------------------------------------------------
-
+  private static final BinaryOperator<Comparable> dist =
+    (q0,q1) -> ((BigFloat) q0).subtract((BigFloat) q1).abs();
+    
   @SuppressWarnings({ "static-method" })
   @Test
   public final void testRounding () {
-
-   // Debug.DEBUG = true;
+    //Debug.DEBUG = true;
     final BigFloat[] f = 
-    { BigFloat.valueOf(
-      new BigInteger("2366052b8b801d",0x10),
-      -22),
+    { 
       BigFloat.valueOf(
-        new BigInteger("-21ab528c4dbc181",0x10),
-        -26),
+        new BigInteger("232330747ceeab",0x10),-23),
       BigFloat.valueOf(
-        new BigInteger("8d9814ae2e0074",0x10),
-        -25),
-      BigFloat.valueOf(
-        new BigInteger("2c94d1dcb123a56b9c1",0x10),
-        -43), };
+        new BigInteger("-232330747ceeab",0x10),-23),
+     BigFloat.valueOf(
+       new BigInteger("2366052b8b801d",0x10),-22),
+     BigFloat.valueOf(
+       new BigInteger("-21ab528c4dbc181",0x10),-26),
+     BigFloat.valueOf(
+       new BigInteger("8d9814ae2e0074",0x10),-25),
+     BigFloat.valueOf(
+       new BigInteger("2c94d1dcb123a56b9c1",0x10),-43), };
     for (final BigFloat fi : f) {
       Common.doubleRoundingTest(
-        BigFloat::valueOf, 
-        Numbers::doubleValue,
-        (q0,q1) -> ((BigFloat) q0).subtract((BigFloat) q1).abs(),
-        Object::toString,
-        fi); 
+        BigFloat::valueOf,Numbers::doubleValue,dist,
+        Object::toString,fi); 
       Common.floatRoundingTest(
-        BigFloat::valueOf,
-        Numbers::floatValue,
-        (q0,q1) -> ((BigFloat) q0).subtract((BigFloat) q1).abs(),
-        Object::toString,
-        fi);  }
+        BigFloat::valueOf,Numbers::floatValue,dist,
+        Object::toString,fi);  }
     //Debug.DEBUG = false;
 
-
     Common.doubleRoundingTests(
-      null,
-      BigFloat::valueOf,
-      Numbers::doubleValue,
-      (q0,q1) -> ((BigFloat) q0).subtract((BigFloat) q1).abs(),
+      null,BigFloat::valueOf,Numbers::doubleValue,dist,
       Object::toString); 
 
     Common.floatRoundingTests(
-      null,
-      BigFloat::valueOf,
-      Numbers::floatValue,
-      (q0,q1) -> ((BigFloat) q0).subtract((BigFloat) q1).abs(),
+      null,BigFloat::valueOf,Numbers::floatValue,dist,
       Object::toString); 
   }
 

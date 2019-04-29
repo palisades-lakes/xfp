@@ -34,7 +34,7 @@ import xfp.java.prng.GeneratorBase;
 /** Utilities for <code>double</code>, <code>double[]</code>.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-22
+ * @version 2019-04-29
  */
 public final class Doubles implements Set {
 
@@ -272,6 +272,40 @@ public final class Doubles implements Set {
     assert (0L == (s & e & t));
     final double x = longBitsToDouble(s | e | t);
     return x; }
+
+  //--------------------------------------------------------------
+  /** (int & LONG_MASK) returns long containing unsigned int. */
+  
+  private static final long UNSIGNED_MASK = 0xffffffffL;
+  private static final long SIGN_0 = 0x0L;
+  private static final long SIGN_1 = 
+    (0x1L << (EXPONENT_BITS + STORED_SIGNIFICAND_BITS));
+
+  /**
+   * @param nonNegative sign 'bit'
+   * @param exponent unbiased exponent, must be in 
+   * [{@link #SUBNORMAL_EXPONENT},{@link Double#MAX_EXPONENT}]
+   * When {@link Double#MIN_EXPONENT} &le; <code>e</code>
+   * &le; {@link Double#MAX_EXPONENT}, te result is a normal
+   * number.
+   * @param significand Must be in 
+   * [0,{@link #SIGNIFICAND_MASK}].
+   * Treated as <code>significand * 
+   * 2<sup>-STORED_SIGNIFICAND_BITS</sup></code>.
+   * @return <code>(-1)<sup>sign</sup> * 2<sup>exponent</sup>
+   * * significand * 2<sup>-{@link #STORED_SIGNIFICAND_BITS}</sup></code>
+   */
+
+  public static final double unsafeBits (final boolean nonNegative,
+                                         final int exponent,
+                                         final long significand) {
+
+     final long s = (nonNegative ? SIGN_0 : SIGN_1);
+     final int be = exponent + EXPONENT_BIAS;
+     final long e = (UNSIGNED_MASK & be) << STORED_SIGNIFICAND_BITS;
+     final long t = significand & STORED_SIGNIFICAND_MASK;
+     final double x = longBitsToDouble(s | e | t);
+     return x; }
 
   //--------------------------------------------------------------
   /**

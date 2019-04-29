@@ -33,7 +33,7 @@ import xfp.java.prng.GeneratorBase;
 /** Utilities for <code>float</code>, <code>float[]</code>.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-22
+ * @version 2019-04-29
  */
 public final class Floats implements Set {
 
@@ -251,7 +251,35 @@ public final class Floats implements Set {
     final int s = (sign) << (EXPONENT_BITS + STORED_SIGNIFICAND_BITS);
     final int e = (be) << STORED_SIGNIFICAND_BITS;
     final int t = significand & STORED_SIGNIFICAND_MASK;
-    assert (0L == (s & e & t));
+    assert (0 == (s & e & t));
+    final float x = Float.intBitsToFloat(s | e | t);
+    return x; }
+
+  //--------------------------------------------------------------
+  private static final int SIGN_0 = 0x0;
+  private static final int SIGN_1 = 
+    (0x1 << (EXPONENT_BITS + STORED_SIGNIFICAND_BITS));
+
+  /**
+   * @param exponent unbiased exponent, must be in 
+   * [{@link #SUBNORMAL_EXPONENT},{@link Float#MAX_EXPONENT}]
+   * When {@link Float#MIN_EXPONENT} &le; <code>e</code>
+   * &le; {@link Float#MAX_EXPONENT}, te result is a normal
+   * number.
+   * @param significand Must be in 
+   * [0,{@link #STORED_SIGNIFICAND_MASK}].
+   * Treated as <code>significand * 2<sup>-52</sup></code>.
+   * @return <code>(-1)<sup>sign</sup> * 2<sup>exponent</sup>
+   * * significand * 2<sup>-{@link #STORED_SIGNIFICAND_BITS}</sup></code>
+   */
+
+  public static final float unsafeBits (final boolean nonNegative,
+                                       final int exponent,
+                                       final int significand) {
+    final int s = (nonNegative ? SIGN_0 : SIGN_1);
+    final int be = exponent + EXPONENT_BIAS;
+    final int e = be << STORED_SIGNIFICAND_BITS;
+    final int t = significand & STORED_SIGNIFICAND_MASK;
     final float x = Float.intBitsToFloat(s | e | t);
     return x; }
 

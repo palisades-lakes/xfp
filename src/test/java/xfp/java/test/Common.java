@@ -32,7 +32,7 @@ import xfp.java.prng.PRNG;
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-27
+ * @version 2019-04-29
  */
 @SuppressWarnings("unchecked")
 public final class Common {
@@ -292,7 +292,14 @@ public final class Common {
       Assertions.assertTrue(dx.compareTo(dhi) <= 0);
       if (dx.equals(dlo) || dx.equals(dhi)) {
         Assertions.assertTrue(Doubles.isEven(x),
-          () -> Double.toHexString(x)); } } }
+          () -> 
+        "not even!"
+        + "\nxlo=" + Double.toHexString(x1o)
+        + "\nx  =" + Double.toHexString(x)
+        + "\nxhi=" + Double.toHexString(xhi)
+        + "\ndlo=" + dlo
+        + "\ndx =" + dx
+        + "\ndhi=" + dhi); } } }
 
   //--------------------------------------------------------------
 

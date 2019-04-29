@@ -7,11 +7,11 @@ import org.apache.commons.rng.UniformRandomProvider;
 
 import xfp.java.accumulators.Accumulator;
 import xfp.java.accumulators.BigFloatAccumulator;
+import xfp.java.accumulators.RationalFloatAccumulator;
 import xfp.java.accumulators.ZhuHayesAccumulator;
 import xfp.java.linear.Dn;
 import xfp.java.numbers.BigFloat;
 import xfp.java.numbers.Doubles;
-import xfp.java.numbers.Numbers;
 import xfp.java.prng.Generator;
 import xfp.java.prng.PRNG;
 import xfp.java.test.Common;
@@ -19,10 +19,10 @@ import xfp.java.test.Common;
 /** Benchmark accumulators tests.
  * 
  * <pre>
- * j --source 11 -ea src/scripts/java/xfp/java/scripts/Distill.java
+ * j --source 11 -ea src/scripts/java/xfp/java/scripts/Distill.java > distilled.txt
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-27
+ * @version 2019-04-29
  */
 @SuppressWarnings("unchecked")
 public final class Distill {
@@ -129,6 +129,7 @@ public final class Distill {
 
   public static final void main (final String[] args) {
     final Accumulator a = BigFloatAccumulator.make();
+    final Accumulator r = RationalFloatAccumulator.make();
     final Accumulator z = ZhuHayesAccumulator.make();
     final int dim = 5;
     final Generator g = factories.get("exponential").apply(dim);
@@ -138,20 +139,18 @@ public final class Distill {
       final double[] x = (double[]) g.next();
       System.out.println("condition= " + Dn.conditionSum(x));
       final double ztruth = z.clear().addAll(x).doubleValue();
+      final double rtruth = r.clear().addAll(x).doubleValue();
       a.clear().addAll(x);
       final BigFloat v = (BigFloat) a.value();
       final double vtruth = v.doubleValue();
       final double truth = a.doubleValue();
-      assert ztruth == truth : "\n"
-        + Double.toHexString(ztruth) 
-        + "\n"
-        + Double.toHexString(truth)
-        + "\n"
-        + Double.toHexString(vtruth)
-        + "\n"
-        + v
-      + "\n"
-      + Numbers.loBit(v.significand());
+      assert ztruth == truth : "z != a"
+        + "\nz= " + Double.toHexString(ztruth) 
+        + "\nr= " + Double.toHexString(rtruth) 
+        + "\nr= " + r.value() 
+        + "\na= " + Double.toHexString(truth)
+        + "\nv= " + Double.toHexString(vtruth)
+        + "\nv= " + v;
       System.out.println("sum= " + Double.toHexString(truth));
       //System.out.println(Dn.toHexString(x));
       int j = 0;
