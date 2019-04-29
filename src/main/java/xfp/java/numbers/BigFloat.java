@@ -253,7 +253,7 @@ implements Comparable<BigFloat> {
       return floatMergeBits(nn,e1,s1); }
     if (eh <= es) { return (nn ? 0.0F : -0.0F); }
     // eh > es > 0
-    final boolean up = s0.testBit(es-1); 
+    final boolean up = roundUp(s0,es); 
     // TODO: faster way to select the right bits as a int?
     final int s1 = s0.shiftRight(es).intValue();
     final int e1 = e0 + es;
