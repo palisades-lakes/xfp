@@ -94,4 +94,14 @@ public interface Accumulator<T extends Accumulator> {
     return (T) this; }
 
   //--------------------------------------------------------------
+
+  public default double[] partialSums (final double[] x) { 
+    final int n = x.length;
+    final double[] s = new double[n];
+    clear(); 
+    for (int i=0;i<n;i++) { s[i] = add(x[i]).doubleValue(); }
+    return s; }
+
+ //--------------------------------------------------------------
 }
+//--------------------------------------------------------------

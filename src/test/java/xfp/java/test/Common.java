@@ -32,7 +32,7 @@ import xfp.java.prng.PRNG;
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-29
+ * @version 2019-04-30
  */
 @SuppressWarnings("unchecked")
 public final class Common {
@@ -513,12 +513,14 @@ public final class Common {
 
   public static final List<String> accumulators () { 
     return Arrays.asList(
-      new String[] {
-                    "xfp.java.accumulators.DoubleAccumulator",
-                    "xfp.java.accumulators.ZhuHayesAccumulator",
-                    "xfp.java.accumulators.BigFloatAccumulator",
-                    "xfp.java.accumulators.RationalFloatAccumulator",
-      }); }
+      new String[] 
+        {
+         "xfp.java.accumulators.DoubleAccumulator",
+         //"xfp.java.accumulators.DistilledAccumulator",
+         "xfp.java.accumulators.ZhuHayesAccumulator",
+         "xfp.java.accumulators.BigFloatAccumulator",
+         "xfp.java.accumulators.RationalFloatAccumulator",
+        }); }
 
   //--------------------------------------------------------------
 
