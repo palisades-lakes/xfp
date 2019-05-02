@@ -464,15 +464,18 @@ public final class Common {
     final int emax = deMax(dim)/2;
     final double dmax = (1<<emax);
     return Arrays.asList(
-      new Generator[] {
-                       Doubles.gaussianGenerator(dim,urp1,0.0,dmax),
-                       Doubles.exponentialGenerator(dim,urp2,0.0,dmax),
-                       Doubles.laplaceGenerator(dim,urp3,0.0,dmax),
-                       Doubles.uniformGenerator(dim,urp4,-dmax,dmax),
-                       Doubles.finiteGenerator(dim,urp0,emax),
-      }); }
+      new Generator[] 
+        {
+         Doubles.gaussianGenerator(dim,urp1,0.0,dmax),
+         Doubles.exponentialGenerator(dim,urp2,0.0,dmax),
+         Doubles.laplaceGenerator(dim,urp3,0.0,dmax),
+         Doubles.uniformGenerator(dim,urp4,-dmax,dmax),
+         Doubles.finiteGenerator(dim,urp0,emax),
+        }); }
 
-  private static final List<Generator> zeroSumGenerators (final List<Generator> gs0) {
+  private static final List<Generator> 
+  zeroSumGenerators (final List<Generator> gs0) {
+
     final List<Generator> gs1 =
       gs0.stream().map(Doubles::zeroSumGenerator)
       .collect(Collectors.toUnmodifiableList());
@@ -492,7 +495,8 @@ public final class Common {
    * finite.
    */
 
-  public static final List<Generator> zeroSumGenerators (final int dim) {
+  public static final List<Generator> 
+  zeroSumGenerators (final int dim) {
     return zeroSumGenerators(baseGenerators(dim)); }
 
   //--------------------------------------------------------------

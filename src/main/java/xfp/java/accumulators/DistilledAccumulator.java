@@ -1,10 +1,13 @@
 package xfp.java.accumulators;
 
-import com.carrotsearch.hppc.DoubleArrayList;
+import java.util.Arrays;
 
 /** Distillation.
+ * <p>
+ * Mutable! Not thread safe!
+ * <p>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-30
+ * @version 2019-05-01
  */
 @SuppressWarnings("unchecked")
 public final class DistilledAccumulator 
@@ -12,28 +15,44 @@ implements Accumulator<DistilledAccumulator> {
 
   //--------------------------------------------------------------
 
-  private final DoubleArrayList _sums = new DoubleArrayList();
+  private double[] _sums = new double[32];
+  private int _end = -1; // inclusive index
+
+  private final void addValue (final double z) {
+    _end++;
+    if (_end >= _sums.length) { 
+      final int newSize = (int) 1.5*_sums.length;
+      _sums = Arrays.copyOf(_sums,newSize); }
+    _sums[_end] = z; }
+
+  private final void compact () {
+    int lastNonZero = _end;
+    while ((0.0 == _sums[lastNonZero]) && (0 < lastNonZero)) { 
+      lastNonZero--; }
+    _end = lastNonZero; }
+
+  //--------------------------------------------------------------
 
   private final boolean twoSum (final int i) {
 
-    final double x1 = _sums.get(i);
-    if (0.0 == x1) { return false; }
+    final double x1 = _sums[i];
+    //if (0.0 == x1) { return false; }
 
-    final double x0 = _sums.get(i-1);
-    
-    if (0.0 == x0) {
-      _sums.set(i,0.0); _sums.set(i-1,x1); return true; }
-    
+    final double x0 = _sums[i-1];
+
+    //if (0.0 == x0) {
+    //  _sums[i] = 0.0; _sums[i-1] = x1; return true; }
+
     final double s = x0 + x1;
     final double z = s - x0;
     final double e = (x0 - (s - z)) + (x1 - z); 
-    _sums.set(i-1,s);
-    _sums.set(i,e); 
+    _sums[i-1] = s;
+    _sums[i] = e; 
     return (x0 != s) || (x1 != e); }
 
   private final boolean distill () {
     boolean changed = false;
-    for (int i=_sums.size()-1;i>0;i--) { 
+    for (int i=_end;i>0;i--) { 
       changed = changed || twoSum(i); } 
     return changed; }
 
@@ -48,8 +67,8 @@ implements Accumulator<DistilledAccumulator> {
 
   @Override
   public final double doubleValue () { 
-    if (0 == _sums.size()) { return 0.0; }
-    return _sums.get(0); }
+    if (0 > _end) { return 0.0; }
+    return _sums[0]; }
 
   @Override
   public final Object value () { 
@@ -61,15 +80,14 @@ implements Accumulator<DistilledAccumulator> {
 
   @Override
   public final DistilledAccumulator clear () { 
-    _sums.clear();
+    _end = -1;
     return this; }
 
   @Override
   public final DistilledAccumulator add (final double z) { 
     assert Double.isFinite(z);
-    _sums.add(z);
-    while (distill()) { }
-    _sums.removeAll(0.0);
+    addValue(z);
+    while (distill()) { compact(); }
     return this; }
 
   @Override
@@ -83,7 +101,7 @@ implements Accumulator<DistilledAccumulator> {
 
   @Override
   public final DistilledAccumulator addProduct (final double z0,
-                                                final double z1) { 
+                                                 final double z1) { 
     assert Double.isFinite(z0);
     assert Double.isFinite(z1);
     final double z01 = z0*z1;
