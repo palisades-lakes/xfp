@@ -7,7 +7,7 @@ import java.util.Arrays;
  * Mutable! Not thread safe!
  * <p>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-01
+ * @version 2019-05-02
  */
 @SuppressWarnings("unchecked")
 public final class DistilledAccumulator 
@@ -20,9 +20,15 @@ implements Accumulator<DistilledAccumulator> {
 
   private final void addValue (final double z) {
     _end++;
+    //Debug.println("addValue(" + z + ")");
+    ////Debug.println(Arrays.toString(Arrays.copyOf(_sums,_end+1)));
+    //Debug.println(_end + "<" + _sums.length);
     if (_end >= _sums.length) { 
-      final int newSize = (int) 1.5*_sums.length;
-      _sums = Arrays.copyOf(_sums,newSize); }
+      final int newSize = Math.max(1,(int) (0.25*_sums.length));
+      //Debug.println("newSize=" + newSize);
+      _sums = Arrays.copyOf(_sums,newSize + _sums.length); 
+       //Debug.println(_sums.length); 
+      }
     _sums[_end] = z; }
 
   private final void compact () {
@@ -51,6 +57,8 @@ implements Accumulator<DistilledAccumulator> {
     return (x0 != s) || (x1 != e); }
 
   private final boolean distill () {
+    if (! Double.isFinite(_sums[0])) { return false; }
+    
     boolean changed = false;
     for (int i=_end;i>0;i--) { 
       changed = changed || twoSum(i); } 
@@ -59,11 +67,12 @@ implements Accumulator<DistilledAccumulator> {
   //--------------------------------------------------------------
   // Accumulator
   //--------------------------------------------------------------
+  
   @Override
   public final boolean isExact () { return true; }
 
   @Override
-  public final boolean noOverflow () { return true; }
+  public final boolean noOverflow () { return false; }
 
   @Override
   public final double doubleValue () { 
@@ -80,19 +89,22 @@ implements Accumulator<DistilledAccumulator> {
 
   @Override
   public final DistilledAccumulator clear () { 
+    Arrays.fill(_sums,0.0);
     _end = -1;
     return this; }
 
   @Override
   public final DistilledAccumulator add (final double z) { 
-    assert Double.isFinite(z);
-    addValue(z);
-    while (distill()) { compact(); }
-    return this; }
+    //Debug.println("add(" + z + ")");
+    //Debug.println(Arrays.toString(Arrays.copyOf(_sums,_end+1)));
+    //Debug.println(_end + "<" + _sums.length);
+    if (Double.isFinite(_sums[0])) {
+      addValue(z);
+      while (distill()) { compact(); } }
+    return this; } 
 
   @Override
   public final DistilledAccumulator add2 (final double z) { 
-    assert Double.isFinite(z);
     final double z2 = z*z;
     final double e = Math.fma(z,z,-z2);
     add(z2);
@@ -101,9 +113,7 @@ implements Accumulator<DistilledAccumulator> {
 
   @Override
   public final DistilledAccumulator addProduct (final double z0,
-                                                 final double z1) { 
-    assert Double.isFinite(z0);
-    assert Double.isFinite(z1);
+                                                final double z1) { 
     final double z01 = z0*z1;
     final double e = Math.fma(z0,z1,-z01);
     add(z01);

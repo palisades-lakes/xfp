@@ -5,7 +5,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import xfp.java.Debug;
-import xfp.java.accumulators.RationalFloatAccumulator;
+import xfp.java.accumulators.BigFloatAccumulator;
 import xfp.java.test.Common;
 
 //----------------------------------------------------------------
@@ -46,7 +46,7 @@ public final class ZhuHayesTest {
     Common.sumTests(
       Common.generators(TEST_DIM),
       Common.makeAccumulators(accumulators),
-      RationalFloatAccumulator.make()); }
+      BigFloatAccumulator.make()); }
 
   @SuppressWarnings("static-method")
   @Test
@@ -57,7 +57,7 @@ public final class ZhuHayesTest {
     Common.l2Tests(
       Common.generators(TEST_DIM),
       Common.makeAccumulators(accumulators),
-      RationalFloatAccumulator.make()); }
+      BigFloatAccumulator.make()); }
 
   @SuppressWarnings("static-method")
   @Test
@@ -68,16 +68,17 @@ public final class ZhuHayesTest {
     Common.dotTests(
       Common.generators(TEST_DIM),
       Common.makeAccumulators(accumulators),
-      RationalFloatAccumulator.make()); }
+      BigFloatAccumulator.make()); }
 
-  @SuppressWarnings("static-method")
-  @Test
-  public final void nanSum () {
-    Debug.DEBUG=false;
-    Debug.println();
-    Debug.println("infinite");
-    Common.nonFiniteTests(
-      Common.makeAccumulators(accumulators)); }
+  // TODO: decide on expected behavior with non-finite input
+//  @SuppressWarnings("static-method")
+//  @Test
+//  public final void nanSum () {
+//    Debug.DEBUG=false;
+//    Debug.println();
+//    Debug.println("infinite");
+//    Common.nonFiniteTests(
+//      Common.makeAccumulators(accumulators)); }
 
   @SuppressWarnings("static-method")
   @Test

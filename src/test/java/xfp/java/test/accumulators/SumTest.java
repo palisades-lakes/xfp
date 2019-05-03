@@ -11,7 +11,7 @@ import static xfp.java.test.Common.zeroSumGenerators;
 import org.junit.jupiter.api.Test;
 
 import xfp.java.Debug;
-import xfp.java.accumulators.RationalFloatAccumulator;
+import xfp.java.accumulators.BigFloatAccumulator;
 import xfp.java.test.Common;
 
 //----------------------------------------------------------------
@@ -22,21 +22,22 @@ import xfp.java.test.Common;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-23
+ * @version 2019-05-02
  */
 
 public final class SumTest {
 
-  private static final int DIM = 1 * 64 * 1024;
+  private static final int DIM = 16 * 1024;
 
-  @SuppressWarnings("static-method")
-  @Test
-  public final void nanSum () {
-    Debug.DEBUG=false;
-    Debug.println();
-    Debug.println("infinite");
-    Common.nonFiniteTests(
-      Common.makeAccumulators(accumulators())); }
+  // TODO: choose expected bahavior with non-finite input
+//  @SuppressWarnings("static-method")
+//  @Test
+//  public final void nanSum () {
+//    Debug.DEBUG=false;
+//    Debug.println();
+//    Debug.println("nonFInite");
+//    Common.nonFiniteTests(
+//      Common.makeAccumulators(accumulators())); }
 
   @SuppressWarnings("static-method")
   @Test
@@ -75,7 +76,7 @@ public final class SumTest {
     sumTests(
       generators(DIM),
       makeAccumulators(accumulators()),
-      RationalFloatAccumulator.make()); }
+      BigFloatAccumulator.make()); }
 
   @SuppressWarnings("static-method")
   @Test
@@ -86,7 +87,7 @@ public final class SumTest {
     l2Tests(
       generators(DIM),
       makeAccumulators(accumulators()),
-      RationalFloatAccumulator.make()); }
+      BigFloatAccumulator.make()); }
 
   @SuppressWarnings("static-method")
   @Test
@@ -97,7 +98,7 @@ public final class SumTest {
     dotTests(
       generators(DIM),
       makeAccumulators(accumulators()),
-      RationalFloatAccumulator.make()); }
+      BigFloatAccumulator.make()); }
 
   //--------------------------------------------------------------
 }

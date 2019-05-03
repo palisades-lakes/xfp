@@ -27,7 +27,7 @@ import xfp.java.numbers.Doubles;
  * <a href="http://epubs.siam.org/doi/abs/10.1137/070710020?journalCode=sjoce3" >
  * Yong Kang Zhu and Wayne B. Hayes,
  * "Correct Rounding and a Hybrid Approach to Exact Floating-Point Summation,"
- * SIAM J. Sci. Comput.,  31(4), p 2981–3001, Jun 2009. (21 pages)</a>
+ * SIAM J. Scientific Computing,  31(4), p 2981–3001, June 2009. (21 pages)</a>
  * <p>
  * This implementation based on the code with TOMS 908 and:
  * <p>
@@ -39,7 +39,7 @@ import xfp.java.numbers.Doubles;
  * <em>NOT</em> thread safe!
  * <p>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-20
+ * @version 2019-05-02
  */
 
 public final class ZhuHayesAccumulator
@@ -126,10 +126,12 @@ implements Accumulator<ZhuHayesAccumulator> {
 
     // Step 2
     for (int ii=0;ii<n[0]; ii++) {
-      twoSum(s,x[ii]); 
-      s = sumTwo; 
-      if (! Double.isFinite(s)) { return s; }
-      x[ii] = errTwo; }
+      final double xii = x[ii];
+      if (0.0 != xii) {
+        twoSum(s,xii); 
+        s = sumTwo; 
+        if (! Double.isFinite(s)) { return s; }
+        x[ii] = errTwo; } }
     // Step 3
     for(;;) {
       // Step 3(1)
@@ -139,17 +141,19 @@ implements Accumulator<ZhuHayesAccumulator> {
       // Step 3(2)
       for (int ii=0;ii<n[0];ii++) {
         // Step 3(2)(a)
-        twoSum(st, x[ii]);
-        st = sumTwo;
-        final double b = errTwo;
-        // Step 3(2)(b)
-        if (0.0 != b) {
-          x[count] = b;
-          // Step 3(2)(b)(i)
-          // throw exception on overflow:
-          count = Math.addExact(count,1);
-          // Step 3(2)(b)(ii)
-          sm = Math.max(sm,Math.abs(st)); } }
+        final double xii = x[ii];
+        if (0.0 != xii) {
+          twoSum(st, x[ii]);
+          st = sumTwo;
+          final double b = errTwo;
+          // Step 3(2)(b)
+          if (0.0 != b) {
+            x[count] = b;
+            // Step 3(2)(b)(i)
+            // throw exception on overflow:
+            count = Math.addExact(count,1);
+            // Step 3(2)(b)(ii)
+            sm = Math.max(sm,Math.abs(st)); } } }
       // Step 3(3)
       // check count exact double
       final double dcount = count;
@@ -299,18 +303,18 @@ implements Accumulator<ZhuHayesAccumulator> {
   public final Object value () { 
     return Double.valueOf(doubleValue()); }
 
+  private static final double[] v =  new double[2*NACCUMULATORS];
   @Override
   public final double doubleValue () {
     // Step 5
-    final double[] x = new double[a1.length+a2.length];
-    System.arraycopy(a1,0,x,0,a1.length);
-    System.arraycopy(a2,0,x,a1.length,a2.length);
+    System.arraycopy(a1,0,v,0,a1.length);
+    System.arraycopy(a2,0,v,a1.length,a2.length);
     // Step 6
     // for checking IFastSum
     //return RationalFloatAccumulator.make().addAll(x).doubleValue(); }
     final int[] n = new int[1];
-    n[0] = x.length;
-    return iFastSum(x,n,true); }
+    n[0] = v.length;
+    return iFastSum(v,n,true); }
 
   //--------------------------------------------------------------
 
