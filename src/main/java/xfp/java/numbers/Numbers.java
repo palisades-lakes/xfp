@@ -22,6 +22,15 @@ import xfp.java.prng.Generators;
 @SuppressWarnings("unchecked")
 public final class Numbers implements Set {
 
+  /** (int & UNSIGNED_MASK) returns long containing unsigned int. */
+  public static final long UNSIGNED_MASK = 0xffffffffL;
+
+  public static final long unsigned (final int i) {
+    return i & UNSIGNED_MASK; }
+  
+  public static final long unsigned (final long i) {
+    return ((int) i) & UNSIGNED_MASK; }
+  
   //--------------------------------------------------------------
   // useful class methods
   //--------------------------------------------------------------

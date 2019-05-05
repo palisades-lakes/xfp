@@ -90,23 +90,25 @@ implements Comparable<BigFloat3> {
                                       final boolean n0,
                                       final BigInteger t0,
                                       final int e) {
-    assert t0.signum() >= 0;
+    //assert t0.signum() >= 0;
     if (n0 ^ n1) { // different signs
-      final int c01 = t0.compareToNonNegative(t1);
-      assert c01 == t0.compareTo(BigInteger.valueOf(t1)) :
-        c01 + " != " + t0.compareTo(BigInteger.valueOf(t1))
-        + "\n" + t0.toString(0x10)
-        + "\n" + Long.toHexString(t1);
-      if (0 == c01) { return ZERO; }
-      // t1 > t0
-      if (0 > c01) { 
-        return valueOf(
-          n1,
-          BigInteger.valueOf(t1).subtract(t0),
-          e); }
-      // t0 > t1
       try {
-        return valueOf(n0,t0.subtractNonNegative(t1),e); }
+        final int c01 = t0.compareTo(t1);
+//        assert c01 == t0.compareTo(BigInteger.valueOf(t1)) :
+//          c01 + " != " + t0.compareTo(BigInteger.valueOf(t1))
+//          + "\n" + t0.toString(0x10)
+//          + "\n" + Long.toHexString(t1);
+
+        if (0 == c01) { return ZERO; }
+
+        // t1 > t0
+        if (0 > c01) { 
+          return valueOf(
+            n1, BigInteger.valueOf(t1).subtract(t0), e); }
+
+        // t0 > t1
+        return valueOf(n0,t0.subtract(t1),e); }
+
       catch (final Throwable t) {
         System.err.println(
           "\nn1=" + n1
@@ -114,10 +116,9 @@ implements Comparable<BigFloat3> {
           + "\nn0=" + n0
           + "\nt0=" + t0.toString(0x10)
           + "\nt0.subtractNonNegative(t1)= " 
-          + t0.subtractNonNegative(t1).toString(0x10));
-        throw t;
-      } }
-
+          + t0.subtract(t1).toString(0x10));
+        throw t; } }
+    
     return valueOf(n0,t0.add(t1),e); }
 
   //--------------------------------------------------------------
@@ -137,22 +138,13 @@ implements Comparable<BigFloat3> {
     final int de = e1 - e0;
     if (de > 0) { 
       if (de < Doubles.EXPONENT_BITS) {
-        return add(
-          n1,BigInteger.valueOf(
-            t1 << de),
-          n0,t0,e0);}
+        return add(n1,BigInteger.valueOf(t1 << de),n0,t0,e0);}
       return add(
-        n1,BigInteger.valueOf(t1)
-        .shiftLeft(de),
-        n0,t0,e0); }
+        n1,BigInteger.valueOf(t1).shiftLeft(de),n0,t0,e0); }
     else if (de < 0) {
-      return add(
-        n1,t1,
-        n0,t0.shiftLeft(-de),e1); }
+      return add(n1,t1,n0,t0.shiftLeft(-de),e1); }
     else {
-      return add(
-        n1,t1,
-        n0,t0,e0); } }
+      return add(n1,t1,n0,t0,e0); } }
 
   //--------------------------------------------------------------
 
@@ -163,7 +155,6 @@ implements Comparable<BigFloat3> {
       Doubles.significand(z),
       Doubles.exponent(z)); }
 
-  //--------------------------------------------------------------
   //--------------------------------------------------------------
 
   private final BigFloat3 add (final boolean n1,

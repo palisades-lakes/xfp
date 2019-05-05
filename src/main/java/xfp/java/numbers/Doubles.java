@@ -274,9 +274,6 @@ public final class Doubles implements Set {
     return x; }
 
   //--------------------------------------------------------------
-  /** (int & UNSIGNED_MASK) returns long containing unsigned int. */
-  
-  public static final long UNSIGNED_MASK = 0xffffffffL;
   private static final long SIGN_0 = 0x0L;
   private static final long SIGN_1 = 
     (0x1L << (EXPONENT_BITS + STORED_SIGNIFICAND_BITS));
@@ -302,7 +299,8 @@ public final class Doubles implements Set {
 
      final long s = (nonNegative ? SIGN_0 : SIGN_1);
      final int be = exponent + EXPONENT_BIAS;
-     final long e = (UNSIGNED_MASK & be) << STORED_SIGNIFICAND_BITS;
+     final long e = 
+       (Numbers.UNSIGNED_MASK & be) << STORED_SIGNIFICAND_BITS;
      final long t = significand & STORED_SIGNIFICAND_MASK;
      final double x = longBitsToDouble(s | e | t);
      return x; }

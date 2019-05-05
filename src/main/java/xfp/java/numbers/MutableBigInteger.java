@@ -132,8 +132,8 @@ class MutableBigInteger {
     if (intLen == 0) {
       return 0;
     }
-    final long d = value[offset] & Doubles.UNSIGNED_MASK;
-    return (intLen == 2) ? (d << 32) | (value[offset + 1] & Doubles.UNSIGNED_MASK) : d;
+    final long d = value[offset] & Numbers.UNSIGNED_MASK;
+    return (intLen == 2) ? (d << 32) | (value[offset + 1] & Numbers.UNSIGNED_MASK) : d;
   }
 
   /**
@@ -174,8 +174,8 @@ class MutableBigInteger {
       return BigInteger.INFLATED;
     }
     final long v = (len == 2) ?
-      ((mag[1] & Doubles.UNSIGNED_MASK) | ((d & Doubles.UNSIGNED_MASK) << 32)) :
-        d & Doubles.UNSIGNED_MASK;
+      ((mag[1] & Numbers.UNSIGNED_MASK) | ((d & Numbers.UNSIGNED_MASK) << 32)) :
+        d & Numbers.UNSIGNED_MASK;
       return sign == -1 ? -v : v;
   }
 
@@ -292,8 +292,8 @@ class MutableBigInteger {
     final int[] val = value;
     for (int i = offset, j = bstart; i < (len + offset);) {
       final int bv = bval[j++];
-      final long hb = ((bv >>> 1) + carry) & Doubles.UNSIGNED_MASK;
-      final long v = val[i++] & Doubles.UNSIGNED_MASK;
+      final long hb = ((bv >>> 1) + carry) & Numbers.UNSIGNED_MASK;
+      final long v = val[i++] & Numbers.UNSIGNED_MASK;
       if (v != hb) {
         return v < hb ? -1 : 1;
       }
@@ -569,8 +569,8 @@ class MutableBigInteger {
     long carry = 0;
 
     for (int j=a.length-1; j >= 0; j--) {
-      final long sum = (a[j] & Doubles.UNSIGNED_MASK) +
-        (result[j+offset] & Doubles.UNSIGNED_MASK) + carry;
+      final long sum = (a[j] & Numbers.UNSIGNED_MASK) +
+        (result[j+offset] & Numbers.UNSIGNED_MASK) + carry;
       result[j+offset] = (int)sum;
       carry = sum >>> 32;
     }
@@ -583,17 +583,17 @@ class MutableBigInteger {
    * when subtracting qhat*divisor from dividend.
    */
   private static int mulsub(final int[] q, final int[] a, final int x, final int len, int offset) {
-    final long xLong = x & Doubles.UNSIGNED_MASK;
+    final long xLong = x & Numbers.UNSIGNED_MASK;
     long carry = 0;
     offset += len;
 
     for (int j=len-1; j >= 0; j--) {
-      final long product = ((a[j] & Doubles.UNSIGNED_MASK) * xLong) + carry;
+      final long product = ((a[j] & Numbers.UNSIGNED_MASK) * xLong) + carry;
       final long difference = q[offset] - product;
       q[offset--] = (int)difference;
       carry = (product >>> 32)
-        + (((difference & Doubles.UNSIGNED_MASK) >
-        (((~(int)product) & Doubles.UNSIGNED_MASK))) ? 1:0);
+        + (((difference & Numbers.UNSIGNED_MASK) >
+        (((~(int)product) & Numbers.UNSIGNED_MASK))) ? 1:0);
     }
     return (int)carry;
   }
@@ -603,15 +603,15 @@ class MutableBigInteger {
    * updated, the only result of the method is borrow flag.
    */
   private static int mulsubBorrow(final int[] q, final int[] a, final int x, final int len, int offset) {
-    final long xLong = x & Doubles.UNSIGNED_MASK;
+    final long xLong = x & Numbers.UNSIGNED_MASK;
     long carry = 0;
     offset += len;
     for (int j=len-1; j >= 0; j--) {
-      final long product = ((a[j] & Doubles.UNSIGNED_MASK) * xLong) + carry;
+      final long product = ((a[j] & Numbers.UNSIGNED_MASK) * xLong) + carry;
       final long difference = q[offset--] - product;
       carry = (product >>> 32)
-        + (((difference & Doubles.UNSIGNED_MASK) >
-        (((~(int)product) & Doubles.UNSIGNED_MASK))) ? 1:0);
+        + (((difference & Numbers.UNSIGNED_MASK) >
+        (((~(int)product) & Numbers.UNSIGNED_MASK))) ? 1:0);
     }
     return (int)carry;
   }
@@ -696,8 +696,8 @@ class MutableBigInteger {
     // Add common parts of both numbers
     while((x > 0) && (y > 0)) {
       x--; y--;
-      sum = (value[x+offset] & Doubles.UNSIGNED_MASK) +
-        (addend.value[y+addend.offset] & Doubles.UNSIGNED_MASK) + carry;
+      sum = (value[x+offset] & Numbers.UNSIGNED_MASK) +
+        (addend.value[y+addend.offset] & Numbers.UNSIGNED_MASK) + carry;
       result[rstart--] = (int)sum;
       carry = sum >>> 32;
     }
@@ -708,13 +708,13 @@ class MutableBigInteger {
       if ((carry == 0) && (result == value) && (rstart == (x + offset))) {
         return;
       }
-      sum = (value[x+offset] & Doubles.UNSIGNED_MASK) + carry;
+      sum = (value[x+offset] & Numbers.UNSIGNED_MASK) + carry;
       result[rstart--] = (int)sum;
       carry = sum >>> 32;
     }
     while(y > 0) {
       y--;
-      sum = (addend.value[y+addend.offset] & Doubles.UNSIGNED_MASK) + carry;
+      sum = (addend.value[y+addend.offset] & Numbers.UNSIGNED_MASK) + carry;
       result[rstart--] = (int)sum;
       carry = sum >>> 32;
     }
@@ -761,8 +761,8 @@ class MutableBigInteger {
     while ((x > 0) && (y > 0)) {
       x--; y--;
       final int bval = (y+addend.offset) < addend.value.length ? addend.value[y+addend.offset] : 0;
-      sum = (value[x+offset] & Doubles.UNSIGNED_MASK) +
-        (bval & Doubles.UNSIGNED_MASK) + carry;
+      sum = (value[x+offset] & Numbers.UNSIGNED_MASK) +
+        (bval & Numbers.UNSIGNED_MASK) + carry;
       result[rstart--] = (int)sum;
       carry = sum >>> 32;
     }
@@ -773,14 +773,14 @@ class MutableBigInteger {
       if ((carry == 0) && (result == value) && (rstart == (x + offset))) {
         return;
       }
-      sum = (value[x+offset] & Doubles.UNSIGNED_MASK) + carry;
+      sum = (value[x+offset] & Numbers.UNSIGNED_MASK) + carry;
       result[rstart--] = (int)sum;
       carry = sum >>> 32;
     }
     while (y > 0) {
       y--;
       final int bval = (y+addend.offset) < addend.value.length ? addend.value[y+addend.offset] : 0;
-      sum = (bval & Doubles.UNSIGNED_MASK) + carry;
+      sum = (bval & Numbers.UNSIGNED_MASK) + carry;
       result[rstart--] = (int)sum;
       carry = sum >>> 32;
     }
@@ -893,14 +893,14 @@ class MutableBigInteger {
     while (y > 0) {
       x--; y--;
 
-      diff = (a.value[x+a.offset] & Doubles.UNSIGNED_MASK) -
-        (b.value[y+b.offset] & Doubles.UNSIGNED_MASK) - ((int)-(diff>>32));
+      diff = (a.value[x+a.offset] & Numbers.UNSIGNED_MASK) -
+        (b.value[y+b.offset] & Numbers.UNSIGNED_MASK) - ((int)-(diff>>32));
       result[rstart--] = (int)diff;
     }
     // Subtract remainder of longer number
     while (x > 0) {
       x--;
-      diff = (a.value[x+a.offset] & Doubles.UNSIGNED_MASK) - ((int)-(diff>>32));
+      diff = (a.value[x+a.offset] & Numbers.UNSIGNED_MASK) - ((int)-(diff>>32));
       result[rstart--] = (int)diff;
     }
 
@@ -935,14 +935,14 @@ class MutableBigInteger {
     // Subtract common parts of both numbers
     while (y > 0) {
       x--; y--;
-      diff = (a.value[a.offset+ x] & Doubles.UNSIGNED_MASK) -
-        (b.value[b.offset+ y] & Doubles.UNSIGNED_MASK) - ((int)-(diff>>32));
+      diff = (a.value[a.offset+ x] & Numbers.UNSIGNED_MASK) -
+        (b.value[b.offset+ y] & Numbers.UNSIGNED_MASK) - ((int)-(diff>>32));
       a.value[a.offset+x] = (int)diff;
     }
     // Subtract remainder of longer number
     while (x > 0) {
       x--;
-      diff = (a.value[a.offset+ x] & Doubles.UNSIGNED_MASK) - ((int)-(diff>>32));
+      diff = (a.value[a.offset+ x] & Numbers.UNSIGNED_MASK) - ((int)-(diff>>32));
       a.value[a.offset+x] = (int)diff;
     }
 
@@ -969,8 +969,8 @@ class MutableBigInteger {
     // The first iteration is hoisted out of the loop to avoid extra add
     long carry = 0;
     for (int j=yLen-1, k=(yLen+xLen)-1; j >= 0; j--, k--) {
-      final long product = ((y.value[j+y.offset] & Doubles.UNSIGNED_MASK) *
-        (value[(xLen-1)+offset] & Doubles.UNSIGNED_MASK)) + carry;
+      final long product = ((y.value[j+y.offset] & Numbers.UNSIGNED_MASK) *
+        (value[(xLen-1)+offset] & Numbers.UNSIGNED_MASK)) + carry;
       z.value[k] = (int)product;
       carry = product >>> 32;
     }
@@ -980,9 +980,9 @@ class MutableBigInteger {
     for (int i = xLen-2; i >= 0; i--) {
       carry = 0;
       for (int j=yLen-1, k=yLen+i; j >= 0; j--, k--) {
-        final long product = ((y.value[j+y.offset] & Doubles.UNSIGNED_MASK) *
-          (value[i+offset] & Doubles.UNSIGNED_MASK)) +
-          (z.value[k] & Doubles.UNSIGNED_MASK) + carry;
+        final long product = ((y.value[j+y.offset] & Numbers.UNSIGNED_MASK) *
+          (value[i+offset] & Numbers.UNSIGNED_MASK)) +
+          (z.value[k] & Numbers.UNSIGNED_MASK) + carry;
         z.value[k] = (int)product;
         carry = product >>> 32;
       }
@@ -1009,12 +1009,12 @@ class MutableBigInteger {
     }
 
     // Perform the multiplication word by word
-    final long ylong = y & Doubles.UNSIGNED_MASK;
+    final long ylong = y & Numbers.UNSIGNED_MASK;
     final int[] zval = (z.value.length < (intLen+1) ? new int[intLen + 1]
       : z.value);
     long carry = 0;
     for (int i = intLen-1; i >= 0; i--) {
-      final long product = (ylong * (value[i+offset] & Doubles.UNSIGNED_MASK)) + carry;
+      final long product = (ylong * (value[i+offset] & Numbers.UNSIGNED_MASK)) + carry;
       zval[i+1] = (int)product;
       carry = product >>> 32;
     }
@@ -1039,11 +1039,11 @@ class MutableBigInteger {
    *
    */
   int divideOneWord(final int divisor, final MutableBigInteger quotient) {
-    final long divisorLong = divisor & Doubles.UNSIGNED_MASK;
+    final long divisorLong = divisor & Numbers.UNSIGNED_MASK;
 
     // Special case of one word dividend
     if (intLen == 1) {
-      final long dividendValue = value[offset] & Doubles.UNSIGNED_MASK;
+      final long dividendValue = value[offset] & Numbers.UNSIGNED_MASK;
       final int q = (int) (dividendValue / divisorLong);
       final int r = (int) (dividendValue - (q * divisorLong));
       quotient.value[0] = q;
@@ -1062,29 +1062,29 @@ class MutableBigInteger {
     final int shift = Integer.numberOfLeadingZeros(divisor);
 
     int rem = value[offset];
-    long remLong = rem & Doubles.UNSIGNED_MASK;
+    long remLong = rem & Numbers.UNSIGNED_MASK;
     if (remLong < divisorLong) {
       quotient.value[0] = 0;
     } else {
       quotient.value[0] = (int)(remLong / divisorLong);
       rem = (int) (remLong - (quotient.value[0] * divisorLong));
-      remLong = rem & Doubles.UNSIGNED_MASK;
+      remLong = rem & Numbers.UNSIGNED_MASK;
     }
     int xlen = intLen;
     while (--xlen > 0) {
       final long dividendEstimate = (remLong << 32) |
-        (value[(offset + intLen) - xlen] & Doubles.UNSIGNED_MASK);
+        (value[(offset + intLen) - xlen] & Numbers.UNSIGNED_MASK);
       int q;
       if (dividendEstimate >= 0) {
         q = (int) (dividendEstimate / divisorLong);
         rem = (int) (dividendEstimate - (q * divisorLong));
       } else {
         final long tmp = divWord(dividendEstimate, divisor);
-        q = (int) (tmp & Doubles.UNSIGNED_MASK);
+        q = (int) (tmp & Numbers.UNSIGNED_MASK);
         rem = (int) (tmp >>> 32);
       }
       quotient.value[intLen - xlen] = q;
-      remLong = rem & Doubles.UNSIGNED_MASK;
+      remLong = rem & Numbers.UNSIGNED_MASK;
     }
 
     quotient.normalize();
@@ -1406,7 +1406,7 @@ class MutableBigInteger {
     quotient.clear();
     // Special case on word divisor
     if (d == 0) {
-      return divideOneWord((int)v, quotient) & Doubles.UNSIGNED_MASK;
+      return divideOneWord((int)v, quotient) & Numbers.UNSIGNED_MASK;
     }
     return divideLongMagnitude(v, quotient).toLong();
   }
@@ -1489,7 +1489,7 @@ class MutableBigInteger {
     }
 
     final int dh = divisor[0];
-    final long dhLong = dh & Doubles.UNSIGNED_MASK;
+    final long dhLong = dh & Numbers.UNSIGNED_MASK;
     final int dl = divisor[1];
 
     // D2 Initialize j
@@ -1508,13 +1508,13 @@ class MutableBigInteger {
         qrem = nh + nm;
         skipCorrection = (qrem + 0x80000000) < nh2;
       } else {
-        final long nChunk = (((long)nh) << 32) | (nm & Doubles.UNSIGNED_MASK);
+        final long nChunk = (((long)nh) << 32) | (nm & Numbers.UNSIGNED_MASK);
         if (nChunk >= 0) {
           qhat = (int) (nChunk / dhLong);
           qrem = (int) (nChunk - (qhat * dhLong));
         } else {
           final long tmp = divWord(nChunk, dh);
-          qhat = (int) (tmp & Doubles.UNSIGNED_MASK);
+          qhat = (int) (tmp & Numbers.UNSIGNED_MASK);
           qrem = (int) (tmp >>> 32);
         }
       }
@@ -1524,16 +1524,16 @@ class MutableBigInteger {
       }
 
       if (!skipCorrection) { // Correct qhat
-        final long nl = rem.value[j+2+rem.offset] & Doubles.UNSIGNED_MASK;
-        long rs = ((qrem & Doubles.UNSIGNED_MASK) << 32) | nl;
-        long estProduct = (dl & Doubles.UNSIGNED_MASK) * (qhat & Doubles.UNSIGNED_MASK);
+        final long nl = rem.value[j+2+rem.offset] & Numbers.UNSIGNED_MASK;
+        long rs = ((qrem & Numbers.UNSIGNED_MASK) << 32) | nl;
+        long estProduct = (dl & Numbers.UNSIGNED_MASK) * (qhat & Numbers.UNSIGNED_MASK);
 
         if (unsignedLongCompare(estProduct, rs)) {
           qhat--;
-          qrem = (int)((qrem & Doubles.UNSIGNED_MASK) + dhLong);
-          if ((qrem & Doubles.UNSIGNED_MASK) >=  dhLong) {
-            estProduct -= (dl & Doubles.UNSIGNED_MASK);
-            rs = ((qrem & Doubles.UNSIGNED_MASK) << 32) | nl;
+          qrem = (int)((qrem & Numbers.UNSIGNED_MASK) + dhLong);
+          if ((qrem & Numbers.UNSIGNED_MASK) >=  dhLong) {
+            estProduct -= (dl & Numbers.UNSIGNED_MASK);
+            rs = ((qrem & Numbers.UNSIGNED_MASK) << 32) | nl;
             if (unsignedLongCompare(estProduct, rs)) {
               qhat--;
             }
@@ -1569,28 +1569,28 @@ class MutableBigInteger {
       qrem = nh + nm;
       skipCorrection = (qrem + 0x80000000) < nh2;
     } else {
-      final long nChunk = (((long) nh) << 32) | (nm & Doubles.UNSIGNED_MASK);
+      final long nChunk = (((long) nh) << 32) | (nm & Numbers.UNSIGNED_MASK);
       if (nChunk >= 0) {
         qhat = (int) (nChunk / dhLong);
         qrem = (int) (nChunk - (qhat * dhLong));
       } else {
         final long tmp = divWord(nChunk, dh);
-        qhat = (int) (tmp & Doubles.UNSIGNED_MASK);
+        qhat = (int) (tmp & Numbers.UNSIGNED_MASK);
         qrem = (int) (tmp >>> 32);
       }
     }
     if (qhat != 0) {
       if (!skipCorrection) { // Correct qhat
-        final long nl = rem.value[limit + 1 + rem.offset] & Doubles.UNSIGNED_MASK;
-        long rs = ((qrem & Doubles.UNSIGNED_MASK) << 32) | nl;
-        long estProduct = (dl & Doubles.UNSIGNED_MASK) * (qhat & Doubles.UNSIGNED_MASK);
+        final long nl = rem.value[limit + 1 + rem.offset] & Numbers.UNSIGNED_MASK;
+        long rs = ((qrem & Numbers.UNSIGNED_MASK) << 32) | nl;
+        long estProduct = (dl & Numbers.UNSIGNED_MASK) * (qhat & Numbers.UNSIGNED_MASK);
 
         if (unsignedLongCompare(estProduct, rs)) {
           qhat--;
-          qrem = (int) ((qrem & Doubles.UNSIGNED_MASK) + dhLong);
-          if ((qrem & Doubles.UNSIGNED_MASK) >= dhLong) {
-            estProduct -= (dl & Doubles.UNSIGNED_MASK);
-            rs = ((qrem & Doubles.UNSIGNED_MASK) << 32) | nl;
+          qrem = (int) ((qrem & Numbers.UNSIGNED_MASK) + dhLong);
+          if ((qrem & Numbers.UNSIGNED_MASK) >= dhLong) {
+            estProduct -= (dl & Numbers.UNSIGNED_MASK);
+            rs = ((qrem & Numbers.UNSIGNED_MASK) << 32) | nl;
             if (unsignedLongCompare(estProduct, rs)) {
               qhat--;
             }
@@ -1671,8 +1671,8 @@ class MutableBigInteger {
     }
 
     final int dh = (int)(ldivisor >>> 32);
-    final long dhLong = dh & Doubles.UNSIGNED_MASK;
-    final int dl = (int)(ldivisor & Doubles.UNSIGNED_MASK);
+    final long dhLong = dh & Numbers.UNSIGNED_MASK;
+    final int dl = (int)(ldivisor & Numbers.UNSIGNED_MASK);
 
     // D2 Initialize j
     for (int j = 0; j < limit; j++) {
@@ -1690,13 +1690,13 @@ class MutableBigInteger {
         qrem = nh + nm;
         skipCorrection = (qrem + 0x80000000) < nh2;
       } else {
-        final long nChunk = (((long) nh) << 32) | (nm & Doubles.UNSIGNED_MASK);
+        final long nChunk = (((long) nh) << 32) | (nm & Numbers.UNSIGNED_MASK);
         if (nChunk >= 0) {
           qhat = (int) (nChunk / dhLong);
           qrem = (int) (nChunk - (qhat * dhLong));
         } else {
           final long tmp = divWord(nChunk, dh);
-          qhat =(int)(tmp & Doubles.UNSIGNED_MASK);
+          qhat =(int)(tmp & Numbers.UNSIGNED_MASK);
           qrem = (int)(tmp>>>32);
         }
       }
@@ -1706,16 +1706,16 @@ class MutableBigInteger {
       }
 
       if (!skipCorrection) { // Correct qhat
-        final long nl = rem.value[j + 2 + rem.offset] & Doubles.UNSIGNED_MASK;
-        long rs = ((qrem & Doubles.UNSIGNED_MASK) << 32) | nl;
-        long estProduct = (dl & Doubles.UNSIGNED_MASK) * (qhat & Doubles.UNSIGNED_MASK);
+        final long nl = rem.value[j + 2 + rem.offset] & Numbers.UNSIGNED_MASK;
+        long rs = ((qrem & Numbers.UNSIGNED_MASK) << 32) | nl;
+        long estProduct = (dl & Numbers.UNSIGNED_MASK) * (qhat & Numbers.UNSIGNED_MASK);
 
         if (unsignedLongCompare(estProduct, rs)) {
           qhat--;
-          qrem = (int) ((qrem & Doubles.UNSIGNED_MASK) + dhLong);
-          if ((qrem & Doubles.UNSIGNED_MASK) >= dhLong) {
-            estProduct -= (dl & Doubles.UNSIGNED_MASK);
-            rs = ((qrem & Doubles.UNSIGNED_MASK) << 32) | nl;
+          qrem = (int) ((qrem & Numbers.UNSIGNED_MASK) + dhLong);
+          if ((qrem & Numbers.UNSIGNED_MASK) >= dhLong) {
+            estProduct -= (dl & Numbers.UNSIGNED_MASK);
+            rs = ((qrem & Numbers.UNSIGNED_MASK) << 32) | nl;
             if (unsignedLongCompare(estProduct, rs)) {
               qhat--;
             }
@@ -1759,10 +1759,10 @@ class MutableBigInteger {
                          final int offset) {
     long carry = 0;
 
-    long sum = (dl & Doubles.UNSIGNED_MASK) + (result[1+offset] & Doubles.UNSIGNED_MASK);
+    long sum = (dl & Numbers.UNSIGNED_MASK) + (result[1+offset] & Numbers.UNSIGNED_MASK);
     result[1+offset] = (int)sum;
 
-    sum = (dh & Doubles.UNSIGNED_MASK) + (result[offset] & Doubles.UNSIGNED_MASK) + carry;
+    sum = (dh & Numbers.UNSIGNED_MASK) + (result[offset] & Numbers.UNSIGNED_MASK) + carry;
     result[offset] = (int)sum;
     carry = sum >>> 32;
         return (int)carry;
@@ -1778,20 +1778,20 @@ class MutableBigInteger {
                          final int dl, 
                          final int x, 
                          int offset1) {
-    final long xLong = x & Doubles.UNSIGNED_MASK;
+    final long xLong = x & Numbers.UNSIGNED_MASK;
     offset1 += 2;
-    long product = (dl & Doubles.UNSIGNED_MASK) * xLong;
+    long product = (dl & Numbers.UNSIGNED_MASK) * xLong;
     long difference = q[offset1] - product;
     q[offset1--] = (int)difference;
     long carry = (product >>> 32)
-      + (((difference & Doubles.UNSIGNED_MASK) >
-      (((~(int)product) & Doubles.UNSIGNED_MASK))) ? 1:0);
-    product = ((dh & Doubles.UNSIGNED_MASK) * xLong) + carry;
+      + (((difference & Numbers.UNSIGNED_MASK) >
+      (((~(int)product) & Numbers.UNSIGNED_MASK))) ? 1:0);
+    product = ((dh & Numbers.UNSIGNED_MASK) * xLong) + carry;
     difference = q[offset1] - product;
     q[offset1--] = (int)difference;
     carry = (product >>> 32)
-      + (((difference & Doubles.UNSIGNED_MASK) >
-      (((~(int)product) & Doubles.UNSIGNED_MASK))) ? 1:0);
+      + (((difference & Numbers.UNSIGNED_MASK) >
+      (((~(int)product) & Numbers.UNSIGNED_MASK))) ? 1:0);
     return (int)carry;
   }
 
@@ -1811,13 +1811,13 @@ class MutableBigInteger {
    * low 32 bits contain quotient value.
    */
   static long divWord(final long n, final int d) {
-    final long dLong = d & Doubles.UNSIGNED_MASK;
+    final long dLong = d & Numbers.UNSIGNED_MASK;
     long r;
     long q;
     if (dLong == 1) {
       q = (int)n;
       r = 0;
-      return (r << 32) | (q & Doubles.UNSIGNED_MASK);
+      return (r << 32) | (q & Numbers.UNSIGNED_MASK);
     }
 
     // Approximate the quotient and remainder
@@ -1834,7 +1834,7 @@ class MutableBigInteger {
       q++;
     }
     // n - q*dlong == r && 0 <= r <dLong, hence we're done.
-    return (r << 32) | (q & Doubles.UNSIGNED_MASK);
+    return (r << 32) | (q & Numbers.UNSIGNED_MASK);
   }
 
   /**
@@ -1856,7 +1856,7 @@ class MutableBigInteger {
     if (this.isZero()) {
       return new MutableBigInteger(0);
     } else if ((this.value.length == 1)
-      && ((this.value[0] & Doubles.UNSIGNED_MASK) < 4)) { // result is unity
+      && ((this.value[0] & Numbers.UNSIGNED_MASK) < 4)) { // result is unity
       return ONE;
     }
 
@@ -1872,7 +1872,7 @@ class MutableBigInteger {
         // Terminate when non-decreasing.
         if (xk1 >= xk) {
           return new MutableBigInteger(new int[] {
-                                                  (int)(xk >>> 32), (int)(xk & Doubles.UNSIGNED_MASK)
+                                                  (int)(xk >>> 32), (int)(xk & Numbers.UNSIGNED_MASK)
           });
         }
 
@@ -2059,11 +2059,11 @@ class MutableBigInteger {
       return new MutableBigInteger(t);
     }
 
-    long pLong = (value[(offset+intLen)-1] & Doubles.UNSIGNED_MASK);
+    long pLong = (value[(offset+intLen)-1] & Numbers.UNSIGNED_MASK);
     if (intLen > 1) {
       pLong |=  ((long)value[(offset+intLen)-2] << 32);
     }
-    long tLong = t & Doubles.UNSIGNED_MASK;
+    long tLong = t & Numbers.UNSIGNED_MASK;
     tLong = tLong * (2 - (pLong * tLong));  // 1 more Newton iter step
     tLong = (k == 64 ? tLong : tLong & ((1L << k) - 1));
 
