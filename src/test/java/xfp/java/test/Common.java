@@ -4,7 +4,6 @@ import static java.lang.Double.toHexString;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -23,6 +22,7 @@ import xfp.java.Debug;
 import xfp.java.accumulators.Accumulator;
 import xfp.java.function.FloatFunction;
 import xfp.java.function.ToFloatFunction;
+import xfp.java.numbers.BigInteger;
 import xfp.java.numbers.Doubles;
 import xfp.java.numbers.Floats;
 import xfp.java.prng.Generator;
@@ -32,12 +32,56 @@ import xfp.java.prng.PRNG;
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-02
+ * @version 2019-05-04
  */
 @SuppressWarnings("unchecked")
 public final class Common {
 
   private static final int TRYS = 1 * 256;
+
+  //--------------------------------------------------------------
+
+  public static final List<String> accumulators () { 
+    return Arrays.asList(
+      new String[] 
+        {
+         "xfp.java.accumulators.DoubleAccumulator",
+         "xfp.java.accumulators.DistilledAccumulator",
+         "xfp.java.accumulators.ZhuHayesAccumulator",
+         "xfp.java.accumulators.BigFloatAccumulator",
+         "xfp.java.accumulators.BigFloatAccumulator3",
+         "xfp.java.accumulators.RationalFloatAccumulator",
+        }); }
+
+  //--------------------------------------------------------------
+
+  public static final Accumulator 
+  makeAccumulator (final String className) {
+    try {
+
+      final Class c = Class.forName(className);
+      final Method m = c.getMethod("make");
+      return (Accumulator) m.invoke(null); }
+
+    catch (final 
+      ClassNotFoundException 
+      | NoSuchMethodException 
+      | SecurityException 
+      | IllegalAccessException 
+      | IllegalArgumentException
+      | InvocationTargetException e) {
+      // e.printStackTrace();
+      throw new RuntimeException(e); } }
+
+  //--------------------------------------------------------------
+
+  public static final List<Accumulator> 
+  makeAccumulators (final List<String> classNames) {
+    return 
+      classNames
+      .stream()
+      .map(Common::makeAccumulator)
+      .collect(Collectors.toUnmodifiableList()); }
 
   //--------------------------------------------------------------
   // TODO: java missing corresponding FloatFunction, etc.
@@ -511,49 +555,6 @@ public final class Common {
     return
       Stream
       .concat(gs0.stream(),gs1.stream())
-      .collect(Collectors.toUnmodifiableList()); }
-
-  //--------------------------------------------------------------
-
-  public static final List<String> accumulators () { 
-    return Arrays.asList(
-      new String[] 
-        {
-         "xfp.java.accumulators.DoubleAccumulator",
-         "xfp.java.accumulators.DistilledAccumulator",
-         "xfp.java.accumulators.ZhuHayesAccumulator",
-         "xfp.java.accumulators.BigFloatAccumulator",
-         "xfp.java.accumulators.RationalFloatAccumulator",
-        }); }
-
-  //--------------------------------------------------------------
-
-  public static final Accumulator 
-  makeAccumulator (final String className) {
-    try {
-
-      final Class c = Class.forName(className);
-      final Method m = c.getMethod("make");
-      return (Accumulator) m.invoke(null); }
-
-    catch (final 
-      ClassNotFoundException 
-      | NoSuchMethodException 
-      | SecurityException 
-      | IllegalAccessException 
-      | IllegalArgumentException
-      | InvocationTargetException e) {
-      // e.printStackTrace();
-      throw new RuntimeException(e); } }
-
-  //--------------------------------------------------------------
-
-  public static final List<Accumulator> 
-  makeAccumulators (final List<String> classNames) {
-    return 
-      classNames
-      .stream()
-      .map(Common::makeAccumulator)
       .collect(Collectors.toUnmodifiableList()); }
 
   //--------------------------------------------------------------

@@ -1,6 +1,6 @@
 package xfp.java.test.numbers;
 
-import java.math.BigInteger;
+import xfp.java.numbers.BigInteger;
 import java.util.function.BinaryOperator;
 
 import org.junit.jupiter.api.Test;

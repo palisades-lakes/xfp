@@ -7,7 +7,7 @@ import static java.lang.Float.floatToIntBits;
 import static java.lang.Float.floatToRawIntBits;
 import static java.lang.Float.toHexString;
 
-import java.math.BigInteger;
+import xfp.java.numbers.BigInteger;
 import java.util.Map;
 import java.util.function.BiPredicate;
 import java.util.function.BinaryOperator;

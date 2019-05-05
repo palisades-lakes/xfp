@@ -3,7 +3,7 @@ package xfp.java.numbers;
 import static xfp.java.numbers.Numbers.hiBit;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
+import xfp.java.numbers.BigInteger;
 import java.util.Objects;
 
 import xfp.java.exceptions.Exceptions;

@@ -1,7 +1,7 @@
 package xfp.java.numbers;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
+import xfp.java.numbers.BigInteger;
 import java.util.Objects;
 
 import xfp.java.exceptions.Exceptions;

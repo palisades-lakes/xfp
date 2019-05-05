@@ -1,6 +1,6 @@
 package xfp.java.numbers;
 
-import java.math.BigInteger;
+import xfp.java.numbers.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiPredicate;

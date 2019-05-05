@@ -1,6 +1,6 @@
 package xfp.java.numbers;
 
-import java.math.BigInteger;
+//import xfp.java.numbers.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiPredicate;
@@ -24,7 +24,7 @@ import xfp.java.prng.Generators;
  * represented by <code>BigFloat</code>
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-17
+ * @version 2019-05-04
  */
 @SuppressWarnings("unchecked")
 public final class BigFloats implements Set {

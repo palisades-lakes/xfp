@@ -1,6 +1,6 @@
 package xfp.java.prng;
 
-import java.math.BigInteger;
+import xfp.java.numbers.BigInteger;
 import java.util.List;
 
 import org.apache.commons.rng.UniformRandomProvider;

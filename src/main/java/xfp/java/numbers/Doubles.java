@@ -274,9 +274,9 @@ public final class Doubles implements Set {
     return x; }
 
   //--------------------------------------------------------------
-  /** (int & LONG_MASK) returns long containing unsigned int. */
+  /** (int & UNSIGNED_MASK) returns long containing unsigned int. */
   
-  private static final long UNSIGNED_MASK = 0xffffffffL;
+  public static final long UNSIGNED_MASK = 0xffffffffL;
   private static final long SIGN_0 = 0x0L;
   private static final long SIGN_1 = 
     (0x1L << (EXPONENT_BITS + STORED_SIGNIFICAND_BITS));
