@@ -404,7 +404,7 @@ implements Comparable<BigInteger> {
   }
 
   // bitsPerDigit in the given radix times 1024
-  // Rounded up to avoid underallocation.
+  // Rounded up to avoid under-allocation.
   private static long bitsPerDigit[] =
   { 0, 0, 1024, 1624, 2048, 2378, 2648, 2875, 3072, 3247, 3402,
     3543, 3672, 3790, 3899, 4001, 4096, 4186, 4271, 4350, 4426,
@@ -607,8 +607,7 @@ implements Comparable<BigInteger> {
    */
   private static final int[] addMagnitude (final int[] x, 
                                            final long val) {
-    assert val >= 0L; 
-
+    //assert val >= 0L; 
     long sum = 0;
     int xIndex = x.length;
     int[] result;
@@ -718,7 +717,7 @@ implements Comparable<BigInteger> {
     if (0 == signum) {
       return new BigInteger(shiftLeft(val,leftShift),1); }
 
-    assert 0 < signum;
+    //assert 0 < signum;
 
     return new BigInteger(add(mag,shiftLeft(val,leftShift)),1); }
 
@@ -766,7 +765,7 @@ implements Comparable<BigInteger> {
 
   private static final int[] subtract (final int[] big,
                                        final int[] little) {
-    assert compareMagnitude(little,big) <= 0;
+    //assert compareMagnitude(little,big) <= 0;
     int bigIndex = big.length;
     final int result[] = new int[bigIndex];
     int littleIndex = little.length;
@@ -850,9 +849,9 @@ implements Comparable<BigInteger> {
 
   public final BigInteger subtract (final long val,
                                     final int leftShift) {
-    assert 0 < signum;
+    //assert 0 < signum;
     if (0L == val) { return this; }
-    assert 0L < val;
+    //assert 0L < val;
     return 
       new BigInteger(subtract(mag,shiftLeft(val,leftShift)),1); }
 
@@ -860,8 +859,8 @@ implements Comparable<BigInteger> {
                                         final int leftShift) {
     if (0 == signum) {
       return new BigInteger(shiftLeft(val,leftShift),1); }
-    assert 0 < signum;
-    assert 0L < val;
+    //assert 0 < signum;
+    //assert 0L < val;
     return 
       new BigInteger(subtract(shiftLeft(val,leftShift),mag),1); }
 
@@ -2840,8 +2839,8 @@ implements Comparable<BigInteger> {
   }
 
   public final int compareTo (final long val) {
-    assert val >= 0L;
-    assert signum >= 0;
+    //assert val >= 0L;
+    //assert signum >= 0;
     if (val == 0L) {
       if (signum == 0) { return 0; }
       return -1; }
@@ -2868,7 +2867,7 @@ implements Comparable<BigInteger> {
     return compareMagnitude(mag,val.mag); }
 
   public final int compareMagnitude (final long val) {
-    assert 0L <= val;
+    //assert 0L <= val;
     final int[] m1 = mag;
     final int len = m1.length;
     if (len > 2) { return 1; }

@@ -116,7 +116,7 @@ implements Comparable<BigFloat4> {
   //--------------------------------------------------------------
 
   public final BigFloat4 add (final double z) {
-    assert Double.isFinite(z);
+    //assert Double.isFinite(z);
     return add(
       Doubles.nonNegative(z),
       Doubles.significand(z),
@@ -207,7 +207,7 @@ implements Comparable<BigFloat4> {
   // TODO: optimize!
 
   public final BigFloat4 add2 (final double z) { 
-    assert Double.isFinite(z);
+    //assert Double.isFinite(z);
     final BigFloat4 q = valueOf(z);
     return add(q.multiply(q)); }
 
@@ -216,8 +216,8 @@ implements Comparable<BigFloat4> {
 
   public final BigFloat4 addProduct (final double z0,
                                      final double z1) { 
-    assert Double.isFinite(z0);
-    assert Double.isFinite(z1);
+    //assert Double.isFinite(z0);
+    //assert Double.isFinite(z1);
     return add(valueOf(z0).multiply(z1)); }
 
   //--------------------------------------------------------------
@@ -503,9 +503,10 @@ implements Comparable<BigFloat4> {
       else {
         _significand = t0.shiftRight(e1);
         _exponent = Math.addExact(e0,e1);  } 
-      assert 0 == Numbers.loBit(_significand)
-        : "lowBit= " + Numbers.loBit(_significand)
-        +"; rightShift= " + e1; } }
+//      assert 0 == Numbers.loBit(_significand)
+//        : "lowBit= " + Numbers.loBit(_significand)
+//        +"; rightShift= " + e1; 
+      } }
 
   //--------------------------------------------------------------
 
@@ -513,7 +514,7 @@ implements Comparable<BigFloat4> {
                                          final BigInteger t,
                                          final int e) {
     if (0 == t.signum()) { return ZERO; }
-    assert 0 < t.signum();
+    //assert 0 < t.signum();
     return new BigFloat4(nonNegative,t,e); } 
 
   public static final BigFloat4 valueOf (final BigInteger n,
