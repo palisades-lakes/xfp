@@ -8,6 +8,11 @@ import java.util.Objects;
 
 /** immutable arbitrary-precision integers for arbitrary precision 
  * floats.
+ * 
+ * TODO: convert to purely non-negative numbers.
+ * 
+ * @author palisades dot lakes at gmail dot com
+ * @version 2019-05-06
  */
 
 @SuppressWarnings("hiding")
@@ -32,7 +37,6 @@ implements Comparable<BigInteger> {
    */
   private static final int MAX_MAG_LENGTH =
     (Integer.MAX_VALUE / Integer.SIZE) + 1; // (1 << 26)
-
 
   //-------------------------------------------------------------
   // construction
@@ -500,21 +504,7 @@ implements Comparable<BigInteger> {
     throw new ArithmeticException(
       "BigInteger would overflow supported range"); }
 
-  // Static Factory Methods
-
-  /** Returns a BigInteger whose value is equal to that of the
-   * specified {@code long}.
-   *
-   * @apiNote This static factory method is provided in preference
-   *          to a ({@code long}) constructor because it allows
-   *          for reuse of
-   *          frequently used BigIntegers.
-   *
-   * @param val
-   *          value of the BigInteger to return.
-   * @return a BigInteger with the specified value.
-   */
-  public static BigInteger valueOf (final long val) {
+  public static final BigInteger valueOf (final long val) {
     // If -MAX_CONSTANT < val < MAX_CONSTANT, return stashed
     // constant
     if (val == 0) { return ZERO; }
@@ -523,6 +513,20 @@ implements Comparable<BigInteger> {
     else if ((val < 0) && (val >= -MAX_CONSTANT)) {
       return negConst[(int) -val]; }
     return new BigInteger(val); }
+
+  private static final int[] shiftLeft (final long x,
+                                        final int leftShift) {
+    //    final int s0 = leftShift / 32;
+    //    final int s1 = leftShift % 32;
+    //    final int n = s0 + 2 + ((s1 > 0) ? 1 : 0);
+    //    final int[] x = new int[n];
+    final int[] xs = { (int) (x >>> 32), 
+                       (int) (x & 0xFFFFFFFFL), };
+    return shiftLeft(xs,leftShift); }
+
+  public static final BigInteger nonNegative (final long x,
+                                              final int leftShift) {
+    return new BigInteger(shiftLeft(x,leftShift),1); }
 
   /** Constructs a BigInteger with the specified value, which may
    * not be zero.
@@ -601,11 +605,14 @@ implements Comparable<BigInteger> {
    * This method allocates a new int array to hold the answer. 
    * Assumes x.length &gt; 0 and val is non-negative
    */
-  private static final int[] add (final int[] x, 
-                                  final long val) {
+  private static final int[] addMagnitude (final int[] x, 
+                                           final long val) {
+    assert val >= 0L; 
+
     long sum = 0;
     int xIndex = x.length;
     int[] result;
+
     final int highWord = (int) (val >>> 32);
     if (highWord == 0) {
       result = new int[xIndex];
@@ -625,6 +632,7 @@ implements Comparable<BigInteger> {
         (x[--xIndex] & UNSIGNED_MASK) + (highWord & UNSIGNED_MASK)
         + (sum >>> 32);
       result[xIndex] = (int) sum; }
+
     // Copy remainder of longer number while carry propagation is
     // required
     boolean carry = ((sum >>> 32) != 0);
@@ -644,7 +652,7 @@ implements Comparable<BigInteger> {
     if (val == 0) { return this; }
     if (signum == 0) { return valueOf(val); }
     if (Long.signum(val) == signum) {
-      return new BigInteger(add(mag,Math.abs(val)),signum); }
+      return new BigInteger(addMagnitude(mag,Math.abs(val)),signum); }
     final int cmp = compareMagnitude(val);
     if (cmp == 0) { return ZERO; }
     int[] resultMag =
@@ -658,7 +666,7 @@ implements Comparable<BigInteger> {
    * int array to hold the answer.
    */
 
-  private static int[] add (int[] x, int[] y) {
+  public static final int[] add (int[] x, int[] y) {
     // If x is shorter, swap the two arrays
     if (x.length < y.length) {
       final int[] tmp = x; x = y; y = tmp; }
@@ -704,6 +712,17 @@ implements Comparable<BigInteger> {
     return new BigInteger(resultMag,cmp == signum ? 1 : -1); }
 
   //--------------------------------------------------------------
+
+  public final BigInteger addMagnitude (final long val,
+                                        final int leftShift) {
+    if (0 == signum) {
+      return new BigInteger(shiftLeft(val,leftShift),1); }
+
+    assert 0 < signum;
+
+    return new BigInteger(add(mag,shiftLeft(val,leftShift)),1); }
+
+  //--------------------------------------------------------------
   // subtract
   //--------------------------------------------------------------
 
@@ -747,6 +766,7 @@ implements Comparable<BigInteger> {
 
   private static final int[] subtract (final int[] big,
                                        final int[] little) {
+    assert compareMagnitude(little,big) <= 0;
     int bigIndex = big.length;
     final int result[] = new int[bigIndex];
     int littleIndex = little.length;
@@ -758,21 +778,18 @@ implements Comparable<BigInteger> {
         ((big[--bigIndex] & UNSIGNED_MASK)
           - (little[--littleIndex] & UNSIGNED_MASK))
         + (difference >> 32);
-      result[bigIndex] = (int) difference;
-    }
+      result[bigIndex] = (int) difference; }
 
     // Subtract remainder of longer number while borrow propagates
     boolean borrow = ((difference >> 32) != 0);
     while ((bigIndex > 0) && borrow) {
-      borrow = ((result[--bigIndex] = big[bigIndex] - 1) == -1);
-    }
+      borrow = ((result[--bigIndex] = big[bigIndex] - 1) == -1); }
 
     // Copy remainder of longer number
     while (bigIndex > 0) {
-      result[--bigIndex] = big[bigIndex];
-    }
+      result[--bigIndex] = big[bigIndex]; }
 
-    return result; }
+    return trustedStripLeadingZeroInts(result); }
 
   public final BigInteger subtract (final BigInteger val) {
     if (val.signum == 0) { return this; }
@@ -828,6 +845,25 @@ implements Comparable<BigInteger> {
     //    assert c > 0;
     if (0L == val) { return this; }
     return new BigInteger(subtract(mag,val),1); }
+
+  //--------------------------------------------------------------
+
+  public final BigInteger subtract (final long val,
+                                    final int leftShift) {
+    assert 0 < signum;
+    if (0L == val) { return this; }
+    assert 0L < val;
+    return 
+      new BigInteger(subtract(mag,shiftLeft(val,leftShift)),1); }
+
+  public final BigInteger subtractFrom (final long val,
+                                        final int leftShift) {
+    if (0 == signum) {
+      return new BigInteger(shiftLeft(val,leftShift),1); }
+    assert 0 < signum;
+    assert 0L < val;
+    return 
+      new BigInteger(subtract(shiftLeft(val,leftShift),mag),1); }
 
   //--------------------------------------------------------------
   // multiply
@@ -2799,9 +2835,7 @@ implements Comparable<BigInteger> {
       case -1:
         return val.compareMagnitude(this);
       default:
-        return 0;
-      }
-    }
+        return 0; } }
     return signum > val.signum ? 1 : -1;
   }
 
@@ -2814,22 +2848,11 @@ implements Comparable<BigInteger> {
     if (signum == 0) { return -1; }
     return compareMagnitude(val); }
 
-  /**
-   * Compares the magnitude array of this BigInteger with the
-   * specified
-   * BigInteger's. This is the version of compareTo ignoring sign.
-   *
-   * @param val
-   *          BigInteger whose magnitude array to be compared.
-   * @return -1, 0 or 1 as this magnitude array is less than,
-   *         equal to or
-   *         greater than the magnitude aray for the specified
-   *         BigInteger's.
-   */
-  public final int compareMagnitude (final BigInteger val) {
-    final int[] m1 = mag;
+  //--------------------------------------------------------------
+
+  private static final int compareMagnitude (final int[] m1,
+                                             final int[] m2) {
     final int len1 = m1.length;
-    final int[] m2 = val.mag;
     final int len2 = m2.length;
     if (len1 < len2) { return -1; }
     if (len1 > len2) { return 1; }
@@ -2837,25 +2860,18 @@ implements Comparable<BigInteger> {
       final int a = m1[i];
       final int b = m2[i];
       if (a != b) {
-        return ((a & UNSIGNED_MASK) < (b & UNSIGNED_MASK)) ? -1 : 1;
-      }
-    }
-    return 0;
-  }
+        return ((a & UNSIGNED_MASK) < (b & UNSIGNED_MASK)) 
+          ? -1 : 1; } }
+    return 0; }
 
-  /**
-   * Version of compareMagnitude that compares magnitude with long
-   * value.
-   * val can't be Long.MIN_VALUE.
-   */
-  int compareMagnitude (long val) {
-    assert val != Long.MIN_VALUE;
+  public final int compareMagnitude (final BigInteger val) {
+    return compareMagnitude(mag,val.mag); }
+
+  public final int compareMagnitude (final long val) {
+    assert 0L <= val;
     final int[] m1 = mag;
     final int len = m1.length;
     if (len > 2) { return 1; }
-    if (val < 0) {
-      val = -val;
-    }
     final int highWord = (int) (val >>> 32);
     if (highWord == 0) {
       if (len < 1) { return -1; }
@@ -2881,39 +2897,11 @@ implements Comparable<BigInteger> {
     return 0;
   }
 
-  /**
-   * Compares this BigInteger with the specified Object for
-   * equality.
-   *
-   * @param x
-   *          Object to which this BigInteger is to be compared.
-   * @return {@code true} if and only if the specified Object is a
-   *         BigInteger whose value is numerically equal to this
-   *         BigInteger.
-   */
-  @Override
-  public boolean equals (final Object x) {
-    // This test is just an optimization, which may or may not
-    // help
-    if (x == this) { return true; }
+  public final int compareMagnitude (final long val,
+                                     final int leftShift) {
+    return compareMagnitude(mag,shiftLeft(val,leftShift)); }
 
-    if (!(x instanceof BigInteger)) { return false; }
-
-    final BigInteger xInt = (BigInteger) x;
-    if (xInt.signum != signum) { return false; }
-
-    final int[] m = mag;
-    final int len = m.length;
-    final int[] xm = xInt.mag;
-    if (len != xm.length) { return false; }
-
-    for (int i = 0; i < len; i++) {
-      if (xm[i] != m[i]) { return false; }
-    }
-
-    return true;
-  }
-
+  //--------------------------------------------------------------
   /**
    * Returns the minimum of this BigInteger and {@code val}.
    *
@@ -2925,8 +2913,7 @@ implements Comparable<BigInteger> {
    *         returned.
    */
   public BigInteger min (final BigInteger val) {
-    return (compareTo(val) < 0 ? this : val);
-  }
+    return (compareTo(val) < 0 ? this : val); }
 
   /**
    * Returns the maximum of this BigInteger and {@code val}.
@@ -2952,6 +2939,20 @@ implements Comparable<BigInteger> {
     }
     return hashCode * signum; }
 
+  @Override
+  public boolean equals (final Object x) {
+    if (x == this) { return true; }
+    if (!(x instanceof BigInteger)) { return false; }
+    final BigInteger xInt = (BigInteger) x;
+    if (xInt.signum != signum) { return false; }
+    final int[] m = mag;
+    final int len = m.length;
+    final int[] xm = xInt.mag;
+    if (len != xm.length) { return false; }
+    for (int i = 0; i < len; i++) {
+      if (xm[i] != m[i]) { return false; } }
+    return true; }
+
   /** Returns the String representation of this BigInteger in the
    * given radix. If the radix is outside the range from {@link
    * Character#MIN_RADIX} to {@link Character#MAX_RADIX}
@@ -2971,7 +2972,7 @@ implements Comparable<BigInteger> {
    * @see Character#forDigit
    * @see #BigInteger(java.lang.String, int)
    */
-  public String toString (int radix) {
+  public final String toString (int radix) {
     if (signum == 0) { return "0"; }
     if ((radix < Character.MIN_RADIX)
       || (radix > Character.MAX_RADIX)) {
@@ -2998,11 +2999,7 @@ implements Comparable<BigInteger> {
     return sb.toString();
   }
 
-  /**
-   * This method is used to perform toString when arguments are
-   * small.
-   */
-  private String smallToString (final int radix) {
+  private final String smallToString (final int radix) {
     if (signum == 0) { return "0"; }
 
     // Compute upper bound on number of digit groups and allocate

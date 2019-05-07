@@ -32,7 +32,7 @@ import xfp.java.prng.PRNG;
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-04
+ * @version 2019-05-06
  */
 @SuppressWarnings("unchecked")
 public final class Common {
@@ -46,11 +46,17 @@ public final class Common {
       new String[] 
         {
          "xfp.java.accumulators.DoubleAccumulator",
+         //"xfp.java.accumulators.KahanAccumulator",
          "xfp.java.accumulators.DistilledAccumulator",
          "xfp.java.accumulators.ZhuHayesAccumulator",
          "xfp.java.accumulators.BigFloatAccumulator",
+         "xfp.java.accumulators.BigFloatAccumulator0",
+         "xfp.java.accumulators.BigFloatAccumulator1",
+         "xfp.java.accumulators.BigFloatAccumulator2",
          "xfp.java.accumulators.BigFloatAccumulator3",
+         "xfp.java.accumulators.BigFloatAccumulator4",
          "xfp.java.accumulators.RationalFloatAccumulator",
+         //"xfp.java.accumulators.RationalAccumulator",
         }); }
 
   //--------------------------------------------------------------
@@ -596,37 +602,37 @@ public final class Common {
 
   // TODO: determine how accumulators should behave when given
   // non-finite input
-  
-//  public static final void 
-//  nonFiniteTest (final Accumulator a) {
-//
-//    Assertions.assertThrows(
-//      AssertionError.class, 
-//      () -> {
-//        final double s0 = 
-//          a.clear()
-//          .addAll(new double[] {-1.0, Double.POSITIVE_INFINITY, })
-//          .doubleValue();
-//        Assertions.assertEquals(Double.POSITIVE_INFINITY,s0,
-//          Classes.className(a)); },
-//      Classes.className(a)); 
-//
-//    Assertions.assertThrows(
-//      AssertionError.class, 
-//      () -> {
-//        final double s2 = 
-//          a.clear()
-//          .addAll(new double[] {-1.0, Double.NaN, })
-//          .doubleValue();
-//        Assertions.assertEquals(
-//          Double.NaN,s2,Classes.className(a));},
-//      Classes.className(a)); 
-//  }
-//
-//  public static final void 
-//  nonFiniteTests (final List<Accumulator> accumulators) {
-//    for (final Accumulator a : accumulators) {
-//      nonFiniteTest(a); } }
+
+  //  public static final void 
+  //  nonFiniteTest (final Accumulator a) {
+  //
+  //    Assertions.assertThrows(
+  //      AssertionError.class, 
+  //      () -> {
+  //        final double s0 = 
+  //          a.clear()
+  //          .addAll(new double[] {-1.0, Double.POSITIVE_INFINITY, })
+  //          .doubleValue();
+  //        Assertions.assertEquals(Double.POSITIVE_INFINITY,s0,
+  //          Classes.className(a)); },
+  //      Classes.className(a)); 
+  //
+  //    Assertions.assertThrows(
+  //      AssertionError.class, 
+  //      () -> {
+  //        final double s2 = 
+  //          a.clear()
+  //          .addAll(new double[] {-1.0, Double.NaN, })
+  //          .doubleValue();
+  //        Assertions.assertEquals(
+  //          Double.NaN,s2,Classes.className(a));},
+  //      Classes.className(a)); 
+  //  }
+  //
+  //  public static final void 
+  //  nonFiniteTests (final List<Accumulator> accumulators) {
+  //    for (final Accumulator a : accumulators) {
+  //      nonFiniteTest(a); } }
 
   //--------------------------------------------------------------
 
