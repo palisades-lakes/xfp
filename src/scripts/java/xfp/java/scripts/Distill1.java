@@ -13,6 +13,7 @@ import xfp.java.accumulators.ZhuHayesAccumulator;
 import xfp.java.linear.Dn;
 import xfp.java.numbers.BigFloat;
 import xfp.java.numbers.Doubles;
+import xfp.java.numbers.Numbers;
 import xfp.java.prng.Generator;
 import xfp.java.prng.PRNG;
 import xfp.java.test.Common;
@@ -23,7 +24,7 @@ import xfp.java.test.Common;
  * j --source 11 -ea src/scripts/java/xfp/java/scripts/Distill.java > distilled.txt
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-29
+ * @version 2019-05-07
  */
 @SuppressWarnings("unchecked")
 public final class Distill1 {
@@ -187,7 +188,7 @@ public final class Distill1 {
       System.out.println("eRange= " + eRange(x));
       assert truth == a.clear().addAll(x).doubleValue();
       assert truth == x[0] : 
-        "\n" + Dn.toHexString(x)
+        "\n" + Numbers.toHexString(x)
         + "\n" + a.value();
       //System.out.println(Dn.toHexString(x)); 
     } }

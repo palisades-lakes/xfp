@@ -1,7 +1,7 @@
 package xfp.java.scripts;
 
 import xfp.java.accumulators.Accumulator;
-import xfp.java.accumulators.BigFloatAccumulator4;
+import xfp.java.accumulators.BigFloatAccumulator5;
 import xfp.java.prng.Generator;
 import xfp.java.test.Common;
 
@@ -11,7 +11,7 @@ import xfp.java.test.Common;
  * jy --source 11 src/scripts/java/xfp/java/scripts/BigFloatProfile.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-06
+ * @version 2019-05-07
  */
 @SuppressWarnings("unchecked")
 public final class BigFloatProfile {
@@ -19,7 +19,7 @@ public final class BigFloatProfile {
   public static final void main (final String[] args) {
     final int dim = (64*1024*1024) + 1;
     final int trys = 128;
-    final Accumulator a = BigFloatAccumulator4.make();
+    final Accumulator a = BigFloatAccumulator5.make();
     assert a.isExact();
     for (final Generator g : Common.generators(dim)) {
       System.out.println();

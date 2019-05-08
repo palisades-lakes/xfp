@@ -1,6 +1,7 @@
 package xfp.java.numbers;
 
 import static xfp.java.numbers.Numbers.UNSIGNED_MASK;
+import static xfp.java.numbers.Numbers.unsigned;
 
 import java.io.ObjectStreamField;
 import java.util.Arrays;
@@ -660,6 +661,19 @@ implements Comparable<BigInteger> {
     resultMag = trustedStripLeadingZeroInts(resultMag);
     return new BigInteger(resultMag,cmp == signum ? 1 : -1); }
 
+  public final BigInteger add4 (final long val) {
+    if (val == 0) { return this; }
+    if (signum == 0) { return valueOf(val); }
+    if (Long.signum(val) == signum) {
+      return new BigInteger(addMagnitude(mag,Math.abs(val)),signum); }
+    final int cmp = compareMagnitude(val);
+    if (cmp == 0) { return ZERO; }
+    int[] resultMag =
+      (cmp > 0 ? subtract(mag,Math.abs(val))
+        : subtract(Math.abs(val),mag));
+    resultMag = trustedStripLeadingZeroInts(resultMag);
+    return new BigInteger(resultMag,cmp == signum ? 1 : -1); }
+
   //--------------------------------------------------------------
   /** Adds the contents of the int arrays x and y. Allocate a new 
    * int array to hold the answer.
@@ -710,98 +724,70 @@ implements Comparable<BigInteger> {
     resultMag = trustedStripLeadingZeroInts(resultMag);
     return new BigInteger(resultMag,cmp == signum ? 1 : -1); }
 
+  public final BigInteger addMagnitude4 (final long val,
+                                         final int leftShift) {
+    if (0 == signum) {
+      return new BigInteger(shiftLeft(val,leftShift),1); }
+    return new BigInteger(add(mag,shiftLeft(val,leftShift)),1); }
+
   //--------------------------------------------------------------
 
+//  private static final int[] addMagnitude (final int[] x,
+//                                           final long y,
+//                                           final int leftBitShift)  {
+//    if (0 == leftBitShift) { return addMagnitude(x,y); }
+//    
+//    final int leftIntShift = leftBitShift >>> 5;
+//    final int remBitShift = leftBitShift & 0x1f;
+//    final long mid = (y << remBitShift);
+//    final long ylo = (mid & 0xFFFFFFFFL);
+//    final long ymi = (mid >>> 32);
+//    final long yhi = ((0==remBitShift) 
+//      ? 0L 
+//      : unsigned((int) (y >>> (64 - remBitShift))));
+//
+//    final int nx = x.length;
+//    final int ny = leftIntShift + 3; // 2 if xhi == 0
+//    final int nr = Math.max(nx,ny);
+//    final int[] result = new int[nr];
+//    // copy low order x to result
+//    for (int i=nx;i>ny;i--) { result[i] = x[i]; }
+//    int xIndex = nx;
+//    int yIndex = nr - leftIntShift - 1;
+//    long sum = 0;
+//    if (yIndex == 1) {
+//      sum = (x[--xIndex] & UNSIGNED_MASK) + (y[0] & UNSIGNED_MASK);
+//      result[xIndex] = (int) sum; }
+//    else {
+//      // Add common parts of both numbers
+//      while (yIndex > 0) {
+//        sum =
+//          (x[--xIndex] & UNSIGNED_MASK) + (y[--yIndex] & UNSIGNED_MASK)
+//          + (sum >>> 32);
+//        result[xIndex] = (int) sum; } }
+//    // Copy remainder of longer number while carry propagation is
+//    // required
+//    boolean carry = ((sum >>> 32) != 0);
+//    while ((xIndex > 0) && carry) {
+//      carry = ((result[--xIndex] = x[xIndex] + 1) == 0); }
+//    // Copy remainder of longer number
+//    while (xIndex > 0) { result[--xIndex] = x[xIndex]; }
+//    // Grow result if necessary
+//    if (carry) {
+//      final int bigger[] = new int[result.length + 1];
+//      System.arraycopy(result,0,bigger,1,result.length);
+//      bigger[0] = 0x01;
+//      return bigger; }
+//    return result; }
+  
   public final BigInteger addMagnitude (final long val,
                                         final int leftShift) {
     if (0 == signum) {
       return new BigInteger(shiftLeft(val,leftShift),1); }
-
-    //assert 0 < signum;
-
     return new BigInteger(add(mag,shiftLeft(val,leftShift)),1); }
 
   //--------------------------------------------------------------
   // subtract
-  //--------------------------------------------------------------
-
-  private static final int[] subtract (final long val,
-                                       final int[] little) {
-    final int highWord = (int) (val >>> 32);
-    if (highWord == 0) {
-      final int result[] = new int[1];
-      result[0] = (int) (val - (little[0] & UNSIGNED_MASK));
-      return result; }
-    final int result[] = new int[2];
-    if (little.length == 1) {
-      final long difference =
-        ((int) val & UNSIGNED_MASK)
-        - (little[0] & UNSIGNED_MASK);
-      result[1] = (int) difference;
-      // Subtract remainder of longer number while borrow
-      // propagates
-      final boolean borrow = ((difference >> 32) != 0);
-      if (borrow) { result[0] = highWord - 1; }
-      // Copy remainder of longer number
-      else { result[0] = highWord; }
-      return result; }
-    long difference =
-      ((int) val & UNSIGNED_MASK)
-      - (little[1] & UNSIGNED_MASK);
-    result[1] = (int) difference;
-    difference =
-      ((highWord & UNSIGNED_MASK)
-        - (little[0] & UNSIGNED_MASK))
-      + (difference >> 32);
-    result[0] = (int) difference;
-    return result; }
-
-  //--------------------------------------------------------------
-  /** Subtracts the contents of the second int arrays (little) 
-   * from the first (big). The first int array (big) must 
-   * represent a larger number than the second. This method 
-   * allocates the space necessary to hold the answer.
-   */
-
-  private static final int[] subtract (final int[] big,
-                                       final int[] little) {
-    //assert compareMagnitude(little,big) <= 0;
-    int bigIndex = big.length;
-    final int result[] = new int[bigIndex];
-    int littleIndex = little.length;
-    long difference = 0;
-
-    // Subtract common parts of both numbers
-    while (littleIndex > 0) {
-      difference =
-        ((big[--bigIndex] & UNSIGNED_MASK)
-          - (little[--littleIndex] & UNSIGNED_MASK))
-        + (difference >> 32);
-      result[bigIndex] = (int) difference; }
-
-    // Subtract remainder of longer number while borrow propagates
-    boolean borrow = ((difference >> 32) != 0);
-    while ((bigIndex > 0) && borrow) {
-      borrow = ((result[--bigIndex] = big[bigIndex] - 1) == -1); }
-
-    // Copy remainder of longer number
-    while (bigIndex > 0) {
-      result[--bigIndex] = big[bigIndex]; }
-
-    return trustedStripLeadingZeroInts(result); }
-
-  public final BigInteger subtract (final BigInteger val) {
-    if (val.signum == 0) { return this; }
-    if (signum == 0) { return val.negate(); }
-    if (val.signum != signum) {
-      return new BigInteger(add(mag,val.mag),signum); }
-    final int cmp = compareMagnitude(val);
-    if (cmp == 0) { return ZERO; }
-    int[] resultMag =
-      (cmp > 0 ? subtract(mag,val.mag) : subtract(val.mag,mag));
-    resultMag = trustedStripLeadingZeroInts(resultMag);
-    return new BigInteger(resultMag,cmp == signum ? 1 : -1); }
-
   //--------------------------------------------------------------
   /** Subtracts the contents of the second argument (val) from the
    * first (big). The first int array (big) must represent a
@@ -845,18 +831,221 @@ implements Comparable<BigInteger> {
     if (0L == val) { return this; }
     return new BigInteger(subtract(mag,val),1); }
 
+  public final BigInteger subtract4 (final long val) {
+    //    assert signum >=0;
+    //    assert val >= 0L;
+    final int c = compareTo(val);
+    if (0 == c) { return ZERO; }
+    //    assert c > 0;
+    if (0L == val) { return this; }
+    return new BigInteger(subtract(mag,val),1); }
+
   //--------------------------------------------------------------
+
+  private static final int[] subtract (final long val,
+                                       final int[] little) {
+    final int highWord = (int) (val >>> 32);
+    if (highWord == 0) {
+      final int result[] = new int[1];
+      result[0] = (int) (val - (little[0] & UNSIGNED_MASK));
+      return result; }
+    final int result[] = new int[2];
+    if (little.length == 1) {
+      final long difference =
+        ((int) val & UNSIGNED_MASK)
+        - (little[0] & UNSIGNED_MASK);
+      result[1] = (int) difference;
+      // Subtract remainder of longer number while borrow
+      // propagates
+      final boolean borrow = ((difference >> 32) != 0);
+      if (borrow) { result[0] = highWord - 1; }
+      // Copy remainder of longer number
+      else { result[0] = highWord; }
+      return result; }
+    long difference =
+      ((int) val & UNSIGNED_MASK)
+      - (little[1] & UNSIGNED_MASK);
+    result[1] = (int) difference;
+    difference =
+      ((highWord & UNSIGNED_MASK)
+        - (little[0] & UNSIGNED_MASK))
+      + (difference >> 32);
+    result[0] = (int) difference;
+    return result; }
+
+  //--------------------------------------------------------------
+  /** Subtracts the contents of the second int arrays (little) 
+   * from the first (big). The first int array (big) must 
+   * represent a larger number than the second. This method 
+   * allocates the space necessary to hold the answer.
+   */
+
+  private static final int[] subtract (final int[] big,
+                                       final int[] little) {
+    //assert compareMagnitude(little,big) <= 0;
+    //Debug.println("4big=\n" + Numbers.toHexString(big));
+    //Debug.println("4little=\n" + Numbers.toHexString(little));
+    int bigIndex = big.length;
+    final int result[] = new int[bigIndex];
+    int littleIndex = little.length;
+    long difference = 0;
+
+    // Subtract common parts of both numbers
+    while (littleIndex > 0) {
+      difference =
+        ((big[--bigIndex] & UNSIGNED_MASK)
+          - (little[--littleIndex] & UNSIGNED_MASK))
+        + (difference >> 32);
+      result[bigIndex] = (int) difference; }
+
+    // Subtract remainder of longer number while borrow propagates
+    boolean borrow = ((difference >> 32) != 0);
+    while ((bigIndex > 0) && borrow) {
+      borrow = ((result[--bigIndex] = big[bigIndex] - 1) == -1); }
+
+    // Copy remainder of longer number
+    while (bigIndex > 0) {
+      result[--bigIndex] = big[bigIndex]; }
+
+    final int[] r = trustedStripLeadingZeroInts(result);
+    //Debug.println("4result=\n" + Numbers.toHexString(r));
+    return r; }
+
+  public final BigInteger subtract (final BigInteger val) {
+    if (val.signum == 0) { return this; }
+    if (signum == 0) { return val.negate(); }
+    if (val.signum != signum) {
+      return new BigInteger(add(mag,val.mag),signum); }
+    final int cmp = compareMagnitude(val);
+    if (cmp == 0) { return ZERO; }
+    int[] resultMag =
+      (cmp > 0 ? subtract(mag,val.mag) : subtract(val.mag,mag));
+    resultMag = trustedStripLeadingZeroInts(resultMag);
+    return new BigInteger(resultMag,cmp == signum ? 1 : -1); }
+
+  //--------------------------------------------------------------
+  // assuming little*2<sup>leftBitShift</sup> <= big
+  // big represents 
+  // sum<sub>i=0,n-1</sub> unsigned(big[n-1-i]) * 2 <sup>i*32</sup>
+  // so big[0] is the most significant term; big[n-1] the least.
+  //
+  // if x = (little << (leftBitShift % 32)),
+  // and leftIntShift = leftBitShift/32,
+  // then x fits in 3 unsigned ints, xlo, xmi, xhi, 
+  // where xhi == 0 if (leftBitShift % 32) == 0, and
+  // little*2<sup>leftBitShift</sup> = 
+  // (xlo * 2<sup>leftIntShift*32</sup) +
+  // (xmi * 2<sup>(leftIntShift+1)*32</sup) +
+  // (xhi * 2<sup>(leftIntShift+2)*32</sup)
+
+  private static final int[] subtract (final int[] big,
+                                       final long little,
+                                       final int leftBitShift) {
+    if (0 == leftBitShift) { return subtract(big,little); }
+    // assert max/min constraints on leftBitShift
+    //Debug.println("little=" + Long.toHexString(little));
+    //Debug.println("leftBitShift=" + leftBitShift);
+    final int leftIntShift = leftBitShift >>> 5;
+    final int remBitShift = leftBitShift & 0x1f;
+    //final int leftIntShift = leftBitShift / 32;
+    //final int remBitShift = leftBitShift % 32;
+    //Debug.println("leftIntShift=" + leftIntShift);
+    //Debug.println("remBitShift=" + remBitShift);
+    //Debug.println(leftIntShift*32);
+    //assert 0 <= remBitShift;
+    //assert remBitShift < 32;
+    final long mid = (little << remBitShift);
+    //Debug.println("mid=" + Long.toHexString(mid));
+    //final long xlo = unsigned((int) (mid & 0xFFFFFFFFL));
+    //final long xmi = unsigned((int) (mid >>> 32));
+    //final long xhi = ((0==remBitShift) ? 0L 
+    //  : unsigned((int) (little >>> (64 - remBitShift))));
+    final long xlo = (mid & 0xFFFFFFFFL);
+    final long xmi = (mid >>> 32);
+    final long xhi = ((0==remBitShift) 
+      ? 0L 
+      : (little >>> (64 - remBitShift)));
+    //Debug.println("big=\n" + Numbers.toHexString(big));
+    //Debug.println("little=\n" 
+    //  + Numbers.toHexString(new int[] { xhi, xmi, xlo,}));
+
+    final int n = big.length;
+    //assert n > leftIntShift; // TODO: is this right?
+    final int result[] = new int[n];
+    int i=n-1;
+    // copy unaffected low order ints
+    for (;i>n-leftIntShift-1;i--) { result[i] = big[i]; }
+
+    long difference = 0;
+    // Subtract common parts of both numbers
+    //Debug.println("i=" + i);
+    //Debug.println("big[i]=" + Long.toHexString(unsigned(big[i])));
+    //Debug.println("xlo=" + Long.toHexString(unsigned(xlo)));
+    difference = (unsigned(big[i]) - xlo);
+    result[i] = (int) difference; 
+    //Debug.println("difference=" + Long.toHexString(difference));
+    //Debug.println("result[i]=" + Integer.toHexString((int) difference));
+    i--;
+    difference = (unsigned(big[i]) - xmi) + (difference >> 32);
+    result[i] = (int) difference; 
+    i--;
+    if (i>=0) {
+      difference = (unsigned(big[i]) - xhi) + (difference >> 32);
+      result[i] = (int) difference; }
+    // Subtract remainder of longer number while borrow propagates
+    boolean borrow = ((difference >> 32) != 0);
+    while ((i > 0) && borrow) {
+      borrow = ((result[--i] = big[i] - 1) == -1); }
+    // Copy remainder of longer number
+    while (i > 0) { result[--i] = big[i]; }
+
+    //final int[] r = trustedStripLeadingZeroInts(result);
+    //Debug.println("result=\n" + Numbers.toHexString(r));
+//    final int[] r0 = subtract(big,shiftLeft(little,leftBitShift));
+//    assert Arrays.equals(r,r0) :
+//      "\nbig=" + Numbers.toHexString(big)
+//      + "\nbig=" + (new BigInteger(big,1)).toString(0x10)
+//      + "\nlittle=" + Numbers.toHexString(little)
+//      + "\nleftBitShift=" + leftBitShift
+//      + "\nremBitShift=" + remBitShift
+//      + "\nLeftIntShift=" + leftIntShift
+//      + "\nlittle=" 
+//      + Numbers.toHexString(new int[] { xhi, xmi, xlo,})
+//      + "\nresult=" + Numbers.toHexString(result)
+//      + "\nr =" + Numbers.toHexString(r)
+//      + "\nr0=" + Numbers.toHexString(r0);
+
+    return trustedStripLeadingZeroInts(result); }
 
   public final BigInteger subtract (final long val,
                                     final int leftShift) {
     //assert 0 < signum;
     if (0L == val) { return this; }
     //assert 0L < val;
-    return 
-      new BigInteger(subtract(mag,shiftLeft(val,leftShift)),1); }
+    return new BigInteger(subtract(mag,val,leftShift),1); }
 
   public final BigInteger subtractFrom (final long val,
                                         final int leftShift) {
+    if (0 == signum) {
+      return new BigInteger(shiftLeft(val,leftShift),1); }
+    //assert 0 < signum;
+    //assert 0L < val;
+    return 
+      new BigInteger(subtract(shiftLeft(val,leftShift),mag),1); }
+
+  //--------------------------------------------------------------
+
+  public final BigInteger subtract4 (final long val,
+                                     final int leftShift) {
+    //assert 0 < signum;
+    if (0L == val) { return this; }
+    //assert 0L < val;
+    //Debug.println("4little=" + Long.toHexString(val));
+    return 
+      new BigInteger(subtract(mag,shiftLeft(val,leftShift)),1); }
+
+  public final BigInteger subtractFrom4 (final long val,
+                                         final int leftShift) {
     if (0 == signum) {
       return new BigInteger(shiftLeft(val,leftShift),1); }
     //assert 0 < signum;
@@ -2878,26 +3067,61 @@ implements Comparable<BigInteger> {
       final int a = m1[0];
       final int b = (int) val;
       if (a != b) {
-        return ((a & UNSIGNED_MASK) < (b & UNSIGNED_MASK)) ? -1 : 1;
-      }
-      return 0;
-    }
+        return 
+          (((a & UNSIGNED_MASK) < (b & UNSIGNED_MASK))
+            ? -1 : 1); }
+      return 0; }
     if (len < 2) { return -1; }
     int a = m1[0];
     int b = highWord;
     if (a != b) {
-      return ((a & UNSIGNED_MASK) < (b & UNSIGNED_MASK)) ? -1 : 1;
-    }
+      return 
+        (((a & UNSIGNED_MASK) < (b & UNSIGNED_MASK)) ? -1 : 1); }
     a = m1[1];
     b = (int) val;
     if (a != b) {
-      return ((a & UNSIGNED_MASK) < (b & UNSIGNED_MASK)) ? -1 : 1;
-    }
-    return 0;
-  }
+      return 
+        (((a & UNSIGNED_MASK) < (b & UNSIGNED_MASK)) ? -1 : 1); }
+    return 0; }
 
   public final int compareMagnitude (final long val,
                                      final int leftShift) {
+    return compareMagnitude(mag,shiftLeft(val,leftShift)); }
+
+  //--------------------------------------------------------------
+
+  public final int compareMagnitude4 (final long val) {
+    //assert 0L <= val;
+    final int[] m1 = mag;
+    final int len = m1.length;
+    if (len > 2) { return 1; }
+    final int highWord = (int) (val >>> 32);
+    if (highWord == 0) {
+      if (len < 1) { return -1; }
+      if (len > 1) { return 1; }
+      final int a = m1[0];
+      final int b = (int) val;
+      if (a != b) {
+        return 
+          (((a & UNSIGNED_MASK) < (b & UNSIGNED_MASK))
+            ? -1 : 1); }
+      return 0; }
+    if (len < 2) { return -1; }
+    int a = m1[0];
+    int b = highWord;
+    if (a != b) {
+      return 
+        (((a & UNSIGNED_MASK) < (b & UNSIGNED_MASK)) ? -1 : 1); }
+    a = m1[1];
+    b = (int) val;
+    if (a != b) {
+      return 
+        (((a & UNSIGNED_MASK) < (b & UNSIGNED_MASK)) ? -1 : 1); }
+    return 0; }
+
+
+  public final int compareMagnitude4 (final long val,
+                                      final int leftShift) {
     return compareMagnitude(mag,shiftLeft(val,leftShift)); }
 
   //--------------------------------------------------------------

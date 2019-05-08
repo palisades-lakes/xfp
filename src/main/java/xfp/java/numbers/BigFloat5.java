@@ -9,12 +9,12 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-04
+ * @version 2019-05-07
  */
 
-public final class BigFloat4 
+public final class BigFloat5 
 extends Number
-implements Comparable<BigFloat4> {
+implements Comparable<BigFloat5> {
 
   private static final long serialVersionUID = 1L;
 
@@ -43,11 +43,11 @@ implements Comparable<BigFloat4> {
   public final boolean isZero () { return isZero(significand()); }
 
   public final boolean isOne () { 
-    return BigFloat4.ONE.equals(this); }
+    return BigFloat5.ONE.equals(this); }
 
   //--------------------------------------------------------------
 
-  public final BigFloat4 negate () {
+  public final BigFloat5 negate () {
     if (isZero()) { return this; }
     return valueOf(! nonNegative(),significand(),exponent()); }
 
@@ -55,7 +55,7 @@ implements Comparable<BigFloat4> {
   /** big float significands adjusted to the same exponent
    */
 
-  private static final BigFloat4 add (final boolean n1,
+  private static final BigFloat5 add (final boolean n1,
                                       final long t1,
                                       final int leftShift,
                                       final boolean n0,
@@ -63,39 +63,18 @@ implements Comparable<BigFloat4> {
                                       final int e) {
     //assert t0.signum() >= 0;
     if (n0 ^ n1) { // different signs
-      final int c01 = t0.compareMagnitude4(t1,leftShift);
+      final int c01 = t0.compareMagnitude(t1,leftShift);
       if (0 == c01) { return ZERO; }
       // t1 > t0
       if (0 > c01) { 
-        return valueOf(n1, t0.subtractFrom4(t1,leftShift), e); }
+        return valueOf(n1, t0.subtractFrom(t1,leftShift), e); }
       // t0 > t1
-      return valueOf(n0,t0.subtract4(t1,leftShift),e); }
-    return valueOf(n0,t0.addMagnitude4(t1,leftShift),e); }
+      return valueOf(n0,t0.subtract(t1,leftShift),e); }
+    return valueOf(n0,t0.addMagnitude(t1,leftShift),e); }
 
-  //--------------------------------------------------------------
-  /** big float significands adjusted to the same exponent
-   */
+   //--------------------------------------------------------------
 
-  private static final BigFloat4 add (final boolean n1,
-                                      final long t1,
-                                      final boolean n0,
-                                      final BigInteger t0,
-                                      final int e) {
-    //assert t0.signum() >= 0;
-    if (n0 ^ n1) { // different signs
-      final int c01 = t0.compareMagnitude4(t1);
-      if (0 == c01) { return ZERO; }
-      // t1 > t0
-      if (0 > c01) { 
-        return valueOf(
-          n1, BigInteger.valueOf(t1).subtract(t0), e); }
-      // t0 > t1
-      return valueOf(n0,t0.subtract4(t1),e); }
-    return valueOf(n0,t0.add4(t1),e); }
-
-  //--------------------------------------------------------------
-
-  private final BigFloat4 add (final boolean n1,
+  private final BigFloat5 add (final boolean n1,
                                final long t1,
                                final int e1) {
 
@@ -108,14 +87,12 @@ implements Comparable<BigFloat4> {
 
     // adjust significands to the same exponent
     final int de = e1 - e0;
-    if (de > 0) { return add(n1,t1,de,n0,t0,e0); }
-    else if (de < 0) { 
-      return add(n1,t1,n0,t0.shiftLeft(-de),e1); }
-    else { return add(n1,t1,n0,t0,e0); } }
+    if (de >= 0) { return add(n1,t1,de,n0,t0,e0); }
+    return add(n1,t1,0,n0,t0.shiftLeft(-de),e1); } 
 
   //--------------------------------------------------------------
 
-  public final BigFloat4 add (final double z) {
+  public final BigFloat5 add (final double z) {
     //assert Double.isFinite(z);
     return add(
       Doubles.nonNegative(z),
@@ -124,7 +101,7 @@ implements Comparable<BigFloat4> {
 
   //--------------------------------------------------------------
 
-  private final BigFloat4 add (final boolean n1,
+  private final BigFloat5 add (final boolean n1,
                                final BigInteger t1,
                                final int e1) {
 
@@ -157,14 +134,14 @@ implements Comparable<BigFloat4> {
 
   //--------------------------------------------------------------
 
-  public final BigFloat4 add (final BigFloat4 q) {
+  public final BigFloat5 add (final BigFloat5 q) {
     if (isZero()) { return q; }
     if (q.isZero()) { return this; }
     return add(q.nonNegative(),q.significand(),q.exponent()); }
 
   //--------------------------------------------------------------
 
-  public final BigFloat4 subtract (final BigFloat4 q) {
+  public final BigFloat5 subtract (final BigFloat5 q) {
     if (isZero()) { return q.negate(); }
     if (q.isZero()) { return this; }
     return add(
@@ -174,13 +151,13 @@ implements Comparable<BigFloat4> {
 
   //--------------------------------------------------------------
 
-  public final BigFloat4 abs () {
+  public final BigFloat5 abs () {
     if (nonNegative()) { return this; }
     return negate(); }
 
   //--------------------------------------------------------------
 
-  private final BigFloat4 multiply (final boolean nonNegative,
+  private final BigFloat5 multiply (final boolean nonNegative,
                                     final BigInteger t,
                                     final int e) {
     return valueOf(
@@ -188,7 +165,7 @@ implements Comparable<BigFloat4> {
       significand().multiply(t), 
       Math.addExact(exponent(),e)); }
 
-  public final BigFloat4 multiply (final BigFloat4 q) {
+  public final BigFloat5 multiply (final BigFloat5 q) {
     //    if (isZero() ) { return ZERO; }
     //    if (q.isZero()) { return ZERO; }
     //    if (q.isOne()) { return this; }
@@ -196,7 +173,7 @@ implements Comparable<BigFloat4> {
     return 
       multiply(q.nonNegative(),q.significand(),q.exponent()); }
 
-  public final BigFloat4 multiply (final double z) {
+  public final BigFloat5 multiply (final double z) {
     return 
       multiply(
         Doubles.nonNegative(z),
@@ -206,15 +183,15 @@ implements Comparable<BigFloat4> {
   //--------------------------------------------------------------
   // TODO: optimize!
 
-  public final BigFloat4 add2 (final double z) { 
+  public final BigFloat5 add2 (final double z) { 
     //assert Double.isFinite(z);
-    final BigFloat4 q = valueOf(z);
+    final BigFloat5 q = valueOf(z);
     return add(q.multiply(q)); }
 
   //--------------------------------------------------------------
   // TODO: optimize!
 
-  public final BigFloat4 addProduct (final double z0,
+  public final BigFloat5 addProduct (final double z0,
                                      final double z1) { 
     //assert Double.isFinite(z0);
     //assert Double.isFinite(z1);
@@ -428,7 +405,7 @@ implements Comparable<BigFloat4> {
   //--------------------------------------------------------------
 
   @Override
-  public final int compareTo (final BigFloat4 q) {
+  public final int compareTo (final BigFloat5 q) {
 
     if (nonNegative() && (! q.nonNegative())) { return 1; }
     if ((! nonNegative()) && q.nonNegative()) { return -1; }
@@ -446,7 +423,7 @@ implements Comparable<BigFloat4> {
   // Object methods
   //--------------------------------------------------------------
 
-  public final boolean equals (final BigFloat4 q) {
+  public final boolean equals (final BigFloat5 q) {
     if (this == q) { return true; }
     if (null == q) { return false; }
     // assuming reduced
@@ -459,8 +436,8 @@ implements Comparable<BigFloat4> {
 
   @Override
   public boolean equals (final Object o) {
-    if (!(o instanceof BigFloat4)) { return false; }
-    return equals((BigFloat4) o); }
+    if (!(o instanceof BigFloat5)) { return false; }
+    return equals((BigFloat5) o); }
 
   @Override
   public int hashCode () {
@@ -485,7 +462,7 @@ implements Comparable<BigFloat4> {
   // construction
   //--------------------------------------------------------------
 
-  private BigFloat4 (final boolean nonNegative,
+  private BigFloat5 (final boolean nonNegative,
                      final BigInteger t0,
                      final int e0) {
     //super();
@@ -503,34 +480,34 @@ implements Comparable<BigFloat4> {
       else {
         _significand = t0.shiftRight(e1);
         _exponent = Math.addExact(e0,e1);  } 
-//      assert 0 == Numbers.loBit(_significand)
-//        : "lowBit= " + Numbers.loBit(_significand)
-//        +"; rightShift= " + e1; 
-      } }
+      //      assert 0 == Numbers.loBit(_significand)
+      //        : "lowBit= " + Numbers.loBit(_significand)
+      //        +"; rightShift= " + e1; 
+    } }
 
   //--------------------------------------------------------------
 
-  public static final BigFloat4 valueOf (final boolean nonNegative,
+  public static final BigFloat5 valueOf (final boolean nonNegative,
                                          final BigInteger t,
                                          final int e) {
     if (0 == t.signum()) { return ZERO; }
     //assert 0 < t.signum();
-    return new BigFloat4(nonNegative,t,e); } 
+    return new BigFloat5(nonNegative,t,e); } 
 
-  public static final BigFloat4 valueOf (final BigInteger n,
+  public static final BigFloat5 valueOf (final BigInteger n,
                                          final int e) {
     final int s = n.signum();
     if (0 == s) { return ZERO; }
-    if (0 < s) { return new BigFloat4(true,n,e); } 
-    return new BigFloat4(false,n.negate(),e); } 
+    if (0 < s) { return new BigFloat5(true,n,e); } 
+    return new BigFloat5(false,n.negate(),e); } 
 
-  public static final BigFloat4 valueOf (final long t,
+  public static final BigFloat5 valueOf (final long t,
                                          final int e) {
     if (0L < t) {
       return valueOf(true,BigInteger.valueOf(t),e); }
     return valueOf(false,BigInteger.valueOf(-t),e); }
 
-  public static final BigFloat4 valueOf (final int t,
+  public static final BigFloat5 valueOf (final int t,
                                          final int e) {
     if (0 < t) {
       return valueOf(true,BigInteger.valueOf(t),e); }
@@ -538,13 +515,13 @@ implements Comparable<BigFloat4> {
 
   //--------------------------------------------------------------
 
-  private static final BigFloat4 valueOf (final boolean nonNegative,
+  private static final BigFloat5 valueOf (final boolean nonNegative,
                                           final int e0,
                                           final long t0)  {
     if (0L == t0) { return ZERO; }
     return valueOf(nonNegative,BigInteger.valueOf(t0),e0); } 
 
-  public static final BigFloat4 valueOf (final double x)  {
+  public static final BigFloat5 valueOf (final double x)  {
     return valueOf(
       Doubles.nonNegative(x),
       Doubles.exponent(x),
@@ -552,13 +529,13 @@ implements Comparable<BigFloat4> {
 
   //--------------------------------------------------------------
 
-  private static final BigFloat4 valueOf (final boolean nonNegative,
+  private static final BigFloat5 valueOf (final boolean nonNegative,
                                           final int e0,
                                           final int t0)  {
     if (0 == t0) { return ZERO; }
     return valueOf(nonNegative,BigInteger.valueOf(t0),e0); } 
 
-  public static final BigFloat4 valueOf (final float x)  {
+  public static final BigFloat5 valueOf (final float x)  {
     return valueOf(
       Floats.nonNegative(x),
       Floats.exponent(x),
@@ -566,55 +543,55 @@ implements Comparable<BigFloat4> {
 
   //--------------------------------------------------------------
 
-  public static final BigFloat4 valueOf (final byte t)  {
+  public static final BigFloat5 valueOf (final byte t)  {
     if (0 < t) {
       return valueOf(true,BigInteger.valueOf(t),0); }
     return valueOf(false,BigInteger.valueOf(-t),0); }
 
-  public static final BigFloat4 valueOf (final short t)  {
+  public static final BigFloat5 valueOf (final short t)  {
     if (0 < t) {
       return valueOf(true,BigInteger.valueOf(t),0); }
     return valueOf(false,BigInteger.valueOf(-t),0); }
 
-  public static final BigFloat4 valueOf (final int t)  {
+  public static final BigFloat5 valueOf (final int t)  {
     if (0 < t) {
       return valueOf(true,BigInteger.valueOf(t),0); }
     return valueOf(false,BigInteger.valueOf(-t),0); }
 
-  public static final BigFloat4 valueOf (final long t)  {
+  public static final BigFloat5 valueOf (final long t)  {
     if (0 < t) {
       return valueOf(true,BigInteger.valueOf(t),0); }
     return valueOf(false,BigInteger.valueOf(-t),0); }
 
   //--------------------------------------------------------------
 
-  public static final BigFloat4 valueOf (final Double x)  {
+  public static final BigFloat5 valueOf (final Double x)  {
     return valueOf(x.doubleValue()); }
 
-  public static final BigFloat4 valueOf (final Float x)  {
+  public static final BigFloat5 valueOf (final Float x)  {
     return valueOf(x.floatValue()); }
 
-  public static final BigFloat4 valueOf (final Byte x)  {
+  public static final BigFloat5 valueOf (final Byte x)  {
     return valueOf(x.byteValue()); }
 
-  public static final BigFloat4 valueOf (final Short x)  {
+  public static final BigFloat5 valueOf (final Short x)  {
     return valueOf(x.shortValue()); }
 
-  public static final BigFloat4 valueOf (final Integer x)  {
+  public static final BigFloat5 valueOf (final Integer x)  {
     return valueOf(x.intValue()); }
 
-  public static final BigFloat4 valueOf (final Long x)  {
+  public static final BigFloat5 valueOf (final Long x)  {
     return valueOf(x.longValue()); }
 
-  public static final BigFloat4 valueOf (final BigDecimal x)  {
+  public static final BigFloat5 valueOf (final BigDecimal x)  {
     throw Exceptions.unsupportedOperation(null,"valueOf",x); }
   //    return valueOf(x, BigInteger.ONE); }
 
-  public static final BigFloat4 valueOf (final BigInteger x)  {
+  public static final BigFloat5 valueOf (final BigInteger x)  {
     return valueOf(x,0); }
 
-  public static final BigFloat4 valueOf (final Number x)  {
-    if (x instanceof BigFloat4) { return (BigFloat4) x; }
+  public static final BigFloat5 valueOf (final Number x)  {
+    if (x instanceof BigFloat5) { return (BigFloat5) x; }
     if (x instanceof Double) { return valueOf((Double) x); }
     if (x instanceof Float) { return valueOf((Float) x); }
     if (x instanceof Byte) { return valueOf((Byte) x); }
@@ -625,25 +602,25 @@ implements Comparable<BigFloat4> {
     if (x instanceof BigDecimal) { return valueOf((BigDecimal) x); }
     throw Exceptions.unsupportedOperation(null,"valueOf",x); }
 
-  public static final BigFloat4 valueOf (final Object x)  {
+  public static final BigFloat5 valueOf (final Object x)  {
     return valueOf((Number) x); }
 
   //--------------------------------------------------------------
 
-  public static final BigFloat4 ZERO = 
-    new BigFloat4(true,BigInteger.ZERO,0);
+  public static final BigFloat5 ZERO = 
+    new BigFloat5(true,BigInteger.ZERO,0);
 
-  public static final BigFloat4 ONE = 
-    new BigFloat4(true,BigInteger.ONE,0);
+  public static final BigFloat5 ONE = 
+    new BigFloat5(true,BigInteger.ONE,0);
 
-  public static final BigFloat4 TWO = 
-    new BigFloat4(true,BigInteger.ONE,1);
+  public static final BigFloat5 TWO = 
+    new BigFloat5(true,BigInteger.ONE,1);
 
-  public static final BigFloat4 TEN = 
-    new BigFloat4(true,BigInteger.valueOf(5),1);
+  public static final BigFloat5 TEN = 
+    new BigFloat5(true,BigInteger.valueOf(5),1);
 
-  public static final BigFloat4 MINUS_ONE =
-    new BigFloat4(false,BigInteger.ONE,0);
+  public static final BigFloat5 MINUS_ONE =
+    new BigFloat5(false,BigInteger.ONE,0);
 
   //--------------------------------------------------------------
 }
