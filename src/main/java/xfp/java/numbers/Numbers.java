@@ -18,20 +18,20 @@ import xfp.java.prng.Generators;
 /** Utilities for Object and primitive numbers.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-07
+ * @version 2019-05-08
  */
 @SuppressWarnings("unchecked")
 public final class Numbers implements Set {
 
   /** (int & UNSIGNED_MASK) returns long containing unsigned int. */
-  public static final long UNSIGNED_MASK = 0xffffffffL;
+  public static final long UNSIGNED_MASK = 0xFFFFFFFFL;
 
   /** (int & UNSIGNED_MASK) returns long containing unsigned int. */
   public static final long unsigned (final int i) {
     return i & UNSIGNED_MASK; }
   
-//  public static final long unsigned (final long i) {
-//    return ((int) i) & UNSIGNED_MASK; }
+  public static final long loWord (final long i) {
+    return i & UNSIGNED_MASK; }
   
   //--------------------------------------------------------------
   /** Like {@link Arrays#toString(double[])}. */

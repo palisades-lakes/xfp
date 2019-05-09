@@ -14,7 +14,7 @@ import xfp.java.test.Common;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-07
+ * @version 2019-05-08
  */
 
 public final class SumTest {
