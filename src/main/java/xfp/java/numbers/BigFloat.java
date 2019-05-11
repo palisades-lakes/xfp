@@ -56,14 +56,14 @@ implements Comparable<BigFloat> {
    */
 
   private static final BigFloat add (final boolean n1,
-                                      final long t1,
-                                      final int leftShift,
-                                      final boolean n0,
-                                      final UnNatural t0,
-                                      final int e) {
+                                     final long t1,
+                                     final int leftShift,
+                                     final boolean n0,
+                                     final UnNatural t0,
+                                     final int e) {
     //assert t0.signum() >= 0;
     if (n0 ^ n1) { // different signs
-      final int c01 = t0.compareMagnitude(t1,leftShift);
+      final int c01 = t0.compareTo(t1,leftShift);
       if (0 == c01) { return ZERO; }
       // t1 > t0
       if (0 > c01) { 
@@ -72,11 +72,11 @@ implements Comparable<BigFloat> {
       return valueOf(n0,t0.subtract(t1,leftShift),e); }
     return valueOf(n0,t0.add(t1,leftShift),e); }
 
-   //--------------------------------------------------------------
+  //--------------------------------------------------------------
 
   private final BigFloat add (final boolean n1,
-                               final long t1,
-                               final int e1) {
+                              final long t1,
+                              final int e1) {
 
     if (0 == t1) { return this; }
     //assert 0 < t1;
@@ -102,8 +102,8 @@ implements Comparable<BigFloat> {
   //--------------------------------------------------------------
 
   private final BigFloat add (final boolean n1,
-                               final UnNatural t1,
-                               final int e1) {
+                              final UnNatural t1,
+                              final int e1) {
 
     if (isZero(t1)) { return this; }
     //assert 0 < t1.signum();
@@ -158,8 +158,8 @@ implements Comparable<BigFloat> {
   //--------------------------------------------------------------
 
   private final BigFloat multiply (final boolean nonNegative,
-                                    final UnNatural t,
-                                    final int e) {
+                                   final UnNatural t,
+                                   final int e) {
     return valueOf(
       (! (nonNegative() ^ nonNegative)),
       significand().multiply(t), 
@@ -192,7 +192,7 @@ implements Comparable<BigFloat> {
   // TODO: optimize!
 
   public final BigFloat addProduct (final double z0,
-                                     final double z1) { 
+                                    final double z1) { 
     //assert Double.isFinite(z0);
     //assert Double.isFinite(z1);
     return add(valueOf(z0).multiply(z1)); }
@@ -442,8 +442,8 @@ implements Comparable<BigFloat> {
   //--------------------------------------------------------------
 
   private BigFloat (final boolean nonNegative,
-                     final UnNatural t0,
-                     final int e0) {
+                    final UnNatural t0,
+                    final int e0) {
     //super();
     if (isZero(t0)) {
       _nonNegative = true;
@@ -466,20 +466,20 @@ implements Comparable<BigFloat> {
   //--------------------------------------------------------------
 
   public static final BigFloat valueOf (final boolean nonNegative,
-                                         final UnNatural t,
-                                         final int e) {
+                                        final UnNatural t,
+                                        final int e) {
     if (isZero(t)) { return ZERO; }
     //assert 0 < t.signum();
     return new BigFloat(nonNegative,t,e); } 
 
   public static final BigFloat valueOf (final long t,
-                                         final int e) {
+                                        final int e) {
     if (0L < t) {
       return valueOf(true,UnNatural.valueOf(t),e); }
     return valueOf(false,UnNatural.valueOf(-t),e); }
 
   public static final BigFloat valueOf (final int t,
-                                         final int e) {
+                                        final int e) {
     if (0 < t) {
       return valueOf(true,UnNatural.valueOf(t),e); }
     return valueOf(false,UnNatural.valueOf(-t),e); }
@@ -487,8 +487,8 @@ implements Comparable<BigFloat> {
   //--------------------------------------------------------------
 
   private static final BigFloat valueOf (final boolean nonNegative,
-                                          final int e0,
-                                          final long t0)  {
+                                         final int e0,
+                                         final long t0)  {
     if (0L == t0) { return ZERO; }
     return valueOf(nonNegative,UnNatural.valueOf(t0),e0); } 
 
@@ -501,8 +501,8 @@ implements Comparable<BigFloat> {
   //--------------------------------------------------------------
 
   private static final BigFloat valueOf (final boolean nonNegative,
-                                          final int e0,
-                                          final int t0)  {
+                                         final int e0,
+                                         final int t0)  {
     if (0 == t0) { return ZERO; }
     return valueOf(nonNegative,UnNatural.valueOf(t0),e0); } 
 

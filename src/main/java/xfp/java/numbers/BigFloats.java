@@ -55,11 +55,10 @@ public final class BigFloats implements Set {
   //--------------------------------------------------------------
 
   @SuppressWarnings("static-method")
-  public final BigFloat additiveIdentity () {
+  public final BigFloat additiveIdentity () { 
     return BigFloat.ZERO; }
 
   //--------------------------------------------------------------
-
   // TODO: is consistency with other algebraic structure classes
   // worth the indirection?
 

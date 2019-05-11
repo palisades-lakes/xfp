@@ -20,7 +20,7 @@ implements Comparable<UnNatural> {
   private static final long serialVersionUID = 1L;
 
   private final int[] _mag;
-  
+
   public final boolean isZero () { return 0 == _mag.length; }
 
   // The following fields are stable variables. A stable 
@@ -44,7 +44,7 @@ implements Comparable<UnNatural> {
   // with zeroth element the most significant.
   // TODO: may be useful to share, move somewhere else?
   //--------------------------------------------------------------
-  
+
   private static final int[] shiftLeft (final int[] mag, 
                                         final int n) {
     final int nInts = n >>> 5;
@@ -99,6 +99,44 @@ implements Comparable<UnNatural> {
     return result; }
 
   //--------------------------------------------------------------
+
+  private static final int compareMagnitude (final int[] m1,
+                                             final int[] m2) {
+    final int len1 = m1.length;
+    final int len2 = m2.length;
+    if (len1 < len2) { return -1; }
+    if (len1 > len2) { return 1; }
+    for (int i = 0; i < len1; i++) {
+      final int a = m1[i];
+      final int b = m2[i];
+      if (a != b) { return (unsigned(a) < unsigned(b)) ? -1 : 1; } }
+    return 0; }
+
+  private static final int compareMagnitude (final int[] m1,
+                                             final long m2) {
+    assert 0L <= m2;
+    final int len = m1.length;
+    if (len > 2) { return 1; }
+    final int highWord = (int) (m2 >>> 32);
+    if (highWord == 0) {
+      if (len < 1) { return -1; }
+      if (len > 1) { return 1; }
+      final int a = m1[0];
+      final int b = (int) m2;
+      if (a != b) {
+        return ((unsigned(a) < unsigned(b)) ? -1 : 1); }
+      return 0; }
+    if (len < 2) { return -1; }
+    int a = m1[0];
+    int b = highWord;
+    if (a != b) {
+      return ((unsigned(a) < unsigned(b)) ? -1 : 1); }
+    a = m1[1];
+    b = (int) m2;
+    if (a != b) { return ((unsigned(a) < unsigned(b)) ? -1 : 1); }
+    return 0; }
+
+  //--------------------------------------------------------------
   // add
   //--------------------------------------------------------------
 
@@ -143,18 +181,12 @@ implements Comparable<UnNatural> {
       return bigger; }
     return result; }
 
-  public final UnNatural add (final long val) {
-    assert 0L <= val;
-    if (0L == val) { return this; }
-    if (isZero()) { return valueOf(val); }
-    return make(add(_mag,val)); }
-
   //--------------------------------------------------------------
   /** Adds the contents of the int arrays x and y. Allocate a new 
    * int array to hold the answer.
    */
 
-  public static final int[] add (final int[] x, 
+  private static final int[] add (final int[] x, 
                                  final int[] y) {
     // If x is shorter, swap the two arrays
     if (x.length < y.length) { return add(y,x); }
@@ -186,12 +218,6 @@ implements Comparable<UnNatural> {
       bigger[0] = 0x01;
       return bigger; }
     return result; }
-
-  public final UnNatural add (final UnNatural val) {
-    if (val.isZero()) { return this; }
-    if (isZero()) { return val; }
-    return make(add(_mag,val._mag)); }
-
   //--------------------------------------------------------------
 
   private static final int[] add (final int[] x,
@@ -289,11 +315,6 @@ implements Comparable<UnNatural> {
 
     return r0; }
 
-  public final UnNatural add (final long val,
-                              final int leftShift) {
-    if (isZero()) { return make(shiftLeft(val,leftShift)); }
-    return make(add(_mag,val,leftShift)); }
-
   //--------------------------------------------------------------
   // subtract -- only where answer is positive
   //--------------------------------------------------------------
@@ -322,14 +343,6 @@ implements Comparable<UnNatural> {
     // Copy remainder of longer number
     while (bigIndex > 0) { result[--bigIndex] = big[bigIndex]; }
     return result; }
-
-  public final UnNatural subtract (final long val) {
-    assert 0L <= val;
-    if (0L == val) { return this; }
-    final int c = compareTo(val);
-    assert 0 <= c;
-    if (0 == c) { return ZERO; }
-    return make(subtract(_mag,val)); }
 
   //--------------------------------------------------------------
 
@@ -362,7 +375,7 @@ implements Comparable<UnNatural> {
   //    return result; }
 
   //--------------------------------------------------------------
-
+  // only valid when little <= big
   private static final int[] subtract (final int[] big,
                                        final int[] little) {
     int bigIndex = big.length;
@@ -391,14 +404,6 @@ implements Comparable<UnNatural> {
     ////Debug.println("4result=\n" + Numbers.toHexString(r));
     return r; }
 
-  public final UnNatural subtract (final UnNatural val) {
-    if (val.isZero()) { return this; }
-    final int c = compareMagnitude(val);
-    assert 0L <= c;
-    if (c == 0) { return ZERO; }
-    return make(subtract(_mag,val._mag)); }
-
-  //--------------------------------------------------------------
   // assuming little*2<sup>bitShift</sup> <= big
   // big represents 
   // sum<sub>i=0,n-1</sub> unsigned(big[n-1-i]) * 2 <sup>i*32</sup>
@@ -453,12 +458,51 @@ implements Comparable<UnNatural> {
     while (0<=i) { result[i] = big[i]; i--; }
     return unsafeStripLeadingZeroInts(result); }
 
+  //--------------------------------------------------------------
+  // arithmetic
+  //--------------------------------------------------------------
+  
+  public final UnNatural add (final UnNatural val) {
+    if (val.isZero()) { return this; }
+    if (isZero()) { return val; }
+    return make(add(_mag,val._mag)); }
+
+  public final UnNatural add (final long val) {
+    assert 0L <= val;
+    if (0L == val) { return this; }
+    if (isZero()) { return valueOf(val); }
+    return make(add(_mag,val)); }
+
+  public final UnNatural add (final long val,
+                              final int leftShift) {
+    if (isZero()) { return make(shiftLeft(val,leftShift)); }
+    return make(add(_mag,val,leftShift)); }
+
+  // only when val <= this
+  public final UnNatural subtract (final long val) {
+    assert 0L <= val;
+    if (0L == val) { return this; }
+    final int c = compareTo(val);
+    assert 0 <= c;
+    if (0 == c) { return ZERO; }
+    return make(subtract(_mag,val)); }
+
+  // only when val <= this
+  public final UnNatural subtract (final UnNatural val) {
+    if (val.isZero()) { return this; }
+    final int c = compareTo(val);
+    assert 0L <= c;
+    if (c == 0) { return ZERO; }
+    return make(subtract(_mag,val._mag)); }
+
+  // only when (val << leftShift) <= this
   public final UnNatural subtract (final long val,
                                    final int leftShift) {
     assert 0L <= val;
     if (0L == val) { return this; }
     return make(subtract(_mag,val,leftShift)); }
 
+  // only when this <= (val << leftShift)
   public final UnNatural subtractFrom (final long val,
                                        final int leftShift) {
     assert 0L <= val;
@@ -467,481 +511,14 @@ implements Comparable<UnNatural> {
     return make(subtract(shiftLeft(val,leftShift),_mag)); }
 
   //--------------------------------------------------------------
-  // multiply
-  /** The threshold value for using squaring code to perform
-   * multiplication of a {@code Natural} instance by itself. If 
-   * the number of ints in the number are larger than this value, 
-   * {@code multiply(this)} will return {@code square()}.
-   */
-  private static final int MULTIPLY_SQUARE_THRESHOLD = 20;
-
+  // squaring --- used in multiplication
   //--------------------------------------------------------------
-  /** The threshold value for using Karatsuba multiplication. If
-   * the number of ints in both arrays are greater, then
-   * Karatsuba multiplication will be used. 
-   */
-
-  private static final int KARATSUBA_THRESHOLD = 80;
-
-  /** Returns a new Natural representing n lower ints of the
-   * number. Used by Karatsuba multiplication and Karatsuba
-   * squaring.
-   */
-  private UnNatural getLower (final int n) {
-    final int len = _mag.length;
-    if (len <= n) { return this; }
-    final int lowerInts[] = new int[n];
-    System.arraycopy(_mag,len - n,lowerInts,0,n);
-    return valueOf(lowerInts); }
-
-  /**
-   * Returns a new Natural representing mag.length-n upper
-   * ints of the number. This is used by Karatsuba multiplication
-   * and
-   * Karatsuba squaring.
-   */
-  private UnNatural getUpper (final int n) {
-    final int len = _mag.length;
-    if (len <= n) { return ZERO; }
-    final int upperLen = len - n;
-    final int upperInts[] = new int[upperLen];
-    System.arraycopy(_mag,0,upperInts,0,upperLen);
-    return valueOf(upperInts); }
-
-  /** Multiplies two Naturals using the Karatsuba multiplication
-   * algorithm. This is a recursive divide-and-conquer algorithm
-   * which is more efficient for large numbers than what is 
-   * commonly called the grade-school" algorithm used in 
-   * multiplyToLen. If the numbers to be multiplied have length n, 
-   * the "grade-school" algorithm has an asymptotic complexity of 
-   * O(n^2). In contrast, the Karatsuba algorithm has complexity 
-   * of O(n^(log2(3))), or O(n^1.585). It achieves this
-   * increased performance by doing 3 multiplies instead of 4 when
-   * evaluating the product. As it has some overhead, should be
-   * used when both numbers are larger than a certain threshold 
-   * (found experimentally).
-   *
-   * See: http://en.wikipedia.org/wiki/Karatsuba_algorithm
-   */
-  private static final UnNatural multiplyKaratsuba (final UnNatural x,
-                                                    final UnNatural y) {
-    final int xlen = x._mag.length;
-    final int ylen = y._mag.length;
-
-    // The number of ints in each half of the number.
-    final int half = (Math.max(xlen,ylen) + 1) / 2;
-
-    // xl and yl are the lower halves of x and y respectively,
-    // xh and yh are the upper halves.
-    final UnNatural xl = x.getLower(half);
-    final UnNatural xh = x.getUpper(half);
-    final UnNatural yl = y.getLower(half);
-    final UnNatural yh = y.getUpper(half);
-
-    final UnNatural p1 = xh.multiply(yh);  // p1 = xh*yh
-    final UnNatural p2 = xl.multiply(yl);  // p2 = xl*yl
-
-    // p3=(xh+xl)*(yh+yl)
-    final UnNatural p3 = xh.add(xl).multiply(yh.add(yl));
-
-    // result = p1 * 2^(32*2*half) + (p3 - p1 - p2) * 2^(32*half)
-    // + p2
-    final UnNatural result =
-      p1.shiftLeft(32 * half).add(p3.subtract(p1).subtract(p2))
-      .shiftLeft(32 * half).add(p2);
-
-    return result; }
-
-  //--------------------------------------------------------------
-  /** The threshold value for using 3-way Toom-Cook multiplication.
-   * If the number of ints in each array is greater than the
-   * Karatsuba threshold, and the number of ints in at least one
-   * of the arrays is greater than this threshold, then 
-   * Toom-Cook multiplication will be used.
-   */
-  private static final int TOOM_COOK_THRESHOLD = 240;
-
-  /** Returns a slice of a Natural for use in Toom-Cook
-   * multiplication.
-   *
-   * @param lowerSize
-   *          The size of the lower-order bit slices.
-   * @param upperSize
-   *          The size of the higher-order bit slices.
-   * @param slice
-   *          The index of which slice is requested, which must be
-   *          a
-   *          number from 0 to size-1. Slice 0 is the
-   *          highest-order bits, and slice
-   *          size-1 are the lowest-order bits. Slice 0 may be of
-   *          different size than
-   *          the other slices.
-   * @param fullsize
-   *          The size of the larger integer array, used to align
-   *          slices to the appropriate position when multiplying
-   *          different-sized
-   *          numbers.
-   */
-  private final UnNatural getToomSlice (final int lowerSize,
-                                        final int upperSize,
-                                        final int slice,
-                                        final int fullsize) {
-    final int len = _mag.length;
-    final int offset = fullsize - len;
-    int start;
-    final int end;
-    if (slice == 0) {
-      start = 0 - offset;
-      end = upperSize - 1 - offset; }
-    else {
-      start = (upperSize + ((slice - 1) * lowerSize)) - offset;
-      end = (start + lowerSize) - 1; }
-    if (start < 0) { start = 0; }
-    if (end < 0) { return ZERO; }
-    final int sliceSize = (end - start) + 1;
-    if (sliceSize <= 0) { return ZERO; }
-    // While performing Toom-Cook, all slices are positive and
-    // the sign is adjusted when the final number is composed.
-    if ((start == 0) && (sliceSize >= len)) { return this; }
-    final int intSlice[] = new int[sliceSize];
-    System.arraycopy(_mag,start,intSlice,0,sliceSize);
-    return make(intSlice); }
-
-  /** Does an exact division (that is, the remainder is known to
-   * be zero) of the specified number by 3. This is used in 
-   * Toom-Cook multiplication. This is an efficient algorithm that 
-   * runs in linear time. If the argument is not exactly divisible 
-   * by 3, results are undefined. Note that this is expected to be 
-   * called with positive arguments only.
-   */
-  private final UnNatural exactDivideBy3 () {
-    final int len = _mag.length;
-    int[] result = new int[len];
-    long x, w, q, borrow;
-    borrow = 0L;
-    for (int i = len - 1; i >= 0; i--) {
-      x = unsigned(_mag[i]);
-      w = x - borrow;
-      if (borrow > x) { // Did we make the number go negative?
-        borrow = 1L; }
-      else { borrow = 0L; }
-      // 0xAAAAAAAB is the modular inverse of 3 (mod 2^32). Thus,
-      // the effect of this is to divide by 3 (mod 2^32).
-      // This is much faster than division on most architectures.
-      q = (w * 0xAAAAAAABL) & UNSIGNED_MASK;
-      result[i] = (int) q;
-      // Now check the borrow. The second check can of course be
-      // eliminated if the first fails.
-      if (q >= 0x55555556L) {
-        borrow++;
-        if (q >= 0xAAAAAAABL) { borrow++; } } }
-    result = unsafeStripLeadingZeroInts(result);
-    return new UnNatural(result); }
-
-  /** Multiplies two Naturals using a 3-way Toom-Cook
-   * multiplication algorithm. This is a recursive 
-   * divide-and-conquer algorithm which is more efficient for 
-   * large numbers than what is commonly called the "grade-school" 
-   * algorithm used in multiplyToLen. If the numbers to be
-   * multiplied have length n, the "grade-school" algorithm has an
-   * asymptotic complexity of O(n^2). In contrast, 3-way Toom-Cook
-   * has a complexity of about O(n^1.465). It achieves this 
-   * increased asymptotic performance by breaking each number into 
-   * three parts and by doing 5 multiplies instead of 9 when 
-   * evaluating the product. Due to overhead (additions, shifts, 
-   * and one division) in the Toom-Cook algorithm, it should only 
-   * be used when both numbers are larger than a certain threshold 
-   * (found experimentally). This threshold is generally larger
-   * than that for Karatsuba multiplication, so this algorithm is
-   * generally only used when numbers become significantly larger.
-   *
-   * The algorithm used is the "optimal" 3-way Toom-Cook algorithm
-   * outlined by Marco Bodrato.
-   *
-   * See: http://bodrato.it/toom-cook/
-   * http://bodrato.it/papers/#WAIFI2007
-   *
-   * "Towards Optimal Toom-Cook Multiplication for Univariate and
-   * Multivariate Polynomials in Characteristic 2 and 0." by Marco
-   * BODRATO;
-   * In C.Carlet and B.Sunar, Eds., "WAIFI'07 proceedings", p.
-   * 116-133,
-   * LNCS #4547. Springer, Madrid, Spain, June 21-22, 2007.
-   */
-
-  private static final UnNatural multiplyToomCook3 (final UnNatural a,
-                                                    final UnNatural b) {
-    final int alen = a._mag.length;
-    final int blen = b._mag.length;
-
-    final int largest = Math.max(alen,blen);
-
-    // k is the size (in ints) of the lower-order slices.
-    final int k = (largest + 2) / 3;   // Equal to ceil(largest/3)
-
-    // r is the size (in ints) of the highest-order slice.
-    final int r = largest - (2 * k);
-
-    // Obtain slices of the numbers. a2 and b2 are the most
-    // significant
-    // bits of the numbers a and b, and a0 and b0 the least
-    // significant.
-    UnNatural a0, a1, a2, b0, b1, b2;
-    a2 = a.getToomSlice(k,r,0,largest);
-    a1 = a.getToomSlice(k,r,1,largest);
-    a0 = a.getToomSlice(k,r,2,largest);
-    b2 = b.getToomSlice(k,r,0,largest);
-    b1 = b.getToomSlice(k,r,1,largest);
-    b0 = b.getToomSlice(k,r,2,largest);
-
-    UnNatural v0, v1, v2, vm1, vinf, t1, t2, tm1, da1, db1;
-
-    v0 = a0.multiply(b0,true);
-    da1 = a2.add(a0);
-    db1 = b2.add(b0);
-    vm1 = da1.subtract(a1).multiply(db1.subtract(b1),true);
-    da1 = da1.add(a1);
-    db1 = db1.add(b1);
-    v1 = da1.multiply(db1,true);
-    v2 =
-      da1.add(a2).shiftLeft(1).subtract(a0)
-      .multiply(db1.add(b2).shiftLeft(1).subtract(b0),true);
-    vinf = a2.multiply(b2,true);
-
-    // The algorithm requires two divisions by 2 and one by 3.
-    // All divisions are known to be exact, that is, they do not
-    // produce
-    // remainders, and all results are positive. The divisions by
-    // 2 are
-    // implemented as right shifts which are relatively efficient,
-    // leaving
-    // only an exact division by 3, which is done by a specialized
-    // linear-time algorithm.
-    t2 = v2.subtract(vm1).exactDivideBy3();
-    tm1 = v1.subtract(vm1).shiftRight(1);
-    t1 = v1.subtract(v0);
-    t2 = t2.subtract(t1).shiftRight(1);
-    t1 = t1.subtract(tm1).subtract(vinf);
-    t2 = t2.subtract(vinf.shiftLeft(1));
-    tm1 = tm1.subtract(t2);
-
-    // Number of bits to shift left.
-    final int ss = k * 32;
-
-    final UnNatural result =
-      vinf.shiftLeft(ss).add(t2).shiftLeft(ss).add(t1)
-      .shiftLeft(ss).add(tm1).shiftLeft(ss).add(v0);
-    return result; }
-
-  //--------------------------------------------------------------
-
-  private static final UnNatural multiply (final int[] x,
-                                           final int y) {
-    if (Integer.bitCount(y) == 1) {
-      return make(shiftLeft(x,Integer.numberOfTrailingZeros(y))); }
-    final int xlen = x.length;
-    int[] rmag = new int[xlen + 1];
-    long carry = 0;
-    final long yl = y & UNSIGNED_MASK;
-    int rstart = rmag.length - 1;
-    for (int i = xlen - 1; i >= 0; i--) {
-      final long product = (unsigned(x[i]) * yl) + carry;
-      rmag[rstart--] = (int) product;
-      carry = product >>> 32; }
-    if (carry == 0L) { 
-      rmag = Arrays.copyOfRange(rmag,1,rmag.length); }
-    else {
-      rmag[rstart] = (int) carry; }
-    return make(rmag); }
-
-  private final UnNatural multiply (final UnNatural val,
-                                    final boolean isRecursion) {
-    if ((val.isZero()) || (isZero())) { return ZERO; }
-    final int xlen = _mag.length;
-    if ((val == this) && (xlen > MULTIPLY_SQUARE_THRESHOLD)) {
-      return square(); }
-
-    final int ylen = val._mag.length;
-
-    if ((xlen < KARATSUBA_THRESHOLD)
-      || (ylen < KARATSUBA_THRESHOLD)) {
-      if (val._mag.length == 1) {
-        return multiply(_mag,val._mag[0]); }
-      if (_mag.length == 1) {
-        return multiply(val._mag,_mag[0]); }
-      int[] result = multiplyToLen(_mag,xlen,val._mag,ylen,null);
-      result = unsafeStripLeadingZeroInts(result);
-      return make(result); }
-    if ((xlen < TOOM_COOK_THRESHOLD)
-      && (ylen < TOOM_COOK_THRESHOLD)) {
-      return multiplyKaratsuba(this,val); }
-    //
-    // In "Hacker's Delight" section 2-13, p.33, it is explained
-    // that if x and y are unsigned 32-bit quantities and m and n
-    // are their respective numbers of leading zeros within 32
-    // bits,
-    // then the number of leading zeros within their product as a
-    // 64-bit unsigned quantity is either m + n or m + n + 1. If
-    // their product is not to overflow, it cannot exceed 32 bits,
-    // and so the number of leading zeros of the product within 64
-    // bits must be at least 32, i.e., the leftmost set bit is at
-    // zero-relative position 31 or less.
-    //
-    // From the above there are three cases:
-    //
-    // m + n leftmost set bit condition
-    // ----- ---------------- ---------
-    // >= 32 x <= 64 - 32 = 32 no overflow
-    // == 31 x >= 64 - 32 = 32 possible overflow
-    // <= 30 x >= 64 - 31 = 33 definite overflow
-    //
-    // The "possible overflow" condition cannot be detected by
-    // examning data lengths alone and requires further
-    // calculation.
-    //
-    // By analogy, if 'this' and 'val' have m and n as their
-    // respective numbers of leading zeros within
-    // 32*MAX_MAG_LENGTH
-    // bits, then:
-    //
-    // m + n >= 32*MAX_MAG_LENGTH no overflow
-    // m + n == 32*MAX_MAG_LENGTH - 1 possible overflow
-    // m + n <= 32*MAX_MAG_LENGTH - 2 definite overflow
-    //
-    // Note however that if the number of ints in the result
-    // were to be MAX_MAG_LENGTH and mag[0] < 0, then there would
-    // be overflow. As a result the leftmost bit (of mag[0])
-    // cannot
-    // be used and the constraints must be adjusted by one bit to:
-    //
-    // m + n > 32*MAX_MAG_LENGTH no overflow
-    // m + n == 32*MAX_MAG_LENGTH possible overflow
-    // m + n < 32*MAX_MAG_LENGTH definite overflow
-    //
-    // The foregoing leading zero-based discussion is for clarity
-    // only. The actual calculations use the estimated bit length
-    // of the product as this is more natural to the internal
-    // array representation of the magnitude which has no leading
-    // zero elements.
-    //
-    if (!isRecursion) {
-      // The bitLength() instance method is not used here as we
-      // are only considering the magnitudes as non-negative. The
-      // Toom-Cook multiplication algorithm determines the sign
-      // at its end from the two signum values.
-      if ((bitLength(_mag,_mag.length) + bitLength(val._mag,
-        val._mag.length)) > (32L * MAX_MAG_LENGTH)) {
-        reportOverflow(); } }
-
-    return multiplyToomCook3(this,val); }
-
-  //  private final Natural multiply (final long v) {
-  //    assert 0L <= v;
-  //    if (v == 0L) { return ZERO; }
-  //    final long dh = v >>> 32;      // higher order bits
-  //    final long dl = v & UNSIGNED_MASK; // lower order bits
-  //    final int xlen = _mag.length;
-  //    final int[] value = _mag;
-  //    int[] rmag =
-  //      (dh == 0L) ? (new int[xlen + 1]) : (new int[xlen + 2]);
-  //      long carry = 0;
-  //      int rstart = rmag.length - 1;
-  //      for (int i = xlen - 1; i >= 0; i--) {
-  //        final long product = (unsigned(value[i]) * dl) + carry;
-  //        rmag[rstart--] = (int) product;
-  //        carry = product >>> 32; }
-  //      rmag[rstart] = (int) carry;
-  //      if (dh != 0L) {
-  //        carry = 0;
-  //        rstart = rmag.length - 2;
-  //        for (int i = xlen - 1; i >= 0; i--) {
-  //          final long product =
-  //            (unsigned(value[i]) * dh)
-  //            + unsigned(rmag[rstart]) + carry;
-  //          rmag[rstart--] = (int) product;
-  //          carry = product >>> 32; }
-  //        rmag[0] = (int) carry; }
-  //      if (carry == 0L) {
-  //        rmag = Arrays.copyOfRange(rmag,1,rmag.length); }
-  //      return make(rmag); }
-
-  //--------------------------------------------------------------
-
-  private static final void multiplyToLenCheck (final int[] array,
-                                                final int length) {
-    // not an error because multiplyToLen won't execute
-    // if len <= 0
-    if (length <= 0) { return; }
-    Objects.requireNonNull(array);
-    if (length > array.length) {
-      throw new ArrayIndexOutOfBoundsException(length-1); } }
-
-  private static final int[] implMultiplyToLen (final int[] x,
-                                                final int xlen,
-                                                final int[] y,
-                                                final int ylen,
-                                                int[] z) {
-    final int xstart = xlen - 1;
-    final int ystart = ylen - 1;
-    if ((z == null) || (z.length < (xlen + ylen))) {
-      z = new int[xlen + ylen]; }
-    long carry = 0;
-    for (int j = ystart, k = ystart + 1 + xstart;
-      j >= 0;
-      j--, k--) {
-      final long product =
-        (unsigned(y[j]) * unsigned(x[xstart])) + carry;
-      z[k] = (int) product;
-      carry = product >>> 32; }
-    z[xstart] = (int) carry;
-    for (int i = xstart - 1; i >= 0; i--) {
-      carry = 0;
-      for (int j = ystart, k = ystart + 1 + i; j >= 0; j--, k--) {
-        final long product =
-          (unsigned(y[j]) * unsigned(x[i]))
-          + unsigned(z[k]) + carry;
-        z[k] = (int) product;
-        carry = product >>> 32; }
-      z[i] = (int) carry; }
-    return z; }
-
-  /** Multiplies leading elements of x and y into z. 
-   * No leading zeros in z.
-   */
-
-  private static final int[] multiplyToLen (final int[] x,
-                                            final int xlen,
-                                            final int[] y,
-                                            final int ylen,
-                                            final int[] z) {
-    multiplyToLenCheck(x,xlen);
-    multiplyToLenCheck(y,ylen);
-    return implMultiplyToLen(x,xlen,y,ylen,z); }
-
-  //--------------------------------------------------------------
-
-  /** Returns a Natural whose value is {@code (this * val)}.
-   *
-   * @implNote An implementation may offer better algorithmic
-   *           performance when {@code val == this}.
-   *
-   * @param val
-   *          value to be multiplied by this Natural.
-   * @return {@code this * val}
-   */
-  public UnNatural multiply (final UnNatural val) {
-    return multiply(val,false);
-  }
-
-  //--------------------------------------------------------------
-  // Squaring
-  //--------------------------------------------------------------
-
   /** The threshold value for using Karatsuba squaring. If the
    * number of ints in the number are larger than this value,
    * Karatsuba squaring will be used. This value is found
    * experimentally to work well.
    */
+  
   private static final int KARATSUBA_SQUARE_THRESHOLD = 128;
 
   /** The threshold value for using Toom-Cook squaring. If the
@@ -949,18 +526,16 @@ implements Comparable<UnNatural> {
    * Toom-Cook squaring will be used. This value is found
    * experimentally to work well.
    */
+  
   private static final int TOOM_COOK_SQUARE_THRESHOLD = 216;
 
-  /**
-   * Returns a Natural whose value is
-   * {@code (this<sup>2</sup>)}. If
-   * the invocation is recursive certain overflow checks are
+  /** Returns a Natural whose value is {@code (this<sup>2</sup>)}. 
+   * If the invocation is recursive certain overflow checks are
    * skipped.
-   *
-   * @param isRecursion
-   *          whether this is a recursive invocation
+   * @param isRecursion whether this is a recursive invocation
    * @return {@code this<sup>2</sup>}
    */
+  
   private final UnNatural square (final boolean isRecursion) {
     if (isZero()) { return ZERO; }
     final int len = _mag.length;
@@ -1089,17 +664,13 @@ implements Comparable<UnNatural> {
     return z;
   }
 
-  /**
-   * Squares a Natural using the Karatsuba squaring algorithm.
-   * It should
-   * be used when both numbers are larger than a certain threshold
-   * (found
-   * experimentally). It is a recursive divide-and-conquer
-   * algorithm that
-   * has better asymptotic performance than the algorithm used in
-   * squareToLen.
+  /** Squares a Natural using the Karatsuba squaring algorithm.
+   * It should be used when both numbers are larger than a certain 
+   * threshold (found experimentally). It is a recursive 
+   * divide-and-conquer algorithm that has better asymptotic 
+   * performance than the algorithm used in squareToLen.
    */
-  private UnNatural squareKaratsuba () {
+  private final UnNatural squareKaratsuba () {
     final int half = (_mag.length + 1) / 2;
 
     final UnNatural xl = getLower(half);
@@ -1111,21 +682,16 @@ implements Comparable<UnNatural> {
     // xh^2 << 64 + (((xl+xh)^2 - (xh^2 + xl^2)) << 32) + xl^2
     return xhs.shiftLeft(half * 32)
       .add(xl.add(xh).square().subtract(xhs.add(xls)))
-      .shiftLeft(half * 32).add(xls);
-  }
+      .shiftLeft(half * 32).add(xls); }
 
-  /**
-   * Squares a Natural using the 3-way Toom-Cook squaring
-   * algorithm. It
-   * should be used when both numbers are larger than a certain
-   * threshold
-   * (found experimentally). It is a recursive divide-and-conquer
-   * algorithm
-   * that has better asymptotic performance than the algorithm
-   * used in
+  /** Squares a Natural using the 3-way Toom-Cook squaring
+   * algorithm. It should be used when both numbers are larger 
+   * than a certain threshold (found experimentally). It is a 
+   * recursive divide-and-conquer algorithm that has better 
+   * asymptotic performance than the algorithm used in
    * squareToLen or squareKaratsuba.
    */
-  private UnNatural squareToomCook3 () {
+  private final UnNatural squareToomCook3 () {
     final int len = _mag.length;
 
     // k is the size (in ints) of the lower-order slices.
@@ -1172,13 +738,464 @@ implements Comparable<UnNatural> {
     final int ss = k * 32;
 
     return vinf.shiftLeft(ss).add(t2).shiftLeft(ss).add(t1)
+      .shiftLeft(ss).add(tm1).shiftLeft(ss).add(v0); }
+
+  //--------------------------------------------------------------
+  // multiply
+  //--------------------------------------------------------------
+
+  /** The threshold value for using squaring code to perform
+   * multiplication of a {@code Natural} instance by itself. If 
+   * the number of ints in the number are larger than this value, 
+   * {@code multiply(this)} will return {@code square()}.
+   */
+  private static final int MULTIPLY_SQUARE_THRESHOLD = 20;
+
+  //--------------------------------------------------------------
+  /** The threshold value for using Karatsuba multiplication. If
+   * the number of ints in both arrays are greater, then
+   * Karatsuba multiplication will be used. 
+   */
+
+  private static final int KARATSUBA_THRESHOLD = 80;
+
+  /** Returns a new Natural representing n lower ints of the
+   * number. Used by Karatsuba multiplication and Karatsuba
+   * squaring.
+   */
+
+  private final UnNatural getLower (final int n) {
+    final int len = _mag.length;
+    if (len <= n) { return this; }
+    final int lowerInts[] = new int[n];
+    System.arraycopy(_mag,len - n,lowerInts,0,n);
+    return valueOf(lowerInts); }
+
+  /** Returns a new Natural representing mag.length-n upper
+   * ints of the number. This is used by Karatsuba multiplication
+   * and * Karatsuba squaring.
+   */
+  
+  private final UnNatural getUpper (final int n) {
+    final int len = _mag.length;
+    if (len <= n) { return ZERO; }
+    final int upperLen = len - n;
+    final int upperInts[] = new int[upperLen];
+    System.arraycopy(_mag,0,upperInts,0,upperLen);
+    return valueOf(upperInts); }
+
+  /** Multiplies two Naturals using the Karatsuba multiplication
+   * algorithm. This is a recursive divide-and-conquer algorithm
+   * which is more efficient for large numbers than what is 
+   * commonly called the grade-school" algorithm used in 
+   * multiplyToLen. If the numbers to be multiplied have length n, 
+   * the "grade-school" algorithm has an asymptotic complexity of 
+   * O(n^2). In contrast, the Karatsuba algorithm has complexity 
+   * of O(n^(log2(3))), or O(n^1.585). It achieves this
+   * increased performance by doing 3 multiplies instead of 4 when
+   * evaluating the product. As it has some overhead, should be
+   * used when both numbers are larger than a certain threshold 
+   * (found experimentally).
+   *
+   * See: http://en.wikipedia.org/wiki/Karatsuba_algorithm
+   */
+  
+  private static final UnNatural multiplyKaratsuba (final UnNatural x,
+                                                    final UnNatural y) {
+    final int xlen = x._mag.length;
+    final int ylen = y._mag.length;
+
+    // The number of ints in each half of the number.
+    final int half = (Math.max(xlen,ylen) + 1) / 2;
+
+    // xl and yl are the lower halves of x and y respectively,
+    // xh and yh are the upper halves.
+    final UnNatural xl = x.getLower(half);
+    final UnNatural xh = x.getUpper(half);
+    final UnNatural yl = y.getLower(half);
+    final UnNatural yh = y.getUpper(half);
+
+    final UnNatural p1 = xh.multiply(yh);  // p1 = xh*yh
+    final UnNatural p2 = xl.multiply(yl);  // p2 = xl*yl
+
+    // p3=(xh+xl)*(yh+yl)
+    final UnNatural p3 = xh.add(xl).multiply(yh.add(yl));
+
+    // result = p1 * 2^(32*2*half) + (p3 - p1 - p2) * 2^(32*half)
+    // + p2
+    final UnNatural result =
+      p1.shiftLeft(32 * half).add(p3.subtract(p1).subtract(p2))
+      .shiftLeft(32 * half).add(p2);
+
+    return result; }
+
+  //--------------------------------------------------------------
+  /** The threshold value for using 3-way Toom-Cook multiplication.
+   * If the number of ints in each array is greater than the
+   * Karatsuba threshold, and the number of ints in at least one
+   * of the arrays is greater than this threshold, then 
+   * Toom-Cook multiplication will be used.
+   */
+  private static final int TOOM_COOK_THRESHOLD = 240;
+
+  /** Returns a slice of a Natural for use in Toom-Cook
+   * multiplication.
+   * @param lowerSize The size of the lower-order bit slices.
+   * @param upperSize The size of the higher-order bit slices.
+   * @param slice The index of which slice is requested, which 
+   * must be a number from 0 to size-1. Slice 0 is the highest-
+   * order bits, and slice size-1 are the lowest-order bits. 
+   * Slice 0 may be of different size than the other slices.
+   * @param fullsize The size of the larger integer array, used to
+   * align slices to the appropriate position when multiplying
+   * different-sized numbers.
+   */
+  private final UnNatural getToomSlice (final int lowerSize,
+                                        final int upperSize,
+                                        final int slice,
+                                        final int fullsize) {
+    final int len = _mag.length;
+    final int offset = fullsize - len;
+    int start;
+    final int end;
+    if (slice == 0) {
+      start = 0 - offset;
+      end = upperSize - 1 - offset; }
+    else {
+      start = (upperSize + ((slice - 1) * lowerSize)) - offset;
+      end = (start + lowerSize) - 1; }
+    if (start < 0) { start = 0; }
+    if (end < 0) { return ZERO; }
+    final int sliceSize = (end - start) + 1;
+    if (sliceSize <= 0) { return ZERO; }
+    // While performing Toom-Cook, all slices are positive and
+    // the sign is adjusted when the final number is composed.
+    if ((start == 0) && (sliceSize >= len)) { return this; }
+    final int intSlice[] = new int[sliceSize];
+    System.arraycopy(_mag,start,intSlice,0,sliceSize);
+    return make(intSlice); }
+
+  /** Does an exact division (that is, the remainder is known to
+   * be zero) of the specified number by 3. This is used in 
+   * Toom-Cook multiplication. This is an efficient algorithm that 
+   * runs in linear time. If the argument is not exactly divisible 
+   * by 3, results are undefined. Note that this is expected to be 
+   * called with positive arguments only.
+   */
+  private final UnNatural exactDivideBy3 () {
+    final int len = _mag.length;
+    int[] result = new int[len];
+    long x, w, q, borrow;
+    borrow = 0L;
+    for (int i = len - 1; i >= 0; i--) {
+      x = unsigned(_mag[i]);
+      w = x - borrow;
+      if (borrow > x) { // Did we make the number go negative?
+        borrow = 1L; }
+      else { borrow = 0L; }
+      // 0xAAAAAAAB is the modular inverse of 3 (mod 2^32). Thus,
+      // the effect of this is to divide by 3 (mod 2^32).
+      // This is much faster than division on most architectures.
+      q = (w * 0xAAAAAAABL) & UNSIGNED_MASK;
+      result[i] = (int) q;
+      // Now check the borrow. The second check can of course be
+      // eliminated if the first fails.
+      if (q >= 0x55555556L) {
+        borrow++;
+        if (q >= 0xAAAAAAABL) { borrow++; } } }
+    result = unsafeStripLeadingZeroInts(result);
+    return new UnNatural(result); }
+
+  /** Multiplies two Naturals using a 3-way Toom-Cook
+   * multiplication algorithm. This is a recursive 
+   * divide-and-conquer algorithm which is more efficient for 
+   * large numbers than what is commonly called the "grade-school" 
+   * algorithm used in multiplyToLen. If the numbers to be
+   * multiplied have length n, the "grade-school" algorithm has an
+   * asymptotic complexity of O(n^2). In contrast, 3-way Toom-Cook
+   * has a complexity of about O(n^1.465). It achieves this 
+   * increased asymptotic performance by breaking each number into 
+   * three parts and by doing 5 multiplies instead of 9 when 
+   * evaluating the product. Due to overhead (additions, shifts, 
+   * and one division) in the Toom-Cook algorithm, it should only 
+   * be used when both numbers are larger than a certain threshold 
+   * (found experimentally). This threshold is generally larger
+   * than that for Karatsuba multiplication, so this algorithm is
+   * generally only used when numbers become significantly larger.
+   *
+   * The algorithm used is the "optimal" 3-way Toom-Cook algorithm
+   * outlined by Marco Bodrato.
+   *
+   * See: http://bodrato.it/toom-cook/
+   * http://bodrato.it/papers/#WAIFI2007
+   *
+   * "Towards Optimal Toom-Cook Multiplication for Univariate and
+   * Multivariate Polynomials in Characteristic 2 and 0." by Marco
+   * BODRATO;
+   * In C.Carlet and B.Sunar, Eds., "WAIFI'07 proceedings", p.
+   * 116-133,
+   * LNCS #4547. Springer, Madrid, Spain, June 21-22, 2007.
+   */
+
+  private static final UnNatural multiplyToomCook3 (final UnNatural a,
+                                                    final UnNatural b) {
+    final int alen = a._mag.length;
+    final int blen = b._mag.length;
+
+    final int largest = Math.max(alen,blen);
+
+    // k is the size (in ints) of the lower-order slices.
+    final int k = (largest + 2) / 3;   // Equal to ceil(largest/3)
+
+    // r is the size (in ints) of the highest-order slice.
+    final int r = largest - (2 * k);
+
+    // Obtain slices of the numbers. a2 and b2 are the most
+    // significant
+    // bits of the numbers a and b, and a0 and b0 the least
+    // significant.
+    UnNatural a0, a1, a2, b0, b1, b2;
+    a2 = a.getToomSlice(k,r,0,largest);
+    a1 = a.getToomSlice(k,r,1,largest);
+    a0 = a.getToomSlice(k,r,2,largest);
+    b2 = b.getToomSlice(k,r,0,largest);
+    b1 = b.getToomSlice(k,r,1,largest);
+    b0 = b.getToomSlice(k,r,2,largest);
+
+    UnNatural v0, v1, v2, vm1, vinf, t1, t2, tm1, da1, db1;
+
+    v0 = a0.multiply(b0,true);
+    da1 = a2.add(a0);
+    db1 = b2.add(b0);
+    vm1 = da1.subtract(a1).multiply(db1.subtract(b1),true);
+    da1 = da1.add(a1);
+    db1 = db1.add(b1);
+    v1 = da1.multiply(db1,true);
+    v2 = da1
+      .add(a2)
+      .shiftLeft(1)
+      .subtract(a0)
+      .multiply(db1.add(b2).shiftLeft(1).subtract(b0),true);
+    vinf = a2.multiply(b2,true);
+
+    // The algorithm requires two divisions by 2 and one by 3.
+    // All divisions are known to be exact, that is, they do not
+    // produce remainders, and all results are positive. The 
+    // divisions by 2 are implemented as right shifts which are 
+    // relatively efficient, leaving only an exact division by 3, 
+    // which is done by a specialized linear-time algorithm.
+    t2 = v2.subtract(vm1).exactDivideBy3();
+    tm1 = v1.subtract(vm1).shiftRight(1);
+    t1 = v1.subtract(v0);
+    t2 = t2.subtract(t1).shiftRight(1);
+    t1 = t1.subtract(tm1).subtract(vinf);
+    t2 = t2.subtract(vinf.shiftLeft(1));
+    tm1 = tm1.subtract(t2);
+
+    // Number of bits to shift left.
+    final int ss = k * 32;
+
+    final UnNatural result =
+      vinf.shiftLeft(ss).add(t2).shiftLeft(ss).add(t1)
       .shiftLeft(ss).add(tm1).shiftLeft(ss).add(v0);
-  }
+    return result; }
+
+  //--------------------------------------------------------------
+
+  private static final UnNatural multiply (final int[] x,
+                                           final int y) {
+    if (Integer.bitCount(y) == 1) {
+      return make(shiftLeft(x,Integer.numberOfTrailingZeros(y))); }
+    final int xlen = x.length;
+    int[] rmag = new int[xlen + 1];
+    long carry = 0;
+    final long yl = y & UNSIGNED_MASK;
+    int rstart = rmag.length - 1;
+    for (int i = xlen - 1; i >= 0; i--) {
+      final long product = (unsigned(x[i]) * yl) + carry;
+      rmag[rstart--] = (int) product;
+      carry = product >>> 32; }
+    if (carry == 0L) { 
+      rmag = Arrays.copyOfRange(rmag,1,rmag.length); }
+    else {
+      rmag[rstart] = (int) carry; }
+    return make(rmag); }
+
+
+  //  private final Natural multiply (final long v) {
+  //    assert 0L <= v;
+  //    if (v == 0L) { return ZERO; }
+  //    final long dh = v >>> 32;      // higher order bits
+  //    final long dl = v & UNSIGNED_MASK; // lower order bits
+  //    final int xlen = _mag.length;
+  //    final int[] value = _mag;
+  //    int[] rmag =
+  //      (dh == 0L) ? (new int[xlen + 1]) : (new int[xlen + 2]);
+  //      long carry = 0;
+  //      int rstart = rmag.length - 1;
+  //      for (int i = xlen - 1; i >= 0; i--) {
+  //        final long product = (unsigned(value[i]) * dl) + carry;
+  //        rmag[rstart--] = (int) product;
+  //        carry = product >>> 32; }
+  //      rmag[rstart] = (int) carry;
+  //      if (dh != 0L) {
+  //        carry = 0;
+  //        rstart = rmag.length - 2;
+  //        for (int i = xlen - 1; i >= 0; i--) {
+  //          final long product =
+  //            (unsigned(value[i]) * dh)
+  //            + unsigned(rmag[rstart]) + carry;
+  //          rmag[rstart--] = (int) product;
+  //          carry = product >>> 32; }
+  //        rmag[0] = (int) carry; }
+  //      if (carry == 0L) {
+  //        rmag = Arrays.copyOfRange(rmag,1,rmag.length); }
+  //      return make(rmag); }
+
+  //--------------------------------------------------------------
+
+  private static final void multiplyToLenCheck (final int[] array,
+                                                final int length) {
+    // not an error because multiplyToLen won't execute
+    // if len <= 0
+    if (length <= 0) { return; }
+    Objects.requireNonNull(array);
+    if (length > array.length) {
+      throw new ArrayIndexOutOfBoundsException(length-1); } }
+
+  private static final int[] implMultiplyToLen (final int[] x,
+                                                final int xlen,
+                                                final int[] y,
+                                                final int ylen,
+                                                int[] z) {
+    final int xstart = xlen - 1;
+    final int ystart = ylen - 1;
+    if ((z == null) || (z.length < (xlen + ylen))) {
+      z = new int[xlen + ylen]; }
+    long carry = 0;
+    for (int j = ystart, k = ystart + 1 + xstart;
+      j >= 0;
+      j--, k--) {
+      final long product =
+        (unsigned(y[j]) * unsigned(x[xstart])) + carry;
+      z[k] = (int) product;
+      carry = product >>> 32; }
+    z[xstart] = (int) carry;
+    for (int i = xstart - 1; i >= 0; i--) {
+      carry = 0;
+      for (int j = ystart, k = ystart + 1 + i; j >= 0; j--, k--) {
+        final long product =
+          (unsigned(y[j]) * unsigned(x[i]))
+          + unsigned(z[k]) + carry;
+        z[k] = (int) product;
+        carry = product >>> 32; }
+      z[i] = (int) carry; }
+    return z; }
+
+  /** Multiplies leading elements of x and y into z. 
+   * No leading zeros in z.
+   */
+
+  private static final int[] multiplyToLen (final int[] x,
+                                            final int xlen,
+                                            final int[] y,
+                                            final int ylen,
+                                            final int[] z) {
+    multiplyToLenCheck(x,xlen);
+    multiplyToLenCheck(y,ylen);
+    return implMultiplyToLen(x,xlen,y,ylen,z); }
+  
+  //--------------------------------------------------------------
+
+  private final UnNatural multiply (final UnNatural val,
+                                    final boolean isRecursion) {
+    if ((val.isZero()) || (isZero())) { return ZERO; }
+    final int xlen = _mag.length;
+    if ((val == this) && (xlen > MULTIPLY_SQUARE_THRESHOLD)) {
+      return square(); }
+
+    final int ylen = val._mag.length;
+
+    if ((xlen < KARATSUBA_THRESHOLD)
+      || (ylen < KARATSUBA_THRESHOLD)) {
+      if (val._mag.length == 1) {
+        return multiply(_mag,val._mag[0]); }
+      if (_mag.length == 1) {
+        return multiply(val._mag,_mag[0]); }
+      int[] result = multiplyToLen(_mag,xlen,val._mag,ylen,null);
+      result = unsafeStripLeadingZeroInts(result);
+      return make(result); }
+    if ((xlen < TOOM_COOK_THRESHOLD)
+      && (ylen < TOOM_COOK_THRESHOLD)) {
+      return multiplyKaratsuba(this,val); }
+    //
+    // In "Hacker's Delight" section 2-13, p.33, it is explained
+    // that if x and y are unsigned 32-bit quantities and m and n
+    // are their respective numbers of leading zeros within 32
+    // bits,
+    // then the number of leading zeros within their product as a
+    // 64-bit unsigned quantity is either m + n or m + n + 1. If
+    // their product is not to overflow, it cannot exceed 32 bits,
+    // and so the number of leading zeros of the product within 64
+    // bits must be at least 32, i.e., the leftmost set bit is at
+    // zero-relative position 31 or less.
+    //
+    // From the above there are three cases:
+    //
+    // m + n leftmost set bit condition
+    // ----- ---------------- ---------
+    // >= 32 x <= 64 - 32 = 32 no overflow
+    // == 31 x >= 64 - 32 = 32 possible overflow
+    // <= 30 x >= 64 - 31 = 33 definite overflow
+    //
+    // The "possible overflow" condition cannot be detected by
+    // examning data lengths alone and requires further
+    // calculation.
+    //
+    // By analogy, if 'this' and 'val' have m and n as their
+    // respective numbers of leading zeros within
+    // 32*MAX_MAG_LENGTH
+    // bits, then:
+    //
+    // m + n >= 32*MAX_MAG_LENGTH no overflow
+    // m + n == 32*MAX_MAG_LENGTH - 1 possible overflow
+    // m + n <= 32*MAX_MAG_LENGTH - 2 definite overflow
+    //
+    // Note however that if the number of ints in the result
+    // were to be MAX_MAG_LENGTH and mag[0] < 0, then there would
+    // be overflow. As a result the leftmost bit (of mag[0])
+    // cannot
+    // be used and the constraints must be adjusted by one bit to:
+    //
+    // m + n > 32*MAX_MAG_LENGTH no overflow
+    // m + n == 32*MAX_MAG_LENGTH possible overflow
+    // m + n < 32*MAX_MAG_LENGTH definite overflow
+    //
+    // The foregoing leading zero-based discussion is for clarity
+    // only. The actual calculations use the estimated bit length
+    // of the product as this is more natural to the internal
+    // array representation of the magnitude which has no leading
+    // zero elements.
+    //
+    if (!isRecursion) {
+      // The bitLength() instance method is not used here as we
+      // are only considering the magnitudes as non-negative. The
+      // Toom-Cook multiplication algorithm determines the sign
+      // at its end from the two signum values.
+      if ((bitLength(_mag,_mag.length) + bitLength(val._mag,
+        val._mag.length)) > (32L * MAX_MAG_LENGTH)) {
+        reportOverflow(); } }
+
+    return multiplyToomCook3(this,val); }
+
+  //--------------------------------------------------------------
+
+  public final UnNatural multiply (final UnNatural val) {
+    return multiply(val,false); }
 
   //--------------------------------------------------------------
   // Division
   //--------------------------------------------------------------
-
   //  /** The threshold value for using Burnikel-Ziegler division. If
   //   * the number of ints in the divisor are larger than this value,
   //   * Burnikel-Ziegler division may be used. This value is found 
@@ -2110,109 +2127,31 @@ implements Comparable<UnNatural> {
     return bc; }
 
   //--------------------------------------------------------------
-  // Comparison Operations
+  // Comparable interface+
   //--------------------------------------------------------------
 
-  /**
-   * Compares this Natural with the specified Natural. This
-   * method is provided in preference to individual methods for
-   * each
-   * of the six boolean comparison operators ({@literal <}, ==,
-   * {@literal >}, {@literal >=}, !=, {@literal <=}). The
-   * suggested
-   * idiom for performing these comparisons is: {@code
-   * (x.compareTo(y)} &lt;<i>op</i>&gt; {@code 0)}, where
-   * &lt;<i>op</i>&gt; is one of the six comparison operators.
-   *
-   * @param val
-   *          Natural to which this Natural is to be
-   *          compared.
-   * @return -1, 0 or 1 as this Natural is numerically less
-   *         than, equal
-   *         to, or greater than {@code val}.
-   */
   @Override
   public final int compareTo (final UnNatural val) {
-    return compareMagnitude(val); }
+    return compareMagnitude(_mag,val._mag); }
 
   public final int compareTo (final long val) {
-    //assert val >= 0L;
-    //assert signum >= 0;
+    if (val < 0L) { return -1; }
     if (val == 0L) {
       if (isZero()) { return 0; }
       return -1; }
     if (isZero()) { return -1; }
-    return compareMagnitude(val); }
+    return compareMagnitude(_mag,val); }
 
-  //--------------------------------------------------------------
-
-  private static final int compareMagnitude (final int[] m1,
-                                             final int[] m2) {
-    final int len1 = m1.length;
-    final int len2 = m2.length;
-    if (len1 < len2) { return -1; }
-    if (len1 > len2) { return 1; }
-    for (int i = 0; i < len1; i++) {
-      final int a = m1[i];
-      final int b = m2[i];
-      if (a != b) { return (unsigned(a) < unsigned(b)) ? -1 : 1; } }
-    return 0; }
-
-  public final int compareMagnitude (final UnNatural val) {
-    return compareMagnitude(_mag,val._mag); }
-
-  public final int compareMagnitude (final long val) {
-    //assert 0L <= val;
-    final int[] m1 = _mag;
-    final int len = m1.length;
-    if (len > 2) { return 1; }
-    final int highWord = (int) (val >>> 32);
-    if (highWord == 0) {
-      if (len < 1) { return -1; }
-      if (len > 1) { return 1; }
-      final int a = m1[0];
-      final int b = (int) val;
-      if (a != b) {
-        return ((unsigned(a) < unsigned(b)) ? -1 : 1); }
-      return 0; }
-    if (len < 2) { return -1; }
-    int a = m1[0];
-    int b = highWord;
-    if (a != b) {
-      return ((unsigned(a) < unsigned(b)) ? -1 : 1); }
-    a = m1[1];
-    b = (int) val;
-    if (a != b) { return ((unsigned(a) < unsigned(b)) ? -1 : 1); }
-    return 0; }
-
-  public final int compareMagnitude (final long val,
-                                     final int leftShift) {
+  public final int compareTo (final long val,
+                              final int leftShift) {
+    assert 0L <= val;
     return compareMagnitude(_mag,shiftLeft(val,leftShift)); }
 
   //--------------------------------------------------------------
 
-  /**
-   * Returns the minimum of this Natural and {@code val}.
-   *
-   * @param val
-   *          value with which the minimum is to be computed.
-   * @return the Natural whose value is the lesser of this
-   *         Natural and
-   *         {@code val}. If they are equal, either may be
-   *         returned.
-   */
   public final UnNatural min (final UnNatural val) {
     return (compareTo(val) < 0 ? this : val); }
 
-  /**
-   * Returns the maximum of this Natural and {@code val}.
-   *
-   * @param val
-   *          value with which the maximum is to be computed.
-   * @return the Natural whose value is the greater of this and
-   *         {@code val}. If they are equal, either may be
-   *         returned.
-   */
   public final UnNatural max (final UnNatural val) {
     return (compareTo(val) > 0 ? this : val); }
 
@@ -2249,6 +2188,8 @@ implements Comparable<UnNatural> {
     return b.toString(); }
 
   //--------------------------------------------------------------
+  // Number interface+
+  //--------------------------------------------------------------
   /** Returns a byte array containing the two's-complement
    * representation of this Natural. The byte array will be in
    * <i>big-endian</i> byte-order: the most significant byte is in
@@ -2266,27 +2207,26 @@ implements Comparable<UnNatural> {
   public byte[] toByteArray () {
     final int byteLen = (bitLength() / 8) + 1;
     final byte[] byteArray = new byte[byteLen];
-
-    for (int i = byteLen - 1, bytesCopied = 4, nextInt =
-      0, intIndex = 0; i >= 0; i--) {
+    for (
+      int i = byteLen - 1, 
+      bytesCopied = 4, 
+      nextInt = 0, 
+      intIndex = 0; 
+      i >= 0; 
+      i--) {
       if (bytesCopied == 4) {
         nextInt = getInt(intIndex++);
-        bytesCopied = 1;
-      }
+        bytesCopied = 1; }
       else {
-        nextInt >>>= 8;
-      bytesCopied++;
-      }
-      byteArray[i] = (byte) nextInt;
-    }
-    return byteArray;
-  }
-
-  @Override
-  public final int intValue () { return getInt(0); }
+        nextInt >>>= 8; bytesCopied++; }
+      byteArray[i] = (byte) nextInt; }
+    return byteArray; }
 
   public final BigInteger bigIntegerValue () {
     return new BigInteger(toByteArray()); }
+
+  @Override
+  public final int intValue () { return getInt(0); }
 
   @Override
   public final long longValue () {
@@ -2343,17 +2283,17 @@ implements Comparable<UnNatural> {
     int signifFloor = twiceSignifFloor >> 1;
         signifFloor &= Floats.STORED_SIGNIFICAND_MASK; // remove the
         // implied bit
-         // We round up if either the fractional part of signif is
-         // strictly
-         // greater than 0.5 (which is true if the 0.5 bit is set and
-         // any lower
-         // bit is set), or if the fractional part of signif is >= 0.5
-         // and
-         // signifFloor is odd (which is true if both the 0.5 bit and
-         // the 1 bit
-         // are set). This is equivalent to the desired HALF_EVEN
-         // rounding.
-                final boolean increment =
+        // We round up if either the fractional part of signif is
+        // strictly
+        // greater than 0.5 (which is true if the 0.5 bit is set and
+        // any lower
+        // bit is set), or if the fractional part of signif is >= 0.5
+        // and
+        // signifFloor is odd (which is true if both the 0.5 bit and
+        // the 1 bit
+        // are set). This is equivalent to the desired HALF_EVEN
+        // rounding.
+        final boolean increment =
           ((twiceSignifFloor
             & 1) != 0) && (((signifFloor & 1) != 0)
               || (getLowestSetBit() < shift));
@@ -2407,19 +2347,14 @@ implements Comparable<UnNatural> {
     else if (exponent > Double.MAX_EXPONENT) {
       return Double.POSITIVE_INFINITY; }
 
-    /*
-     * We need the top SIGNIFICAND_WIDTH bits, including the
-     * "implicit"
-     * one bit. To make rounding easier, we pick out the top
-     * SIGNIFICAND_WIDTH + 1 bits, so we have one to help us round
-     * up or
-     * down. twiceSignifFloor will contain the top
-     * SIGNIFICAND_WIDTH + 1
-     * bits, and signifFloor the top SIGNIFICAND_WIDTH.
-     *
-     * It helps to consider the real number signif = abs(this) *
-     * 2^(SIGNIFICAND_WIDTH - 1 - exponent).
-     */
+    // We need the top SIGNIFICAND_WIDTH bits, including the
+    // "implicit" one bit. To make rounding easier, we pick out 
+    // the top SIGNIFICAND_WIDTH + 1 bits, so we have one to help 
+    // us round up or down. twiceSignifFloor will contain the top
+    // SIGNIFICAND_WIDTH + 1 bits, and signifFloor the top 
+    // SIGNIFICAND_WIDTH. 
+    // It helps to consider the real number signif = abs(this) *
+    // 2^(SIGNIFICAND_WIDTH - 1 - exponent).
     final int shift = exponent - Doubles.SIGNIFICAND_BITS;
 
     long twiceSignifFloor;
@@ -2449,44 +2384,33 @@ implements Comparable<UnNatural> {
     twiceSignifFloor =
       (unsigned(highBits) << 32) | unsigned(lowBits);
 
-    long signifFloor = twiceSignifFloor >> 1;
-      signifFloor &= Doubles.STORED_SIGNIFICAND_MASK; // remove the
-      // implied bit
+    // remove the implied bit
+    final long signifFloor = 
+      (twiceSignifFloor >> 1) & Doubles.STORED_SIGNIFICAND_MASK; 
+    // We round up if either the fractional part of signif is
+    // strictly greater than 0.5 (which is true if the 0.5 bit 
+    // is set and any lower bit is set), or if the fractional 
+    // part of signif is >= 0.5 and signifFloor is odd (which is 
+    // true if both the 0.5 bit and the 1 bit are set). This is 
+    // equivalent to the desired HALF_EVEN rounding.
 
-      /*
-       * We round up if either the fractional part of signif is
-       * strictly
-       * greater than 0.5 (which is true if the 0.5 bit is set and
-       * any lower
-       * bit is set), or if the fractional part of signif is >= 0.5
-       * and
-       * signifFloor is odd (which is true if both the 0.5 bit and
-       * the 1 bit
-       * are set). This is equivalent to the desired HALF_EVEN
-       * rounding.
-       */
-      final boolean increment =
-        ((twiceSignifFloor
-          & 1) != 0) && (((signifFloor & 1) != 0)
-            || (getLowestSetBit() < shift));
-      final long signifRounded =
-        increment ? signifFloor + 1 : signifFloor;
-      long bits =
-        (long) ((exponent
-          + Doubles.EXPONENT_BIAS)) << Doubles.STORED_SIGNIFICAND_BITS;
-      bits += signifRounded;
-      /*
-       * If signifRounded == 2^53, we'd need to set all of the
-       * significand
-       * bits to zero and add 1 to the exponent. This is exactly the
-       * behavior
-       * we get from just adding signifRounded to bits directly. If
-       * the
-       * exponent is Double.MAX_EXPONENT, we round up (correctly) to
-       * Double.POSITIVE_INFINITY.
-       */
-      bits |= 1 & Doubles.SIGN_MASK;
-      return Double.longBitsToDouble(bits);
+    final boolean increment =
+      ((twiceSignifFloor
+        & 1) != 0) && (((signifFloor & 1) != 0)
+          || (getLowestSetBit() < shift));
+    final long signifRounded =
+      increment ? signifFloor + 1 : signifFloor;
+    long bits =
+      (long) ((exponent
+        + Doubles.EXPONENT_BIAS)) << Doubles.STORED_SIGNIFICAND_BITS;
+    bits += signifRounded;
+    // If signifRounded == 2^53, we'd need to set all of the
+    // significand bits to zero and add 1 to the exponent. This is 
+    // exactly the behavior we get from just adding signifRounded 
+    // to bits directly. If the exponent is Double.MAX_EXPONENT, 
+    // we round up (correctly) to Double.POSITIVE_INFINITY.
+    bits |= 1 & Doubles.SIGN_MASK;
+    return Double.longBitsToDouble(bits);
   }
 
   //--------------------------------------------------------------
