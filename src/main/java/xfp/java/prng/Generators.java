@@ -1,6 +1,6 @@
 package xfp.java.prng;
 
-import xfp.java.numbers.BigInteger;
+import java.math.BigInteger;
 import java.util.List;
 
 import org.apache.commons.rng.UniformRandomProvider;
@@ -8,11 +8,13 @@ import org.apache.commons.rng.sampling.CollectionSampler;
 import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
 import org.apache.commons.rng.sampling.distribution.ContinuousUniformSampler;
 
+import xfp.java.numbers.UnNatural;
+
 /** Generators of primitives or Objects as zero-arity 'functions'
  * that return different values on each call.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-01
+ * @version 2019-05-11
  */
 
 @SuppressWarnings("unchecked")
@@ -169,6 +171,83 @@ public final class Generators {
     urp.nextBytes(b);
     return b; }
 
+  //--------------------------------------------------------------
+  /** Intended primarily for testing. <b>
+   * Generate enough bytes to at least cover the range of 
+   * <code>double</code> values.
+   */
+
+  public static final Generator 
+  unnaturalGenerator (final UniformRandomProvider urp) {
+    final double dp = 0.99;
+    return new GeneratorBase ("unnaturalGenerator") {
+      private final ContinuousSampler choose = 
+        new ContinuousUniformSampler(urp,0.0,1.0);
+      private final CollectionSampler edgeCases = 
+        new CollectionSampler(
+          urp,
+          List.of(
+            UnNatural.ZERO,
+            UnNatural.ONE,
+            UnNatural.TWO,
+            UnNatural.TEN));
+      @Override
+      public Object next () { 
+        final boolean edge = choose.sample() > dp;
+        if (edge) { return edgeCases.sample(); }
+        return UnNatural.valueOf(nextBytes(urp,1024)); } }; }
+
+  public static final Generator 
+  unnaturalGenerator (final int n,
+                      final UniformRandomProvider urp) {
+    return new GeneratorBase ("unnaturalGenerator:" + n) {
+      final Generator g = unnaturalGenerator(urp);
+      @Override
+      public final Object next () {
+        final UnNatural[] z = new UnNatural[n];
+        for (int i=0;i<n;i++) { z[i] = (UnNatural) g.next(); }
+        return z; } }; }
+
+  /** Intended primarily for testing. <b>
+   * Generate enough bytes to at least cover the range of 
+   * <code>double</code> values.
+   */
+
+  public static final Generator 
+  nonzeroUnNaturalGenerator (final UniformRandomProvider urp) {
+    final double dp = 0.99;
+    return new GeneratorBase ("nonzeroUnNaturalGenerator") {
+      private final ContinuousSampler choose = 
+        new ContinuousUniformSampler(urp,0.0,1.0);
+      private final CollectionSampler edgeCases = 
+        new CollectionSampler(
+          urp,
+          List.of(
+            UnNatural.ONE,
+            UnNatural.TWO,
+            UnNatural.TEN));
+      @Override
+      public Object next () { 
+        final boolean edge = choose.sample() > dp;
+        if (edge) { return edgeCases.sample(); }
+        // TODO: bound infinite loop?
+        for (;;) {
+          final UnNatural b = 
+            UnNatural.valueOf(nextBytes(urp,1024)); 
+          if (! b.isZero()) { return b; } } } }; }
+
+  public static final Generator 
+  nonzeroUnNaturalGenerator (final int n,
+                             final UniformRandomProvider urp) {
+    return new GeneratorBase ("nonzeroUnNaturalGenerator:" + n) {
+      final Generator g = nonzeroUnNaturalGenerator(urp);
+      @Override
+      public final Object next () {
+        final UnNatural[] z = new UnNatural[n];
+        for (int i=0;i<n;i++) { z[i] = (UnNatural) g.next(); }
+        return z; } }; }
+
+  //--------------------------------------------------------------
   /** Intended primarily for testing. <b>
    * Generate enough bytes to at least cover the range of 
    * <code>double</code> values.
@@ -204,7 +283,6 @@ public final class Generators {
         final BigInteger[] z = new BigInteger[n];
         for (int i=0;i<n;i++) { z[i] = (BigInteger) g.next(); }
         return z; } }; }
-
   /** Intended primarily for testing. <b>
    * Generate enough bytes to at least cover the range of 
    * <code>double</code> values.
@@ -284,7 +362,7 @@ public final class Generators {
 
   //--------------------------------------------------------------
 
-  
+
 
   //--------------------------------------------------------------
   // disable constructor

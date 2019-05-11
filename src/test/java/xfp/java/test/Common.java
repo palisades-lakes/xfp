@@ -4,6 +4,7 @@ import static java.lang.Double.toHexString;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -22,7 +23,6 @@ import xfp.java.Debug;
 import xfp.java.accumulators.Accumulator;
 import xfp.java.function.FloatFunction;
 import xfp.java.function.ToFloatFunction;
-import xfp.java.numbers.BigInteger;
 import xfp.java.numbers.Doubles;
 import xfp.java.numbers.Floats;
 import xfp.java.prng.Generator;
@@ -50,13 +50,6 @@ public final class Common {
          "xfp.java.accumulators.DistilledAccumulator",
          "xfp.java.accumulators.ZhuHayesAccumulator",
          "xfp.java.accumulators.BigFloatAccumulator",
-         //"xfp.java.accumulators.BigFloatAccumulator0",
-         //"xfp.java.accumulators.BigFloatAccumulator1",
-         //"xfp.java.accumulators.BigFloatAccumulator2",
-         //"xfp.java.accumulators.BigFloatAccumulator3",
-         //"xfp.java.accumulators.BigFloatAccumulator4",
-         "xfp.java.accumulators.BigFloatAccumulator5",
-         "xfp.java.accumulators.BigFloatNAccumulator",
          //"xfp.java.accumulators.RationalFloatAccumulator",
          //"xfp.java.accumulators.RationalAccumulator",
         }); }

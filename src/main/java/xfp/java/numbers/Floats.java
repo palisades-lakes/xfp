@@ -7,7 +7,7 @@ import static java.lang.Float.floatToIntBits;
 import static java.lang.Float.floatToRawIntBits;
 import static java.lang.Float.toHexString;
 
-import xfp.java.numbers.BigInteger;
+import java.math.BigInteger;
 import java.util.Map;
 import java.util.function.BiPredicate;
 import java.util.function.BinaryOperator;
@@ -33,7 +33,7 @@ import xfp.java.prng.GeneratorBase;
 /** Utilities for <code>float</code>, <code>float[]</code>.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-29
+ * @version 2019-05-11
  */
 public final class Floats implements Set {
 

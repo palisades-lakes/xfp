@@ -3,7 +3,7 @@ package xfp.java.numbers;
 import static xfp.java.numbers.Numbers.hiBit;
 
 import java.math.BigDecimal;
-import xfp.java.numbers.BigInteger;
+import java.math.BigInteger;
 import java.util.Objects;
 
 import xfp.java.exceptions.Exceptions;
@@ -17,7 +17,7 @@ import xfp.java.exceptions.Exceptions;
  * arithmetic on them faster.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-29
+ * @version 2019-05-11
  */
 
 public final class RationalFloat extends Number

@@ -1,5 +1,6 @@
 package xfp.java.numbers;
 
+import java.math.BigInteger;
 //import xfp.java.numbers.BigInteger;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +25,7 @@ import xfp.java.prng.Generators;
  * represented by <code>BigFloat</code>
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-04
+ * @version 2019-05-11
  */
 @SuppressWarnings("unchecked")
 public final class BigFloats implements Set {
@@ -149,8 +150,13 @@ public final class BigFloats implements Set {
       public Object next () { 
         final boolean edge = choose.sample() > dp;
         if (edge) { return edgeCases.sample(); }
-        return BigFloat.valueOf(
-          (BigInteger) g0.next(),g2.nextInt()); } }; }
+        final BigInteger bi = (BigInteger) g0.next();
+        final boolean nonNegative = (0 <= bi.signum());
+        final UnNatural significand = 
+          UnNatural.valueOf(nonNegative ? bi : bi.negate());
+        final int exponent = g2.nextInt();
+        return 
+          BigFloat.valueOf(nonNegative,significand,exponent); } }; }
 
   // Is this characteristic of most inputs?
   public static final Generator 
@@ -182,7 +188,7 @@ public final class BigFloats implements Set {
 
   public static final Generator 
   fromDoubleGenerator (final int n,
-             final UniformRandomProvider urp) {
+                       final UniformRandomProvider urp) {
     return new GeneratorBase ("fromDoubleGenerator:" + n) {
       final Generator g = fromDoubleGenerator(urp);
       @Override

@@ -1,6 +1,6 @@
 package xfp.java.scripts;
 
-import xfp.java.numbers.BigFloatN;
+import xfp.java.numbers.BigFloat;
 import xfp.java.prng.Generator;
 import xfp.java.test.Common;
 
@@ -24,7 +24,7 @@ public final class BigFloatProfile {
       final double[] x = (double[]) g.next();
       final long t = System.nanoTime();
       for (int i=0;i<trys;i++) {
-        BigFloatN a = BigFloatN.ZERO;
+        BigFloat a = BigFloat.ZERO;
         for (final double xi : x) { a = a.add(xi); }
         final double z0 = a.doubleValue();
         if (0.0 != z0) {

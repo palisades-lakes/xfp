@@ -1,6 +1,5 @@
 package xfp.java.test.numbers;
 
-import xfp.java.numbers.BigInteger;
 import java.util.function.BinaryOperator;
 
 import org.junit.jupiter.api.Test;
@@ -8,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import xfp.java.numbers.Numbers;
 import xfp.java.numbers.Rational;
 import xfp.java.test.Common;
+import java.math.BigInteger;
 
 //----------------------------------------------------------------
 /** Test desired properties of Rational. 

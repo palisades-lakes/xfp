@@ -11,15 +11,17 @@ import java.util.Objects;
 /** immutable arbitrary-precision non-negative integers.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-09
+ * @version 2019-05-11
  */
 
-public final class Natural extends Number
-implements Comparable<Natural> {
+public final class UnNatural extends Number
+implements Comparable<UnNatural> {
 
   private static final long serialVersionUID = 1L;
 
   private final int[] _mag;
+  
+  public final boolean isZero () { return 0 == _mag.length; }
 
   // The following fields are stable variables. A stable 
   // variable's value changes at most once from the default zero 
@@ -37,203 +39,12 @@ implements Comparable<Natural> {
   private static final int MAX_MAG_LENGTH =
     (Integer.MAX_VALUE / Integer.SIZE) + 1; // (1 << 26)
 
-  //-------------------------------------------------------------
-  // construction
-  //-------------------------------------------------------------
-
-  private static final void reportOverflow () {
-    throw new ArithmeticException(
-      "Natural would overflow supported range"); }
-
-  private static final void checkMagnitude (final int[] m) {
-    assert m.length < MAX_MAG_LENGTH; }
-
-  private static final int[] unsafeStripLeadingZeroInts (final int m[]) {
-
-    final int n = m.length;
-    int keep = 0;
-    while ((keep < n) && (m[keep] == 0)) { keep++; }
-    return keep == 0 ? m : Arrays.copyOfRange(m,keep,n); }
-
-  private static final int[] stripLeadingZeroBytes (final byte a[],
-                                                    final int off,
-                                                    final int len) {
-    final int indexBound = off + len;
-    int keep = off;
-    while ((keep < indexBound) && (a[keep] == 0)) { keep++; }
-    final int intLength = ((indexBound - keep) + 3) >>> 2;
-    final int[] result = new int[intLength];
-    int b = indexBound - 1;
-    for (int i = intLength - 1; i >= 0; i--) {
-      result[i] = a[b--] & 0xff;
-      final int bytesRemaining = (b - keep) + 1;
-      final int bytesToTransfer = Math.min(3,bytesRemaining);
-      for (int j = 8; j <= (bytesToTransfer << 3); j += 8) {
-        result[i] |= ((a[b--] & 0xff) << j); } }
-    return result; }
-
-  //-------------------------------------------------------------
-
-  private Natural (final int[] mag) { _mag = mag; }
-
-  private static final Natural make (final int[] m) {
-    final int[] m1 = unsafeStripLeadingZeroInts(m); 
-    checkMagnitude(m1);
-    return new Natural(m1); }
-
-  // TODO: a little faster to use a safe stripLeadingZeros
-  public static final Natural valueOf (final int[] m) {
-    return make(Arrays.copyOf(m,m.length)); }
-
-  public static final Natural valueOf (final byte[] b, 
-                                       final int off,
-                                       final int len) {
-    return make(stripLeadingZeroBytes(b,off,len)); }
-
-  public static final Natural valueOf (final byte[] b) { 
-    return valueOf(b,0,b.length); }
-
-  //-------------------------------------------------------------
-  // string parsing
-  //-------------------------------------------------------------
-  // bitsPerDigit in the given radix times 1024
-  // Rounded up to avoid under-allocation.
-
-  private static long bitsPerDigit[] =
-  { 0, 0, 1024, 1624, 2048, 2378, 2648, 2875, 3072, 3247, 3402,
-    3543, 3672, 3790, 3899, 4001, 4096, 4186, 4271, 4350, 4426,
-    4498, 4567, 4633, 4696, 4756, 4814, 4870, 4923, 4975, 5025,
-    5074, 5120, 5166, 5210, 5253, 5295 };
-
-  // Multiply x array times word y in place, and add word z
-
-  private static final void destructiveMulAdd (final int[] x,
-                                               final int y,
-                                               final int z) {
-    final long ylong = unsigned(y);
-    final long zlong = unsigned(z);
-    final int lm1 = x.length-1;
-    long product = 0;
-    long carry = 0;
-    for (int i = lm1; i >= 0; i--) {
-      product = (ylong * unsigned(x[i])) + carry;
-      x[i] = (int) product;
-      carry = product >>> 32; }
-    long sum = unsigned(x[lm1]) + zlong;
-    x[lm1] = (int) sum;
-    carry = sum >>> 32;
-    for (int i = lm1-1; i >= 0; i--) {
-      sum = unsigned(x[i]) + carry;
-      x[i] = (int) sum;
-      carry = sum >>> 32; } }
-
-  //-------------------------------------------------------------
-
-  public static final Natural valueOf (final String s, 
-                                       final int radix) {
-    final int len = s.length();
-    assert 0 < len;
-    assert Character.MIN_RADIX <= radix;
-    assert radix <= Character.MAX_RADIX;
-    assert 0 > s.indexOf('-');
-    assert 0 > s.indexOf('+');
-
-    int cursor = 0;
-    // skip leading '0' --- not strictly necessary?
-    while ((cursor < len)
-      && (Character.digit(s.charAt(cursor),radix) == 0)) {
-      cursor++; }
-    if (cursor == len) { return ZERO; }
-
-    final int numDigits = len - cursor;
-
-    // might be bigger than needed, but make(int[]) handles that
-    final long numBits =
-      ((numDigits * bitsPerDigit[radix]) >>> 10) + 1;
-    if ((numBits + 31) >= (1L << 32)) {
-      reportOverflow(); }
-    final int numWords = (int) (numBits + 31) >>> 5;
-    final int[] magnitude = new int[numWords];
-
-    // Process first (potentially short) digit group
-    int firstGroupLen = numDigits % digitsPerInt[radix];
-    if (firstGroupLen == 0) { firstGroupLen = digitsPerInt[radix]; }
-    String group = s.substring(cursor,cursor += firstGroupLen);
-    magnitude[numWords - 1] = Integer.parseInt(group,radix);
-    if (magnitude[numWords - 1] < 0) {
-      throw new NumberFormatException("Illegal digit"); }
-
-    // Process remaining digit groups
-    final int superRadix = intRadix[radix];
-    int groupVal = 0;
-    while (cursor < len) {
-      group = s.substring(cursor,cursor += digitsPerInt[radix]);
-      groupVal = Integer.parseInt(group,radix);
-      if (groupVal < 0) {
-        throw new NumberFormatException("Illegal digit"); }
-      destructiveMulAdd(magnitude,superRadix,groupVal); }
-    return make(magnitude); }
-
-  public static final Natural valueOf (final String s) {
-    return valueOf(s,10); }
-
   //--------------------------------------------------------------
-  // cached values
+  // operations on int[] representing non-negative integers,
+  // with zeroth element the most significant.
+  // TODO: may be useful to share, move somewhere else?
   //--------------------------------------------------------------
-
-  private static final int MAX_CONSTANT = 16;
-  private static Natural posConst[] = new Natural[MAX_CONSTANT+1];
-
-  /** The cache of powers of each radix. This allows us to not 
-   * have to recalculate powers of radix^(2^n) more than once. 
-   * This speeds Schoenhage recursive base conversion 
-   * significantly.
-   */
-  private static volatile Natural[][] powerCache;
-
-  /** The cache of logarithms of radices for base conversion. */
-  private static final double[] logCache;
-
-  //private static final double LOG_TWO = Math.log(2.0);
-
-  static {
-    for (int i = 1; i <= MAX_CONSTANT; i++) {
-      final int[] magnitude = new int[1];
-      magnitude[0] = i;
-      posConst[i] = make(magnitude); }
-    // Initialize the cache of radix^(2^x) values used for base
-    // conversion with just the very first value. Additional 
-    // values will be created on demand.
-    powerCache = new Natural[Character.MAX_RADIX + 1][];
-    logCache = new double[Character.MAX_RADIX + 1];
-    for (
-      int i = Character.MIN_RADIX; 
-      i <= Character.MAX_RADIX;
-      i++) {
-      powerCache[i] = new Natural[] { Natural.valueOf(i) };
-      logCache[i] = Math.log(i); } }
-
-  public static final Natural ZERO = new Natural(new int[0]);
-  public static final Natural ONE = valueOf(1);
-  public static final Natural TWO = valueOf(2);
-  //private static final Natural NEGATIVE_ONE = valueOf(-1);
-  public static final Natural TEN = valueOf(10);
-
-  //--------------------------------------------------------------
-
-  public static final Natural valueOf (final long val) {
-    assert 0 <= val;
-
-    if (val == 0) { return ZERO; }
-    if ((val > 0) && (val <= MAX_CONSTANT)) {
-      return posConst[(int) val]; }
-
-    // make(int[]) will strip a leading zero.
-    final int[] m = { (int) (val >>> 32), (int) val, };
-    return make(m); }
-
-  //--------------------------------------------------------------
-
+  
   private static final int[] shiftLeft (final int[] mag, 
                                         final int n) {
     final int nInts = n >>> 5;
@@ -263,13 +74,29 @@ implements Comparable<Natural> {
                        (int) (x & 0xFFFFFFFFL), };
     return shiftLeft(xs,leftShift); }
 
-  //--------------------------------------------------------------
+  private static final int[] unsafeStripLeadingZeroInts (final int m[]) {
 
-  public static final Natural valueOf (final long x,
-                                       final int leftShift) {
-    if (0L == x) { return ZERO; }
-    assert 0L < x;
-    return make(shiftLeft(x,leftShift)); }
+    final int n = m.length;
+    int keep = 0;
+    while ((keep < n) && (m[keep] == 0)) { keep++; }
+    return keep == 0 ? m : Arrays.copyOfRange(m,keep,n); }
+
+  private static final int[] stripLeadingZeroBytes (final byte a[],
+                                                    final int off,
+                                                    final int len) {
+    final int indexBound = off + len;
+    int keep = off;
+    while ((keep < indexBound) && (a[keep] == 0)) { keep++; }
+    final int intLength = ((indexBound - keep) + 3) >>> 2;
+    final int[] result = new int[intLength];
+    int b = indexBound - 1;
+    for (int i = intLength - 1; i >= 0; i--) {
+      result[i] = a[b--] & 0xff;
+      final int bytesRemaining = (b - keep) + 1;
+      final int bytesToTransfer = Math.min(3,bytesRemaining);
+      for (int j = 8; j <= (bytesToTransfer << 3); j += 8) {
+        result[i] |= ((a[b--] & 0xff) << j); } }
+    return result; }
 
   //--------------------------------------------------------------
   // add
@@ -316,10 +143,10 @@ implements Comparable<Natural> {
       return bigger; }
     return result; }
 
-  public final Natural add (final long val) {
+  public final UnNatural add (final long val) {
     assert 0L <= val;
     if (0L == val) { return this; }
-    if (equals(ZERO)) { return valueOf(val); }
+    if (isZero()) { return valueOf(val); }
     return make(add(_mag,val)); }
 
   //--------------------------------------------------------------
@@ -360,9 +187,9 @@ implements Comparable<Natural> {
       return bigger; }
     return result; }
 
-  public final Natural add (final Natural val) {
-    if (val.equals(ZERO)) { return this; }
-    if (equals(ZERO)) { return val; }
+  public final UnNatural add (final UnNatural val) {
+    if (val.isZero()) { return this; }
+    if (isZero()) { return val; }
     return make(add(_mag,val._mag)); }
 
   //--------------------------------------------------------------
@@ -462,9 +289,9 @@ implements Comparable<Natural> {
 
     return r0; }
 
-  public final Natural add (final long val,
-                            final int leftShift) {
-    if (equals(ZERO)) { return make(shiftLeft(val,leftShift)); }
+  public final UnNatural add (final long val,
+                              final int leftShift) {
+    if (isZero()) { return make(shiftLeft(val,leftShift)); }
     return make(add(_mag,val,leftShift)); }
 
   //--------------------------------------------------------------
@@ -496,7 +323,7 @@ implements Comparable<Natural> {
     while (bigIndex > 0) { result[--bigIndex] = big[bigIndex]; }
     return result; }
 
-  public final Natural subtract (final long val) {
+  public final UnNatural subtract (final long val) {
     assert 0L <= val;
     if (0L == val) { return this; }
     final int c = compareTo(val);
@@ -564,8 +391,8 @@ implements Comparable<Natural> {
     ////Debug.println("4result=\n" + Numbers.toHexString(r));
     return r; }
 
-  public final Natural subtract (final Natural val) {
-    if (val.equals(ZERO)) { return this; }
+  public final UnNatural subtract (final UnNatural val) {
+    if (val.isZero()) { return this; }
     final int c = compareMagnitude(val);
     assert 0L <= c;
     if (c == 0) { return ZERO; }
@@ -626,17 +453,17 @@ implements Comparable<Natural> {
     while (0<=i) { result[i] = big[i]; i--; }
     return unsafeStripLeadingZeroInts(result); }
 
-  public final Natural subtract (final long val,
-                                 final int leftShift) {
+  public final UnNatural subtract (final long val,
+                                   final int leftShift) {
     assert 0L <= val;
     if (0L == val) { return this; }
     return make(subtract(_mag,val,leftShift)); }
 
-  public final Natural subtractFrom (final long val,
-                                     final int leftShift) {
+  public final UnNatural subtractFrom (final long val,
+                                       final int leftShift) {
     assert 0L <= val;
-    if (0L == val) { assert equals(ZERO); return ZERO; }
-    if (equals(ZERO)) { return make(shiftLeft(val,leftShift)); }
+    if (0L == val) { assert isZero(); return ZERO; }
+    if (isZero()) { return make(shiftLeft(val,leftShift)); }
     return make(subtract(shiftLeft(val,leftShift),_mag)); }
 
   //--------------------------------------------------------------
@@ -660,7 +487,7 @@ implements Comparable<Natural> {
    * number. Used by Karatsuba multiplication and Karatsuba
    * squaring.
    */
-  private Natural getLower (final int n) {
+  private UnNatural getLower (final int n) {
     final int len = _mag.length;
     if (len <= n) { return this; }
     final int lowerInts[] = new int[n];
@@ -673,7 +500,7 @@ implements Comparable<Natural> {
    * and
    * Karatsuba squaring.
    */
-  private Natural getUpper (final int n) {
+  private UnNatural getUpper (final int n) {
     final int len = _mag.length;
     if (len <= n) { return ZERO; }
     final int upperLen = len - n;
@@ -696,8 +523,8 @@ implements Comparable<Natural> {
    *
    * See: http://en.wikipedia.org/wiki/Karatsuba_algorithm
    */
-  private static final Natural multiplyKaratsuba (final Natural x,
-                                                  final Natural y) {
+  private static final UnNatural multiplyKaratsuba (final UnNatural x,
+                                                    final UnNatural y) {
     final int xlen = x._mag.length;
     final int ylen = y._mag.length;
 
@@ -706,20 +533,20 @@ implements Comparable<Natural> {
 
     // xl and yl are the lower halves of x and y respectively,
     // xh and yh are the upper halves.
-    final Natural xl = x.getLower(half);
-    final Natural xh = x.getUpper(half);
-    final Natural yl = y.getLower(half);
-    final Natural yh = y.getUpper(half);
+    final UnNatural xl = x.getLower(half);
+    final UnNatural xh = x.getUpper(half);
+    final UnNatural yl = y.getLower(half);
+    final UnNatural yh = y.getUpper(half);
 
-    final Natural p1 = xh.multiply(yh);  // p1 = xh*yh
-    final Natural p2 = xl.multiply(yl);  // p2 = xl*yl
+    final UnNatural p1 = xh.multiply(yh);  // p1 = xh*yh
+    final UnNatural p2 = xl.multiply(yl);  // p2 = xl*yl
 
     // p3=(xh+xl)*(yh+yl)
-    final Natural p3 = xh.add(xl).multiply(yh.add(yl));
+    final UnNatural p3 = xh.add(xl).multiply(yh.add(yl));
 
     // result = p1 * 2^(32*2*half) + (p3 - p1 - p2) * 2^(32*half)
     // + p2
-    final Natural result =
+    final UnNatural result =
       p1.shiftLeft(32 * half).add(p3.subtract(p1).subtract(p2))
       .shiftLeft(32 * half).add(p2);
 
@@ -755,10 +582,10 @@ implements Comparable<Natural> {
    *          different-sized
    *          numbers.
    */
-  private final Natural getToomSlice (final int lowerSize,
-                                      final int upperSize,
-                                      final int slice,
-                                      final int fullsize) {
+  private final UnNatural getToomSlice (final int lowerSize,
+                                        final int upperSize,
+                                        final int slice,
+                                        final int fullsize) {
     final int len = _mag.length;
     final int offset = fullsize - len;
     int start;
@@ -787,7 +614,7 @@ implements Comparable<Natural> {
    * by 3, results are undefined. Note that this is expected to be 
    * called with positive arguments only.
    */
-  private final Natural exactDivideBy3 () {
+  private final UnNatural exactDivideBy3 () {
     final int len = _mag.length;
     int[] result = new int[len];
     long x, w, q, borrow;
@@ -809,7 +636,7 @@ implements Comparable<Natural> {
         borrow++;
         if (q >= 0xAAAAAAABL) { borrow++; } } }
     result = unsafeStripLeadingZeroInts(result);
-    return new Natural(result); }
+    return new UnNatural(result); }
 
   /** Multiplies two Naturals using a 3-way Toom-Cook
    * multiplication algorithm. This is a recursive 
@@ -842,8 +669,8 @@ implements Comparable<Natural> {
    * LNCS #4547. Springer, Madrid, Spain, June 21-22, 2007.
    */
 
-  private static final Natural multiplyToomCook3 (final Natural a,
-                                                  final Natural b) {
+  private static final UnNatural multiplyToomCook3 (final UnNatural a,
+                                                    final UnNatural b) {
     final int alen = a._mag.length;
     final int blen = b._mag.length;
 
@@ -859,7 +686,7 @@ implements Comparable<Natural> {
     // significant
     // bits of the numbers a and b, and a0 and b0 the least
     // significant.
-    Natural a0, a1, a2, b0, b1, b2;
+    UnNatural a0, a1, a2, b0, b1, b2;
     a2 = a.getToomSlice(k,r,0,largest);
     a1 = a.getToomSlice(k,r,1,largest);
     a0 = a.getToomSlice(k,r,2,largest);
@@ -867,7 +694,7 @@ implements Comparable<Natural> {
     b1 = b.getToomSlice(k,r,1,largest);
     b0 = b.getToomSlice(k,r,2,largest);
 
-    Natural v0, v1, v2, vm1, vinf, t1, t2, tm1, da1, db1;
+    UnNatural v0, v1, v2, vm1, vinf, t1, t2, tm1, da1, db1;
 
     v0 = a0.multiply(b0,true);
     da1 = a2.add(a0);
@@ -901,15 +728,15 @@ implements Comparable<Natural> {
     // Number of bits to shift left.
     final int ss = k * 32;
 
-    final Natural result =
+    final UnNatural result =
       vinf.shiftLeft(ss).add(t2).shiftLeft(ss).add(t1)
       .shiftLeft(ss).add(tm1).shiftLeft(ss).add(v0);
     return result; }
 
   //--------------------------------------------------------------
 
-  private static final Natural multiply (final int[] x,
-                                         final int y) {
+  private static final UnNatural multiply (final int[] x,
+                                           final int y) {
     if (Integer.bitCount(y) == 1) {
       return make(shiftLeft(x,Integer.numberOfTrailingZeros(y))); }
     final int xlen = x.length;
@@ -927,9 +754,9 @@ implements Comparable<Natural> {
       rmag[rstart] = (int) carry; }
     return make(rmag); }
 
-  private final Natural multiply (final Natural val,
-                                  final boolean isRecursion) {
-    if ((val.equals(ZERO)) || (equals(ZERO))) { return ZERO; }
+  private final UnNatural multiply (final UnNatural val,
+                                    final boolean isRecursion) {
+    if ((val.isZero()) || (isZero())) { return ZERO; }
     final int xlen = _mag.length;
     if ((val == this) && (xlen > MULTIPLY_SQUARE_THRESHOLD)) {
       return square(); }
@@ -1102,7 +929,7 @@ implements Comparable<Natural> {
    *          value to be multiplied by this Natural.
    * @return {@code this * val}
    */
-  public Natural multiply (final Natural val) {
+  public UnNatural multiply (final UnNatural val) {
     return multiply(val,false);
   }
 
@@ -1134,8 +961,8 @@ implements Comparable<Natural> {
    *          whether this is a recursive invocation
    * @return {@code this<sup>2</sup>}
    */
-  private final Natural square (final boolean isRecursion) {
-    if (equals(ZERO)) { return ZERO; }
+  private final UnNatural square (final boolean isRecursion) {
+    if (isZero()) { return ZERO; }
     final int len = _mag.length;
 
     if (len < KARATSUBA_SQUARE_THRESHOLD) {
@@ -1149,7 +976,7 @@ implements Comparable<Natural> {
         reportOverflow(); } }
     return squareToomCook3(); }
 
-  private final Natural square () { return square(false); }
+  private final UnNatural square () { return square(false); }
 
   /**
    * Squares the contents of the int array x. The result is placed
@@ -1272,14 +1099,14 @@ implements Comparable<Natural> {
    * has better asymptotic performance than the algorithm used in
    * squareToLen.
    */
-  private Natural squareKaratsuba () {
+  private UnNatural squareKaratsuba () {
     final int half = (_mag.length + 1) / 2;
 
-    final Natural xl = getLower(half);
-    final Natural xh = getUpper(half);
+    final UnNatural xl = getLower(half);
+    final UnNatural xh = getUpper(half);
 
-    final Natural xhs = xh.square();  // xhs = xh^2
-    final Natural xls = xl.square();  // xls = xl^2
+    final UnNatural xhs = xh.square();  // xhs = xh^2
+    final UnNatural xls = xl.square();  // xls = xl^2
 
     // xh^2 << 64 + (((xl+xh)^2 - (xh^2 + xl^2)) << 32) + xl^2
     return xhs.shiftLeft(half * 32)
@@ -1298,7 +1125,7 @@ implements Comparable<Natural> {
    * used in
    * squareToLen or squareKaratsuba.
    */
-  private Natural squareToomCook3 () {
+  private UnNatural squareToomCook3 () {
     final int len = _mag.length;
 
     // k is the size (in ints) of the lower-order slices.
@@ -1309,11 +1136,11 @@ implements Comparable<Natural> {
 
     // Obtain slices of the numbers. a2 is the most significant
     // bits of the number, and a0 the least significant.
-    Natural a0, a1, a2;
+    UnNatural a0, a1, a2;
     a2 = getToomSlice(k,r,0,len);
     a1 = getToomSlice(k,r,1,len);
     a0 = getToomSlice(k,r,2,len);
-    Natural v0, v1, v2, vm1, vinf, t1, t2, tm1, da1;
+    UnNatural v0, v1, v2, vm1, vinf, t1, t2, tm1, da1;
 
     v0 = a0.square(true);
     da1 = a2.add(a0);
@@ -1902,8 +1729,8 @@ implements Comparable<Natural> {
    * @return {@code this << n}
    * @see #shiftRight
    */
-  public final Natural shiftLeft (final int n) {
-    if (equals(ZERO)) { return ZERO; }
+  public final UnNatural shiftLeft (final int n) {
+    if (isZero()) { return ZERO; }
     if (n > 0) { return make(shiftLeft(_mag,n)); }
     else if (n == 0) { return this; }
     // Possible int overflow in (-n) is not a trouble,
@@ -1921,8 +1748,8 @@ implements Comparable<Natural> {
    * @return {@code this >> n}
    * @see #shiftLeft
    */
-  public final Natural shiftRight (final int n) {
-    if (equals(ZERO)) { return ZERO; }
+  public final UnNatural shiftRight (final int n) {
+    if (isZero()) { return ZERO; }
     if (n > 0) { return shiftRightImpl(n); }
     else if (n == 0) { return this; }
     // Possible int overflow in {@code -n} is not a trouble,
@@ -1939,7 +1766,7 @@ implements Comparable<Natural> {
    *          unsigned shift distance, in bits.
    * @return {@code this >> n}
    */
-  private final Natural shiftRightImpl (final int n) {
+  private final UnNatural shiftRightImpl (final int n) {
     final int nInts = n >>> 5;
     final int nBits = n & 0x1f;
     final int magLen = _mag.length;
@@ -1969,7 +1796,7 @@ implements Comparable<Natural> {
         newMag[i++] = (_mag[j++] << nBits2) | (_mag[j] >>> nBits);
       }
     }
-    return new Natural(newMag); }
+    return new UnNatural(newMag); }
 
   //  private static final int[] javaIncrement (int[] val) {
   //    int lastSum = 0;
@@ -2136,7 +1963,7 @@ implements Comparable<Natural> {
    * @throws ArithmeticException
    *           {@code n} is negative.
    */
-  public final Natural setBit (final int n) {
+  public final UnNatural setBit (final int n) {
     if (n < 0) {
       throw new ArithmeticException("Negative bit address"); }
 
@@ -2160,7 +1987,7 @@ implements Comparable<Natural> {
    * @throws ArithmeticException
    *           {@code n} is negative.
    */
-  public Natural clearBit (final int n) {
+  public UnNatural clearBit (final int n) {
     if (n < 0) {
       throw new ArithmeticException("Negative bit address"); }
 
@@ -2186,7 +2013,7 @@ implements Comparable<Natural> {
    * @throws ArithmeticException
    *           {@code n} is negative.
    */
-  public Natural flipBit (final int n) {
+  public UnNatural flipBit (final int n) {
     if (n < 0) {
       throw new ArithmeticException("Negative bit address"); }
     final int intNum = n >>> 5;
@@ -2211,7 +2038,7 @@ implements Comparable<Natural> {
     int lsb = lowestSetBitPlusTwo - 2;
     if (lsb == -2) {  // lowestSetBit not initialized yet
       lsb = 0;
-      if (equals(ZERO)) {
+      if (isZero()) {
         lsb -= 1;
       }
       else {
@@ -2227,7 +2054,9 @@ implements Comparable<Natural> {
     return lsb;
   }
 
+  //--------------------------------------------------------------
   // Miscellaneous Bit Operations
+  //--------------------------------------------------------------
 
   /**
    * Returns the number of bits in the minimal two's-complement
@@ -2249,17 +2078,14 @@ implements Comparable<Natural> {
     if (n == -1) { // bitLength not initialized yet
       final int[] m = _mag;
       final int len = m.length;
-      if (len == 0) {
-        n = 0; // offset by one to initialize
-      }
+      if (len == 0) { // offset by one to initialize
+        n = 0; }
       else {
         // Calculate the bit length of the magnitude
         final int magBitLength =
           ((len - 1) << 5) + bitLengthForInt(_mag[0]);
-        n = magBitLength;
-      }
-      bitLengthPlusOne = n + 1;
-    }
+        n = magBitLength; }
+      bitLengthPlusOne = n + 1; }
     return n; }
 
   /**
@@ -2279,12 +2105,9 @@ implements Comparable<Natural> {
       bc = 0;      // offset by one to initialize
       // Count the bits in the magnitude
       for (final int element : _mag) {
-        bc += Integer.bitCount(element);
-      }
-      bitCountPlusOne = bc + 1;
-    }
-    return bc;
-  }
+        bc += Integer.bitCount(element); }
+      bitCountPlusOne = bc + 1; }
+    return bc; }
 
   //--------------------------------------------------------------
   // Comparison Operations
@@ -2309,16 +2132,16 @@ implements Comparable<Natural> {
    *         to, or greater than {@code val}.
    */
   @Override
-  public final int compareTo (final Natural val) {
+  public final int compareTo (final UnNatural val) {
     return compareMagnitude(val); }
 
   public final int compareTo (final long val) {
     //assert val >= 0L;
     //assert signum >= 0;
     if (val == 0L) {
-      if (equals(ZERO)) { return 0; }
+      if (isZero()) { return 0; }
       return -1; }
-    if (equals(ZERO)) { return -1; }
+    if (isZero()) { return -1; }
     return compareMagnitude(val); }
 
   //--------------------------------------------------------------
@@ -2335,7 +2158,7 @@ implements Comparable<Natural> {
       if (a != b) { return (unsigned(a) < unsigned(b)) ? -1 : 1; } }
     return 0; }
 
-  public final int compareMagnitude (final Natural val) {
+  public final int compareMagnitude (final UnNatural val) {
     return compareMagnitude(_mag,val._mag); }
 
   public final int compareMagnitude (final long val) {
@@ -2378,7 +2201,7 @@ implements Comparable<Natural> {
    *         {@code val}. If they are equal, either may be
    *         returned.
    */
-  public final Natural min (final Natural val) {
+  public final UnNatural min (final UnNatural val) {
     return (compareTo(val) < 0 ? this : val); }
 
   /**
@@ -2390,7 +2213,7 @@ implements Comparable<Natural> {
    *         {@code val}. If they are equal, either may be
    *         returned.
    */
-  public final Natural max (final Natural val) {
+  public final UnNatural max (final UnNatural val) {
     return (compareTo(val) > 0 ? this : val); }
 
   //--------------------------------------------------------------
@@ -2407,8 +2230,8 @@ implements Comparable<Natural> {
   @Override
   public boolean equals (final Object x) {
     if (x == this) { return true; }
-    if (!(x instanceof Natural)) { return false; }
-    final Natural xInt = (Natural) x;
+    if (!(x instanceof UnNatural)) { return false; }
+    final UnNatural xInt = (UnNatural) x;
     final int[] m = _mag;
     final int len = m.length;
     final int[] xm = xInt._mag;
@@ -2426,8 +2249,7 @@ implements Comparable<Natural> {
     return b.toString(); }
 
   //--------------------------------------------------------------
-  /**
-   * Returns a byte array containing the two's-complement
+  /** Returns a byte array containing the two's-complement
    * representation of this Natural. The byte array will be in
    * <i>big-endian</i> byte-order: the most significant byte is in
    * the zeroth element. The array will contain the minimum number
@@ -2475,7 +2297,7 @@ implements Comparable<Natural> {
 
   @Override
   public final float floatValue () {
-    if (equals(ZERO)) { return 0.0f; }
+    if (isZero()) { return 0.0f; }
 
     final int exponent =
       (((_mag.length - 1) << 5) + bitLengthForInt(_mag[0])) - 1;
@@ -2521,20 +2343,17 @@ implements Comparable<Natural> {
     int signifFloor = twiceSignifFloor >> 1;
         signifFloor &= Floats.STORED_SIGNIFICAND_MASK; // remove the
         // implied bit
-
-        /*
-         * We round up if either the fractional part of signif is
-         * strictly
-         * greater than 0.5 (which is true if the 0.5 bit is set and
-         * any lower
-         * bit is set), or if the fractional part of signif is >= 0.5
-         * and
-         * signifFloor is odd (which is true if both the 0.5 bit and
-         * the 1 bit
-         * are set). This is equivalent to the desired HALF_EVEN
-         * rounding.
-         */
-        final boolean increment =
+         // We round up if either the fractional part of signif is
+         // strictly
+         // greater than 0.5 (which is true if the 0.5 bit is set and
+         // any lower
+         // bit is set), or if the fractional part of signif is >= 0.5
+         // and
+         // signifFloor is odd (which is true if both the 0.5 bit and
+         // the 1 bit
+         // are set). This is equivalent to the desired HALF_EVEN
+         // rounding.
+                final boolean increment =
           ((twiceSignifFloor
             & 1) != 0) && (((signifFloor & 1) != 0)
               || (getLowestSetBit() < shift));
@@ -2576,7 +2395,7 @@ implements Comparable<Natural> {
    */
   @Override
   public final double doubleValue () {
-    if (equals(ZERO)) { return 0.0; }
+    if (isZero()) { return 0.0; }
 
     final int exponent =
       (((_mag.length - 1) << 5) + bitLengthForInt(_mag[0])) - 1;
@@ -2670,9 +2489,8 @@ implements Comparable<Natural> {
       return Double.longBitsToDouble(bits);
   }
 
-
-  /*
-   * These two arrays are the integer analog of above.
+  //--------------------------------------------------------------
+  /* These two arrays are the integer analog of above.
    */
   private static int digitsPerInt[] =
   { 0, 0, 30, 19, 15, 13, 11, 11, 10, 9, 9, 8, 8, 8, 8, 7, 7, 7,
@@ -2707,11 +2525,192 @@ implements Comparable<Natural> {
   private final int getInt (final int n) {
     if (n < 0) { return 0; }
     if (n >= _mag.length) { return 0; }
-
     final int magInt = _mag[_mag.length - n - 1];
-
     return magInt; }
 
+  //-------------------------------------------------------------
+  // construction
+  //-------------------------------------------------------------
 
+  private static final void reportOverflow () {
+    throw new ArithmeticException(
+      "Natural would overflow supported range"); }
 
+  private static final void checkMagnitude (final int[] m) {
+    assert m.length < MAX_MAG_LENGTH; }
+
+  //-------------------------------------------------------------
+
+  private UnNatural (final int[] mag) { _mag = mag; }
+
+  private static final UnNatural make (final int[] m) {
+    final int[] m1 = unsafeStripLeadingZeroInts(m); 
+    checkMagnitude(m1);
+    return new UnNatural(m1); }
+
+  // TODO: a little faster to use a safe stripLeadingZeros
+  public static final UnNatural valueOf (final int[] m) {
+    return make(Arrays.copyOf(m,m.length)); }
+
+  public static final UnNatural valueOf (final byte[] b, 
+                                         final int off,
+                                         final int len) {
+    return make(stripLeadingZeroBytes(b,off,len)); }
+
+  public static final UnNatural valueOf (final byte[] b) { 
+    return valueOf(b,0,b.length); }
+
+  public static final UnNatural valueOf (final BigInteger bi) { 
+    return valueOf(bi.toByteArray()); }
+
+  //-------------------------------------------------------------
+  // string parsing
+  //-------------------------------------------------------------
+  // bitsPerDigit in the given radix times 1024
+  // Rounded up to avoid under-allocation.
+
+  private static long bitsPerDigit[] =
+  { 0, 0, 1024, 1624, 2048, 2378, 2648, 2875, 3072, 3247, 3402,
+    3543, 3672, 3790, 3899, 4001, 4096, 4186, 4271, 4350, 4426,
+    4498, 4567, 4633, 4696, 4756, 4814, 4870, 4923, 4975, 5025,
+    5074, 5120, 5166, 5210, 5253, 5295 };
+
+  // Multiply x array times word y in place, and add word z
+
+  private static final void destructiveMulAdd (final int[] x,
+                                               final int y,
+                                               final int z) {
+    final long ylong = unsigned(y);
+    final long zlong = unsigned(z);
+    final int lm1 = x.length-1;
+    long product = 0;
+    long carry = 0;
+    for (int i = lm1; i >= 0; i--) {
+      product = (ylong * unsigned(x[i])) + carry;
+      x[i] = (int) product;
+      carry = product >>> 32; }
+    long sum = unsigned(x[lm1]) + zlong;
+    x[lm1] = (int) sum;
+    carry = sum >>> 32;
+    for (int i = lm1-1; i >= 0; i--) {
+      sum = unsigned(x[i]) + carry;
+      x[i] = (int) sum;
+      carry = sum >>> 32; } }
+
+  //-------------------------------------------------------------
+
+  public static final UnNatural valueOf (final String s, 
+                                         final int radix) {
+    final int len = s.length();
+    assert 0 < len;
+    assert Character.MIN_RADIX <= radix;
+    assert radix <= Character.MAX_RADIX;
+    assert 0 > s.indexOf('-');
+    assert 0 > s.indexOf('+');
+
+    int cursor = 0;
+    // skip leading '0' --- not strictly necessary?
+    while ((cursor < len)
+      && (Character.digit(s.charAt(cursor),radix) == 0)) {
+      cursor++; }
+    if (cursor == len) { return ZERO; }
+
+    final int numDigits = len - cursor;
+
+    // might be bigger than needed, but make(int[]) handles that
+    final long numBits =
+      ((numDigits * bitsPerDigit[radix]) >>> 10) + 1;
+    if ((numBits + 31) >= (1L << 32)) {
+      reportOverflow(); }
+    final int numWords = (int) (numBits + 31) >>> 5;
+    final int[] magnitude = new int[numWords];
+
+    // Process first (potentially short) digit group
+    int firstGroupLen = numDigits % digitsPerInt[radix];
+    if (firstGroupLen == 0) { firstGroupLen = digitsPerInt[radix]; }
+    String group = s.substring(cursor,cursor += firstGroupLen);
+    magnitude[numWords - 1] = Integer.parseInt(group,radix);
+    if (magnitude[numWords - 1] < 0) {
+      throw new NumberFormatException("Illegal digit"); }
+
+    // Process remaining digit groups
+    final int superRadix = intRadix[radix];
+    int groupVal = 0;
+    while (cursor < len) {
+      group = s.substring(cursor,cursor += digitsPerInt[radix]);
+      groupVal = Integer.parseInt(group,radix);
+      if (groupVal < 0) {
+        throw new NumberFormatException("Illegal digit"); }
+      destructiveMulAdd(magnitude,superRadix,groupVal); }
+    return make(magnitude); }
+
+  public static final UnNatural valueOf (final String s) {
+    return valueOf(s,10); }
+
+  //--------------------------------------------------------------
+  // cached values
+  //--------------------------------------------------------------
+
+  private static final int MAX_CONSTANT = 16;
+  private static final UnNatural posConst[] = 
+    new UnNatural[MAX_CONSTANT+1];
+
+  /** The cache of powers of each radix. This allows us to not 
+   * have to recalculate powers of radix^(2^n) more than once. 
+   * This speeds Schoenhage recursive base conversion 
+   * significantly.
+   */
+  private static volatile UnNatural[][] powerCache;
+
+  /** The cache of logarithms of radices for base conversion. */
+  private static final double[] logCache;
+
+  //private static final double LOG_TWO = Math.log(2.0);
+
+  static {
+    for (int i = 1; i <= MAX_CONSTANT; i++) {
+      final int[] magnitude = new int[1];
+      magnitude[0] = i;
+      posConst[i] = make(magnitude); }
+    // Initialize the cache of radix^(2^x) values used for base
+    // conversion with just the very first value. Additional 
+    // values will be created on demand.
+    powerCache = new UnNatural[Character.MAX_RADIX + 1][];
+    logCache = new double[Character.MAX_RADIX + 1];
+    for (
+      int i = Character.MIN_RADIX; 
+      i <= Character.MAX_RADIX;
+      i++) {
+      powerCache[i] = new UnNatural[] { UnNatural.valueOf(i) };
+      logCache[i] = Math.log(i); } }
+
+  public static final UnNatural ZERO = new UnNatural(new int[0]);
+  public static final UnNatural ONE = valueOf(1);
+  public static final UnNatural TWO = valueOf(2);
+  public static final UnNatural TEN = valueOf(10);
+
+  //--------------------------------------------------------------
+
+  public static final UnNatural valueOf (final long val) {
+    assert 0 <= val;
+
+    if (val == 0) { return ZERO; }
+    if ((val > 0) && (val <= MAX_CONSTANT)) {
+      return posConst[(int) val]; }
+
+    // make(int[]) will strip a leading zero.
+    final int[] m = { (int) (val >>> 32), (int) val, };
+    return make(m); }
+
+  //--------------------------------------------------------------
+
+  public static final UnNatural valueOf (final long x,
+                                         final int leftShift) {
+    if (0L == x) { return ZERO; }
+    assert 0L < x;
+    return make(shiftLeft(x,leftShift)); }
+
+  //--------------------------------------------------------------
 }
+//--------------------------------------------------------------
+

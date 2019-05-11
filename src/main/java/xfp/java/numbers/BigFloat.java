@@ -1,16 +1,15 @@
 package xfp.java.numbers;
 
 import java.math.BigDecimal;
-//import xfp.java.numbers.BigInteger;
 import java.util.Objects;
 
 import xfp.java.exceptions.Exceptions;
 
-/** A sign times a {@link BigInteger} significand times 2 to a 
+/** A sign times a {@link UnNatural} significand times 2 to a 
  * <code>int</code> exponent.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-29
+ * @version 2019-05-11
  */
 
 public final class BigFloat 
@@ -30,16 +29,16 @@ implements Comparable<BigFloat> {
   public final int exponent () { return _exponent; }
 
   // must always be non-negative
-  private final BigInteger _significand;
-  public final BigInteger significand () { return _significand; }
+  private final UnNatural _significand;
+  public final UnNatural significand () { return _significand; }
 
   //--------------------------------------------------------------
 
-  //  private static final boolean isNegative (final BigInteger i) {
+  //  private static final boolean isNegative (final UnNatural i) {
   //    return 0 > i.signum(); }
 
-  private static final boolean isZero (final BigInteger i) {
-    return 0 == i.signum(); }
+  private static final boolean isZero (final UnNatural i) {
+    return i.equals(UnNatural.ZERO); }
 
   public final boolean isZero () { return isZero(significand()); }
 
@@ -53,19 +52,67 @@ implements Comparable<BigFloat> {
     return valueOf(! nonNegative(),significand(),exponent()); }
 
   //--------------------------------------------------------------
+  /** big float significands adjusted to the same exponent
+   */
+
+  private static final BigFloat add (final boolean n1,
+                                      final long t1,
+                                      final int leftShift,
+                                      final boolean n0,
+                                      final UnNatural t0,
+                                      final int e) {
+    //assert t0.signum() >= 0;
+    if (n0 ^ n1) { // different signs
+      final int c01 = t0.compareMagnitude(t1,leftShift);
+      if (0 == c01) { return ZERO; }
+      // t1 > t0
+      if (0 > c01) { 
+        return valueOf(n1, t0.subtractFrom(t1,leftShift), e); }
+      // t0 > t1
+      return valueOf(n0,t0.subtract(t1,leftShift),e); }
+    return valueOf(n0,t0.add(t1,leftShift),e); }
+
+   //--------------------------------------------------------------
 
   private final BigFloat add (final boolean n1,
-                              final BigInteger t1,
-                              final int e1) {
+                               final long t1,
+                               final int e1) {
 
-    if (0 == t1.signum()) { return this; }
+    if (0 == t1) { return this; }
+    //assert 0 < t1;
+
+    final boolean n0 = nonNegative();
+    final UnNatural t0 = significand();
+    final int e0 = exponent();
+
+    // adjust significands to the same exponent
+    final int de = e1 - e0;
+    if (de >= 0) { return add(n1,t1,de,n0,t0,e0); }
+    return add(n1,t1,0,n0,t0.shiftLeft(-de),e1); } 
+
+  //--------------------------------------------------------------
+
+  public final BigFloat add (final double z) {
+    //assert Double.isFinite(z);
+    return add(
+      Doubles.nonNegative(z),
+      Doubles.significand(z),
+      Doubles.exponent(z)); }
+
+  //--------------------------------------------------------------
+
+  private final BigFloat add (final boolean n1,
+                               final UnNatural t1,
+                               final int e1) {
+
+    if (isZero(t1)) { return this; }
     //assert 0 < t1.signum();
 
     final boolean n0 = nonNegative();
-    final BigInteger t0 = significand();
+    final UnNatural t0 = significand();
     final int e0 = exponent();
 
-    final BigInteger t02,t12;
+    final UnNatural t02,t12;
     final int e2;
     final int de = e1 - e0;
     if (de > 0) { 
@@ -94,15 +141,6 @@ implements Comparable<BigFloat> {
 
   //--------------------------------------------------------------
 
-  public final BigFloat add (final double z) {
-    assert Double.isFinite(z);
-    return add(
-      Doubles.nonNegative(z),
-      BigInteger.valueOf(Doubles.significand(z)),
-      Doubles.exponent(z)); }
-
-  //--------------------------------------------------------------
-
   public final BigFloat subtract (final BigFloat q) {
     if (isZero()) { return q.negate(); }
     if (q.isZero()) { return this; }
@@ -120,8 +158,8 @@ implements Comparable<BigFloat> {
   //--------------------------------------------------------------
 
   private final BigFloat multiply (final boolean nonNegative,
-                                   final BigInteger t,
-                                   final int e) {
+                                    final UnNatural t,
+                                    final int e) {
     return valueOf(
       (! (nonNegative() ^ nonNegative)),
       significand().multiply(t), 
@@ -139,14 +177,14 @@ implements Comparable<BigFloat> {
     return 
       multiply(
         Doubles.nonNegative(z),
-        BigInteger.valueOf(Doubles.significand(z)),
+        UnNatural.valueOf(Doubles.significand(z)),
         Doubles.exponent(z)); }
 
   //--------------------------------------------------------------
   // TODO: optimize!
 
   public final BigFloat add2 (final double z) { 
-    assert Double.isFinite(z);
+    //assert Double.isFinite(z);
     final BigFloat q = valueOf(z);
     return add(q.multiply(q)); }
 
@@ -154,9 +192,9 @@ implements Comparable<BigFloat> {
   // TODO: optimize!
 
   public final BigFloat addProduct (final double z0,
-                                    final double z1) { 
-    assert Double.isFinite(z0);
-    assert Double.isFinite(z1);
+                                     final double z1) { 
+    //assert Double.isFinite(z0);
+    //assert Double.isFinite(z1);
     return add(valueOf(z0).multiply(z1)); }
 
   //--------------------------------------------------------------
@@ -169,8 +207,7 @@ implements Comparable<BigFloat> {
    */
   @Override
   public final int intValue () {
-    final int i = bigIntegerValue().intValue(); 
-    return (nonNegative() ? i : -i); }
+    throw Exceptions.unsupportedOperation(this,"longValue"); }
 
   /** Returns the low order bits of the truncated quotient.
    * 
@@ -179,31 +216,11 @@ implements Comparable<BigFloat> {
    */
   @Override
   public final long longValue () {
-    final long i = bigIntegerValue().longValue(); 
-    return (nonNegative() ? i : -i); }
-
-  /** Returns the truncated quotient.
-   * 
-   * TODO: should it round instead? Or
-   * should there be more explicit round, floor, ceil, etc.?
-   */
-  public final BigInteger bigIntegerValue () { 
-    final BigInteger t0 = significand().shiftLeft(exponent()); 
-    return (nonNegative() ? t0 : t0.negate()); }
-
-//  public final Rational rationalValue () { 
-//    if (0 <= exponent()) {
-//      final BigInteger n0 = significand().shiftLeft(exponent());
-//      final BigInteger n1 = (nonNegative() ? n0 : n0.negate());
-//      return Rational.valueOf(n1,BigInteger.ONE); }
-//    final BigInteger n0 = significand();
-//    final BigInteger n1 = (nonNegative() ? n0 : n0.negate());
-//    return Rational.valueOf(
-//      n1,BigInteger.ONE.shiftLeft(-exponent())); }
+    throw Exceptions.unsupportedOperation(this,"longValue"); }
 
   //--------------------------------------------------------------
-  
-  private static final boolean roundUp (final BigInteger s,
+
+  private static final boolean roundUp (final UnNatural s,
                                         final int e) {
     //Debug.println("roundUp");
     //Debug.println("s=" + s.toString(0x10));
@@ -245,9 +262,9 @@ implements Comparable<BigFloat> {
   @Override
   public final float floatValue () { 
     final boolean nn = nonNegative();
-    final BigInteger s0 = significand();
+    final UnNatural s0 = significand();
     final int e0 = exponent();
-    if (0 == s0.signum()) { return (nn ? 0.0F : -0.0F); }
+    if (isZero(s0)) { return (nn ? 0.0F : -0.0F); }
     //assert (0 < s0.signum());
 
     final int eh = Numbers.hiBit(s0);
@@ -312,13 +329,13 @@ implements Comparable<BigFloat> {
   @Override
   public final double doubleValue () { 
     final boolean nn = nonNegative();
-    final BigInteger s0 = significand();
+    final UnNatural s0 = significand();
     final int e0 = exponent();
     //Debug.println();
     //Debug.println("nn= " + nn);
     //Debug.println("s0= " + s0.toString(0x10));
     //Debug.println("e0= " + e0);
-    if (0 == s0.signum()) { return (nn ? 0.0 : -0.0); }
+    if (isZero(s0)) { return (nn ? 0.0 : -0.0); }
     //assert (0 < s0.signum());
 
     final int eh = Numbers.hiBit(s0);
@@ -372,8 +389,8 @@ implements Comparable<BigFloat> {
     if (nonNegative() && (! q.nonNegative())) { return 1; }
     if ((! nonNegative()) && q.nonNegative()) { return -1; }
     // same signs
-    final BigInteger t0 = significand();
-    final BigInteger t1 = q.significand();
+    final UnNatural t0 = significand();
+    final UnNatural t1 = q.significand();
     final int e0 = exponent();
     final int e1 = q.exponent();
     final int c;
@@ -412,12 +429,12 @@ implements Comparable<BigFloat> {
   @Override
   public final String toString () {
     assert (0 == Numbers.loBit(significand()))
-    || (0 == significand().signum()):
-      significand().toString(0x10) 
+    || isZero(significand()) :
+      significand().toString() 
       + "\nlo= " + Numbers.loBit(significand());
     return 
       (nonNegative() ? "" : "-")
-      + "0x" + significand().toString(0x10) 
+      + "0x" + significand().toString() 
       + "p" + exponent(); }
 
   //--------------------------------------------------------------
@@ -425,15 +442,14 @@ implements Comparable<BigFloat> {
   //--------------------------------------------------------------
 
   private BigFloat (final boolean nonNegative,
-                    final BigInteger t0,
-                    final int e0) {
+                     final UnNatural t0,
+                     final int e0) {
     //super();
-    if (0 == t0.signum()) {
+    if (isZero(t0)) {
       _nonNegative = true;
-      _significand = BigInteger.ZERO;
+      _significand = UnNatural.ZERO;
       _exponent = 0; }
     else {
-      assert 0 < t0.signum();
       final int e1 = Math.max(0,Numbers.loBit(t0));
       _nonNegative = nonNegative;
       if (e1 == 0) {
@@ -442,45 +458,39 @@ implements Comparable<BigFloat> {
       else {
         _significand = t0.shiftRight(e1);
         _exponent = Math.addExact(e0,e1);  } 
-      assert 0 == Numbers.loBit(_significand)
-        : "lowBit= " + Numbers.loBit(_significand)
-        +"; rightShift= " + e1; } }
+      //      assert 0 == Numbers.loBit(_significand)
+      //        : "lowBit= " + Numbers.loBit(_significand)
+      //        +"; rightShift= " + e1; 
+    } }
 
   //--------------------------------------------------------------
 
   public static final BigFloat valueOf (final boolean nonNegative,
-                                        final BigInteger t,
-                                        final int e) {
-    if (0 == t.signum()) { return ZERO; }
-    assert 0 < t.signum();
+                                         final UnNatural t,
+                                         final int e) {
+    if (isZero(t)) { return ZERO; }
+    //assert 0 < t.signum();
     return new BigFloat(nonNegative,t,e); } 
 
-  public static final BigFloat valueOf (final BigInteger n,
-                                        final int e) {
-    final int s = n.signum();
-    if (0 == s) { return ZERO; }
-    if (0 < s) { return new BigFloat(true,n,e); } 
-    return new BigFloat(false,n.negate(),e); } 
-
   public static final BigFloat valueOf (final long t,
-                                        final int e) {
+                                         final int e) {
     if (0L < t) {
-      return valueOf(true,BigInteger.valueOf(t),e); }
-    return valueOf(false,BigInteger.valueOf(-t),e); }
+      return valueOf(true,UnNatural.valueOf(t),e); }
+    return valueOf(false,UnNatural.valueOf(-t),e); }
 
   public static final BigFloat valueOf (final int t,
-                                        final int e) {
+                                         final int e) {
     if (0 < t) {
-      return valueOf(true,BigInteger.valueOf(t),e); }
-    return valueOf(false,BigInteger.valueOf(-t),e); }
+      return valueOf(true,UnNatural.valueOf(t),e); }
+    return valueOf(false,UnNatural.valueOf(-t),e); }
 
   //--------------------------------------------------------------
 
   private static final BigFloat valueOf (final boolean nonNegative,
-                                         final int e0,
-                                         final long t0)  {
+                                          final int e0,
+                                          final long t0)  {
     if (0L == t0) { return ZERO; }
-    return valueOf(nonNegative,BigInteger.valueOf(t0),e0); } 
+    return valueOf(nonNegative,UnNatural.valueOf(t0),e0); } 
 
   public static final BigFloat valueOf (final double x)  {
     return valueOf(
@@ -491,10 +501,10 @@ implements Comparable<BigFloat> {
   //--------------------------------------------------------------
 
   private static final BigFloat valueOf (final boolean nonNegative,
-                                         final int e0,
-                                         final int t0)  {
+                                          final int e0,
+                                          final int t0)  {
     if (0 == t0) { return ZERO; }
-    return valueOf(nonNegative,BigInteger.valueOf(t0),e0); } 
+    return valueOf(nonNegative,UnNatural.valueOf(t0),e0); } 
 
   public static final BigFloat valueOf (final float x)  {
     return valueOf(
@@ -506,23 +516,23 @@ implements Comparable<BigFloat> {
 
   public static final BigFloat valueOf (final byte t)  {
     if (0 < t) {
-      return valueOf(true,BigInteger.valueOf(t),0); }
-    return valueOf(false,BigInteger.valueOf(-t),0); }
+      return valueOf(true,UnNatural.valueOf(t),0); }
+    return valueOf(false,UnNatural.valueOf(-t),0); }
 
   public static final BigFloat valueOf (final short t)  {
     if (0 < t) {
-      return valueOf(true,BigInteger.valueOf(t),0); }
-    return valueOf(false,BigInteger.valueOf(-t),0); }
+      return valueOf(true,UnNatural.valueOf(t),0); }
+    return valueOf(false,UnNatural.valueOf(-t),0); }
 
   public static final BigFloat valueOf (final int t)  {
     if (0 < t) {
-      return valueOf(true,BigInteger.valueOf(t),0); }
-    return valueOf(false,BigInteger.valueOf(-t),0); }
+      return valueOf(true,UnNatural.valueOf(t),0); }
+    return valueOf(false,UnNatural.valueOf(-t),0); }
 
   public static final BigFloat valueOf (final long t)  {
     if (0 < t) {
-      return valueOf(true,BigInteger.valueOf(t),0); }
-    return valueOf(false,BigInteger.valueOf(-t),0); }
+      return valueOf(true,UnNatural.valueOf(t),0); }
+    return valueOf(false,UnNatural.valueOf(-t),0); }
 
   //--------------------------------------------------------------
 
@@ -546,10 +556,10 @@ implements Comparable<BigFloat> {
 
   public static final BigFloat valueOf (final BigDecimal x)  {
     throw Exceptions.unsupportedOperation(null,"valueOf",x); }
-  //    return valueOf(x, BigInteger.ONE); }
+  //    return valueOf(x, UnNatural.ONE); }
 
-  public static final BigFloat valueOf (final BigInteger x)  {
-    return valueOf(x,0); }
+  public static final BigFloat valueOf (final UnNatural x)  {
+    return valueOf(true,x,0); }
 
   public static final BigFloat valueOf (final Number x)  {
     if (x instanceof BigFloat) { return (BigFloat) x; }
@@ -559,7 +569,7 @@ implements Comparable<BigFloat> {
     if (x instanceof Short) { return valueOf((Short) x); }
     if (x instanceof Integer) { return valueOf((Integer) x); }
     if (x instanceof Long) { return valueOf((Long) x); }
-    if (x instanceof BigInteger) { return valueOf((BigInteger) x); }
+    if (x instanceof UnNatural) { return valueOf((UnNatural) x); }
     if (x instanceof BigDecimal) { return valueOf((BigDecimal) x); }
     throw Exceptions.unsupportedOperation(null,"valueOf",x); }
 
@@ -569,19 +579,19 @@ implements Comparable<BigFloat> {
   //--------------------------------------------------------------
 
   public static final BigFloat ZERO = 
-    new BigFloat(true,BigInteger.ZERO,0);
+    new BigFloat(true,UnNatural.ZERO,0);
 
   public static final BigFloat ONE = 
-    new BigFloat(true,BigInteger.ONE,0);
+    new BigFloat(true,UnNatural.ONE,0);
 
   public static final BigFloat TWO = 
-    new BigFloat(true,BigInteger.ONE,1);
+    new BigFloat(true,UnNatural.ONE,1);
 
   public static final BigFloat TEN = 
-    new BigFloat(true,BigInteger.valueOf(5),1);
+    new BigFloat(true,UnNatural.valueOf(5),1);
 
   public static final BigFloat MINUS_ONE =
-    new BigFloat(false,BigInteger.ONE,0);
+    new BigFloat(false,UnNatural.ONE,0);
 
   //--------------------------------------------------------------
 }

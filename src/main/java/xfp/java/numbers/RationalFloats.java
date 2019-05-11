@@ -1,6 +1,6 @@
 package xfp.java.numbers;
 
-import xfp.java.numbers.BigInteger;
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiPredicate;
@@ -24,7 +24,7 @@ import xfp.java.prng.Generators;
  * <code>RationalFloat</code>
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-17
+ * @version 2019-05-11
  */
 @SuppressWarnings("unchecked")
 public final class RationalFloats implements Set {

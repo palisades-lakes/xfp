@@ -1,6 +1,7 @@
 package xfp.java.numbers;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Arrays;
 //import xfp.java.numbers.BigInteger;
 import java.util.List;
@@ -18,7 +19,7 @@ import xfp.java.prng.Generators;
 /** Utilities for Object and primitive numbers.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-08
+ * @version 2019-05-11
  */
 @SuppressWarnings("unchecked")
 public final class Numbers implements Set {
@@ -103,19 +104,11 @@ public final class Numbers implements Set {
     return i.bitLength(); }
 
   /** inclusive */
-  public static final int loBit (final Natural i) {
+  public static final int loBit (final UnNatural i) {
     return i.getLowestSetBit(); }
 
   /** exclusive */
-  public static final int hiBit (final Natural i) {
-    return i.bitLength(); }
-
-  /** inclusive */
-  public static final int loBit (final java.math.BigInteger i) {
-    return i.getLowestSetBit(); }
-
-  /** exclusive */
-  public static final int hiBit (final java.math.BigInteger i) {
+  public static final int hiBit (final UnNatural i) {
     return i.bitLength(); }
 
   /** inclusive */

@@ -1,23 +1,23 @@
 package xfp.java.test.numbers;
 
-import xfp.java.numbers.BigInteger;
 import java.util.function.BinaryOperator;
 
 import org.junit.jupiter.api.Test;
 
 import xfp.java.numbers.BigFloat;
 import xfp.java.numbers.Numbers;
+import xfp.java.numbers.UnNatural;
 import xfp.java.test.Common;
 
 //----------------------------------------------------------------
 /** Test desired properties of BigFloat. 
  * <p>
  * <pre>
- * mvn -Dtest=xfp/java/test/numbers/BigFloatTest test > BigFloatTest.txt
+ * mvn -Dtest=xfp/java/test/numbers/Test test > Test.txt
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-29
+ * @version 2019-05-11
  */
 
 public final class BigFloatTest {
@@ -32,17 +32,17 @@ public final class BigFloatTest {
     final BigFloat[] f = 
     { 
       BigFloat.valueOf(
-        new BigInteger("232330747ceeab",0x10),-23),
+        true,UnNatural.valueOf("232330747ceeab",0x10),-23),
       BigFloat.valueOf(
-        new BigInteger("-232330747ceeab",0x10),-23),
+        false,UnNatural.valueOf("232330747ceeab",0x10),-23),
      BigFloat.valueOf(
-       new BigInteger("2366052b8b801d",0x10),-22),
+       true,UnNatural.valueOf("2366052b8b801d",0x10),-22),
      BigFloat.valueOf(
-       new BigInteger("-21ab528c4dbc181",0x10),-26),
+       false,UnNatural.valueOf("21ab528c4dbc181",0x10),-26),
      BigFloat.valueOf(
-       new BigInteger("8d9814ae2e0074",0x10),-25),
+       true,UnNatural.valueOf("8d9814ae2e0074",0x10),-25),
      BigFloat.valueOf(
-       new BigInteger("2c94d1dcb123a56b9c1",0x10),-43), };
+       true,UnNatural.valueOf("2c94d1dcb123a56b9c1",0x10),-43), };
     for (final BigFloat fi : f) {
       Common.doubleRoundingTest(
         BigFloat::valueOf,Numbers::doubleValue,dist,
