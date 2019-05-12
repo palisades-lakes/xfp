@@ -187,7 +187,7 @@ implements Comparable<UnNatural> {
    */
 
   private static final int[] add (final int[] x, 
-                                 final int[] y) {
+                                  final int[] y) {
     // If x is shorter, swap the two arrays
     if (x.length < y.length) { return add(y,x); }
     int xIndex = x.length;
@@ -461,7 +461,7 @@ implements Comparable<UnNatural> {
   //--------------------------------------------------------------
   // arithmetic
   //--------------------------------------------------------------
-  
+
   public final UnNatural add (final UnNatural val) {
     if (val.isZero()) { return this; }
     if (isZero()) { return val; }
@@ -518,7 +518,7 @@ implements Comparable<UnNatural> {
    * Karatsuba squaring will be used. This value is found
    * experimentally to work well.
    */
-  
+
   private static final int KARATSUBA_SQUARE_THRESHOLD = 128;
 
   /** The threshold value for using Toom-Cook squaring. If the
@@ -526,7 +526,7 @@ implements Comparable<UnNatural> {
    * Toom-Cook squaring will be used. This value is found
    * experimentally to work well.
    */
-  
+
   private static final int TOOM_COOK_SQUARE_THRESHOLD = 216;
 
   /** Returns a Natural whose value is {@code (this<sup>2</sup>)}. 
@@ -535,7 +535,7 @@ implements Comparable<UnNatural> {
    * @param isRecursion whether this is a recursive invocation
    * @return {@code this<sup>2</sup>}
    */
-  
+
   private final UnNatural square (final boolean isRecursion) {
     if (isZero()) { return ZERO; }
     final int len = _mag.length;
@@ -600,44 +600,37 @@ implements Comparable<UnNatural> {
                                         final int len,
                                         final int[] z,
                                         final int zlen) {
-    /*
-     * The algorithm used here is adapted from Colin Plumb's C
-     * library.
-     * Technique: Consider the partial products in the
-     * multiplication
-     * of "abcde" by itself:
-     *
-     * a b c d e
-     * * a b c d e
-     * ==================
-     * ae be ce de ee
-     * ad bd cd dd de
-     * ac bc cc cd ce
-     * ab bb bc bd be
-     * aa ab ac ad ae
-     *
-     * Note that everything above the main diagonal:
-     * ae be ce de = (abcd) * e
-     * ad bd cd = (abc) * d
-     * ac bc = (ab) * c
-     * ab = (a) * b
-     *
-     * is a copy of everything below the main diagonal:
-     * de
-     * cd ce
-     * bc bd be
-     * ab ac ad ae
-     *
-     * Thus, the sum is 2 * (off the diagonal) + diagonal.
-     *
-     * This is accumulated beginning with the diagonal (which
-     * consist of the squares of the digits of the input), which
-     * is then
-     * divided by two, the off-diagonal added, and multiplied by
-     * two
-     * again. The low bit is simply a copy of the low bit of the
-     * input, so it doesn't need special care.
-     */
+
+    // The algorithm used here is adapted from Colin Plumb's C
+    // library.
+    // Technique: Consider the partial products in the
+    // multiplication
+    // of "abcde" by itself:
+    // a b c d e
+    // * a b c d e
+    // ==================
+    // ae be ce de ee
+    // ad bd cd dd de
+    // ac bc cc cd ce
+    // ab bb bc bd be
+    // aa ab ac ad ae
+    // Note that everything above the main diagonal:
+    // ae be ce de = (abcd) * e
+    // ad bd cd = (abc) * d
+    // ac bc = (ab) * c
+    // ab = (a) * b
+    // is a copy of everything below the main diagonal:
+    // de
+    // cd ce
+    // bc bd be
+    // ab ac ad ae
+    // Thus, the sum is 2 * (off the diagonal) + diagonal.
+    // This is accumulated beginning with the diagonal (which
+    // consist of the squares of the digits of the input), which
+    // is then divided by two, the off-diagonal added, and multiplied by
+    // two
+    // again. The low bit is simply a copy of the low bit of the
+    // input, so it doesn't need special care.
 
     // Store the squares, right shifted one bit (i.e., divided by
     // 2)
@@ -743,7 +736,6 @@ implements Comparable<UnNatural> {
   //--------------------------------------------------------------
   // multiply
   //--------------------------------------------------------------
-
   /** The threshold value for using squaring code to perform
    * multiplication of a {@code Natural} instance by itself. If 
    * the number of ints in the number are larger than this value, 
@@ -775,7 +767,7 @@ implements Comparable<UnNatural> {
    * ints of the number. This is used by Karatsuba multiplication
    * and * Karatsuba squaring.
    */
-  
+
   private final UnNatural getUpper (final int n) {
     final int len = _mag.length;
     if (len <= n) { return ZERO; }
@@ -799,7 +791,7 @@ implements Comparable<UnNatural> {
    *
    * See: http://en.wikipedia.org/wiki/Karatsuba_algorithm
    */
-  
+
   private static final UnNatural multiplyKaratsuba (final UnNatural x,
                                                     final UnNatural y) {
     final int xlen = x._mag.length;
@@ -951,9 +943,8 @@ implements Comparable<UnNatural> {
     final int r = largest - (2 * k);
 
     // Obtain slices of the numbers. a2 and b2 are the most
-    // significant
-    // bits of the numbers a and b, and a0 and b0 the least
-    // significant.
+    // significant bits of the numbers a and b, and a0 and b0 the 
+    // least significant.
     UnNatural a0, a1, a2, b0, b1, b2;
     a2 = a.getToomSlice(k,r,0,largest);
     a1 = a.getToomSlice(k,r,1,largest);
@@ -1104,7 +1095,7 @@ implements Comparable<UnNatural> {
     multiplyToLenCheck(x,xlen);
     multiplyToLenCheck(y,ylen);
     return implMultiplyToLen(x,xlen,y,ylen,z); }
-  
+
   //--------------------------------------------------------------
 
   private final UnNatural multiply (final UnNatural val,
@@ -1118,7 +1109,7 @@ implements Comparable<UnNatural> {
 
     if ((xlen < KARATSUBA_THRESHOLD)
       || (ylen < KARATSUBA_THRESHOLD)) {
-      if (val._mag.length == 1) {
+      if (val._mag.length == 1) { 
         return multiply(_mag,val._mag[0]); }
       if (_mag.length == 1) {
         return multiply(val._mag,_mag[0]); }
@@ -2204,7 +2195,7 @@ implements Comparable<UnNatural> {
    *         this Natural.
    * @see #Natural(byte[])
    */
-  public byte[] toByteArray () {
+  public final byte[] toByteArray () {
     final int byteLen = (bitLength() / 8) + 1;
     final byte[] byteArray = new byte[byteLen];
     for (
@@ -2235,6 +2226,8 @@ implements Comparable<UnNatural> {
       result = (result << 32) + unsigned(getInt(i)); }
     return result; }
 
+  //--------------------------------------------------------------
+  
   @Override
   public final float floatValue () {
     if (isZero()) { return 0.0f; }
@@ -2247,19 +2240,14 @@ implements Comparable<UnNatural> {
     else if (exponent > Float.MAX_EXPONENT) {
       return Float.POSITIVE_INFINITY; }
 
-    /*
-     * We need the top SIGNIFICAND_WIDTH bits, including the
-     * "implicit"
-     * one bit. To make rounding easier, we pick out the top
-     * SIGNIFICAND_WIDTH + 1 bits, so we have one to help us round
-     * up or
-     * down. twiceSignifFloor will contain the top
-     * SIGNIFICAND_WIDTH + 1
-     * bits, and signifFloor the top SIGNIFICAND_WIDTH.
-     *
-     * It helps to consider the real number signif = abs(this) *
-     * 2^(SIGNIFICAND_WIDTH - 1 - exponent).
-     */
+    // We need the top SIGNIFICAND_WIDTH bits, including the
+    // "implicit" one bit. To make rounding easier, we pick out 
+    // the top SIGNIFICAND_WIDTH + 1 bits, so we have one to help 
+    //us round up or down. twiceSignifFloor will contain the top
+    // SIGNIFICAND_WIDTH + 1 bits, and signifFloor the top 
+    // SIGNIFICAND_WIDTH.
+    // It helps to consider the real number signif = abs(this) *
+    // 2^(SIGNIFICAND_WIDTH - 1 - exponent).
     final int shift = exponent - Floats.SIGNIFICAND_BITS;
 
     int twiceSignifFloor;
@@ -2271,9 +2259,7 @@ implements Comparable<UnNatural> {
     final int nBits = shift & 0x1f;
     final int nBits2 = 32 - nBits;
 
-    if (nBits == 0) {
-      twiceSignifFloor = _mag[0];
-    }
+    if (nBits == 0) { twiceSignifFloor = _mag[0]; }
     else {
       twiceSignifFloor = _mag[0] >>> nBits;
       if (twiceSignifFloor == 0) {
