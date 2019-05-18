@@ -13,11 +13,11 @@ import xfp.java.test.Common;
 /** Test desired properties of BigFloat. 
  * <p>
  * <pre>
- * mvn -Dtest=xfp/java/test/numbers/Test test > Test.txt
+ * mvn -q -Dtest=xfp/java/test/numbers/BigFloatTest test > BigFloatTest.txt
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-11
+ * @version 2019-05-17
  */
 
 public final class BigFloatTest {
