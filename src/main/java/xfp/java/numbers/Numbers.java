@@ -19,7 +19,7 @@ import xfp.java.prng.Generators;
 /** Utilities for Object and primitive numbers.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-11
+ * @version 2019-05-18
  */
 @SuppressWarnings("unchecked")
 public final class Numbers implements Set {
@@ -33,6 +33,9 @@ public final class Numbers implements Set {
   
   public static final long loWord (final long i) {
     return i & UNSIGNED_MASK; }
+  
+  public static final long hiWord (final long i) {
+    return i >>> 32; }
   
   //--------------------------------------------------------------
   /** Like {@link Arrays#toString(double[])}. */

@@ -9,7 +9,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-11
+ * @version 2019-05-18
  */
 
 public final class BigFloat 
@@ -34,13 +34,8 @@ implements Comparable<BigFloat> {
 
   //--------------------------------------------------------------
 
-  //  private static final boolean isNegative (final UnNatural i) {
-  //    return 0 > i.signum(); }
-
-  private static final boolean isZero (final UnNatural i) {
-    return i.equals(UnNatural.ZERO); }
-
-  public final boolean isZero () { return isZero(significand()); }
+  public final boolean isZero () { 
+    return significand().isZero(); }
 
   public final boolean isOne () { 
     return BigFloat.ONE.equals(this); }
@@ -48,7 +43,7 @@ implements Comparable<BigFloat> {
   //--------------------------------------------------------------
 
   public final BigFloat negate () {
-    if (isZero()) { return this; }
+    //if (isZero()) { return this; }
     return valueOf(! nonNegative(),significand(),exponent()); }
 
   //--------------------------------------------------------------
@@ -105,7 +100,7 @@ implements Comparable<BigFloat> {
                               final UnNatural t1,
                               final int e1) {
 
-    if (isZero(t1)) { return this; }
+    //if (t1.isZero()) { return this; }
     //assert 0 < t1.signum();
 
     final boolean n0 = nonNegative();
@@ -135,15 +130,15 @@ implements Comparable<BigFloat> {
   //--------------------------------------------------------------
 
   public final BigFloat add (final BigFloat q) {
-    if (isZero()) { return q; }
-    if (q.isZero()) { return this; }
+    //if (isZero()) { return q; }
+    //if (q.isZero()) { return this; }
     return add(q.nonNegative(),q.significand(),q.exponent()); }
 
   //--------------------------------------------------------------
 
   public final BigFloat subtract (final BigFloat q) {
-    if (isZero()) { return q.negate(); }
-    if (q.isZero()) { return this; }
+    //if (isZero()) { return q.negate(); }
+    //if (q.isZero()) { return this; }
     return add(
       ! q.nonNegative(),
       q.significand(),
@@ -200,7 +195,7 @@ implements Comparable<BigFloat> {
   //--------------------------------------------------------------
   // Number methods
   //--------------------------------------------------------------
-  /** Returns the low order bits of the truncated quotient.
+  /** Unsupported.
    * 
    * TODO: should it really truncate or round instead? Or
    * should there be more explicit round, floor, ceil, etc.?
@@ -209,7 +204,7 @@ implements Comparable<BigFloat> {
   public final int intValue () {
     throw Exceptions.unsupportedOperation(this,"longValue"); }
 
-  /** Returns the low order bits of the truncated quotient.
+  /** Unsupported.
    * 
    * TODO: should it really truncate or round instead? Or
    * should there be more explicit round, floor, ceil, etc.?
@@ -222,13 +217,8 @@ implements Comparable<BigFloat> {
 
   private static final boolean roundUp (final UnNatural s,
                                         final int e) {
-    //Debug.println("roundUp");
-    //Debug.println("s=" + s.toString(0x10));
-    //Debug.println("e=" + e);
-    //Debug.println("s.testBit(e-1)=" + s.testBit(e-1));
     if (! s.testBit(e-1)) { return false; }
     for (int i=e-2;i>=0;i--) {
-      //Debug.println("i=" + i + ", s.testBit(i)=" + s.testBit(i));
       if (s.testBit(i)) { return true; } }
     return s.testBit(e); }
 
@@ -264,7 +254,7 @@ implements Comparable<BigFloat> {
     final boolean nn = nonNegative();
     final UnNatural s0 = significand();
     final int e0 = exponent();
-    if (isZero(s0)) { return (nn ? 0.0F : -0.0F); }
+    if (s0.isZero()) { return (nn ? 0.0F : -0.0F); }
     //assert (0 < s0.signum());
 
     final int eh = Numbers.hiBit(s0);
@@ -335,7 +325,7 @@ implements Comparable<BigFloat> {
     //Debug.println("nn= " + nn);
     //Debug.println("s0= " + s0.toString(0x10));
     //Debug.println("e0= " + e0);
-    if (isZero(s0)) { return (nn ? 0.0 : -0.0); }
+    if (s0.isZero()) { return (nn ? 0.0 : -0.0); }
     //assert (0 < s0.signum());
 
     final int eh = Numbers.hiBit(s0);
@@ -429,7 +419,7 @@ implements Comparable<BigFloat> {
   @Override
   public final String toString () {
     assert (0 == Numbers.loBit(significand()))
-    || isZero(significand()) :
+    || significand().isZero() :
       significand().toString() 
       + "\nlo= " + Numbers.loBit(significand());
     return 
@@ -444,44 +434,31 @@ implements Comparable<BigFloat> {
   private BigFloat (final boolean nonNegative,
                     final UnNatural t0,
                     final int e0) {
-    //super();
-    if (isZero(t0)) {
-      _nonNegative = true;
-      _significand = UnNatural.ZERO;
-      _exponent = 0; }
+    final int e1 = Math.max(0,Numbers.loBit(t0));
+    _nonNegative = nonNegative;
+    if (e1 == 0) {
+      _significand = t0;
+      _exponent = e0; }
     else {
-      final int e1 = Math.max(0,Numbers.loBit(t0));
-      _nonNegative = nonNegative;
-      if (e1 == 0) {
-        _significand = t0;
-        _exponent = e0;  }
-      else {
-        _significand = t0.shiftRight(e1);
-        _exponent = Math.addExact(e0,e1);  } 
-      //      assert 0 == Numbers.loBit(_significand)
-      //        : "lowBit= " + Numbers.loBit(_significand)
-      //        +"; rightShift= " + e1; 
-    } }
+      _significand = t0.shiftRight(e1);
+      _exponent = Math.addExact(e0,e1); } }
 
   //--------------------------------------------------------------
 
   public static final BigFloat valueOf (final boolean nonNegative,
                                         final UnNatural t,
                                         final int e) {
-    if (isZero(t)) { return ZERO; }
-    //assert 0 < t.signum();
+    //if (t.isZero()) { return ZERO; }
     return new BigFloat(nonNegative,t,e); } 
 
   public static final BigFloat valueOf (final long t,
                                         final int e) {
-    if (0L < t) {
-      return valueOf(true,UnNatural.valueOf(t),e); }
+    if (0L < t) { return valueOf(true,UnNatural.valueOf(t),e); }
     return valueOf(false,UnNatural.valueOf(-t),e); }
 
   public static final BigFloat valueOf (final int t,
                                         final int e) {
-    if (0 < t) {
-      return valueOf(true,UnNatural.valueOf(t),e); }
+    if (0 < t) { return valueOf(true,UnNatural.valueOf(t),e); }
     return valueOf(false,UnNatural.valueOf(-t),e); }
 
   //--------------------------------------------------------------

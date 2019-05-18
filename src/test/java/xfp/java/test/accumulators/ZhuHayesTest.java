@@ -12,11 +12,11 @@ import xfp.java.test.Common;
 /** Test summation algorithms. 
  * <p>
  * <pre>
- * mvn clean -Dtest=xfp/jmh/test/accumulators/ZhuHayesTest test > ZhuHayesTest.txt
+ * mvn -q -Dtest=xfp/java/test/accumulators/ZhuHayesTest test > ZhuHayesTest.txt
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-20
+ * @version 2019-05-18
  */
 
 public final class ZhuHayesTest {

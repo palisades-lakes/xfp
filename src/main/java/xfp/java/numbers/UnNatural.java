@@ -9,7 +9,7 @@ import java.util.Arrays;
 /** immutable arbitrary-precision non-negative integers.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-17
+ * @version 2019-05-18
  */
 
 public final class UnNatural extends Number
@@ -21,16 +21,6 @@ implements Comparable<UnNatural> {
 
   public final boolean isZero () { return 0 == _mag.length; }
 
-  // The following fields are stable variables. A stable 
-  // variable's value changes at most once from the default zero 
-  // value to a non-zero stable value. A stable value is 
-  // calculated lazily on demand.
-
-  //  private int bitCountPlusOne;
-  //  private int bitLengthPlusOne;
-  //  private int lowestSetBitPlusTwo;
-  //private int firstNonzeroIntNumPlusTwo;
-
   /** This constant limits {@code mag.length} of Naturals to 
    * the supported range.
    */
@@ -41,53 +31,53 @@ implements Comparable<UnNatural> {
   // arithmetic
   //--------------------------------------------------------------
 
-  public final UnNatural add (final UnNatural val) {
-    if (val.isZero()) { return this; }
-    if (isZero()) { return val; }
-    return make(Bei.add(_mag,val._mag)); }
+  public final UnNatural add (final UnNatural m) {
+    //if (m.isZero()) { return this; }
+    //if (isZero()) { return m; }
+    return unsafe(Bei.add(_mag,m._mag)); }
 
-  public final UnNatural add (final long val) {
-    assert 0L <= val;
-    if (0L == val) { return this; }
-    if (isZero()) { return valueOf(val); }
-    return make(Bei.add(_mag,val)); }
+  public final UnNatural add (final long m) {
+    assert 0L <= m;
+    if (0L == m) { return this; }
+    //if (isZero()) { return valueOf(m); }
+    return unsafe(Bei.add(_mag,m)); }
 
-  public final UnNatural add (final long val,
-                              final int leftShift) {
-    if (isZero()) { return make(Bei.shiftLeft(val,leftShift)); }
-    return make(Bei.add(_mag,val,leftShift)); }
-
-  // only when val <= this
-  public final UnNatural subtract (final long val) {
-    assert 0L <= val;
-    if (0L == val) { return this; }
-    final int c = compareTo(val);
-    assert 0 <= c;
-    if (0 == c) { return ZERO; }
-    return make(Bei.subtract(_mag,val)); }
+  public final UnNatural add (final long m,
+                              final int shift) {
+    //if (isZero()) { return unsafe(Bei.shiftLeft(m,shift)); }
+    return unsafe(Bei.add(_mag,m,shift)); }
 
   // only when val <= this
-  public final UnNatural subtract (final UnNatural val) {
-    if (val.isZero()) { return this; }
-    final int c = compareTo(val);
-    assert 0L <= c;
-    if (c == 0) { return ZERO; }
-    return make(Bei.subtract(_mag,val._mag)); }
+  public final UnNatural subtract (final long m) {
+    assert 0L <= m;
+    if (0L == m) { return this; }
+    //final int c = compareTo(m);
+    //assert 0 <= c;
+    //if (0 == c) { return ZERO; }
+    return unsafe(Bei.subtract(_mag,m)); }
+
+  // only when val <= this
+  public final UnNatural subtract (final UnNatural m) {
+//    if (m.isZero()) { return this; }
+//    final int c = compareTo(m);
+//    assert 0L <= c;
+//    if (c == 0) { return ZERO; }
+    return unsafe(Bei.subtract(_mag,m._mag)); }
 
   // only when (val << leftShift) <= this
-  public final UnNatural subtract (final long val,
+  public final UnNatural subtract (final long m,
                                    final int leftShift) {
-    assert 0L <= val;
-    if (0L == val) { return this; }
-    return make(Bei.subtract(_mag,val,leftShift)); }
+    assert 0L <= m;
+    if (0L == m) { return this; }
+    return unsafe(Bei.subtract(_mag,m,leftShift)); }
 
   // only when this <= (val << leftShift)
-  public final UnNatural subtractFrom (final long val,
+  public final UnNatural subtractFrom (final long m,
                                        final int leftShift) {
-    assert 0L <= val;
-    if (0L == val) { assert isZero(); return ZERO; }
-    if (isZero()) { return make(Bei.shiftLeft(val,leftShift)); }
-    return make(Bei.subtract(Bei.shiftLeft(val,leftShift),_mag)); }
+    assert 0L <= m;
+    if (0L == m) { assert isZero(); return ZERO; }
+    //if (isZero()) { return make(Bei.shiftLeft(m,leftShift)); }
+    return unsafe(Bei.subtract(Bei.shiftLeft(m,leftShift),_mag)); }
 
   //--------------------------------------------------------------
 
@@ -99,11 +89,11 @@ implements Comparable<UnNatural> {
   //--------------------------------------------------------------
 
   public final UnNatural shiftLeft (final int n) {
-    if (isZero()) { return ZERO; }
+    //if (isZero()) { return ZERO; }
     return make(Bei.shiftLeft(_mag,n)); }
 
   public final UnNatural shiftRight (final int n) {
-    if (isZero()) { return ZERO; }
+    //if (isZero()) { return ZERO; }
     return make(Bei.shiftRight(_mag,n)); }
 
   public final boolean testBit (final int n) {
@@ -146,16 +136,7 @@ implements Comparable<UnNatural> {
   public final int compareTo (final long y,
                               final int leftShift) {
     assert 0L <= y;
-    final int c0 = compare(_mag,Bei.shiftLeft(y,leftShift));
-    final int c1 = Bei.compare(_mag,y,leftShift); 
-    assert c0 == c1 :
-      "\nx=" + toString()
-      + "\ny=" + Long.toHexString(y) + " << " + leftShift
-      + "\ny=" + Bei.toHexString(Bei.shiftLeft(y,leftShift))
-      + "\nc0=" + c0
-      + "\nc1=" + c1;
-    return c0; }
-  //return compare(_mag,Bei.shiftLeft(val,leftShift)); }
+    return Bei.compare(_mag,y,leftShift); }
 
   //--------------------------------------------------------------
 
@@ -236,6 +217,11 @@ implements Comparable<UnNatural> {
     final int[] m1 = Bei.stripLeadingZeros(m); 
     checkMagnitude(m1);
     return new UnNatural(m1); }
+
+  // assume no leading zeros
+  private static final UnNatural unsafe (final int[] m) {
+    checkMagnitude(m);
+    return new UnNatural(m); }
 
   public static final UnNatural valueOf (final int[] m) {
     return make(Arrays.copyOf(m,m.length)); }
