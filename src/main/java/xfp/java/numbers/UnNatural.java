@@ -36,11 +36,11 @@ implements Comparable<UnNatural> {
     //if (isZero()) { return m; }
     return unsafe(Bei.add(_mag,m._mag)); }
 
-  public final UnNatural add (final long m) {
-    assert 0L <= m;
-    if (0L == m) { return this; }
-    //if (isZero()) { return valueOf(m); }
-    return unsafe(Bei.add(_mag,m)); }
+//  public final UnNatural add (final long m) {
+//    assert 0L <= m;
+//    if (0L == m) { return this; }
+//    //if (isZero()) { return valueOf(m); }
+//    return unsafe(Bei.add(_mag,m)); }
 
   public final UnNatural add (final long m,
                               final int shift) {
