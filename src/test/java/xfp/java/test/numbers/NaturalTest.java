@@ -14,7 +14,7 @@ import xfp.java.test.Common;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-29
+ * @version 2019-05-19
  */
 
 public final class NaturalTest {
@@ -26,12 +26,12 @@ public final class NaturalTest {
       (z) -> UnNatural.valueOf(z),
       (z) -> ((UnNatural) z).bigIntegerValue()); }
 
-//  @SuppressWarnings({ "static-method" })
-//  @Test
-//  public final void unNatural0 () {
-//    Common.naturalTest(
-//      (z) -> UnNatural0.valueOf(z),
-//      (z) -> ((UnNatural0) z).bigIntegerValue()); }
+  @SuppressWarnings({ "static-method" })
+  @Test
+  public final void unNatural0 () {
+    Common.naturalTest(
+      (z) -> UnNatural0.valueOf(z),
+      (z) -> ((UnNatural0) z).bigIntegerValue()); }
 
   //--------------------------------------------------------------
 }
