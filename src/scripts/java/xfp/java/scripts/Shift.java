@@ -15,7 +15,7 @@ public final class Shift {
       System.out.println(i + " : " + Integer.toHexString(iones >>> i)); }
     final long lones = 0xFFFFFFFFFFFFFFFFL;
     for (int i=0;i<=64;i++) {
-      System.out.println(i + " : " + Long.toHexString(lones >>> i)); } 
+      System.out.println(i + " : " + Long.toHexString(lones >>> i)); }
   }
 
   //--------------------------------------------------------------

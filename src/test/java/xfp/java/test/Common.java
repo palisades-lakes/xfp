@@ -25,6 +25,7 @@ import xfp.java.function.FloatFunction;
 import xfp.java.function.ToFloatFunction;
 import xfp.java.numbers.Doubles;
 import xfp.java.numbers.Floats;
+import xfp.java.numbers.Ringlike;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
 import xfp.java.prng.PRNG;
@@ -32,7 +33,7 @@ import xfp.java.prng.PRNG;
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-09
+ * @version 2019-05-19
  */
 @SuppressWarnings("unchecked")
 public final class Common {
@@ -40,10 +41,218 @@ public final class Common {
   private static final int TRYS = 1 * 256;
 
   //--------------------------------------------------------------
+  // natural number/ integer tests
 
-  public static final List<String> accumulators () { 
+  public static final void
+  roundTrip (final Function<BigInteger,Ringlike> fromBI,
+             final Function<Ringlike,BigInteger> toBI,
+             final BigInteger z0) {
+    final BigInteger x0 = z0.abs();
+    final Ringlike y = fromBI.apply(x0);
+    final BigInteger x1 = toBI.apply(y);
+    Assertions.assertEquals(x0,x1,() ->
+    "0x" + x0.toString(0x10)
+    + "\n" + y.toString()
+    + "\n0x" + x1.toString(0x10)); }
+
+  public static final void
+  add (final Function<BigInteger,Ringlike> fromBI,
+       final Function<Ringlike,BigInteger> toBI,
+       final BigInteger z0,
+       final BigInteger z1) {
+    final BigInteger x0 = z0.abs();
+    final BigInteger x1 = z1.abs();
+    final Ringlike y0 = fromBI.apply(x0);
+    final Ringlike y1 = fromBI.apply(x1);
+    final BigInteger x2 = x0.add(x1);
+    final Ringlike y2 = y0.add(y1);
+    final BigInteger x3 = toBI.apply( y2);
+    Assertions.assertEquals(x2,x3,() ->
+    x0.toString(0x10)
+    + "\n + "
+    + "\n" +  x1.toString(0x10)
+    + "\n -> "
+    + "\n" + x2.toString(0x10)
+    + "\n" + y0.toString(0x10)
+    + "\n + "
+    + "\n" +  y1.toString(0x10)
+    + "\n -> "
+    + "\n" + y2.toString(0x10)
+    + "\n" + x3.toString(0x10)); }
+
+  public static final void
+  subtract (final Function<BigInteger,Ringlike> fromBI,
+            final Function<Ringlike,BigInteger> toBI,
+            final BigInteger z0,
+            final BigInteger z1) {
+    final BigInteger xx0 = z0.abs();
+    final BigInteger xx1 = z1.abs();
+    final BigInteger x0 = xx0.max(xx1);
+    final BigInteger x1 = xx0.min(xx1);
+    final Ringlike y0 = fromBI.apply(x0);
+    final Ringlike y1 = fromBI.apply(x1);
+    final BigInteger x2 = x0.subtract(x1);
+    final Ringlike y2 = y0.subtract(y1);
+    final BigInteger x3 = toBI.apply( y2);
+    Assertions.assertEquals(x2,x3,() ->
+    x0.toString(0x10)
+    + "\n - "
+    + "\n" +  x1.toString(0x10)
+    + "\n -> "
+    + "\n" + x2.toString(0x10)
+    + "\n" + y0.toString(0x10)
+    + "\n - "
+    + "\n" +  y1.toString(0x10)
+    + "\n -> "
+    + "\n" + y2.toString(0x10)
+    + "\n" + x3.toString(0x10)); }
+
+  public static final void
+  multiply (final Function<BigInteger,Ringlike> fromBI,
+            final Function<Ringlike,BigInteger> toBI,
+            final BigInteger z0,
+            final BigInteger z1) {
+    final BigInteger x0 = z0.abs();
+    final BigInteger x1 = z1.abs();
+    final Ringlike y0 = fromBI.apply(x0);
+    final Ringlike y1 = fromBI.apply(x1);
+    final BigInteger x2 = x0.multiply(x1);
+    final Ringlike y2 = y0.multiply(y1);
+    final BigInteger x3 = toBI.apply( y2);
+    Assertions.assertEquals(x2,x3,() ->
+    "0x" + x0.toString(0x10)
+    + "\n * "
+    + "\n0x" +  x1.toString(0x10)
+    + "\n -> "
+    + "\n0x" + x2.toString(0x10)
+    + "\n" + y0.toString(0x10)
+    + "\n * "
+    + "\n" +  y1.toString(0x10)
+    + "\n -> "
+    + "\n" + y2.toString(0x10)
+    + "\n\n0x" + x2.toString(0x10)
+    + "\n0x" + x3.toString(0x10)
+    + "\n\n0x" + x2.subtract(x3).toString(0x10)
+      ); }
+
+  public static final void
+  divide (final Function<BigInteger,Ringlike> fromBI,
+          final Function<Ringlike,BigInteger> toBI,
+          final BigInteger z0,
+          final BigInteger z1) {
+    final BigInteger x0 = z0.abs();
+    final BigInteger x1 = z1.abs();
+    if (0 != x1.signum()) {
+      final Ringlike y0 = fromBI.apply(x0);
+      final Ringlike y1 = fromBI.apply(x1);
+      final BigInteger x2 = x0.divide(x1);
+      final Ringlike y2 = y0.divide(y1);
+      final BigInteger x3 = toBI.apply( y2);
+      Assertions.assertEquals(x2,x3,() ->
+      x0.toString(0x10)
+      + "\n / "
+      + "\n" +  x1.toString(0x10)
+      + "\n -> "
+      + "\n" + x2.toString(0x10)
+      + "\n" + y0.toString(0x10)
+      + "\n / "
+      + "\n" +  y1.toString(0x10)
+      + "\n -> "
+      + "\n" + y2.toString(0x10)
+      + "\n" + x3.toString(0x10)); } }
+
+  public static final void
+  divideAndRemainder (final Function<BigInteger,Ringlike> fromBI,
+                      final Function<Ringlike,BigInteger> toBI,
+                      final BigInteger z0,
+                      final BigInteger z1) {
+    final BigInteger x0 = z0.abs();
+    final BigInteger x1 = z1.abs();
+    if (0 != x1.signum()) {
+      final Ringlike y0 = fromBI.apply(x0);
+      final Ringlike y1 = fromBI.apply(x1);
+      final BigInteger[] x2 = x0.divideAndRemainder(x1);
+      final Ringlike[] y2 = (Ringlike[]) y0.divideAndRemainder(y1).toArray(new Ringlike[2]);
+      final BigInteger[] x3 = { toBI.apply(y2[0]), toBI.apply(y2[1]),};
+
+      Assertions.assertEquals(x2[0],x3[0],() ->
+      x0.toString(0x10)
+      + "\n / "
+      + "\n" +  x1.toString(0x10)
+      + "\n -> "
+      + "\n" + x2[0].toString(0x10)
+      + "\n" + y0.toString(0x10)
+      + "\n / "
+      + "\n" +  y1.toString(0x10)
+      + "\n -> "
+      + "\n" + y2[0].toString(0x10)
+      + "\n" + x3[0].toString(0x10));
+
+      Assertions.assertEquals(x2[1],x3[1],() ->
+      x0.toString(0x10)
+      + "\n rem "
+      + "\n" +  x1.toString(0x10)
+      + "\n -> "
+      + "\n" + x2[1].toString(0x10)
+      + "\n" + y0.toString(0x10)
+      + "\n rem "
+      + "\n" +  y1.toString(0x10)
+      + "\n -> "
+      + "\n" + y2[1].toString(0x10)
+      + "\n" + x3[1].toString(0x10)); } }
+
+  public static final void
+  naturalTest (final Function<BigInteger,Ringlike> fromBI,
+               final Function<Ringlike,BigInteger> toBI,
+               final BigInteger z0,
+               final BigInteger z1) {
+    roundTrip(fromBI,toBI,z0);
+    roundTrip(fromBI,toBI,z1);
+    add(fromBI,toBI,z0,z1);
+    subtract(fromBI,toBI,z0,z1);
+    //multiply(fromBI,toBI,z0,z1);
+    //divide(fromBI,toBI,z0,z1);
+    //divideAndRemainder(fromBI,toBI,z0,z1);
+  }
+
+
+  public static final void
+  naturalTest (final Function<BigInteger,Ringlike> fromBI,
+               final Function<Ringlike,BigInteger> toBI) {
+    final Generator gn =
+      Generators.bigIntegerGenerator(
+        PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
+    for (int i=0;i<TRYS;i++) {
+      naturalTest(fromBI,toBI,
+        (BigInteger) gn.next(), (BigInteger) gn.next()); } }
+
+  public static final void
+  integerTest (final Function<BigInteger,Ringlike> fromBI,
+               final Function<Ringlike,BigInteger> toBI,
+               final BigInteger z0,
+               final BigInteger z1) {
+    naturalTest(fromBI,toBI,z0,z1);
+    multiply(fromBI,toBI,z0,z1);
+    divide(fromBI,toBI,z0,z1);
+    divideAndRemainder(fromBI,toBI,z0,z1);
+  }
+
+
+  public static final void
+  integerTest (final Function<BigInteger,Ringlike> fromBI,
+               final Function<Ringlike,BigInteger> toBI) {
+    final Generator gn =
+      Generators.bigIntegerGenerator(
+        PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
+    for (int i=0;i<TRYS;i++) {
+      integerTest(fromBI,toBI,
+        (BigInteger) gn.next(), (BigInteger) gn.next()); } }
+
+  //--------------------------------------------------------------
+
+  public static final List<String> accumulators () {
     return Arrays.asList(
-      new String[] 
+      new String[]
         {
          "xfp.java.accumulators.DoubleAccumulator",
          //"xfp.java.accumulators.KahanAccumulator",
@@ -56,7 +265,7 @@ public final class Common {
 
   //--------------------------------------------------------------
 
-  public static final Accumulator 
+  public static final Accumulator
   makeAccumulator (final String className) {
     try {
 
@@ -64,11 +273,11 @@ public final class Common {
       final Method m = c.getMethod("make");
       return (Accumulator) m.invoke(null); }
 
-    catch (final 
-      ClassNotFoundException 
-      | NoSuchMethodException 
-      | SecurityException 
-      | IllegalAccessException 
+    catch (final
+      ClassNotFoundException
+      | NoSuchMethodException
+      | SecurityException
+      | IllegalAccessException
       | IllegalArgumentException
       | InvocationTargetException e) {
       // e.printStackTrace();
@@ -76,9 +285,9 @@ public final class Common {
 
   //--------------------------------------------------------------
 
-  public static final List<Accumulator> 
+  public static final List<Accumulator>
   makeAccumulators (final List<String> classNames) {
-    return 
+    return
       classNames
       .stream()
       .map(Common::makeAccumulator)
@@ -87,7 +296,7 @@ public final class Common {
   //--------------------------------------------------------------
   // TODO: java missing corresponding FloatFunction, etc.
 
-  public static final void 
+  public static final void
   floatRoundTripTest (final FloatFunction fromFloat,
                       final ToFloatFunction toFloat,
                       final float x0) {
@@ -95,14 +304,14 @@ public final class Common {
     final float x1 = toFloat.applyAsFloat(f);
     // differentiate -0.0, 0.0 and handle NaN
     Assertions.assertEquals(0,Float.compare(x0,x1),
-      () -> 
+      () ->
     Float.toHexString(x0)
     + "\n->" + f.toString()
     + "\n->" + Float.toHexString(x1)); }
 
   //--------------------------------------------------------------
 
-  public static final void 
+  public static final void
   floatRoundingTest (final FloatFunction<Comparable> fromFloat,
                      final ToFloatFunction toFloat,
                      final BinaryOperator<Comparable> dist,
@@ -132,11 +341,11 @@ public final class Common {
 
       Debug.println("r=" + r);
       //if (r < 0) { // f < fx
-      Assertions.assertTrue(flo.compareTo(f) < 0); 
+      Assertions.assertTrue(flo.compareTo(f) < 0);
       //}
       //if (r > 0) { // f > fx
-      Assertions.assertTrue(f.compareTo(fhi) < 0); 
-      // } 
+      Assertions.assertTrue(f.compareTo(fhi) < 0);
+      // }
 
       final Comparable dlo = dist.apply(f,flo);
       final Comparable dx = dist.apply(f,fx);
@@ -151,7 +360,7 @@ public final class Common {
 
   //--------------------------------------------------------------
 
-  private static final void 
+  private static final void
   floatRoundingTest (final BiFunction<BigInteger,BigInteger,Comparable> fromBigIntegers,
                      final FloatFunction<Comparable> fromFloat,
                      final ToFloatFunction toFloat,
@@ -161,37 +370,37 @@ public final class Common {
     floatRoundingTest(fromFloat,toFloat,dist,string,
       fromBigIntegers.apply(
         BigInteger.valueOf(13),
-        BigInteger.valueOf(11))); 
+        BigInteger.valueOf(11)));
 
     // Debug.DEBUG = true;
 
     floatRoundingTest(fromFloat,toFloat,dist,string,
       fromBigIntegers.apply(
         BigInteger.valueOf(-0x331c0c32d0072fL),
-        BigInteger.valueOf(0x1000000L))); 
+        BigInteger.valueOf(0x1000000L)));
 
     floatRoundingTest(fromFloat,toFloat,dist,string,
       fromBigIntegers.apply(
         BigInteger.valueOf(0x331c0c32d0072fL),
-        BigInteger.valueOf(0x1000000L))); 
+        BigInteger.valueOf(0x1000000L)));
 
-    //Debug.DEBUG = false; 
+    //Debug.DEBUG = false;
 
     floatRoundingTest(fromFloat,toFloat,dist,string,
       fromBigIntegers.apply(
         BigInteger.valueOf(0x789f09858446ad92L),
         BigInteger.valueOf(0x19513ea5d70c32eL))); }
 
-  private static final void 
+  private static final void
   fromBigIntegersRoundingTest (final BiFunction<BigInteger,BigInteger,Comparable> fromBigIntegers,
                                final FloatFunction<Comparable> fromFloat,
                                final ToFloatFunction toFloat,
                                final BinaryOperator<Comparable> dist,
                                final Function<Comparable,String> string) {
-    final Generator gn = 
+    final Generator gn =
       Generators.bigIntegerGenerator(
         PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
-    final Generator gd = 
+    final Generator gd =
       Generators.positiveBigIntegerGenerator(
         PRNG.well44497b("seeds/Well44497b-2019-01-07.txt"));
     //Debug.DEBUG = true;
@@ -200,20 +409,20 @@ public final class Common {
       final BigInteger n = (BigInteger) gn.next();
       final BigInteger d = (BigInteger) gd.next();
       floatRoundingTest(fromFloat,toFloat,dist,string,
-        fromBigIntegers.apply(n,d)); } 
+        fromBigIntegers.apply(n,d)); }
     //Debug.DEBUG = false;
   }
 
-  private static final void 
+  private static final void
   fromLongsRoundingTest (final BiFunction<BigInteger,BigInteger,Comparable> fromBigIntegers,
                          final FloatFunction<Comparable> fromFloat,
                          final ToFloatFunction toFloat,
                          final BinaryOperator<Comparable> dist,
                          final Function<Comparable,String> string) {
-    final Generator g0 = 
+    final Generator g0 =
       Generators.longGenerator(
         PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
-    final Generator g1 = 
+    final Generator g1 =
       Generators.positiveLongGenerator(
         PRNG.well44497b("seeds/Well44497b-2019-01-07.txt"));
     for (int i=0;i<TRYS;i++) {
@@ -225,12 +434,12 @@ public final class Common {
           BigInteger.valueOf(n),
           BigInteger.valueOf(d))); } }
 
-  private static final void 
+  private static final void
   finiteFloatRoundingTest (final FloatFunction<Comparable> fromFloat,
                            final ToFloatFunction toFloat,
                            final BinaryOperator<Comparable> dist,
                            final Function<Comparable,String> string) {
-    final Generator g = 
+    final Generator g =
       Floats.finiteGenerator(
         PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
     for (int i=0;i<TRYS;i++) {
@@ -239,12 +448,12 @@ public final class Common {
       final Comparable f = fromFloat.apply(x);
       floatRoundingTest(fromFloat,toFloat,dist,string,f); } }
 
-  private static final void 
+  private static final void
   subnormalFloatRoundingTest (final FloatFunction<Comparable> fromFloat,
                               final ToFloatFunction toFloat,
                               final BinaryOperator<Comparable> dist,
                               final Function<Comparable,String> string) {
-    final Generator g = 
+    final Generator g =
       Floats.subnormalGenerator(
         PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
     for (int i=0;i<TRYS;i++) {
@@ -253,7 +462,7 @@ public final class Common {
       final Comparable f = fromFloat.apply(x);
       floatRoundingTest(fromFloat,toFloat,dist,string,f); } }
 
-  public static final void 
+  public static final void
   floatRoundingTests (final BiFunction<BigInteger,BigInteger,Comparable> fromBigIntegers,
                       final FloatFunction<Comparable> fromFloat,
                       final ToFloatFunction toFloat,
@@ -274,7 +483,7 @@ public final class Common {
   //--------------------------------------------------------------
   // TODO: java missing corresponding FloatFunction, etc.
 
-  public static final void 
+  public static final void
   doubleRoundTripTest (final DoubleFunction fromDouble,
                        final ToDoubleFunction toDouble,
                        final double x0) {
@@ -282,14 +491,14 @@ public final class Common {
     final double x1 = toDouble.applyAsDouble(f);
     // differentiate -0.0, 0.0 and handle NaN
     Assertions.assertEquals(0,Double.compare(x0,x1),
-      () -> 
+      () ->
     Double.toHexString(x0)
     + "\n->" + f.toString()
     + "\n->" + Double.toHexString(x1)); }
 
   //--------------------------------------------------------------
 
-  public static final void 
+  public static final void
   doubleRoundingTest (final DoubleFunction<Comparable> fromDouble,
                       final ToDoubleFunction toDouble,
                       final BinaryOperator<Comparable> dist,
@@ -327,17 +536,17 @@ public final class Common {
       Debug.println("|f-flo|= " + toString.apply(dlo));
       Debug.println("|f-fx |= " + toString.apply(dx));
       Debug.println("|f-fhi|= " + toString.apply(dhi));
-      Assertions.assertTrue(flo.compareTo(f) < 0, 
+      Assertions.assertTrue(flo.compareTo(f) < 0,
         "f=" + f + " > flo=" + flo);
-      Assertions.assertTrue(f.compareTo(fhi) < 0); 
-      Assertions.assertTrue(flo.compareTo(fx) <= 0); 
-      Assertions.assertTrue(fx.compareTo(fhi) <= 0); 
+      Assertions.assertTrue(f.compareTo(fhi) < 0);
+      Assertions.assertTrue(flo.compareTo(fx) <= 0);
+      Assertions.assertTrue(fx.compareTo(fhi) <= 0);
       Assertions.assertTrue(dx.compareTo(dlo) <= 0,
         "dx=" + dx + " > dlo=" + dlo);
       Assertions.assertTrue(dx.compareTo(dhi) <= 0);
       if (dx.equals(dlo) || dx.equals(dhi)) {
         Assertions.assertTrue(Doubles.isEven(x),
-          () -> 
+          () ->
         "not even!"
         + "\nxlo=" + Double.toHexString(x1o)
         + "\nx  =" + Double.toHexString(x)
@@ -348,7 +557,7 @@ public final class Common {
 
   //--------------------------------------------------------------
 
-  private static final void 
+  private static final void
   doubleRoundingTest (final BiFunction<BigInteger,BigInteger,Comparable> fromBigIntegers,
                       final DoubleFunction<Comparable> fromDouble,
                       final ToDoubleFunction toDouble,
@@ -358,37 +567,37 @@ public final class Common {
     doubleRoundingTest(fromDouble,toDouble,dist,string,
       fromBigIntegers.apply(
         BigInteger.valueOf(13),
-        BigInteger.valueOf(11))); 
+        BigInteger.valueOf(11)));
 
     // Debug.DEBUG = true;
 
     doubleRoundingTest(fromDouble,toDouble,dist,string,
       fromBigIntegers.apply(
         BigInteger.valueOf(-0x331c0c32d0072fL),
-        BigInteger.valueOf(0x1000000L))); 
+        BigInteger.valueOf(0x1000000L)));
 
     doubleRoundingTest(fromDouble,toDouble,dist,string,
       fromBigIntegers.apply(
         BigInteger.valueOf(0x331c0c32d0072fL),
-        BigInteger.valueOf(0x1000000L))); 
+        BigInteger.valueOf(0x1000000L)));
 
-    //Debug.DEBUG = false; 
+    //Debug.DEBUG = false;
 
     doubleRoundingTest(fromDouble,toDouble,dist,string,
       fromBigIntegers.apply(
         BigInteger.valueOf(0x789f09858446ad92L),
         BigInteger.valueOf(0x19513ea5d70c32eL))); }
 
-  private static final void 
+  private static final void
   fromBigIntegersRoundingTest (final BiFunction<BigInteger,BigInteger,Comparable> fromBigIntegers,
                                final DoubleFunction<Comparable> fromDouble,
                                final ToDoubleFunction toDouble,
                                final BinaryOperator<Comparable> dist,
                                final Function<Comparable,String> string) {
-    final Generator gn = 
+    final Generator gn =
       Generators.bigIntegerGenerator(
         PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
-    final Generator gd = 
+    final Generator gd =
       Generators.positiveBigIntegerGenerator(
         PRNG.well44497b("seeds/Well44497b-2019-01-07.txt"));
     for (int i=0;i<TRYS;i++) {
@@ -398,16 +607,16 @@ public final class Common {
       doubleRoundingTest(fromDouble,toDouble,dist,string,
         fromBigIntegers.apply(n,d)); } }
 
-  private static final void 
+  private static final void
   fromLongsRoundingTest (final BiFunction<BigInteger,BigInteger,Comparable> fromBigIntegers,
                          final DoubleFunction<Comparable> fromDouble,
                          final ToDoubleFunction toDouble,
                          final BinaryOperator<Comparable> dist,
                          final Function<Comparable,String> string) {
-    final Generator g0 = 
+    final Generator g0 =
       Generators.longGenerator(
         PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
-    final Generator g1 = 
+    final Generator g1 =
       Generators.positiveLongGenerator(
         PRNG.well44497b("seeds/Well44497b-2019-01-07.txt"));
     for (int i=0;i<TRYS;i++) {
@@ -419,12 +628,12 @@ public final class Common {
           BigInteger.valueOf(n),
           BigInteger.valueOf(d))); } }
 
-  private static final void 
+  private static final void
   finiteDoubleRoundingTest (final DoubleFunction<Comparable> fromDouble,
                             final ToDoubleFunction toDouble,
                             final BinaryOperator<Comparable> dist,
                             final Function<Comparable,String> string) {
-    final Generator g = 
+    final Generator g =
       Doubles.finiteGenerator(
         PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
     for (int i=0;i<TRYS;i++) {
@@ -433,12 +642,12 @@ public final class Common {
       final Comparable f = fromDouble.apply(x);
       doubleRoundingTest(fromDouble,toDouble,dist,string,f); } }
 
-  private static final void 
+  private static final void
   subnormalDoubleRoundingTest (final DoubleFunction<Comparable> fromDouble,
                                final ToDoubleFunction toDouble,
                                final BinaryOperator<Comparable> dist,
                                final Function<Comparable,String> string) {
-    final Generator g = 
+    final Generator g =
       Doubles.subnormalGenerator(
         PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
     for (int i=0;i<TRYS;i++) {
@@ -447,7 +656,7 @@ public final class Common {
       final Comparable f = fromDouble.apply(x);
       doubleRoundingTest(fromDouble,toDouble,dist,string,f); } }
 
-  public static final void 
+  public static final void
   doubleRoundingTests (final BiFunction<BigInteger,BigInteger,Comparable> fromBigIntegers,
                        final DoubleFunction<Comparable> fromDouble,
                        final ToDoubleFunction toDouble,
@@ -472,44 +681,44 @@ public final class Common {
 
   // TODO: more efficient via bits?
   public static final boolean isEven (final int k) {
-    return k == 2*(k/2); }
+    return k == (2*(k/2)); }
 
   //--------------------------------------------------------------
-  /** Maximum exponent for double generation such that a float 
+  /** Maximum exponent for double generation such that a float
    * sum of <code>dim</code> <code>double</code>s will be finite
    * (with high enough probability).
    */
-  //  public static final int feMax (final int dim) { 
+  //  public static final int feMax (final int dim) {
   //    final int d = Float.MAX_EXPONENT - ceilLog2(dim);
   //    return d; }
 
-  /** Maximum exponent for double generation such that a double 
+  /** Maximum exponent for double generation such that a double
    * sum of <code>dim</code> <code>double</code>s will be finite
    * (with high enough probability).
    */
-  public static final int deMax (final int dim) { 
+  public static final int deMax (final int dim) {
     final int d = Double.MAX_EXPONENT - ceilLog2(dim);
     return d; }
 
   //--------------------------------------------------------------
 
   private static final List<Generator> baseGenerators (final int dim) {
-    final UniformRandomProvider urp0 = 
+    final UniformRandomProvider urp0 =
       PRNG.well44497b("seeds/Well44497b-2019-01-05.txt");
-    final UniformRandomProvider urp1 = 
+    final UniformRandomProvider urp1 =
       PRNG.well44497b("seeds/Well44497b-2019-01-07.txt");
-    final UniformRandomProvider urp2 = 
+    final UniformRandomProvider urp2 =
       PRNG.well44497b("seeds/Well44497b-2019-01-09.txt");
-    final UniformRandomProvider urp3 = 
+    final UniformRandomProvider urp3 =
       PRNG.well44497b("seeds/Well44497b-2019-01-11.txt");
-    final UniformRandomProvider urp4 = 
+    final UniformRandomProvider urp4 =
       PRNG.well44497b("seeds/Well44497b-2019-04-01.txt");
 
     // as large as will still have finite float l2 norm squared
     final int emax = deMax(dim)/2;
     final double dmax = (1<<emax);
     return Arrays.asList(
-      new Generator[] 
+      new Generator[]
         {
          Doubles.gaussianGenerator(dim,urp1,0.0,dmax),
          Doubles.exponentialGenerator(dim,urp2,0.0,dmax),
@@ -518,13 +727,13 @@ public final class Common {
          Doubles.finiteGenerator(dim,urp0,emax),
         }); }
 
-  private static final List<Generator> 
+  private static final List<Generator>
   zeroSumGenerators (final List<Generator> gs0) {
 
     final List<Generator> gs1 =
       gs0.stream().map(Doubles::zeroSumGenerator)
       .collect(Collectors.toUnmodifiableList());
-    final UniformRandomProvider urp = 
+    final UniformRandomProvider urp =
       PRNG.well44497b("seeds/Well44497b-2019-04-09.txt");
     final List<Generator> gs2 =
       gs1.stream().map((g) -> Doubles.shuffledGenerator(g,urp))
@@ -536,17 +745,17 @@ public final class Common {
 
   //--------------------------------------------------------------
   /** Generate <code>double[dim]</code> such that the sum of the
-   * squares (and the sum of the elements) is very likely to be 
+   * squares (and the sum of the elements) is very likely to be
    * finite.
    */
 
-  public static final List<Generator> 
+  public static final List<Generator>
   zeroSumGenerators (final int dim) {
     return zeroSumGenerators(baseGenerators(dim)); }
 
   //--------------------------------------------------------------
   /** Generate <code>double[dim]</code> such that the sum of the
-   * squares (and the sum of the elements) is very likely to be 
+   * squares (and the sum of the elements) is very likely to be
    * finite.
    */
 
@@ -560,35 +769,35 @@ public final class Common {
 
   //--------------------------------------------------------------
 
-  public static final void 
+  public static final void
   overflowTest (final Accumulator a) {
 
-    final double s0 = 
+    final double s0 =
       a.clear()
       .addAll(
-        new double[] 
-          { Double.MAX_VALUE, 
-            Double.MAX_VALUE, 
+        new double[]
+          { Double.MAX_VALUE,
+            Double.MAX_VALUE,
             1.0,
             -Double.MAX_VALUE,
             -Double.MAX_VALUE})
       .doubleValue();
     if (a.noOverflow()) {
-      Assertions.assertEquals(1.0,s0,Classes.className(a)); } 
+      Assertions.assertEquals(1.0,s0,Classes.className(a)); }
 
-    final double s1 = 
+    final double s1 =
       a.clear()
       .addAll(new double[]
-        { -Double.MAX_VALUE, 
-          -Double.MAX_VALUE, 
-          -1.0, 
-          Double.MAX_VALUE, 
+        { -Double.MAX_VALUE,
+          -Double.MAX_VALUE,
+          -1.0,
+          Double.MAX_VALUE,
           Double.MAX_VALUE})
       .doubleValue();
     if (a.noOverflow()) {
       Assertions.assertEquals(-1.0,s1,Classes.className(a));  } }
 
-  public static final void 
+  public static final void
   overflowTests (final List<Accumulator> accumulators) {
     for (final Accumulator a : accumulators) {
       overflowTest(a); } }
@@ -598,59 +807,59 @@ public final class Common {
   // TODO: determine how accumulators should behave when given
   // non-finite input
 
-  //  public static final void 
+  //  public static final void
   //  nonFiniteTest (final Accumulator a) {
   //
   //    Assertions.assertThrows(
-  //      AssertionError.class, 
+  //      AssertionError.class,
   //      () -> {
-  //        final double s0 = 
+  //        final double s0 =
   //          a.clear()
   //          .addAll(new double[] {-1.0, Double.POSITIVE_INFINITY, })
   //          .doubleValue();
   //        Assertions.assertEquals(Double.POSITIVE_INFINITY,s0,
   //          Classes.className(a)); },
-  //      Classes.className(a)); 
+  //      Classes.className(a));
   //
   //    Assertions.assertThrows(
-  //      AssertionError.class, 
+  //      AssertionError.class,
   //      () -> {
-  //        final double s2 = 
+  //        final double s2 =
   //          a.clear()
   //          .addAll(new double[] {-1.0, Double.NaN, })
   //          .doubleValue();
   //        Assertions.assertEquals(
   //          Double.NaN,s2,Classes.className(a));},
-  //      Classes.className(a)); 
+  //      Classes.className(a));
   //  }
   //
-  //  public static final void 
+  //  public static final void
   //  nonFiniteTests (final List<Accumulator> accumulators) {
   //    for (final Accumulator a : accumulators) {
   //      nonFiniteTest(a); } }
 
   //--------------------------------------------------------------
 
-  public static final void 
+  public static final void
   infinityTest (final Accumulator a) {
 
-    final double s0 = 
+    final double s0 =
       a.clear()
       .addAll(new double[] {Double.MAX_VALUE, Double.MAX_VALUE, })
       .doubleValue();
     Assertions.assertEquals(Double.POSITIVE_INFINITY,s0,
-      Classes.className(a)); 
+      Classes.className(a));
 
-    final double s1 = 
+    final double s1 =
       a.clear()
       .addAll(new double[] {-Double.MAX_VALUE, -Double.MAX_VALUE, })
       .doubleValue();
     Assertions.assertEquals(Double.NEGATIVE_INFINITY,s1,
-      Classes.className(a)); 
+      Classes.className(a));
 
   }
 
-  public static final void 
+  public static final void
   infinityTests (final List<Accumulator> accumulators) {
     for (final Accumulator a : accumulators) {
       infinityTest(a); } }
@@ -659,25 +868,25 @@ public final class Common {
   /** Assumes the generator creates arrays whose exact sum is 0.0
    */
 
-  private static final void 
+  private static final void
   zeroSumTest (final Generator g,
                final List<Accumulator> accumulators) {
     final double[] x = (double[]) g.next();
     Debug.println(g.name());
     for (final Accumulator a : accumulators) {
       final long t0 = System.nanoTime();
-      final double pred = a.clear().addAll(x).doubleValue(); 
+      final double pred = a.clear().addAll(x).doubleValue();
       final long t1 = (System.nanoTime()-t0);
-      if (a.isExact()) { 
+      if (a.isExact()) {
         Assertions.assertEquals(0.0,pred,
-          "sum not zero: " + Classes.className(a) 
+          "sum not zero: " + Classes.className(a)
           + " = " + Double.toHexString(pred) + "\n");  }
       final double l1d = Math.abs(pred);
       Debug.println(
         String.format("%32s %8.2fms ",Classes.className(a),
-          Double.valueOf(t1*1.0e-6)) 
-        + toHexString(l1d) + " = " 
-        + String.format("%8.2e",Double.valueOf(l1d))); } } 
+          Double.valueOf(t1*1.0e-6))
+        + toHexString(l1d) + " = "
+        + String.format("%8.2e",Double.valueOf(l1d))); } }
 
   /** Assumes the generators create arrays whose exact sum is 0.0
    */
@@ -685,12 +894,12 @@ public final class Common {
   public static final void
   zeroSumTests (final List<Generator> generators,
                 final List<Accumulator> accumulators) {
-    for (final Generator g : generators) { 
+    for (final Generator g : generators) {
       Common.zeroSumTest(g,accumulators); } }
 
   //--------------------------------------------------------------
 
-  private static final void 
+  private static final void
   sumTest (final Generator g,
            final List<Accumulator> accumulators,
            final Accumulator exact) {
@@ -706,31 +915,31 @@ public final class Common {
       final Accumulator pfinal = a.clear().addAll(x);
       Debug.println(Classes.className(a));
       Debug.println(pfinal.value().toString());
-      final double pred = pfinal.doubleValue(); 
+      final double pred = pfinal.doubleValue();
       final long t1 = (System.nanoTime()-t0);
-      if (a.isExact()) { 
+      if (a.isExact()) {
         Assertions.assertEquals(truth,pred,
-          "\nexact: " + Classes.className(exact) 
+          "\nexact: " + Classes.className(exact)
           + " = " + Double.toHexString(truth)
           + "\n= " + exact.value()
-          + "\npred: " + Classes.className(a) 
-          + " = " + Double.toHexString(pred) 
+          + "\npred: " + Classes.className(a)
+          + " = " + Double.toHexString(pred)
           + "\n= " + a.value()
           + "\n"); }
       final double l1d = Math.abs(truth-pred);
       final double l1n = Math.max(1.0,Math.abs(truth));
       Debug.println(
         String.format("%32s %8.2fms ",Classes.className(a),
-          Double.valueOf(t1*1.0e-6)) 
-        + toHexString(l1d) 
-        + " / " + toHexString(l1n) + " = " 
+          Double.valueOf(t1*1.0e-6))
+        + toHexString(l1d)
+        + " / " + toHexString(l1n) + " = "
         + String.format("%8.2e",Double.valueOf(l1d/l1n))); } }
 
   public static final void
   sumTests (final List<Generator> generators,
             final List<Accumulator> accumulators,
             final Accumulator exact) {
-    for (final Generator g : generators) { 
+    for (final Generator g : generators) {
       Common.sumTest(g,accumulators,exact); } }
 
   //--------------------------------------------------------------
@@ -740,27 +949,27 @@ public final class Common {
                                     final Accumulator exact) {
     Assertions.assertTrue(exact.isExact());
     final double[] x = (double[]) g.next();
-    final double truth = exact.clear().add2All(x).doubleValue(); 
+    final double truth = exact.clear().add2All(x).doubleValue();
     Debug.println(g.name());
     for (final Accumulator a : accumulators) {
       final long t0 = System.nanoTime();
-      final double pred = 
-        a.clear().add2All(x).doubleValue(); 
+      final double pred =
+        a.clear().add2All(x).doubleValue();
       final long t1 = (System.nanoTime()-t0);
       if (a.isExact()) { Assertions.assertEquals(truth,pred); }
       final double l1d = Math.abs(truth - pred);
       final double l1n = Math.max(1.0,Math.abs(truth));
       Debug.println(
-        String.format("%32s %8.2fms ",Classes.className(a),Double.valueOf(t1*1.0e-6)) 
-        + toHexString(l1d) 
-        + " / " + toHexString(l1n) + " = " 
+        String.format("%32s %8.2fms ",Classes.className(a),Double.valueOf(t1*1.0e-6))
+        + toHexString(l1d)
+        + " / " + toHexString(l1n) + " = "
         + String.format("%8.2e",Double.valueOf(l1d/l1n))); } }
 
   public static final void l2Tests (final List<Generator> generators,
                                     final List<Accumulator> accumulators,
                                     final Accumulator exact) {
 
-    for (final Generator g : generators) { 
+    for (final Generator g : generators) {
       l2Test(g,accumulators,exact); } }
 
   //--------------------------------------------------------------
@@ -771,27 +980,27 @@ public final class Common {
     Assertions.assertTrue(exact.isExact());
     final double[] x0 = (double[]) g.next();
     final double[] x1 = (double[]) g.next();
-    final double truth = exact.clear().addProducts(x0,x1).doubleValue(); 
+    final double truth = exact.clear().addProducts(x0,x1).doubleValue();
     Debug.println(g.name());
     for (final Accumulator a : accumulators) {
       final long t0 = System.nanoTime();
-      final double pred = 
-        a.clear().addProducts(x0,x1).doubleValue(); 
+      final double pred =
+        a.clear().addProducts(x0,x1).doubleValue();
       final long t1 = (System.nanoTime()-t0);
       if (a.isExact()) { Assertions.assertEquals(truth,pred); }
       final double l1d = Math.abs(truth - pred);
       final double l1n = Math.max(1.0,Math.abs(truth));
       Debug.println(
-        String.format("%32s %8.2fms ",Classes.className(a),Double.valueOf(t1*1.0e-6)) 
-        + toHexString(l1d) 
-        + " / " + toHexString(l1n) + " = " 
+        String.format("%32s %8.2fms ",Classes.className(a),Double.valueOf(t1*1.0e-6))
+        + toHexString(l1d)
+        + " / " + toHexString(l1n) + " = "
         + String.format("%8.2e",Double.valueOf(l1d/l1n))); } }
 
   public static final void dotTests (final List<Generator> generators,
                                      final List<Accumulator> accumulators,
                                      final Accumulator exact) {
 
-    for (final Generator g : generators) { 
+    for (final Generator g : generators) {
       dotTest(g,accumulators,exact); } }
 
   //--------------------------------------------------------------

@@ -6,7 +6,7 @@ import xfp.java.prng.Generator;
 import xfp.java.test.Common;
 
 /** Profile accumulators.
- * 
+ *
  * <pre>
  * jy --source 11 src/scripts/java/xfp/java/scripts/ZhuHayesProfile.java
  * </pre>
@@ -33,10 +33,10 @@ public final class ZhuHayesProfile {
         a.addAll(x);
         final double z = a.doubleValue();
         if (0.0 != z) {
-          System.out.println(Double.toHexString(0.0) 
+          System.out.println(Double.toHexString(0.0)
             + " != " + Double.toHexString(z)); } }
-    System.out.printf("total secs: %8.2f\n",
-      Double.valueOf((System.nanoTime()-t)*1.0e-9)); } }
+      System.out.printf("total secs: %8.2f\n",
+        Double.valueOf((System.nanoTime()-t)*1.0e-9)); } }
 
   //--------------------------------------------------------------
 }

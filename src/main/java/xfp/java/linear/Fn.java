@@ -22,21 +22,21 @@ import xfp.java.numbers.Floats;
 import xfp.java.prng.Generator;
 
 /** The set of arrays of some fixed length <code>n</code>,
- *  of primitive numbers, or 
+ *  of primitive numbers, or
  * of certain subclasses of <code>Number</code>,
  * interpreted as tuples of rational numbers.
- * 
+ *
  * This is primarily intended to support implementing the standard
  * <em>rational</em> linear space <b>Q</b><sup>n</sup>.
  * (Essentially <b>R</b><sup>n</sup> except over the rational
  * numbers rather than the reals.)
 
- * TODO: generalize to tuples 
+ * TODO: generalize to tuples
  * implemented with lists, <code>int</code> indexed maps
  * for sparse vectors, etc.
  * Long term goal is to support any useful data structures
  * that can be used to represent tuples of rational numbers.
- * 
+ *
  * @author palisades dot lakes at gmail dot com
  * @version 2019-03-29
  */
@@ -76,7 +76,7 @@ public final class Fn extends LinearSpaceLike {
 
   public static final float maxAbs (final float[] x) {
     float m = NEGATIVE_INFINITY;
-    for (int i=0;i<x.length;i++) { 
+    for (int i=0;i<x.length;i++) {
       m = Math.max(m,Math.abs(x[i])); }
     return m; }
 
@@ -98,7 +98,7 @@ public final class Fn extends LinearSpaceLike {
   // operations for algebraic structures over float[] arrays.
   //--------------------------------------------------------------
 
-  public final float[] add (final float[] x0, 
+  public final float[] add (final float[] x0,
                             final float[] x1) {
     assert contains(x0);
     assert contains(x1);
@@ -107,7 +107,7 @@ public final class Fn extends LinearSpaceLike {
     return qq; }
 
   @Override
-  public final float[] add (final Object x0, 
+  public final float[] add (final Object x0,
                             final Object x1) {
     return add((float[]) x0, (float[]) x1); }
 
@@ -125,33 +125,33 @@ public final class Fn extends LinearSpaceLike {
     assert contains(x);
     final float[] qq = new float[dimension()];
     for (int i=0;i<dimension();i++) { qq[i] = - x[i]; }
-    return qq; } 
+    return qq; }
 
   @Override
   public final float[] negate (final Object x) {
-    return negate((float[]) x); } 
+    return negate((float[]) x); }
 
   //--------------------------------------------------------------
 
-  public final float[] scale (final float a, 
+  public final float[] scale (final float a,
                               final float[] x) {
     assert contains(x);
     final float[] qq = new float[dimension()];
-    for (int i=0;i<dimension();i++) { 
+    for (int i=0;i<dimension();i++) {
       qq[i] = a * x[i]; }
-    return qq; } 
+    return qq; }
 
   @Override
-  public final float[] scale (final Object a, 
+  public final float[] scale (final Object a,
                               final Object x) {
-    return scale(((Number) a).floatValue(), (float[]) x); } 
+    return scale(((Number) a).floatValue(), (float[]) x); }
 
   //--------------------------------------------------------------
   // Set methods
   //--------------------------------------------------------------
 
   @Override
-  public final boolean equals (final Object x0, 
+  public final boolean equals (final Object x0,
                                final Object x1) {
     assert contains(x0);
     assert contains(x1);
@@ -168,15 +168,15 @@ public final class Fn extends LinearSpaceLike {
     return Array.getLength(element) == dimension(); }
 
   //--------------------------------------------------------------
-  /** Intended primarily for testing. 
+  /** Intended primarily for testing.
    */
 
   @Override
   public final Supplier generator (final Map options) {
     final UniformRandomProvider urp = Set.urp(options);
-    return 
+    return
       new Supplier () {
-      final Generator g = 
+      final Generator g =
         Floats.finiteGenerator(dimension(),urp);
       @Override
       public final Object get () { return g.next(); } }; }
@@ -195,13 +195,13 @@ public final class Fn extends LinearSpaceLike {
 
   private Fn (final int dimension) { super(dimension); }
 
-  private static final IntObjectMap<Fn> _cache = 
+  private static final IntObjectMap<Fn> _cache =
     new IntObjectHashMap();
 
   public static final Fn get (final int dimension) {
     final Fn dn0 = _cache.get(dimension);
     if (null != dn0) { return dn0; }
-    final Fn dn1 = new Fn(dimension); 
+    final Fn dn1 = new Fn(dimension);
     _cache.put(dimension,dn1);
     return dn1; }
 
@@ -216,25 +216,25 @@ public final class Fn extends LinearSpaceLike {
    * any known rational array.
    */
 
-  private static final TwoSetsOneOperation 
-  makeSpace (final int n) { 
+  private static final TwoSetsOneOperation
+  makeSpace (final int n) {
     return
       TwoSetsOneOperation.floatingPointSpace(
         Fn.get(n).scaler(),
         Fn.magma(n),
         Floats.FLOATING_POINT); }
 
-  private static final IntObjectMap<TwoSetsOneOperation> 
+  private static final IntObjectMap<TwoSetsOneOperation>
   _spaceCache = new IntObjectHashMap();
 
   /** n-dimensional floating point space, implemented with
    * <code>float[]</code>.
    */
-  public static final TwoSetsOneOperation 
+  public static final TwoSetsOneOperation
   space (final int dimension) {
     final TwoSetsOneOperation space0 = _spaceCache.get(dimension);
     if (null != space0) { return space0; }
-    final TwoSetsOneOperation space1 = makeSpace(dimension); 
+    final TwoSetsOneOperation space1 = makeSpace(dimension);
     _spaceCache.put(dimension,space1);
     return space1; }
 

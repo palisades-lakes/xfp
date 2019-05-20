@@ -4,7 +4,7 @@ import xfp.java.exceptions.Exceptions;
 
 /** Generators of primitives or Objects as zero-arity 'functions'
  * that return different values on each call.
- * 
+ *
  * @author palisades dot lakes at gmail dot com
  * @version 2019-04-01
  */
@@ -16,7 +16,7 @@ public interface Generator {
 
   public default String name () {
     throw Exceptions.unsupportedOperation(this,"name"); }
-  
+
   public default Object next () {
     throw Exceptions.unsupportedOperation(this,"next"); }
 

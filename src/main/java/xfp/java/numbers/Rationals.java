@@ -21,16 +21,16 @@ import xfp.java.prng.Generator;
 import xfp.java.prng.GeneratorBase;
 import xfp.java.prng.Generators;
 
-/** The set of rational numbers represented by 
+/** The set of rational numbers represented by
  * <code>Rational</code>
- * 
+ *
  * @author palisades dot lakes at gmail dot com
  * @version 2019-05-11
  */
 @SuppressWarnings("unchecked")
 public final class Rationals implements Set {
 
-   //--------------------------------------------------------------
+  //--------------------------------------------------------------
 
   public static final Rational[] toRational (final Number[] x) {
     final int n = x.length;
@@ -80,25 +80,25 @@ public final class Rationals implements Set {
 
     if (x instanceof Rational[]) { return (Rational[]) x; }
 
-    if (x instanceof byte[]) { 
+    if (x instanceof byte[]) {
       return toRational((byte[]) x); }
 
-    if (x instanceof short[]) { 
+    if (x instanceof short[]) {
       return toRational((short[]) x); }
 
-    if (x instanceof int[]) { 
+    if (x instanceof int[]) {
       return toRational((int[]) x); }
 
-    if (x instanceof long[]) { 
+    if (x instanceof long[]) {
       return toRational((long[]) x); }
 
-    if (x instanceof float[]) { 
+    if (x instanceof float[]) {
       return toRational((float[]) x); }
 
-    if (x instanceof double[]) { 
+    if (x instanceof double[]) {
       return toRational((double[]) x); }
 
-    if (x instanceof Number[]) { 
+    if (x instanceof Number[]) {
       return toRational((Number[]) x); }
 
     throw Exceptions.unsupportedOperation(
@@ -111,18 +111,18 @@ public final class Rationals implements Set {
   // TODO: is consistency with other algebraic structure classes
   // worth the indirection?
 
-  private final Rational add (final Rational q0, 
+  private final Rational add (final Rational q0,
                               final Rational q1) {
     assert contains(q0);
     assert contains(q1);
-    return q0.add(q1); } 
+    return q0.add(q1); }
 
   public final BinaryOperator<Rational> adder () {
     return new BinaryOperator<Rational> () {
       @Override
       public final String toString () { return "BF.add()"; }
       @Override
-      public final Rational apply (final Rational q0, 
+      public final Rational apply (final Rational q0,
                                    final Rational q1) {
         return Rationals.this.add(q0,q1); } }; }
 
@@ -139,7 +139,7 @@ public final class Rationals implements Set {
 
   private final Rational negate (final Rational q) {
     assert contains(q);
-    return q.negate(); } 
+    return q.negate(); }
 
   public final UnaryOperator<Rational> additiveInverse () {
     return new UnaryOperator<Rational> () {
@@ -151,18 +151,18 @@ public final class Rationals implements Set {
 
   //--------------------------------------------------------------
 
-  private final Rational multiply (final Rational q0, 
+  private final Rational multiply (final Rational q0,
                                    final Rational q1) {
     assert contains(q0);
     assert contains(q1);
-    return q0.multiply(q1); } 
+    return q0.multiply(q1); }
 
   public final BinaryOperator<Rational> multiplier () {
     return new BinaryOperator<Rational>() {
       @Override
       public final String toString () { return "BF.multiply()"; }
       @Override
-      public final Rational apply (final Rational q0, 
+      public final Rational apply (final Rational q0,
                                    final Rational q1) {
         return Rationals.this.multiply(q0,q1); } }; }
 
@@ -178,7 +178,7 @@ public final class Rationals implements Set {
     assert contains(q);
     // only a partial inverse
     if (q.isZero()) { return null; }
-    return q.reciprocal();  } 
+    return q.reciprocal();  }
 
   public final UnaryOperator<Rational> multiplicativeInverse () {
     return new UnaryOperator<Rational> () {
@@ -202,7 +202,7 @@ public final class Rationals implements Set {
   public final BiPredicate equivalence () {
     return new BiPredicate<Rational,Rational>() {
       @Override
-      public final boolean test (final Rational q0, 
+      public final boolean test (final Rational q0,
                                  final Rational q1) {
         return q0.equals(q1); } }; }
 
@@ -212,22 +212,22 @@ public final class Rationals implements Set {
    * (see {@link xfp.java.prng.DoubleSampler})
    * and convert to <code></code>
    * with {@link #DOUBLE_P} probability;
-   * otherwise return {@link #ZERO} or 
-   * {@link #ONE}, {@link #MINUS_ONE},  
+   * otherwise return {@link #ZERO} or
+   * {@link #ONE}, {@link #MINUS_ONE},
    * with equal probability (these are potential edge cases).
    */
 
-  public static final Generator 
+  public static final Generator
   fromBigIntegerGenerator (final UniformRandomProvider urp) {
     final double dp = 0.9;
     return new GeneratorBase ("fromBigIntegerGenerator") {
-      private final ContinuousSampler choose = 
+      private final ContinuousSampler choose =
         new ContinuousUniformSampler(urp,0.0,1.0);
-      private final Generator g0 = 
+      private final Generator g0 =
         Generators.bigIntegerGenerator(urp);
-      private final Generator g1 = 
+      private final Generator g1 =
         Generators.positiveBigIntegerGenerator(urp);
-      private final CollectionSampler edgeCases = 
+      private final CollectionSampler edgeCases =
         new CollectionSampler(
           urp,
           List.of(
@@ -237,7 +237,7 @@ public final class Rationals implements Set {
             Rational.TEN,
             Rational.MINUS_ONE));
       @Override
-      public Object next () { 
+      public Object next () {
         final boolean edge = choose.sample() > dp;
         if (edge) { return edgeCases.sample(); }
         return Rational.valueOf(
@@ -245,14 +245,14 @@ public final class Rationals implements Set {
           (BigInteger) g1.next()); } }; }
 
   // Is this characteristic of most inputs?
-  public static final Generator 
+  public static final Generator
   fromDoubleGenerator (final UniformRandomProvider urp) {
     final double dp = 0.9;
     return new GeneratorBase ("fromDoubleGenerator") {
-      private final ContinuousSampler choose = 
+      private final ContinuousSampler choose =
         new ContinuousUniformSampler(urp,0.0,1.0);
       private final Generator g = Doubles.finiteGenerator(urp);
-      private final CollectionSampler edgeCases = 
+      private final CollectionSampler edgeCases =
         new CollectionSampler(
           urp,
           List.of(
@@ -262,19 +262,19 @@ public final class Rationals implements Set {
             Rational.TEN,
             Rational.MINUS_ONE));
       @Override
-      public Object next () { 
+      public Object next () {
         final boolean edge = choose.sample() > dp;
         if (edge) { return edgeCases.sample(); }
         return Rational.valueOf(g.nextDouble()); } }; }
 
   // Is this characteristic of most inputs?
-  public static final Generator 
+  public static final Generator
   generator (final UniformRandomProvider urp) {
     return fromDoubleGenerator(urp); }
 
-  public static final Generator 
+  public static final Generator
   fromDoubleGenerator (final int n,
-             final UniformRandomProvider urp) {
+                       final UniformRandomProvider urp) {
     return new GeneratorBase ("fromDoubleGenerator:" + n) {
       final Generator g = fromDoubleGenerator(urp);
       @Override
@@ -283,7 +283,7 @@ public final class Rationals implements Set {
         for (int i=0;i<n;i++) { z[i] = (Rational) g.next(); }
         return z; } }; }
 
-  public static final Generator 
+  public static final Generator
   generator (final int n,
              final UniformRandomProvider urp) {
     return new GeneratorBase ("rationalGenerator:" + n) {
@@ -299,7 +299,7 @@ public final class Rationals implements Set {
   public final Supplier generator (final Map options) {
     final UniformRandomProvider urp = Set.urp(options);
     final Generator g = generator(urp);
-    return 
+    return
       new Supplier () {
       @Override
       public final Object get () { return g.next(); } }; }
@@ -328,17 +328,17 @@ public final class Rationals implements Set {
 
   private static final Rationals SINGLETON = new Rationals();
 
-  public static final Rationals get () { return SINGLETON; } 
+  public static final Rationals get () { return SINGLETON; }
 
   //--------------------------------------------------------------
 
-  public static final OneSetOneOperation ADDITIVE_MAGMA = 
+  public static final OneSetOneOperation ADDITIVE_MAGMA =
     OneSetOneOperation.magma(get().adder(),get());
 
-  public static final OneSetOneOperation MULTIPLICATIVE_MAGMA = 
+  public static final OneSetOneOperation MULTIPLICATIVE_MAGMA =
     OneSetOneOperation.magma(get().multiplier(),get());
 
-  public static final OneSetTwoOperations FIELD = 
+  public static final OneSetTwoOperations FIELD =
     OneSetTwoOperations.field(
       get().adder(),
       get().additiveIdentity(),

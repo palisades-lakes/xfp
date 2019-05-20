@@ -9,7 +9,7 @@ import xfp.java.prng.Generators;
 import xfp.java.prng.PRNG;
 
 //----------------------------------------------------------------
-/** Test desired properties of doubles. 
+/** Test desired properties of doubles.
  * <p>
  * <pre>
  * mvn -Dtest=xfp/java/test/numbers/LongsTest test > LongsTest.txt
@@ -25,8 +25,8 @@ public final class LongsTest {
   private static final int TRYS = 16 * 1024;
 
   //--------------------------------------------------------------
-  /** Will fail randomly roughly 1/2^n trials. */  
- 
+  /** Will fail randomly roughly 1/2^n trials. */
+
   private static final boolean hasNegativeSample (final Generator g,
                                                   final int n) {
     for (int i=0;i<n;i++) {
@@ -38,7 +38,7 @@ public final class LongsTest {
   public final void negativeSamplesTest () {
     final Generator g = Generators.longGenerator(
       PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
-    assertTrue(hasNegativeSample(g,TRYS)); } 
+    assertTrue(hasNegativeSample(g,TRYS)); }
 
   //--------------------------------------------------------------
 }

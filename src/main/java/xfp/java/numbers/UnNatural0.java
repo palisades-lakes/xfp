@@ -9,13 +9,13 @@ import java.util.Arrays;
 import java.util.Objects;
 
 /** immutable arbitrary-precision non-negative integers.
- * 
+ *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-11
+ * @version 2019-05-19
  */
 
 public final class UnNatural0 extends Number
-implements Comparable<UnNatural0> {
+implements Ringlike<UnNatural0> {
 
   private static final long serialVersionUID = 1L;
 
@@ -23,9 +23,9 @@ implements Comparable<UnNatural0> {
 
   public final boolean isZero () { return 0 == _mag.length; }
 
-  // The following fields are stable variables. A stable 
-  // variable's value changes at most once from the default zero 
-  // value to a non-zero stable value. A stable value is 
+  // The following fields are stable variables. A stable
+  // variable's value changes at most once from the default zero
+  // value to a non-zero stable value. A stable value is
   // calculated lazily on demand.
 
   private int bitCountPlusOne;
@@ -33,7 +33,7 @@ implements Comparable<UnNatural0> {
   private int lowestSetBitPlusTwo;
   //private int firstNonzeroIntNumPlusTwo;
 
-  /** This constant limits {@code mag.length} of Naturals to 
+  /** This constant limits {@code mag.length} of Naturals to
    * the supported range.
    */
   private static final int MAX_MAG_LENGTH =
@@ -45,7 +45,7 @@ implements Comparable<UnNatural0> {
   // TODO: may be useful to share, move somewhere else?
   //--------------------------------------------------------------
 
-  private static final int[] shiftLeft (final int[] mag, 
+  private static final int[] shiftLeft (final int[] mag,
                                         final int n) {
     final int nInts = n >>> 5;
     final int nBits = n & 0x1f;
@@ -70,7 +70,7 @@ implements Comparable<UnNatural0> {
 
   private static final int[] shiftLeft (final long x,
                                         final int leftShift) {
-    final int[] xs = { (int) (x >>> 32), 
+    final int[] xs = { (int) (x >>> 32),
                        (int) (x & 0xFFFFFFFFL), };
     return shiftLeft(xs,leftShift); }
 
@@ -140,9 +140,9 @@ implements Comparable<UnNatural0> {
   // add
   //--------------------------------------------------------------
 
-  private static final int[] add (final int[] x, 
+  private static final int[] add (final int[] x,
                                   final long val) {
-    assert 0L <= val; 
+    assert 0L <= val;
     long sum = 0;
     int xIndex = x.length;
     int[] result;
@@ -182,11 +182,11 @@ implements Comparable<UnNatural0> {
     return result; }
 
   //--------------------------------------------------------------
-  /** Adds the contents of the int arrays x and y. Allocate a new 
+  /** Adds the contents of the int arrays x and y. Allocate a new
    * int array to hold the answer.
    */
 
-  private static final int[] add (final int[] x, 
+  private static final int[] add (final int[] x,
                                   final int[] y) {
     // If x is shorter, swap the two arrays
     if (x.length < y.length) { return add(y,x); }
@@ -229,7 +229,7 @@ implements Comparable<UnNatural0> {
     final int intShift = bitShift >>> 5;
     final int remShift = bitShift & 0x1f;
     final boolean yCarry = (64 < (remShift + Numbers.hiBit(y)));
-    final int ny = intShift + (yCarry ? 3 : 2); 
+    final int ny = intShift + (yCarry ? 3 : 2);
 
     final int nx = x.length;
     int ix=nx-1;
@@ -242,7 +242,7 @@ implements Comparable<UnNatural0> {
     //Debug.println("nx>ny=" + (nx>ny));
     //Debug.println("x=" + toHexString(x));
     //Debug.println("y=" + toHexString(y));
-    //Debug.println("shift y=" 
+    //Debug.println("shift y="
     //+ Numbers.toHexString(shiftLeft(y,bitShift)));
     //Debug.println("bitShift=" + bitShift);
     //Debug.println("intShift=" + intShift);
@@ -266,7 +266,7 @@ implements Comparable<UnNatural0> {
     final long mid = (y << remShift);
     sum = (mid & 0xFFFFFFFFL);
     //Debug.println("ylo=" + toHexString(mid & 0xFFFFFFFFL));
-    if (0<=ix) { 
+    if (0<=ix) {
       //Debug.println("x[" + ix + "]=" + toHexString(x[ix]));
       sum += unsigned(x[ix--]); }
     //Debug.println("sum=" + toHexString(sum));
@@ -275,7 +275,7 @@ implements Comparable<UnNatural0> {
     sum = (mid >>> 32) + (sum >>> 32);
     //Debug.println("ymi=" + toHexString(mid >>> 32));
     //Debug.println("sum=" + toHexString(sum));
-    if (0<=ix) { 
+    if (0<=ix) {
       //Debug.println("x[" + ix + "]=" + toHexString(x[ix]));
       sum += unsigned(x[ix--]); }
     //Debug.println("sum=" + toHexString(sum));
@@ -286,12 +286,12 @@ implements Comparable<UnNatural0> {
       sum = (y >>> (64 - remShift)) + (sum >>> 32);
       //Debug.println("yhi=" + toHexString(y >>> (64 - remShift)));
       //Debug.println("sum=" + toHexString(sum));
-      if (0<=ix) { 
+      if (0<=ix) {
         //Debug.println("x[" + ix + "]=" + toHexString(x[ix]));
         sum += unsigned(x[ix--]); }
       //Debug.println("sum=" + toHexString(sum));
       r0[ir--] = (int) sum;
-      //Debug.println("r0=" + toHexString(r0)); 
+      //Debug.println("r0=" + toHexString(r0));
     }
 
     // handle carry propagation
@@ -355,7 +355,7 @@ implements Comparable<UnNatural0> {
   //      return result; }
   //    final int result[] = new int[2];
   //    if (little.length == 1) {
-  //      final long difference = 
+  //      final long difference =
   //        unsigned((int) val) - unsigned(little[0]);
   //      result[1] = (int) difference;
   //      // Subtract remainder of longer number while borrow
@@ -405,15 +405,15 @@ implements Comparable<UnNatural0> {
     return r; }
 
   // assuming little*2<sup>bitShift</sup> <= big
-  // big represents 
+  // big represents
   // sum<sub>i=0,n-1</sub> unsigned(big[n-1-i]) * 2 <sup>i*32</sup>
   // so big[0] is the most significant term; big[n-1] the least.
   //
   // if x = (little << (bitShift % 32)),
   // and intShift = bitShift/32,
-  // then x fits in 3 unsigned ints, xlo, xmi, xhi, 
+  // then x fits in 3 unsigned ints, xlo, xmi, xhi,
   // where xhi == 0 if (bitShift % 32) == 0, and
-  // little*2<sup>bitShift</sup> = 
+  // little*2<sup>bitShift</sup> =
   // (xlo * 2<sup>intShift*32</sup) +
   // (xmi * 2<sup>(intShift+1)*32</sup) +
   // (xhi * 2<sup>(intShift+2)*32</sup)
@@ -427,7 +427,7 @@ implements Comparable<UnNatural0> {
     final int result[] = new int[n];
     int i=n-1;
     // copy unaffected low order ints
-    for (;i>n-intShift-1;i--) { result[i] = big[i]; }
+    for (;i>(n-intShift-1);i--) { result[i] = big[i]; }
 
     final int remShift = bitShift & 0x1f;
     final long mid = (little << remShift);
@@ -436,18 +436,18 @@ implements Comparable<UnNatural0> {
 
     // Subtract common parts of both numbers
     difference = (unsigned(big[i]) - (mid & 0xFFFFFFFFL));
-    result[i] = (int) difference; 
+    result[i] = (int) difference;
     i--;
-    difference = (unsigned(big[i]) - (mid >>> 32)) 
+    difference = (unsigned(big[i]) - (mid >>> 32))
       + (difference >> 32);
-    result[i] = (int) difference; 
+    result[i] = (int) difference;
     i--;
     // TODO: i==0 implies remShift==0 ?
     if ((0<=i) && (0<remShift)) {
-      difference = 
+      difference =
         (unsigned(big[i]) - (little >>> (64 - remShift)))
         + (difference >> 32);
-      result[i] = (int) difference; 
+      result[i] = (int) difference;
       i--; }
 
     // Subtract remainder of longer number while borrow propagates
@@ -462,6 +462,7 @@ implements Comparable<UnNatural0> {
   // arithmetic
   //--------------------------------------------------------------
 
+  @Override
   public final UnNatural0 add (final UnNatural0 val) {
     if (val.isZero()) { return this; }
     if (isZero()) { return val; }
@@ -474,7 +475,7 @@ implements Comparable<UnNatural0> {
     return make(add(_mag,val)); }
 
   public final UnNatural0 add (final long val,
-                              final int leftShift) {
+                               final int leftShift) {
     if (isZero()) { return make(shiftLeft(val,leftShift)); }
     return make(add(_mag,val,leftShift)); }
 
@@ -488,6 +489,7 @@ implements Comparable<UnNatural0> {
     return make(subtract(_mag,val)); }
 
   // only when val <= this
+  @Override
   public final UnNatural0 subtract (final UnNatural0 val) {
     if (val.isZero()) { return this; }
     final int c = compareTo(val);
@@ -497,14 +499,14 @@ implements Comparable<UnNatural0> {
 
   // only when (val << leftShift) <= this
   public final UnNatural0 subtract (final long val,
-                                   final int leftShift) {
+                                    final int leftShift) {
     assert 0L <= val;
     if (0L == val) { return this; }
     return make(subtract(_mag,val,leftShift)); }
 
   // only when this <= (val << leftShift)
   public final UnNatural0 subtractFrom (final long val,
-                                       final int leftShift) {
+                                        final int leftShift) {
     assert 0L <= val;
     if (0L == val) { assert isZero(); return ZERO; }
     if (isZero()) { return make(shiftLeft(val,leftShift)); }
@@ -529,7 +531,7 @@ implements Comparable<UnNatural0> {
 
   private static final int TOOM_COOK_SQUARE_THRESHOLD = 216;
 
-  /** Returns a Natural whose value is {@code (this<sup>2</sup>)}. 
+  /** Returns a Natural whose value is {@code (this<sup>2</sup>)}.
    * If the invocation is recursive certain overflow checks are
    * skipped.
    * @param isRecursion whether this is a recursive invocation
@@ -558,7 +560,7 @@ implements Comparable<UnNatural0> {
    * into the
    * int array z. The contents of x are not changed.
    */
-  private static final int[] squareToLen (final int[] x, 
+  private static final int[] squareToLen (final int[] x,
                                           final int len,
                                           int[] z) {
     final int zlen = len << 1;
@@ -658,9 +660,9 @@ implements Comparable<UnNatural0> {
   }
 
   /** Squares a Natural using the Karatsuba squaring algorithm.
-   * It should be used when both numbers are larger than a certain 
-   * threshold (found experimentally). It is a recursive 
-   * divide-and-conquer algorithm that has better asymptotic 
+   * It should be used when both numbers are larger than a certain
+   * threshold (found experimentally). It is a recursive
+   * divide-and-conquer algorithm that has better asymptotic
    * performance than the algorithm used in squareToLen.
    */
   private final UnNatural0 squareKaratsuba () {
@@ -678,9 +680,9 @@ implements Comparable<UnNatural0> {
       .shiftLeft(half * 32).add(xls); }
 
   /** Squares a Natural using the 3-way Toom-Cook squaring
-   * algorithm. It should be used when both numbers are larger 
-   * than a certain threshold (found experimentally). It is a 
-   * recursive divide-and-conquer algorithm that has better 
+   * algorithm. It should be used when both numbers are larger
+   * than a certain threshold (found experimentally). It is a
+   * recursive divide-and-conquer algorithm that has better
    * asymptotic performance than the algorithm used in
    * squareToLen or squareKaratsuba.
    */
@@ -737,8 +739,8 @@ implements Comparable<UnNatural0> {
   // multiply
   //--------------------------------------------------------------
   /** The threshold value for using squaring code to perform
-   * multiplication of a {@code Natural} instance by itself. If 
-   * the number of ints in the number are larger than this value, 
+   * multiplication of a {@code Natural} instance by itself. If
+   * the number of ints in the number are larger than this value,
    * {@code multiply(this)} will return {@code square()}.
    */
   private static final int MULTIPLY_SQUARE_THRESHOLD = 20;
@@ -746,7 +748,7 @@ implements Comparable<UnNatural0> {
   //--------------------------------------------------------------
   /** The threshold value for using Karatsuba multiplication. If
    * the number of ints in both arrays are greater, then
-   * Karatsuba multiplication will be used. 
+   * Karatsuba multiplication will be used.
    */
 
   private static final int KARATSUBA_THRESHOLD = 80;
@@ -778,22 +780,22 @@ implements Comparable<UnNatural0> {
 
   /** Multiplies two Naturals using the Karatsuba multiplication
    * algorithm. This is a recursive divide-and-conquer algorithm
-   * which is more efficient for large numbers than what is 
-   * commonly called the grade-school" algorithm used in 
-   * multiplyToLen. If the numbers to be multiplied have length n, 
-   * the "grade-school" algorithm has an asymptotic complexity of 
-   * O(n^2). In contrast, the Karatsuba algorithm has complexity 
+   * which is more efficient for large numbers than what is
+   * commonly called the grade-school" algorithm used in
+   * multiplyToLen. If the numbers to be multiplied have length n,
+   * the "grade-school" algorithm has an asymptotic complexity of
+   * O(n^2). In contrast, the Karatsuba algorithm has complexity
    * of O(n^(log2(3))), or O(n^1.585). It achieves this
    * increased performance by doing 3 multiplies instead of 4 when
    * evaluating the product. As it has some overhead, should be
-   * used when both numbers are larger than a certain threshold 
+   * used when both numbers are larger than a certain threshold
    * (found experimentally).
    *
    * See: http://en.wikipedia.org/wiki/Karatsuba_algorithm
    */
 
   private static final UnNatural0 multiplyKaratsuba (final UnNatural0 x,
-                                                    final UnNatural0 y) {
+                                                     final UnNatural0 y) {
     final int xlen = x._mag.length;
     final int ylen = y._mag.length;
 
@@ -825,7 +827,7 @@ implements Comparable<UnNatural0> {
   /** The threshold value for using 3-way Toom-Cook multiplication.
    * If the number of ints in each array is greater than the
    * Karatsuba threshold, and the number of ints in at least one
-   * of the arrays is greater than this threshold, then 
+   * of the arrays is greater than this threshold, then
    * Toom-Cook multiplication will be used.
    */
   private static final int TOOM_COOK_THRESHOLD = 240;
@@ -834,18 +836,18 @@ implements Comparable<UnNatural0> {
    * multiplication.
    * @param lowerSize The size of the lower-order bit slices.
    * @param upperSize The size of the higher-order bit slices.
-   * @param slice The index of which slice is requested, which 
+   * @param slice The index of which slice is requested, which
    * must be a number from 0 to size-1. Slice 0 is the highest-
-   * order bits, and slice size-1 are the lowest-order bits. 
+   * order bits, and slice size-1 are the lowest-order bits.
    * Slice 0 may be of different size than the other slices.
    * @param fullsize The size of the larger integer array, used to
    * align slices to the appropriate position when multiplying
    * different-sized numbers.
    */
   private final UnNatural0 getToomSlice (final int lowerSize,
-                                        final int upperSize,
-                                        final int slice,
-                                        final int fullsize) {
+                                         final int upperSize,
+                                         final int slice,
+                                         final int fullsize) {
     final int len = _mag.length;
     final int offset = fullsize - len;
     int start;
@@ -868,10 +870,10 @@ implements Comparable<UnNatural0> {
     return make(intSlice); }
 
   /** Does an exact division (that is, the remainder is known to
-   * be zero) of the specified number by 3. This is used in 
-   * Toom-Cook multiplication. This is an efficient algorithm that 
-   * runs in linear time. If the argument is not exactly divisible 
-   * by 3, results are undefined. Note that this is expected to be 
+   * be zero) of the specified number by 3. This is used in
+   * Toom-Cook multiplication. This is an efficient algorithm that
+   * runs in linear time. If the argument is not exactly divisible
+   * by 3, results are undefined. Note that this is expected to be
    * called with positive arguments only.
    */
   private final UnNatural0 exactDivideBy3 () {
@@ -899,18 +901,18 @@ implements Comparable<UnNatural0> {
     return new UnNatural0(result); }
 
   /** Multiplies two Naturals using a 3-way Toom-Cook
-   * multiplication algorithm. This is a recursive 
-   * divide-and-conquer algorithm which is more efficient for 
-   * large numbers than what is commonly called the "grade-school" 
+   * multiplication algorithm. This is a recursive
+   * divide-and-conquer algorithm which is more efficient for
+   * large numbers than what is commonly called the "grade-school"
    * algorithm used in multiplyToLen. If the numbers to be
    * multiplied have length n, the "grade-school" algorithm has an
    * asymptotic complexity of O(n^2). In contrast, 3-way Toom-Cook
-   * has a complexity of about O(n^1.465). It achieves this 
-   * increased asymptotic performance by breaking each number into 
-   * three parts and by doing 5 multiplies instead of 9 when 
-   * evaluating the product. Due to overhead (additions, shifts, 
-   * and one division) in the Toom-Cook algorithm, it should only 
-   * be used when both numbers are larger than a certain threshold 
+   * has a complexity of about O(n^1.465). It achieves this
+   * increased asymptotic performance by breaking each number into
+   * three parts and by doing 5 multiplies instead of 9 when
+   * evaluating the product. Due to overhead (additions, shifts,
+   * and one division) in the Toom-Cook algorithm, it should only
+   * be used when both numbers are larger than a certain threshold
    * (found experimentally). This threshold is generally larger
    * than that for Karatsuba multiplication, so this algorithm is
    * generally only used when numbers become significantly larger.
@@ -930,7 +932,7 @@ implements Comparable<UnNatural0> {
    */
 
   private static final UnNatural0 multiplyToomCook3 (final UnNatural0 a,
-                                                    final UnNatural0 b) {
+                                                     final UnNatural0 b) {
     final int alen = a._mag.length;
     final int blen = b._mag.length;
 
@@ -943,7 +945,7 @@ implements Comparable<UnNatural0> {
     final int r = largest - (2 * k);
 
     // Obtain slices of the numbers. a2 and b2 are the most
-    // significant bits of the numbers a and b, and a0 and b0 the 
+    // significant bits of the numbers a and b, and a0 and b0 the
     // least significant.
     UnNatural0 a0, a1, a2, b0, b1, b2;
     a2 = a.getToomSlice(k,r,0,largest);
@@ -971,9 +973,9 @@ implements Comparable<UnNatural0> {
 
     // The algorithm requires two divisions by 2 and one by 3.
     // All divisions are known to be exact, that is, they do not
-    // produce remainders, and all results are positive. The 
-    // divisions by 2 are implemented as right shifts which are 
-    // relatively efficient, leaving only an exact division by 3, 
+    // produce remainders, and all results are positive. The
+    // divisions by 2 are implemented as right shifts which are
+    // relatively efficient, leaving only an exact division by 3,
     // which is done by a specialized linear-time algorithm.
     t2 = v2.subtract(vm1).exactDivideBy3();
     tm1 = v1.subtract(vm1).shiftRight(1);
@@ -994,7 +996,7 @@ implements Comparable<UnNatural0> {
   //--------------------------------------------------------------
 
   private static final UnNatural0 multiply (final int[] x,
-                                           final int y) {
+                                            final int y) {
     if (Integer.bitCount(y) == 1) {
       return make(shiftLeft(x,Integer.numberOfTrailingZeros(y))); }
     final int xlen = x.length;
@@ -1006,7 +1008,7 @@ implements Comparable<UnNatural0> {
       final long product = (unsigned(x[i]) * yl) + carry;
       rmag[rstart--] = (int) product;
       carry = product >>> 32; }
-    if (carry == 0L) { 
+    if (carry == 0L) {
       rmag = Arrays.copyOfRange(rmag,1,rmag.length); }
     else {
       rmag[rstart] = (int) carry; }
@@ -1083,7 +1085,7 @@ implements Comparable<UnNatural0> {
       z[i] = (int) carry; }
     return z; }
 
-  /** Multiplies leading elements of x and y into z. 
+  /** Multiplies leading elements of x and y into z.
    * No leading zeros in z.
    */
 
@@ -1099,7 +1101,7 @@ implements Comparable<UnNatural0> {
   //--------------------------------------------------------------
 
   private final UnNatural0 multiply (final UnNatural0 val,
-                                    final boolean isRecursion) {
+                                     final boolean isRecursion) {
     if ((val.isZero()) || (isZero())) { return ZERO; }
     final int xlen = _mag.length;
     if ((val == this) && (xlen > MULTIPLY_SQUARE_THRESHOLD)) {
@@ -1109,7 +1111,7 @@ implements Comparable<UnNatural0> {
 
     if ((xlen < KARATSUBA_THRESHOLD)
       || (ylen < KARATSUBA_THRESHOLD)) {
-      if (val._mag.length == 1) { 
+      if (val._mag.length == 1) {
         return multiply(_mag,val._mag[0]); }
       if (_mag.length == 1) {
         return multiply(val._mag,_mag[0]); }
@@ -1181,6 +1183,7 @@ implements Comparable<UnNatural0> {
 
   //--------------------------------------------------------------
 
+  @Override
   public final UnNatural0 multiply (final UnNatural0 val) {
     return multiply(val,false); }
 
@@ -1189,15 +1192,15 @@ implements Comparable<UnNatural0> {
   //--------------------------------------------------------------
   //  /** The threshold value for using Burnikel-Ziegler division. If
   //   * the number of ints in the divisor are larger than this value,
-  //   * Burnikel-Ziegler division may be used. This value is found 
+  //   * Burnikel-Ziegler division may be used. This value is found
   //   * experimentally to work well.
   //   */
   //  public static final int BURNIKEL_ZIEGLER_THRESHOLD = 80;
   //
   //  /** The offset value for using Burnikel-Ziegler division. If the
   //   * number of ints in the divisor exceeds the Burnikel-Ziegler
-  //   * threshold, and the number of ints in the dividend is greater 
-  //   * than the number of ints in the divisor plus this value, 
+  //   * threshold, and the number of ints in the dividend is greater
+  //   * than the number of ints in the divisor plus this value,
   //   * Burnikel-Ziegler division will be used. This
   //   * value is found experimentally to work well.
   //   */
@@ -1313,7 +1316,7 @@ implements Comparable<UnNatural0> {
   //  /**
   //   * Calculates {@code this / val} using the Burnikel-Ziegler
   //   * algorithm.
-  //   * 
+  //   *
   //   * @param val
   //   *          the divisor
   //   * @return {@code this / val}
@@ -1325,7 +1328,7 @@ implements Comparable<UnNatural0> {
   //  /**
   //   * Calculates {@code this % val} using the Burnikel-Ziegler
   //   * algorithm.
-  //   * 
+  //   *
   //   * @param val
   //   *          the divisor
   //   * @return {@code this % val}
@@ -1337,7 +1340,7 @@ implements Comparable<UnNatural0> {
   //  /**
   //   * Computes {@code this / val} and {@code this % val} using the
   //   * Burnikel-Ziegler algorithm.
-  //   * 
+  //   *
   //   * @param val
   //   *          the divisor
   //   * @return an array containing the quotient and remainder
@@ -1576,7 +1579,7 @@ implements Comparable<UnNatural0> {
 
   // shifts a up to len right n bits assumes no leading zeros,
   // 0<n<32
-  static void primitiveRightShift (final int[] a, 
+  static void primitiveRightShift (final int[] a,
                                    final int len,
                                    final int n) {
     final int n2 = 32 - n;
@@ -1679,9 +1682,9 @@ implements Comparable<UnNatural0> {
     }
   }
 
-  private static final int implMulAdd (final int[] out, 
+  private static final int implMulAdd (final int[] out,
                                        final int[] in,
-                                       int offset, 
+                                       int offset,
                                        final int len,
                                        final int k) {
     final long kLong = k & UNSIGNED_MASK;
@@ -1703,8 +1706,8 @@ implements Comparable<UnNatural0> {
    * resulting
    * carry.
    */
-  private static final int addOne (final int[] a, 
-                                   int offset, 
+  private static final int addOne (final int[] a,
+                                   int offset,
                                    int mlen,
                                    final int carry) {
     offset = a.length - 1 - mlen - offset;
@@ -1937,9 +1940,9 @@ implements Comparable<UnNatural0> {
   //    return valueOf(result);
   //  }
 
-  //--------------------------------------------------------------  
+  //--------------------------------------------------------------
   // Single Bit Operations
-  //--------------------------------------------------------------  
+  //--------------------------------------------------------------
   // TODO: check that high int is non-negative
   /**
    * Returns {@code true} if and only if the designated bit is
@@ -1980,7 +1983,7 @@ implements Comparable<UnNatural0> {
 
     for (int i = 0; i < result.length; i++) {
       result[result.length - i - 1] = getInt(i); }
-    result[result.length - intNum - 1] |= (1 << (n & 31)); 
+    result[result.length - intNum - 1] |= (1 << (n & 31));
     return make(result); }
 
   /**
@@ -2029,7 +2032,7 @@ implements Comparable<UnNatural0> {
       new int[Math.max(intLength(),intNum + 2)];
     for (int i = 0; i < result.length; i++) {
       result[result.length - i - 1] = getInt(i); }
-    result[result.length - intNum - 1] ^= (1 << (n & 31)); 
+    result[result.length - intNum - 1] ^= (1 << (n & 31));
     return make(result); }
 
   /**
@@ -2175,8 +2178,15 @@ implements Comparable<UnNatural0> {
   @Override
   public String toString () {
     final StringBuilder b = new StringBuilder("0x");
-    for (final int w : _mag) { b.append(Integer.toHexString(w)); }
+    for (final int mi : _mag) {
+      b.append(String.format("%08x",Integer.valueOf(mi))); }
     return b.toString(); }
+
+  /** hex string. */
+  @Override
+  public String toString (final int radix) { 
+    assert radix == 0x10;
+    return Bei.toHexString(_mag); }
 
   //--------------------------------------------------------------
   // Number interface+
@@ -2199,11 +2209,11 @@ implements Comparable<UnNatural0> {
     final int byteLen = (bitLength() / 8) + 1;
     final byte[] byteArray = new byte[byteLen];
     for (
-      int i = byteLen - 1, 
-      bytesCopied = 4, 
-      nextInt = 0, 
-      intIndex = 0; 
-      i >= 0; 
+      int i = byteLen - 1,
+      bytesCopied = 4,
+      nextInt = 0,
+      intIndex = 0;
+      i >= 0;
       i--) {
       if (bytesCopied == 4) {
         nextInt = getInt(intIndex++);
@@ -2227,7 +2237,7 @@ implements Comparable<UnNatural0> {
     return result; }
 
   //--------------------------------------------------------------
-  
+
   @Override
   public final float floatValue () {
     if (isZero()) { return 0.0f; }
@@ -2241,10 +2251,10 @@ implements Comparable<UnNatural0> {
       return Float.POSITIVE_INFINITY; }
 
     // We need the top SIGNIFICAND_WIDTH bits, including the
-    // "implicit" one bit. To make rounding easier, we pick out 
-    // the top SIGNIFICAND_WIDTH + 1 bits, so we have one to help 
+    // "implicit" one bit. To make rounding easier, we pick out
+    // the top SIGNIFICAND_WIDTH + 1 bits, so we have one to help
     //us round up or down. twiceSignifFloor will contain the top
-    // SIGNIFICAND_WIDTH + 1 bits, and signifFloor the top 
+    // SIGNIFICAND_WIDTH + 1 bits, and signifFloor the top
     // SIGNIFICAND_WIDTH.
     // It helps to consider the real number signif = abs(this) *
     // 2^(SIGNIFICAND_WIDTH - 1 - exponent).
@@ -2334,11 +2344,11 @@ implements Comparable<UnNatural0> {
       return Double.POSITIVE_INFINITY; }
 
     // We need the top SIGNIFICAND_WIDTH bits, including the
-    // "implicit" one bit. To make rounding easier, we pick out 
-    // the top SIGNIFICAND_WIDTH + 1 bits, so we have one to help 
+    // "implicit" one bit. To make rounding easier, we pick out
+    // the top SIGNIFICAND_WIDTH + 1 bits, so we have one to help
     // us round up or down. twiceSignifFloor will contain the top
-    // SIGNIFICAND_WIDTH + 1 bits, and signifFloor the top 
-    // SIGNIFICAND_WIDTH. 
+    // SIGNIFICAND_WIDTH + 1 bits, and signifFloor the top
+    // SIGNIFICAND_WIDTH.
     // It helps to consider the real number signif = abs(this) *
     // 2^(SIGNIFICAND_WIDTH - 1 - exponent).
     final int shift = exponent - Doubles.SIGNIFICAND_BITS;
@@ -2371,13 +2381,13 @@ implements Comparable<UnNatural0> {
       (unsigned(highBits) << 32) | unsigned(lowBits);
 
     // remove the implied bit
-    final long signifFloor = 
-      (twiceSignifFloor >> 1) & Doubles.STORED_SIGNIFICAND_MASK; 
+    final long signifFloor =
+      (twiceSignifFloor >> 1) & Doubles.STORED_SIGNIFICAND_MASK;
     // We round up if either the fractional part of signif is
-    // strictly greater than 0.5 (which is true if the 0.5 bit 
-    // is set and any lower bit is set), or if the fractional 
-    // part of signif is >= 0.5 and signifFloor is odd (which is 
-    // true if both the 0.5 bit and the 1 bit are set). This is 
+    // strictly greater than 0.5 (which is true if the 0.5 bit
+    // is set and any lower bit is set), or if the fractional
+    // part of signif is >= 0.5 and signifFloor is odd (which is
+    // true if both the 0.5 bit and the 1 bit are set). This is
     // equivalent to the desired HALF_EVEN rounding.
 
     final boolean increment =
@@ -2391,9 +2401,9 @@ implements Comparable<UnNatural0> {
         + Doubles.EXPONENT_BIAS)) << Doubles.STORED_SIGNIFICAND_BITS;
     bits += signifRounded;
     // If signifRounded == 2^53, we'd need to set all of the
-    // significand bits to zero and add 1 to the exponent. This is 
-    // exactly the behavior we get from just adding signifRounded 
-    // to bits directly. If the exponent is Double.MAX_EXPONENT, 
+    // significand bits to zero and add 1 to the exponent. This is
+    // exactly the behavior we get from just adding signifRounded
+    // to bits directly. If the exponent is Double.MAX_EXPONENT,
     // we round up (correctly) to Double.POSITIVE_INFINITY.
     bits |= 1 & Doubles.SIGN_MASK;
     return Double.longBitsToDouble(bits);
@@ -2454,7 +2464,7 @@ implements Comparable<UnNatural0> {
   private UnNatural0 (final int[] mag) { _mag = mag; }
 
   private static final UnNatural0 make (final int[] m) {
-    final int[] m1 = unsafeStripLeadingZeroInts(m); 
+    final int[] m1 = unsafeStripLeadingZeroInts(m);
     checkMagnitude(m1);
     return new UnNatural0(m1); }
 
@@ -2462,15 +2472,15 @@ implements Comparable<UnNatural0> {
   public static final UnNatural0 valueOf (final int[] m) {
     return make(Arrays.copyOf(m,m.length)); }
 
-  public static final UnNatural0 valueOf (final byte[] b, 
-                                         final int off,
-                                         final int len) {
+  public static final UnNatural0 valueOf (final byte[] b,
+                                          final int off,
+                                          final int len) {
     return make(stripLeadingZeroBytes(b,off,len)); }
 
-  public static final UnNatural0 valueOf (final byte[] b) { 
+  public static final UnNatural0 valueOf (final byte[] b) {
     return valueOf(b,0,b.length); }
 
-  public static final UnNatural0 valueOf (final BigInteger bi) { 
+  public static final UnNatural0 valueOf (final BigInteger bi) {
     return valueOf(bi.toByteArray()); }
 
   //-------------------------------------------------------------
@@ -2509,8 +2519,8 @@ implements Comparable<UnNatural0> {
 
   //-------------------------------------------------------------
 
-  public static final UnNatural0 valueOf (final String s, 
-                                         final int radix) {
+  public static final UnNatural0 valueOf (final String s,
+                                          final int radix) {
     final int len = s.length();
     assert 0 < len;
     assert Character.MIN_RADIX <= radix;
@@ -2562,12 +2572,12 @@ implements Comparable<UnNatural0> {
   //--------------------------------------------------------------
 
   private static final int MAX_CONSTANT = 16;
-  private static final UnNatural0 posConst[] = 
+  private static final UnNatural0 posConst[] =
     new UnNatural0[MAX_CONSTANT+1];
 
-  /** The cache of powers of each radix. This allows us to not 
-   * have to recalculate powers of radix^(2^n) more than once. 
-   * This speeds Schoenhage recursive base conversion 
+  /** The cache of powers of each radix. This allows us to not
+   * have to recalculate powers of radix^(2^n) more than once.
+   * This speeds Schoenhage recursive base conversion
    * significantly.
    */
   private static volatile UnNatural0[][] powerCache;
@@ -2583,12 +2593,12 @@ implements Comparable<UnNatural0> {
       magnitude[0] = i;
       posConst[i] = make(magnitude); }
     // Initialize the cache of radix^(2^x) values used for base
-    // conversion with just the very first value. Additional 
+    // conversion with just the very first value. Additional
     // values will be created on demand.
     powerCache = new UnNatural0[Character.MAX_RADIX + 1][];
     logCache = new double[Character.MAX_RADIX + 1];
     for (
-      int i = Character.MIN_RADIX; 
+      int i = Character.MIN_RADIX;
       i <= Character.MAX_RADIX;
       i++) {
       powerCache[i] = new UnNatural0[] { UnNatural0.valueOf(i) };
@@ -2615,7 +2625,7 @@ implements Comparable<UnNatural0> {
   //--------------------------------------------------------------
 
   public static final UnNatural0 valueOf (final long x,
-                                         final int leftShift) {
+                                          final int leftShift) {
     if (0L == x) { return ZERO; }
     assert 0L < x;
     return make(shiftLeft(x,leftShift)); }

@@ -7,13 +7,13 @@ import java.math.BigInteger;
 import java.util.Arrays;
 
 /** immutable arbitrary-precision non-negative integers.
- * 
+ *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-18
+ * @version 2019-05-19
  */
 
 public final class UnNatural extends Number
-implements Comparable<UnNatural> {
+implements Ringlike<UnNatural> {
 
   private static final long serialVersionUID = 1L;
 
@@ -21,7 +21,7 @@ implements Comparable<UnNatural> {
 
   public final boolean isZero () { return 0 == _mag.length; }
 
-  /** This constant limits {@code mag.length} of Naturals to 
+  /** This constant limits {@code mag.length} of Naturals to
    * the supported range.
    */
   private static final int MAX_MAG_LENGTH =
@@ -31,16 +31,17 @@ implements Comparable<UnNatural> {
   // arithmetic
   //--------------------------------------------------------------
 
+  @Override
   public final UnNatural add (final UnNatural m) {
     //if (m.isZero()) { return this; }
     //if (isZero()) { return m; }
     return unsafe(Bei.add(_mag,m._mag)); }
 
-//  public final UnNatural add (final long m) {
-//    assert 0L <= m;
-//    if (0L == m) { return this; }
-//    //if (isZero()) { return valueOf(m); }
-//    return unsafe(Bei.add(_mag,m)); }
+  //  public final UnNatural add (final long m) {
+  //    assert 0L <= m;
+  //    if (0L == m) { return this; }
+  //    //if (isZero()) { return valueOf(m); }
+  //    return unsafe(Bei.add(_mag,m)); }
 
   public final UnNatural add (final long m,
                               final int shift) {
@@ -57,11 +58,12 @@ implements Comparable<UnNatural> {
     return unsafe(Bei.subtract(_mag,m)); }
 
   // only when val <= this
+  @Override
   public final UnNatural subtract (final UnNatural m) {
-//    if (m.isZero()) { return this; }
-//    final int c = compareTo(m);
-//    assert 0L <= c;
-//    if (c == 0) { return ZERO; }
+    //    if (m.isZero()) { return this; }
+    //    final int c = compareTo(m);
+    //    assert 0L <= c;
+    //    if (c == 0) { return ZERO; }
     return unsafe(Bei.subtract(_mag,m._mag)); }
 
   // only when (val << leftShift) <= this
@@ -81,6 +83,7 @@ implements Comparable<UnNatural> {
 
   //--------------------------------------------------------------
 
+  @Override
   public final UnNatural multiply (final UnNatural val) {
     return make(Bei.multiply(_mag,val._mag)); }
 
@@ -174,6 +177,12 @@ implements Comparable<UnNatural> {
   @Override
   public String toString () { return Bei.toHexString(_mag); }
 
+  /** hex string. */
+  @Override
+  public String toString (final int radix) { 
+    assert radix == 0x10;
+    return Bei.toHexString(_mag); }
+
   //--------------------------------------------------------------
   // Number interface+
   //--------------------------------------------------------------
@@ -185,7 +194,7 @@ implements Comparable<UnNatural> {
     return Bei.bigIntegerValue(_mag); }
 
   @Override
-  public final int intValue () { 
+  public final int intValue () {
     return Bei.intValue(_mag); }
 
   @Override
@@ -214,7 +223,7 @@ implements Comparable<UnNatural> {
   private UnNatural (final int[] mag) { _mag = mag; }
 
   private static final UnNatural make (final int[] m) {
-    final int[] m1 = Bei.stripLeadingZeros(m); 
+    final int[] m1 = Bei.stripLeadingZeros(m);
     checkMagnitude(m1);
     return new UnNatural(m1); }
 
@@ -226,20 +235,20 @@ implements Comparable<UnNatural> {
   public static final UnNatural valueOf (final int[] m) {
     return make(Arrays.copyOf(m,m.length)); }
 
-  public static final UnNatural valueOf (final byte[] b, 
+  public static final UnNatural valueOf (final byte[] b,
                                          final int off,
                                          final int len) {
     return make(Bei.stripLeadingZeros(b,off,len)); }
 
-  public static final UnNatural valueOf (final byte[] b) { 
+  public static final UnNatural valueOf (final byte[] b) {
     return valueOf(b,0,b.length); }
 
-  public static final UnNatural valueOf (final BigInteger bi) { 
+  public static final UnNatural valueOf (final BigInteger bi) {
     return valueOf(bi.toByteArray()); }
 
   //-------------------------------------------------------------
 
-  public static final UnNatural valueOf (final String s, 
+  public static final UnNatural valueOf (final String s,
                                          final int radix) {
     return make(Bei.valueOf(s,radix)); }
 
@@ -251,7 +260,7 @@ implements Comparable<UnNatural> {
   //--------------------------------------------------------------
 
   private static final int MAX_CONSTANT = 16;
-  private static final UnNatural posConst[] = 
+  private static final UnNatural posConst[] =
     new UnNatural[MAX_CONSTANT+1];
 
   private static volatile UnNatural[][] powerCache;
@@ -265,12 +274,12 @@ implements Comparable<UnNatural> {
       magnitude[0] = i;
       posConst[i] = make(magnitude); }
     // Initialize the cache of radix^(2^x) values used for base
-    // conversion with just the very first value. Additional 
+    // conversion with just the very first value. Additional
     // values will be created on demand.
     powerCache = new UnNatural[Character.MAX_RADIX + 1][];
     logCache = new double[Character.MAX_RADIX + 1];
     for (
-      int i = Character.MIN_RADIX; 
+      int i = Character.MIN_RADIX;
       i <= Character.MAX_RADIX;
       i++) {
       powerCache[i] = new UnNatural[] { UnNatural.valueOf(i) };

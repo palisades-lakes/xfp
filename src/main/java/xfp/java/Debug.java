@@ -20,16 +20,16 @@ public final class Debug {
 
   public static PrintStream OUT = System.out;
 
-   //--------------------------------------------------------------
+  //--------------------------------------------------------------
   // methods
   //--------------------------------------------------------------
-  /** Hex string representation of the bits 
-   * implementing the double. Not at all the same as 
+  /** Hex string representation of the bits
+   * implementing the double. Not at all the same as
    * {@link Double#toHexString}.
    */
 
   public static final String hexBits (final double x) {
-    return 
+    return
       Long.toHexString(Double.doubleToLongBits(x))
       .toUpperCase(); }
 
@@ -76,8 +76,8 @@ public final class Debug {
   public static final void printf (final String format,
                                    final double arg0,
                                    final double arg1) {
-    if (DEBUG) { 
-      OUT.printf(format, 
+    if (DEBUG) {
+      OUT.printf(format,
         Double.valueOf(arg0), Double.valueOf(arg1)); } }
 
   //--------------------------------------------------------------

@@ -22,9 +22,9 @@ import xfp.java.algebra.TwoSetsOneOperation;
 import xfp.java.numbers.Doubles;
 import xfp.java.prng.Generator;
 
-/** The set of instances of <code>double[n]</code>, for some given 
+/** The set of instances of <code>double[n]</code>, for some given
  * <code>n</code>.
- * 
+ *
  * @author palisades dot lakes at gmail dot com
  * @version 2019-04-27
  */
@@ -36,21 +36,21 @@ public final class Dn extends LinearSpaceLike {
   // operations on arrays of double
   // TODO: better elsewhere?
   //--------------------------------------------------------------
-  
+
   public static final double[] concatenate (final double[] x0,
                                             final double[] x1) {
     final double[] x = new double[x0.length + x1.length];
     for (int i=0;i<x0.length;i++) { x[i] = x0[i]; }
     for (int i=0;i<x1.length;i++) { x[i+x0.length] = x1[i]; }
     return x; }
-  
+
   //--------------------------------------------------------------
 
   public static final double[] minus (final double[] x) {
     final double[] y = new double[x.length];
     for (int i=0;i<x.length;i++) { y[i] = -x[i]; }
     return y; }
-  
+
   //--------------------------------------------------------------
 
   public static final double l1Dist (final double[] x0,
@@ -60,7 +60,7 @@ public final class Dn extends LinearSpaceLike {
     final Accumulator a = RationalFloatAccumulator.make();
     for (int i=0;i<n;i++) { a.add(Math.abs(x0[i]-x1[i])); }
     return a.doubleValue(); }
-  
+
   //--------------------------------------------------------------
 
   public static final double l1Norm (final double[] x) {
@@ -68,33 +68,33 @@ public final class Dn extends LinearSpaceLike {
     final Accumulator a = RationalFloatAccumulator.make();
     for (int i=0;i<n;i++) { a.add(Math.abs(x[i])); }
     return a.doubleValue(); }
-  
+
   //--------------------------------------------------------------
 
   public static final double maxAbs (final double[] x) {
     double m = NEGATIVE_INFINITY;
-    for (int i=0;i<x.length;i++) { 
+    for (int i=0;i<x.length;i++) {
       m = Math.max(m,Math.abs(x[i])); }
     return m; }
-  
+
   //--------------------------------------------------------------
 
   public static final double max (final double[] x) {
     double m = NEGATIVE_INFINITY;
     for (int i=0;i<x.length;i++) { m = Math.max(m,x[i]); }
     return m; }
-  
+
   //--------------------------------------------------------------
 
   public static final double min (final double[] x) {
     double m = POSITIVE_INFINITY;
     for (int i=0;i<x.length;i++) { m = Math.min(m,x[i]); }
     return m; }
-  
+
   //--------------------------------------------------------------
   /** Return the condition number for summing the elements
    * (might be {@link Double#POSITIVE_INFINITY}). */
-  
+
   public static final double conditionSum (final double[] x) {
     // TODO: choose accumulator based on array length??
     final Accumulator numerator = ZhuHayesAccumulator.make();
@@ -105,25 +105,25 @@ public final class Dn extends LinearSpaceLike {
     final double n = numerator.doubleValue();
     final double d = Math.abs(denominator.doubleValue());
     if (0.0 == d) {
-   // TODO: is this right? NaN or infinity better?
-      if (0.0 == n) { return 1.0; } 
+      // TODO: is this right? NaN or infinity better?
+      if (0.0 == n) { return 1.0; }
       return Double.POSITIVE_INFINITY; }
     return n / d; }
-  
-//  public static final double conditionSum (final double[] x) {
-//    // TODO: use an accurate summation algorithm?
-//    double numerator = 0.0;
-//    double denominator = 0.0;
-//    for (final double xi : x) {
-//      numerator += Math.abs(xi);
-//      denominator += xi; }
-//    return numerator / Math.abs(denominator); }
-  
+
+  //  public static final double conditionSum (final double[] x) {
+  //    // TODO: use an accurate summation algorithm?
+  //    double numerator = 0.0;
+  //    double denominator = 0.0;
+  //    for (final double xi : x) {
+  //      numerator += Math.abs(xi);
+  //      denominator += xi; }
+  //    return numerator / Math.abs(denominator); }
+
   //--------------------------------------------------------------
   // operations for algebraic structures over double[] arrays.
   //--------------------------------------------------------------
 
-  public final double[] add (final double[] x0, 
+  public final double[] add (final double[] x0,
                              final double[] x1) {
     assert contains(x0);
     assert contains(x1);
@@ -132,7 +132,7 @@ public final class Dn extends LinearSpaceLike {
     return qq; }
 
   @Override
-  public final double[] add (final Object x0, 
+  public final double[] add (final Object x0,
                              final Object x1) {
     return add((double[]) x0, (double[]) x1); }
 
@@ -148,33 +148,33 @@ public final class Dn extends LinearSpaceLike {
 
   public final double[] negate (final double[] x) {
     assert contains(x);
-    return minus(x); } 
+    return minus(x); }
 
   @Override
   public final double[] negate (final Object x) {
-    return negate((double[]) x); } 
+    return negate((double[]) x); }
 
   //--------------------------------------------------------------
 
-  public final double[] scale (final double a, 
+  public final double[] scale (final double a,
                                final double[] x) {
     assert contains(x);
     final double[] qq = new double[dimension()];
-    for (int i=0;i<dimension();i++) { 
+    for (int i=0;i<dimension();i++) {
       qq[i] = a * x[i]; }
-    return qq; } 
+    return qq; }
 
   @Override
-  public final double[] scale (final Object a, 
+  public final double[] scale (final Object a,
                                final Object x) {
-    return scale(((Number) a).doubleValue(), (double[]) x); } 
+    return scale(((Number) a).doubleValue(), (double[]) x); }
 
   //--------------------------------------------------------------
   // Set methods
   //--------------------------------------------------------------
 
   @Override
-  public final boolean equals (final Object x0, 
+  public final boolean equals (final Object x0,
                                final Object x1) {
     assert contains(x0);
     assert contains(x1);
@@ -191,15 +191,15 @@ public final class Dn extends LinearSpaceLike {
     return Array.getLength(element) == dimension(); }
 
   //--------------------------------------------------------------
-  /** Intended primarily for testing. 
+  /** Intended primarily for testing.
    */
 
   @Override
   public final Supplier generator (final Map options) {
     final UniformRandomProvider urp = Set.urp(options);
-    return 
+    return
       new Supplier () {
-      final Generator g = 
+      final Generator g =
         Doubles.finiteGenerator(dimension(),urp);
       @Override
       public final Object get () { return g.next(); } }; }
@@ -218,13 +218,13 @@ public final class Dn extends LinearSpaceLike {
 
   private Dn (final int dimension) { super(dimension); }
 
-  private static final IntObjectMap<Dn> _cache = 
+  private static final IntObjectMap<Dn> _cache =
     new IntObjectHashMap();
 
   public static final Dn get (final int dimension) {
     final Dn dn0 = _cache.get(dimension);
     if (null != dn0) { return dn0; }
-    final Dn dn1 = new Dn(dimension); 
+    final Dn dn1 = new Dn(dimension);
     _cache.put(dimension,dn1);
     return dn1; }
 
@@ -239,25 +239,25 @@ public final class Dn extends LinearSpaceLike {
    * any known rational array.
    */
 
-  private static final TwoSetsOneOperation 
-  makeSpace (final int n) { 
+  private static final TwoSetsOneOperation
+  makeSpace (final int n) {
     return
       TwoSetsOneOperation.floatingPointSpace(
         Dn.get(n).scaler(),
         Dn.magma(n),
         Doubles.FLOATING_POINT); }
 
-  private static final IntObjectMap<TwoSetsOneOperation> 
+  private static final IntObjectMap<TwoSetsOneOperation>
   _spaceCache = new IntObjectHashMap();
 
   /** n-dimensional floating point space, implemented with
    * <code>double[]</code>.
    */
-  public static final TwoSetsOneOperation 
+  public static final TwoSetsOneOperation
   space (final int dimension) {
     final TwoSetsOneOperation space0 = _spaceCache.get(dimension);
     if (null != space0) { return space0; }
-    final TwoSetsOneOperation space1 = makeSpace(dimension); 
+    final TwoSetsOneOperation space1 = makeSpace(dimension);
     _spaceCache.put(dimension,space1);
     return space1; }
 

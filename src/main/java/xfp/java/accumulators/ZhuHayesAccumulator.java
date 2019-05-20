@@ -101,15 +101,15 @@ implements Accumulator<ZhuHayesAccumulator> {
   private double errTwo = Double.NaN;
 
   /** Update {@link #sumTwo} and {@link #errTwo} so that
-   * <code>{@link #sumTwo} == x0 + x1</code> 
+   * <code>{@link #sumTwo} == x0 + x1</code>
    * (sum rounded to nearest double), and
-   * <code>rationalSum({@link #sumTwo},{@link #errTwo}) 
-   * == rationalSum(x0,x1)</code> 
+   * <code>rationalSum({@link #sumTwo},{@link #errTwo})
+   * == rationalSum(x0,x1)</code>
    * (exact sums, implemented, for example, with arbitrary
    * precision rationals)
    */
 
-  private final void twoSum (final double x0, 
+  private final void twoSum (final double x0,
                              final double x1) {
     // might get +/- Infinity due to overflow
     sumTwo = x0 + x1;
@@ -128,8 +128,8 @@ implements Accumulator<ZhuHayesAccumulator> {
     for (int ii=0;ii<n[0]; ii++) {
       final double xii = x[ii];
       if (0.0 != xii) {
-        twoSum(s,xii); 
-        s = sumTwo; 
+        twoSum(s,xii);
+        s = sumTwo;
         if (! Double.isFinite(s)) { return s; }
         x[ii] = errTwo; } }
     // Step 3
@@ -193,7 +193,7 @@ implements Accumulator<ZhuHayesAccumulator> {
           // Step 3(5)(d)(iii)
           final double s2 = iFastSum(x, n, false);
           // Step 3(5)(d)(iv)
-          s = round3(s, s1, s2); 
+          s = round3(s, s1, s2);
           if (! Double.isFinite(s)) { return s; } }
         // Step 3(5)(e)
         return s; } } }
@@ -210,8 +210,8 @@ implements Accumulator<ZhuHayesAccumulator> {
 
   //--------------------------------------------------------------
 
-  //  private static void twoInc (final double[] s, 
-  //                              final double[] e, 
+  //  private static void twoInc (final double[] s,
+  //                              final double[] e,
   //                              final double x) {
   //    // might get +/- Infinity due to overflow
   //    final int j = biasedExponent(x);
@@ -220,8 +220,8 @@ implements Accumulator<ZhuHayesAccumulator> {
   //    final double z = s[j] - sj;
   //    e[j] += (sj - (s[j] - z)) + (x - z); }
 
-  private static void twoInc (final double[] s, 
-                              final double[] e, 
+  private static void twoInc (final double[] s,
+                              final double[] e,
                               final double x) {
     // might get +/- Infinity due to overflow
     final int j = biasedExponent(x);
@@ -237,16 +237,16 @@ implements Accumulator<ZhuHayesAccumulator> {
   // size and arraycopy from that?
 
   private final void zeroB () {
-    Arrays.fill(b1,0.0); 
+    Arrays.fill(b1,0.0);
     Arrays.fill(b2,0.0); }
 
   //  private final void zeroB () {
-  //    b1[0] = 0.0; 
-  //    b2[0] = 0.0; 
+  //    b1[0] = 0.0;
+  //    b2[0] = 0.0;
   //    for (int j=1; j<NACCUMULATORS; j++) {
   //      final int n_j = NACCUMULATORS-j;
   //      final int n = (n_j<j) ? n_j : j;
-  //      System.arraycopy(b1,0,b1,j,n); 
+  //      System.arraycopy(b1,0,b1,j,n);
   //      System.arraycopy(b1,0,b2,j,n); } }
 
   //--------------------------------------------------------------
@@ -266,7 +266,7 @@ implements Accumulator<ZhuHayesAccumulator> {
       twoInc(b1,b2,x); }
 
     // Step 4(6)(c)
-    // swap 
+    // swap
     final double[] tmp1 = a1;
     final double[] tmp2 = a2;
     a1 = b1;
@@ -300,7 +300,7 @@ implements Accumulator<ZhuHayesAccumulator> {
   //--------------------------------------------------------------
 
   @Override
-  public final Object value () { 
+  public final Object value () {
     return Double.valueOf(doubleValue()); }
 
   private static final double[] v =  new double[2*NACCUMULATORS];
@@ -328,7 +328,7 @@ implements Accumulator<ZhuHayesAccumulator> {
     // Step 4(5)
     i += 1;
     // Step 4(6)
-    if (i >= NADDS) { i = compact(); } 
+    if (i >= NADDS) { i = compact(); }
     return this; }
 
   //--------------------------------------------------------------
@@ -339,7 +339,7 @@ implements Accumulator<ZhuHayesAccumulator> {
     final double x2 = x*x;
     final double e = Math.fma(x,x,-x2);
     add(x2);
-    add(e); 
+    add(e);
     return this; }
 
   //--------------------------------------------------------------
@@ -352,7 +352,7 @@ implements Accumulator<ZhuHayesAccumulator> {
     final double x01 = x0*x1;
     final double e = Math.fma(x0,x1,-x01);
     add(x01);
-    add(e); 
+    add(e);
     return this; }
 
   //--------------------------------------------------------------

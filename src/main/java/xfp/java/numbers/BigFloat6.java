@@ -5,16 +5,16 @@ import java.util.Objects;
 
 import xfp.java.exceptions.Exceptions;
 
-/** A sign times a {@link UnNatural0} significand times 2 to a 
+/** A sign times a {@link UnNatural0} significand times 2 to a
  * <code>int</code> exponent.
- * 
+ *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-11
+ * @version 2019-05-19
  */
 
-public final class BigFloat6 
+public final class BigFloat6
 extends Number
-implements Comparable<BigFloat6> {
+implements Ringlike<BigFloat6> {
 
   private static final long serialVersionUID = 1L;
 
@@ -42,11 +42,12 @@ implements Comparable<BigFloat6> {
 
   public final boolean isZero () { return isZero(significand()); }
 
-  public final boolean isOne () { 
+  public final boolean isOne () {
     return BigFloat6.ONE.equals(this); }
 
   //--------------------------------------------------------------
 
+  @Override
   public final BigFloat6 negate () {
     if (isZero()) { return this; }
     return valueOf(! nonNegative(),significand(),exponent()); }
@@ -56,17 +57,17 @@ implements Comparable<BigFloat6> {
    */
 
   private static final BigFloat6 add (final boolean n1,
-                                     final long t1,
-                                     final int leftShift,
-                                     final boolean n0,
-                                     final UnNatural0 t0,
-                                     final int e) {
+                                      final long t1,
+                                      final int leftShift,
+                                      final boolean n0,
+                                      final UnNatural0 t0,
+                                      final int e) {
     //assert t0.signum() >= 0;
     if (n0 ^ n1) { // different signs
       final int c01 = t0.compareTo(t1,leftShift);
       if (0 == c01) { return ZERO; }
       // t1 > t0
-      if (0 > c01) { 
+      if (0 > c01) {
         return valueOf(n1, t0.subtractFrom(t1,leftShift), e); }
       // t0 > t1
       return valueOf(n0,t0.subtract(t1,leftShift),e); }
@@ -75,8 +76,8 @@ implements Comparable<BigFloat6> {
   //--------------------------------------------------------------
 
   private final BigFloat6 add (final boolean n1,
-                              final long t1,
-                              final int e1) {
+                               final long t1,
+                               final int e1) {
 
     if (0 == t1) { return this; }
     //assert 0 < t1;
@@ -88,7 +89,7 @@ implements Comparable<BigFloat6> {
     // adjust significands to the same exponent
     final int de = e1 - e0;
     if (de >= 0) { return add(n1,t1,de,n0,t0,e0); }
-    return add(n1,t1,0,n0,t0.shiftLeft(-de),e1); } 
+    return add(n1,t1,0,n0,t0.shiftLeft(-de),e1); }
 
   //--------------------------------------------------------------
 
@@ -102,8 +103,8 @@ implements Comparable<BigFloat6> {
   //--------------------------------------------------------------
 
   private final BigFloat6 add (final boolean n1,
-                              final UnNatural0 t1,
-                              final int e1) {
+                               final UnNatural0 t1,
+                               final int e1) {
 
     if (isZero(t1)) { return this; }
     //assert 0 < t1.signum();
@@ -115,7 +116,7 @@ implements Comparable<BigFloat6> {
     final UnNatural0 t02,t12;
     final int e2;
     final int de = e1 - e0;
-    if (de > 0) { 
+    if (de > 0) {
       t02 = t0; t12 = t1.shiftLeft(de); e2 = e0; }
     else if (de < 0) {
       t02 = t0.shiftLeft(-de); t12 = t1; e2 = e1; }
@@ -134,6 +135,7 @@ implements Comparable<BigFloat6> {
 
   //--------------------------------------------------------------
 
+  @Override
   public final BigFloat6 add (final BigFloat6 q) {
     if (isZero()) { return q; }
     if (q.isZero()) { return this; }
@@ -141,6 +143,7 @@ implements Comparable<BigFloat6> {
 
   //--------------------------------------------------------------
 
+  @Override
   public final BigFloat6 subtract (final BigFloat6 q) {
     if (isZero()) { return q.negate(); }
     if (q.isZero()) { return this; }
@@ -151,6 +154,7 @@ implements Comparable<BigFloat6> {
 
   //--------------------------------------------------------------
 
+  @Override
   public final BigFloat6 abs () {
     if (nonNegative()) { return this; }
     return negate(); }
@@ -158,23 +162,24 @@ implements Comparable<BigFloat6> {
   //--------------------------------------------------------------
 
   private final BigFloat6 multiply (final boolean nonNegative,
-                                   final UnNatural0 t,
-                                   final int e) {
+                                    final UnNatural0 t,
+                                    final int e) {
     return valueOf(
       (! (nonNegative() ^ nonNegative)),
-      significand().multiply(t), 
+      significand().multiply(t),
       Math.addExact(exponent(),e)); }
 
+  @Override
   public final BigFloat6 multiply (final BigFloat6 q) {
     //    if (isZero() ) { return ZERO; }
     //    if (q.isZero()) { return ZERO; }
     //    if (q.isOne()) { return this; }
     //    if (isOne()) { return q; }
-    return 
+    return
       multiply(q.nonNegative(),q.significand(),q.exponent()); }
 
   public final BigFloat6 multiply (final double z) {
-    return 
+    return
       multiply(
         Doubles.nonNegative(z),
         UnNatural0.valueOf(Doubles.significand(z)),
@@ -183,7 +188,7 @@ implements Comparable<BigFloat6> {
   //--------------------------------------------------------------
   // TODO: optimize!
 
-  public final BigFloat6 add2 (final double z) { 
+  public final BigFloat6 add2 (final double z) {
     //assert Double.isFinite(z);
     final BigFloat6 q = valueOf(z);
     return add(q.multiply(q)); }
@@ -192,7 +197,7 @@ implements Comparable<BigFloat6> {
   // TODO: optimize!
 
   public final BigFloat6 addProduct (final double z0,
-                                    final double z1) { 
+                                     final double z1) {
     //assert Double.isFinite(z0);
     //assert Double.isFinite(z1);
     return add(valueOf(z0).multiply(z1)); }
@@ -201,7 +206,7 @@ implements Comparable<BigFloat6> {
   // Number methods
   //--------------------------------------------------------------
   /** Returns the low order bits of the truncated quotient.
-   * 
+   *
    * TODO: should it really truncate or round instead? Or
    * should there be more explicit round, floor, ceil, etc.?
    */
@@ -210,7 +215,7 @@ implements Comparable<BigFloat6> {
     throw Exceptions.unsupportedOperation(this,"longValue"); }
 
   /** Returns the low order bits of the truncated quotient.
-   * 
+   *
    * TODO: should it really truncate or round instead? Or
    * should there be more explicit round, floor, ceil, etc.?
    */
@@ -237,30 +242,30 @@ implements Comparable<BigFloat6> {
    * to significand as a binary 'decimal'.
    * <p>
    * TODO: make integer/fractional significand consistent
-   * across all classes. Probably convert to integer 
+   * across all classes. Probably convert to integer
    * interpretation everywhere.
    */
 
   private static final float floatMergeBits (final boolean nonNegative,
                                              final int exponent,
-                                             final int significand) { 
+                                             final int significand) {
     final int sh = Numbers.hiBit(significand);
     if (sh > Doubles.SIGNIFICAND_BITS) {
-      return (nonNegative 
+      return (nonNegative
         ? Float.POSITIVE_INFINITY : Float.NEGATIVE_INFINITY); }
 
-    final int e = 
+    final int e =
       ((sh == Floats.SIGNIFICAND_BITS)
         ? exponent + Floats.STORED_SIGNIFICAND_BITS
           : Floats.SUBNORMAL_EXPONENT);
 
     return Floats.unsafeBits(nonNegative,e,significand); }
 
-  /** @return closest half-even rounded <code>float</code> 
+  /** @return closest half-even rounded <code>float</code>
    */
 
   @Override
-  public final float floatValue () { 
+  public final float floatValue () {
     final boolean nn = nonNegative();
     final UnNatural0 s0 = significand();
     final int e0 = exponent();
@@ -268,7 +273,7 @@ implements Comparable<BigFloat6> {
     //assert (0 < s0.signum());
 
     final int eh = Numbers.hiBit(s0);
-    final int es = 
+    final int es =
       Math.max(Floats.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND - e0,
         Math.min(
           Floats.MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND - e0 -1,
@@ -281,7 +286,7 @@ implements Comparable<BigFloat6> {
       return floatMergeBits(nn,e1,s1); }
     if (eh <= es) { return (nn ? 0.0F : -0.0F); }
     // eh > es > 0
-    final boolean up = roundUp(s0,es); 
+    final boolean up = roundUp(s0,es);
     // TODO: faster way to select the right bits as a int?
     final int s1 = s0.shiftRight(es).intValue();
     final int e1 = e0 + es;
@@ -302,20 +307,20 @@ implements Comparable<BigFloat6> {
    * to significand as a binary 'decimal'.
    * <p>
    * TODO: make integer/fractional significand consistent
-   * across all classes. Probably convert to integer 
+   * across all classes. Probably convert to integer
    * interpretation everywhere.
    */
 
   private static final double doubleMergeBits (final boolean nonNegative,
                                                final int exponent,
-                                               final long significand) { 
+                                               final long significand) {
     //assert 0L < significand;
     final int sh = Numbers.hiBit(significand);
     if (sh > Doubles.SIGNIFICAND_BITS) {
-      return (nonNegative 
+      return (nonNegative
         ? Double.POSITIVE_INFINITY : Double.NEGATIVE_INFINITY); }
 
-    final int e = 
+    final int e =
       ((sh == Doubles.SIGNIFICAND_BITS)
         ? exponent + Doubles.STORED_SIGNIFICAND_BITS
           : Doubles.SUBNORMAL_EXPONENT);
@@ -323,11 +328,11 @@ implements Comparable<BigFloat6> {
     return Doubles.unsafeBits(nonNegative,e,significand); }
 
   //--------------------------------------------------------------
-  /** @return closest half-even rounded <code>double</code> 
+  /** @return closest half-even rounded <code>double</code>
    */
 
   @Override
-  public final double doubleValue () { 
+  public final double doubleValue () {
     final boolean nn = nonNegative();
     final UnNatural0 s0 = significand();
     final int e0 = exponent();
@@ -339,7 +344,7 @@ implements Comparable<BigFloat6> {
     //assert (0 < s0.signum());
 
     final int eh = Numbers.hiBit(s0);
-    final int es = 
+    final int es =
       Math.max(Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND - e0,
         Math.min(
           Doubles.MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND - e0 -1,
@@ -354,7 +359,7 @@ implements Comparable<BigFloat6> {
       return doubleMergeBits(nn,e1,s1); }
     if (eh <= es) { return (nn ? 0.0 : -0.0); }
     // eh > es > 0
-    final boolean up = roundUp(s0,es); 
+    final boolean up = roundUp(s0,es);
     //Debug.println("up=" + up);
     // TODO: faster way to select the right bits as a long?
     //Debug.println("s1=" + s0.shiftRight(es).toString(0x10));
@@ -395,8 +400,8 @@ implements Comparable<BigFloat6> {
     final int e1 = q.exponent();
     final int c;
     if (e0 <= e1) { c = t0.compareTo(t1.shiftLeft(e1-e0)); }
-    else { c = t0.shiftLeft(e0-e1).compareTo(t1); } 
-    return (nonNegative() ? c : -c); } 
+    else { c = t0.shiftLeft(e0-e1).compareTo(t1); }
+    return (nonNegative() ? c : -c); }
 
   //--------------------------------------------------------------
   // Object methods
@@ -406,10 +411,10 @@ implements Comparable<BigFloat6> {
     if (this == q) { return true; }
     if (null == q) { return false; }
     // assuming reduced
-    return 
-      nonNegative() == q.nonNegative()
+    return
+      (nonNegative() == q.nonNegative())
       &&
-      exponent() == q.exponent()
+      (exponent() == q.exponent())
       &&
       significand().equals(q._significand); }
 
@@ -421,20 +426,20 @@ implements Comparable<BigFloat6> {
   @Override
   public int hashCode () {
     int h = 17;
-    h = 31*h + (nonNegative() ? 0 : 1);
-    h = 31*h + exponent();
-    h = 31*h + Objects.hash(significand());
+    h = (31*h) + (nonNegative() ? 0 : 1);
+    h = (31*h) + exponent();
+    h = (31*h) + Objects.hash(significand());
     return h; }
 
   @Override
   public final String toString () {
     assert (0 == Numbers.loBit(significand()))
     || isZero(significand()) :
-      significand().toString() 
+      significand().toString()
       + "\nlo= " + Numbers.loBit(significand());
-    return 
+    return
       (nonNegative() ? "" : "-")
-      + "0x" + significand().toString() 
+      + "0x" + significand().toString()
       + "p" + exponent(); }
 
   //--------------------------------------------------------------
@@ -442,8 +447,8 @@ implements Comparable<BigFloat6> {
   //--------------------------------------------------------------
 
   private BigFloat6 (final boolean nonNegative,
-                    final UnNatural0 t0,
-                    final int e0) {
+                     final UnNatural0 t0,
+                     final int e0) {
     //super();
     if (isZero(t0)) {
       _nonNegative = true;
@@ -457,29 +462,29 @@ implements Comparable<BigFloat6> {
         _exponent = e0;  }
       else {
         _significand = t0.shiftRight(e1);
-        _exponent = Math.addExact(e0,e1);  } 
+        _exponent = Math.addExact(e0,e1);  }
       //      assert 0 == Numbers.loBit(_significand)
       //        : "lowBit= " + Numbers.loBit(_significand)
-      //        +"; rightShift= " + e1; 
+      //        +"; rightShift= " + e1;
     } }
 
   //--------------------------------------------------------------
 
   public static final BigFloat6 valueOf (final boolean nonNegative,
-                                        final UnNatural0 t,
-                                        final int e) {
+                                         final UnNatural0 t,
+                                         final int e) {
     if (isZero(t)) { return ZERO; }
     //assert 0 < t.signum();
-    return new BigFloat6(nonNegative,t,e); } 
+    return new BigFloat6(nonNegative,t,e); }
 
   public static final BigFloat6 valueOf (final long t,
-                                        final int e) {
+                                         final int e) {
     if (0L < t) {
       return valueOf(true,UnNatural0.valueOf(t),e); }
     return valueOf(false,UnNatural0.valueOf(-t),e); }
 
   public static final BigFloat6 valueOf (final int t,
-                                        final int e) {
+                                         final int e) {
     if (0 < t) {
       return valueOf(true,UnNatural0.valueOf(t),e); }
     return valueOf(false,UnNatural0.valueOf(-t),e); }
@@ -487,30 +492,30 @@ implements Comparable<BigFloat6> {
   //--------------------------------------------------------------
 
   private static final BigFloat6 valueOf (final boolean nonNegative,
-                                         final int e0,
-                                         final long t0)  {
+                                          final int e0,
+                                          final long t0)  {
     if (0L == t0) { return ZERO; }
-    return valueOf(nonNegative,UnNatural0.valueOf(t0),e0); } 
+    return valueOf(nonNegative,UnNatural0.valueOf(t0),e0); }
 
   public static final BigFloat6 valueOf (final double x)  {
     return valueOf(
       Doubles.nonNegative(x),
       Doubles.exponent(x),
-      Doubles.significand(x)); } 
+      Doubles.significand(x)); }
 
   //--------------------------------------------------------------
 
   private static final BigFloat6 valueOf (final boolean nonNegative,
-                                         final int e0,
-                                         final int t0)  {
+                                          final int e0,
+                                          final int t0)  {
     if (0 == t0) { return ZERO; }
-    return valueOf(nonNegative,UnNatural0.valueOf(t0),e0); } 
+    return valueOf(nonNegative,UnNatural0.valueOf(t0),e0); }
 
   public static final BigFloat6 valueOf (final float x)  {
     return valueOf(
       Floats.nonNegative(x),
       Floats.exponent(x),
-      Floats.significand(x)); } 
+      Floats.significand(x)); }
 
   //--------------------------------------------------------------
 
@@ -578,16 +583,16 @@ implements Comparable<BigFloat6> {
 
   //--------------------------------------------------------------
 
-  public static final BigFloat6 ZERO = 
+  public static final BigFloat6 ZERO =
     new BigFloat6(true,UnNatural0.ZERO,0);
 
-  public static final BigFloat6 ONE = 
+  public static final BigFloat6 ONE =
     new BigFloat6(true,UnNatural0.ONE,0);
 
-  public static final BigFloat6 TWO = 
+  public static final BigFloat6 TWO =
     new BigFloat6(true,UnNatural0.ONE,1);
 
-  public static final BigFloat6 TEN = 
+  public static final BigFloat6 TEN =
     new BigFloat6(true,UnNatural0.valueOf(5),1);
 
   public static final BigFloat6 MINUS_ONE =

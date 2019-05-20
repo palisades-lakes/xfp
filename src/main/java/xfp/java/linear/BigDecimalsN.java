@@ -17,11 +17,11 @@ import xfp.java.numbers.BigDecimals;
 import xfp.java.prng.Generator;
 
 /** The set of instances of <code>BigDecimal[dimension]</code>).
- * 
+ *
  * TODO: generalize to tuples of <code>BigDecimal</code>
  * implemented with lists, <code>int</code> indexed maps
  * for sparse vectors, etc.
- * 
+ *
  * @author palisades dot lakes at gmail dot com
  * @version 2019-03-07
  */
@@ -32,11 +32,11 @@ public final class BigDecimalsN extends LinearSpaceLike {
   // operations for algebraic structures over BigDecimal arrays.
   //--------------------------------------------------------------
   /** A <code>BinaryOperator</code> that adds elementwise
-   * <code>BigDecimal[]</code> instances of length 
+   * <code>BigDecimal[]</code> instances of length
    * <code>dimension</code>.
    */
 
-  private final BigDecimal[] add (final BigDecimal[] q0, 
+  private final BigDecimal[] add (final BigDecimal[] q0,
                                   final BigDecimal[] q1) {
     assert contains(q0);
     assert contains(q1);
@@ -45,7 +45,7 @@ public final class BigDecimalsN extends LinearSpaceLike {
     return qq; }
 
   @Override
-  public final Object add (final Object q0, 
+  public final Object add (final Object q0,
                            final Object q1) {
     return add((BigDecimal[]) q0, (BigDecimal[]) q1); }
 
@@ -63,32 +63,32 @@ public final class BigDecimalsN extends LinearSpaceLike {
     assert contains(q);
     final BigDecimal[] qq = new BigDecimal[dimension()];
     for (int i=0;i<dimension();i++) { qq[i] = q[i].negate(); }
-    return qq; } 
+    return qq; }
 
   @Override
   public final Object negate (final Object q) {
-    return negate((BigDecimal[]) q); } 
+    return negate((BigDecimal[]) q); }
 
   //--------------------------------------------------------------
 
-  private final BigDecimal[] scale (final BigDecimal a, 
+  private final BigDecimal[] scale (final BigDecimal a,
                                     final BigDecimal[] q) {
     assert contains(q);
     final BigDecimal[] qq = new BigDecimal[dimension()];
-    for (int i=0;i<dimension();i++) { 
+    for (int i=0;i<dimension();i++) {
       qq[i] = q[i].multiply(a); }
-    return qq; } 
+    return qq; }
 
   @Override
-  public final Object scale (final Object a, 
+  public final Object scale (final Object a,
                              final Object q) {
-    return scale((BigDecimal) a, (BigDecimal[]) q); } 
+    return scale((BigDecimal) a, (BigDecimal[]) q); }
 
   //--------------------------------------------------------------
   // Set methods
   //--------------------------------------------------------------
 
-  private final boolean equals (final BigDecimal[] q0, 
+  private final boolean equals (final BigDecimal[] q0,
                                 final BigDecimal[] q1) {
     assert contains(q0);
     assert contains(q1);
@@ -101,31 +101,31 @@ public final class BigDecimalsN extends LinearSpaceLike {
   public final boolean equals (final Object q0,
                                final Object q1) {
     return equals((BigDecimal[]) q0, (BigDecimal[]) q1); }
-  
+
   //--------------------------------------------------------------
 
   @Override
   public final boolean contains (final Object element) {
-    return 
+    return
       (element instanceof BigDecimal[])
       &&
-      ((BigDecimal[]) element).length == dimension(); }
+      (((BigDecimal[]) element).length == dimension()); }
 
   //--------------------------------------------------------------
-  /** Intended primarily for testing. 
+  /** Intended primarily for testing.
    */
-  
+
   @Override
   public final Supplier generator (final Map options) {
     final UniformRandomProvider urp = Set.urp(options);
-    return 
+    return
       new Supplier () {
-      final Generator bf = 
+      final Generator bf =
         BigDecimals.bigDecimalGenerator(dimension(),urp);
       @Override
       public final Object get () { return bf.next(); } }; }
 
-   //--------------------------------------------------------------
+  //--------------------------------------------------------------
   // Object methods
   //--------------------------------------------------------------
 
@@ -137,16 +137,16 @@ public final class BigDecimalsN extends LinearSpaceLike {
   //--------------------------------------------------------------
   // TODO: support zero-dimensional space?
 
-  private BigDecimalsN (final int dimension) { 
+  private BigDecimalsN (final int dimension) {
     super(dimension);  }
 
-  private static final IntObjectMap<BigDecimalsN> _cache = 
+  private static final IntObjectMap<BigDecimalsN> _cache =
     new IntObjectHashMap();
 
   public static final BigDecimalsN get (final int dimension) {
     final BigDecimalsN dn0 = _cache.get(dimension);
     if (null != dn0) { return dn0; }
-    final BigDecimalsN dn1 = new BigDecimalsN(dimension); 
+    final BigDecimalsN dn1 = new BigDecimalsN(dimension);
     _cache.put(dimension,dn1);
     return dn1; }
 
@@ -162,27 +162,27 @@ public final class BigDecimalsN extends LinearSpaceLike {
 
   //--------------------------------------------------------------
 
-  private static final TwoSetsOneOperation 
-  makeSpace (final int n) { 
+  private static final TwoSetsOneOperation
+  makeSpace (final int n) {
     return
       TwoSetsOneOperation.linearSpaceLike(
         BigDecimalsN.get(n).scaler(),
         BigDecimalsN.group(n),
         BigDecimals.RING); }
 
-  private static final IntObjectMap<TwoSetsOneOperation> 
+  private static final IntObjectMap<TwoSetsOneOperation>
   _spaceCache = new IntObjectHashMap();
 
   /** n-dimensional rational module, implemented with
    * <code>BigDecimal[]</code>.
-   * (not a vector space because BigDecimal doesn't have a 
+   * (not a vector space because BigDecimal doesn't have a
    * multiplicative inverse.)
    */
-  public static final TwoSetsOneOperation 
+  public static final TwoSetsOneOperation
   space (final int dimension) {
     final TwoSetsOneOperation space0 = _spaceCache.get(dimension);
     if (null != space0) { return space0; }
-    final TwoSetsOneOperation space1 = makeSpace(dimension); 
+    final TwoSetsOneOperation space1 = makeSpace(dimension);
     _spaceCache.put(dimension,space1);
     return space1; }
 

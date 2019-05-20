@@ -18,7 +18,7 @@ import xfp.java.prng.PRNG;
 import xfp.java.test.Common;
 
 /** Benchmark double dot products.
- * 
+ *
  * <pre>
  * java -ea -jar target\benchmarks.jar Dot
  * </pre>
@@ -29,9 +29,9 @@ import xfp.java.test.Common;
 public final class Dot {
 
   //--------------------------------------------------------------
-   // TODO: more efficient via bits?
+  // TODO: more efficient via bits?
   private static final boolean isEven (final int k) {
-    return k == 2*(k/2); }
+    return k == (2*(k/2)); }
 
   // exact sum is 0.0
   private static double[] sampleDoubles (final Generator g,
@@ -45,9 +45,9 @@ public final class Dot {
   private static double[][] sampleDoubles (final int dim,
                                            final int n) {
     assert isEven(dim);
-    final UniformRandomProvider urp = 
+    final UniformRandomProvider urp =
       PRNG.well44497b("seeds/Well44497b-2019-01-05.txt");
-    final Generator g = 
+    final Generator g =
       Doubles.finiteGenerator(dim/2,urp,Common.deMax(dim));
 
     final double[][] x = new double[n][];
@@ -59,7 +59,7 @@ public final class Dot {
 
   //--------------------------------------------------------------
 
-  public static final void main (final String[] args) 
+  public static final void main (final String[] args)
     throws InterruptedException {
 
     final double[][] x0 = sampleDoubles(DIM,N);
@@ -69,23 +69,23 @@ public final class Dot {
     final double[] truth = new double[N];
     final double[] pred = new double[N];
     // assuming ERational is correct!!!
-    for (int i=0;i<N;i++) { 
-      truth[i] = 
+    for (int i=0;i<N;i++) {
+      truth[i] =
         RationalFloatAccumulator
         .make()
         .addProducts(x0[i],x1[i])
         .doubleValue(); }
 
-    for (int i=0;i<N;i++) { 
+    for (int i=0;i<N;i++) {
       System.out.println(
-        i + " : " 
-          + Double.toHexString(truth[i]) 
-          + ", " 
-          + Double.toHexString(Dn.maxAbs(x0[i])) 
-          + ", " 
+        i + " : "
+          + Double.toHexString(truth[i])
+          + ", "
+          + Double.toHexString(Dn.maxAbs(x0[i]))
+          + ", "
           + Double.toHexString(Dn.maxAbs(x1[i]))); }
     System.out.println();
-    final Accumulator[] accumulators = 
+    final Accumulator[] accumulators =
     {
      DoubleAccumulator.make(),
      RationalFloatAccumulator.make(),
@@ -95,13 +95,13 @@ public final class Dot {
     for (final Accumulator a : accumulators) {
       long t;
       t = System.nanoTime();
-      for (int i=0;i<N;i++) { 
-        pred[i] = 
+      for (int i=0;i<N;i++) {
+        pred[i] =
           a.clear().addProducts(x0[i],x1[i]).doubleValue(); }
       t = (System.nanoTime()-t);
-      System.out.println(toHexString(Dn.l1Dist(truth,pred)) + 
-        " in " + (t*1.0e-9) 
-        + " secs " + Classes.className(a)); } 
+      System.out.println(toHexString(Dn.l1Dist(truth,pred)) +
+        " in " + (t*1.0e-9)
+        + " secs " + Classes.className(a)); }
 
     Thread.sleep(16*1024); }
 

@@ -31,21 +31,21 @@ import xfp.java.prng.Generator;
 import xfp.java.prng.GeneratorBase;
 
 /** Utilities for <code>float</code>, <code>float[]</code>.
- * 
+ *
  * @author palisades dot lakes at gmail dot com
  * @version 2019-05-11
  */
 public final class Floats implements Set {
 
   //--------------------------------------------------------------
-  // TODO: cleanly separate stuff treating significand as 
+  // TODO: cleanly separate stuff treating significand as
   // integer from stuff treating is as a binary fraction
   // with one digit before the 'decimal' point.
   // In other words:
   // Most descriptions of floating point formats refer to the
-  // significand as 1.xxx...xxx 
+  // significand as 1.xxx...xxx
   // It's often more convenient to treat it as an integer, which
-  // requires us to subtract 23 from the exponent to get the same 
+  // requires us to subtract 23 from the exponent to get the same
   // value.
   //--------------------------------------------------------------
 
@@ -53,7 +53,7 @@ public final class Floats implements Set {
   public static final int EXPONENT_BITS = 8;
   public static final int STORED_SIGNIFICAND_BITS = 23;
 
-  public static final int SIGNIFICAND_BITS = 
+  public static final int SIGNIFICAND_BITS =
     STORED_SIGNIFICAND_BITS + 1;
 
   public static final int STORED_SIGNIFICAND_MASK =
@@ -86,7 +86,7 @@ public final class Floats implements Set {
   /** Unbiased exponent for subnormal numbers, with implied
    * leading bit = 0.
    */
-  public static final int SUBNORMAL_EXPONENT = 
+  public static final int SUBNORMAL_EXPONENT =
     MIN_EXPONENT - 1;
 
   /** Unbiased exponent of smallest non zero value. */
@@ -97,7 +97,7 @@ public final class Floats implements Set {
    * {@link Float#NEGATIVE_INFINITY}, or
    * {@link Float#POSITIVE_INFINITY}.
    */
-  public static final int INFINITE_OR_NAN_EXPONENT = 
+  public static final int INFINITE_OR_NAN_EXPONENT =
     MAX_EXPONENT + 1;
 
   //--------------------------------------------------------------
@@ -109,9 +109,9 @@ public final class Floats implements Set {
 
   /** Exclusive upper bound on exponents for rounding to float.
    */
-  
+
   public static final int MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND =
-    MAX_EXPONENT - STORED_SIGNIFICAND_BITS + 1;
+    (MAX_EXPONENT - STORED_SIGNIFICAND_BITS) + 1;
 
   //--------------------------------------------------------------
   //    static {
@@ -138,8 +138,8 @@ public final class Floats implements Set {
     return STORED_SIGNIFICAND_MASK & floatToRawIntBits(x); }
 
   /** 24 bit significand.
-   * Adds the implicit leading bit to the stored bits, 
-   * if there is one. 
+   * Adds the implicit leading bit to the stored bits,
+   * if there is one.
    */
 
   public static final int significand (final float x) {
@@ -168,7 +168,7 @@ public final class Floats implements Set {
     // subnormal numbers have an exponent one less that what it
     // should really be, as a way of coding the initial zero bit
     // in the significand
-    return 
+    return
       Math.max(
         unbiasedExponent(x) - STORED_SIGNIFICAND_BITS,
         MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND); }
@@ -176,10 +176,10 @@ public final class Floats implements Set {
   //--------------------------------------------------------------
 
   public static final boolean isEven (final float x) {
-    return 
-      // TODO: is excluding non-finite right? 
+    return
+      // TODO: is excluding non-finite right?
       // otherwise infinities are even, NaN odd
-      Float.isFinite(x) 
+      Float.isFinite(x)
       &&
       (0 == (significand(x) & 0x1)); }
 
@@ -195,12 +195,12 @@ public final class Floats implements Set {
 
   /**
    * @param sign sign bit, must be 0 or 1
-   * @param exponent unbiased exponent, must be in 
+   * @param exponent unbiased exponent, must be in
    * [{@link #SUBNORMAL_EXPONENT},{@link Float#MAX_EXPONENT}]
    * When {@link Float#MIN_EXPONENT} &le; <code>e</code>
    * &le; {@link Float#MAX_EXPONENT}, te result is a normal
    * number.
-   * @param significand Must be in 
+   * @param significand Must be in
    * [0,{@link #STORED_SIGNIFICAND_MASK}].
    * Treated as <code>significand * 2<sup>-52</sup></code>.
    * @return <code>(-1)<sup>sign</sup> * 2<sup>exponent</sup>
@@ -213,13 +213,13 @@ public final class Floats implements Set {
 
     assert ((0 == sign) || (1 ==sign)) : "Invalid sign bit:" + sign;
 
-    assert (SUBNORMAL_EXPONENT <= exponent)  : 
+    assert (SUBNORMAL_EXPONENT <= exponent)  :
       "(unbiased) exponent too small: " + exponent;
     assert (exponent <= MAX_EXPONENT) :
       "(unbiased) exponent too large: " + exponent;
     final int be = exponent + EXPONENT_BIAS;
     assert (0 <= be) :
-      "Negative exponent:" + Integer.toHexString(be) + " : " + be 
+      "Negative exponent:" + Integer.toHexString(be) + " : " + be
       + "\n" + SUBNORMAL_EXPONENT + "<=" + exponent + "<=" + MAX_EXPONENT
       + "\n" + MIN_VALUE + " " + toHexString(MIN_VALUE)
       + "\n" + EXPONENT_BIAS;
@@ -235,17 +235,17 @@ public final class Floats implements Set {
     else if (INFINITE_OR_NAN_EXPONENT == exponent) {
       // no leading 1 bit for infinity or NaN
       assert (0 <= significand) :
-        "infinite or NaN significand too small:" 
+        "infinite or NaN significand too small:"
         + Integer.toHexString(significand);
       assert significand <= MAX_SUBNORMAL_SIGNIFICAND :
-        "infinite or NaN significand too large:" 
+        "infinite or NaN significand too large:"
         + Integer.toHexString(significand); }
     else { // normal numbers
       assert (MIN_NORMAL_SIGNIFICAND <= significand) :
-        "Normal significand too small:" 
+        "Normal significand too small:"
         + Integer.toHexString(significand);
       assert (significand <= MAX_NORMAL_SIGNIFICAND) :
-        "Normal significand too large:" 
+        "Normal significand too large:"
         + Integer.toHexString(significand); }
 
     final int s = (sign) << (EXPONENT_BITS + STORED_SIGNIFICAND_BITS);
@@ -257,16 +257,16 @@ public final class Floats implements Set {
 
   //--------------------------------------------------------------
   private static final int SIGN_0 = 0x0;
-  private static final int SIGN_1 = 
+  private static final int SIGN_1 =
     (0x1 << (EXPONENT_BITS + STORED_SIGNIFICAND_BITS));
 
   /**
-   * @param exponent unbiased exponent, must be in 
+   * @param exponent unbiased exponent, must be in
    * [{@link #SUBNORMAL_EXPONENT},{@link Float#MAX_EXPONENT}]
    * When {@link Float#MIN_EXPONENT} &le; <code>e</code>
    * &le; {@link Float#MAX_EXPONENT}, te result is a normal
    * number.
-   * @param significand Must be in 
+   * @param significand Must be in
    * [0,{@link #STORED_SIGNIFICAND_MASK}].
    * Treated as <code>significand * 2<sup>-52</sup></code>.
    * @return <code>(-1)<sup>sign</sup> * 2<sup>exponent</sup>
@@ -274,8 +274,8 @@ public final class Floats implements Set {
    */
 
   public static final float unsafeBits (final boolean nonNegative,
-                                       final int exponent,
-                                       final int significand) {
+                                        final int exponent,
+                                        final int significand) {
     final int s = (nonNegative ? SIGN_0 : SIGN_1);
     final int be = exponent + EXPONENT_BIAS;
     final int e = be << STORED_SIGNIFICAND_BITS;
@@ -286,16 +286,16 @@ public final class Floats implements Set {
   //--------------------------------------------------------------
   /**
    * @param negative boolean version of sign bit
-   * @param exponent unbiased, must be in 
+   * @param exponent unbiased, must be in
    * [{@link #SUBNORMAL_EXPONENT},
    * {@link #INFINITE_OR_NAN_EXPONENT}]
-   * @param significand 
-   * Must be in [0,{@link #MAX_SUBNORMAL_SIGNIFICAND}] 
+   * @param significand
+   * Must be in [0,{@link #MAX_SUBNORMAL_SIGNIFICAND}]
    * if <code>exponent</code> is {@link #SUBNORMAL_EXPONENT} or
    * {@link #INFINITE_OR_NAN_EXPONENT}].
-   * Must be in 
+   * Must be in
    * [{@link #MIN_NORMAL_SIGNIFICAND},{@link #MAX_NORMAL_SIGNIFICAND}]
-   * if <code>exponent</code> is in 
+   * if <code>exponent</code> is in
    * [{@link Float#MIN_EXPONENT}, {@link Float#MAX_EXPONENT}].
    * @return <code>(-1)<sup>sign</sup> * 2<sup>exponent</sup>
    * * significand</code>
@@ -305,30 +305,30 @@ public final class Floats implements Set {
                                        final int exponent,
                                        final int significand) {
     return mergeBits(
-      (negative ? 1 : 0), 
+      (negative ? 1 : 0),
       exponent + STORED_SIGNIFICAND_BITS,
       significand); }
 
   //--------------------------------------------------------------
-  // operations for algebraic structures over 
+  // operations for algebraic structures over
   //--------------------------------------------------------------
 
   // TODO: is consistency with other algebraic structure classes
   // worth the indirection?
 
   @SuppressWarnings("static-method")
-  private final Float add (final Float q0, 
+  private final Float add (final Float q0,
                            final Float q1) {
     assert null != q0;
     assert null != q1;
-    return Float.valueOf(q0.floatValue() + q1.floatValue()); } 
+    return Float.valueOf(q0.floatValue() + q1.floatValue()); }
 
   public final BinaryOperator<Float> adder () {
     return new BinaryOperator<Float> () {
       @Override
       public final String toString () { return "D.add()"; }
       @Override
-      public final Float apply (final Float q0, 
+      public final Float apply (final Float q0,
                                 final Float q1) {
         return Floats.this.add(q0,q1); } }; }
 
@@ -347,7 +347,7 @@ public final class Floats implements Set {
   @SuppressWarnings("static-method")
   private final Float negate (final Float q) {
     assert null != q;
-    return  Float.valueOf(- q.floatValue()); } 
+    return  Float.valueOf(- q.floatValue()); }
 
   public final UnaryOperator<Float> additiveInverse () {
     return new UnaryOperator<Float> () {
@@ -360,18 +360,18 @@ public final class Floats implements Set {
   //--------------------------------------------------------------
 
   @SuppressWarnings("static-method")
-  private final Float multiply (final Float q0, 
+  private final Float multiply (final Float q0,
                                 final Float q1) {
     assert null != q0;
     assert null != q1;
-    return Float.valueOf(q0.floatValue() * q1.floatValue()); } 
+    return Float.valueOf(q0.floatValue() * q1.floatValue()); }
 
   public final BinaryOperator<Float> multiplier () {
     return new BinaryOperator<Float>() {
       @Override
       public final String toString () { return "D.multiply()"; }
       @Override
-      public final Float apply (final Float q0, 
+      public final Float apply (final Float q0,
                                 final Float q1) {
         return Floats.this.multiply(q0,q1); } }; }
 
@@ -390,7 +390,7 @@ public final class Floats implements Set {
     final float z = q.floatValue();
     // only a partial inverse
     if (0.0 == z) { return null; }
-    return Float.valueOf(1.0F/z);  } 
+    return Float.valueOf(1.0F/z);  }
 
   public final UnaryOperator<Float> multiplicativeInverse () {
     return new UnaryOperator<Float> () {
@@ -421,7 +421,7 @@ public final class Floats implements Set {
   // which method to use?
 
   @SuppressWarnings("static-method")
-  public final boolean equals (final Float q0, 
+  public final boolean equals (final Float q0,
                                final Float q1) {
     assert null != q0;
     assert null != q1;
@@ -431,7 +431,7 @@ public final class Floats implements Set {
   public final BiPredicate equivalence () {
     return new BiPredicate<Float,Float>() {
       @Override
-      public final boolean test (final Float q0, 
+      public final boolean test (final Float q0,
                                  final Float q1) {
         return Floats.this.equals(q0,q1); } }; }
 
@@ -441,7 +441,7 @@ public final class Floats implements Set {
   public final Supplier generator (final Map options) {
     final UniformRandomProvider urp = Set.urp(options);
     final Generator g = finiteGenerator(urp);
-    return 
+    return
       new Supplier () {
       @Override
       public final Object get () { return g.next(); } }; }
@@ -467,26 +467,26 @@ public final class Floats implements Set {
    * Create a fraction given the float value.
    * <p>
    * This constructor behaves <em>differently</em> from
-   * {@link #BigFraction(double, double, int)}. It converts the 
-   * float value exactly, considering its internal bits 
-   * representation. This works for all values except NaN and 
-   * infinities and does not requires any loop or convergence 
+   * {@link #BigFraction(double, double, int)}. It converts the
+   * float value exactly, considering its internal bits
+   * representation. This works for all values except NaN and
+   * infinities and does not requires any loop or convergence
    * threshold.
    * </p>
    * @see #BigFraction(double, double, int)
    * @param x the float value to convert to a fraction.
    * @exception IllegalArgumentException if value is not finite
    */
-  
+
   public static final BigInteger[] toRatio (final float x)  {
-  
+
     if (! Float.isFinite(x)) {
       throw new IllegalArgumentException(
-       "toRatio"  + " cannot handle "+ x); }
-  
+        "toRatio"  + " cannot handle "+ x); }
+
     final BigInteger numerator;
     final BigInteger denominator;
-  
+
     // compute m and k such that x = m * 2^k
     final int bits     = floatToIntBits(x);
     final int sign     = bits & SIGN_MASK;
@@ -499,35 +499,35 @@ public final class Floats implements Set {
       else {
         if (sign != 0) { m = -m; }
         numerator   = BigInteger.valueOf(m);
-        denominator = 
+        denominator =
           BigInteger.ZERO.setBit(-MINIMUM_SUBNORMAL_EXPONENT); } }
     else { // normal
       // add the implicit most significant bit
-      m |= (1L << STORED_SIGNIFICAND_BITS); 
+      m |= (1L << STORED_SIGNIFICAND_BITS);
       if (sign != 0) { m = -m; }
-      int k = 
-        (exponent >> STORED_SIGNIFICAND_BITS) 
-        + MINIMUM_SUBNORMAL_EXPONENT - 1;
-      while (((m & (STORED_SIGNIFICAND_MASK - 1)) != 0) 
+      int k =
+        ((exponent >> STORED_SIGNIFICAND_BITS)
+          + MINIMUM_SUBNORMAL_EXPONENT) - 1;
+      while (((m & (STORED_SIGNIFICAND_MASK - 1)) != 0)
         &&
         ((m & 0x1) == 0)) {
-        m >>= 1; 
-        ++k; }
-      if (k < 0) { 
+        m >>= 1;
+    ++k; }
+      if (k < 0) {
         numerator   = BigInteger.valueOf(m);
-        denominator = BigInteger.ZERO.flipBit(-k); } 
+        denominator = BigInteger.ZERO.flipBit(-k); }
       else {
         numerator   = BigInteger.valueOf(m)
           .multiply(BigInteger.ZERO.flipBit(k));
-        denominator = BigInteger.ONE; } } 
-  
+        denominator = BigInteger.ONE; } }
+
     return new BigInteger[]{ numerator, denominator}; }
 
   //--------------------------------------------------------------
   // generators
   //--------------------------------------------------------------
 
-  private static final Generator 
+  private static final Generator
   arrayGenerator (final int n,
                   final Generator g) {
     return new GeneratorBase (g.name() + ":" + n) {
@@ -537,7 +537,7 @@ public final class Floats implements Set {
         for (int i=0;i<n;i++) { z[i] = g.nextFloat(); }
         return z; } }; }
 
-  private static final Generator 
+  private static final Generator
   arrayGenerator (final int m,
                   final int n,
                   final Generator g) {
@@ -545,12 +545,12 @@ public final class Floats implements Set {
       @Override
       public final Object next () {
         final float[][] z = new float[m][n];
-        for (int i=0;i<m;i++) { 
+        for (int i=0;i<m;i++) {
           for (int j=0;j<n;j++) { z[i][j] = g.nextFloat(); } }
         return z; } }; }
 
   //--------------------------------------------------------------
-  /** Conventional 'uniform' distribution sampler, as 'uniform' 
+  /** Conventional 'uniform' distribution sampler, as 'uniform'
    * as it can be projected on <code>float</code>.
    * @param urp source of randomness
    * @param zmin inclusive min or generated numbers
@@ -558,19 +558,19 @@ public final class Floats implements Set {
    * (TODO: should this be exclusive? commons rng doesn't
    * actually specify.)
    */
-  public static final Generator 
+  public static final Generator
   uniformGenerator (final UniformRandomProvider urp,
                     final float zmin,
                     final float zmax) {
     return new GeneratorBase (
       "uniformGenerator[" + zmin + "," + zmax + "]") {
-      private final ContinuousSampler s = 
+      private final ContinuousSampler s =
         new ContinuousUniformSampler(urp,zmin,zmax);
       @Override
-      public final float nextFloat () { 
+      public final float nextFloat () {
         return (float) s.sample(); } }; }
 
-  /** Conventional 'uniform' distribution sampler, as 'uniform' 
+  /** Conventional 'uniform' distribution sampler, as 'uniform'
    * as it can be projected on <code>float</code>.
    * @param urp source of randomness
    * @param zmin inclusive min or generated numbers
@@ -578,14 +578,14 @@ public final class Floats implements Set {
    * (TODO: should this be exclusive? commons rng doesn't
    * actually specify.)
    */
-  public static final Generator 
+  public static final Generator
   uniformGenerator (final int n,
                     final UniformRandomProvider urp,
                     final float zmin,
                     final float zmax) {
     return arrayGenerator(n,uniformGenerator(urp,zmin,zmax)); }
 
-  /** Conventional 'uniform' distribution sampler, as 'uniform' 
+  /** Conventional 'uniform' distribution sampler, as 'uniform'
    * as it can be projected on <code>float</code>.
    * @param urp source of randomness
    * @param zmin inclusive min or generated numbers
@@ -593,7 +593,7 @@ public final class Floats implements Set {
    * (TODO: should this be exclusive? commons rng doesn't
    * actually specify.)
    */
-  public static final Generator 
+  public static final Generator
   uniformGenerator (final int m,
                     final int n,
                     final UniformRandomProvider urp,
@@ -603,19 +603,19 @@ public final class Floats implements Set {
 
   //--------------------------------------------------------------
 
-  public static final Generator 
+  public static final Generator
   gaussianGenerator (final NormalizedGaussianSampler ngs,
                      final float mu,
                      final float sigma) {
     return new GeneratorBase (
       "gaussianGenerator(" + mu + "," + sigma + ")") {
-      private final ContinuousSampler s = 
+      private final ContinuousSampler s =
         new GaussianSampler(ngs,mu,sigma);
       @Override
-      public final float nextFloat () { 
+      public final float nextFloat () {
         return (float) s.sample(); } }; }
 
-  public static final Generator 
+  public static final Generator
   gaussianGenerator (final UniformRandomProvider urp,
                      final float mu,
                      final float sigma) {
@@ -625,14 +625,14 @@ public final class Floats implements Set {
       new ZigguratNormalizedGaussianSampler(urp),
       mu,sigma); }
 
-  public static final Generator 
+  public static final Generator
   gaussianGenerator (final int n,
                      final UniformRandomProvider urp,
                      final float mu,
                      final float sigma) {
     return arrayGenerator(n,gaussianGenerator(urp,mu,sigma)); }
 
-  public static final Generator 
+  public static final Generator
   gaussianGenerator (final int m,
                      final int n,
                      final UniformRandomProvider urp,
@@ -642,30 +642,30 @@ public final class Floats implements Set {
 
   //--------------------------------------------------------------
 
-  public static final Generator 
+  public static final Generator
   laplaceGenerator (final UniformRandomProvider urp,
                     final float mu,
                     final float sigma) {
     return new GeneratorBase (
       "laplaceGenerator(" + mu + "," + sigma + ")") {
-      private final DiscreteSampler b = 
+      private final DiscreteSampler b =
         new DiscreteUniformSampler(urp,0,1);
-      private final ContinuousSampler e = 
+      private final ContinuousSampler e =
         new AhrensDieterExponentialSampler(urp,sigma);
       @Override
-      public final float nextFloat () { 
-        final int sign = 2*b.sample() - 1;
-        return mu + sign*((float) e.sample()); } }; }
+      public final float nextFloat () {
+        final int sign = (2*b.sample()) - 1;
+        return mu + (sign*((float) e.sample())); } }; }
 
 
-  public static final Generator 
+  public static final Generator
   laplaceGenerator (final int n,
                     final UniformRandomProvider urp,
                     final float mu,
                     final float sigma) {
     return arrayGenerator(n,laplaceGenerator(urp,mu,sigma)); }
 
-  public static final Generator 
+  public static final Generator
   laplaceGenerator (final int m,
                     final int n,
                     final UniformRandomProvider urp,
@@ -678,7 +678,7 @@ public final class Floats implements Set {
   // uniformly from the discrete elements of that set.
   //--------------------------------------------------------------
 
-  public static final Generator 
+  public static final Generator
   subnormalGenerator (final UniformRandomProvider urp,
                       final int eMax) {
     final Generator d = generator(urp,eMax);
@@ -688,23 +688,23 @@ public final class Floats implements Set {
         // TODO: fix infinite loop
         for (;;) {
           final float x = d.nextFloat();
-          if ((Float.isFinite(x)) && (! isNormal(x))) { 
-            return x; } } } 
+          if ((Float.isFinite(x)) && (! isNormal(x))) {
+            return x; } } }
       @Override
       public final Object next () {
         return Float.valueOf(nextFloat()); } }; }
 
-  public static final Generator 
+  public static final Generator
   subnormalGenerator (final UniformRandomProvider urp) {
     return subnormalGenerator(urp,Float.MAX_EXPONENT); }
 
-  public static final Generator 
+  public static final Generator
   subnormalGenerator (final int n,
                       final UniformRandomProvider urp,
                       final int eMax) {
     return arrayGenerator(n,subnormalGenerator(urp,eMax)); }
 
-  public static final Generator 
+  public static final Generator
   subnormalGenerator (final int n,
                       final UniformRandomProvider urp) {
     return arrayGenerator(n,subnormalGenerator(urp)); }
@@ -718,7 +718,7 @@ public final class Floats implements Set {
    * @return
    */
 
-  public static final Generator 
+  public static final Generator
   normalGenerator (final UniformRandomProvider urp,
                    final int eMax) {
     final Generator d = generator(urp,eMax);
@@ -728,22 +728,22 @@ public final class Floats implements Set {
         // TODO: fix infinite loop
         for (;;) {
           final float x = d.nextFloat();
-          if (Float.isFinite(x) && isNormal(x)) { 
-            return x; } } } 
+          if (Float.isFinite(x) && isNormal(x)) {
+            return x; } } }
       @Override
       public final Object next () {
         return Float.valueOf(nextFloat()); } }; }
 
-  public static final Generator 
+  public static final Generator
   normalGenerator (final UniformRandomProvider urp) {
     return normalGenerator(urp,Float.MAX_EXPONENT); }
 
-  public static final Generator 
+  public static final Generator
   normalGenerator (final int n,
                    final UniformRandomProvider urp) {
     return arrayGenerator(n,normalGenerator(urp)); }
 
-  public static final Generator 
+  public static final Generator
   normalGenerator (final int n,
                    final UniformRandomProvider urp,
                    final int eMax) {
@@ -751,7 +751,7 @@ public final class Floats implements Set {
 
   //--------------------------------------------------------------
 
-  public static final Generator 
+  public static final Generator
   finiteGenerator (final UniformRandomProvider urp,
                    final int eMax) {
     final Generator d = generator(urp,eMax);
@@ -761,34 +761,34 @@ public final class Floats implements Set {
         // TODO: fix infinite loop
         for (;;) {
           final float x = d.nextFloat();
-          if (Float.isFinite(x)) { return x; } } } 
+          if (Float.isFinite(x)) { return x; } } }
       @Override
       public final Object next () {
         return Float.valueOf(nextFloat()); } }; }
 
-  public static final Generator 
+  public static final Generator
   finiteGenerator (final UniformRandomProvider urp) {
     return finiteGenerator(urp,Float.MAX_EXPONENT); }
 
-  public static final Generator 
+  public static final Generator
   finiteGenerator (final int n,
                    final UniformRandomProvider urp,
                    final int eMax) {
     return arrayGenerator(n,normalGenerator(urp,eMax)); }
 
-  public static final Generator 
+  public static final Generator
   finiteGenerator (final int n,
                    final UniformRandomProvider urp) {
     return arrayGenerator(n,normalGenerator(urp)); }
 
-  public static final Generator 
+  public static final Generator
   finiteGenerator (final int m,
                    final int n,
                    final UniformRandomProvider urp,
                    final int eMax) {
     return arrayGenerator(m,n,normalGenerator(urp,eMax)); }
 
-  public static final Generator 
+  public static final Generator
   finiteGenerator (final int m,
                    final int n,
                    final UniformRandomProvider urp) {
@@ -796,61 +796,61 @@ public final class Floats implements Set {
 
   //--------------------------------------------------------------
 
-  public static final Generator 
+  public static final Generator
   generator (final UniformRandomProvider urp,
              final int eMin,
              // exclusive
              final int eMax) {
     assert eMin >= SUBNORMAL_EXPONENT;
-    assert eMax <= INFINITE_OR_NAN_EXPONENT + 1;
+    assert eMax <= (INFINITE_OR_NAN_EXPONENT + 1);
     assert eMin < eMax;
     return new GeneratorBase (
       "floatGenerator(" + eMin + "," + eMax + ")") {
       final int eRan = eMax-eMin;
       @Override
-      public final float nextFloat () { 
+      public final float nextFloat () {
         final int s = urp.nextInt(2);
         final int d = urp.nextInt(eRan);
         final int e = d + eMin; // unbiased exponent
-        assert (eMin <= e) && (e < eMax); 
-        final int u = urp.nextInt() 
+        assert (eMin <= e) && (e < eMax);
+        final int u = urp.nextInt()
           & STORED_SIGNIFICAND_MASK;
-        final int t; 
+        final int t;
         if ((e == SUBNORMAL_EXPONENT)
           || (e == INFINITE_OR_NAN_EXPONENT)) {
           t = u; }
         else {
           t = u + MIN_NORMAL_SIGNIFICAND; }
-        final float x = mergeBits(s,e,t); 
-        return x;} 
+        final float x = mergeBits(s,e,t);
+        return x;}
       @Override
       public final Object next () {
         return Float.valueOf(nextFloat()); } }; }
 
-  public static final Generator 
+  public static final Generator
   generator (final UniformRandomProvider urp,
              final int eMax) {
     return generator(urp,SUBNORMAL_EXPONENT,eMax); }
 
-  public static final Generator 
+  public static final Generator
   generator (final UniformRandomProvider urp) {
-    return 
+    return
       generator(urp,SUBNORMAL_EXPONENT,MAX_EXPONENT+1); }
 
-  public static final Generator 
+  public static final Generator
   generator (final int n,
              final UniformRandomProvider urp,
              final int eMin,
              final int eMax) {
     return arrayGenerator(n,generator(urp,eMin,eMax)); }
 
-  public static final Generator 
+  public static final Generator
   generator (final int n,
              final UniformRandomProvider urp,
              final int eMax) {
     return arrayGenerator(n,generator(urp,eMax)); }
 
-  public static final Generator 
+  public static final Generator
   generator (final int n,
              final UniformRandomProvider urp) {
     return arrayGenerator(n,generator(urp)); }
@@ -863,19 +863,19 @@ public final class Floats implements Set {
 
   private static final Floats SINGLETON = new Floats();
 
-  public static final Floats get () { return SINGLETON; } 
+  public static final Floats get () { return SINGLETON; }
 
   //--------------------------------------------------------------
   // pre-defined structures
   //--------------------------------------------------------------
 
-  public static final OneSetOneOperation ADDITIVE_MAGMA = 
+  public static final OneSetOneOperation ADDITIVE_MAGMA =
     OneSetOneOperation.magma(get().adder(),get());
 
-  public static final OneSetOneOperation MULTIPLICATIVE_MAGMA = 
+  public static final OneSetOneOperation MULTIPLICATIVE_MAGMA =
     OneSetOneOperation.magma(get().multiplier(),get());
 
-  public static final OneSetTwoOperations FLOATING_POINT = 
+  public static final OneSetTwoOperations FLOATING_POINT =
     OneSetTwoOperations.floatingPoint(
       get().adder(),
       get().additiveIdentity(),

@@ -16,7 +16,7 @@ import xfp.java.test.Common;
 // java -ea --illegal-access=warn -jar target/benchmarks.jar
 
 /** Benchmark algebraic structure tests.
- * 
+ *
  * <pre>
  * jy --source 11 src/scripts/java/xfp/java/scripts/Sum.java
  * </pre>
@@ -33,7 +33,7 @@ public final class Sum {
 
   // TODO: more efficient via bits?
   private static final boolean isEven (final int k) {
-    return k == 2*(k/2); }
+    return k == (2*(k/2)); }
 
   private static double[] sampleDoubles (final Generator g,
                                          final UniformRandomProvider urp) {
@@ -46,9 +46,9 @@ public final class Sum {
   private static double[][] sampleDoubles (final int dim,
                                            final int n) {
     assert isEven(dim);
-    final UniformRandomProvider urp = 
+    final UniformRandomProvider urp =
       PRNG.well44497b("seeds/Well44497b-2019-01-05.txt");
-    final Generator g = 
+    final Generator g =
       Doubles.finiteGenerator(dim/2,urp,Common.deMax(dim));
 
     final double[][] x = new double[n][];
@@ -59,22 +59,22 @@ public final class Sum {
 
   private static final int TRYS = 32;
 
-  public static final void main (final String[] args) 
+  public static final void main (final String[] args)
     throws InterruptedException {
     final double[] x0 = sampleDoubles(DIM,1)[0];
- 
-    final Accumulator a = RationalFloatAccumulator.make();
-      Thread.sleep(16*1024);
-  final long t = System.nanoTime();
-  for (int i=0;i<TRYS;i++) {
-    a.clear();
-    a.addAll(x0);
-    if (2.0*Math.ulp(1.0) > a.doubleValue()) {
-      System.out.println("false"); } } 
-  System.out.printf("total secs: %8.2f\n",
-    Double.valueOf((System.nanoTime()-t)*1.0e-9)); 
-  Thread.sleep(16*1024); }
 
-//--------------------------------------------------------------
+    final Accumulator a = RationalFloatAccumulator.make();
+    Thread.sleep(16*1024);
+    final long t = System.nanoTime();
+    for (int i=0;i<TRYS;i++) {
+      a.clear();
+      a.addAll(x0);
+      if ((2.0*Math.ulp(1.0)) > a.doubleValue()) {
+        System.out.println("false"); } }
+    System.out.printf("total secs: %8.2f\n",
+      Double.valueOf((System.nanoTime()-t)*1.0e-9));
+    Thread.sleep(16*1024); }
+
+  //--------------------------------------------------------------
 }
 //--------------------------------------------------------------

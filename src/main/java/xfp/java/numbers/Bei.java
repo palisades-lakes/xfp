@@ -681,8 +681,8 @@ public final class Bei {
 
     // The algorithm requires two divisions by 2 and one by 3.
     // All divisions are known to be exact, that is, they do not
-    // produce remainders, and all results are positive. The 
-    // divisions by 2 are implemented as right shifts which are 
+    // produce remainders, and all results are positive. The
+    // divisions by 2 are implemented as right shifts which are
     // relatively efficient, leaving only a division by 3.
     // The division by 3 is done by an optimized algorithm for
     // this case.
@@ -770,7 +770,7 @@ public final class Bei {
 
   private static final int[] exactDivideBy3 (final int[] m) {
     final int len = m.length;
-    int[] result = new int[len];
+    final int[] result = new int[len];
     long x, w, q, borrow;
     borrow = 0L;
     for (int i = len - 1; i >= 0; i--) {
@@ -1170,7 +1170,7 @@ public final class Bei {
 
   public static final boolean testBit (final int[] m,
                                        final int n) {
-    assert 0 < n;
+    assert 0 <= n;
     return (getInt(m,n >>> 5) & (1 << (n & 31))) != 0; }
 
   public static final int[] setBit (final int[] m,
@@ -1245,7 +1245,8 @@ public final class Bei {
   public static final String toHexString (final int[] m) {
     final StringBuilder b = new StringBuilder("0x");
     if (0 == m.length) { b.append('0'); }
-    for (final int mi : m) { b.append(Integer.toHexString(mi)); }
+    for (final int mi : m) {
+      b.append(String.format("%08x",Integer.valueOf(mi))); }
     return b.toString(); }
 
   //--------------------------------------------------------------

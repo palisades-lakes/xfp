@@ -14,7 +14,7 @@ import com.google.common.collect.ImmutableMap;
  * Two sets, 'elements' and 'scalars'.
  * One operation: 'multiplication' of elements by scalars.
  * <p>
- * The scalars are (usually) an instance of some one set two 
+ * The scalars are (usually) an instance of some one set two
  * operation structure, like a ring or a field.
  * <p>
  * The elements are (usually) a group-like structure.
@@ -30,7 +30,7 @@ import com.google.common.collect.ImmutableMap;
  * <p>
  * Note that this doesn't work if we want to generalize
  * linear to affine spaces, etc.
- * 
+ *
  * @author palisades dot lakes at gmail dot com
  * @version 2019-02-26
  */
@@ -43,14 +43,14 @@ public final class TwoSetsOneOperation extends Structure {
 
   /** Secondary set.
    * <p>
-   * Typically a ring (giving a module) or a field (giving a 
+   * Typically a ring (giving a module) or a field (giving a
    * linear space).
    */
   public final Set scalars () { return _scalars; }
 
   //--------------------------------------------------------------
   // Operation over primary X secondary sets.
-  
+
   private final BiFunction _scale;
 
   /** Multiply an element by a scalar. */
@@ -61,44 +61,50 @@ public final class TwoSetsOneOperation extends Structure {
   //--------------------------------------------------------------
 
   @Override
-  public final ImmutableMap<Set,Supplier> 
+  public final ImmutableMap<Set,Supplier>
   generators (final Map options) {
-    final ImmutableMap.Builder<Set,Supplier> b = 
+    final ImmutableMap.Builder<Set,Supplier> b =
       ImmutableMap.builder();
     b.putAll(elements().generators(options));
     b.putAll(scalars().generators(options));
     return b.build(); }
-  
+
   //--------------------------------------------------------------
   // Object methods
   //--------------------------------------------------------------
 
   @Override
-  public final int hashCode () { 
-    return 
+  public final int hashCode () {
+    return
       Objects.hash(
         scale(),
         elements(),
         scalars()); }
 
   @Override
-  public boolean equals (Object obj) {
-    if (this == obj) return true;
-    if (obj == null) return false;
-    if (getClass() != obj.getClass()) return false;
+  public boolean equals (final Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
     final TwoSetsOneOperation other = (TwoSetsOneOperation) obj;
     if (! Objects.equals(scale(),other.scale())) {
       return false; }
-    if (! Objects.equals(elements(),other.elements())) { 
+    if (! Objects.equals(elements(),other.elements())) {
       return false; }
-    if (! Objects.equals(scalars(),other.scalars())) { 
+    if (! Objects.equals(scalars(),other.scalars())) {
       return false; }
     return true; }
 
   @Override
-  public final String toString () { 
-    return "S2O1[" + 
-      //",\n" + scale () + "," + 
+  public final String toString () {
+    return "S2O1[" +
+      //",\n" + scale () + "," +
       elements() + "," + scalars() +
       "]"; }
 
@@ -106,11 +112,11 @@ public final class TwoSetsOneOperation extends Structure {
   // construction
   //--------------------------------------------------------------
 
-  private 
+  private
   TwoSetsOneOperation (final BiFunction multiply,
-                        final Set elements,
-                        final Set scalars,
-                        final ImmutableList<Predicate<Map<Set,Supplier>>> laws) { 
+                       final Set elements,
+                       final Set scalars,
+                       final ImmutableList<Predicate<Map<Set,Supplier>>> laws) {
     super(elements,laws);
     assert Objects.nonNull(multiply);
     assert Objects.nonNull(scalars);
@@ -119,7 +125,7 @@ public final class TwoSetsOneOperation extends Structure {
 
   //--------------------------------------------------------------
 
-  public static final TwoSetsOneOperation 
+  public static final TwoSetsOneOperation
   make (final BiFunction multiply,
         final Set elements,
         final Set scalars,
@@ -136,8 +142,8 @@ public final class TwoSetsOneOperation extends Structure {
    * else is determined by the laws contained in the elements and
    * scalars.
    */
-  
-  public static final TwoSetsOneOperation 
+
+  public static final TwoSetsOneOperation
   linearSpaceLike (final BiFunction multiply,
                    final Set elements,
                    final Set scalars) {
@@ -154,11 +160,11 @@ public final class TwoSetsOneOperation extends Structure {
   /** Same operations as module/linear space, but few laws apply,
    * due to floating point rounding.
    */
-  
-  public static final TwoSetsOneOperation 
+
+  public static final TwoSetsOneOperation
   floatingPointSpace (final BiFunction multiply,
-                   final Set elements,
-                   final Set scalars) {
+                      final Set elements,
+                      final Set scalars) {
     return make(
       multiply,
       elements,

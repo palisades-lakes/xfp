@@ -15,7 +15,7 @@ import clojure.lang.Keyword;
 import xfp.java.exceptions.Exceptions;
 import xfp.java.prng.PRNG;
 
-/** General, possibly unbounded, sets of <code>Object</code>s, 
+/** General, possibly unbounded, sets of <code>Object</code>s,
  * and primitive values, as opposed to <code>java.util.Set</code>
  * (and primitive variants) which are enumerated finite sets.
  *
@@ -23,35 +23,35 @@ import xfp.java.prng.PRNG;
  * <ol>
  * <li> Given a thing, a way to tell if that thing is in the set
  * (<code>contains</code>).
- * <li> A way to get at least some elements of the (non-empty) 
- * set. 
+ * <li> A way to get at least some elements of the (non-empty)
+ * set.
  * <ol>
- * <li> What you have to specify to determine a particular 
+ * <li> What you have to specify to determine a particular
  * element will depend on the details of that set,
- * so <code>getXxx</code> methods take an opaque 
+ * so <code>getXxx</code> methods take an opaque
  * <code>options</code> argument.
- * It's also useful, for testing, to require some simple 
- * <code>sample</code> methods, that default to something 
+ * It's also useful, for testing, to require some simple
+ * <code>sample</code> methods, that default to something
  * reasonable in the no-arg case, allow seeded randomization
  * in the 1-arg case, and accept a general <code>options</code>
- * when desired. 
+ * when desired.
  * </ol>
- * 
- * This might be more accurately called 
+ *
+ * This might be more accurately called
  * (see <a href="https://en.wikipedia.org/wiki/Setoid">
  * <code>Setoid</code></a>.
- *  
+ *
  * Default <code>contains</code> return <code>false</code>
  * for every thing (ie, default is empty set).
- * 
+ *
  * <b>TODO:</b> replace sampling iterators with 0-arg functions?
- * 
+ *
  * <b>TODO:<.b> should a Set require an equality relation,
  * not necessarily the same as <code>equals</code>?
- * ...since multiple classes might be used to represent the 
+ * ...since multiple classes might be used to represent the
  * elements. Or the set might really be the set of equivalence
  * classes, represented by some element of each equivalence class.
- * 
+ *
  * @author palisades dot lakes at gmail dot com
  * @version 2019-03-05
  */
@@ -71,7 +71,7 @@ public interface Set {
   // as the default?
 
   /** The equivalence relation that's used to map implementation
-   * objects to the true elements of the set, which are 
+   * objects to the true elements of the set, which are
    * equivalence classes of objects.
    */
 
@@ -180,12 +180,12 @@ public interface Set {
   //      this,"get",options); }
 
   //--------------------------------------------------------------
-  // TODO: is there a reasonable way to specify generating 
+  // TODO: is there a reasonable way to specify generating
   // n_k elements from k=1..m sets?
   // In clojure, might take a map from set to count and return
   // a map from set to list of elements?
 
-  // TODO: replace Supplier with an interface that has 
+  // TODO: replace Supplier with an interface that has
   // generateArray(), generateList(), etc, convenience methods.
 
   // TODO: replace Supplier with an interface than has 0-arity
@@ -194,30 +194,30 @@ public interface Set {
   public static final Keyword URP = Keyword.intern("urp");
   public static final Keyword SEED = Keyword.intern("seed");
 
-   /** Get a <code>UniformRandomProvider</code>
-    * based on the <code>options</code>:
-    * <ol>
-    * <li> First look for <code>UniformRandomProvider</code> value
-    * associated with the key * <code>:urp</code>. If not null, 
-    * asn the right type, return that. 
-    * <li> Then look for an <code>int[]</code> value for the
-    * <code>:seed</code> key. NUll or not, the seed value is 
-    * passed to {@link PRNG#well44497b(int[])} to create the
-    * <code>UniformRandomProvider</code>. A null seed is 
-    * equivalent to choosing a new 'random' seed for the 
-    * <code>UniformRandomProvider</code>.
+  /** Get a <code>UniformRandomProvider</code>
+   * based on the <code>options</code>:
+   * <ol>
+   * <li> First look for <code>UniformRandomProvider</code> value
+   * associated with the key * <code>:urp</code>. If not null,
+   * asn the right type, return that.
+   * <li> Then look for an <code>int[]</code> value for the
+   * <code>:seed</code> key. NUll or not, the seed value is
+   * passed to {@link PRNG#well44497b(int[])} to create the
+   * <code>UniformRandomProvider</code>. A null seed is
+   * equivalent to choosing a new 'random' seed for the
+   * <code>UniformRandomProvider</code>.
    * <p>
-   * In the future may use other options to choose a 
+   * In the future may use other options to choose a
    * <code>UniformRandomProvider</code>.
    */
-  
+
   public static UniformRandomProvider urp (final Map options) {
-    final UniformRandomProvider u0 =  
-      (UniformRandomProvider) URP.invoke(options); 
+    final UniformRandomProvider u0 =
+      (UniformRandomProvider) URP.invoke(options);
     if (null != u0) { return u0; }
     final Object seed = SEED.invoke(options);
     return PRNG.well44497b(seed);  }
-  
+
   public default Supplier generator (final Map options) {
     throw Exceptions.unsupportedOperation(
       this,"generator",options); }
@@ -226,7 +226,7 @@ public interface Set {
    * results for more complicated structures of which this set
    * might be a component.
    */
-  public default ImmutableMap<Set,Supplier> 
+  public default ImmutableMap<Set,Supplier>
   generators (final Map options) {
     return ImmutableMap.of(this, generator(options)); }
 
@@ -234,7 +234,7 @@ public interface Set {
   /** should eventually cover the whole set.
    * might be used for testing, so might make sense 'travel fast',
    * and go back to fill in.
-   * 
+   *
    * TODO: unify with {@link #generator(UniformRandomProvider, Map)}
    * via options?
    */

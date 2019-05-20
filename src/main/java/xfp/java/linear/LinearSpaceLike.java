@@ -11,7 +11,7 @@ import xfp.java.algebra.Set;
 /** Base class for structures that are like linear spaces.
  * Main reason a structure might not be a true linear space
  * is that the scalars might not be a field.
- * 
+ *
  * @author palisades dot lakes at gmail dot com
  * @version 2019-02-25
  */
@@ -34,14 +34,14 @@ public abstract class LinearSpaceLike implements Set {
 
   public abstract Object zero (final int dimension);
   private final Object _additiveIdentity;
-  public final Object additiveIdentity () { 
+  public final Object additiveIdentity () {
     return _additiveIdentity; }
 
   //--------------------------------------------------------------
 
   public abstract Object negate (final Object v);
   private final UnaryOperator _additiveInverse;
-  public final UnaryOperator additiveInverse () { 
+  public final UnaryOperator additiveInverse () {
     return _additiveInverse; }
 
   //--------------------------------------------------------------
@@ -64,10 +64,10 @@ public abstract class LinearSpaceLike implements Set {
   //--------------------------------------------------------------
 
   @Override
-  public final int hashCode () { 
+  public final int hashCode () {
     int h = 17;
-    h = 31*h + dimension();
-    h = 31*h + Objects.hashCode(getClass());
+    h = (31*h) + dimension();
+    h = (31*h) + Objects.hashCode(getClass());
     return h; }
 
   @Override
@@ -84,7 +84,7 @@ public abstract class LinearSpaceLike implements Set {
     public final String toString () {
       return LinearSpaceLike.this.toString() + ".equals"; }
     @Override
-    public final boolean test (final Object q0, 
+    public final boolean test (final Object q0,
                                final Object q1) {
       return LinearSpaceLike.this.equals(q0,q1); } }
 
@@ -93,7 +93,7 @@ public abstract class LinearSpaceLike implements Set {
     public final String toString () {
       return LinearSpaceLike.this.toString() + ".scale"; }
     @Override
-    public final Object apply (final Object a, 
+    public final Object apply (final Object a,
                                final Object q) {
       return LinearSpaceLike.this.scale(a,q); }  }
 
@@ -110,7 +110,7 @@ public abstract class LinearSpaceLike implements Set {
     public final String toString () {
       return LinearSpaceLike.this.toString() + ".add"; }
     @Override
-    public final Object apply (final Object q0, 
+    public final Object apply (final Object q0,
                                final Object q1) {
       return LinearSpaceLike.this.add(q0,q1); } }
 
@@ -119,7 +119,7 @@ public abstract class LinearSpaceLike implements Set {
   //--------------------------------------------------------------
   // TODO: support zero-dimensional space?
 
-  public LinearSpaceLike (final int dimension) { 
+  public LinearSpaceLike (final int dimension) {
 
     assert dimension > 0;
     _dimension = dimension;

@@ -11,11 +11,11 @@ import xfp.java.exceptions.Exceptions;
 /** Ratios of {@link BigInteger}.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-11
+ * @version 2019-05-19
  */
 
 public final class Rational extends Number
-implements Comparable<Rational> {
+implements Ringlike<Rational> {
 
   private static final long serialVersionUID = 1L;
 
@@ -45,7 +45,7 @@ implements Comparable<Rational> {
                                       final BigInteger d) {
     return n.equals(d); }
 
-  public final boolean isOne () { 
+  public final boolean isOne () {
     return isOne(numerator(),denominator()); }
 
   //--------------------------------------------------------------
@@ -53,7 +53,7 @@ implements Comparable<Rational> {
   private static final Rational reduced (final BigInteger n,
                                          final BigInteger d) {
     assert 0 != d.signum();
-    
+
     if (d.signum() < 0) { return reduced(n.negate(),d.negate()); }
 
     if (n == BigInteger.ZERO) { return ZERO; }
@@ -64,12 +64,13 @@ implements Comparable<Rational> {
 
     final BigInteger gcd = n.gcd(d);
     if (gcd.compareTo(BigInteger.ONE) > 0) {
-      return new Rational(n.divide(gcd),d.divide(gcd)); } 
+      return new Rational(n.divide(gcd),d.divide(gcd)); }
 
     return new Rational(n,d); }
 
   //--------------------------------------------------------------
 
+  @Override
   public final Rational negate () {
     if (isZero()) { return this; }
     return valueOf(numerator().negate(),denominator()); }
@@ -86,6 +87,7 @@ implements Comparable<Rational> {
       numerator().multiply(d).add(n.multiply(denominator())),
       denominator().multiply(d)); }
 
+  @Override
   public final Rational add (final Rational q) {
     if (isZero()) { return q; }
     if (q.isZero()) { return this; }
@@ -99,22 +101,24 @@ implements Comparable<Rational> {
     final BigInteger u = BigInteger.valueOf(s ? t : -t);
     final BigInteger du = denominator().multiply(u);
     if (0 <= e) {
-      return 
+      return
         valueOf(
           numerator().add(du.shiftLeft(e)),
           denominator()); }
-    return 
+    return
       valueOf(
         numerator().shiftLeft(-e).add(du),
         denominator().shiftLeft(-e)); }
 
   //--------------------------------------------------------------
 
+  @Override
   public final Rational subtract (final Rational q) {
     if (isZero()) { return q.negate(); }
     if (q.isZero()) { return this; }
     return add(q.numerator().negate(),q.denominator()); }
 
+  @Override
   public final Rational abs () {
     // TODO: direct signum
     final int s = numerator().signum();
@@ -125,11 +129,12 @@ implements Comparable<Rational> {
 
   private final Rational multiply (final BigInteger n,
                                    final BigInteger d) {
-    return 
+    return
       valueOf(
-        numerator().multiply(n), 
+        numerator().multiply(n),
         denominator().multiply(d)); }
 
+  @Override
   public final Rational multiply (final Rational q) {
     if (isZero() ) { return ZERO; }
     if (q.isZero()) { return ZERO; }
@@ -139,7 +144,7 @@ implements Comparable<Rational> {
 
   //--------------------------------------------------------------
 
-  public final Rational add2 (final double z) { 
+  public final Rational add2 (final double z) {
     assert Double.isFinite(z);
     final boolean s = Doubles.nonNegative(z);
     final int e = 2*Doubles.exponent(z);
@@ -158,15 +163,15 @@ implements Comparable<Rational> {
   //--------------------------------------------------------------
 
   public final Rational addProduct (final double z0,
-                                    final double z1) { 
+                                    final double z1) {
     assert Double.isFinite(z0);
     assert Double.isFinite(z1);
-    final boolean s = 
+    final boolean s =
       ! (Doubles.nonNegative(z0) ^ Doubles.nonNegative(z1));
     final int e = Doubles.exponent(z0) + Doubles.exponent(z1);
     final long t0 = (s ? 1L : -1L) * Doubles.significand(z0);
     final long t1 = Doubles.significand(z1);
-    final BigInteger n = 
+    final BigInteger n =
       BigInteger.valueOf(t0).multiply(BigInteger.valueOf(t1));
     final BigInteger dn = denominator().multiply(n);
     if (0 <= e) {
@@ -182,7 +187,7 @@ implements Comparable<Rational> {
   //--------------------------------------------------------------
 
   /** Returns the low order bits of the truncated quotient.
-   * 
+   *
    * TODO: should it really truncate or round instead? Or
    * should there be more explicit round, floor, ceil, etc.?
    */
@@ -191,7 +196,7 @@ implements Comparable<Rational> {
     return bigIntegerValue().intValue(); }
 
   /** Returns the low order bits of the truncated quotient.
-   * 
+   *
    * TODO: should it really truncate or round instead? Or
    * should there be more explicit round, floor, ceil, etc.?
    */
@@ -200,15 +205,15 @@ implements Comparable<Rational> {
     return bigIntegerValue().longValue(); }
 
   /** Returns the truncated quotient.
-   * 
+   *
    * TODO: should it round instead? Or
    * should there be more explicit round, floor, ceil, etc.?
    */
-  public final BigInteger bigIntegerValue () { 
+  public final BigInteger bigIntegerValue () {
     return numerator().divide(denominator()); }
 
   //--------------------------------------------------------------
-  /** Half-even rounding from {@link BigInteger} ratio to 
+  /** Half-even rounding from {@link BigInteger} ratio to
    * <code>float</code>.
    * @param n numerator
    * @param d positive denominator
@@ -217,7 +222,7 @@ implements Comparable<Rational> {
 
 
   @Override
-  public final float floatValue () { 
+  public final float floatValue () {
     final int s = numerator().signum();
     if (s == 0) { return 0.0F; }
     final boolean neg = (s < 0);
@@ -254,25 +259,25 @@ implements Comparable<Rational> {
 
     // round down or up? <= implies half-even (?)
     final int c = qr[1].shiftLeft(1).compareTo(d3);
-    final int q4 = qr[0].intValueExact(); 
+    final int q4 = qr[0].intValueExact();
     final boolean even = (0x0 == (q4 & 0x1));
     final boolean down = (c < 0) || ((c == 0) && even);
 
     final int q;
     final int e;
-    if (down) { 
-      q = q4; 
+    if (down) {
+      q = q4;
       e = (sub ? e4 - 1 : e4); }
-    else { 
-      final int q5 = q4 + 1; 
+    else {
+      final int q5 = q4 + 1;
       // handle carry if needed after round up
       final boolean carry = (hiBit(q5) > Floats.SIGNIFICAND_BITS);
       q = carry ? q5 >>> 1 : q5;
-      e = (sub ? (carry ? e4 : e4 - 1) : (carry ? e4 + 1 : e4)); }
+    e = (sub ? (carry ? e4 : e4 - 1) : (carry ? e4 + 1 : e4)); }
     return Floats.makeFloat(neg,e,q); }
 
   //--------------------------------------------------------------
-  /** Half-even rounding from {@link BigInteger} ratio to 
+  /** Half-even rounding from {@link BigInteger} ratio to
    * <code>double</code>.
    * @param n numerator
    * @param d positive denominator
@@ -280,7 +285,7 @@ implements Comparable<Rational> {
    */
 
   @Override
-  public final double doubleValue () { 
+  public final double doubleValue () {
     final int s = numerator().signum();
     if (s == 0) { return 0.0; }
     final boolean neg = (s < 0);
@@ -317,21 +322,21 @@ implements Comparable<Rational> {
 
     // round down or up? <= implies half-even (?)
     final int c = qr[1].shiftLeft(1).compareTo(d3);
-    final long q4 = qr[0].longValueExact(); 
+    final long q4 = qr[0].longValueExact();
     final boolean even = (0x0L == (q4 & 0x1L));
     final boolean down = (c < 0) || ((c == 0) && even);
 
     final long q;
     final int e;
-    if (down) { 
-      q = q4; 
+    if (down) {
+      q = q4;
       e = (sub ? e4 - 1 : e4); }
-    else { 
-      final long q5 = q4 + 1; 
+    else {
+      final long q5 = q4 + 1;
       // handle carry if needed after round up
       final boolean carry = (hiBit(q5) > Doubles.SIGNIFICAND_BITS);
       q = carry ? q5 >>> 1 : q5;
-      e = (sub ? (carry ? e4 : e4 - 1) : (carry ? e4 + 1 : e4)); }
+    e = (sub ? (carry ? e4 : e4 - 1) : (carry ? e4 + 1 : e4)); }
     return Doubles.makeDouble(neg,e,q); }
 
   //--------------------------------------------------------------
@@ -351,10 +356,10 @@ implements Comparable<Rational> {
   public final boolean equals (final Rational q) {
     if (this == q) { return true; }
     if (null == q) { return false; }
-    final BigInteger n0 = numerator(); 
-    final BigInteger d0 = denominator(); 
-    final BigInteger n1 = q.numerator(); 
-    final BigInteger d1 = q.denominator(); 
+    final BigInteger n0 = numerator();
+    final BigInteger d0 = denominator();
+    final BigInteger n1 = q.numerator();
+    final BigInteger d1 = q.denominator();
     return n0.multiply(d1).equals(n1.multiply(d0)); }
 
   @Override
@@ -368,9 +373,9 @@ implements Comparable<Rational> {
 
   @Override
   public final String toString () {
-    return 
-      "(" + numerator().toString(0x10) 
-      + " / " + denominator().toString(0x10) 
+    return
+      "(" + numerator().toString(0x10)
+      + " / " + denominator().toString(0x10)
       + ")"; }
 
   //--------------------------------------------------------------
@@ -381,7 +386,7 @@ implements Comparable<Rational> {
                     final BigInteger denominator) {
     super();
     assert 1 == denominator.signum() :
-      numerator.toString(0x10) 
+      numerator.toString(0x10)
       + "\n"
       + denominator.toString(0x10);
     _numerator = numerator;
@@ -419,13 +424,13 @@ implements Comparable<Rational> {
     final BigInteger n1 = nonNegative ? n0 : n0.negate();
     if (0 == e) {  return valueOf(n1); }
     if (0 < e) { return valueOf(n1.shiftLeft(e)); }
-    return valueOf(n1,BigInteger.ZERO.setBit(-e)); } 
+    return valueOf(n1,BigInteger.ZERO.setBit(-e)); }
 
   public static final Rational valueOf (final double x)  {
     return valueOf(
       Doubles.nonNegative(x),
       Doubles.exponent(x),
-      Doubles.significand(x)); } 
+      Doubles.significand(x)); }
 
   //--------------------------------------------------------------
 
@@ -437,13 +442,13 @@ implements Comparable<Rational> {
     final BigInteger n1 = nonNegative ? n0 : n0.negate();
     if (0 == e) {  return valueOf(n1); }
     if (0 < e) { return valueOf(n1.shiftLeft(e)); }
-    return valueOf(n1,BigInteger.ZERO.setBit(-e)); } 
+    return valueOf(n1,BigInteger.ZERO.setBit(-e)); }
 
   public static final Rational valueOf (final float x)  {
     return valueOf(
       Floats.nonNegative(x),
       Floats.exponent(x),
-      Floats.significand(x)); } 
+      Floats.significand(x)); }
 
   //--------------------------------------------------------------
 
@@ -503,16 +508,16 @@ implements Comparable<Rational> {
 
   //--------------------------------------------------------------
 
-  public static final Rational ZERO = 
+  public static final Rational ZERO =
     new Rational(BigInteger.ZERO,BigInteger.ONE);
 
-  public static final Rational ONE = 
+  public static final Rational ONE =
     new Rational(BigInteger.ONE,BigInteger.ONE);
 
-  public static final Rational TWO = 
+  public static final Rational TWO =
     new Rational(BigInteger.TWO,BigInteger.ONE);
 
-  public static final Rational TEN = 
+  public static final Rational TEN =
     new Rational(BigInteger.TEN,BigInteger.ONE);
 
   public static final Rational MINUS_ONE = ONE.negate();

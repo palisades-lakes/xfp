@@ -4,7 +4,7 @@ import xfp.java.exceptions.Exceptions;
 
 /** Convenience interface for mutable, <em>non-</em>thread safe
  * objects used for general kinds of reductions of data sets,
- * typically online. 
+ * typically online.
  * <p>
  * All methods are optional.
  * <p>
@@ -24,44 +24,44 @@ public interface Accumulator<T extends Accumulator> {
   //--------------------------------------------------------------
 
   // TODO: numerical error bounds for inexact accumulators,
-  // or some other predicate for testing that results are as 
+  // or some other predicate for testing that results are as
   // as accurate as expected.
-  
+
   /** An <em>exact</em> accumulator returns values equivalent
    * to half-even rounding to nearest of infinite precision
    * calculation.
    */
   public default boolean isExact () {
     throw Exceptions.unsupportedOperation(this,"isExact"); }
-  
-  /** Intermediate results will never silently <em>overflow</em> 
-   * to an absorbing 'infinity' state. They may fail due to 
+
+  /** Intermediate results will never silently <em>overflow</em>
+   * to an absorbing 'infinity' state. They may fail due to
    * implementation bounds on memory, etc.
    */
   public default boolean noOverflow () {
     throw Exceptions.unsupportedOperation(this,"noOverflow"); }
-  
+
   /** General accumulators provide this. */
   public default Object value () {
-    throw 
+    throw
     Exceptions.unsupportedOperation(this,"value"); }
 
   /** Half-even rounding to nearest <code>double</code>. */
   public default double doubleValue () {
-    throw 
+    throw
     Exceptions.unsupportedOperation(this,"doubleValue"); }
 
   /** Half-even rounding to nearest <code>float</code>. */
   public default float floatValue () {
-    throw 
+    throw
     Exceptions.unsupportedOperation(this,"floatValue"); }
 
   public default T clear () {
-    throw 
+    throw
     Exceptions.unsupportedOperation(this,"clear"); }
 
   public default T add (final double z) {
-    throw 
+    throw
     Exceptions.unsupportedOperation(this,"add",z); }
 
   public default T addAll (final double[] z)  {
@@ -69,13 +69,13 @@ public interface Accumulator<T extends Accumulator> {
     return (T) this; }
 
   /** add <code>z<sup>2</sup></code> to the accumulator. */
-  
+
   public default T add2 (final double z) {
-    throw 
+    throw
     Exceptions.unsupportedOperation(this,"add2",z); }
 
-  /** add all <code>z<sub>i</sub><sup>2</sup></code> to the 
-   * accumulator. 
+  /** add all <code>z<sub>i</sub><sup>2</sup></code> to the
+   * accumulator.
    * */
   public default T add2All (final double[] z)  {
     for (final double zi : z) { add2(zi); }
@@ -83,7 +83,7 @@ public interface Accumulator<T extends Accumulator> {
 
   public default T addProduct (final double z0,
                                final double z1) {
-    throw 
+    throw
     Exceptions.unsupportedOperation(this,"addProduct",z0,z1); }
 
   public default T addProducts (final double[] z0,
@@ -95,13 +95,13 @@ public interface Accumulator<T extends Accumulator> {
 
   //--------------------------------------------------------------
 
-  public default double[] partialSums (final double[] x) { 
+  public default double[] partialSums (final double[] x) {
     final int n = x.length;
     final double[] s = new double[n];
-    clear(); 
+    clear();
     for (int i=0;i<n;i++) { s[i] = add(x[i]).doubleValue(); }
     return s; }
 
- //--------------------------------------------------------------
+  //--------------------------------------------------------------
 }
 //--------------------------------------------------------------

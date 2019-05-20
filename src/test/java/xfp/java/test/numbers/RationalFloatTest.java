@@ -1,5 +1,6 @@
 package xfp.java.test.numbers;
 
+import java.math.BigInteger;
 import java.util.function.BinaryOperator;
 
 import org.junit.jupiter.api.Test;
@@ -7,10 +8,9 @@ import org.junit.jupiter.api.Test;
 import xfp.java.numbers.Numbers;
 import xfp.java.numbers.RationalFloat;
 import xfp.java.test.Common;
-import java.math.BigInteger;
 
 //----------------------------------------------------------------
-/** Test desired properties of RationalFloat. 
+/** Test desired properties of RationalFloat.
  * <p>
  * <pre>
  * mvn -Dtest=xfp/java/test/numbers/RationalFloatTest test > RationalFloatTest.txt
@@ -22,15 +22,15 @@ import java.math.BigInteger;
 
 public final class RationalFloatTest {
 
-  private static final BinaryOperator<Comparable> dist = (q0,q1) -> 
+  private static final BinaryOperator<Comparable> dist = (q0,q1) ->
   ((RationalFloat) q0).subtract((RationalFloat) q1).abs();
 
   @SuppressWarnings({ "static-method" })
   @Test
   public final void testRounding () {
     //Debug.DEBUG = true;
-    final RationalFloat[] f = 
-    { 
+    final RationalFloat[] f =
+    {
      RationalFloat.valueOf(
        new BigInteger("-2366052b8b801d",0x10),-22),
      RationalFloat.valueOf(
@@ -48,7 +48,7 @@ public final class RationalFloatTest {
     for (final RationalFloat fi : f) {
       Common.doubleRoundingTest(
         RationalFloat::valueOf, Numbers::doubleValue, dist,
-        Object::toString, fi); 
+        Object::toString, fi);
       Common.floatRoundingTest(
         RationalFloat::valueOf, Numbers::floatValue, dist,
         Object::toString, fi);  }
@@ -56,11 +56,11 @@ public final class RationalFloatTest {
 
     Common.doubleRoundingTests(
       RationalFloat::valueOf, RationalFloat::valueOf,
-      Numbers::doubleValue, dist, Object::toString); 
+      Numbers::doubleValue, dist, Object::toString);
 
     Common.floatRoundingTests(
       RationalFloat::valueOf, RationalFloat::valueOf,
-      Numbers::floatValue, dist, Object::toString); 
+      Numbers::floatValue, dist, Object::toString);
   }
 
   //--------------------------------------------------------------

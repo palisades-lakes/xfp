@@ -27,7 +27,7 @@ public final class Seeds {
   //--------------------------------------------------------------
   // generate seeds
   //--------------------------------------------------------------
-  /** Get a default seed from commons rng 
+  /** Get a default seed from commons rng
    * <code>SeedFactory</code>.
    */
 
@@ -35,7 +35,7 @@ public final class Seeds {
     return SeedFactory.createIntArray(size); }
 
   //--------------------------------------------------------------
-  // Note: restoring these method requires adding the 
+  // Note: restoring these method requires adding the
   // uncommons maths dependency to the pom
   // and the necessary imports to this file.
   //--------------------------------------------------------------
@@ -90,9 +90,9 @@ public final class Seeds {
       final int[] seed = new int[lines.size()];
       int i = 0;
       for (final String line : lines) {
-        seed[i++] = Integer.parseInt(line); }  
+        seed[i++] = Integer.parseInt(line); }
       return seed; }
-    catch (IOException e) {
+    catch (final IOException e) {
       e.printStackTrace();
       throw new RuntimeException(e); } }
 
@@ -103,7 +103,7 @@ public final class Seeds {
 
   private static final int[] seed (final URL url) {
     try {
-      final BufferedReader r = 
+      final BufferedReader r =
         new BufferedReader(
           new InputStreamReader(
             url.openStream()));
@@ -112,10 +112,10 @@ public final class Seeds {
         final int n = lines.length;
         final int[] seed = new int[n];
         for (int i = 0;i<n;i++) {
-          seed[i] = Integer.parseInt((String) lines[i]); }  
+          seed[i] = Integer.parseInt((String) lines[i]); }
         return seed; }
       finally { r.close(); } }
-    catch (IOException e) {
+    catch (final IOException e) {
       e.printStackTrace();
       throw new RuntimeException(e); } }
 
@@ -129,7 +129,7 @@ public final class Seeds {
     if (r instanceof URL) { return seed((URL) r); }
 
     if (r instanceof String) {
-      final URL url = 
+      final URL url =
         Thread.currentThread()
         .getContextClassLoader()
         .getResource((String) r);

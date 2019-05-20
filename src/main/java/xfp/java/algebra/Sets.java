@@ -27,7 +27,7 @@ public final class Sets {
   public static final BiPredicate OBJECT_EQUALS =
     new BiPredicate() {
     @Override
-    public final boolean test (final Object t, 
+    public final boolean test (final Object t,
                                final Object u) {
       return Objects.equals(t,u); }
   };
@@ -56,7 +56,7 @@ public final class Sets {
       final UniformRandomProvider urp = Set.urp(options);
       assert null != urp;
       final CollectionSampler cs =
-        new CollectionSampler(urp,((java.util.Set) set)); 
+        new CollectionSampler(urp,((java.util.Set) set));
       return
         new Supplier () {
         @Override

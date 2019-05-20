@@ -17,7 +17,7 @@ import xfp.java.prng.GeneratorBase;
 import xfp.java.prng.Generators;
 
 /** Utilities for Object and primitive numbers.
- * 
+ *
  * @author palisades dot lakes at gmail dot com
  * @version 2019-05-18
  */
@@ -30,60 +30,60 @@ public final class Numbers implements Set {
   /** (int & UNSIGNED_MASK) returns long containing unsigned int. */
   public static final long unsigned (final int i) {
     return i & UNSIGNED_MASK; }
-  
+
   public static final long loWord (final long i) {
     return i & UNSIGNED_MASK; }
-  
+
   public static final long hiWord (final long i) {
     return i >>> 32; }
-  
+
   //--------------------------------------------------------------
   /** Like {@link Arrays#toString(double[])}. */
-  
+
   public static final String toHexString (final double[] x) {
     if (null == x) { return "null"; }
     final StringBuilder b = new StringBuilder("[");
     if (x.length > 0) { b.append(Double.toHexString(x[0])); }
-    for (int i=1;i<x.length;i++) { 
+    for (int i=1;i<x.length;i++) {
       // Arrays.toString wastes space with commas
-      //b.append(",");  
+      //b.append(",");
       b.append(" "); b.append(Double.toHexString(x[i])); }
     return b.append("]").toString(); }
-  
+
   public static final String toHexString (final int[] x) {
     if (null == x) { return "null"; }
     final StringBuilder b = new StringBuilder("[");
     if (x.length > 0) { b.append(Integer.toHexString(x[0])); }
-    for (int i=1;i<x.length;i++) { 
+    for (int i=1;i<x.length;i++) {
       // Arrays.toString wastes space with commas
-      //b.append(",");  
+      //b.append(",");
       b.append(" "); b.append(Integer.toHexString(x[i])); }
     return b.append("]").toString(); }
-    
+
   public static final String toHexString (final long[] x) {
     if (null == x) { return "null"; }
     final StringBuilder b = new StringBuilder("[");
     if (x.length > 0) { b.append(Long.toHexString(x[0])); }
-    for (int i=1;i<x.length;i++) { 
+    for (int i=1;i<x.length;i++) {
       // Arrays.toString wastes space with commas
-      //b.append(",");  
+      //b.append(",");
       b.append(" "); b.append(Long.toHexString(x[i])); }
     return b.append("]").toString(); }
-  
+
   public static final String toHexString (final long x) {
     return Long.toHexString(x); }
-  
+
   public static final String toHexString (final int x) {
     return Integer.toHexString(x); }
-  
+
   public static final String toHexString (final double x) {
     return Double.toHexString(x); }
-  
+
   //--------------------------------------------------------------
   // useful class methods
   //--------------------------------------------------------------
   // Useful for passing as a Function method reference
-  
+
   public static final double doubleValue (final Number x) {
     return x.doubleValue(); }
 
@@ -142,70 +142,70 @@ public final class Numbers implements Set {
 
   public static final boolean isZero (final double x) {
     return 0.0 == x; }
-  
+
   public static final boolean isZero (final float x) {
     return 0.0F == x; }
-  
+
   public static final boolean isZero (final byte x) {
     return 0 == x; }
-  
+
   public static final boolean isZero (final short x) {
     return 0 == x; }
-  
+
   public static final boolean isZero (final int x) {
     return 0 == x; }
-  
+
   public static final boolean isZero (final long x) {
     return 0L == x; }
-  
+
   public static final boolean isZero (final BigInteger x) {
     return 0 == x.signum(); }
-  
+
   public static final boolean isZero (final BigDecimal x) {
     return 0 == BigDecimal.ZERO.compareTo(x); }
-  
+
   public static final boolean isZero (final Number x) {
     if (x instanceof Rational) { return ((Rational) x).isZero(); }
     if (x instanceof BigInteger) { return isZero((BigInteger) x); }
     if (x instanceof BigDecimal) { return isZero((BigDecimal) x); }
-    if (x instanceof Double) { 
+    if (x instanceof Double) {
       return isZero(((Double) x).doubleValue()); }
-    if (x instanceof Float) { 
+    if (x instanceof Float) {
       return isZero(((Float) x).floatValue()); }
-    if (x instanceof Integer) { 
+    if (x instanceof Integer) {
       return isZero(((Integer) x).intValue()); }
-    if (x instanceof Long) { 
+    if (x instanceof Long) {
       return isZero(((Long) x).longValue()); }
-    if (x instanceof Byte) {  
+    if (x instanceof Byte) {
       return isZero(((Byte) x).byteValue()); }
-    if (x instanceof Short) {  
+    if (x instanceof Short) {
       return isZero(((Short) x).shortValue()); }
     throw Exceptions.unsupportedOperation(null,"valueOf",x); }
- 
+
   //--------------------------------------------------------------
 
   public static final String description (final String name,
                                           final BigInteger i) {
 
-   return name 
-     + "[lo,hi)=" + loBit(i) + "," + hiBit(i) + ")"
-     + " : " + i.toString(0x10); }
+    return name
+      + "[lo,hi)=" + loBit(i) + "," + hiBit(i) + ")"
+      + " : " + i.toString(0x10); }
 
- public static final String description (final String name,
-                                         final int i) {
+  public static final String description (final String name,
+                                          final int i) {
 
-   return name + " = " 
-     + Integer.toHexString(i) + "; " + Integer.toString(i) + "\n"
-     + "lo,hi bits= [" + 
-     loBit(i) + "," + hiBit(i) + ")"; }
+    return name + " = "
+      + Integer.toHexString(i) + "; " + Integer.toString(i) + "\n"
+      + "lo,hi bits= [" +
+      loBit(i) + "," + hiBit(i) + ")"; }
 
- public static final String description (final String name,
-                                         final long i) {
+  public static final String description (final String name,
+                                          final long i) {
 
-   return name + " = " 
-     + Long.toHexString(i) + "; " + Long.toString(i) + "\n"
-     + "lo,hi bits= [" + 
-     loBit(i) + "," + hiBit(i) + ")"; }
+    return name + " = "
+      + Long.toHexString(i) + "; " + Long.toString(i) + "\n"
+      + "lo,hi bits= [" +
+      loBit(i) + "," + hiBit(i) + ")"; }
 
   //--------------------------------------------------------------
   // Set methods
@@ -248,7 +248,7 @@ public final class Numbers implements Set {
   // which method to use?
 
   @SuppressWarnings("static-method")
-  public final boolean equals (final Number x0, 
+  public final boolean equals (final Number x0,
                                final Number x1) {
     assert null != x0;
     assert null != x1;
@@ -260,7 +260,7 @@ public final class Numbers implements Set {
   public final BiPredicate equivalence () {
     return new BiPredicate<Number,Number>() {
       @Override
-      public final boolean test (final Number q0, 
+      public final boolean test (final Number q0,
                                  final Number q1) {
         return Numbers.this.equals(q0,q1); } }; }
 
@@ -283,7 +283,7 @@ public final class Numbers implements Set {
   // construction
   //--------------------------------------------------------------
 
-  public static final Generator 
+  public static final Generator
   finiteNumberGenerator (final int n,
                          final UniformRandomProvider urp) {
     return new GeneratorBase ("finiteNumberGenerator:" + n) {
@@ -298,15 +298,15 @@ public final class Numbers implements Set {
    * (see {@link xfp.java.prng.DoubleSampler})
    * and convert to <code>BigFraction</code>
    * with {@link #DOUBLE_P} probability;
-   * otherwise return {@link BigFraction#ZERO} or 
-   * {@link BigFractrion#ONE}, {@link BigFractrion#MINUS_ONE},  
+   * otherwise return {@link BigFraction#ZERO} or
+   * {@link BigFractrion#ONE}, {@link BigFractrion#MINUS_ONE},
    * with equal probability (these are potential edge cases).
    */
-  
-  public static final Generator 
+
+  public static final Generator
   finiteNumberGenerator (final UniformRandomProvider urp) {
     return new GeneratorBase ("finiteNumberGenerator") {
-      private final CollectionSampler<Generator> generators = 
+      private final CollectionSampler<Generator> generators =
         new CollectionSampler(
           urp,
           List.of(
@@ -323,7 +323,7 @@ public final class Numbers implements Set {
       public final Object next () {
         return generators.sample().next(); } }; }
 
-  public static final Generator 
+  public static final Generator
   numberGenerator (final int n,
                    final UniformRandomProvider urp) {
     return new GeneratorBase ("numberGenerator:" + n) {
@@ -334,10 +334,10 @@ public final class Numbers implements Set {
         for (int i=0;i<n;i++) { z[i] = (Number) g.next(); }
         return z; } }; }
 
-  public static final Generator 
+  public static final Generator
   numberGenerator (final UniformRandomProvider urp) {
     return new GeneratorBase ("numberGenerator") {
-      private final CollectionSampler<Generator> generators = 
+      private final CollectionSampler<Generator> generators =
         new CollectionSampler(
           urp,
           List.of(
@@ -359,7 +359,7 @@ public final class Numbers implements Set {
 
   private static final Numbers SINGLETON = new Numbers();
 
-  public static final Numbers get () { return SINGLETON; } 
+  public static final Numbers get () { return SINGLETON; }
 
   //--------------------------------------------------------------
 }

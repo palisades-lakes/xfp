@@ -7,7 +7,7 @@ import xfp.java.accumulators.BigFloatAccumulator;
 import xfp.java.test.Common;
 
 //----------------------------------------------------------------
-/** Test summation algorithms. 
+/** Test summation algorithms.
  * <p>
  * <pre>
  * mvn -q -Dtest=xfp/java/test/accumulators/SumTest test > SumTest.txt
@@ -83,14 +83,14 @@ public final class SumTest {
       BigFloatAccumulator.make()); }
 
   // TODO: choose expected behavior with non-finite input
-//@SuppressWarnings("static-method")
-//@Test
-//public final void nanSum () {
-//  Debug.DEBUG=false;
-//  Debug.println();
-//  Debug.println("nonFInite");
-//  Common.nonFiniteTests(
-//    Common.makeAccumulators(Common.accumulators())); }
+  //@SuppressWarnings("static-method")
+  //@Test
+  //public final void nanSum () {
+  //  Debug.DEBUG=false;
+  //  Debug.println();
+  //  Debug.println("nonFInite");
+  //  Common.nonFiniteTests(
+  //    Common.makeAccumulators(Common.accumulators())); }
 
   //--------------------------------------------------------------
 }

@@ -1,5 +1,6 @@
 package xfp.java.test.numbers;
 
+import java.math.BigInteger;
 import java.util.function.BinaryOperator;
 
 import org.junit.jupiter.api.Test;
@@ -7,10 +8,9 @@ import org.junit.jupiter.api.Test;
 import xfp.java.numbers.Numbers;
 import xfp.java.numbers.Rational;
 import xfp.java.test.Common;
-import java.math.BigInteger;
 
 //----------------------------------------------------------------
-/** Test desired properties of Rational. 
+/** Test desired properties of Rational.
  * <p>
  * <pre>
  * mvn -q -Dtest=xfp/java/test/numbers/RationalTest test > RationalTest.txt
@@ -22,7 +22,7 @@ import java.math.BigInteger;
 
 public final class RationalTest {
 
-  private static final BinaryOperator<Comparable> dist = (q0,q1) -> 
+  private static final BinaryOperator<Comparable> dist = (q0,q1) ->
   ((Rational) q0).subtract((Rational) q1).abs();
 
   @SuppressWarnings({ "static-method" })
@@ -30,8 +30,8 @@ public final class RationalTest {
   public final void testRounding () {
 
     //Debug.DEBUG = true;
-    final Rational[] f = 
-    { 
+    final Rational[] f =
+    {
      Rational.valueOf(
        new BigInteger("-2366052b8b801d",0x10),
        BigInteger.ONE.shiftLeft(22)),
@@ -56,15 +56,15 @@ public final class RationalTest {
     for (final Rational fi : f) {
       Common.doubleRoundingTest(
         Rational::valueOf, Numbers::doubleValue, dist,
-        Object::toString, fi); 
+        Object::toString, fi);
       Common.floatRoundingTest(
         Rational::valueOf, Numbers::floatValue, dist,
         Object::toString, fi);  }
     //Debug.DEBUG = false;
- 
+
     Common.doubleRoundingTests(
       Rational::valueOf,Rational::valueOf,Numbers::doubleValue,
-      dist, Object::toString); 
+      dist, Object::toString);
 
     Common.floatRoundingTests(
       Rational::valueOf, Rational::valueOf, Numbers::floatValue,

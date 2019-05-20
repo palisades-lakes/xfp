@@ -18,17 +18,17 @@ public final class Exceptions {
   // methods
   //--------------------------------------------------------------
 
-  public static final UnsupportedOperationException 
+  public static final UnsupportedOperationException
   unsupportedOperation (final String receiver,
                         final String method,
                         final String... args) {
-    return 
+    return
       new UnsupportedOperationException(
         "No " + receiver +
-        "." + method + "(" + 
+        "." + method + "(" +
         String.join(",",args) + ")"); }
 
-  public static final UnsupportedOperationException 
+  public static final UnsupportedOperationException
   unsupportedOperation (final Class receiver,
                         final String method,
                         final Class... args) {

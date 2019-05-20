@@ -14,7 +14,7 @@ import xfp.java.prng.Generator;
 import xfp.java.prng.PRNG;
 
 //----------------------------------------------------------------
-/** Test number conversions expected to be lossless. 
+/** Test number conversions expected to be lossless.
  * <p>
  * <pre>
  * mvn -Dtest=xfp/java/test/numbers/RoundtripTests test > RoundtripTests.txt
@@ -50,21 +50,21 @@ public final class RoundtripTests {
    */
 
   private static final boolean double2BigDecimal2Double () {
-    final Generator g = 
+    final Generator g =
       finiteDoubles();
-      //subnormalDoubles();
+    //subnormalDoubles();
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
       final BigDecimal f = new BigDecimal(x);
       final double xf = f.doubleValue();
-      if (x != xf) { 
-        System.out.println("\n\n" + 
-          "BigDecimal.doubleValue():" + Doubles.isNormal(x) +"\n" 
+      if (x != xf) {
+        System.out.println("\n\n" +
+          "BigDecimal.doubleValue():" + Doubles.isNormal(x) +"\n"
           + x + "\n" + xf + "\n\n" +
           Double.toHexString(x) + "\n" +
           Double.toHexString(xf) + "\n\n" +
-          f + "\n" 
-          //+ f.toHexString(f) + "\n" 
+          f + "\n"
+          //+ f.toHexString(f) + "\n"
           );
         return false; } }
     return true; }
@@ -74,19 +74,19 @@ public final class RoundtripTests {
    */
 
   private static final boolean double2Rational2Double () {
-    final Generator g = 
+    final Generator g =
       finiteDoubles();
-      //subnormalDoubles();
+    //subnormalDoubles();
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
       final Rational f = Rational.valueOf(x);
       final double xf = f.doubleValue();
-      if (x != xf) { 
-        System.out.println("\n\n" + 
+      if (x != xf) {
+        System.out.println("\n\n" +
           "Rational.doubleValue:" + Doubles.isNormal(x) + "\n"
-          + "exponent: " + Doubles.exponent(x) + "\n" 
-          + "significand: " 
-          + Long.toHexString(Doubles.significand(x)) + "\nn" 
+          + "exponent: " + Doubles.exponent(x) + "\n"
+          + "significand: "
+          + Long.toHexString(Doubles.significand(x)) + "\nn"
           + x + " :x\n" + xf + " : xf\n\n" +
           Double.toHexString(x) + " :x\n" +
           Double.toHexString(xf) + " :xf\n\n" +
@@ -102,19 +102,19 @@ public final class RoundtripTests {
    */
 
   private static final boolean double2RBF2Double () {
-    final Generator g = 
+    final Generator g =
       finiteDoubles();
-      //subnormalDoubles();
+    //subnormalDoubles();
     for (int i=0;i<TRYS;i++) {
       final double x = g.nextDouble();
       final RationalFloat f = RationalFloat.valueOf(x);
       final double xf = f.doubleValue();
-      if (x != xf) { 
-        System.out.println("\n\n" + 
+      if (x != xf) {
+        System.out.println("\n\n" +
           "Rational.doubleValue:" + Doubles.isNormal(x) + "\n"
-          + "exponent: " + Doubles.exponent(x) + "\n" 
-          + "significand: " 
-          + Long.toHexString(Doubles.significand(x)) + "\nn" 
+          + "exponent: " + Doubles.exponent(x) + "\n"
+          + "significand: "
+          + Long.toHexString(Doubles.significand(x)) + "\nn"
           + x + " :x\n" + xf + " : xf\n\n" +
           Double.toHexString(x) + " :x\n" +
           Double.toHexString(xf) + " :xf\n\n" +
@@ -160,21 +160,21 @@ public final class RoundtripTests {
    */
 
   private static final boolean float2BigDecimal2Float () {
-    final Generator g = 
+    final Generator g =
       finiteFloats();
-      //subnormalFloats();
+    //subnormalFloats();
     for (int i=0;i<TRYS;i++) {
       final float x = g.nextFloat();
       final BigDecimal f = new BigDecimal(x);
       final float xf = f.floatValue();
-      if (x != xf) { 
-        System.out.println("\n\n" + 
-          "BigDecimal.floatValue():" + Floats.isNormal(x) +"\n" 
+      if (x != xf) {
+        System.out.println("\n\n" +
+          "BigDecimal.floatValue():" + Floats.isNormal(x) +"\n"
           + x + "\n" + xf + "\n\n" +
           Float.toHexString(x) + "\n" +
           Float.toHexString(xf) + "\n\n" +
-          f + "\n" 
-          //+ f.toHexString(f) + "\n" 
+          f + "\n"
+          //+ f.toHexString(f) + "\n"
           );
         return false; } }
     return true; }
@@ -184,19 +184,19 @@ public final class RoundtripTests {
    */
 
   private static final boolean float2RBF2Float () {
-    final Generator g = 
+    final Generator g =
       finiteFloats();
-      //subnormalFloats();
+    //subnormalFloats();
     for (int i=0;i<TRYS;i++) {
       final float x = g.nextFloat();
       final RationalFloat f = RationalFloat.valueOf(x);
       final float xf = f.floatValue();
-      if (x != xf) { 
-        System.out.println("\n\n" + 
+      if (x != xf) {
+        System.out.println("\n\n" +
           "Rational.floatValue:" + Floats.isNormal(x) + "\n"
-          + "exponent: " + Floats.exponent(x) + "\n" 
-          + "significand: " 
-          + Long.toHexString(Floats.significand(x)) + "\nn" 
+          + "exponent: " + Floats.exponent(x) + "\n"
+          + "significand: "
+          + Long.toHexString(Floats.significand(x)) + "\nn"
           + x + " :x\n" + xf + " : xf\n\n" +
           Float.toHexString(x) + " :x\n" +
           Float.toHexString(xf) + " :xf\n\n" +
@@ -212,19 +212,19 @@ public final class RoundtripTests {
    */
 
   private static final boolean float2Rational2Float () {
-    final Generator g = 
+    final Generator g =
       finiteFloats();
-      //subnormalFloats();
+    //subnormalFloats();
     for (int i=0;i<TRYS;i++) {
       final float x = g.nextFloat();
       final Rational f = Rational.valueOf(x);
       final float xf = f.floatValue();
-      if (x != xf) { 
-        System.out.println("\n\n" + 
+      if (x != xf) {
+        System.out.println("\n\n" +
           "Rational.floatValue:" + Floats.isNormal(x) + "\n"
-          + "exponent: " + Floats.exponent(x) + "\n" 
-          + "significand: " 
-          + Long.toHexString(Floats.significand(x)) + "\nn" 
+          + "exponent: " + Floats.exponent(x) + "\n"
+          + "significand: "
+          + Long.toHexString(Floats.significand(x)) + "\nn"
           + x + " :x\n" + xf + " : xf\n\n" +
           Float.toHexString(x) + " :x\n" +
           Float.toHexString(xf) + " :xf\n\n" +
@@ -244,7 +244,7 @@ public final class RoundtripTests {
   @Test
   public final void floatRoundTripTest () {
 
-    assertTrue(float2Rational2Float());    
+    assertTrue(float2Rational2Float());
     assertTrue(float2RBF2Float());
     assertTrue(float2BigDecimal2Float());
   }

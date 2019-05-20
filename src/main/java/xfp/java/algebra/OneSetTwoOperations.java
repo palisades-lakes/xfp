@@ -10,7 +10,7 @@ import java.util.function.UnaryOperator;
 import com.google.common.collect.ImmutableList;
 
 /** Ring-like structures
- * 
+ *
  * @author palisades dot lakes at gmail dot com
  * @version 2019-02-23
  */
@@ -36,16 +36,16 @@ public final class OneSetTwoOperations extends Structure {
   private final UnaryOperator _multiplicativeInverse;
 
   //--------------------------------------------------------------
-  // methods 
+  // methods
   //--------------------------------------------------------------
 
   public final BinaryOperator add () { return _add; }
 
-  public final UnaryOperator additiveInverse () { 
+  public final UnaryOperator additiveInverse () {
     return _additiveInverse; }
 
   // TODO: return a Supplier (nullary operator) instead?
-  public final Object additiveIdentity () { 
+  public final Object additiveIdentity () {
     return _additiveIdentity; }
 
   public final BinaryOperator multiply () { return _multiply; }
@@ -54,11 +54,11 @@ public final class OneSetTwoOperations extends Structure {
    * <code>additiveIdentity</code> will throw an exception.
    * TODO: is that always true?
    */
-  public final UnaryOperator multiplicativeInverse () { 
+  public final UnaryOperator multiplicativeInverse () {
     return _multiplicativeInverse; }
 
   // TODO: return a Supplier (nullary operator) instead?
-  public final Object multiplicativeIdentity () { 
+  public final Object multiplicativeIdentity () {
     return _multiplicativeIdentity; }
 
   //--------------------------------------------------------------
@@ -66,8 +66,8 @@ public final class OneSetTwoOperations extends Structure {
   //--------------------------------------------------------------
 
   @Override
-  public final int hashCode () { 
-    return 
+  public final int hashCode () {
+    return
       Objects.hash(
         add(),
         additiveIdentity(),
@@ -78,41 +78,47 @@ public final class OneSetTwoOperations extends Structure {
         elements()); }
 
   @Override
-  public boolean equals (Object obj) {
-    if (this == obj) return true;
-    if (obj == null) return false;
-    if (getClass() != obj.getClass()) return false;
+  public boolean equals (final Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
     final OneSetTwoOperations other = (OneSetTwoOperations) obj;
-    if (! Objects.equals(add(),other.add())) { 
+    if (! Objects.equals(add(),other.add())) {
       return false; }
     if (! Objects.equals(
-      additiveIdentity(),other.additiveIdentity())) { 
+      additiveIdentity(),other.additiveIdentity())) {
       return false; }
     if (! Objects.equals(
-      additiveInverse(),other.additiveInverse())) { 
+      additiveInverse(),other.additiveInverse())) {
       return false; }
     if (! Objects.equals(multiply(),other.multiply())) {
       return false; }
     if (! Objects.equals(
-      multiplicativeIdentity(),other.multiplicativeIdentity())) { 
+      multiplicativeIdentity(),other.multiplicativeIdentity())) {
       return false; }
     if (! Objects.equals
-      (multiplicativeInverse(),other.multiplicativeInverse())) { 
+      (multiplicativeInverse(),other.multiplicativeInverse())) {
       return false; }
-    if (! Objects.equals(elements(),other.elements())) { 
+    if (! Objects.equals(elements(),other.elements())) {
       return false; }
     return true; }
 
   @Override
-  public final String toString () { 
-    return "S1O2[" + 
-      // add() + 
-      //"," + additiveIdentity() + 
-      //"," + additiveInverse() + 
-      //",\n" + multiply() + 
-      //"," + multiplicativeIdentity() + 
+  public final String toString () {
+    return "S1O2[" +
+      // add() +
+      //"," + additiveIdentity() +
+      //"," + additiveInverse() +
+      //",\n" + multiply() +
+      //"," + multiplicativeIdentity() +
       //"," + multiplicativeInverse() +
-      //",\n" + 
+      //",\n" +
       elements() +
       "]"; }
 
@@ -120,7 +126,7 @@ public final class OneSetTwoOperations extends Structure {
   // construction
   //--------------------------------------------------------------
 
-  private 
+  private
   OneSetTwoOperations (final BinaryOperator add,
                        final Object additiveIdentity,
                        final UnaryOperator additiveInverse,
@@ -128,7 +134,7 @@ public final class OneSetTwoOperations extends Structure {
                        final Object multiplicativeIdentity,
                        final UnaryOperator multiplicativeInverse,
                        final Set elements,
-                       final ImmutableList<Predicate<Map<Set,Supplier>>> laws) { 
+                       final ImmutableList<Predicate<Map<Set,Supplier>>> laws) {
     super(elements,laws);
     assert Objects.nonNull(add);
     assert Objects.nonNull(additiveIdentity);
@@ -146,7 +152,7 @@ public final class OneSetTwoOperations extends Structure {
 
   //--------------------------------------------------------------
 
-  public static final OneSetTwoOperations 
+  public static final OneSetTwoOperations
   make (final BinaryOperator add,
         final Object additiveIdentity,
         final UnaryOperator additiveInverse,
@@ -168,7 +174,7 @@ public final class OneSetTwoOperations extends Structure {
 
   //--------------------------------------------------------------
 
-  public static final OneSetTwoOperations 
+  public static final OneSetTwoOperations
   ring (final BinaryOperator add,
         final Object additiveIdentity,
         final UnaryOperator additiveInverse,
@@ -185,7 +191,7 @@ public final class OneSetTwoOperations extends Structure {
 
   //--------------------------------------------------------------
 
-  public static final OneSetTwoOperations 
+  public static final OneSetTwoOperations
   commutativeRing (final BinaryOperator add,
                    final Object additiveIdentity,
                    final UnaryOperator additiveInverse,
@@ -202,7 +208,7 @@ public final class OneSetTwoOperations extends Structure {
 
   //--------------------------------------------------------------
 
-  public static final OneSetTwoOperations 
+  public static final OneSetTwoOperations
   field (final BinaryOperator add,
          final Object additiveIdentity,
          final UnaryOperator additiveInverse,
@@ -220,11 +226,11 @@ public final class OneSetTwoOperations extends Structure {
         elements)); }
 
   //--------------------------------------------------------------
-  /** Same operations as a field, but not associative or 
+  /** Same operations as a field, but not associative or
    * distributive.
    */
 
-  public static final OneSetTwoOperations 
+  public static final OneSetTwoOperations
   floatingPoint (final BinaryOperator add,
                  final Object additiveIdentity,
                  final UnaryOperator additiveInverse,

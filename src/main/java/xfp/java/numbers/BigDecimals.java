@@ -19,9 +19,9 @@ import xfp.java.algebra.Set;
 import xfp.java.prng.Generator;
 import xfp.java.prng.GeneratorBase;
 
-/** The set of rational numbers represented by 
+/** The set of rational numbers represented by
  * <code>BigDecimal</code>.
- * 
+ *
  * @author palisades dot lakes at gmail dot com
  * @version 2019-04-17
  */
@@ -35,18 +35,18 @@ public final class BigDecimals implements Set {
   // TODO: is consistency with other algebraic structure classes
   // worth the indirection?
 
-  private final BigDecimal add (final BigDecimal q0, 
+  private final BigDecimal add (final BigDecimal q0,
                                 final BigDecimal q1) {
     assert contains(q0);
     assert contains(q1);
-    return q0.add(q1); } 
+    return q0.add(q1); }
 
   public final BinaryOperator<BigDecimal> adder () {
     return new BinaryOperator<BigDecimal> () {
       @Override
       public final String toString () { return "BD.add()"; }
       @Override
-      public final BigDecimal apply (final BigDecimal q0, 
+      public final BigDecimal apply (final BigDecimal q0,
                                      final BigDecimal q1) {
         return BigDecimals.this.add(q0,q1); } }; }
 
@@ -55,7 +55,7 @@ public final class BigDecimals implements Set {
   @SuppressWarnings("static-method")
   public final BigDecimal additiveIdentity () {
     return BigDecimal.ZERO; }
-  
+
   //--------------------------------------------------------------
 
   // TODO: is consistency with other algebraic structure classes
@@ -63,7 +63,7 @@ public final class BigDecimals implements Set {
 
   private final BigDecimal negate (final BigDecimal q) {
     assert contains(q);
-    return q.negate(); } 
+    return q.negate(); }
 
   public final UnaryOperator<BigDecimal> additiveInverse () {
     return new UnaryOperator<BigDecimal> () {
@@ -75,23 +75,23 @@ public final class BigDecimals implements Set {
 
   //--------------------------------------------------------------
 
-  private final BigDecimal multiply (final BigDecimal q0, 
+  private final BigDecimal multiply (final BigDecimal q0,
                                      final BigDecimal q1) {
     assert contains(q0);
     assert contains(q1);
-    return q0.multiply(q1); } 
+    return q0.multiply(q1); }
 
   public final BinaryOperator<BigDecimal> multiplier () {
     return new BinaryOperator<BigDecimal>() {
       @Override
       public final String toString () { return "BD.multiply()"; }
       @Override
-      public final BigDecimal apply (final BigDecimal q0, 
+      public final BigDecimal apply (final BigDecimal q0,
                                      final BigDecimal q1) {
         return BigDecimals.this.multiply(q0,q1); } }; }
 
   //--------------------------------------------------------------
-  
+
   @SuppressWarnings("static-method")
   public final BigDecimal multiplicativeIdentity () {
     return BigDecimal.ONE; }
@@ -102,7 +102,7 @@ public final class BigDecimals implements Set {
     assert contains(q);
     // only a partial inverse
     if (BigDecimal.ZERO.equals(q)) { return null; }
-    return BigDecimal.ONE.divide(q);  } 
+    return BigDecimal.ONE.divide(q);  }
 
 
   public final UnaryOperator<BigDecimal> multiplicativeInverse () {
@@ -127,10 +127,10 @@ public final class BigDecimals implements Set {
    * numbers.
    */
   @SuppressWarnings("static-method")
-  public final boolean equals (final BigDecimal q0, 
+  public final boolean equals (final BigDecimal q0,
                                final BigDecimal q1) {
     if (q0 == q1) { return true; }
-    if (null == q0) { 
+    if (null == q0) {
       if (null == q1) { return true; }
       return false; }
     if (null == q1) { return false; }
@@ -143,7 +143,7 @@ public final class BigDecimals implements Set {
       @Override
       public final String toString () { return "BD.equals()"; }
       @Override
-      public final boolean test (final BigDecimal q0, 
+      public final boolean test (final BigDecimal q0,
                                  final BigDecimal q1) {
         return BigDecimals.this.equals(q0,q1); } }; }
 
@@ -153,7 +153,7 @@ public final class BigDecimals implements Set {
   public final Supplier generator (final Map options) {
     final UniformRandomProvider urp = Set.urp(options);
     final Generator bfs = BigDecimals.bigDecimalGenerator(urp);
-    return 
+    return
       new Supplier () {
       @Override
       public final Object get () { return bfs.next(); } }; }
@@ -181,21 +181,21 @@ public final class BigDecimals implements Set {
    * (see {@link xfp.java.prng.DoubleSampler})
    * and convert to <code>BigDecimal</code>
    * with {@link #DOUBLE_P} probability;
-   * otherwise return {@link BigDecimal#ZERO} or 
-   * {@link BigDecimal#ONE}, {@link BigDecimal#TEN},  
+   * otherwise return {@link BigDecimal#ZERO} or
+   * {@link BigDecimal#ONE}, {@link BigDecimal#TEN},
    * with equal probability (these are potential edge cases).
-   * 
+   *
    * TODO: sample rounding modes?
    */
-  
-  public static final Generator 
+
+  public static final Generator
   bigDecimalGenerator (final UniformRandomProvider urp) {
     final double dp = 0.9;
     return new GeneratorBase ("bigDecimalGenerator") {
-      private final ContinuousSampler choose = 
+      private final ContinuousSampler choose =
         new ContinuousUniformSampler(urp,0.0,1.0);
       private final Generator fdg = Doubles.finiteGenerator(urp);
-      private final CollectionSampler edgeCases = 
+      private final CollectionSampler edgeCases =
         new CollectionSampler(
           urp,
           List.of(
@@ -203,12 +203,12 @@ public final class BigDecimals implements Set {
             BigDecimal.ONE,
             BigDecimal.TEN));
       @Override
-      public Object next () { 
+      public Object next () {
         final boolean edge = choose.sample() > dp;
         if (edge) { return edgeCases.sample(); }
         return new BigDecimal(fdg.nextDouble()); } }; }
 
-  public static final Generator 
+  public static final Generator
   bigDecimalGenerator (final int n,
                        final UniformRandomProvider urp) {
     return new GeneratorBase ("bigDecimalGenerator:" + n) {
@@ -221,29 +221,29 @@ public final class BigDecimals implements Set {
 
   private BigDecimals () { }
 
-  private static final BigDecimals SINGLETON = 
+  private static final BigDecimals SINGLETON =
     new BigDecimals();
 
-  public static final BigDecimals get () { return SINGLETON; } 
+  public static final BigDecimals get () { return SINGLETON; }
 
   //--------------------------------------------------------------
   // pre-defined structures
   //--------------------------------------------------------------
 
-  public static final OneSetOneOperation ADDITIVE_MAGMA = 
-  OneSetOneOperation.magma(get().adder(),get());
+  public static final OneSetOneOperation ADDITIVE_MAGMA =
+    OneSetOneOperation.magma(get().adder(),get());
 
-  public static final OneSetOneOperation MULTIPLICATIVE_MAGMA = 
-  OneSetOneOperation.magma(get().multiplier(),get());
+  public static final OneSetOneOperation MULTIPLICATIVE_MAGMA =
+    OneSetOneOperation.magma(get().multiplier(),get());
 
-  public static final OneSetTwoOperations RING = 
-  OneSetTwoOperations.commutativeRing(
-    get().adder(),
-    get().additiveIdentity(),
-    get().additiveInverse(),
-    get().multiplier(),
-    get().multiplicativeIdentity(),
-    get());
+  public static final OneSetTwoOperations RING =
+    OneSetTwoOperations.commutativeRing(
+      get().adder(),
+      get().additiveIdentity(),
+      get().additiveInverse(),
+      get().multiplier(),
+      get().multiplicativeIdentity(),
+      get());
 
 
 }

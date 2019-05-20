@@ -17,7 +17,7 @@ import xfp.java.prng.PRNG;
 import xfp.java.test.Common;
 
 /** Distillation experiments.
- * 
+ *
  * <pre>
  * j --source 11 -ea src/scripts/java/xfp/java/scripts/Distill.java > distilled.txt
  * </pre>
@@ -26,19 +26,19 @@ import xfp.java.test.Common;
  */
 @SuppressWarnings("unchecked")
 public final class Distill {
-  
+
   //--------------------------------------------------------------
   // experiment script
   //--------------------------------------------------------------
 
-  private static final String SEED0 = 
+  private static final String SEED0 =
     "seeds/Well44497b-2019-01-05.txt";
   //  "seeds/Well44497b-2019-01-07.txt";
   //  "seeds/Well44497b-2019-01-09.txt";
 
-  private static final 
-  Map<String,IntFunction<Generator>> 
-  factories = 
+  private static final
+  Map<String,IntFunction<Generator>>
+  factories =
   Map.of(
     "uniform",
     new IntFunction<Generator>() {
@@ -47,7 +47,7 @@ public final class Distill {
         final UniformRandomProvider urp0 = PRNG.well44497b(SEED0);
         final int emax = Common.deMax(dim)/2;
         final double dmax = (1<<emax);
-        return Doubles.uniformGenerator(dim,urp0,-dmax,dmax); } 
+        return Doubles.uniformGenerator(dim,urp0,-dmax,dmax); }
     },
     "finite",
     new IntFunction<Generator>() {
@@ -56,7 +56,7 @@ public final class Distill {
         final UniformRandomProvider urp0 = PRNG.well44497b(SEED0);
         final int emax = Common.deMax(dim)/2;
         Debug.println("emax=" + emax);
-        return Doubles.finiteGenerator(dim,urp0,emax); } 
+        return Doubles.finiteGenerator(dim,urp0,emax); }
     },
     "exponential",
     new IntFunction<Generator>() {
@@ -65,7 +65,7 @@ public final class Distill {
         final UniformRandomProvider urp0 = PRNG.well44497b(SEED0);
         final int emax = Common.deMax(dim)/2;
         final double dmax = (1<<emax);
-        return Doubles.exponentialGenerator(dim,urp0,0.0,dmax); } 
+        return Doubles.exponentialGenerator(dim,urp0,0.0,dmax); }
     },
     "gaussian",
     new IntFunction<Generator>() {
@@ -74,7 +74,7 @@ public final class Distill {
         final UniformRandomProvider urp0 = PRNG.well44497b(SEED0);
         final int emax = Common.deMax(dim)/2;
         final double dmax = (1<<emax);
-        return Doubles.gaussianGenerator(dim,urp0,0.0,dmax); } 
+        return Doubles.gaussianGenerator(dim,urp0,0.0,dmax); }
     },
     "laplace",
     new IntFunction<Generator>() {
@@ -83,10 +83,10 @@ public final class Distill {
         final UniformRandomProvider urp0 = PRNG.well44497b(SEED0);
         final int emax = Common.deMax(dim)/2;
         final double dmax = (1<<emax);
-        return Doubles.laplaceGenerator(dim,urp0,0.0,dmax); } 
+        return Doubles.laplaceGenerator(dim,urp0,0.0,dmax); }
     });
 
-  private static final String[] generators = 
+  private static final String[] generators =
     factories.keySet().toArray(new String[0]);
 
   //--------------------------------------------------------------
@@ -110,7 +110,7 @@ public final class Distill {
     return emax - emin; }
 
   private static final int used (final double[] x) {
-    for (int i=x.length;i>0;i--) { 
+    for (int i=x.length;i>0;i--) {
       if (0 != x[i-1]) { return i; } }
     return 0; }
 
@@ -121,7 +121,7 @@ public final class Distill {
     final int n = x.length;
     final double[] sums = new double[n];
     a.clear();
-    for (int i=0;i<n;i++) { 
+    for (int i=0;i<n;i++) {
       sums[i]= a.add(x[i]).doubleValue(); }
     return sums; }
 
@@ -133,7 +133,7 @@ public final class Distill {
     final Accumulator da = DistilledAccumulator.make();
     final int dim = (32 * 1024) - 1;
     Debug.println("dim=" + dim);
-    Debug.println("bound=" + 64*dim);
+    Debug.println("bound=" + (64*dim));
     Arrays.sort(generators);
     for (final String k : generators) {
       final Generator g = factories.get(k).apply(dim);

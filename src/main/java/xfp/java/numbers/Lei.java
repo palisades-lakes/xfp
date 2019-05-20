@@ -38,9 +38,9 @@ public final class Lei {
     if (n==m.length) { return m; }
     return Arrays.copyOf(m,n); }
 
-  //-------------------------------------------------------------- 
+  //--------------------------------------------------------------
   // fixing
-  //--------------------------------------------------------------  
+  //--------------------------------------------------------------
 
   private static final int[] shiftRightImpl (final int[] m,
                                              final int bitShift) {
@@ -62,7 +62,7 @@ public final class Lei {
     final int nBits2 = 32 - rmeShift;
     int j = 0;
     while (j < (n - intShift - 1)) {
-      newMag[i++] = (m[j++] << nBits2) | (m[j] >>> rmeShift); } 
+      newMag[i++] = (m[j++] << nBits2) | (m[j] >>> rmeShift); }
     return newMag; }
 
   public static final int[] shiftLeft (final int[] m,
@@ -91,9 +91,9 @@ public final class Lei {
       newMag[i] = m[j] << nBits; }
     return newMag; }
 
-  //-------------------------------------------------------------- 
+  //--------------------------------------------------------------
   // fixed to here
-  //--------------------------------------------------------------  
+  //--------------------------------------------------------------
 
   public static final int[] shiftLeft (final long m,
                                        final int shift) {
@@ -717,8 +717,8 @@ public final class Lei {
 
     // The algorithm requires two divisions by 2 and one by 3.
     // All divisions are known to be exact, that is, they do not
-    // produce remainders, and all results are positive. The 
-    // divisions by 2 are implemented as right shifts which are 
+    // produce remainders, and all results are positive. The
+    // divisions by 2 are implemented as right shifts which are
     // relatively efficient, leaving only a division by 3.
     // The division by 3 is done by an optimized algorithm for
     // this case.
@@ -806,7 +806,7 @@ public final class Lei {
 
   private static final int[] exactDivideBy3 (final int[] m) {
     final int len = m.length;
-    int[] result = new int[len];
+    final int[] result = new int[len];
     long x, w, q, borrow;
     borrow = 0L;
     for (int i = len - 1; i >= 0; i--) {

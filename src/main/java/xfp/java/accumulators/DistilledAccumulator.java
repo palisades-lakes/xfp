@@ -10,7 +10,7 @@ import java.util.Arrays;
  * @version 2019-05-02
  */
 @SuppressWarnings("unchecked")
-public final class DistilledAccumulator 
+public final class DistilledAccumulator
 implements Accumulator<DistilledAccumulator> {
 
   //--------------------------------------------------------------
@@ -23,17 +23,17 @@ implements Accumulator<DistilledAccumulator> {
     //Debug.println("addValue(" + z + ")");
     ////Debug.println(Arrays.toString(Arrays.copyOf(_sums,_end+1)));
     //Debug.println(_end + "<" + _sums.length);
-    if (_end >= _sums.length) { 
+    if (_end >= _sums.length) {
       final int newSize = Math.max(1,(int) (0.25*_sums.length));
       //Debug.println("newSize=" + newSize);
-      _sums = Arrays.copyOf(_sums,newSize + _sums.length); 
-       //Debug.println(_sums.length); 
-      }
+      _sums = Arrays.copyOf(_sums,newSize + _sums.length);
+      //Debug.println(_sums.length);
+    }
     _sums[_end] = z; }
 
   private final void compact () {
     int lastNonZero = _end;
-    while ((0.0 == _sums[lastNonZero]) && (0 < lastNonZero)) { 
+    while ((0.0 == _sums[lastNonZero]) && (0 < lastNonZero)) {
       lastNonZero--; }
     _end = lastNonZero; }
 
@@ -51,23 +51,23 @@ implements Accumulator<DistilledAccumulator> {
 
     final double s = x0 + x1;
     final double z = s - x0;
-    final double e = (x0 - (s - z)) + (x1 - z); 
+    final double e = (x0 - (s - z)) + (x1 - z);
     _sums[i-1] = s;
-    _sums[i] = e; 
+    _sums[i] = e;
     return (x0 != s) || (x1 != e); }
 
   private final boolean distill () {
     if (! Double.isFinite(_sums[0])) { return false; }
-    
+
     boolean changed = false;
-    for (int i=_end;i>0;i--) { 
-      changed = changed || twoSum(i); } 
+    for (int i=_end;i>0;i--) {
+      changed = changed || twoSum(i); }
     return changed; }
 
   //--------------------------------------------------------------
   // Accumulator
   //--------------------------------------------------------------
-  
+
   @Override
   public final boolean isExact () { return true; }
 
@@ -75,49 +75,49 @@ implements Accumulator<DistilledAccumulator> {
   public final boolean noOverflow () { return false; }
 
   @Override
-  public final double doubleValue () { 
+  public final double doubleValue () {
     if (0 > _end) { return 0.0; }
     return _sums[0]; }
 
   @Override
-  public final Object value () { 
+  public final Object value () {
     return Double.valueOf(doubleValue()); }
 
   @Override
-  public final float floatValue () { 
+  public final float floatValue () {
     return (float) doubleValue(); }
 
   @Override
-  public final DistilledAccumulator clear () { 
+  public final DistilledAccumulator clear () {
     Arrays.fill(_sums,0.0);
     _end = -1;
     return this; }
 
   @Override
-  public final DistilledAccumulator add (final double z) { 
+  public final DistilledAccumulator add (final double z) {
     //Debug.println("add(" + z + ")");
     //Debug.println(Arrays.toString(Arrays.copyOf(_sums,_end+1)));
     //Debug.println(_end + "<" + _sums.length);
     if (Double.isFinite(_sums[0])) {
       addValue(z);
       while (distill()) { compact(); } }
-    return this; } 
+    return this; }
 
   @Override
-  public final DistilledAccumulator add2 (final double z) { 
+  public final DistilledAccumulator add2 (final double z) {
     final double z2 = z*z;
     final double e = Math.fma(z,z,-z2);
     add(z2);
-    add(e); 
+    add(e);
     return this; }
 
   @Override
   public final DistilledAccumulator addProduct (final double z0,
-                                                final double z1) { 
+                                                final double z1) {
     final double z01 = z0*z1;
     final double e = Math.fma(z0,z1,-z01);
     add(z01);
-    add(e); 
+    add(e);
     return this; }
 
   //--------------------------------------------------------------
@@ -126,7 +126,7 @@ implements Accumulator<DistilledAccumulator> {
 
   private DistilledAccumulator () { super(); clear(); }
 
-  public static final DistilledAccumulator make () { 
+  public static final DistilledAccumulator make () {
     return new DistilledAccumulator(); }
 
   //--------------------------------------------------------------

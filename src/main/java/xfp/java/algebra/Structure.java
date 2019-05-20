@@ -9,9 +9,9 @@ import java.util.function.Supplier;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-/** Base class for mathematical structures on collections of 
+/** Base class for mathematical structures on collections of
  * sets.
- * 
+ *
  * @author palisades dot lakes at gmail dot com
  * @version 2019-02-23
  */
@@ -28,7 +28,7 @@ public abstract class Structure implements Set {
    * some of the sets involved in the structure to generators
    * of test elements of those sets.
    */
-  public final Iterable<Predicate<Map<Set,Supplier>>> laws () { 
+  public final Iterable<Predicate<Map<Set,Supplier>>> laws () {
     return _laws; }
 
   //--------------------------------------------------------------
@@ -41,7 +41,7 @@ public abstract class Structure implements Set {
 
   // TODO: should there be an _equivalence slot?
   // instead of inheriting from _elements?
-  // Would it be a good idea to allow an equivalence relation 
+  // Would it be a good idea to allow an equivalence relation
   // different from the element set?
   // ---probably not. could always have a wrapper set that changes
   // the equivalence relation.
@@ -51,22 +51,22 @@ public abstract class Structure implements Set {
     return _elements.equivalence(); }
 
   @Override
-  public final Supplier generator (final Map options) { 
+  public final Supplier generator (final Map options) {
     return _elements.generator(options); }
 
   // TODO: more general specification for generators
   @Override
-  public ImmutableMap<Set,Supplier> 
+  public ImmutableMap<Set,Supplier>
   generators (final Map options) {
     return elements().generators(options); }
-  
+
   //--------------------------------------------------------------
   // construction
   //--------------------------------------------------------------
 
-  public 
+  public
   Structure (final Set elements,
-             final ImmutableList<Predicate<Map<Set,Supplier>>> laws) { 
+             final ImmutableList<Predicate<Map<Set,Supplier>>> laws) {
     assert Objects.nonNull(elements);
     assert Objects.nonNull(laws);
     _elements = elements;

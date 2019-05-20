@@ -26,16 +26,16 @@ public final class SaveSeeds {
       Seeds.commonsRngSeed(1391),
       //Seeds.randomDotOrgSeed(1391),
       new File(
-        "src/main/resources/seeds", 
-        "Well44497b-" + LocalDate.now() + ".txt")); 
+        "src/main/resources/seeds",
+        "Well44497b-" + LocalDate.now() + ".txt"));
 
     // for Mersenne Twister
     Seeds.write(
       Seeds.commonsRngSeed(624),
       // Seeds.randomDotOrgSeed(624),
       new File(
-        "src/main/resources/seeds", 
-        "MT-" + LocalDate.now() + ".txt")); 
+        "src/main/resources/seeds",
+        "MT-" + LocalDate.now() + ".txt"));
   }
 
   //--------------------------------------------------------------

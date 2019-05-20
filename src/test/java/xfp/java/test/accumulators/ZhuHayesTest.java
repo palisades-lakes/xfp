@@ -9,7 +9,7 @@ import xfp.java.accumulators.BigFloatAccumulator;
 import xfp.java.test.Common;
 
 //----------------------------------------------------------------
-/** Test summation algorithms. 
+/** Test summation algorithms.
  * <p>
  * <pre>
  * mvn -q -Dtest=xfp/java/test/accumulators/ZhuHayesTest test > ZhuHayesTest.txt
@@ -23,9 +23,9 @@ public final class ZhuHayesTest {
 
   private static final List<String> accumulators =
     List.of(
-    "xfp.java.accumulators.ZhuHayesAccumulator");
-  
-  private static final int TEST_DIM = (1 * 64 * 1024) - 1; 
+      "xfp.java.accumulators.ZhuHayesAccumulator");
+
+  private static final int TEST_DIM = (1 * 64 * 1024) - 1;
 
   @SuppressWarnings("static-method")
   @Test
@@ -71,14 +71,14 @@ public final class ZhuHayesTest {
       BigFloatAccumulator.make()); }
 
   // TODO: decide on expected behavior with non-finite input
-//  @SuppressWarnings("static-method")
-//  @Test
-//  public final void nanSum () {
-//    Debug.DEBUG=false;
-//    Debug.println();
-//    Debug.println("infinite");
-//    Common.nonFiniteTests(
-//      Common.makeAccumulators(accumulators)); }
+  //  @SuppressWarnings("static-method")
+  //  @Test
+  //  public final void nanSum () {
+  //    Debug.DEBUG=false;
+  //    Debug.println();
+  //    Debug.println("infinite");
+  //    Common.nonFiniteTests(
+  //      Common.makeAccumulators(accumulators)); }
 
   @SuppressWarnings("static-method")
   @Test
