@@ -9,7 +9,7 @@ import java.util.Arrays;
 /** immutable arbitrary-precision non-negative integers.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-19
+ * @version 2019-05-21
  */
 
 public final class UnNatural extends Number
@@ -253,7 +253,7 @@ implements Ringlike<UnNatural> {
     return make(Bei.valueOf(s,radix)); }
 
   public static final UnNatural valueOf (final String s) {
-    return valueOf(s,10); }
+    return valueOf(s,0x10); }
 
   //--------------------------------------------------------------
   // cached values

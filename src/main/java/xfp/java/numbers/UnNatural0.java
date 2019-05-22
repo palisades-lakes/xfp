@@ -8,6 +8,8 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Objects;
 
+import xfp.java.Debug;
+
 /** immutable arbitrary-precision non-negative integers.
  *
  * @author palisades dot lakes at gmail dot com
@@ -493,7 +495,10 @@ implements Ringlike<UnNatural0> {
   public final UnNatural0 subtract (final UnNatural0 val) {
     if (val.isZero()) { return this; }
     final int c = compareTo(val);
-    assert 0L <= c;
+    assert 0 <= c :
+      "\nc=" + c
+      + "\nthis=" + toString(0x10)
+      + "\nthat=" + val.toString(0x10);
     if (c == 0) { return ZERO; }
     return make(subtract(_mag,val._mag)); }
 
@@ -933,6 +938,7 @@ implements Ringlike<UnNatural0> {
 
   private static final UnNatural0 multiplyToomCook3 (final UnNatural0 a,
                                                      final UnNatural0 b) {
+    Debug.println("a=" + a.toString(0x10));
     final int alen = a._mag.length;
     final int blen = b._mag.length;
 
@@ -947,29 +953,36 @@ implements Ringlike<UnNatural0> {
     // Obtain slices of the numbers. a2 and b2 are the most
     // significant bits of the numbers a and b, and a0 and b0 the
     // least significant.
-    UnNatural0 a0, a1, a2, b0, b1, b2;
-    a2 = a.getToomSlice(k,r,0,largest);
-    a1 = a.getToomSlice(k,r,1,largest);
-    a0 = a.getToomSlice(k,r,2,largest);
-    b2 = b.getToomSlice(k,r,0,largest);
-    b1 = b.getToomSlice(k,r,1,largest);
-    b0 = b.getToomSlice(k,r,2,largest);
+    final UnNatural0 a2 = a.getToomSlice(k,r,0,largest);
+    final UnNatural0 a1 = a.getToomSlice(k,r,1,largest);
+    final UnNatural0 a0 = a.getToomSlice(k,r,2,largest);
+    final UnNatural0 b2 = b.getToomSlice(k,r,0,largest);
+    final UnNatural0 b1 = b.getToomSlice(k,r,1,largest);
+    final UnNatural0 b0 = b.getToomSlice(k,r,2,largest);
 
-    UnNatural0 v0, v1, v2, vm1, vinf, t1, t2, tm1, da1, db1;
+    final UnNatural0 v0 = a0.multiply(b0,true);
+    UnNatural0 da1 = a2.add(a0);
+    UnNatural0 db1 = b2.add(b0);
+    // might be negative
+    final UnNatural0 da1_a1;
+    final int ca = da1.compareTo(a1);
+    if (0 < ca) { da1_a1 = da1.subtract(a1); }
+    else { da1_a1 = a1.subtract(da1); }
+    // might be negative
+    final UnNatural0 db1_b1;
+    final int cb = db1.compareTo(b1);
+    if (0 < cb) { db1_b1 = db1.subtract(b1); }
+    else { db1_b1 = b1.subtract(db1); }
+    final int cv = ca * cb;
+    final UnNatural0 vm1 = da1_a1.multiply(db1_b1,true);
 
-    v0 = a0.multiply(b0,true);
-    da1 = a2.add(a0);
-    db1 = b2.add(b0);
-    vm1 = da1.subtract(a1).multiply(db1.subtract(b1),true);
     da1 = da1.add(a1);
     db1 = db1.add(b1);
-    v1 = da1.multiply(db1,true);
-    v2 = da1
-      .add(a2)
-      .shiftLeft(1)
-      .subtract(a0)
-      .multiply(db1.add(b2).shiftLeft(1).subtract(b0),true);
-    vinf = a2.multiply(b2,true);
+    final UnNatural0 v1 = da1.multiply(db1,true);
+    final UnNatural0 v2 = da1.add(a2).shiftLeft(1).subtract(a0)
+      .multiply(
+        db1.add(b2).shiftLeft(1).subtract(b0),true);
+    final UnNatural0 vinf = a2.multiply(b2,true);
 
     // The algorithm requires two divisions by 2 and one by 3.
     // All divisions are known to be exact, that is, they do not
@@ -977,9 +990,17 @@ implements Ringlike<UnNatural0> {
     // divisions by 2 are implemented as right shifts which are
     // relatively efficient, leaving only an exact division by 3,
     // which is done by a specialized linear-time algorithm.
-    t2 = v2.subtract(vm1).exactDivideBy3();
-    tm1 = v1.subtract(vm1).shiftRight(1);
-    t1 = v1.subtract(v0);
+    UnNatural0 t2;
+    // handle missing sign of vm1
+    if (0 < cv) { t2 = v2.subtract(vm1).exactDivideBy3(); }
+    else { t2 = v2.add(vm1).exactDivideBy3(); }
+    
+    UnNatural0 tm1;
+    // handle missing sign of vm1
+    if (0 < cv) { tm1 = v1.subtract(vm1).shiftRight(1); }
+    else { tm1 = v1.add(vm1).shiftRight(1);}
+    
+    UnNatural0 t1 = v1.subtract(v0);
     t2 = t2.subtract(t1).shiftRight(1);
     t1 = t1.subtract(tm1).subtract(vinf);
     t2 = t2.subtract(vinf.shiftLeft(1));
@@ -988,10 +1009,11 @@ implements Ringlike<UnNatural0> {
     // Number of bits to shift left.
     final int ss = k * 32;
 
-    final UnNatural0 result =
-      vinf.shiftLeft(ss).add(t2).shiftLeft(ss).add(t1)
-      .shiftLeft(ss).add(tm1).shiftLeft(ss).add(v0);
-    return result; }
+    return vinf
+      .shiftLeft(ss).add(t2)
+      .shiftLeft(ss).add(t1)
+      .shiftLeft(ss).add(tm1)
+      .shiftLeft(ss).add(v0); }
 
   //--------------------------------------------------------------
 
@@ -1100,27 +1122,31 @@ implements Ringlike<UnNatural0> {
 
   //--------------------------------------------------------------
 
-  private final UnNatural0 multiply (final UnNatural0 val,
+  private final UnNatural0 multiply (final UnNatural0 that,
                                      final boolean isRecursion) {
-    if ((val.isZero()) || (isZero())) { return ZERO; }
+    Debug.println("multiply " + isRecursion);
+    Debug.println("this=" + this.toString(0x10));
+    Debug.println("that=" + that.toString(0x10));
+    //(new Throwable()).printStackTrace(System.out);
+    if ((that.isZero()) || (isZero())) { return ZERO; }
     final int xlen = _mag.length;
-    if ((val == this) && (xlen > MULTIPLY_SQUARE_THRESHOLD)) {
+    if ((that == this) && (xlen > MULTIPLY_SQUARE_THRESHOLD)) {
       return square(); }
 
-    final int ylen = val._mag.length;
+    final int ylen = that._mag.length;
 
     if ((xlen < KARATSUBA_THRESHOLD)
       || (ylen < KARATSUBA_THRESHOLD)) {
-      if (val._mag.length == 1) {
-        return multiply(_mag,val._mag[0]); }
+      if (that._mag.length == 1) {
+        return multiply(_mag,that._mag[0]); }
       if (_mag.length == 1) {
-        return multiply(val._mag,_mag[0]); }
-      int[] result = multiplyToLen(_mag,xlen,val._mag,ylen,null);
+        return multiply(that._mag,_mag[0]); }
+      int[] result = multiplyToLen(_mag,xlen,that._mag,ylen,null);
       result = unsafeStripLeadingZeroInts(result);
       return make(result); }
     if ((xlen < TOOM_COOK_THRESHOLD)
       && (ylen < TOOM_COOK_THRESHOLD)) {
-      return multiplyKaratsuba(this,val); }
+      return multiplyKaratsuba(this,that); }
     //
     // In "Hacker's Delight" section 2-13, p.33, it is explained
     // that if x and y are unsigned 32-bit quantities and m and n
@@ -1175,17 +1201,17 @@ implements Ringlike<UnNatural0> {
       // are only considering the magnitudes as non-negative. The
       // Toom-Cook multiplication algorithm determines the sign
       // at its end from the two signum values.
-      if ((bitLength(_mag,_mag.length) + bitLength(val._mag,
-        val._mag.length)) > (32L * MAX_MAG_LENGTH)) {
+      if ((bitLength(_mag,_mag.length) + bitLength(that._mag,
+        that._mag.length)) > (32L * MAX_MAG_LENGTH)) {
         reportOverflow(); } }
 
-    return multiplyToomCook3(this,val); }
+    return multiplyToomCook3(this,that); }
 
   //--------------------------------------------------------------
 
   @Override
-  public final UnNatural0 multiply (final UnNatural0 val) {
-    return multiply(val,false); }
+  public final UnNatural0 multiply (final UnNatural0 that) {
+    return multiply(that,false); }
 
   //--------------------------------------------------------------
   // Division
@@ -2176,15 +2202,11 @@ implements Ringlike<UnNatural0> {
 
   /** hex string. */
   @Override
-  public String toString () {
-    final StringBuilder b = new StringBuilder("0x");
-    for (final int mi : _mag) {
-      b.append(String.format("%08x",Integer.valueOf(mi))); }
-    return b.toString(); }
+  public String toString () { return toString(0x10); }
 
   /** hex string. */
   @Override
-  public String toString (final int radix) { 
+  public String toString (final int radix) {
     assert radix == 0x10;
     return Bei.toHexString(_mag); }
 
@@ -2461,7 +2483,9 @@ implements Ringlike<UnNatural0> {
 
   //-------------------------------------------------------------
 
-  private UnNatural0 (final int[] mag) { _mag = mag; }
+  private UnNatural0 (final int[] mag) {
+    if ((null != mag) && (0 < mag.length)) { assert 0 != mag[0]; }
+    _mag = mag; }
 
   private static final UnNatural0 make (final int[] m) {
     final int[] m1 = unsafeStripLeadingZeroInts(m);
@@ -2521,7 +2545,11 @@ implements Ringlike<UnNatural0> {
 
   public static final UnNatural0 valueOf (final String s,
                                           final int radix) {
+    //Debug.println("UnNatural0");
+    //Debug.println("s=" + s);
+    //Debug.println("radix=" + radix);
     final int len = s.length();
+    //Debug.println("len=" + len);
     assert 0 < len;
     assert Character.MIN_RADIX <= radix;
     assert radix <= Character.MAX_RADIX;
@@ -2529,43 +2557,42 @@ implements Ringlike<UnNatural0> {
     assert 0 > s.indexOf('+');
 
     int cursor = 0;
-    // skip leading '0' --- not strictly necessary?
-    while ((cursor < len)
+    while ((cursor<len)
       && (Character.digit(s.charAt(cursor),radix) == 0)) {
       cursor++; }
-    if (cursor == len) { return ZERO; }
+    if (cursor==len) { return ZERO; }
 
-    final int numDigits = len - cursor;
+    final int numDigits = len-cursor;
+    //Debug.println("numDigits=" + numDigits);
 
     // might be bigger than needed, but make(int[]) handles that
-    final long numBits =
-      ((numDigits * bitsPerDigit[radix]) >>> 10) + 1;
-    if ((numBits + 31) >= (1L << 32)) {
-      reportOverflow(); }
+    final long numBits = ((numDigits*bitsPerDigit[radix])>>>10)+1;
+    //Debug.println("numBits=" + numBits);
+    if ((numBits + 31) >= (1L << 32)) { reportOverflow(); }
     final int numWords = (int) (numBits + 31) >>> 5;
+    //Debug.println("numWords=" + numWords);
     final int[] magnitude = new int[numWords];
 
-    // Process first (potentially short) digit group
+    // first (potentially short) digit group
     int firstGroupLen = numDigits % digitsPerInt[radix];
     if (firstGroupLen == 0) { firstGroupLen = digitsPerInt[radix]; }
+    //Debug.println("firstGroupLen=" + firstGroupLen);
     String group = s.substring(cursor,cursor += firstGroupLen);
-    magnitude[numWords - 1] = Integer.parseInt(group,radix);
-    if (magnitude[numWords - 1] < 0) {
-      throw new NumberFormatException("Illegal digit"); }
+    magnitude[numWords-1] = Integer.parseInt(group,radix);
+    assert 0<=magnitude[numWords-1] : "Illegal digit";
 
-    // Process remaining digit groups
     final int superRadix = intRadix[radix];
     int groupVal = 0;
-    while (cursor < len) {
-      group = s.substring(cursor,cursor += digitsPerInt[radix]);
+    while (cursor<len) {
+      group = s.substring(cursor,cursor+=digitsPerInt[radix]);
       groupVal = Integer.parseInt(group,radix);
-      if (groupVal < 0) {
-        throw new NumberFormatException("Illegal digit"); }
+      assert 0<=groupVal : "Illegal digit";
       destructiveMulAdd(magnitude,superRadix,groupVal); }
+
     return make(magnitude); }
 
   public static final UnNatural0 valueOf (final String s) {
-    return valueOf(s,10); }
+    return valueOf(s,0x10); }
 
   //--------------------------------------------------------------
   // cached values

@@ -11,9 +11,10 @@ import xfp.java.exceptions.Exceptions;
  * (eq associativity).
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-19
+ * @version 2019-05-21
  */
 
+@SuppressWarnings("unchecked")
 public interface
 Ringlike<T extends Ringlike>
 extends Comparable<T>{

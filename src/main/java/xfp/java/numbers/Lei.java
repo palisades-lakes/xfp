@@ -15,7 +15,7 @@ import java.util.Objects;
  * TODO: ensure no leading zeros in inputs
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-18
+ * @version 2019-05-21
  */
 
 public final class Lei {
@@ -1568,7 +1568,7 @@ public final class Lei {
     return stripLeadingZeros(m); }
 
   public static final int[] valueOf (final String s) {
-    return valueOf(s,10); }
+    return valueOf(s,0x10); }
 
   //--------------------------------------------------------------
 

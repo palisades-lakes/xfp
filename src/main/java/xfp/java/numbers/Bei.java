@@ -15,7 +15,7 @@ import java.util.Objects;
  * TODO: ensure no leading zeros in inputs
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-18
+ * @version 2019-05-21
  */
 
 public final class Bei {
@@ -816,7 +816,20 @@ public final class Bei {
     final int[] v0 = multiply(a0,b0,true);
     int[] da1 = add(a2,a0);
     int[] db1 = add(b2,b0);
-    final int[] vm1 = multiply(subtract(da1,a1),subtract(db1,b1),true);
+
+    // might be negative
+    final int[] da1_a1;
+    final int ca = compare(da1,a1);
+    if (0 < ca) { da1_a1 = subtract(da1,a1); }
+    else { da1_a1 = subtract(a1,da1); }
+    // might be negative
+    final int[] db1_b1;
+    final int cb = compare(db1,b1);
+    if (0 < cb) { db1_b1 = subtract(db1,b1); }
+    else { db1_b1 = subtract(b1,db1); }
+    final int cv = ca * cb;
+    final int[] vm1 = multiply(da1_a1,db1_b1,true);
+    
     da1 = add(da1,a1);
     db1 = add(db1,b1);
     final int[] v1 = multiply(da1,db1,true);
@@ -834,8 +847,16 @@ public final class Bei {
     // divisions by 2 are implemented as right shifts which are
     // relatively efficient, leaving only an exact division by 3,
     // which is done by a specialized linear-time algorithm.
-    int[] t2 = exactDivideBy3(subtract(v2,vm1));
-    int[] tm1 = shiftRight(subtract(v1,vm1),1);
+    int[] t2;
+    // handle missing sign of vm1
+    if (0 < cv) { t2 = exactDivideBy3(subtract(v2,vm1)); }
+    else { t2 = exactDivideBy3(add(v2,vm1));}
+    
+    int[] tm1;
+    // handle missing sign of vm1
+    if (0 < cv) { tm1 = shiftRight(subtract(v1,vm1),1); }
+    else { tm1 = shiftRight(add(v1,vm1),1); }
+     
     int[] t1 = subtract(v1,v0);
     t2 = shiftRight(subtract(t2,t1),1);
     t1 = subtract(subtract(t1,tm1),vinf);
@@ -1243,10 +1264,15 @@ public final class Bei {
   /** hex string. */
 
   public static final String toHexString (final int[] m) {
-    final StringBuilder b = new StringBuilder("0x");
-    if (0 == m.length) { b.append('0'); }
-    for (final int mi : m) {
-      b.append(String.format("%08x",Integer.valueOf(mi))); }
+    //final StringBuilder b = new StringBuilder("0x");
+    final StringBuilder b = new StringBuilder("");
+    final int n = m.length;
+    if (0 == n) { b.append('0'); }
+    else {
+      b.append(String.format("%x",Long.valueOf(unsigned(m[0]))));
+      for (int i=1;i<n;i++) {
+        b.append(
+          String.format("%08x",Long.valueOf(unsigned(m[i])))); } }
     return b.toString(); }
 
   //--------------------------------------------------------------
@@ -1257,7 +1283,7 @@ public final class Bei {
     final int byteLen = (bitLength(m) / 8) + 1;
     final byte[] byteArray = new byte[byteLen];
     for (
-      int i = byteLen - 1,
+      int i = byteLen-1,
       bytesCopied = 4,
       nextInt = 0,
       intIndex = 0;
@@ -1545,7 +1571,7 @@ public final class Bei {
     int firstGroupLen = numDigits % digitsPerInt[radix];
     if (firstGroupLen == 0) { firstGroupLen = digitsPerInt[radix]; }
     String group = s.substring(cursor,cursor += firstGroupLen);
-    m[numWords - 1] = Integer.parseInt(group,radix);
+    m[numWords-1] = Integer.parseInt(group,radix);
     if (m[numWords - 1] < 0) {
       throw new NumberFormatException("Illegal digit"); }
 
@@ -1561,7 +1587,7 @@ public final class Bei {
     return stripLeadingZeros(m); }
 
   public static final int[] valueOf (final String s) {
-    return valueOf(s,10); }
+    return valueOf(s,0x10); }
 
   //--------------------------------------------------------------
 
