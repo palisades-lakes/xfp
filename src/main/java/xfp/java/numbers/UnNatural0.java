@@ -1238,7 +1238,7 @@ implements Ringlike<UnNatural0> {
 
   private final UnNatural0 
   divideKnuth (final UnNatural0 that) {
-    final MutableUnNatural q = new MutableUnNatural();
+    final MutableUnNatural q = MutableUnNatural.make();
     final MutableUnNatural a = MutableUnNatural.valueOf(this._mag);
     final MutableUnNatural b = MutableUnNatural.valueOf(that._mag);
     a.divideKnuth(b,q,false);
@@ -1247,26 +1247,26 @@ implements Ringlike<UnNatural0> {
   /** Long division */
   private final UnNatural0[] 
     divideAndRemainderKnuth (final UnNatural0 that) {
-    final MutableUnNatural q = new MutableUnNatural();
+    final MutableUnNatural q = MutableUnNatural.make();
     final MutableUnNatural num = MutableUnNatural.valueOf(this._mag);
     final MutableUnNatural den = MutableUnNatural.valueOf(that._mag);
-    final MutableUnNatural r = num.divideKnuth(den,q);
+    final MutableUnNatural r = num.divideKnuth(den,q,true);
     return new UnNatural0[] 
       { valueOf(q.getMagnitudeArray()),
         valueOf(r.getMagnitudeArray()), }; }
 
   private final UnNatural0 remainderKnuth (final UnNatural0 that) {
-    final MutableUnNatural q = new MutableUnNatural();
+    final MutableUnNatural q = MutableUnNatural.make();
     final MutableUnNatural num = MutableUnNatural.valueOf(this._mag);
     final MutableUnNatural den = MutableUnNatural.valueOf(that._mag);
-    final MutableUnNatural r = num.divideKnuth(den,q);
+    final MutableUnNatural r = num.divideKnuth(den,q,true);
     return valueOf(r.getMagnitudeArray()); }
 
   //--------------------------------------------------------------
 
   private final UnNatural0[] 
     divideAndRemainderBurnikelZiegler (final UnNatural0 that) {
-    final MutableUnNatural q = new MutableUnNatural();
+    final MutableUnNatural q = MutableUnNatural.make();
     final MutableUnNatural num = MutableUnNatural.valueOf(this._mag);
     final MutableUnNatural den = MutableUnNatural.valueOf(that._mag);
     final MutableUnNatural r =

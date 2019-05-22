@@ -486,6 +486,11 @@ public final class Bei {
 
   private static final int TOOM_COOK_SQUARE_THRESHOLD = 216;
 
+  private static int bitLength (final int[] val,
+                                final int len) {
+    if (len == 0) { return 0; }
+    return ((len - 1) << 5) + Numbers.bitLength(val[0]); }
+
   private static final int[] square (final int[] m,
                                      final boolean isRecursion) {
     if (isZero(m)) { return ZERO; }
@@ -1067,14 +1072,9 @@ public final class Bei {
 
   //--------------------------------------------------------------
 
-  public static final int[] multiply (final int[] m,
-                                      final int[] val) {
-    return multiply(m,val,false); }
-
-  private static int bitLength (final int[] val,
-                                final int len) {
-    if (len == 0) { return 0; }
-    return ((len - 1) << 5) + Numbers.bitLength(val[0]); }
+  public static final int[] multiply (final int[] x0,
+                                      final int[] x1) {
+    return multiply(x0,x1,false); }
 
   //--------------------------------------------------------------
   // Modular Arithmetic
