@@ -6,6 +6,7 @@ import static xfp.java.numbers.Numbers.unsigned;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 import xfp.java.Debug;
@@ -13,7 +14,7 @@ import xfp.java.Debug;
 /** immutable arbitrary-precision non-negative integers.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-19
+ * @version 2019-05-22
  */
 
 public final class UnNatural0 extends Number
@@ -21,7 +22,8 @@ implements Ringlike<UnNatural0> {
 
   private static final long serialVersionUID = 1L;
 
-  private final int[] _mag;
+  // Danger!!!
+  public final int[] _mag;
 
   public final boolean isZero () { return 0 == _mag.length; }
 
@@ -1216,410 +1218,103 @@ implements Ringlike<UnNatural0> {
   //--------------------------------------------------------------
   // Division
   //--------------------------------------------------------------
-  //  /** The threshold value for using Burnikel-Ziegler division. If
-  //   * the number of ints in the divisor are larger than this value,
-  //   * Burnikel-Ziegler division may be used. This value is found
-  //   * experimentally to work well.
-  //   */
-  //  public static final int BURNIKEL_ZIEGLER_THRESHOLD = 80;
-  //
-  //  /** The offset value for using Burnikel-Ziegler division. If the
-  //   * number of ints in the divisor exceeds the Burnikel-Ziegler
-  //   * threshold, and the number of ints in the dividend is greater
-  //   * than the number of ints in the divisor plus this value,
-  //   * Burnikel-Ziegler division will be used. This
-  //   * value is found experimentally to work well.
-  //   */
-  //  public static final int BURNIKEL_ZIEGLER_OFFSET = 40;
-  //
-  //  /**
-  //   * Returns a Natural whose value is {@code (this / val)}.
-  //   *
-  //   * @param val
-  //   *          value by which this Natural is to be divided.
-  //   * @return {@code this / val}
-  //   * @throws ArithmeticException
-  //   *           if {@code val} is zero.
-  //   */
-  //  public Natural divide (final Natural val) {
-  //    if ((val._mag.length < BURNIKEL_ZIEGLER_THRESHOLD)
-  //      || ((_mag.length
-  //        - val._mag.length) < BURNIKEL_ZIEGLER_OFFSET)) {
-  //      return divideKnuth(val);
-  //    }
-  //    return divideBurnikelZiegler(val);
-  //  }
-  //
-  //  /**
-  //   * Returns a Natural whose value is {@code (this / val)}
-  //   * using an O(n^2) algorithm from Knuth.
-  //   *
-  //   * @param val
-  //   *          value by which this Natural is to be divided.
-  //   * @return {@code this / val}
-  //   * @throws ArithmeticException
-  //   *           if {@code val} is zero.
-  //   * @see MutableNatural#divideKnuth(MutableNatural,
-  //   *      MutableNatural, boolean)
-  //   */
-  //  private Natural divideKnuth (final Natural val) {
-  //    final MutableNatural q = new MutableNatural(),
-  //      a = new MutableNatural(this._mag),
-  //      b = new MutableNatural(val._mag);
-  //
-  //    a.divideKnuth(b,q,false);
-  //    return q.toNatural(this.signum * val.signum);
-  //  }
-  //
-  //  /**
-  //   * Returns an array of two Naturals containing
-  //   * {@code (this / val)}
-  //   * followed by {@code (this % val)}.
-  //   *
-  //   * @param val
-  //   *          value by which this Natural is to be divided, and
-  //   *          the
-  //   *          remainder computed.
-  //   * @return an array of two Naturals: the quotient
-  //   *         {@code (this / val)}
-  //   *         is the initial element, and the remainder
-  //   *         {@code (this % val)}
-  //   *         is the final element.
-  //   * @throws ArithmeticException
-  //   *           if {@code val} is zero.
-  //   */
-  //  public Natural[] divideAndRemainder (final Natural val) {
-  //    if ((val._mag.length < BURNIKEL_ZIEGLER_THRESHOLD)
-  //      || ((_mag.length
-  //        - val._mag.length) < BURNIKEL_ZIEGLER_OFFSET)) {
-  //      return divideAndRemainderKnuth(val);
-  //    }
-  //    return divideAndRemainderBurnikelZiegler(val);
-  //  }
-  //
-  //  /** Long division */
-  //  private Natural[] divideAndRemainderKnuth (final Natural val) {
-  //    final Natural[] result = new Natural[2];
-  //    final MutableNatural q = new MutableNatural(),
-  //      a = new MutableNatural(this._mag),
-  //      b = new MutableNatural(val._mag);
-  //    final MutableNatural r = a.divideKnuth(b,q);
-  //    result[0] =
-  //      q.toNatural(this.signum == val.signum ? 1 : -1);
-  //    result[1] = r.toNatural(this.signum);
-  //    return result;
-  //  }
-  //
-  //  /**
-  //   * Returns a Natural whose value is {@code (this % val)}.
-  //   *
-  //   * @param val
-  //   *          value by which this Natural is to be divided, and
-  //   *          the
-  //   *          remainder computed.
-  //   * @return {@code this % val}
-  //   * @throws ArithmeticException
-  //   *           if {@code val} is zero.
-  //   */
-  //  public Natural remainder (final Natural val) {
-  //    if ((val._mag.length < BURNIKEL_ZIEGLER_THRESHOLD)
-  //      || ((_mag.length
-  //        - val._mag.length) < BURNIKEL_ZIEGLER_OFFSET)) {
-  //      return remainderKnuth(val);
-  //    }
-  //    return remainderBurnikelZiegler(val);
-  //  }
-  //
-  //  /** Long division */
-  //  private Natural remainderKnuth (final Natural val) {
-  //    final MutableNatural q = new MutableNatural(),
-  //      a = new MutableNatural(this._mag),
-  //      b = new MutableNatural(val._mag);
-  //
-  //    return a.divideKnuth(b,q).toNatural(this.signum);
-  //  }
-  //
-  //  /**
-  //   * Calculates {@code this / val} using the Burnikel-Ziegler
-  //   * algorithm.
-  //   *
-  //   * @param val
-  //   *          the divisor
-  //   * @return {@code this / val}
-  //   */
-  //  private Natural divideBurnikelZiegler (final Natural val) {
-  //    return divideAndRemainderBurnikelZiegler(val)[0];
-  //  }
-  //
-  //  /**
-  //   * Calculates {@code this % val} using the Burnikel-Ziegler
-  //   * algorithm.
-  //   *
-  //   * @param val
-  //   *          the divisor
-  //   * @return {@code this % val}
-  //   */
-  //  private Natural remainderBurnikelZiegler (final Natural val) {
-  //    return divideAndRemainderBurnikelZiegler(val)[1];
-  //  }
-  //
-  //  /**
-  //   * Computes {@code this / val} and {@code this % val} using the
-  //   * Burnikel-Ziegler algorithm.
-  //   *
-  //   * @param val
-  //   *          the divisor
-  //   * @return an array containing the quotient and remainder
-  //   */
-  //  private Natural[] divideAndRemainderBurnikelZiegler (final Natural val) {
-  //    final MutableNatural q = new MutableNatural();
-  //    final MutableNatural r =
-  //      new MutableNatural(this)
-  //      .divideAndRemainderBurnikelZiegler(
-  //        new MutableNatural(val),q);
-  //    final Natural qBigInt =
-  //      q.isZero() ? ZERO : q.toNatural(signum * val.signum);
-  //    final Natural rBigInt =
-  //      r.isZero() ? ZERO : r.toNatural(signum);
-  //    return new Natural[] { qBigInt, rBigInt };
-  //  }
-  //
-  //  /**
-  //   * Returns a Natural whose value is
-  //   * <code>(this<sup>exponent</sup>)</code>.
-  //   * Note that {@code exponent} is an integer rather than a
-  //   * Natural.
-  //   *
-  //   * @param exponent
-  //   *          exponent to which this Natural is to be raised.
-  //   * @return <code>this<sup>exponent</sup></code>
-  //   * @throws ArithmeticException
-  //   *           {@code exponent} is negative. (This would
-  //   *           cause the operation to yield a non-integer value.)
-  //   */
-  //  public Natural pow (final int exponent) {
-  //    if (exponent < 0) {
-  //      throw new ArithmeticException("Negative exponent");
-  //    }
-  //    if (signum == 0) { return (exponent == 0 ? ONE : this); }
-  //
-  //    Natural partToSquare = this.abs();
-  //
-  //    // Factor out powers of two from the base, as the
-  //    // exponentiation of
-  //    // these can be done by left shifts only.
-  //    // The remaining part can then be exponentiated faster. The
-  //    // powers of two will be multiplied back at the end.
-  //    final int powersOfTwo = partToSquare.getLowestSetBit();
-  //    final long bitsToShiftLong = (long) powersOfTwo * exponent;
-  //    if (bitsToShiftLong > Integer.MAX_VALUE) {
-  //      reportOverflow();
-  //    }
-  //    final int bitsToShift = (int) bitsToShiftLong;
-  //
-  //    int remainingBits;
-  //
-  //    // Factor the powers of two out quickly by shifting right, if
-  //    // needed.
-  //    if (powersOfTwo > 0) {
-  //      partToSquare = partToSquare.shiftRight(powersOfTwo);
-  //      remainingBits = partToSquare.bitLength();
-  //      if (remainingBits == 1) {  // Nothing left but +/- 1?
-  //        if ((signum < 0) && ((exponent & 1) == 1)) {
-  //          return NEGATIVE_ONE.shiftLeft(bitsToShift);
-  //        }
-  //        return ONE.shiftLeft(bitsToShift);
-  //      }
-  //    }
-  //    else {
-  //      remainingBits = partToSquare.bitLength();
-  //      if (remainingBits == 1) { // Nothing left but +/- 1?
-  //        if ((signum < 0) && ((exponent & 1) == 1)) {
-  //          return NEGATIVE_ONE;
-  //        }
-  //        return ONE;
-  //      }
-  //    }
-  //
-  //    // This is a quick way to approximate the size of the result,
-  //    // similar to doing log2[n] * exponent. This will give an
-  //    // upper bound
-  //    // of how big the result can be, and which algorithm to use.
-  //    final long scaleFactor = (long) remainingBits * exponent;
-  //
-  //    // Use slightly different algorithms for small and large
-  //    // operands.
-  //    // See if the result will safely fit into a long. (Largest
-  //    // 2^63-1)
-  //    if ((partToSquare._mag.length == 1) && (scaleFactor <= 62)) {
-  //      // Small number algorithm. Everything fits into a long.
-  //      final int newSign =
-  //        ((signum < 0) && ((exponent & 1) == 1) ? -1 : 1);
-  //      long result = 1;
-  //      long baseToPow2 = partToSquare._mag[0] & UNSIGNED_MASK;
-  //
-  //      int workingExponent = exponent;
-  //
-  //      // Perform exponentiation using repeated squaring trick
-  //      while (workingExponent != 0) {
-  //        if ((workingExponent & 1) == 1) {
-  //          result = result * baseToPow2;
-  //        }
-  //
-  //        if ((workingExponent >>>= 1) != 0) {
-  //          baseToPow2 = baseToPow2 * baseToPow2;
-  //        }
-  //      }
-  //
-  //      // Multiply back the powers of two (quickly, by shifting
-  //      // left)
-  //      if (powersOfTwo > 0) {
-  //        if ((bitsToShift + scaleFactor) <= 62) { // Fits in long?
-  //          return valueOf((result << bitsToShift) * newSign);
-  //        }
-  //        return valueOf(result * newSign).shiftLeft(bitsToShift);
-  //      }
-  //      return valueOf(result * newSign);
-  //    }
-  //    if ((((long) bitLength() * exponent)
-  //      / Integer.SIZE) > MAX_MAG_LENGTH) {
-  //      reportOverflow();
-  //    }
-  //
-  //    // Large number algorithm. This is basically identical to
-  //    // the algorithm above, but calls multiply() and square()
-  //    // which may use more efficient algorithms for large numbers.
-  //    Natural answer = ONE;
-  //
-  //    int workingExponent = exponent;
-  //    // Perform exponentiation using repeated squaring trick
-  //    while (workingExponent != 0) {
-  //      if ((workingExponent & 1) == 1) {
-  //        answer = answer.multiply(partToSquare);
-  //      }
-  //
-  //      if ((workingExponent >>>= 1) != 0) {
-  //        partToSquare = partToSquare.square();
-  //      }
-  //    }
-  //    // Multiply back the (exponentiated) powers of two (quickly,
-  //    // by shifting left)
-  //    if (powersOfTwo > 0) {
-  //      answer = answer.shiftLeft(bitsToShift);
-  //    }
-  //
-  //    if ((signum < 0) && ((exponent & 1) == 1)) {
-  //      return answer.negate();
-  //    }
-  //    return answer;
-  //  }
-  //
-  //  /**
-  //   * Returns the integer square root of this Natural. The
-  //   * integer square
-  //   * root of the corresponding mathematical integer {@code n} is
-  //   * the largest
-  //   * mathematical integer {@code s} such that {@code s*s <= n}. It
-  //   * is equal
-  //   * to the value of {@code floor(sqrt(n))}, where {@code sqrt(n)}
-  //   * denotes the
-  //   * real square root of {@code n} treated as a real. Note that
-  //   * the integer
-  //   * square root will be less than the real square root if the
-  //   * latter is not
-  //   * representable as an integral value.
-  //   *
-  //   * @return the integer square root of {@code this}
-  //   * @throws ArithmeticException
-  //   *           if {@code this} is negative. (The square
-  //   *           root of a negative integer {@code val} is
-  //   *           {@code (i * sqrt(-val))} where <i>i</i> is the
-  //   *           <i>imaginary unit</i> and is equal to
-  //   *           {@code sqrt(-1)}.)
-  //   * @since 9
-  //   */
-  //  public Natural sqrt () {
-  //    if (this.signum < 0) {
-  //      throw new ArithmeticException("Negative Natural");
-  //    }
-  //
-  //    return new MutableNatural(this._mag).sqrt().toNatural();
-  //  }
-  //
-  //  /**
-  //   * Returns an array of two Naturals containing the integer
-  //   * square root
-  //   * {@code s} of {@code this} and its remainder
-  //   * {@code this - s*s},
-  //   * respectively.
-  //   *
-  //   * @return an array of two Naturals with the integer square
-  //   *         root at
-  //   *         offset 0 and the remainder at offset 1
-  //   * @throws ArithmeticException
-  //   *           if {@code this} is negative. (The square
-  //   *           root of a negative integer {@code val} is
-  //   *           {@code (i * sqrt(-val))} where <i>i</i> is the
-  //   *           <i>imaginary unit</i> and is equal to
-  //   *           {@code sqrt(-1)}.)
-  //   * @see #sqrt()
-  //   * @since 9
-  //   */
-  //  public Natural[] sqrtAndRemainder () {
-  //    final Natural s = sqrt();
-  //    final Natural r = this.subtract(s.square());
-  //    assert r.compareTo(Natural.ZERO) >= 0;
-  //    return new Natural[] { s, r };
-  //  }
-  //
-  //  /**
-  //   * Returns a Natural whose value is the greatest common
-  //   * divisor of
-  //   * {@code abs(this)} and {@code abs(val)}. Returns 0 if
-  //   * {@code this == 0 && val == 0}.
-  //   *
-  //   * @param val
-  //   *          value with which the GCD is to be computed.
-  //   * @return {@code GCD(abs(this), abs(val))}
-  //   */
-  //  public Natural gcd (final Natural val) {
-  //    if (val.signum == 0) {
-  //      return this.abs();
-  //    }
-  //    else if (this.signum == 0) { return val.abs(); }
-  //
-  //    final MutableNatural a = new MutableNatural(this);
-  //    final MutableNatural b = new MutableNatural(val);
-  //
-  //    final MutableNatural result = a.hybridGCD(b);
-  //
-  //    return result.toNatural(1);
-  //  }
 
-  /**
-   * Package private method to return bit length for an integer.
-   */
-  private static final int bitLengthForInt (final int n) {
-    return 32 - Integer.numberOfLeadingZeros(n);
-  }
+  public static final int BURNIKEL_ZIEGLER_THRESHOLD = 80;
+  public static final int BURNIKEL_ZIEGLER_OFFSET = 40;
 
-  // shifts a up to len right n bits assumes no leading zeros,
-  // 0<n<32
-  static void primitiveRightShift (final int[] a,
-                                   final int len,
-                                   final int n) {
-    final int n2 = 32 - n;
-    for (int i = len - 1, c = a[i]; i > 0; i--) {
-      final int b = c;
-      c = a[i - 1];
-      a[i] = (c << n2) | (b >>> n);
-    }
-    a[0] >>>= n;
-  }
+  private static final boolean 
+  useKnuthDivision (final UnNatural0 num,
+                    final UnNatural0 den) {
+    final int nn = num._mag.length;
+    final int nd = den._mag.length;
+    return 
+      (nd < BURNIKEL_ZIEGLER_THRESHOLD)
+      || 
+      ((nn-nd) < BURNIKEL_ZIEGLER_OFFSET); }
+  
+  //--------------------------------------------------------------
+  // Knuth algorithm
+  //--------------------------------------------------------------
 
+  private final UnNatural0 
+  divideKnuth (final UnNatural0 that) {
+    final MutableUnNatural q = new MutableUnNatural();
+    final MutableUnNatural a = MutableUnNatural.valueOf(this._mag);
+    final MutableUnNatural b = MutableUnNatural.valueOf(that._mag);
+    a.divideKnuth(b,q,false);
+    return valueOf(q.getMagnitudeArray()); }
+
+  /** Long division */
+  private final UnNatural0[] 
+    divideAndRemainderKnuth (final UnNatural0 that) {
+    final MutableUnNatural q = new MutableUnNatural();
+    final MutableUnNatural num = MutableUnNatural.valueOf(this._mag);
+    final MutableUnNatural den = MutableUnNatural.valueOf(that._mag);
+    final MutableUnNatural r = num.divideKnuth(den,q);
+    return new UnNatural0[] 
+      { valueOf(q.getMagnitudeArray()),
+        valueOf(r.getMagnitudeArray()), }; }
+
+  private final UnNatural0 remainderKnuth (final UnNatural0 that) {
+    final MutableUnNatural q = new MutableUnNatural();
+    final MutableUnNatural num = MutableUnNatural.valueOf(this._mag);
+    final MutableUnNatural den = MutableUnNatural.valueOf(that._mag);
+    final MutableUnNatural r = num.divideKnuth(den,q);
+    return valueOf(r.getMagnitudeArray()); }
+
+  //--------------------------------------------------------------
+
+  private final UnNatural0[] 
+    divideAndRemainderBurnikelZiegler (final UnNatural0 that) {
+    final MutableUnNatural q = new MutableUnNatural();
+    final MutableUnNatural num = MutableUnNatural.valueOf(this._mag);
+    final MutableUnNatural den = MutableUnNatural.valueOf(that._mag);
+    final MutableUnNatural r =
+      num.divideAndRemainderBurnikelZiegler(den,q);
+    final UnNatural0 qq = 
+      q.isZero() ? ZERO : valueOf(q.getMagnitudeArray());
+    final UnNatural0 rr = 
+      r.isZero() ? ZERO :valueOf(r.getMagnitudeArray());
+    return new UnNatural0[] { qq, rr }; }
+
+  private final UnNatural0 
+  divideBurnikelZiegler (final UnNatural0 that) {
+    return divideAndRemainderBurnikelZiegler(that)[0]; }
+
+  private final UnNatural0 
+  remainderBurnikelZiegler (final UnNatural0 that) {
+    return divideAndRemainderBurnikelZiegler(that)[1]; }
+
+  //--------------------------------------------------------------
+  // division Ringlike api
+  //--------------------------------------------------------------
+
+  @Override
+  public final UnNatural0 
+  divide (final UnNatural0 that) {
+    if (useKnuthDivision(this,that)) { return divideKnuth(that); }
+    return divideBurnikelZiegler(that); }
+
+  @Override
+  public List<UnNatural0> 
+  divideAndRemainder (final UnNatural0 that) {
+    if (useKnuthDivision(this,that)) {
+      return Arrays.asList(divideAndRemainderKnuth(that)); }
+    return 
+      Arrays.asList(divideAndRemainderBurnikelZiegler(that)); }
+
+  @Override
+  public final UnNatural0 remainder (final UnNatural0 that) {
+    if (useKnuthDivision(this,that)) {
+      return remainderKnuth(that); }
+    return remainderBurnikelZiegler(that); }
+
+
+  //--------------------------------------------------------------
   // shifts a up to len left n bits assumes no leading zeros,
   // 0<=n<32
-  static void primitiveLeftShift (final int[] a, final int len,
+  private static final void 
+  primitiveLeftShift (final int[] a, final int len,
                                   final int n) {
     if ((len == 0) || (n == 0)) { return; }
 
@@ -1639,7 +1334,7 @@ implements Ringlike<UnNatural0> {
    */
   private static int bitLength (final int[] val, final int len) {
     if (len == 0) { return 0; }
-    return ((len - 1) << 5) + bitLengthForInt(val[0]);
+    return ((len - 1) << 5) + Numbers.bitLength(val[0]);
   }
 
   //--------------------------------------------------------------
@@ -2120,7 +1815,7 @@ implements Ringlike<UnNatural0> {
       else {
         // Calculate the bit length of the magnitude
         final int magBitLength =
-          ((len - 1) << 5) + bitLengthForInt(_mag[0]);
+          ((len - 1) << 5) + Numbers.bitLength(_mag[0]);
         n = magBitLength; }
       bitLengthPlusOne = n + 1; }
     return n; }
@@ -2249,10 +1944,15 @@ implements Ringlike<UnNatural0> {
     return new BigInteger(toByteArray()); }
 
   @Override
-  public final int intValue () { return getInt(0); }
+  public final int intValue () { 
+    assert 1 >= _mag.length;
+    if (isZero()) { return 0; }
+    return getInt(0); }
 
   @Override
   public final long longValue () {
+    assert 2 >= _mag.length;
+    if (isZero()) { return 0L; }
     long result = 0;
     for (int i = 1; i >= 0; i--) {
       result = (result << 32) + unsigned(getInt(i)); }
@@ -2265,7 +1965,7 @@ implements Ringlike<UnNatural0> {
     if (isZero()) { return 0.0f; }
 
     final int exponent =
-      (((_mag.length - 1) << 5) + bitLengthForInt(_mag[0])) - 1;
+      (((_mag.length - 1) << 5) + Numbers.bitLength(_mag[0])) - 1;
 
     // exponent == floor(log2(abs(this)))
     if (exponent < (Long.SIZE - 1)) { return longValue(); }
@@ -2356,7 +2056,7 @@ implements Ringlike<UnNatural0> {
     if (isZero()) { return 0.0; }
 
     final int exponent =
-      (((_mag.length - 1) << 5) + bitLengthForInt(_mag[0])) - 1;
+      (((_mag.length - 1) << 5) + Numbers.bitLength(_mag[0])) - 1;
 
     // exponent == floor(log2(abs(this))Double)
     if (exponent < (Long.SIZE - 1)) {

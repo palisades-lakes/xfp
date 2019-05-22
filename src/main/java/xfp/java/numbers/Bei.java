@@ -15,7 +15,7 @@ import java.util.Objects;
  * TODO: ensure no leading zeros in inputs
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-21
+ * @version 2019-05-22
  */
 
 public final class Bei {
@@ -1071,13 +1071,10 @@ public final class Bei {
                                       final int[] val) {
     return multiply(m,val,false); }
 
-  private static final int bitLength (final int n) {
-    return 32 - Integer.numberOfLeadingZeros(n); }
-
   private static int bitLength (final int[] val,
                                 final int len) {
     if (len == 0) { return 0; }
-    return ((len - 1) << 5) + bitLength(val[0]); }
+    return ((len - 1) << 5) + Numbers.bitLength(val[0]); }
 
   //--------------------------------------------------------------
   // Modular Arithmetic
@@ -1249,7 +1246,7 @@ public final class Bei {
     final int len = m.length;
     if (len == 0) { return(0); }
     // Calculate the bit length of the magnitude
-    final int n = ((len - 1) << 5) + bitLength(m[0]);
+    final int n = ((len - 1) << 5) + Numbers.bitLength(m[0]);
     return n; }
 
   // TODO: BigInteger caches this with the instance. Is it worth
@@ -1315,7 +1312,7 @@ public final class Bei {
     //if (isZero(m)) { return 0.0f; }
 
     final int exponent =
-      (((m.length - 1) << 5) + bitLength(m[0])) - 1;
+      (((m.length - 1) << 5) + Numbers.bitLength(m[0])) - 1;
 
     // exponent == floor(log2(abs(this)))
     if (exponent < (Long.SIZE - 1)) { return longValue(m); }
@@ -1383,7 +1380,7 @@ public final class Bei {
     //if (isZero(m)) { return 0.0; }
 
     final int exponent =
-      (((m.length - 1) << 5) + bitLength(m[0])) - 1;
+      (((m.length - 1) << 5) + Numbers.bitLength(m[0])) - 1;
 
     // exponent == floor(log2(abs(this))Double)
     if (exponent < (Long.SIZE - 1)) {

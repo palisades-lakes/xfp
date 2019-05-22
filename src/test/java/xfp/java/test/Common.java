@@ -30,7 +30,7 @@ import xfp.java.prng.PRNG;
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-21
+ * @version 2019-05-22
  */
 @SuppressWarnings("unchecked")
 public final class Common {
@@ -45,18 +45,17 @@ public final class Common {
                 final Function<String,Ringlike> valueOf,
                 final BigInteger z0) {
 
-    assert 0<=z0.signum();
     final String zs = z0.toString(0x10);
     //Debug.println(zs);
-    
+
     final Ringlike r0 = fromBI.apply(z0);
     final String rs = r0.toString(0x10);
-    
+
     Assertions.assertEquals(zs,rs,() -> 
     "\nzs=" + zs + "\nrs=" + rs); 
 
     //Debug.println("rs=" + rs);
-    
+
     final Ringlike r1 = valueOf.apply(rs);
     Assertions.assertEquals(r0,r1,() ->
     "\n" + rs + "\n" + r1.toString(0x10));  }
@@ -64,8 +63,7 @@ public final class Common {
   public static final void
   biRoundTrip (final Function<BigInteger,Ringlike> fromBI,
                final Function<Ringlike,BigInteger> toBI,
-               final BigInteger z0) {
-    final BigInteger x0 = z0.abs();
+               final BigInteger x0) {
     final Ringlike y = fromBI.apply(x0);
     final BigInteger x1 = toBI.apply(y);
     Assertions.assertEquals(x0,x1,() ->
@@ -76,10 +74,8 @@ public final class Common {
   public static final void
   add (final Function<BigInteger,Ringlike> fromBI,
        final Function<Ringlike,BigInteger> toBI,
-       final BigInteger z0,
-       final BigInteger z1) {
-    final BigInteger x0 = z0.abs();
-    final BigInteger x1 = z1.abs();
+       final BigInteger x0,
+       final BigInteger x1) {
     final Ringlike y0 = fromBI.apply(x0);
     final Ringlike y1 = fromBI.apply(x1);
     final BigInteger x2 = x0.add(x1);
@@ -99,12 +95,35 @@ public final class Common {
     + "\n" + x3.toString(0x10)); }
 
   public static final void
-  subtract (final Function<BigInteger,Ringlike> fromBI,
+  absDiff (final Function<BigInteger,Ringlike> fromBI,
             final Function<Ringlike,BigInteger> toBI,
             final BigInteger z0,
             final BigInteger z1) {
     final BigInteger x0 = z0.max(z1);
     final BigInteger x1 = z0.min(z1);
+    final Ringlike y0 = fromBI.apply(x0);
+    final Ringlike y1 = fromBI.apply(x1);
+    final BigInteger x2 = x0.subtract(x1);
+    final Ringlike y2 = y0.subtract(y1);
+    final BigInteger x3 = toBI.apply( y2);
+    Assertions.assertEquals(x2,x3,() ->
+    x0.toString(0x10)
+    + "\n - "
+    + "\n" +  x1.toString(0x10)
+    + "\n -> "
+    + "\n" + x2.toString(0x10)
+    + "\n" + y0.toString(0x10)
+    + "\n - "
+    + "\n" +  y1.toString(0x10)
+    + "\n -> "
+    + "\n" + y2.toString(0x10)
+    + "\n" + x3.toString(0x10)); }
+
+  public static final void
+  subtract (final Function<BigInteger,Ringlike> fromBI,
+            final Function<Ringlike,BigInteger> toBI,
+            final BigInteger x0,
+            final BigInteger x1) {
     final Ringlike y0 = fromBI.apply(x0);
     final Ringlike y1 = fromBI.apply(x1);
     final BigInteger x2 = x0.subtract(x1);
@@ -211,6 +230,31 @@ public final class Common {
       + "\n" + y2[1].toString(0x10)
       + "\n" + x3[1].toString(0x10)); } }
 
+  public static final void
+  remainder (final Function<BigInteger,Ringlike> fromBI,
+                      final Function<Ringlike,BigInteger> toBI,
+                      final BigInteger x0,
+                      final BigInteger x1) {
+    if (0 != x1.signum()) {
+      final Ringlike y0 = fromBI.apply(x0);
+      final Ringlike y1 = fromBI.apply(x1);
+      final BigInteger x2 = x0.remainder(x1);
+      final Ringlike y2 = y0.remainder(y1);
+      final BigInteger x3 = toBI.apply(y2);
+
+      Assertions.assertEquals(x2,x3,() ->
+      x0.toString(0x10)
+      + "\n / "
+      + "\n" +  x1.toString(0x10)
+      + "\n -> "
+      + "\n" + x2.toString(0x10)
+      + "\n" + y0.toString(0x10)
+      + "\n / "
+      + "\n" +  y1.toString(0x10)
+      + "\n -> "
+      + "\n" + y2.toString(0x10)
+      + "\n" + x3.toString(0x10)); } }
+
   //--------------------------------------------------------------
 
   public static final void
@@ -221,18 +265,24 @@ public final class Common {
                final BigInteger z1) {
     assert 0 <= z0.signum();
     assert 0 <= z1.signum();
-//    Debug.println("z0=" + z0.toString(0x10));
-//    Debug.println("z1=" + z1.toString(0x10));
+    //    Debug.println("z0=" + z0.toString(0x10));
+    //    Debug.println("z1=" + z1.toString(0x10));
     hexRoundTrip(fromBI,valueOf,z0);
     hexRoundTrip(fromBI,valueOf,z1);
     biRoundTrip(fromBI,toBI,z0);
     biRoundTrip(fromBI,toBI,z1);
     add(fromBI,toBI,z0,z1);
-    subtract(fromBI,toBI,z0,z1);
+    add(fromBI,toBI,z0,z0);
+    absDiff(fromBI,toBI,z0,z1);
+    absDiff(fromBI,toBI,z0,z0);
     multiply(fromBI,toBI,z0,z1);
-    //divide(fromBI,toBI,z0,z1);
-    //divideAndRemainder(fromBI,toBI,z0,z1);
-  }
+    multiply(fromBI,toBI,z0,z0);
+    divide(fromBI,toBI,z0,z1);
+    divide(fromBI,toBI,z0,z0);
+    divideAndRemainder(fromBI,toBI,z0,z1);
+    divideAndRemainder(fromBI,toBI,z0,z0); 
+    remainder(fromBI,toBI,z0,z1);
+    remainder(fromBI,toBI,z0,z0); }
 
 
   public static final void
@@ -251,18 +301,32 @@ public final class Common {
 
   public static final void
   integerTest (final Function<String,Ringlike> valueOf,
-    final Function<BigInteger,Ringlike> fromBI,
+               final Function<BigInteger,Ringlike> fromBI,
                final Function<Ringlike,BigInteger> toBI,
                final BigInteger z0,
                final BigInteger z1) {
-    naturalTest(valueOf,fromBI,toBI,z0,z1);
+    hexRoundTrip(fromBI,valueOf,z0);
+    hexRoundTrip(fromBI,valueOf,z1);
+    biRoundTrip(fromBI,toBI,z0);
+    biRoundTrip(fromBI,toBI,z1);
+    add(fromBI,toBI,z0,z1);
+    add(fromBI,toBI,z0,z0);
+    absDiff(fromBI,toBI,z0,z1);
+    absDiff(fromBI,toBI,z0,z0);
+    subtract(fromBI,toBI,z0,z1);
+    subtract(fromBI,toBI,z0,z0);
     multiply(fromBI,toBI,z0,z1);
+    multiply(fromBI,toBI,z0,z0);
     divide(fromBI,toBI,z0,z1);
-    divideAndRemainder(fromBI,toBI,z0,z1); }
+    divide(fromBI,toBI,z0,z0);
+    divideAndRemainder(fromBI,toBI,z0,z1);
+    divideAndRemainder(fromBI,toBI,z0,z0);
+    remainder(fromBI,toBI,z0,z1);
+    remainder(fromBI,toBI,z0,z0); }
 
   public static final void
   integerTest (final Function<String,Ringlike> valueOf,
-    final Function<BigInteger,Ringlike> fromBI,
+               final Function<BigInteger,Ringlike> fromBI,
                final Function<Ringlike,BigInteger> toBI) {
     final Generator gn =
       Generators.bigIntegerGenerator(
@@ -339,8 +403,8 @@ public final class Common {
                      final ToFloatFunction toFloat,
                      final BinaryOperator<Comparable> dist,
                      @SuppressWarnings("unused") 
-                     final Function<Comparable,String> toString,
-                     final Comparable f) {
+  final Function<Comparable,String> toString,
+  final Comparable f) {
 
     //Debug.println("f=" + toString.apply(f));
 
@@ -527,8 +591,8 @@ public final class Common {
                       final ToDoubleFunction toDouble,
                       final BinaryOperator<Comparable> dist,
                       @SuppressWarnings("unused") 
-                      final Function<Comparable,String> toString,
-                      final Comparable f) {
+  final Function<Comparable,String> toString,
+  final Comparable f) {
 
     //Debug.println("f=" + toString.apply(f));
 
@@ -912,7 +976,7 @@ public final class Common {
       //    Double.valueOf(t1*1.0e-6))
       //  + toHexString(l1d) + " = "
       //  + String.format("%8.2e",Double.valueOf(l1d))); 
-      } }
+    } }
 
   /** Assumes the generators create arrays whose exact sum is 0.0
    */
@@ -960,7 +1024,7 @@ public final class Common {
       //  + toHexString(l1d)
       //  + " / " + toHexString(l1n) + " = "
       //  + String.format("%8.2e",Double.valueOf(l1d/l1n)));
-      } }
+    } }
 
   public static final void
   sumTests (final List<Generator> generators,
@@ -992,7 +1056,7 @@ public final class Common {
       //  + toHexString(l1d)
       //  + " / " + toHexString(l1n) + " = "
       //  + String.format("%8.2e",Double.valueOf(l1d/l1n))); 
-      } }
+    } }
 
   public static final void l2Tests (final List<Generator> generators,
                                     final List<Accumulator> accumulators,
@@ -1025,7 +1089,7 @@ public final class Common {
       //  + toHexString(l1d)
       //  + " / " + toHexString(l1n) + " = "
       //  + String.format("%8.2e",Double.valueOf(l1d/l1n))); 
-      } }
+    } }
 
   public static final void dotTests (final List<Generator> generators,
                                      final List<Accumulator> accumulators,

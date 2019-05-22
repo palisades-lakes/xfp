@@ -58,6 +58,11 @@ extends Comparable<T>{
     final T r = subtract((T) x.multiply(d));
     return List.of(d,r); }
 
+  public default T remainder (final T x) {
+    final T d = divide(x);
+    final T r = subtract((T) x.multiply(d));
+    return r; }
+
   //--------------------------------------------------------------
 
   public default String toString (final int radix) {

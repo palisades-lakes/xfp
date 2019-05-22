@@ -5,11 +5,12 @@ import static xfp.java.numbers.Numbers.unsigned;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.List;
 
 /** immutable arbitrary-precision non-negative integers.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-21
+ * @version 2019-05-22
  */
 
 public final class UnNatural extends Number
@@ -86,6 +87,100 @@ implements Ringlike<UnNatural> {
   @Override
   public final UnNatural multiply (final UnNatural val) {
     return make(Bei.multiply(_mag,val._mag)); }
+
+  //--------------------------------------------------------------
+  // Division
+  //--------------------------------------------------------------
+
+  public static final int BURNIKEL_ZIEGLER_THRESHOLD = 80;
+  public static final int BURNIKEL_ZIEGLER_OFFSET = 40;
+
+  private static final boolean 
+  useKnuthDivision (final UnNatural num,
+                    final UnNatural den) {
+    final int nn = num._mag.length;
+    final int nd = den._mag.length;
+    return 
+      (nd < BURNIKEL_ZIEGLER_THRESHOLD)
+      || 
+      ((nn-nd) < BURNIKEL_ZIEGLER_OFFSET); }
+  
+  //--------------------------------------------------------------
+  // Knuth algorithm
+  //--------------------------------------------------------------
+
+  private final UnNatural 
+  divideKnuth (final UnNatural that) {
+    final MutableUnNatural q = new MutableUnNatural();
+    final MutableUnNatural num = MutableUnNatural.valueOf(this._mag);
+    final MutableUnNatural den = MutableUnNatural.valueOf(that._mag);
+    num.divideKnuth(den,q,false);
+    return valueOf(q.getMagnitudeArray()); }
+
+  private final UnNatural[] 
+    divideAndRemainderKnuth (final UnNatural that) {
+    final MutableUnNatural q = new MutableUnNatural();
+    final MutableUnNatural num = MutableUnNatural.valueOf(this._mag);
+    final MutableUnNatural den = MutableUnNatural.valueOf(that._mag);
+    final MutableUnNatural r = num.divideKnuth(den,q);
+    return new UnNatural[] 
+      { valueOf(q.getMagnitudeArray()),
+        valueOf(r.getMagnitudeArray()), }; }
+
+  private final UnNatural remainderKnuth (final UnNatural that) {
+    final MutableUnNatural q = new MutableUnNatural();
+    final MutableUnNatural num = MutableUnNatural.valueOf(this._mag);
+    final MutableUnNatural den = MutableUnNatural.valueOf(that._mag);
+    final MutableUnNatural r = num.divideKnuth(den,q);
+    return valueOf(r.getMagnitudeArray()); }
+
+  //--------------------------------------------------------------
+
+  private final UnNatural[] 
+    divideAndRemainderBurnikelZiegler (final UnNatural that) {
+    final MutableUnNatural q = new MutableUnNatural();
+    final MutableUnNatural num = MutableUnNatural.valueOf(this._mag);
+    final MutableUnNatural den = MutableUnNatural.valueOf(that._mag);
+    final MutableUnNatural r =
+      num.divideAndRemainderBurnikelZiegler(den,q);
+    final UnNatural qq = 
+      q.isZero() ? ZERO : valueOf(q.getMagnitudeArray());
+    final UnNatural rr = 
+      r.isZero() ? ZERO : valueOf(r.getMagnitudeArray());
+    return new UnNatural[] { qq, rr }; }
+
+  private final UnNatural 
+  divideBurnikelZiegler (final UnNatural that) {
+    return divideAndRemainderBurnikelZiegler(that)[0]; }
+
+  private final UnNatural 
+  remainderBurnikelZiegler (final UnNatural that) {
+    return divideAndRemainderBurnikelZiegler(that)[1]; }
+
+  //--------------------------------------------------------------
+  // division Ringlike api
+  //--------------------------------------------------------------
+
+  @Override
+  public final UnNatural 
+  divide (final UnNatural that) {
+    if (useKnuthDivision(this,that)) { return divideKnuth(that); }
+    return divideBurnikelZiegler(that); }
+
+  @Override
+  public List<UnNatural> 
+  divideAndRemainder (final UnNatural that) {
+    if (useKnuthDivision(this,that)) {
+      return Arrays.asList(divideAndRemainderKnuth(that)); }
+    return 
+      Arrays.asList(divideAndRemainderBurnikelZiegler(that)); }
+
+  @Override
+  public final UnNatural remainder (final UnNatural that) {
+    if (useKnuthDivision(this,that)) {
+      return remainderKnuth(that); }
+    return remainderBurnikelZiegler(that); }
+
 
   //--------------------------------------------------------------
   // Bit Operations

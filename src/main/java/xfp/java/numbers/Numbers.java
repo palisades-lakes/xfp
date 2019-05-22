@@ -140,6 +140,11 @@ public final class Numbers implements Set {
 
   //--------------------------------------------------------------
 
+  public static final int bitLength (final int n) {
+    return 32 - Integer.numberOfLeadingZeros(n); }
+
+  //--------------------------------------------------------------
+
   public static final boolean isZero (final double x) {
     return 0.0 == x; }
 
