@@ -88,7 +88,6 @@ public final class Bei {
     return result; }
 
   //--------------------------------------------------------------
-
   // assuming m0 and m1 have no leading zeros
   public static final int compare (final int[] m0,
                                    final int[] m1) {
@@ -97,8 +96,11 @@ public final class Bei {
     if (n0<n1) { return -1; }
     if (n0>n1) { return 1; }
     for (int i=0;i<n0;i++) {
+      // unsigned() version may be slightly faster?
+      //final int m0i = m0[i] + 0x80000000;
+      //final int m1i = m1[i] + 0x80000000;
       final long m0i = unsigned(m0[i]);
-      final long m1i = unsigned(m1[i]);
+    final long m1i = unsigned(m1[i]);
       if (m0i<m1i) { return -1; }
       if (m0i>m1i) { return 1; } }
     return 0; }
@@ -162,10 +164,6 @@ public final class Bei {
     if (m01>m11) { return 1; }
     for (int i=2;i<n0;i++) { if (0!=m0[i]) { return 1; } }
     return 0; }
-
-  //  public static final int compare (final long m0,
-  //                                   final int[] m1) {
-  //    return -compare(m1,m0); }
 
   //--------------------------------------------------------------
   // add
@@ -1076,6 +1074,23 @@ public final class Bei {
                                       final int[] x1) {
     return multiply(x0,x1,false); }
 
+  //--------------------------------------------------------------
+  // division
+  //--------------------------------------------------------------
+  
+  public static final int BURNIKEL_ZIEGLER_THRESHOLD = 80;
+  public static final int BURNIKEL_ZIEGLER_OFFSET = 40;
+
+  public static final boolean 
+  useKnuthDivision (final int[] num,
+                    final int[] den) {
+    final int nn = num.length;
+    final int nd = den.length;
+    return 
+      (nd < BURNIKEL_ZIEGLER_THRESHOLD)
+      || 
+      ((nn-nd) < BURNIKEL_ZIEGLER_OFFSET); }
+  
   //--------------------------------------------------------------
   // Modular Arithmetic
   //--------------------------------------------------------------

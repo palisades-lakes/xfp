@@ -92,18 +92,10 @@ implements Ringlike<UnNatural> {
   // Division
   //--------------------------------------------------------------
 
-  public static final int BURNIKEL_ZIEGLER_THRESHOLD = 80;
-  public static final int BURNIKEL_ZIEGLER_OFFSET = 40;
-
   private static final boolean 
   useKnuthDivision (final UnNatural num,
                     final UnNatural den) {
-    final int nn = num._mag.length;
-    final int nd = den._mag.length;
-    return 
-      (nd < BURNIKEL_ZIEGLER_THRESHOLD)
-      || 
-      ((nn-nd) < BURNIKEL_ZIEGLER_OFFSET); }
+    return Bei.useKnuthDivision(num._mag,den._mag); }
   
   //--------------------------------------------------------------
   // Knuth algorithm

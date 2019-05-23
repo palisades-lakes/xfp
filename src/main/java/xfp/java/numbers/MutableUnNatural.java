@@ -1,6 +1,6 @@
 package xfp.java.numbers;
 
-import static xfp.java.numbers.UnNatural0.BURNIKEL_ZIEGLER_THRESHOLD;
+import static xfp.java.numbers.Bei.BURNIKEL_ZIEGLER_THRESHOLD;
 
 import java.util.Arrays;
 
@@ -37,6 +37,67 @@ public final class MutableUnNatural {
       return Arrays.copyOfRange(value, offset, offset + intLen); }
     return value; }
 
+  /** Makes this number an {@code n}-int number all of whose bits
+   * are ones. Used by Burnikel-Ziegler division.
+   * @param n number of ints in the {@code value} array
+   * @return a number equal to {@code ((1<<(32*n)))-1}
+   */
+
+  private final void ones (final int n) {
+    if (n > value.length) { value = new int[n]; }
+    Arrays.fill(value, -1);
+    offset = 0;
+    intLen = n; }
+
+  private final void clear () {
+    offset = intLen = 0;
+    for (int index=0, n=value.length; index < n; index++) {
+      value[index] = 0; } }
+
+  private final void reset () { offset = intLen = 0; }
+
+  private final int getLowestSetBit() {
+    if (intLen == 0) { return -1; }
+    int j, b;
+    for (j=intLen-1; (j > 0) && (value[j+offset] == 0); j--) { }
+    b = value[j+offset];
+    if (b == 0) { return -1; }
+    return ((intLen-1-j)<<5) + Integer.numberOfTrailingZeros(b); }
+
+  private final void normalize () {
+    if (intLen == 0) { offset = 0; return; }
+    int index = offset;
+    if (value[index] != 0) { return; }
+    final int indexBound = index+intLen;
+    do { index++; } 
+    while((index < indexBound) && (value[index] == 0));
+    final int numZeros = index - offset;
+    intLen -= numZeros;
+    offset = (intLen == 0 ?  0 : offset+numZeros); }
+
+  /** Discards all ints whose index is greater than {@code n}.
+   */
+  private final void keepLower (final int n) {
+    if (intLen >= n) { offset += intLen - n; intLen = n; } }
+
+  /** Returns a {@code BigInteger} equal to the {@code n}
+   * low ints of this number.
+   */
+  private final int[] getLower (final int n) {
+    if (isZero()) { return Bei.ZERO; }
+    // TODO: copy here? DANGER!!!
+    else if (intLen < n) { return getMagnitudeArray(); }
+    else {
+      // strip zeros
+      int len = n;
+      while ((len > 0) && (value[(offset+intLen)-len] == 0)) {
+        len--; }
+      return
+        Arrays.copyOfRange(
+          value, (offset+intLen)-len, offset+intLen); } }
+
+  public final boolean isZero () { return (intLen == 0); }
+
   //--------------------------------------------------------------
 
   private static final MutableUnNatural ONE = new MutableUnNatural(1);
@@ -48,8 +109,32 @@ public final class MutableUnNatural {
   //--------------------------------------------------------------
   // bit operations
   //--------------------------------------------------------------
+  /** Right shift this MutableUnNatural n bits, where n is
+   * less than 32. Assumes that intLen > 0, n > 0 for speed
+   */
+  private final void primitiveRightShift (final int n) {
+    final int[] val = value;
+    final int n2 = 32 - n;
+    for (int i=(offset+intLen)-1, c=val[i]; i > offset; i--) {
+      final int b = c;
+      c = val[i-1];
+      val[i] = (c << n2) | (b >>> n); }
+    val[offset] >>>= n; }
+
+  /** Left shift this MutableUnNatural n bits, where n is
+   * less than 32. Assumes that intLen > 0, n > 0 for speed
+   */
+  private final void primitiveLeftShift(final int n) {
+    final int[] val = value;
+    final int n2 = 32 - n;
+    for (int i=offset, c=val[i], m=(i+intLen)-1; i < m; i++) {
+      final int b = c;
+      c = val[i+1];
+      val[i] = (b << n) | (c >>> n2); }
+    val[(offset+intLen)-1] <<= n; }
   /** {@code n} can be greater than the length of the number.
    */
+
   private final void safeRightShift (final int n) {
     if ((n/32) >= intLen) { reset(); } 
     else { rightShift(n); } }
@@ -111,191 +196,7 @@ public final class MutableUnNatural {
       primitiveLeftShift(nBits); }
     else { primitiveRightShift(32 -nBits); } }
 
-  /** Makes this number an {@code n}-int number all of whose bits
-   * are ones. Used by Burnikel-Ziegler division.
-   * @param n number of ints in the {@code value} array
-   * @return a number equal to {@code ((1<<(32*n)))-1}
-   */
-
-  private final void ones (final int n) {
-    if (n > value.length) { value = new int[n]; }
-    Arrays.fill(value, -1);
-    offset = 0;
-    intLen = n; }
-
-  private final void clear () {
-    offset = intLen = 0;
-    for (int index=0, n=value.length; index < n; index++) {
-      value[index] = 0; } }
-
-  private final void reset () { offset = intLen = 0; }
-
-  private final int getLowestSetBit() {
-    if (intLen == 0) { return -1; }
-    int j, b;
-    for (j=intLen-1; (j > 0) && (value[j+offset] == 0); j--) { }
-    b = value[j+offset];
-    if (b == 0) { return -1; }
-    return ((intLen-1-j)<<5) + Integer.numberOfTrailingZeros(b); }
-
-  private final void normalize () {
-    if (intLen == 0) { offset = 0; return; }
-    int index = offset;
-    if (value[index] != 0) { return; }
-    final int indexBound = index+intLen;
-    do { index++; } 
-    while((index < indexBound) && (value[index] == 0));
-    final int numZeros = index - offset;
-    intLen -= numZeros;
-    offset = (intLen == 0 ?  0 : offset+numZeros); }
-
-  public final boolean isZero () { return (intLen == 0); }
-
-  //-------------------------------------------------------------
-  // pseudo-Comparable, not Comparable due to mutability
-  //-------------------------------------------------------------
-
-  private final int compareTo (final MutableUnNatural b) {
-    final int blen = b.intLen;
-    if (intLen < blen) { return -1; }
-    if (intLen > blen) { return 1; }
-    // TODO: is this faster than unsigned long conversion?
-    final int[] bval = b.value;
-    for (int i = offset, j = b.offset; i < (intLen + offset); i++, j++) {
-      final int b1 = value[i] + 0x80000000;
-      final int b2 = bval[j]  + 0x80000000;
-      if (b1 < b2) { return -1; }
-      if (b1 > b2) { return 1; } }
-    return 0; }
-
-  private final int compareShifted (final MutableUnNatural b, 
-                                    final int ints) {
-    final int blen = b.intLen;
-    final int alen = intLen - ints;
-    if (alen < blen) { return -1; }
-    if (alen > blen) { return 1; }
-    // TODO: is this faster than unsigned long conversion?
-    final int[] bval = b.value;
-    for (int i = offset, j = b.offset; i < (alen + offset); i++, j++) {
-      final int b1 = value[i] + 0x80000000;
-      final int b2 = bval[j]  + 0x80000000;
-      if (b1 < b2) { return -1; }
-      if (b1 > b2) { return 1; } }
-    return 0; }
-
   //--------------------------------------------------------------
-  // Object methods
-  //--------------------------------------------------------------
-
-  @Override
-  public final String toString() {
-    return UnNatural.valueOf(getMagnitudeArray()).toString(); }
-
-  /** A primitive used for division. This method adds in one 
-   * multiple of the divisor a back to the dividend result at a 
-   * specified offset. It is used when qhat was estimated too 
-   * large, and must be adjusted.
-   */
-  private static final int divadd (final int[] a, 
-                                   final int[] result, 
-                                   final int offset) {
-    long carry = 0;
-    for (int j=a.length-1; j >= 0; j--) {
-      final long sum = (a[j] & Numbers.UNSIGNED_MASK) +
-        (result[j+offset] & Numbers.UNSIGNED_MASK) + carry;
-      result[j+offset] = (int)sum;
-      carry = sum >>> 32; }
-    return (int) carry; }
-
-  /** This method is used for division. It multiplies an n word 
-   * input a by one word input x, and subtracts the n word product 
-   * from q. This is needed when subtracting qhat*divisor from 
-   * the dividend.
-   */
-  private static final int mulsub (final int[] q, 
-                                   final int[] a, 
-                                   final int x, 
-                                   final int len, 
-                                   int offset) {
-    final long xLong = x & Numbers.UNSIGNED_MASK;
-    long carry = 0;
-    offset += len;
-    for (int j=len-1; j >= 0; j--) {
-      final long product = 
-        ((a[j] & Numbers.UNSIGNED_MASK) * xLong) + carry;
-      final long difference = q[offset] - product;
-      q[offset--] = (int)difference;
-      carry = (product >>> 32)
-        + (((difference & Numbers.UNSIGNED_MASK) >
-        (((~(int)product) & Numbers.UNSIGNED_MASK))) ? 1:0); }
-    return (int) carry; }
-
-  /** The method is the same as {@link #mulsub}, except the fact 
-   * that q array is not updated, the only result of the method is 
-   * borrow flag.
-   */
-  private static final int mulsubBorrow (final int[] q, 
-                                         final int[] a, 
-                                         final int x, 
-                                         final int len, 
-                                         int offset) {
-    final long xLong = x & Numbers.UNSIGNED_MASK;
-    long carry = 0;
-    offset += len;
-    for (int j=len-1; j >= 0; j--) {
-      final long product =
-        ((a[j] & Numbers.UNSIGNED_MASK) * xLong) + carry;
-      final long difference = q[offset--] - product;
-      carry = (product >>> 32)
-        + (((difference & Numbers.UNSIGNED_MASK) >
-        (((~(int)product) & Numbers.UNSIGNED_MASK))) ? 1:0); }
-    return (int) carry; }
-
-  /** Right shift this MutableUnNatural n bits, where n is
-   * less than 32. Assumes that intLen > 0, n > 0 for speed
-   */
-  private final void primitiveRightShift (final int n) {
-    final int[] val = value;
-    final int n2 = 32 - n;
-    for (int i=(offset+intLen)-1, c=val[i]; i > offset; i--) {
-      final int b = c;
-      c = val[i-1];
-      val[i] = (c << n2) | (b >>> n); }
-    val[offset] >>>= n; }
-
-  /** Left shift this MutableUnNatural n bits, where n is
-   * less than 32. Assumes that intLen > 0, n > 0 for speed
-   */
-  private final void primitiveLeftShift(final int n) {
-    final int[] val = value;
-    final int n2 = 32 - n;
-    for (int i=offset, c=val[i], m=(i+intLen)-1; i < m; i++) {
-      final int b = c;
-      c = val[i+1];
-      val[i] = (b << n) | (c >>> n2); }
-    val[(offset+intLen)-1] <<= n; }
-
-  /** Returns a {@code BigInteger} equal to the {@code n}
-   * low ints of this number.
-   */
-  private final UnNatural0 getLower (final int n) {
-    if (isZero()) { return UnNatural0.ZERO; }
-    else if (intLen < n) {
-      return UnNatural0.valueOf(getMagnitudeArray()); }
-    else {
-      // strip zeros
-      int len = n;
-      while ((len > 0) && (value[(offset+intLen)-len] == 0)) {
-        len--; }
-      return
-        UnNatural0.valueOf(
-          Arrays.copyOfRange(
-            value, (offset+intLen)-len, offset+intLen)); } }
-
-  /** Discards all ints whose index is greater than {@code n}.
-   */
-  private final void keepLower (final int n) {
-    if (intLen >= n) { offset += intLen - n; intLen = n; } }
 
   /** Adds the contents of two MutableUnNatural objects.The result
    * is placed within this MutableUnNatural. The contents of the 
@@ -744,7 +645,7 @@ public final class MutableUnNatural {
     // step 2: view b as [b1,b2] where each bi is n ints or less
     final MutableUnNatural b1 = new MutableUnNatural(b);
     b1.safeRightShift(n * 32);
-    final UnNatural0 b2 = b.getLower(n);
+    final int[] b2 = b.getLower(n);
 
     MutableUnNatural r;
     MutableUnNatural d;
@@ -753,8 +654,8 @@ public final class MutableUnNatural {
       r = a12.divide2n1n(b1, quotient);
 
       // step 4: d=quotient*b2
-      final UnNatural0 qu = UnNatural0.valueOf(quotient.getMagnitudeArray());
-      d = MutableUnNatural.valueOf(qu.multiply(b2)._mag);
+      final int[] qu = Bei.multiply(quotient.getMagnitudeArray(),b2);
+      d = MutableUnNatural.valueOf(qu);
     } else {
       // step 3b: if a1>=b1, let quotient=beta^n-1 and r=a12-b1*2^n+b1
       quotient.ones(n);
@@ -764,9 +665,9 @@ public final class MutableUnNatural {
       r = a12;
 
       // step 4: d=quotient*b2=(b2 << 32*n) - b2
-      d = MutableUnNatural.valueOf(b2._mag);
+      d = MutableUnNatural.valueOf(b2);
       d.leftShift(32 * n);
-      d.subtract(MutableUnNatural.valueOf(b2._mag)); }
+      d.subtract(MutableUnNatural.valueOf(b2)); }
 
     // step 5: r = r*beta^n + a3 - d (paper says a4)
     // However, don't subtract d until after the while loop so r doesn't become negative
@@ -822,6 +723,66 @@ public final class MutableUnNatural {
       c = src[++srcFrom];
       dst[dstFrom+i] = (b << shift) | (c >>> n2); }
     dst[(dstFrom+srcLen)-1] = c << shift; }
+
+  /** A primitive used for division. This method adds in one 
+   * multiple of the divisor a back to the dividend result at a 
+   * specified offset. It is used when qhat was estimated too 
+   * large, and must be adjusted.
+   */
+  private static final int divadd (final int[] a, 
+                                   final int[] result, 
+                                   final int offset) {
+    long carry = 0;
+    for (int j=a.length-1; j >= 0; j--) {
+      final long sum = (a[j] & Numbers.UNSIGNED_MASK) +
+        (result[j+offset] & Numbers.UNSIGNED_MASK) + carry;
+      result[j+offset] = (int)sum;
+      carry = sum >>> 32; }
+    return (int) carry; }
+
+  /** This method is used for division. It multiplies an n word 
+   * input a by one word input x, and subtracts the n word product 
+   * from q. This is needed when subtracting qhat*divisor from 
+   * the dividend.
+   */
+  private static final int mulsub (final int[] q, 
+                                   final int[] a, 
+                                   final int x, 
+                                   final int len, 
+                                   int offset) {
+    final long xLong = x & Numbers.UNSIGNED_MASK;
+    long carry = 0;
+    offset += len;
+    for (int j=len-1; j >= 0; j--) {
+      final long product = 
+        ((a[j] & Numbers.UNSIGNED_MASK) * xLong) + carry;
+      final long difference = q[offset] - product;
+      q[offset--] = (int)difference;
+      carry = (product >>> 32)
+        + (((difference & Numbers.UNSIGNED_MASK) >
+        (((~(int)product) & Numbers.UNSIGNED_MASK))) ? 1:0); }
+    return (int) carry; }
+
+  /** The method is the same as {@link #mulsub}, except the fact 
+   * that q array is not updated, the only result of the method is 
+   * borrow flag.
+   */
+  private static final int mulsubBorrow (final int[] q, 
+                                         final int[] a, 
+                                         final int x, 
+                                         final int len, 
+                                         int offset) {
+    final long xLong = x & Numbers.UNSIGNED_MASK;
+    long carry = 0;
+    offset += len;
+    for (int j=len-1; j >= 0; j--) {
+      final long product =
+        ((a[j] & Numbers.UNSIGNED_MASK) * xLong) + carry;
+      final long difference = q[offset--] - product;
+      carry = (product >>> 32)
+        + (((difference & Numbers.UNSIGNED_MASK) >
+        (((~(int)product) & Numbers.UNSIGNED_MASK))) ? 1:0); }
+    return (int) carry; }
 
   /** Divide this MutableUnNatural by the divisor.
    * The quotient will be placed into the provided quotient object
@@ -1075,6 +1036,46 @@ public final class MutableUnNatural {
     // n - q*dlong == r && 0 <= r <dLong, hence we're done.
     return (r << 32) | (q & Numbers.UNSIGNED_MASK);
   }
+
+  //-------------------------------------------------------------
+  // pseudo-Comparable, not Comparable due to mutability
+  //-------------------------------------------------------------
+
+  private final int compareTo (final MutableUnNatural b) {
+    final int blen = b.intLen;
+    if (intLen < blen) { return -1; }
+    if (intLen > blen) { return 1; }
+    // TODO: is this faster than unsigned long conversion?
+    final int[] bval = b.value;
+    for (int i = offset, j = b.offset; i < (intLen + offset); i++, j++) {
+      final int b1 = value[i] + 0x80000000;
+      final int b2 = bval[j]  + 0x80000000;
+      if (b1 < b2) { return -1; }
+      if (b1 > b2) { return 1; } }
+    return 0; }
+
+  private final int compareShifted (final MutableUnNatural b, 
+                                    final int ints) {
+    final int blen = b.intLen;
+    final int alen = intLen - ints;
+    if (alen < blen) { return -1; }
+    if (alen > blen) { return 1; }
+    // TODO: is this faster than unsigned long conversion?
+    final int[] bval = b.value;
+    for (int i = offset, j = b.offset; i < (alen + offset); i++, j++) {
+      final int b1 = value[i] + 0x80000000;
+      final int b2 = bval[j]  + 0x80000000;
+      if (b1 < b2) { return -1; }
+      if (b1 > b2) { return 1; } }
+    return 0; }
+
+  //--------------------------------------------------------------
+  // Object methods
+  //--------------------------------------------------------------
+
+  @Override
+  public final String toString() {
+    return UnNatural.valueOf(getMagnitudeArray()).toString(); }
 
   //--------------------------------------------------------------
   // construction
