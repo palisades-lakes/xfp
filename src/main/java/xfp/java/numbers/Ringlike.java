@@ -63,6 +63,9 @@ extends Comparable<T>{
     final T r = subtract((T) x.multiply(d));
     return r; }
 
+  public default T gcd (final T x) {
+    throw Exceptions.unsupportedOperation(this,"gcd",x); }
+
   //--------------------------------------------------------------
 
   public default String toString (final int radix) {

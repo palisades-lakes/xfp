@@ -1234,7 +1234,7 @@ implements Ringlike<UnNatural0> {
     final MutableUnNatural a = MutableUnNatural.valueOf(this._mag);
     final MutableUnNatural b = MutableUnNatural.valueOf(that._mag);
     a.divideKnuth(b,q,false);
-    return valueOf(q.getMagnitudeArray()); }
+    return valueOf(q.getValue()); }
 
   /** Long division */
   private final UnNatural0[] 
@@ -1244,15 +1244,15 @@ implements Ringlike<UnNatural0> {
     final MutableUnNatural den = MutableUnNatural.valueOf(that._mag);
     final MutableUnNatural r = num.divideKnuth(den,q,true);
     return new UnNatural0[] 
-      { valueOf(q.getMagnitudeArray()),
-        valueOf(r.getMagnitudeArray()), }; }
+      { valueOf(q.getValue()),
+        valueOf(r.getValue()), }; }
 
   private final UnNatural0 remainderKnuth (final UnNatural0 that) {
     final MutableUnNatural q = MutableUnNatural.make();
     final MutableUnNatural num = MutableUnNatural.valueOf(this._mag);
     final MutableUnNatural den = MutableUnNatural.valueOf(that._mag);
     final MutableUnNatural r = num.divideKnuth(den,q,true);
-    return valueOf(r.getMagnitudeArray()); }
+    return valueOf(r.getValue()); }
 
   //--------------------------------------------------------------
 
@@ -1264,9 +1264,9 @@ implements Ringlike<UnNatural0> {
     final MutableUnNatural r =
       num.divideAndRemainderBurnikelZiegler(den,q);
     final UnNatural0 qq = 
-      q.isZero() ? ZERO : valueOf(q.getMagnitudeArray());
+      q.isZero() ? ZERO : valueOf(q.getValue());
     final UnNatural0 rr = 
-      r.isZero() ? ZERO :valueOf(r.getMagnitudeArray());
+      r.isZero() ? ZERO :valueOf(r.getValue());
     return new UnNatural0[] { qq, rr }; }
 
   private final UnNatural0 
@@ -1301,33 +1301,21 @@ implements Ringlike<UnNatural0> {
       return remainderKnuth(that); }
     return remainderBurnikelZiegler(that); }
 
-
   //--------------------------------------------------------------
-  // shifts a up to len left n bits assumes no leading zeros,
-  // 0<=n<32
-  private static final void 
-  primitiveLeftShift (final int[] a, final int len,
-                                  final int n) {
-    if ((len == 0) || (n == 0)) { return; }
+  // gcd
+  //--------------------------------------------------------------
 
-    final int n2 = 32 - n;
-    for (int i = 0, c = a[i], m = (i + len) - 1; i < m; i++) {
-      final int b = c;
-      c = a[i + 1];
-      a[i] = (b << n) | (c >>> n2);
-    }
-    a[len - 1] <<= n;
-  }
+  @Override
+  public final UnNatural0 gcd (final UnNatural0 that) {
+    if (that.isZero()) { return this; }
+    else if (isZero()) { return that; }
 
-  /**
-   * Calculate bitlength of contents of the first len elements an
-   * int array,
-   * assuming there are no leading zero ints.
-   */
-  private static int bitLength (final int[] val, final int len) {
-    if (len == 0) { return 0; }
-    return ((len - 1) << 5) + Numbers.bitLength(val[0]);
-  }
+    final MutableUnNatural a = MutableUnNatural.valueOf(_mag);
+    final MutableUnNatural b = MutableUnNatural.valueOf(that._mag);
+
+    final MutableUnNatural result = a.hybridGCD(b);
+
+    return valueOf(result.getValue()); }
 
   //--------------------------------------------------------------
   // Modular Arithmetic
@@ -1536,8 +1524,36 @@ implements Ringlike<UnNatural0> {
   //  }
 
   //--------------------------------------------------------------
+  // shifts a up to len left n bits assumes no leading zeros,
+  // 0<=n<32
+
+  private static final void 
+  primitiveLeftShift (final int[] a, final int len,
+                                  final int n) {
+    if ((len == 0) || (n == 0)) { return; }
+
+    final int n2 = 32 - n;
+    for (int i = 0, c = a[i], m = (i + len) - 1; i < m; i++) {
+      final int b = c;
+      c = a[i + 1];
+      a[i] = (b << n) | (c >>> n2);
+    }
+    a[len - 1] <<= n;
+  }
+
+  //--------------------------------------------------------------
   // Bitwise Operations
   //--------------------------------------------------------------
+
+  /**
+   * Calculate bitlength of contents of the first len elements an
+   * int array,
+   * assuming there are no leading zero ints.
+   */
+  private static int bitLength (final int[] val, final int len) {
+    if (len == 0) { return 0; }
+    return ((len - 1) << 5) + Numbers.bitLength(val[0]);
+  }
 
   //  /**
   //   * Returns a Natural whose value is {@code (this & val)}.
@@ -1779,9 +1795,6 @@ implements Ringlike<UnNatural0> {
   }
 
   //--------------------------------------------------------------
-  // Miscellaneous Bit Operations
-  //--------------------------------------------------------------
-
   /**
    * Returns the number of bits in the minimal two's-complement
    * representation of this Natural, <em>excluding</em> a sign

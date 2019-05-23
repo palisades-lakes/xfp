@@ -30,7 +30,7 @@ import xfp.java.prng.PRNG;
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-22
+ * @version 2019-05-23
  */
 @SuppressWarnings("unchecked")
 public final class Common {
@@ -96,9 +96,9 @@ public final class Common {
 
   public static final void
   absDiff (final Function<BigInteger,Ringlike> fromBI,
-            final Function<Ringlike,BigInteger> toBI,
-            final BigInteger z0,
-            final BigInteger z1) {
+           final Function<Ringlike,BigInteger> toBI,
+           final BigInteger z0,
+           final BigInteger z1) {
     final BigInteger x0 = z0.max(z1);
     final BigInteger x1 = z0.min(z1);
     final Ringlike y0 = fromBI.apply(x0);
@@ -232,9 +232,9 @@ public final class Common {
 
   public static final void
   remainder (final Function<BigInteger,Ringlike> fromBI,
-                      final Function<Ringlike,BigInteger> toBI,
-                      final BigInteger x0,
-                      final BigInteger x1) {
+             final Function<Ringlike,BigInteger> toBI,
+             final BigInteger x0,
+             final BigInteger x1) {
     if (0 != x1.signum()) {
       final Ringlike y0 = fromBI.apply(x0);
       final Ringlike y1 = fromBI.apply(x1);
@@ -244,12 +244,37 @@ public final class Common {
 
       Assertions.assertEquals(x2,x3,() ->
       x0.toString(0x10)
-      + "\n / "
+      + "\n rem "
       + "\n" +  x1.toString(0x10)
       + "\n -> "
       + "\n" + x2.toString(0x10)
       + "\n" + y0.toString(0x10)
-      + "\n / "
+      + "\n rem "
+      + "\n" +  y1.toString(0x10)
+      + "\n -> "
+      + "\n" + y2.toString(0x10)
+      + "\n" + x3.toString(0x10)); } }
+
+  public static final void
+  gcd (final Function<BigInteger,Ringlike> fromBI,
+       final Function<Ringlike,BigInteger> toBI,
+       final BigInteger x0,
+       final BigInteger x1) {
+    if (0 != x1.signum()) {
+      final Ringlike y0 = fromBI.apply(x0);
+      final Ringlike y1 = fromBI.apply(x1);
+      final BigInteger x2 = x0.gcd(x1);
+      final Ringlike y2 = y0.gcd(y1);
+      final BigInteger x3 = toBI.apply(y2);
+
+      Assertions.assertEquals(x2,x3,() ->
+      x0.toString(0x10)
+      + "\n gcd "
+      + "\n" +  x1.toString(0x10)
+      + "\n -> "
+      + "\n" + x2.toString(0x10)
+      + "\n" + y0.toString(0x10)
+      + "\n gcd "
       + "\n" +  y1.toString(0x10)
       + "\n -> "
       + "\n" + y2.toString(0x10)
@@ -282,7 +307,9 @@ public final class Common {
     divideAndRemainder(fromBI,toBI,z0,z1);
     divideAndRemainder(fromBI,toBI,z0,z0); 
     remainder(fromBI,toBI,z0,z1);
-    remainder(fromBI,toBI,z0,z0); }
+    remainder(fromBI,toBI,z0,z0); 
+    gcd(fromBI,toBI,z0,z1);
+    gcd(fromBI,toBI,z0,z0); }
 
 
   public static final void
@@ -321,8 +348,8 @@ public final class Common {
     divide(fromBI,toBI,z0,z0);
     divideAndRemainder(fromBI,toBI,z0,z1);
     divideAndRemainder(fromBI,toBI,z0,z0);
-    remainder(fromBI,toBI,z0,z1);
-    remainder(fromBI,toBI,z0,z0); }
+    gcd(fromBI,toBI,z0,z1);
+    gcd(fromBI,toBI,z0,z0); }
 
   public static final void
   integerTest (final Function<String,Ringlike> valueOf,
@@ -338,17 +365,19 @@ public final class Common {
   //--------------------------------------------------------------
 
   public static final List<String> accumulators () {
-    return Arrays.asList(
-      new String[]
-        {
-         "xfp.java.accumulators.DoubleAccumulator",
-         //"xfp.java.accumulators.KahanAccumulator",
-         "xfp.java.accumulators.DistilledAccumulator",
-         "xfp.java.accumulators.ZhuHayesAccumulator",
-         "xfp.java.accumulators.BigFloatAccumulator",
-         //"xfp.java.accumulators.RationalFloatAccumulator",
-         //"xfp.java.accumulators.RationalAccumulator",
-        }); }
+    return 
+      Arrays.asList(
+        new String[]
+          { "xfp.java.accumulators.DoubleAccumulator",
+            //"xfp.java.accumulators.KahanAccumulator",
+            "xfp.java.accumulators.DistilledAccumulator",
+            "xfp.java.accumulators.ZhuHayesAccumulator",
+            "xfp.java.accumulators.BigFloatAccumulator",
+            "xfp.java.accumulators.RationalFloatAccumulator",
+            //"xfp.java.accumulators.RationalFloat0Accumulator",
+            "xfp.java.accumulators.RationalFloatBIAccumulator",
+            //"xfp.java.accumulators.RationalAccumulator", 
+          }); }
 
   //--------------------------------------------------------------
 

@@ -107,7 +107,7 @@ implements Ringlike<UnNatural> {
     final MutableUnNatural num = MutableUnNatural.valueOf(this._mag);
     final MutableUnNatural den = MutableUnNatural.valueOf(that._mag);
     num.divideKnuth(den,q,false);
-    return valueOf(q.getMagnitudeArray()); }
+    return valueOf(q.getValue()); }
 
   private final UnNatural[] 
     divideAndRemainderKnuth (final UnNatural that) {
@@ -116,15 +116,15 @@ implements Ringlike<UnNatural> {
     final MutableUnNatural den = MutableUnNatural.valueOf(that._mag);
     final MutableUnNatural r = num.divideKnuth(den,q,true);
     return new UnNatural[] 
-      { valueOf(q.getMagnitudeArray()),
-        valueOf(r.getMagnitudeArray()), }; }
+      { valueOf(q.getValue()),
+        valueOf(r.getValue()), }; }
 
   private final UnNatural remainderKnuth (final UnNatural that) {
     final MutableUnNatural q = MutableUnNatural.make();
     final MutableUnNatural num = MutableUnNatural.valueOf(this._mag);
     final MutableUnNatural den = MutableUnNatural.valueOf(that._mag);
     final MutableUnNatural r = num.divideKnuth(den,q,true);
-    return valueOf(r.getMagnitudeArray()); }
+    return valueOf(r.getValue()); }
 
   //--------------------------------------------------------------
 
@@ -136,9 +136,9 @@ implements Ringlike<UnNatural> {
     final MutableUnNatural r =
       num.divideAndRemainderBurnikelZiegler(den,q);
     final UnNatural qq = 
-      q.isZero() ? ZERO : valueOf(q.getMagnitudeArray());
+      q.isZero() ? ZERO : valueOf(q.getValue());
     final UnNatural rr = 
-      r.isZero() ? ZERO : valueOf(r.getMagnitudeArray());
+      r.isZero() ? ZERO : valueOf(r.getValue());
     return new UnNatural[] { qq, rr }; }
 
   private final UnNatural 
@@ -172,6 +172,19 @@ implements Ringlike<UnNatural> {
     if (useKnuthDivision(this,that)) {
       return remainderKnuth(that); }
     return remainderBurnikelZiegler(that); }
+
+  //--------------------------------------------------------------
+  // gcd
+  //--------------------------------------------------------------
+
+  @Override
+  public final UnNatural gcd (final UnNatural that) {
+    if (that.isZero()) { return this; }
+    else if (isZero()) { return that; }
+    final MutableUnNatural a = MutableUnNatural.valueOf(_mag);
+    final MutableUnNatural b = MutableUnNatural.valueOf(that._mag);
+    final MutableUnNatural result = a.hybridGCD(b);
+    return valueOf(result.getValue()); }
 
 
   //--------------------------------------------------------------
