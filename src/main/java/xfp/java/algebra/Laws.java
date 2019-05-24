@@ -10,6 +10,8 @@ import java.util.function.UnaryOperator;
 
 import com.google.common.collect.ImmutableList;
 
+import xfp.java.Debug;
+
 /** Constructor methods for Predicates/BiPredicate closures on
  * sets and operations.
  *
@@ -197,6 +199,13 @@ public final class Laws {
           eq.test(identity,operation.apply(a,ainv))
           &&
           eq.test(identity,operation.apply(ainv,a));
+//        if (! result) {
+//          Debug.println("a=" + a);
+//          Debug.println("ainv=" + ainv);
+//          Debug.println("identity=" + identity);
+//          Debug.println("(op a ainv)=" + operation.apply(a,ainv));
+//          Debug.println("(op ainv a)=" + operation.apply(ainv,a));
+//        }
         return result; } }
     return new Inverse(); }
 

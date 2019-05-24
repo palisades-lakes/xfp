@@ -10,19 +10,19 @@ import xfp.java.Debug;
 import xfp.java.exceptions.Exceptions;
 
 /** Representing a rational number as a ratio of
- * {@link UnNatural} times 2 to a <code>long</code> exponent.
+ * {@link UnNatural0} times 2 to a <code>long</code> exponent.
  *
  * The idea is that most data will start as <code>double</code>;
  * extracting the resulting powers of 2 from the numerator and
- * denominator should keep the UnNaturals smaller, and make
+ * denominator should keep the UnNatural0s smaller, and make
  * arithmetic on them faster.
  *
  * @author palisades dot lakes at gmail dot com
  * @version 2019-05-23
  */
 
-public final class RationalFloat extends Number
-implements Ringlike<RationalFloat> {
+public final class RationalFloat0 extends Number
+implements Ringlike<RationalFloat0> {
 
   private static final long serialVersionUID = 1L;
 
@@ -33,11 +33,11 @@ implements Ringlike<RationalFloat> {
   private final boolean _nonNegative;
   public final boolean nonNegative () { return _nonNegative; }
 
-  private final UnNatural _numerator;
-  public final UnNatural numerator () { return _numerator; }
+  private final UnNatural0 _numerator;
+  public final UnNatural0 numerator () { return _numerator; }
 
-  private final UnNatural _denominator;
-  public final UnNatural denominator () { return _denominator; }
+  private final UnNatural0 _denominator;
+  public final UnNatural0 denominator () { return _denominator; }
 
   private final int _exponent;
   public final int exponent () { return _exponent; }
@@ -46,11 +46,11 @@ implements Ringlike<RationalFloat> {
 
   public final boolean isZero () { return numerator().isZero(); }
 
-  //  private static final boolean isOne (final UnNatural i) {
-  //    return UnNatural.ONE.equals(i); }
+  //  private static final boolean isOne (final UnNatural0 i) {
+  //    return UnNatural0.ONE.equals(i); }
 
-  private static final boolean isOne (final UnNatural n,
-                                      final UnNatural d) {
+  private static final boolean isOne (final UnNatural0 n,
+                                      final UnNatural0 d) {
     return n.equals(d); }
 
   public final boolean isOne () {
@@ -58,28 +58,28 @@ implements Ringlike<RationalFloat> {
 
   //--------------------------------------------------------------
 
-  private static final RationalFloat
+  private static final RationalFloat0
   reduced (final boolean nonNegative,
-           final UnNatural n,
-           final UnNatural d,
+           final UnNatural0 n,
+           final UnNatural0 d,
            final int e) {
 
     if (n.isZero()) { return ZERO; }
 
     final int en = Numbers.loBit(n);
     final int ed = Numbers.loBit(d);
-    final UnNatural n0 = (en != 0) ? n.shiftRight(en) : n;
-    final UnNatural d0 = (ed != 0) ? d.shiftRight(ed) : d;
+    final UnNatural0 n0 = (en != 0) ? n.shiftRight(en) : n;
+    final UnNatural0 d0 = (ed != 0) ? d.shiftRight(ed) : d;
     final int e0 = (e + en) - ed;
 
-    //    if (UnNatural.ONE.equals(d0)) {
+    //    if (UnNatural0.ONE.equals(d0)) {
     //      return new RationalFloat(n0,d0,e0); }
 
-    final UnNatural gcd = n0.gcd(d0);
+    final UnNatural0 gcd = n0.gcd(d0);
     // TODO: any value in this test?
-    if (gcd.compareTo(UnNatural.ONE) > 0) {
-      final UnNatural n1 = n0.divide(gcd);
-      final UnNatural d1 = d0.divide(gcd);
+    if (gcd.compareTo(UnNatural0.ONE) > 0) {
+      final UnNatural0 n1 = n0.divide(gcd);
+      final UnNatural0 d1 = d0.divide(gcd);
       //      assert d1.signum() == 1 :
       //        "non positive denominator:"
       //        + "\nn= " + n.toString(0x10)
@@ -97,43 +97,40 @@ implements Ringlike<RationalFloat> {
       //        + "\ne1= " + e0
       //        + "\n"
       //        ;
-      return new RationalFloat(nonNegative,n1,d1,e0); }
+      return new RationalFloat0(nonNegative,n1,d1,e0); }
 
-    return new RationalFloat(nonNegative,n0,d0,e0); }
+    return new RationalFloat0(nonNegative,n0,d0,e0); }
 
   //--------------------------------------------------------------
 
   @Override
-  public final RationalFloat negate () {
+  public final RationalFloat0 negate () {
     if (isZero()) { return this; }
     return
       valueOf(
         !nonNegative(),numerator(),denominator(),exponent()); }
 
-  public final RationalFloat reciprocal () {
+  public final RationalFloat0 reciprocal () {
     assert !(numerator().isZero());
     return valueOf(
-      nonNegative(),
-      denominator(),
-      numerator(),
-      -exponent()); }
+      nonNegative(),denominator(),numerator(),-exponent()); }
 
   //--------------------------------------------------------------
   // TODO: optimize denominator == 1 cases?
 
-  private static final RationalFloat add (final boolean p0,
-                                          final UnNatural n0,
-                                          final UnNatural d0,
+  private static final RationalFloat0 add (final boolean p0,
+                                          final UnNatural0 n0,
+                                          final UnNatural0 d0,
                                           final int e0,
                                           final boolean p1,
-                                          final UnNatural n1,
-                                          final UnNatural d1,
+                                          final UnNatural0 n1,
+                                          final UnNatural0 d1,
                                           final int e1) {
-    final UnNatural n0d1 = n0.multiply(d1);
-    final UnNatural n1d0 = n1.multiply(d0);
+    final UnNatural0 n0d1 = n0.multiply(d1);
+    final UnNatural0 n1d0 = n1.multiply(d0);
 
-    final UnNatural a;
-    final UnNatural b;
+    final UnNatural0 a;
+    final UnNatural0 b;
     final int e;
     if (e0 == e1) { a = n0d1; b = n1d0; e = e0; }
     else if (e0 > e1) {
@@ -141,7 +138,7 @@ implements Ringlike<RationalFloat> {
     else { a = n0d1; b = n1d0.shiftLeft(e1-e0); e = e0; }
 
     final boolean p;
-    final UnNatural n;
+    final UnNatural0 n;
     if (p0) {
       if (p1) { n = a.add(b); p = true; }
       else {
@@ -155,18 +152,18 @@ implements Ringlike<RationalFloat> {
         else { n = a.subtract(b); p = false; } }
       else { n = a.add(b); p = false; } } 
 
-    final UnNatural d = d0.multiply(d1);
+    final UnNatural0 d = d0.multiply(d1);
     return valueOf(p,n,d,e); }
 
-  private final RationalFloat add (final boolean p1,
-                                   final UnNatural n1,
-                                   final UnNatural d1,
+  private final RationalFloat0 add (final boolean p1,
+                                   final UnNatural0 n1,
+                                   final UnNatural0 d1,
                                    final int e1) {
     return add(
       nonNegative(),numerator(),denominator(),exponent(),
       p1,n1,d1,e1); }
   @Override
-  public final RationalFloat add (final RationalFloat q) {
+  public final RationalFloat0 add (final RationalFloat0 q) {
     if (isZero()) { return q; }
     if (q.isZero()) { return this; }
     return add(
@@ -176,18 +173,18 @@ implements Ringlike<RationalFloat> {
       q.exponent()); }
 
   // TODO: optimize denominator ONE case?
-  public final RationalFloat add (final double z) {
+  public final RationalFloat0 add (final double z) {
     assert Double.isFinite(z);
     return add(
       Doubles.nonNegative(z),
-      UnNatural.valueOf(Doubles.significand(z)),
-      UnNatural.ONE,
+      UnNatural0.valueOf(Doubles.significand(z)),
+      UnNatural0.ONE,
       Doubles.exponent(z));}
 
   //--------------------------------------------------------------
 
   @Override
-  public final RationalFloat subtract (final RationalFloat q) {
+  public final RationalFloat0 subtract (final RationalFloat0 q) {
     if (isZero()) { return q.negate(); }
     if (q.isZero()) { return this; }
     return add(
@@ -197,15 +194,15 @@ implements Ringlike<RationalFloat> {
       q.exponent()); }
 
   @Override
-  public final RationalFloat abs () {
+  public final RationalFloat0 abs () {
     if (nonNegative()) { return this; }
     return negate(); }
 
   //--------------------------------------------------------------
 
-  private final RationalFloat multiply (final boolean p,
-                                        final UnNatural n,
-                                        final UnNatural d,
+  private final RationalFloat0 multiply (final boolean p,
+                                        final UnNatural0 n,
+                                        final UnNatural0 d,
                                         final int e) {
     return valueOf(
       !(nonNegative() ^ p),
@@ -214,7 +211,7 @@ implements Ringlike<RationalFloat> {
       exponent() + e); }
 
   @Override
-  public final RationalFloat multiply (final RationalFloat q) {
+  public final RationalFloat0 multiply (final RationalFloat0 q) {
     //    if (isZero() ) { return ZERO; }
     //    if (q.isZero()) { return ZERO; }
     //    if (q.isOne()) { return this; }
@@ -227,30 +224,30 @@ implements Ringlike<RationalFloat> {
 
   //--------------------------------------------------------------
 
-  public final RationalFloat add2 (final double z) {
+  public final RationalFloat0 add2 (final double z) {
     assert Double.isFinite(z);
-    final UnNatural n1 = 
-      UnNatural.valueOf(Doubles.significand(z));
+    final UnNatural0 n1 = 
+      UnNatural0.valueOf(Doubles.significand(z));
     // TODO: use optimized square
-    final UnNatural n2 = n1.multiply(n1);
+    final UnNatural0 n2 = n1.multiply(n1);
     final int e2 = 2*Doubles.exponent(z);
-    return add(true,n2,UnNatural.ONE,e2); }
+    return add(true,n2,UnNatural0.ONE,e2); }
 
   //--------------------------------------------------------------
 
 
-  public final RationalFloat addProduct (final double z0,
+  public final RationalFloat0 addProduct (final double z0,
                                          final double z1) {
     assert Double.isFinite(z0);
     assert Double.isFinite(z1);
     final boolean p = 
       ! (Doubles.nonNegative(z0) ^ Doubles.nonNegative(z1));
-    // TODO: optimize long*long -> UnNatural?
-    final UnNatural n =
-      UnNatural.valueOf(Doubles.significand(z0))
-      .multiply(UnNatural.valueOf(Doubles.significand(z1)));
+    // TODO: optimize long*long -> UnNatural0?
+    final UnNatural0 n =
+      UnNatural0.valueOf(Doubles.significand(z0))
+      .multiply(UnNatural0.valueOf(Doubles.significand(z1)));
     final int e = Doubles.exponent(z0) + Doubles.exponent(z1);
-    return add(p,n,UnNatural.ONE,e); }
+    return add(p,n,UnNatural0.ONE,e); }
 
   //--------------------------------------------------------------
   // Number methods
@@ -278,7 +275,7 @@ implements Ringlike<RationalFloat> {
    * TODO: should it round instead? Or
    * should there be more explicit round, floor, ceil, etc.?
    */
-  public final UnNatural bigIntegerValue () {
+  public final UnNatural0 bigIntegerValue () {
     return
       numerator().divide(denominator()).shiftLeft(exponent()); }
 
@@ -290,7 +287,7 @@ implements Ringlike<RationalFloat> {
   //      numerator(),denominator().shiftLeft(-exponent())); }
 
   //--------------------------------------------------------------
-  /** Half-even rounding from {@link UnNatural} ratio to
+  /** Half-even rounding from {@link UnNatural0} ratio to
    * <code>float</code>.
    * @param n numerator
    * @param d positive denominator
@@ -301,24 +298,24 @@ implements Ringlike<RationalFloat> {
   public final float floatValue () {
     if (isZero()) { return 0.0F; }
     final boolean neg = !nonNegative();
-    final UnNatural n0 = numerator();
-    final UnNatural d0 = denominator();
+    final UnNatural0 n0 = numerator();
+    final UnNatural0 d0 = denominator();
 
     // TODO: fix this hack
     final boolean large = (exponent() >= 0);
-    final UnNatural n00 = large ? n0.shiftLeft(exponent()) : n0;
-    final UnNatural d00 = large ? d0 : d0.shiftLeft(-exponent());
+    final UnNatural0 n00 = large ? n0.shiftLeft(exponent()) : n0;
+    final UnNatural0 d00 = large ? d0 : d0.shiftLeft(-exponent());
 
     // choose exponent, and shift numerator and denominator so
     // quotient has the right number of bits.
     final int e0 = hiBit(n00) - hiBit(d00) - 1;
     final boolean small = (e0 > 0);
-    final UnNatural n1 = small ? n00 : n00.shiftLeft(-e0);
-    final UnNatural d1 = small ? d00.shiftLeft(e0) : d00;
+    final UnNatural0 n1 = small ? n00 : n00.shiftLeft(-e0);
+    final UnNatural0 d1 = small ? d00.shiftLeft(e0) : d00;
 
     // ensure numerator is less than 2x denominator
-    final UnNatural d11 = d1.shiftLeft(1);
-    final UnNatural d2;
+    final UnNatural0 d11 = d1.shiftLeft(1);
+    final UnNatural0 d2;
     final int e2;
     if (n1.compareTo(d11) < 0) { d2 = d1; e2 = e0;}
     else { d2 = d11; e2 = e0 + 1; }
@@ -332,16 +329,16 @@ implements Ringlike<RationalFloat> {
     // subnormal numbers need slightly different handling
     final boolean sub = (e2 < Float.MIN_EXPONENT);
     final int e3 = sub ? Float.MIN_EXPONENT : e2;
-    final UnNatural d3 = sub ? d2.shiftLeft(e3-e2) : d2;
-    final UnNatural n3 = n1.shiftLeft(Floats.STORED_SIGNIFICAND_BITS);
+    final UnNatural0 d3 = sub ? d2.shiftLeft(e3-e2) : d2;
+    final UnNatural0 n3 = n1.shiftLeft(Floats.STORED_SIGNIFICAND_BITS);
 
     final int e4 = e3 - Floats.STORED_SIGNIFICAND_BITS;
 
     //Debug.println("num=" + n3.toString(0x10));
     //Debug.println("den=" + d3.toString(0x10));
 
-    final UnNatural[] qr = 
-      n3.divideAndRemainder(d3).toArray(new UnNatural[0]);
+    final UnNatural0[] qr = 
+      n3.divideAndRemainder(d3).toArray(new UnNatural0[0]);
 
     //Debug.println("quo=" + qr[0].toString(0x10));
     //Debug.println("quo=" + Long.toHexString(qr[0].longValueExact()));
@@ -369,7 +366,7 @@ implements Ringlike<RationalFloat> {
     return Floats.makeFloat(neg,e,q); }
 
   //--------------------------------------------------------------
-  /** Half-even rounding from {@link UnNatural} ratio to
+  /** Half-even rounding from {@link UnNatural0} ratio to
    * <code>double</code>.
    * @param n numerator
    * @param d positive denominator
@@ -380,24 +377,24 @@ implements Ringlike<RationalFloat> {
   public final double doubleValue () {
     if (isZero()) { return 0.0; }
     final boolean neg = !nonNegative();
-    final UnNatural n0 = numerator();
-    final UnNatural d0 = denominator();
+    final UnNatural0 n0 = numerator();
+    final UnNatural0 d0 = denominator();
 
     // TODO: fix this hack
     final boolean large = (exponent() >= 0);
-    final UnNatural n00 = large ? n0.shiftLeft(exponent()) : n0;
-    final UnNatural d00 = large ? d0 : d0.shiftLeft(-exponent());
+    final UnNatural0 n00 = large ? n0.shiftLeft(exponent()) : n0;
+    final UnNatural0 d00 = large ? d0 : d0.shiftLeft(-exponent());
 
     // choose exponent, and shift numerator and denominator so
     // quotient has the right number of bits.
     final int e0 = hiBit(n00) - hiBit(d00) - 1;
     final boolean small = (e0 > 0);
-    final UnNatural n1 = small ? n00 : n00.shiftLeft(-e0);
-    final UnNatural d1 = small ? d00.shiftLeft(e0) : d00;
+    final UnNatural0 n1 = small ? n00 : n00.shiftLeft(-e0);
+    final UnNatural0 d1 = small ? d00.shiftLeft(e0) : d00;
 
     // ensure numerator is less than 2x denominator
-    final UnNatural d11 = d1.shiftLeft(1);
-    final UnNatural d2;
+    final UnNatural0 d11 = d1.shiftLeft(1);
+    final UnNatural0 d2;
     final int e2;
     if (n1.compareTo(d11) < 0) { d2 = d1; e2 = e0;}
     else { d2 = d11; e2 = e0 + 1; }
@@ -411,15 +408,15 @@ implements Ringlike<RationalFloat> {
     // subnormal numbers need slightly different handling
     final boolean sub = (e2 < Double.MIN_EXPONENT);
     final int e3 = sub ? Double.MIN_EXPONENT : e2;
-    final UnNatural d3 = sub ? d2.shiftLeft(e3-e2) : d2;
-    final UnNatural n3 = n1.shiftLeft(Doubles.STORED_SIGNIFICAND_BITS);
+    final UnNatural0 d3 = sub ? d2.shiftLeft(e3-e2) : d2;
+    final UnNatural0 n3 = n1.shiftLeft(Doubles.STORED_SIGNIFICAND_BITS);
 
     final int e4 = e3 - Doubles.STORED_SIGNIFICAND_BITS;
 
     Debug.println("num=" + n3.toString(0x10));
     Debug.println("den=" + d3.toString(0x10));
 
-    final UnNatural[] qr = n3.divideAndRemainder(d3).toArray(new UnNatural[0]);
+    final UnNatural0[] qr = n3.divideAndRemainder(d3).toArray(new UnNatural0[0]);
 
     Debug.println("quo=" + qr[0].toString(0x10));
     //Debug.println("quo=" + Long.toHexString(qr[0].longValue()));
@@ -455,12 +452,12 @@ implements Ringlike<RationalFloat> {
   //--------------------------------------------------------------
 
   @Override
-  public final int compareTo (final RationalFloat q) {
+  public final int compareTo (final RationalFloat0 q) {
     if (nonNegative() && (! q.nonNegative())) { return 1; }
     if ((! nonNegative()) && q.nonNegative()) { return -1; }
     // same signs
-    final UnNatural n0d1 = numerator().multiply(q.denominator());
-    final UnNatural n1d0 = q.numerator().multiply(denominator());
+    final UnNatural0 n0d1 = numerator().multiply(q.denominator());
+    final UnNatural0 n1d0 = q.numerator().multiply(denominator());
     final int e0 = exponent();
     final int e1 = q.exponent();
     final int c;
@@ -472,7 +469,7 @@ implements Ringlike<RationalFloat> {
   // Object methods
   //--------------------------------------------------------------
 
-  public final boolean equals (final RationalFloat q) {
+  public final boolean equals (final RationalFloat0 q) {
     if (this == q) { return true; }
     if (null == q) { return false; }
     // assuming reduced
@@ -487,8 +484,8 @@ implements Ringlike<RationalFloat> {
 
   @Override
   public boolean equals (final Object o) {
-    if (!(o instanceof RationalFloat)) { return false; }
-    return equals((RationalFloat) o); }
+    if (!(o instanceof RationalFloat0)) { return false; }
+    return equals((RationalFloat0) o); }
 
   @Override
   public int hashCode () {
@@ -513,9 +510,9 @@ implements Ringlike<RationalFloat> {
   // construction
   //--------------------------------------------------------------
 
-  private RationalFloat (final boolean nonNegative,
-                         final UnNatural numerator,
-                         final UnNatural denominator,
+  private RationalFloat0 (final boolean nonNegative,
+                         final UnNatural0 numerator,
+                         final UnNatural0 denominator,
                          final int exponent) {
     //    super();
     //    assert 1 == denominator.signum() :
@@ -529,31 +526,31 @@ implements Ringlike<RationalFloat> {
 
   //--------------------------------------------------------------
 
-  public static final RationalFloat valueOf (final boolean nonNegative,
-                                             final UnNatural n,
-                                             final UnNatural d,
+  public static final RationalFloat0 valueOf (final boolean nonNegative,
+                                             final UnNatural0 n,
+                                             final UnNatural0 d,
                                              final int e) {
     return reduced(nonNegative,n,d,e); }
 
-  public static final RationalFloat valueOf (final boolean nonNegative,
-                                             final UnNatural n,
+  public static final RationalFloat0 valueOf (final boolean nonNegative,
+                                             final UnNatural0 n,
                                              final int e) {
-    return reduced(nonNegative,n,UnNatural.ONE,e); }
+    return reduced(nonNegative,n,UnNatural0.ONE,e); }
 
-  public static final RationalFloat valueOf (final boolean nonNegative,
-                                             final UnNatural n,
-                                             final UnNatural d) {
+  public static final RationalFloat0 valueOf (final boolean nonNegative,
+                                             final UnNatural0 n,
+                                             final UnNatural0 d) {
     return valueOf(nonNegative,n,d,0); }
 
-  public static final RationalFloat valueOf (final BigInteger n,
+  public static final RationalFloat0 valueOf (final BigInteger n,
                                              final BigInteger d) {
     return valueOf(
       0 <= (n.signum()*d.signum()),
-      UnNatural.valueOf(n.abs()),
-      UnNatural.valueOf(d.abs()),
+      UnNatural0.valueOf(n.abs()),
+      UnNatural0.valueOf(d.abs()),
       0); }
 
-  public static final RationalFloat valueOf (final long n,
+  public static final RationalFloat0 valueOf (final long n,
                                              final long d,
                                              final int e) {
     if (0L > d) { return valueOf(-n,-d,e); }
@@ -562,11 +559,11 @@ implements Ringlike<RationalFloat> {
     return
       valueOf(
         p,
-        UnNatural.valueOf(p ? n : -n),
-        UnNatural.valueOf(d),
+        UnNatural0.valueOf(p ? n : -n),
+        UnNatural0.valueOf(d),
         e); }
 
-  public static final RationalFloat valueOf (final int n,
+  public static final RationalFloat0 valueOf (final int n,
                                              final int d,
                                              final int e) {
     if (0 > d) { return valueOf(-n,-d,e); }
@@ -575,20 +572,20 @@ implements Ringlike<RationalFloat> {
     return
       valueOf(
         p,
-        UnNatural.valueOf(p ? n : -n),
-        UnNatural.valueOf(d),
+        UnNatural0.valueOf(p ? n : -n),
+        UnNatural0.valueOf(d),
         e); }
 
   //--------------------------------------------------------------
 
-  private static final RationalFloat valueOf (final boolean nonNegative,
+  private static final RationalFloat0 valueOf (final boolean nonNegative,
                                               final int e,
                                               final long t)  {
     if (0L == t) { return ZERO; }
     assert 0L < t;
-    return valueOf(nonNegative,UnNatural.valueOf(t),e); }
+    return valueOf(nonNegative,UnNatural0.valueOf(t),e); }
 
-  public static final RationalFloat valueOf (final double x)  {
+  public static final RationalFloat0 valueOf (final double x)  {
     return valueOf(
       Doubles.nonNegative(x),
       Doubles.exponent(x),
@@ -596,14 +593,14 @@ implements Ringlike<RationalFloat> {
 
   //--------------------------------------------------------------
 
-  private static final RationalFloat valueOf (final boolean nonNegative,
+  private static final RationalFloat0 valueOf (final boolean nonNegative,
                                               final int e,
                                               final int t)  {
     if (0 == t) { return ZERO; }
     assert 0 < t;
-    return valueOf(nonNegative,UnNatural.valueOf(t),e); }
+    return valueOf(nonNegative,UnNatural0.valueOf(t),e); }
 
-  public static final RationalFloat valueOf (final float x)  {
+  public static final RationalFloat0 valueOf (final float x)  {
     return valueOf(
       Floats.nonNegative(x),
       Floats.exponent(x),
@@ -611,76 +608,76 @@ implements Ringlike<RationalFloat> {
 
   //--------------------------------------------------------------
 
-  public static final RationalFloat valueOf (final byte x)  {
-    return valueOf(UnNatural.valueOf(x)); }
+  public static final RationalFloat0 valueOf (final byte x)  {
+    return valueOf(UnNatural0.valueOf(x)); }
 
-  public static final RationalFloat valueOf (final short x)  {
-    return valueOf(UnNatural.valueOf(x)); }
+  public static final RationalFloat0 valueOf (final short x)  {
+    return valueOf(UnNatural0.valueOf(x)); }
 
-  public static final RationalFloat valueOf (final int x)  {
-    return valueOf(UnNatural.valueOf(x)); }
+  public static final RationalFloat0 valueOf (final int x)  {
+    return valueOf(UnNatural0.valueOf(x)); }
 
-  public static final RationalFloat valueOf (final long x)  {
-    return valueOf(UnNatural.valueOf(x)); }
+  public static final RationalFloat0 valueOf (final long x)  {
+    return valueOf(UnNatural0.valueOf(x)); }
 
   //--------------------------------------------------------------
 
-  public static final RationalFloat valueOf (final Double x)  {
+  public static final RationalFloat0 valueOf (final Double x)  {
     return valueOf(x.doubleValue()); }
 
-  public static final RationalFloat valueOf (final Float x)  {
+  public static final RationalFloat0 valueOf (final Float x)  {
     return valueOf(x.floatValue()); }
 
-  public static final RationalFloat valueOf (final Byte x)  {
+  public static final RationalFloat0 valueOf (final Byte x)  {
     return valueOf(x.byteValue()); }
 
-  public static final RationalFloat valueOf (final Short x)  {
+  public static final RationalFloat0 valueOf (final Short x)  {
     return valueOf(x.shortValue()); }
 
-  public static final RationalFloat valueOf (final Integer x)  {
+  public static final RationalFloat0 valueOf (final Integer x)  {
     return valueOf(x.intValue()); }
 
-  public static final RationalFloat valueOf (final Long x)  {
+  public static final RationalFloat0 valueOf (final Long x)  {
     return valueOf(x.longValue()); }
 
-  public static final RationalFloat valueOf (final BigDecimal x)  {
+  public static final RationalFloat0 valueOf (final BigDecimal x)  {
     throw Exceptions.unsupportedOperation(null,"valueOf",x); }
-  //    return valueOf(x, UnNatural.ONE); }
+  //    return valueOf(x, UnNatural0.ONE); }
 
-  public static final RationalFloat valueOf (final UnNatural x)  {
-    return valueOf(true, x, UnNatural.ONE, 0); }
+  public static final RationalFloat0 valueOf (final UnNatural0 x)  {
+    return valueOf(true, x, UnNatural0.ONE, 0); }
 
-  public static final RationalFloat valueOf (final Number x)  {
-    if (x instanceof RationalFloat) { return (RationalFloat) x; }
+  public static final RationalFloat0 valueOf (final Number x)  {
+    if (x instanceof RationalFloat0) { return (RationalFloat0) x; }
     if (x instanceof Double) { return valueOf((Double) x); }
     if (x instanceof Float) { return valueOf((Float) x); }
     if (x instanceof Byte) { return valueOf((Byte) x); }
     if (x instanceof Short) { return valueOf((Short) x); }
     if (x instanceof Integer) { return valueOf((Integer) x); }
     if (x instanceof Long) { return valueOf((Long) x); }
-    if (x instanceof UnNatural) { return valueOf((UnNatural) x); }
+    if (x instanceof UnNatural0) { return valueOf((UnNatural0) x); }
     if (x instanceof BigDecimal) { return valueOf((BigDecimal) x); }
     throw Exceptions.unsupportedOperation(null,"valueOf",x); }
 
-  public static final RationalFloat valueOf (final Object x)  {
+  public static final RationalFloat0 valueOf (final Object x)  {
     return valueOf((Number) x); }
 
   //--------------------------------------------------------------
   // Note: these need to be reduced.
 
-  public static final RationalFloat ZERO =
-    new RationalFloat(true,UnNatural.ZERO,UnNatural.ONE,0);
+  public static final RationalFloat0 ZERO =
+    new RationalFloat0(true,UnNatural0.ZERO,UnNatural0.ONE,0);
 
-  public static final RationalFloat ONE =
-    new RationalFloat(true,UnNatural.ONE,UnNatural.ONE,0);
+  public static final RationalFloat0 ONE =
+    new RationalFloat0(true,UnNatural0.ONE,UnNatural0.ONE,0);
 
-  public static final RationalFloat TWO =
-    new RationalFloat(true,UnNatural.ONE,UnNatural.ONE,1);
+  public static final RationalFloat0 TWO =
+    new RationalFloat0(true,UnNatural0.ONE,UnNatural0.ONE,1);
 
-  public static final RationalFloat TEN =
-    new RationalFloat(true,UnNatural.valueOf(5),UnNatural.ONE,1);
+  public static final RationalFloat0 TEN =
+    new RationalFloat0(true,UnNatural0.valueOf(5),UnNatural0.ONE,1);
 
-  public static final RationalFloat MINUS_ONE =
+  public static final RationalFloat0 MINUS_ONE =
     ONE.negate();
 
   //--------------------------------------------------------------

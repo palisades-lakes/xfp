@@ -45,7 +45,7 @@ public final class RationalFloats implements Set {
   public final BinaryOperator<RationalFloat> adder () {
     return new BinaryOperator<RationalFloat> () {
       @Override
-      public final String toString () { return "BF.add()"; }
+      public final String toString () { return "RF.add()"; }
       @Override
       public final RationalFloat apply (final RationalFloat q0,
                                         final RationalFloat q1) {
@@ -69,7 +69,7 @@ public final class RationalFloats implements Set {
   public final UnaryOperator<RationalFloat> additiveInverse () {
     return new UnaryOperator<RationalFloat> () {
       @Override
-      public final String toString () { return "BF.negate()"; }
+      public final String toString () { return "RF.negate()"; }
       @Override
       public final RationalFloat apply (final RationalFloat q) {
         return RationalFloats.this.negate(q); } }; }
@@ -85,7 +85,7 @@ public final class RationalFloats implements Set {
   public final BinaryOperator<RationalFloat> multiplier () {
     return new BinaryOperator<RationalFloat>() {
       @Override
-      public final String toString () { return "BF.multiply()"; }
+      public final String toString () { return "RF.multiply()"; }
       @Override
       public final RationalFloat apply (final RationalFloat q0,
                                         final RationalFloat q1) {
@@ -108,7 +108,7 @@ public final class RationalFloats implements Set {
   public final UnaryOperator<RationalFloat> multiplicativeInverse () {
     return new UnaryOperator<RationalFloat> () {
       @Override
-      public final String toString () { return "BF.inverse()"; }
+      public final String toString () { return "RF.inverse()"; }
       @Override
       public final RationalFloat apply (final RationalFloat q) {
         return RationalFloats.this.reciprocal(q); } }; }
@@ -171,8 +171,8 @@ public final class RationalFloats implements Set {
         final BigInteger z1 = (BigInteger) g1.next();
         return RationalFloat.valueOf(
           0<=z0.signum(),
-          UnNatural0.valueOf(z0.abs()),
-          UnNatural0.valueOf(z1),
+          UnNatural.valueOf(z0.abs()),
+          UnNatural.valueOf(z1),
           g2.nextInt()); } }; }
 
   // Is this characteristic of most inputs?

@@ -374,7 +374,7 @@ public final class Common {
             "xfp.java.accumulators.ZhuHayesAccumulator",
             "xfp.java.accumulators.BigFloatAccumulator",
             "xfp.java.accumulators.RationalFloatAccumulator",
-            //"xfp.java.accumulators.RationalFloat0Accumulator",
+            "xfp.java.accumulators.RationalFloat0Accumulator",
             "xfp.java.accumulators.RationalFloatBIAccumulator",
             //"xfp.java.accumulators.RationalAccumulator", 
           }); }
