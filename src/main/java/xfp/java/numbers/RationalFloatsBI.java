@@ -21,97 +21,97 @@ import xfp.java.prng.GeneratorBase;
 import xfp.java.prng.Generators;
 
 /** The set of rational numbers represented by
- * <code>RationalFloat</code>
+ * <code>RationalFloatBI</code>
  *
  * @author palisades dot lakes at gmail dot com
  * @version 2019-05-23
  */
 @SuppressWarnings("unchecked")
-public final class RationalFloats implements Set {
+public final class RationalFloatsBI implements Set {
 
   //--------------------------------------------------------------
-  // operations for algebraic structures over RationalFloats.
+  // operations for algebraic structures over RationalFloatBIs.
   //--------------------------------------------------------------
 
   // TODO: is consistency with other algebraic structure classes
   // worth the indirection?
 
-  private final RationalFloat add (final RationalFloat q0,
-                                   final RationalFloat q1) {
+  private final RationalFloatBI add (final RationalFloatBI q0,
+                                   final RationalFloatBI q1) {
     assert contains(q0);
     assert contains(q1);
     return q0.add(q1); }
 
-  public final BinaryOperator<RationalFloat> adder () {
-    return new BinaryOperator<RationalFloat> () {
+  public final BinaryOperator<RationalFloatBI> adder () {
+    return new BinaryOperator<RationalFloatBI> () {
       @Override
       public final String toString () { return "BF.add()"; }
       @Override
-      public final RationalFloat apply (final RationalFloat q0,
-                                        final RationalFloat q1) {
-        return RationalFloats.this.add(q0,q1); } }; }
+      public final RationalFloatBI apply (final RationalFloatBI q0,
+                                        final RationalFloatBI q1) {
+        return RationalFloatsBI.this.add(q0,q1); } }; }
 
   //--------------------------------------------------------------
 
   @SuppressWarnings("static-method")
-  public final RationalFloat additiveIdentity () {
-    return RationalFloat.ZERO; }
+  public final RationalFloatBI additiveIdentity () {
+    return RationalFloatBI.ZERO; }
 
   //--------------------------------------------------------------
 
   // TODO: is consistency with other algebraic structure classes
   // worth the indirection?
 
-  private final RationalFloat negate (final RationalFloat q) {
+  private final RationalFloatBI negate (final RationalFloatBI q) {
     assert contains(q);
     return q.negate(); }
 
-  public final UnaryOperator<RationalFloat> additiveInverse () {
-    return new UnaryOperator<RationalFloat> () {
+  public final UnaryOperator<RationalFloatBI> additiveInverse () {
+    return new UnaryOperator<RationalFloatBI> () {
       @Override
       public final String toString () { return "BF.negate()"; }
       @Override
-      public final RationalFloat apply (final RationalFloat q) {
-        return RationalFloats.this.negate(q); } }; }
+      public final RationalFloatBI apply (final RationalFloatBI q) {
+        return RationalFloatsBI.this.negate(q); } }; }
 
   //--------------------------------------------------------------
 
-  private final RationalFloat multiply (final RationalFloat q0,
-                                        final RationalFloat q1) {
+  private final RationalFloatBI multiply (final RationalFloatBI q0,
+                                        final RationalFloatBI q1) {
     assert contains(q0);
     assert contains(q1);
     return q0.multiply(q1); }
 
-  public final BinaryOperator<RationalFloat> multiplier () {
-    return new BinaryOperator<RationalFloat>() {
+  public final BinaryOperator<RationalFloatBI> multiplier () {
+    return new BinaryOperator<RationalFloatBI>() {
       @Override
       public final String toString () { return "BF.multiply()"; }
       @Override
-      public final RationalFloat apply (final RationalFloat q0,
-                                        final RationalFloat q1) {
-        return RationalFloats.this.multiply(q0,q1); } }; }
+      public final RationalFloatBI apply (final RationalFloatBI q0,
+                                        final RationalFloatBI q1) {
+        return RationalFloatsBI.this.multiply(q0,q1); } }; }
 
   //--------------------------------------------------------------
 
   @SuppressWarnings("static-method")
-  public final RationalFloat multiplicativeIdentity () {
-    return RationalFloat.ONE; }
+  public final RationalFloatBI multiplicativeIdentity () {
+    return RationalFloatBI.ONE; }
 
   //--------------------------------------------------------------
 
-  private final RationalFloat reciprocal (final RationalFloat q) {
+  private final RationalFloatBI reciprocal (final RationalFloatBI q) {
     assert contains(q);
     // only a partial inverse
     if (q.isZero()) { return null; }
     return q.reciprocal();  }
 
-  public final UnaryOperator<RationalFloat> multiplicativeInverse () {
-    return new UnaryOperator<RationalFloat> () {
+  public final UnaryOperator<RationalFloatBI> multiplicativeInverse () {
+    return new UnaryOperator<RationalFloatBI> () {
       @Override
       public final String toString () { return "BF.inverse()"; }
       @Override
-      public final RationalFloat apply (final RationalFloat q) {
-        return RationalFloats.this.reciprocal(q); } }; }
+      public final RationalFloatBI apply (final RationalFloatBI q) {
+        return RationalFloatsBI.this.reciprocal(q); } }; }
 
   //--------------------------------------------------------------
   // Set methods
@@ -119,16 +119,16 @@ public final class RationalFloats implements Set {
 
   @Override
   public final boolean contains (final Object element) {
-    return element instanceof RationalFloat; }
+    return element instanceof RationalFloatBI; }
 
   //--------------------------------------------------------------
 
   @Override
   public final BiPredicate equivalence () {
-    return new BiPredicate<RationalFloat,RationalFloat>() {
+    return new BiPredicate<RationalFloatBI,RationalFloatBI>() {
       @Override
-      public final boolean test (final RationalFloat q0,
-                                 final RationalFloat q1) {
+      public final boolean test (final RationalFloatBI q0,
+                                 final RationalFloatBI q1) {
         return q0.equals(q1); } }; }
 
   //--------------------------------------------------------------
@@ -151,28 +151,25 @@ public final class RationalFloats implements Set {
       private final Generator g0 =
         Generators.bigIntegerGenerator(urp);
       private final Generator g1 =
-        Generators.positiveBigIntegerGenerator(urp);
+        Generators.bigIntegerGenerator(urp);
       private final Generator g2 =
         Generators.intGenerator(urp);
       private final CollectionSampler edgeCases =
         new CollectionSampler(
           urp,
           List.of(
-            RationalFloat.ZERO,
-            RationalFloat.ONE,
-            RationalFloat.TWO,
-            RationalFloat.TEN,
-            RationalFloat.MINUS_ONE));
+            RationalFloatBI.ZERO,
+            RationalFloatBI.ONE,
+            RationalFloatBI.TWO,
+            RationalFloatBI.TEN,
+            RationalFloatBI.MINUS_ONE));
       @Override
       public Object next () {
         final boolean edge = choose.sample() > dp;
         if (edge) { return edgeCases.sample(); }
-        final BigInteger z0 = (BigInteger) g0.next();
-        final BigInteger z1 = (BigInteger) g1.next();
-        return RationalFloat.valueOf(
-          0<=z0.signum(),
-          UnNatural0.valueOf(z0.abs()),
-          UnNatural0.valueOf(z1),
+        return RationalFloatBI.valueOf(
+          (BigInteger) g0.next(),
+          (BigInteger) g1.next(),
           g2.nextInt()); } }; }
 
   // Is this characteristic of most inputs?
@@ -187,16 +184,16 @@ public final class RationalFloats implements Set {
         new CollectionSampler(
           urp,
           List.of(
-            RationalFloat.ZERO,
-            RationalFloat.ONE,
-            RationalFloat.TWO,
-            RationalFloat.TEN,
-            RationalFloat.MINUS_ONE));
+            RationalFloatBI.ZERO,
+            RationalFloatBI.ONE,
+            RationalFloatBI.TWO,
+            RationalFloatBI.TEN,
+            RationalFloatBI.MINUS_ONE));
       @Override
       public Object next () {
         final boolean edge = choose.sample() > dp;
         if (edge) { return edgeCases.sample(); }
-        return RationalFloat.valueOf(g.nextDouble()); } }; }
+        return RationalFloatBI.valueOf(g.nextDouble()); } }; }
 
   // Is this characteristic of most inputs?
   public static final Generator
@@ -210,8 +207,8 @@ public final class RationalFloats implements Set {
       final Generator g = fromDoubleGenerator(urp);
       @Override
       public final Object next () {
-        final RationalFloat[] z = new RationalFloat[n];
-        for (int i=0;i<n;i++) { z[i] = (RationalFloat) g.next(); }
+        final RationalFloatBI[] z = new RationalFloatBI[n];
+        for (int i=0;i<n;i++) { z[i] = (RationalFloatBI) g.next(); }
         return z; } }; }
 
   public static final Generator
@@ -221,8 +218,8 @@ public final class RationalFloats implements Set {
       final Generator g = generator(urp);
       @Override
       public final Object next () {
-        final RationalFloat[] z = new RationalFloat[n];
-        for (int i=0;i<n;i++) { z[i] = (RationalFloat) g.next(); }
+        final RationalFloatBI[] z = new RationalFloatBI[n];
+        for (int i=0;i<n;i++) { z[i] = (RationalFloatBI) g.next(); }
         return z; } }; }
 
   // TODO: determine which generator from options.
@@ -245,7 +242,7 @@ public final class RationalFloats implements Set {
   // singleton
   @Override
   public final boolean equals (final Object that) {
-    return that instanceof RationalFloats; }
+    return that instanceof RationalFloatsBI; }
 
   @Override
   public final String toString () { return "RF"; }
@@ -255,12 +252,12 @@ public final class RationalFloats implements Set {
   //--------------------------------------------------------------
 
 
-  private RationalFloats () { }
+  private RationalFloatsBI () { }
 
-  private static final RationalFloats SINGLETON =
-    new RationalFloats();
+  private static final RationalFloatsBI SINGLETON =
+    new RationalFloatsBI();
 
-  public static final RationalFloats get () { return SINGLETON; }
+  public static final RationalFloatsBI get () { return SINGLETON; }
 
   //--------------------------------------------------------------
 

@@ -655,8 +655,9 @@ public final class Common {
       //Debug.println("|f-fx |= " + toString.apply(dx));
       //Debug.println("|f-fhi|= " + toString.apply(dhi));
       Assertions.assertTrue(flo.compareTo(f) < 0,
-        "f=" + f + " > flo=" + flo);
-      Assertions.assertTrue(f.compareTo(fhi) < 0);
+        "\nf=" + f + " > flo=" + flo);
+      Assertions.assertTrue(f.compareTo(fhi) < 0,
+        "\nf=" + f + " < fhi=" + fhi);
       Assertions.assertTrue(flo.compareTo(fx) <= 0);
       Assertions.assertTrue(fx.compareTo(fhi) <= 0);
       Assertions.assertTrue(dx.compareTo(dlo) <= 0,

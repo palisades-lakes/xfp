@@ -9,8 +9,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import xfp.java.Debug;
-
 /** immutable arbitrary-precision non-negative integers.
  *
  * @author palisades dot lakes at gmail dot com
@@ -940,7 +938,7 @@ implements Ringlike<UnNatural0> {
 
   private static final UnNatural0 multiplyToomCook3 (final UnNatural0 a,
                                                      final UnNatural0 b) {
-    Debug.println("a=" + a.toString(0x10));
+    //Debug.println("a=" + a.toString(0x10));
     final int alen = a._mag.length;
     final int blen = b._mag.length;
 
@@ -1126,9 +1124,9 @@ implements Ringlike<UnNatural0> {
 
   private final UnNatural0 multiply (final UnNatural0 that,
                                      final boolean isRecursion) {
-    Debug.println("multiply " + isRecursion);
-    Debug.println("this=" + this.toString(0x10));
-    Debug.println("that=" + that.toString(0x10));
+    //Debug.println("multiply " + isRecursion);
+    //Debug.println("this=" + this.toString(0x10));
+    //Debug.println("that=" + that.toString(0x10));
     //(new Throwable()).printStackTrace(System.out);
     if ((that.isZero()) || (isZero())) { return ZERO; }
     final int xlen = _mag.length;
@@ -2210,6 +2208,7 @@ implements Ringlike<UnNatural0> {
     return valueOf(b,0,b.length); }
 
   public static final UnNatural0 valueOf (final BigInteger bi) {
+    assert 0<=bi.signum();
     return valueOf(bi.toByteArray()); }
 
   //-------------------------------------------------------------
