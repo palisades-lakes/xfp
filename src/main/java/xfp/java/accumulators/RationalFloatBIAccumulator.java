@@ -1,6 +1,6 @@
 package xfp.java.accumulators;
 
-import xfp.java.numbers.RationalFloat;
+import xfp.java.numbers.RationalFloatBI;
 
 /** Naive sum of <code>double</code> values with a Rational-valued
  * accumulator (for testing).
@@ -12,7 +12,7 @@ public final class RationalFloatBIAccumulator
 
 implements Accumulator<RationalFloatBIAccumulator> {
 
-  private RationalFloat _sum;
+  private RationalFloatBI _sum;
 
   //--------------------------------------------------------------
 
@@ -35,7 +35,7 @@ implements Accumulator<RationalFloatBIAccumulator> {
 
   @Override
   public final RationalFloatBIAccumulator clear () {
-    _sum = RationalFloat.ZERO;
+    _sum = RationalFloatBI.ZERO;
     return this; }
 
   @Override
