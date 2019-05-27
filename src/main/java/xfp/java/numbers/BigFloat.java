@@ -9,7 +9,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-19
+ * @version 2019-05-27
  */
 
 public final class BigFloat
@@ -48,15 +48,15 @@ implements Ringlike<BigFloat> {
     return valueOf(! nonNegative(),significand(),exponent()); }
 
   //--------------------------------------------------------------
-  /** big float significands adjusted to the same exponent
+  /** significands adjusted to the same exponent
    */
 
-  private static final BigFloat add (final boolean n1,
-                                     final long t1,
-                                     final int leftShift,
-                                     final boolean n0,
+  private static final BigFloat add (final boolean n0,
                                      final UnNatural t0,
-                                     final int e) {
+                                     final int e,
+                                     final boolean n1,
+                                     final long t1,
+                                     final int leftShift) {
     //assert t0.signum() >= 0;
     if (n0 ^ n1) { // different signs
       final int c01 = t0.compareTo(t1,leftShift);
@@ -83,8 +83,8 @@ implements Ringlike<BigFloat> {
 
     // adjust significands to the same exponent
     final int de = e1 - e0;
-    if (de >= 0) { return add(n1,t1,de,n0,t0,e0); }
-    return add(n1,t1,0,n0,t0.shiftLeft(-de),e1); }
+    if (de >= 0) { return add(n0,t0,e0,n1,t1,de); }
+    return add(n0,t0.shiftLeft(-de),e1,n1,t1,0); }
 
   //--------------------------------------------------------------
 

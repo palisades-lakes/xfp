@@ -1037,35 +1037,35 @@ implements Ringlike<UnNatural0> {
     return make(rmag); }
 
 
-  //  private final Natural multiply (final long v) {
-  //    assert 0L <= v;
-  //    if (v == 0L) { return ZERO; }
-  //    final long dh = v >>> 32;      // higher order bits
-  //    final long dl = v & UNSIGNED_MASK; // lower order bits
-  //    final int xlen = _mag.length;
-  //    final int[] value = _mag;
-  //    int[] rmag =
-  //      (dh == 0L) ? (new int[xlen + 1]) : (new int[xlen + 2]);
-  //      long carry = 0;
-  //      int rstart = rmag.length - 1;
-  //      for (int i = xlen - 1; i >= 0; i--) {
-  //        final long product = (unsigned(value[i]) * dl) + carry;
-  //        rmag[rstart--] = (int) product;
-  //        carry = product >>> 32; }
-  //      rmag[rstart] = (int) carry;
-  //      if (dh != 0L) {
-  //        carry = 0;
-  //        rstart = rmag.length - 2;
-  //        for (int i = xlen - 1; i >= 0; i--) {
-  //          final long product =
-  //            (unsigned(value[i]) * dh)
-  //            + unsigned(rmag[rstart]) + carry;
-  //          rmag[rstart--] = (int) product;
-  //          carry = product >>> 32; }
-  //        rmag[0] = (int) carry; }
-  //      if (carry == 0L) {
-  //        rmag = Arrays.copyOfRange(rmag,1,rmag.length); }
-  //      return make(rmag); }
+    private final UnNatural0 multiply (final long v) {
+      assert 0L <= v;
+      if (v == 0L) { return ZERO; }
+      final long dh = v >>> 32;      // higher order bits
+      final long dl = v & UNSIGNED_MASK; // lower order bits
+      final int xlen = _mag.length;
+      final int[] value = _mag;
+      int[] rmag =
+        (dh == 0L) ? (new int[xlen + 1]) : (new int[xlen + 2]);
+        long carry = 0;
+        int rstart = rmag.length - 1;
+        for (int i = xlen - 1; i >= 0; i--) {
+          final long product = (unsigned(value[i]) * dl) + carry;
+          rmag[rstart--] = (int) product;
+          carry = product >>> 32; }
+        rmag[rstart] = (int) carry;
+        if (dh != 0L) {
+          carry = 0;
+          rstart = rmag.length - 2;
+          for (int i = xlen - 1; i >= 0; i--) {
+            final long product =
+              (unsigned(value[i]) * dh)
+              + unsigned(rmag[rstart]) + carry;
+            rmag[rstart--] = (int) product;
+            carry = product >>> 32; }
+          rmag[0] = (int) carry; }
+        if (carry == 0L) {
+          rmag = Arrays.copyOfRange(rmag,1,rmag.length); }
+        return make(rmag); }
 
   //--------------------------------------------------------------
 

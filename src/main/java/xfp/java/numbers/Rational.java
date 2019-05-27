@@ -11,7 +11,7 @@ import xfp.java.exceptions.Exceptions;
 /** Ratios of {@link BigInteger}.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-19
+ * @version 2019-05-26
  */
 
 public final class Rational extends Number

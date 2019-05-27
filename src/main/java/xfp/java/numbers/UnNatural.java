@@ -10,7 +10,7 @@ import java.util.List;
 /** immutable arbitrary-precision non-negative integers.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-22
+ * @version 2019-05-27
  */
 
 public final class UnNatural extends Number
@@ -84,9 +84,15 @@ implements Ringlike<UnNatural> {
 
   //--------------------------------------------------------------
 
+  public final UnNatural multiply (final long that) {
+    if (ONE.equals(this)) { return UnNatural.valueOf(that); }
+    return make(Bei.multiply(_mag,that)); }
+
   @Override
-  public final UnNatural multiply (final UnNatural val) {
-    return make(Bei.multiply(_mag,val._mag)); }
+  public final UnNatural multiply (final UnNatural that) {
+    if (ONE.equals(this)) { return that; }
+    if (ONE.equals(that)) { return this; }
+    return make(Bei.multiply(_mag,that._mag)); }
 
   //--------------------------------------------------------------
   // Division

@@ -18,7 +18,7 @@ import xfp.java.exceptions.Exceptions;
  * arithmetic on them faster.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-23
+ * @version 2019-05-27
  */
 
 public final class RationalFloat extends Number
@@ -57,6 +57,24 @@ implements Ringlike<RationalFloat> {
     return isOne(numerator(),denominator()); }
 
   //--------------------------------------------------------------
+  /** optimize denominator == 1 case. */
+
+  private static final RationalFloat
+  reduced (final boolean nonNegative,
+           final UnNatural n,
+           final int e) {
+
+    if (n.isZero()) { return ZERO; }
+
+    // TODO: is numerator 1 case worth optimizing?
+    if (UnNatural.ONE.equals(n)) {
+      return new RationalFloat(
+        nonNegative,UnNatural.ONE,UnNatural.ONE,e); }
+    final int en = Numbers.loBit(n);
+    final UnNatural n0 = (en != 0) ? n.shiftRight(en) : n;
+    final int e0 = (e + en);
+    return new RationalFloat(nonNegative,n0,UnNatural.ONE,e0); }
+
 
   private static final RationalFloat
   reduced (final boolean nonNegative,
@@ -66,44 +84,53 @@ implements Ringlike<RationalFloat> {
 
     if (n.isZero()) { return ZERO; }
 
-    if (UnNatural.ONE.equals(d)) {
-      final int en = Numbers.loBit(n);
-      final UnNatural n0 = (en != 0) ? n.shiftRight(en) : n;
-      final int e0 = (e + en);
-      return new RationalFloat(nonNegative,n0,UnNatural.ONE,e0); }
+    if (UnNatural.ONE.equals(d)) { 
+      return reduced(nonNegative,n,e); }
+
+    // TODO: is numerator 1 case worth optimizing?
+    if (UnNatural.ONE.equals(n)) {
+      final int ed = Numbers.loBit(d);
+      final UnNatural d0 = (ed != 0) ? d.shiftRight(ed) : d;
+      final int e0 = e - ed;
+      return new RationalFloat(nonNegative,UnNatural.ONE,d0,e0); }
 
     final int en = Numbers.loBit(n);
     final int ed = Numbers.loBit(d);
     final UnNatural n0 = (en != 0) ? n.shiftRight(en) : n;
     final UnNatural d0 = (ed != 0) ? d.shiftRight(ed) : d;
     final int e0 = (e + en) - ed;
-    
-    // might have denominator 1 after shift
+
+    // might have numerator or denominator 1 after shift
     if (UnNatural.ONE.equals(d0)) {
+      if (UnNatural.ONE.equals(n0)) {
+        return new RationalFloat(
+          nonNegative,UnNatural.ONE,UnNatural.ONE,e0); }
       return new RationalFloat(nonNegative,n0,UnNatural.ONE,e0); }
+    if (UnNatural.ONE.equals(n0)) {
+      return new RationalFloat(nonNegative,UnNatural.ONE,d0,e0); }
 
     final UnNatural gcd = n0.gcd(d0);
     // TODO: any value in this test?
     if (gcd.compareTo(UnNatural.ONE) > 0) {
       final UnNatural n1 = n0.divide(gcd);
       final UnNatural d1 = d0.divide(gcd);
-      //      assert d1.signum() == 1 :
-      //        "non positive denominator:"
-      //        + "\nn= " + n.toString(0x10)
-      //        + "\nd= " + d.toString(0x10)
-      //        + "\ne= " + e
-      //        + "\n"
-      //        + "\nn0= " + n0.toString(0x10)
-      //        + "\nd0= " + d0.toString(0x10)
-      //        + "\ne0= " + e0
-      //        + "\n"
-      //        + "\ngcd= " + gcd.toString(0x10)
-      //        + "\n"
-      //        + "\nn1= " + n1.toString(0x10)
-      //        + "\nd1= " + d1.toString(0x10)
-      //        + "\ne1= " + e0
-      //        + "\n"
-      //        ;
+      // assert d1.signum() == 1 :
+      //   "non positive denominator:"
+      //   + "\nn= " + n.toString(0x10)
+      //   + "\nd= " + d.toString(0x10)
+      //   + "\ne= " + e
+      //   + "\n"
+      //   + "\nn0= " + n0.toString(0x10)
+      //   + "\nd0= " + d0.toString(0x10)
+      //   + "\ne0= " + e0
+      //   + "\n"
+      //   + "\ngcd= " + gcd.toString(0x10)
+      //   + "\n"
+      //   + "\nn1= " + n1.toString(0x10)
+      //   + "\nd1= " + d1.toString(0x10)
+      //   + "\ne1= " + e0
+      //   + "\n"
+      //   ;
       return new RationalFloat(nonNegative,n1,d1,e0); }
 
     return new RationalFloat(nonNegative,n0,d0,e0); }
@@ -172,23 +199,102 @@ implements Ringlike<RationalFloat> {
     return add(
       nonNegative(),numerator(),denominator(),exponent(),
       p1,n1,d1,e1); }
-  @Override
-  public final RationalFloat add (final RationalFloat q) {
-    if (isZero()) { return q; }
-    if (q.isZero()) { return this; }
-    return add(
-      q.nonNegative(),
-      q.numerator(),
-      q.denominator(),
-      q.exponent()); }
 
-  // TODO: optimize denominator ONE case?
+  @Override
+  public final RationalFloat add (final RationalFloat that) {
+    if (isZero()) { return that; }
+    if (that.isZero()) { return this; }
+    return add(
+      that.nonNegative(),
+      that.numerator(),
+      that.denominator(),
+      that.exponent()); }
+
+  //--------------------------------------------------------------
+
+  private static final RationalFloat add (final boolean p0,
+                                          final UnNatural n0,
+                                          final UnNatural d0,
+                                          final int e0,
+                                          final boolean p1,
+                                          final long n1,
+                                          final int e1) {
+    final UnNatural n1d0 = d0.multiply(n1);
+
+    final UnNatural a;
+    final UnNatural b;
+    final int e;
+    if (e0 == e1) { a = n0; b = n1d0; e = e0; }
+    else if (e0 > e1) {
+      a = n0.shiftLeft(e0-e1); b = n1d0; e = e1; }
+    else { 
+      a = n0; b = n1d0.shiftLeft(e1-e0); e = e0; }
+
+    final boolean p;
+    final UnNatural n;
+    if (p0) {
+      if (p1) { n = a.add(b); p = true; }
+      else {
+        final int c = a.compareTo(b);
+        if (0 <= c) { n = a.subtract(b); p = true; }
+        else { n = b.subtract(a); p = false; } } }
+    else { 
+      if (p1) {
+        final int c = b.compareTo(a);
+        if (0 <= c) { n = b.subtract(a); p = true; }
+        else { n = a.subtract(b); p = false; } }
+      else { n = a.add(b); p = false; } } 
+
+    return valueOf(p,n,d0,e); }
+
+  //--------------------------------------------------------------
+  /** both denominators 1. 
+   * significands adjusted to the same exponent.
+   * 2nd arg starts as <code>double</code>.
+   */
+
+  private static final RationalFloat add (final boolean n0,
+                                          final UnNatural t0,
+                                          final int e,
+                                          final boolean n1,
+                                          final long t1,
+                                          final int leftShift) {
+    //assert t0.signum() >= 0;
+    if (n0 ^ n1) { // different signs
+      final int c01 = t0.compareTo(t1,leftShift);
+      if (0 == c01) { return ZERO; }
+      // t1 > t0
+      if (0 > c01) {
+        return valueOf(n1, t0.subtractFrom(t1,leftShift), e); }
+      // t0 > t1
+      return valueOf(n0,t0.subtract(t1,leftShift),e); }
+    return valueOf(n0,t0.add(t1,leftShift),e); }
+
+  private final RationalFloat add (final boolean n1,
+                                   final long t1,
+                                   final int e1) {
+    if (0 == t1) { return this; }
+    if (UnNatural.ONE.equals(denominator())) {
+      //assert 0 < t1;
+
+      final boolean n0 = nonNegative();
+      final UnNatural t0 = numerator();
+      final int e0 = exponent();
+
+      // adjust significands to the same exponent
+      final int de = e1 - e0;
+      if (de >= 0) { return add(n0,t0,e0,n1,t1,de); }
+      return add(n0,t0.shiftLeft(-de),e1,n1,t1,0); } 
+
+    return add(
+      nonNegative(),numerator(),denominator(),exponent(),
+      n1,t1,e1); }
+
   public final RationalFloat add (final double z) {
     assert Double.isFinite(z);
     return add(
       Doubles.nonNegative(z),
-      UnNatural.valueOf(Doubles.significand(z)),
-      UnNatural.ONE,
+      Doubles.significand(z),
       Doubles.exponent(z));}
 
   //--------------------------------------------------------------

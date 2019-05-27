@@ -984,30 +984,28 @@ public final class Bei {
 
   //--------------------------------------------------------------
 
-  private static final int[] multiply (final int[] m,
-                                       final int[] val,
+  private static final int[] multiply (final int[] x,
+                                       final int[] y,
                                        final boolean isRecursion) {
-    if ((isZero(val)) || (isZero(m))) { return ZERO; }
-    final int xlen = m.length;
-    if ((val == m)
+    if ((isZero(y)) || (isZero(x))) { return ZERO; }
+    final int xlen = x.length;
+    if ((y == x)
       &&
       (xlen > MULTIPLY_SQUARE_THRESHOLD)) {
-      return square(m,false); }
+      return square(x,false); }
 
-    final int ylen = val.length;
+    final int ylen = y.length;
 
     if ((xlen < KARATSUBA_THRESHOLD)
       || (ylen < KARATSUBA_THRESHOLD)) {
-      if (val.length == 1) {
-        return multiply(m,val[0]); }
-      if (m.length == 1) {
-        return multiply(val,m[0]); }
-      int[] result = multiplyToLen(m,xlen,val,ylen,null);
+      if (y.length == 1) { return multiply(x,y[0]); }
+      if (x.length == 1) { return multiply(y,x[0]); }
+      int[] result = multiplyToLen(x,xlen,y,ylen,null);
       result = stripLeadingZeros(result);
       return stripLeadingZeros(result); }
     if ((xlen < TOOM_COOK_THRESHOLD)
       && (ylen < TOOM_COOK_THRESHOLD)) {
-      return multiplyKaratsuba(m,val); }
+      return multiplyKaratsuba(x,y); }
     //
     // In "Hacker's Delight" section 2-13, p.33, it is explained
     // that if x and y are unsigned 32-bit quantities and m and n
@@ -1062,11 +1060,11 @@ public final class Bei {
       // are only considering the magnitudes as non-negative. The
       // Toom-Cook multiplication algorithm determines the sign
       // at its end from the two signum values.
-      if ((bitLength(m,m.length) + bitLength(val,
-        val.length)) > (32L * MAX_MAG_LENGTH)) {
+      if ((bitLength(x,x.length) + bitLength(y,
+        y.length)) > (32L * MAX_MAG_LENGTH)) {
         reportOverflow(); } }
 
-    return multiplyToomCook3(m,val); }
+    return multiplyToomCook3(x,y); }
 
   //--------------------------------------------------------------
 

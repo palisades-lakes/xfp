@@ -18,7 +18,7 @@ import xfp.java.exceptions.Exceptions;
  * arithmetic on them faster.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-23
+ * @version 2019-05-26
  */
 
 public final class RationalFloat0 extends Number
