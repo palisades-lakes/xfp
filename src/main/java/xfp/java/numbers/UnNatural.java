@@ -38,11 +38,11 @@ implements Ringlike<UnNatural> {
     //if (isZero()) { return m; }
     return unsafe(Bei.add(_mag,m._mag)); }
 
-  //  public final UnNatural add (final long m) {
-  //    assert 0L <= m;
-  //    if (0L == m) { return this; }
-  //    //if (isZero()) { return valueOf(m); }
-  //    return unsafe(Bei.add(_mag,m)); }
+  public final UnNatural add (final long m) {
+    assert 0L <= m;
+    if (0L == m) { return this; }
+    //if (isZero()) { return valueOf(m); }
+    return unsafe(Bei.add(_mag,m)); }
 
   public final UnNatural add (final long m,
                               final int shift) {
@@ -67,14 +67,16 @@ implements Ringlike<UnNatural> {
     //    if (c == 0) { return ZERO; }
     return unsafe(Bei.subtract(_mag,m._mag)); }
 
-  // only when (val << leftShift) <= this
+  // only when (m << leftShift) <= this
   public final UnNatural subtract (final long m,
                                    final int leftShift) {
     assert 0L <= m;
     if (0L == m) { return this; }
     return unsafe(Bei.subtract(_mag,m,leftShift)); }
 
-  // only when this <= (val << leftShift)
+  //--------------------------------------------------------------
+  // only when this <= (m << leftShift)
+
   public final UnNatural subtractFrom (final long m,
                                        final int leftShift) {
     assert 0L <= m;
@@ -82,17 +84,25 @@ implements Ringlike<UnNatural> {
     //if (isZero()) { return make(Bei.shiftLeft(m,leftShift)); }
     return unsafe(Bei.subtract(Bei.shiftLeft(m,leftShift),_mag)); }
 
+  // only when this <= m
+  
+  public final UnNatural subtractFrom (final long m) {
+    assert 0L <= m;
+    if (0L == m) { assert isZero(); return ZERO; }
+    //if (isZero()) { return make(m); }
+    return unsafe(Bei.subtract(m,_mag)); }
+
   //--------------------------------------------------------------
 
   public final UnNatural multiply (final long that) {
     if (ONE.equals(this)) { return UnNatural.valueOf(that); }
-    return make(Bei.multiply(_mag,that)); }
+    return unsafe(Bei.multiply(_mag,that)); }
 
   @Override
   public final UnNatural multiply (final UnNatural that) {
     if (ONE.equals(this)) { return that; }
     if (ONE.equals(that)) { return this; }
-    return make(Bei.multiply(_mag,that._mag)); }
+    return unsafe(Bei.multiply(_mag,that._mag)); }
 
   //--------------------------------------------------------------
   // Division
@@ -102,7 +112,7 @@ implements Ringlike<UnNatural> {
   useKnuthDivision (final UnNatural num,
                     final UnNatural den) {
     return Bei.useKnuthDivision(num._mag,den._mag); }
-  
+
   //--------------------------------------------------------------
   // Knuth algorithm
   //--------------------------------------------------------------

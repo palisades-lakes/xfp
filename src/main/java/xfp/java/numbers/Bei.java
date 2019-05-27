@@ -89,6 +89,7 @@ public final class Bei {
 
   //--------------------------------------------------------------
   // assuming m0 and m1 have no leading zeros
+
   public static final int compare (final int[] m0,
                                    final int[] m1) {
     final int n0 = m0.length;
@@ -100,7 +101,7 @@ public final class Bei {
       //final int m0i = m0[i] + 0x80000000;
       //final int m1i = m1[i] + 0x80000000;
       final long m0i = unsigned(m0[i]);
-    final long m1i = unsigned(m1[i]);
+      final long m1i = unsigned(m1[i]);
       if (m0i<m1i) { return -1; }
       if (m0i>m1i) { return 1; } }
     return 0; }
@@ -122,6 +123,10 @@ public final class Bei {
     if (m01<m11) { return -1; }
     if (m01>m11) { return 1; }
     return 0; }
+
+  public static final int compare (final long m0,
+                                   final int[] m1) {
+    return -compare(m1,m0); }
 
   // assuming m0 has no leading zeros
   public static final int compare (final int[] m0,
@@ -336,40 +341,38 @@ public final class Bei {
     return stripLeadingZeros(result); }
 
   //--------------------------------------------------------------
+  // only valid when m1 <= m0
 
-  //  public static final int[] subtract (final long m0,
-  //                                      final int[] m1) {
-  //    assert 0L <= m0;
-  //    //if (isZero(little)) { return valueOf(big); }
-  //    final int c = -compare(m1,m0);
-  //    assert 0 <= c;
-  //    if (0 == c) { return ZERO; }
-  //    final int highWord = (int) (m0 >>> 32);
-  //    if (highWord == 0) {
-  //      final int result[] = new int[1];
-  //      result[0] = (int) (m0 - unsigned(m1[0]));
-  //      return result; }
-  //    final int result[] = new int[2];
-  //    if (m1.length == 1) {
-  //      final long difference = loWord(m0) - unsigned(m1[0]);
-  //      result[1] = (int) difference;
-  //      // Subtract remainder of longer number while borrow
-  //      // propagates
-  //      final boolean borrow = ((difference >> 32) != 0);
-  //      if (borrow) { result[0] = highWord - 1; }
-  //      // Copy remainder of longer number
-  //      else { result[0] = highWord; }
-  //      return result; }
-  //    long difference = loWord(m0) - unsigned(m1[1]);
-  //    result[1] = (int) difference;
-  //    difference =
-  //      (unsigned(highWord) - unsigned(m1[0]))
-  //      + (difference >> 32);
-  //    result[0] = (int) difference;
-  //    return result; }
+  public static final int[] subtract (final long m0,
+                                      final int[] m1) {
+    assert 0L <= m0;
+    if (isZero(m1)) { return valueOf(m0); }
+    final int c = compare(m0,m1);
+    assert 0 <= c;
+    if (0 == c) { return ZERO; }
+    final int highWord = (int) hiWord(m0);
+    if (highWord == 0) {
+      final int result[] = new int[1];
+      result[0] = (int) (m0 - unsigned(m1[0]));
+      return result; }
+    final int result[] = new int[2];
+    if (m1.length == 1) {
+      final long difference = loWord(m0) - unsigned(m1[0]);
+      result[1] = (int) difference;
+      final boolean borrow = ((difference >> 32) != 0);
+      if (borrow) { result[0] = highWord - 1; }
+      // Copy remainder of longer number
+      else { result[0] = highWord; }
+      return result; }
+    long difference = loWord(m0) - unsigned(m1[1]);
+    result[1] = (int) difference;
+    difference =
+      unsigned(highWord)-unsigned(m1[0])+(difference >> 32);
+    result[0] = (int) difference;
+    return result; }
 
   //--------------------------------------------------------------
-  // only valid when little <= big
+  // only valid when m1 <= m0
 
   public static final int[] subtract (final int[] m0,
                                       final int[] m1) {
@@ -832,7 +835,7 @@ public final class Bei {
     else { db1_b1 = subtract(b1,db1); }
     final int cv = ca * cb;
     final int[] vm1 = multiply(da1_a1,db1_b1,true);
-    
+
     da1 = add(da1,a1);
     db1 = add(db1,b1);
     final int[] v1 = multiply(da1,db1,true);
@@ -854,12 +857,12 @@ public final class Bei {
     // handle missing sign of vm1
     if (0 < cv) { t2 = exactDivideBy3(subtract(v2,vm1)); }
     else { t2 = exactDivideBy3(add(v2,vm1));}
-    
+
     int[] tm1;
     // handle missing sign of vm1
     if (0 < cv) { tm1 = shiftRight(subtract(v1,vm1),1); }
     else { tm1 = shiftRight(add(v1,vm1),1); }
-     
+
     int[] t1 = subtract(v1,v0);
     t2 = shiftRight(subtract(t2,t1),1);
     t1 = subtract(subtract(t1,tm1),vinf);
@@ -1075,7 +1078,7 @@ public final class Bei {
   //--------------------------------------------------------------
   // division
   //--------------------------------------------------------------
-  
+
   public static final int BURNIKEL_ZIEGLER_THRESHOLD = 80;
   public static final int BURNIKEL_ZIEGLER_OFFSET = 40;
 
@@ -1088,7 +1091,7 @@ public final class Bei {
       (nd < BURNIKEL_ZIEGLER_THRESHOLD)
       || 
       ((nn-nd) < BURNIKEL_ZIEGLER_OFFSET); }
-  
+
   //--------------------------------------------------------------
   // Modular Arithmetic
   //--------------------------------------------------------------

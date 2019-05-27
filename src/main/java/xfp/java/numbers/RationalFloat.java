@@ -248,6 +248,24 @@ implements Ringlike<RationalFloat> {
     return valueOf(p,n,d0,e); }
 
   //--------------------------------------------------------------
+  // 0 leftShift
+  
+  private static final RationalFloat add (final boolean n0,
+                                          final UnNatural t0,
+                                          final int e,
+                                          final boolean n1,
+                                          final long t1) {
+    //assert t0.signum() >= 0;
+    if (n0 ^ n1) { // different signs
+      final int c01 = t0.compareTo(t1);
+      if (0 == c01) { return ZERO; }
+      // t1 > t0
+      if (0 > c01) {
+        return valueOf(n1, t0.subtractFrom(t1), e); }
+      // t0 > t1
+      return valueOf(n0,t0.subtract(t1),e); }
+    return valueOf(n0,t0.add(t1),e); }
+
   /** both denominators 1. 
    * significands adjusted to the same exponent.
    * 2nd arg starts as <code>double</code>.
@@ -284,7 +302,7 @@ implements Ringlike<RationalFloat> {
       // adjust significands to the same exponent
       final int de = e1 - e0;
       if (de >= 0) { return add(n0,t0,e0,n1,t1,de); }
-      return add(n0,t0.shiftLeft(-de),e1,n1,t1,0); } 
+      return add(n0,t0.shiftLeft(-de),e1,n1,t1); } 
 
     return add(
       nonNegative(),numerator(),denominator(),exponent(),
