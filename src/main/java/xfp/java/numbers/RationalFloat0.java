@@ -66,11 +66,21 @@ implements Ringlike<RationalFloat0> {
 
     if (n.isZero()) { return ZERO; }
 
+    if (UnNatural0.ONE.equals(d)) {
+      final int en = Numbers.loBit(n);
+      final UnNatural0 n0 = (en != 0) ? n.shiftRight(en) : n;
+      final int e0 = (e + en);
+      return new RationalFloat0(nonNegative,n0,UnNatural0.ONE,e0); }
+
     final int en = Numbers.loBit(n);
     final int ed = Numbers.loBit(d);
     final UnNatural0 n0 = (en != 0) ? n.shiftRight(en) : n;
     final UnNatural0 d0 = (ed != 0) ? d.shiftRight(ed) : d;
     final int e0 = (e + en) - ed;
+
+    // might have denominator 1 after shift
+    if (UnNatural0.ONE.equals(d0)) {
+      return new RationalFloat0(nonNegative,n0,UnNatural0.ONE,e0); }
 
     //    if (UnNatural0.ONE.equals(d0)) {
     //      return new RationalFloat(n0,d0,e0); }
