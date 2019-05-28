@@ -29,15 +29,14 @@ import xfp.java.prng.PRNG;
 
 //----------------------------------------------------------------
 /** <pre>
- * mvn -Dtest=xfp/java/test/algebra/AlgebraicStructureTests test
+ * mvn -q -Dtest=xfp/java/test/algebra/AlgebraicStructureTests test
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-23
+ * @version 2019-05-28
  */
 
 @SuppressWarnings("unchecked")
 public final class AlgebraicStructureTests {
-
   private static final int TRYS = 32;
   static final int SPACE_TRYS = 4;
 

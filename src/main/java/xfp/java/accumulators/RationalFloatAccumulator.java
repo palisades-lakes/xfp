@@ -6,7 +6,7 @@ import xfp.java.numbers.RationalFloat;
  * accumulator (for testing).
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-20
+ * @version 2019-05-28
  */
 public final class RationalFloatAccumulator
 

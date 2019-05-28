@@ -6,7 +6,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Objects;
 
-import xfp.java.Debug;
 import xfp.java.exceptions.Exceptions;
 
 /** Representing a rational number as a ratio of
@@ -18,7 +17,7 @@ import xfp.java.exceptions.Exceptions;
  * arithmetic on them faster.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-27
+ * @version 2019-05-28
  */
 
 public final class RationalFloat extends Number
@@ -329,9 +328,10 @@ implements Ringlike<RationalFloat> {
    * TODO: should it round instead? Or
    * should there be more explicit round, floor, ceil, etc.?
    */
-  public final UnNatural bigIntegerValue () {
-    return
-      numerator().divide(denominator()).shiftLeft(exponent()); }
+  public final BigInteger bigIntegerValue () {
+    final BigInteger x = 
+      numerator().divide(denominator()).bigIntegerValue(); 
+    return (nonNegative() ? x : x.negate()); }
 
   //  public final Rational rationalValue () {
   //    if (0 <= exponent()) {
@@ -467,22 +467,23 @@ implements Ringlike<RationalFloat> {
 
     final int e4 = e3 - Doubles.STORED_SIGNIFICAND_BITS;
 
-    Debug.println("num=" + n3.toString(0x10));
-    Debug.println("den=" + d3.toString(0x10));
+    //Debug.println("num=" + n3.toString(0x10));
+    //Debug.println("den=" + d3.toString(0x10));
 
     final UnNatural[] qr = 
       n3.divideAndRemainder(d3).toArray(new UnNatural[0]);
 
-    Debug.println("quo=" + qr[0].toString(0x10));
+    //(new Throwable()).printStackTrace();
+    //Debug.println("quo=" + qr[0].toString(0x10));
     //Debug.println("quo=" + Long.toHexString(qr[0].longValue()));
-    Debug.println("rem=" + qr[1].toString(0x10));
+    //Debug.println("rem=" + qr[1].toString(0x10));
 
     // round down or up?
     // want to know if remainder/denominator is more or less than 1/2
     // comparing 2*remainder to denominator
     // TODO: faster way to do this?
     final int c = qr[1].shiftLeft(1).compareTo(d3);
-    Debug.println("c=" + c);
+    //Debug.println("c=" + c);
     final long q4 = qr[0].longValue();
     final boolean even = (0x0L == (q4 & 0x1L));
     final boolean down = (c < 0) || ((c == 0) && even);
@@ -497,9 +498,9 @@ implements Ringlike<RationalFloat> {
       final boolean carry = (hiBit(q5) > Doubles.SIGNIFICAND_BITS);
       q = (carry ? q5 >>> 1 : q5);
       e = (sub ? (carry ? e4 : e4 - 1) : (carry ? e4 + 1 : e4)); }
-    Debug.println("neg=" + neg);
-    Debug.println("q=" + Long.toHexString(q));
-    Debug.println("e=" + e);
+    //Debug.println("neg=" + neg);
+    //Debug.println("q=" + Long.toHexString(q));
+    //Debug.println("e=" + e);
     return Doubles.makeDouble(neg,e,q); }
 
   //--------------------------------------------------------------

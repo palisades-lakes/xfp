@@ -33,7 +33,7 @@ import xfp.java.Debug;
  * no instance state or methods.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-17
+ * @version 2019-05-28
  */
 
 @SuppressWarnings("unchecked")
@@ -199,13 +199,15 @@ public final class Laws {
           eq.test(identity,operation.apply(a,ainv))
           &&
           eq.test(identity,operation.apply(ainv,a));
-//        if (! result) {
-//          Debug.println("a=" + a);
-//          Debug.println("ainv=" + ainv);
-//          Debug.println("identity=" + identity);
-//          Debug.println("(op a ainv)=" + operation.apply(a,ainv));
-//          Debug.println("(op ainv a)=" + operation.apply(ainv,a));
-//        }
+        if (! result) {
+          System.out.println("op=" + operation);
+          System.out.println("invert=" + inverse);
+          System.out.println("a=" + a);
+          System.out.println("ainv=" + ainv);
+          System.out.println("identity=" + identity);
+          System.out.println("(op a ainv)=" + operation.apply(a,ainv));
+          System.out.println("(op ainv a)=" + operation.apply(ainv,a));
+        }
         return result; } }
     return new Inverse(); }
 
@@ -318,12 +320,23 @@ public final class Laws {
         final Object c = generator.get();
         assert elements.contains(c);
         final BiPredicate equal = elements.equivalence();
-        return
-          equal.test(
-            multiply.apply(a,add.apply(b,c)),
-            add.apply(
-              multiply.apply(a,b),
-              multiply.apply(a,c))); } }
+        final Object left = multiply.apply(a,add.apply(b,c));
+        final Object right = add.apply(
+          multiply.apply(a,b),
+          multiply.apply(a,c));
+        final boolean pass = equal.test(left,right);
+        if (! pass) {
+          if (! pass) {
+            System.out.println();
+            System.out.println("mul=" + multiply);
+            System.out.println("add=" + add);
+            System.out.println("a=" + a);
+            System.out.println("b=" + b);
+            System.out.println("c=" + c);
+            System.out.println("a*(b+c)    =" + left); 
+            System.out.println("(a*b)+(a*c)=" + right);}
+    } 
+        return pass; } }
     return new Distributive(); }
 
   //--------------------------------------------------------------

@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 
 import org.junit.jupiter.api.Test;
 
+import xfp.java.numbers.BigFloat;
 import xfp.java.numbers.Doubles;
 import xfp.java.numbers.Floats;
 import xfp.java.numbers.Rational;
@@ -21,7 +22,7 @@ import xfp.java.prng.PRNG;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-01-14
+ * @version 2019-05-28
  */
 
 public final class RoundtripTests {
@@ -98,10 +99,10 @@ public final class RoundtripTests {
     return true; }
 
   //--------------------------------------------------------------
-  /** Rational should be able to represent any double exactly.
+  /** RationalFloat should be able to represent any double exactly.
    */
 
-  private static final boolean double2RBF2Double () {
+  private static final boolean double2RF2Double () {
     final Generator g =
       finiteDoubles();
     //subnormalDoubles();
@@ -111,7 +112,7 @@ public final class RoundtripTests {
       final double xf = f.doubleValue();
       if (x != xf) {
         System.out.println("\n\n" +
-          "Rational.doubleValue:" + Doubles.isNormal(x) + "\n"
+          "RationalFloat.doubleValue:" + Doubles.isNormal(x) + "\n"
           + "exponent: " + Doubles.exponent(x) + "\n"
           + "significand: "
           + Long.toHexString(Doubles.significand(x)) + "\nn"
@@ -126,6 +127,31 @@ public final class RoundtripTests {
     return true; }
 
   //--------------------------------------------------------------
+  /** BigFloat should be able to represent any double exactly.
+   */
+
+  private static final boolean double2BF2Double () {
+    final Generator g =
+      finiteDoubles();
+    //subnormalDoubles();
+    for (int i=0;i<TRYS;i++) {
+      final double x = g.nextDouble();
+      final BigFloat f = BigFloat.valueOf(x);
+      final double xf = f.doubleValue();
+      if (x != xf) {
+        System.out.println("\n\n" +
+          "BigFloat.doubleValue:" + Doubles.isNormal(x) + "\n"
+          + "exponent: " + Doubles.exponent(x) + "\n"
+          + "significand: "
+          + Long.toHexString(Doubles.significand(x)) + "\nn"
+          + x + " :x\n" + xf + " : xf\n\n" +
+          Double.toHexString(x) + " :x\n" +
+          Double.toHexString(xf) + " :xf\n\n" +
+          f.toString(0x10));
+        return false; } }
+    return true; }
+
+  //--------------------------------------------------------------
   /** check for round trip consistency:
    * double -&gt; rational -&gt; double
    * should be an identity transform.
@@ -135,7 +161,8 @@ public final class RoundtripTests {
   public final void doubleRoundTripTest () {
 
     assertTrue(double2Rational2Double());
-    assertTrue(double2RBF2Double());
+    assertTrue(double2RF2Double());
+    assertTrue(double2BF2Double());
     assertTrue(double2BigDecimal2Double());
   }
   //--------------------------------------------------------------

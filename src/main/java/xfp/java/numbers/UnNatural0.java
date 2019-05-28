@@ -1943,9 +1943,6 @@ implements Ringlike<UnNatural0> {
       byteArray[i] = (byte) nextInt; }
     return byteArray; }
 
-  public final BigInteger bigIntegerValue () {
-    return new BigInteger(toByteArray()); }
-
   @Override
   public final int intValue () { 
     assert 1 >= _mag.length;
@@ -1960,6 +1957,9 @@ implements Ringlike<UnNatural0> {
     for (int i = 1; i >= 0; i--) {
       result = (result << 32) + unsigned(getInt(i)); }
     return result; }
+
+  public final BigInteger bigIntegerValue () {
+    return new BigInteger(toByteArray()); }
 
   //--------------------------------------------------------------
 

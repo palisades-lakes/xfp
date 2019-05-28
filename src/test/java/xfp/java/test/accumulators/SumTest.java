@@ -14,7 +14,7 @@ import xfp.java.test.Common;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-18
+ * @version 2019-05-28
  */
 
 public final class SumTest {
@@ -24,9 +24,9 @@ public final class SumTest {
   @SuppressWarnings("static-method")
   @Test
   public final void overflowSum () {
-    Debug.DEBUG=false;
-    Debug.println();
-    Debug.println("overflow");
+//    Debug.DEBUG=true;
+//    Debug.println();
+//    Debug.println("overflow");
     Common.overflowTests(
       Common.makeAccumulators(Common.accumulators())); 
     Debug.DEBUG=false;}

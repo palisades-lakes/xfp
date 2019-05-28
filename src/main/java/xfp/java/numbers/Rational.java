@@ -6,13 +6,12 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Objects;
 
-import xfp.java.Debug;
 import xfp.java.exceptions.Exceptions;
 
 /** Ratios of {@link UnNatural}.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-27
+ * @version 2019-05-28
  */
 
 public final class Rational extends Number
@@ -26,26 +25,25 @@ implements Ringlike<Rational> {
 
   private final boolean _nonNegative;
   public final boolean nonNegative () { return _nonNegative; }
-
   private final UnNatural _numerator;
   public final UnNatural numerator () { return _numerator; }
-
   private final UnNatural _denominator;
   public final UnNatural denominator () { return _denominator; }
 
   //--------------------------------------------------------------
 
-  public final boolean isZero () { return numerator().isZero(); }
+  private static final boolean isZero (final UnNatural i) {
+    return i.isZero(); }
 
-  //  private static final boolean isOne (final UnNatural i) {
-  //    return UnNatural.ONE.equals(i); }
+  public final boolean isZero () { return isZero(numerator()); }
 
-  private static final boolean isOne (final UnNatural n,
+  private static final boolean isOne (final boolean nonNegative,
+                                      final UnNatural n,
                                       final UnNatural d) {
-    return n.equals(d); }
+    return nonNegative && n.equals(d); }
 
   public final boolean isOne () {
-    return isOne(numerator(),denominator()); }
+    return isOne(nonNegative(),numerator(),denominator()); }
 
   //--------------------------------------------------------------
 
@@ -55,30 +53,10 @@ implements Ringlike<Rational> {
     return valueOf(! nonNegative(), numerator(), denominator()); }
 
   public final Rational reciprocal () {
-    assert !numerator().isZero();
+    assert !isZero(numerator());
     return valueOf(nonNegative(),denominator(),numerator()); }
 
   //--------------------------------------------------------------
-
-  private static final Rational add (final boolean p0,
-                                     final UnNatural n0,
-                                     final boolean p1,
-                                     final UnNatural n1) {
-    final boolean p;
-    final UnNatural n;
-    if (p0) {
-      if (p1) { n = n0.add(n1); p = true; }
-      else {
-        final int c = n0.compareTo(n1);
-        if (0 <= c) { n = n0.subtract(n1); p = true; }
-        else { n = n1.subtract(n0); p = false; } } }
-    else { 
-      if (p1) {
-        final int c = n1.compareTo(n0);
-        if (0 <= c) { n = n1.subtract(n0); p = true; }
-        else { n = n0.subtract(n1); p = false; } }
-      else { n = n0.add(n1); p = false; } } 
-    return valueOf(p,n); }
 
   private static final Rational add (final boolean p0,
                                      final UnNatural n0,
@@ -88,24 +66,22 @@ implements Ringlike<Rational> {
                                      final UnNatural d1) {
     final UnNatural n0d1 = n0.multiply(d1);
     final UnNatural n1d0 = n1.multiply(d0);
-
-    final UnNatural a = n0d1;
-    final UnNatural b = n1d0;
-
     final boolean p;
     final UnNatural n;
     if (p0) {
-      if (p1) { n = a.add(b); p = true; }
+      if (p1) { n = n0d1.add(n1d0); p = true; }
       else {
-        final int c = a.compareTo(b);
-        if (0 <= c) { n = a.subtract(b); p = true; }
-        else { n = b.subtract(a); p = false; } } }
+        final int c = n0d1.compareTo(n1d0);
+        if (0 == c) { return ZERO; }
+        if (0 < c) { n = n0d1.subtract(n1d0); p = true; }
+        else { n = n1d0.subtract(n0d1); p = false; } } }
     else { 
       if (p1) {
-        final int c = b.compareTo(a);
-        if (0 <= c) { n = b.subtract(a); p = true; }
-        else { n = a.subtract(b); p = false; } }
-      else { n = a.add(b); p = false; } } 
+        final int c = n1d0.compareTo(n0d1);
+        if (0 == c) { return ZERO; }
+        if (0 < c) { n = n1d0.subtract(n0d1); p = true; }
+        else { n = n0d1.subtract(n1d0); p = false; } }
+      else { n = n0d1.add(n1d0); p = false; } } 
     final UnNatural d = d0.multiply(d1);
     return valueOf(p,n,d); }
 
@@ -122,101 +98,9 @@ implements Ringlike<Rational> {
 
   //--------------------------------------------------------------
 
-  private static final Rational add (final boolean p0,
-                                     final UnNatural n0,
-                                     final boolean p1,
-                                     final long n1) {
-    Debug.println("p0=" + p0);
-    Debug.println("n0=" + n0);
-    Debug.println("p1=" + p1);
-    Debug.println("n1=" + n1);
-        if (p0) {
-      if (p1) { 
-        return valueOf(true,n0.add(n1)); }
-      final int c = n0.compareTo(n1);
-      if (0 == c) { return ZERO; }
-      if (0 < c) { return valueOf(true,n0.subtract(n1)); }
-      return valueOf(false,n0.subtractFrom(n1)); }
-    if (p1) { //p0==false
-      final int c = -n0.compareTo(n1);
-      if (0 == c) { return ZERO; }
-      if (0 < c) { return valueOf(true,n0.subtractFrom(n1)); }
-      return valueOf(false,n0.subtract(n1)); }
-    return valueOf(false,n0.add(n1)); }
-
-  // common denominator, 0 exponent in double
-
-  private static final Rational add (final boolean p0,
-                                     final UnNatural n0,
-                                     final UnNatural d0,
-                                     final boolean p1,
-                                     final UnNatural n1) {
-    final boolean p;
-    final UnNatural n;
-    if (p0) {
-      if (p1) { n = n0.add(n1); p = true; }
-      else {
-        final int c = n0.compareTo(n1);
-        if (0 <= c) { n = n0.subtract(n1); p = true; }
-        else { n = n1.subtract(n0); p = false; } } }
-    else { 
-      if (p1) {
-        final int c = n1.compareTo(n0);
-        if (0 <= c) { n = n1.subtract(n0); p = true; }
-        else { n = n0.subtract(n1); p = false; } }
-      else { n = n0.add(n1); p = false; } } 
-
-    return valueOf(p,n,d0); }
-
-  private static final Rational add (final boolean p0,
-                                     final UnNatural n0,
-                                     final UnNatural d0,
-                                     final boolean p1,
-                                     final long n1) {
-    if (UnNatural.ONE.equals(d0)) { return add(p0,n0,p1,n1); }
-    return add(p0,n0,d0,p1,d0.multiply(n1)); }
-
-  private static final Rational add (final boolean p0,
-                                     final UnNatural n0,
-                                     final UnNatural d0,
-                                     final boolean p1,
-                                     final long n1,
-                                     final int e1) {
-    Debug.println("p0=" + p0);
-    Debug.println("n0=" + n0);
-    Debug.println("d0=" + d0);
-    Debug.println("p1=" + p1);
-    Debug.println("n1=" + Long.toHexString(n1));
-    Debug.println("e1=" + e1);
-    if (0 == e1) { 
-      if (UnNatural.ONE.equals(d0)) { return add(p0,n0,p1,n1); }
-      return add(p0,n0,d0,p1,n1); }
-    if (0 < e1) { 
-      if (UnNatural.ONE.equals(d0)) {
-        return add(p0,n0,p1,UnNatural.valueOf(n1,e1)); }
-      return add(p0,n0,d0,p1,d0.multiply(n1,e1)); }
-    return add(p0,n0.shiftLeft(-e1),d0,p1,d0.multiply(n1)); }
-
-  private final Rational add (final boolean p1,
-                              final long t1,
-                              final int e1) {
-    if (0 == t1) { return this; }
-    
-    // TODO: tests fail without this, but it shouldn't be necessary...
-    final int shift = Numbers.loBit(t1);
-    final long t2 = (t1 >>> shift);
-    final int e2 = e1 + shift;
-    
-    return add(
-      nonNegative(),numerator(),denominator(),
-      p1,t2,e2); }
-
   public final Rational add (final double z) {
     assert Double.isFinite(z);
-    return add(
-      Doubles.nonNegative(z),
-      Doubles.significand(z),
-      Doubles.exponent(z));}
+    return add(valueOf(z)); }
 
   //--------------------------------------------------------------
 
@@ -224,10 +108,7 @@ implements Ringlike<Rational> {
   public final Rational subtract (final Rational q) {
     if (isZero()) { return q.negate(); }
     if (q.isZero()) { return this; }
-    return add(
-      ! q.nonNegative(),
-      q.numerator(),
-      q.denominator()); }
+    return add(q.negate()); }
 
   @Override
   public final Rational abs () {
@@ -247,10 +128,10 @@ implements Ringlike<Rational> {
 
   @Override
   public final Rational multiply (final Rational q) {
-    //    if (isZero() ) { return ZERO; }
-    //    if (q.isZero()) { return ZERO; }
-    //    if (q.isOne()) { return this; }
-    //    if (isOne()) { return q; }
+    if (isZero() ) { return ZERO; }
+    if (q.isZero()) { return ZERO; }
+    if (q.isOne()) { return this; }
+    if (isOne()) { return q; }
     return multiply(
       q.nonNegative(),q.numerator(),q.denominator()); }
 
@@ -258,17 +139,8 @@ implements Ringlike<Rational> {
 
   public final Rational add2 (final double z) {
     assert Double.isFinite(z);
-    final UnNatural n1 = 
-      UnNatural.valueOf(Doubles.significand(z));
-    // TODO: use optimized square
-    final UnNatural n2 = 
-      n1.multiply(n1).shiftLeft(2*Doubles.exponent(z));
-    return add(
-      nonNegative(),
-      numerator(),
-      denominator(),
-      true,
-      n2); }
+    final Rational q = valueOf(z);
+    return add(q.multiply(q)); }
 
   //--------------------------------------------------------------
 
@@ -276,57 +148,41 @@ implements Ringlike<Rational> {
                                     final double z1) {
     assert Double.isFinite(z0);
     assert Double.isFinite(z1);
-    final boolean p = 
-      ! (Doubles.nonNegative(z0) ^ Doubles.nonNegative(z1));
-    // TODO: optimize long*long -> UnNatural?
-    final UnNatural n =
-      UnNatural.valueOf(Doubles.significand(z0))
-      .multiply(UnNatural.valueOf(Doubles.significand(z1)))
-      .shiftLeft(Doubles.exponent(z0) + Doubles.exponent(z1));
-    return add(
-      nonNegative(),
-      numerator(),
-      denominator(),
-      p,
-      n); }
+    return add(valueOf(z0).multiply(valueOf(z1))); }
 
   //--------------------------------------------------------------
   // Number methods
   //--------------------------------------------------------------
-  /** Returns the low order bits of the truncated quotient.
-   *
-   * TODO: should it really truncate or round instead? Or
+  /** TODO: should it truncate or round? Or
    * should there be more explicit round, floor, ceil, etc.?
    */
   @Override
   public final int intValue () {
     return bigIntegerValue().intValue(); }
 
-  /** Returns the low order bits of the truncated quotient.
-   *
-   * TODO: should it really truncate or round instead? Or
+  /**  TODO: should it truncate or round? Or
    * should there be more explicit round, floor, ceil, etc.?
    */
   @Override
   public final long longValue () {
     return bigIntegerValue().longValue(); }
 
-  /** Returns the truncated quotient.
-   *
-   * TODO: should it round instead? Or
-   * should there be more explicit round, floor, ceil, etc.?
-   */
-  public final UnNatural bigIntegerValue () {
-    return numerator().divide(denominator()); }
+ /** Returns the truncated quotient.
+ *
+ * TODO: should it round instead? Or
+ * should there be more explicit round, floor, ceil, etc.?
+ */
+public final BigInteger bigIntegerValue () {
+  final BigInteger x = 
+    numerator().divide(denominator()).bigIntegerValue(); 
+  return (nonNegative() ? x : x.negate()); }
 
   //--------------------------------------------------------------
-  /** Half-even rounding from {@link UnNatural} ratio to
-   * <code>float</code>.
+  /** Half-even rounding to <code>float</code>.
    * @param n numerator
    * @param d positive denominator
    * @return closest half-even rounded <code>float</code> to n / d.
    */
-
 
   @Override
   public final float floatValue () {
@@ -384,8 +240,7 @@ implements Ringlike<Rational> {
     return Floats.makeFloat(neg,e,q); }
 
   //--------------------------------------------------------------
-  /** Half-even rounding from {@link UnNatural} ratio to
-   * <code>double</code>.
+  /** Half-even rounding to <code>double</code>.
    * @param n numerator
    * @param d positive denominator
    * @return closest half-even rounded <code>double</code> to n / d.
@@ -414,9 +269,7 @@ implements Ringlike<Rational> {
 
     // check for out of range
     if (e2 > Double.MAX_EXPONENT) {
-      return (neg 
-        ? Double.NEGATIVE_INFINITY 
-          : Double.POSITIVE_INFINITY); }
+      return neg ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY; }
     if (e2 < Doubles.MINIMUM_SUBNORMAL_EXPONENT) {
       return (neg ? -0.0 : 0.0); }
 
@@ -469,6 +322,7 @@ implements Ringlike<Rational> {
   public final boolean equals (final Rational q) {
     if (this == q) { return true; }
     if (null == q) { return false; }
+    if (nonNegative() != q.nonNegative()) { return false; }
     final UnNatural n0 = numerator();
     final UnNatural d0 = denominator();
     final UnNatural n1 = q.numerator();
@@ -482,12 +336,15 @@ implements Ringlike<Rational> {
 
   @Override
   public int hashCode () {
-    return Objects.hash(numerator(),denominator()); }
+    return Objects.hash(
+      Boolean.valueOf(nonNegative()),numerator(),denominator()); }
 
   @Override
   public final String toString () {
     return
-      "(" + numerator().toString(0x10)
+      (nonNegative() ? "" : "-")
+      + "(" 
+      + numerator().toString(0x10)
       + " / " + denominator().toString(0x10)
       + ")"; }
 
@@ -495,15 +352,10 @@ implements Ringlike<Rational> {
   // construction
   //--------------------------------------------------------------
 
-  private Rational
-  (final boolean nonNegative,
-   final UnNatural numerator,
-   final UnNatural denominator) {
+  private Rational (final boolean nonNegative,
+                    final UnNatural numerator,
+                    final UnNatural denominator) {
     //    super();
-    //    assert 1 == denominator.signum() :
-    //      "\nn= " + numerator.toString(0x10)
-    //      + "\nd= " + denominator.toString(0x10)
-    //      + "\ne= " + exponent;
     _nonNegative = nonNegative;
     _numerator = numerator;
     _denominator = denominator; }
@@ -514,15 +366,13 @@ implements Ringlike<Rational> {
                                          final UnNatural n,
                                          final UnNatural d) {
     if (n == UnNatural.ZERO) { return ZERO; }
-
     // TODO: any value in this test?
     if ((n == UnNatural.ONE) || (d == UnNatural.ONE)) {
       return new Rational(nonNegative,n,d); }
-
     final UnNatural gcd = n.gcd(d);
     if (gcd.compareTo(UnNatural.ONE) > 0) {
-      return new Rational(nonNegative,n.divide(gcd),d.divide(gcd)); }
-
+      return 
+        new Rational(nonNegative,n.divide(gcd),d.divide(gcd)); }
     return new Rational(nonNegative,n,d); }
 
   //--------------------------------------------------------------
@@ -537,6 +387,7 @@ implements Ringlike<Rational> {
     return reduced(nonNegative,n,UnNatural.ONE); }
 
   // TODO: compute gcd and reduce longs
+
   public static final Rational valueOf (final long n,
                                         final long d) {
     assert 0L != d;
@@ -564,7 +415,7 @@ implements Ringlike<Rational> {
                                          final long t,
                                          final int e)  {
     if (0L == t) { return ZERO; }
-    assert 0L <= t;
+    assert 0L < t;
     final UnNatural n0 = UnNatural.valueOf(t);
     if (0 == e) {  return valueOf(nonNegative,n0); }
     if (0 < e) { return valueOf(nonNegative,n0.shiftLeft(e)); }
@@ -582,7 +433,7 @@ implements Ringlike<Rational> {
                                          final int e,
                                          final int t)  {
     if (0 == t) { return ZERO; }
-    assert 0 <= t;
+    assert 0 < t;
     final UnNatural n0 = UnNatural.valueOf(t);
     if (0 == e) {  return valueOf(nonNegative,n0); }
     if (0 < e) { return valueOf(nonNegative,n0.shiftLeft(e)); }
@@ -668,8 +519,8 @@ implements Ringlike<Rational> {
     if (x instanceof Integer) { return valueOf((Integer) x); }
     if (x instanceof Long) { return valueOf((Long) x); }
     if (x instanceof UnNatural) { return valueOf((UnNatural) x); }
-    if (x instanceof BigDecimal) { return valueOf((BigDecimal) x); }
     if (x instanceof BigInteger) { return valueOf((BigInteger) x); }
+    if (x instanceof BigDecimal) { return valueOf((BigDecimal) x); }
     throw Exceptions.unsupportedOperation(
       Rational.class,"valueOf",x); }
 

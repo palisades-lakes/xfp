@@ -18,7 +18,7 @@ import xfp.java.exceptions.Exceptions;
  * arithmetic on them faster.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-26
+ * @version 2019-05-28
  */
 
 public final class RationalFloat0 extends Number
@@ -285,9 +285,10 @@ implements Ringlike<RationalFloat0> {
    * TODO: should it round instead? Or
    * should there be more explicit round, floor, ceil, etc.?
    */
-  public final UnNatural0 bigIntegerValue () {
-    return
-      numerator().divide(denominator()).shiftLeft(exponent()); }
+  public final BigInteger bigIntegerValue () {
+    final BigInteger x = 
+      numerator().divide(denominator()).bigIntegerValue(); 
+    return (nonNegative() ? x : x.negate()); }
 
   //  public final Rational rationalValue () {
   //    if (0 <= exponent()) {

@@ -11,7 +11,7 @@ import xfp.java.exceptions.Exceptions;
 /** Ratios of {@link BigInteger}.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-27
+ * @version 2019-05-28
  */
 
 public final class RationalBI extends Number
@@ -38,35 +38,12 @@ implements Ringlike<RationalBI> {
 
   public final boolean isZero () { return isZero(numerator()); }
 
-  //  private static final boolean isOne (final BigInteger i) {
-  //    return BigInteger.ONE.equals(i); }
-
   private static final boolean isOne (final BigInteger n,
                                       final BigInteger d) {
     return n.equals(d); }
 
   public final boolean isOne () {
     return isOne(numerator(),denominator()); }
-
-  //--------------------------------------------------------------
-
-  private static final RationalBI reduced (final BigInteger n,
-                                           final BigInteger d) {
-    assert 0 != d.signum();
-
-    if (d.signum() < 0) { return reduced(n.negate(),d.negate()); }
-
-    if (n == BigInteger.ZERO) { return ZERO; }
-
-    // TODO: any value in this test?
-    if ((n == BigInteger.ONE) || (d == BigInteger.ONE)) {
-      return new RationalBI(n,d); }
-
-    final BigInteger gcd = n.gcd(d);
-    if (gcd.compareTo(BigInteger.ONE) > 0) {
-      return new RationalBI(n.divide(gcd),d.divide(gcd)); }
-
-    return new RationalBI(n,d); }
 
   //--------------------------------------------------------------
 
@@ -81,11 +58,17 @@ implements Ringlike<RationalBI> {
 
   //--------------------------------------------------------------
 
+  private static final RationalBI add (final BigInteger n0,
+                                       final BigInteger d0,
+                                       final BigInteger n1,
+                                       final BigInteger d1) {
+    return valueOf(
+      n0.multiply(d1).add(n1.multiply(d0)),
+      d0.multiply(d1)); }
+
   private final RationalBI add (final BigInteger n,
                                 final BigInteger d) {
-    return valueOf(
-      numerator().multiply(d).add(n.multiply(denominator())),
-      denominator().multiply(d)); }
+    return add(numerator(),denominator(),n,d); }
 
   @Override
   public final RationalBI add (final RationalBI q) {
@@ -120,7 +103,6 @@ implements Ringlike<RationalBI> {
 
   @Override
   public final RationalBI abs () {
-    // TODO: direct signum
     final int s = numerator().signum();
     if (0<=s) { return this; }
     return negate(); }
@@ -185,7 +167,6 @@ implements Ringlike<RationalBI> {
   //--------------------------------------------------------------
   // Number methods
   //--------------------------------------------------------------
-
   /** Returns the low order bits of the truncated quotient.
    *
    * TODO: should it really truncate or round instead? Or
@@ -213,19 +194,16 @@ implements Ringlike<RationalBI> {
     return numerator().divide(denominator()); }
 
   //--------------------------------------------------------------
-  /** Half-even rounding from {@link BigInteger} ratio to
-   * <code>float</code>.
+  /** Half-even rounding to <code>float</code>.
    * @param n numerator
    * @param d positive denominator
    * @return closest half-even rounded <code>float</code> to n / d.
    */
 
-
   @Override
   public final float floatValue () {
-    final int s = numerator().signum();
-    if (s == 0) { return 0.0F; }
-    final boolean neg = (s < 0);
+    if (isZero()) { return 0.0F; }
+    final boolean neg = isNegative(numerator());
     final BigInteger n0 = (neg ? numerator().negate() : numerator());
     final BigInteger d0 = denominator();
 
@@ -255,7 +233,8 @@ implements Ringlike<RationalBI> {
     final BigInteger d3 = sub ? d2.shiftLeft(e3-e2) : d2;
     final BigInteger n3 = n1.shiftLeft(Floats.STORED_SIGNIFICAND_BITS);
     final int e4 = e3 - Floats.STORED_SIGNIFICAND_BITS;
-    final BigInteger[] qr = n3.divideAndRemainder(d3);
+    final BigInteger[] qr = 
+      n3.divideAndRemainder(d3);
 
     // round down or up? <= implies half-even (?)
     final int c = qr[1].shiftLeft(1).compareTo(d3);
@@ -277,8 +256,7 @@ implements Ringlike<RationalBI> {
     return Floats.makeFloat(neg,e,q); }
 
   //--------------------------------------------------------------
-  /** Half-even rounding from {@link BigInteger} ratio to
-   * <code>double</code>.
+  /** Half-even rounding to <code>double</code>.
    * @param n numerator
    * @param d positive denominator
    * @return closest half-even rounded <code>double</code> to n / d.
@@ -286,9 +264,8 @@ implements Ringlike<RationalBI> {
 
   @Override
   public final double doubleValue () {
-    final int s = numerator().signum();
-    if (s == 0) { return 0.0; }
-    final boolean neg = (s < 0);
+    if (isZero()) { return 0.0; }
+    final boolean neg = isNegative(numerator());
     final BigInteger n0 = (neg ? numerator().negate() : numerator());
     final BigInteger d0 = denominator();
 
@@ -394,6 +371,26 @@ implements Ringlike<RationalBI> {
 
   //--------------------------------------------------------------
 
+  private static final RationalBI reduced (final BigInteger n,
+                                           final BigInteger d) {
+    assert 0 != d.signum();
+
+    if (d.signum() < 0) { return reduced(n.negate(),d.negate()); }
+
+    if (n == BigInteger.ZERO) { return ZERO; }
+
+    // TODO: any value in this test?
+    if ((n == BigInteger.ONE) || (d == BigInteger.ONE)) {
+      return new RationalBI(n,d); }
+
+    final BigInteger gcd = n.gcd(d);
+    if (gcd.compareTo(BigInteger.ONE) > 0) {
+      return new RationalBI(n.divide(gcd),d.divide(gcd)); }
+
+    return new RationalBI(n,d); }
+
+  //--------------------------------------------------------------
+  
   public static final RationalBI valueOf (final BigInteger n,
                                           final BigInteger d) {
     assert 0 != d.signum();
@@ -417,9 +414,10 @@ implements Ringlike<RationalBI> {
   //--------------------------------------------------------------
 
   private static final RationalBI valueOf (final boolean nonNegative,
-                                           final int e,
-                                           final long t)  {
+                                           final long t,
+                                           final int e)  {
     if (0L == t) { return ZERO; }
+    assert 0L < t;
     final BigInteger n0 = BigInteger.valueOf(t);
     final BigInteger n1 = nonNegative ? n0 : n0.negate();
     if (0 == e) {  return valueOf(n1); }
@@ -429,8 +427,8 @@ implements Ringlike<RationalBI> {
   public static final RationalBI valueOf (final double x)  {
     return valueOf(
       Doubles.nonNegative(x),
-      Doubles.exponent(x),
-      Doubles.significand(x)); }
+      Doubles.significand(x),
+      Doubles.exponent(x)); }
 
   //--------------------------------------------------------------
 
@@ -438,7 +436,8 @@ implements Ringlike<RationalBI> {
                                            final int e,
                                            final int t)  {
     if (0 == t) { return ZERO; }
-    final BigInteger n0 = BigInteger.valueOf(t);
+    assert 0 < t;
+        final BigInteger n0 = BigInteger.valueOf(t);
     final BigInteger n1 = nonNegative ? n0 : n0.negate();
     if (0 == e) {  return valueOf(n1); }
     if (0 < e) { return valueOf(n1.shiftLeft(e)); }

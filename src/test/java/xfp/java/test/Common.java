@@ -17,6 +17,7 @@ import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 
 import xfp.java.Classes;
+import xfp.java.Debug;
 import xfp.java.accumulators.Accumulator;
 import xfp.java.function.FloatFunction;
 import xfp.java.function.ToFloatFunction;
@@ -30,7 +31,7 @@ import xfp.java.prng.PRNG;
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-27
+ * @version 2019-05-28
  */
 @SuppressWarnings("unchecked")
 public final class Common {
@@ -44,7 +45,7 @@ public final class Common {
       Arrays.asList(
         new String[]
           { "xfp.java.accumulators.DoubleAccumulator",
-            //"xfp.java.accumulators.KahanAccumulator",
+            "xfp.java.accumulators.KahanAccumulator",
             "xfp.java.accumulators.DistilledAccumulator",
             "xfp.java.accumulators.ZhuHayesAccumulator",
             "xfp.java.accumulators.BigFloatAccumulator",
@@ -891,7 +892,7 @@ public final class Common {
   public static final void
   overflowTest (final Accumulator a) {
 
-    final double s =
+    final double ss =
       a.clear()
       .addAll(
         new double[]
@@ -900,6 +901,19 @@ public final class Common {
             1.0,
             -100.0,
             -100.0})
+      .doubleValue();
+    if (a.noOverflow()) {
+      Assertions.assertEquals(1.0,ss,Classes.className(a)); }
+
+    final double s =
+      a.clear()
+      .addAll(
+        new double[]
+          { 1.0e-1,
+            1.0e-1,
+            1.0,
+            -1.0e-1,
+            -1.0e-1})
       .doubleValue();
     if (a.noOverflow()) {
       Assertions.assertEquals(1.0,s,Classes.className(a)); }
@@ -1033,21 +1047,58 @@ public final class Common {
   //--------------------------------------------------------------
 
   private static final void
-  sumTest (final Generator g,
+  addTest (final Generator g,
            final List<Accumulator> accumulators,
            final Accumulator exact) {
+    Debug.DEBUG = false;
     Assertions.assertTrue(exact.isExact());
     final double[] x = (double[]) g.next();
+    Debug.println(Classes.className(exact));
+    Debug.println(exact.toString());
+    //Debug.println(g.name());
+    for (final Accumulator a : accumulators) {
+      Accumulator e = exact.clear();
+      Accumulator p = a.clear();
+      for (final double xi : x) {
+        e = e.add(xi);
+        p = p.add(xi);
+        final double truth = e.doubleValue();
+        final double pred = p.doubleValue();
+        Debug.println();
+        Debug.println("xi=" + Double.toHexString(xi));
+        Debug.println(Classes.className(e));
+        Debug.println(Double.toHexString(truth));
+        Debug.println(Classes.className(p));
+        Debug.println(Double.toHexString(pred));
+        if (a.isExact()) {
+          Assertions.assertEquals(truth,pred,
+            "\nexact: " + Classes.className(exact)
+            + " = " + Double.toHexString(truth)
+            + "\n= " + exact.value()
+            + "\npred: " + Classes.className(a)
+            + " = " + Double.toHexString(pred)
+            + "\n= " + a.value()
+            + "\n"); } } }
+    Debug.DEBUG = false; }
+
+  private static final void
+  addAllTest (final Generator g,
+              final List<Accumulator> accumulators,
+              final Accumulator exact) {
+    Debug.DEBUG = false;
+    Assertions.assertTrue(exact.isExact());
+    final double[] x = (double[]) g.next();
+    //final Accumulator efinal = exact.clear().addAll(x);
     final Accumulator efinal = exact.clear().addAll(x);
-    //Debug.println(Classes.className(exact));
-    //Debug.println(exact.toString());
+    Debug.println(Classes.className(exact));
+    Debug.println(exact.toString());
     final double truth = efinal.doubleValue();
     //Debug.println(g.name());
     for (final Accumulator a : accumulators) {
       //final long t0 = System.nanoTime();
       final Accumulator pfinal = a.clear().addAll(x);
-      //Debug.println(Classes.className(a));
-      //Debug.println(pfinal.value().toString());
+      Debug.println(Classes.className(a));
+      Debug.println(pfinal.value().toString());
       final double pred = pfinal.doubleValue();
       //final long t1 = (System.nanoTime()-t0);
       if (a.isExact()) {
@@ -1061,12 +1112,13 @@ public final class Common {
           + "\n"); }
       //final double l1d = Math.abs(truth-pred);
       //final double l1n = Math.max(1.0,Math.abs(truth));
-      //Debug.println(
-      //  String.format("%32s %8.2fms ",Classes.className(a),
-      //    Double.valueOf(t1*1.0e-6))
-      //  + toHexString(l1d)
-      //  + " / " + toHexString(l1n) + " = "
-      //  + String.format("%8.2e",Double.valueOf(l1d/l1n)));
+      //      Debug.println(
+      //        String.format("%32s %8.2fms ",Classes.className(a),
+      //          Double.valueOf(t1*1.0e-6))
+      //        + toHexString(l1d)
+      //        + " / " + toHexString(l1n) + " = "
+      //        + String.format("%8.2e",Double.valueOf(l1d/l1n)));
+      Debug.DEBUG = false;
     } }
 
   public static final void
@@ -1074,7 +1126,8 @@ public final class Common {
             final List<Accumulator> accumulators,
             final Accumulator exact) {
     for (final Generator g : generators) {
-      Common.sumTest(g,accumulators,exact); } }
+      Common.addTest(g,accumulators,exact);
+      Common.addAllTest(g,accumulators,exact); } }
 
   //--------------------------------------------------------------
 

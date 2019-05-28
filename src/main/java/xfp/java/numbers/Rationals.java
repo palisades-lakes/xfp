@@ -120,7 +120,7 @@ public final class Rationals implements Set {
   public final BinaryOperator<Rational> adder () {
     return new BinaryOperator<Rational> () {
       @Override
-      public final String toString () { return "BF.add()"; }
+      public final String toString () { return "Rationals.add()"; }
       @Override
       public final Rational apply (final Rational q0,
                                    final Rational q1) {
@@ -144,7 +144,7 @@ public final class Rationals implements Set {
   public final UnaryOperator<Rational> additiveInverse () {
     return new UnaryOperator<Rational> () {
       @Override
-      public final String toString () { return "BF.negate()"; }
+      public final String toString () { return "Rationals.negate()"; }
       @Override
       public final Rational apply (final Rational q) {
         return Rationals.this.negate(q); } }; }
@@ -160,7 +160,8 @@ public final class Rationals implements Set {
   public final BinaryOperator<Rational> multiplier () {
     return new BinaryOperator<Rational>() {
       @Override
-      public final String toString () { return "BF.multiply()"; }
+      public final String toString () { 
+        return "Rationals.multiply()"; }
       @Override
       public final Rational apply (final Rational q0,
                                    final Rational q1) {
@@ -183,7 +184,8 @@ public final class Rationals implements Set {
   public final UnaryOperator<Rational> multiplicativeInverse () {
     return new UnaryOperator<Rational> () {
       @Override
-      public final String toString () { return "BF.inverse()"; }
+      public final String toString () { 
+        return "Rationals.inverse()"; }
       @Override
       public final Rational apply (final Rational q) {
         return Rationals.this.reciprocal(q); } }; }
@@ -320,7 +322,7 @@ public final class Rationals implements Set {
     return that instanceof Rationals; }
 
   @Override
-  public final String toString () { return "BF"; }
+  public final String toString () { return "Rationals"; }
 
   //--------------------------------------------------------------
   // construction

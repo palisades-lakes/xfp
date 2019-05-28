@@ -17,7 +17,7 @@ import xfp.java.test.Common;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-22
+ * @version 2019-05-28
  */
 
 public final class NaturalTest {
