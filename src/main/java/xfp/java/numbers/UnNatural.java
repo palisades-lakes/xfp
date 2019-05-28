@@ -96,6 +96,7 @@ implements Ringlike<UnNatural> {
 
   public final UnNatural multiply (final long that) {
     if (ONE.equals(this)) { return UnNatural.valueOf(that); }
+    if (1L == that) { return this; }
     return unsafe(Bei.multiply(_mag,that)); }
 
   // TODO: multiply by shifted long

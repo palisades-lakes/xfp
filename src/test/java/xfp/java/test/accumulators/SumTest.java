@@ -28,7 +28,8 @@ public final class SumTest {
     Debug.println();
     Debug.println("overflow");
     Common.overflowTests(
-      Common.makeAccumulators(Common.accumulators())); }
+      Common.makeAccumulators(Common.accumulators())); 
+    Debug.DEBUG=false;}
 
   @SuppressWarnings("static-method")
   @Test

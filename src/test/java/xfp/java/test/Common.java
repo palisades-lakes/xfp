@@ -30,12 +30,59 @@ import xfp.java.prng.PRNG;
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-23
+ * @version 2019-05-27
  */
 @SuppressWarnings("unchecked")
 public final class Common {
 
   private static final int TRYS = 1 * 256;
+
+  //--------------------------------------------------------------
+
+  public static final List<String> accumulators () {
+    return 
+      Arrays.asList(
+        new String[]
+          { "xfp.java.accumulators.DoubleAccumulator",
+            //"xfp.java.accumulators.KahanAccumulator",
+            "xfp.java.accumulators.DistilledAccumulator",
+            "xfp.java.accumulators.ZhuHayesAccumulator",
+            "xfp.java.accumulators.BigFloatAccumulator",
+            "xfp.java.accumulators.RationalFloatAccumulator",
+            "xfp.java.accumulators.RationalFloat0Accumulator",
+            "xfp.java.accumulators.RationalFloatBIAccumulator",
+            "xfp.java.accumulators.RationalAccumulator", 
+          }); }
+
+  //--------------------------------------------------------------
+
+  public static final Accumulator
+  makeAccumulator (final String className) {
+    try {
+
+      final Class c = Class.forName(className);
+      final Method m = c.getMethod("make");
+      return (Accumulator) m.invoke(null); }
+
+    catch (final
+      ClassNotFoundException
+      | NoSuchMethodException
+      | SecurityException
+      | IllegalAccessException
+      | IllegalArgumentException
+      | InvocationTargetException e) {
+      // e.printStackTrace();
+      throw new RuntimeException(e); } }
+
+  //--------------------------------------------------------------
+
+  public static final List<Accumulator>
+  makeAccumulators (final List<String> classNames) {
+    return
+      classNames
+      .stream()
+      .map(Common::makeAccumulator)
+      .collect(Collectors.toUnmodifiableList()); }
 
   //--------------------------------------------------------------
   // natural number/ integer tests
@@ -361,53 +408,6 @@ public final class Common {
     for (int i=0;i<TRYS;i++) {
       integerTest(valueOf,fromBI,toBI,
         (BigInteger) gn.next(), (BigInteger) gn.next()); } }
-
-  //--------------------------------------------------------------
-
-  public static final List<String> accumulators () {
-    return 
-      Arrays.asList(
-        new String[]
-          { "xfp.java.accumulators.DoubleAccumulator",
-            //"xfp.java.accumulators.KahanAccumulator",
-            "xfp.java.accumulators.DistilledAccumulator",
-            "xfp.java.accumulators.ZhuHayesAccumulator",
-            "xfp.java.accumulators.BigFloatAccumulator",
-            "xfp.java.accumulators.RationalFloatAccumulator",
-            "xfp.java.accumulators.RationalFloat0Accumulator",
-            "xfp.java.accumulators.RationalFloatBIAccumulator",
-            //"xfp.java.accumulators.RationalAccumulator", 
-          }); }
-
-  //--------------------------------------------------------------
-
-  public static final Accumulator
-  makeAccumulator (final String className) {
-    try {
-
-      final Class c = Class.forName(className);
-      final Method m = c.getMethod("make");
-      return (Accumulator) m.invoke(null); }
-
-    catch (final
-      ClassNotFoundException
-      | NoSuchMethodException
-      | SecurityException
-      | IllegalAccessException
-      | IllegalArgumentException
-      | InvocationTargetException e) {
-      // e.printStackTrace();
-      throw new RuntimeException(e); } }
-
-  //--------------------------------------------------------------
-
-  public static final List<Accumulator>
-  makeAccumulators (final List<String> classNames) {
-    return
-      classNames
-      .stream()
-      .map(Common::makeAccumulator)
-      .collect(Collectors.toUnmodifiableList()); }
 
   //--------------------------------------------------------------
   // TODO: java missing corresponding FloatFunction, etc.
@@ -890,6 +890,19 @@ public final class Common {
 
   public static final void
   overflowTest (final Accumulator a) {
+
+    final double s =
+      a.clear()
+      .addAll(
+        new double[]
+          { 100.0,
+            100.0,
+            1.0,
+            -100.0,
+            -100.0})
+      .doubleValue();
+    if (a.noOverflow()) {
+      Assertions.assertEquals(1.0,s,Classes.className(a)); }
 
     final double s0 =
       a.clear()

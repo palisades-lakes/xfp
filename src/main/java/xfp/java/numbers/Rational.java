@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Objects;
 
+import xfp.java.Debug;
 import xfp.java.exceptions.Exceptions;
 
 /** Ratios of {@link UnNatural}.
@@ -125,22 +126,23 @@ implements Ringlike<Rational> {
                                      final UnNatural n0,
                                      final boolean p1,
                                      final long n1) {
-    final boolean p;
-    final UnNatural n;
-    if (p0) {
-      if (p1) { n = n0.add(n1); p = true; }
-      else {
-        final int c = n0.compareTo(n1);
-        if (0 <= c) { n = n0.subtract(n1); p = true; }
-        else { n = n0.subtractFrom(n1); p = false; } } }
-    else { 
-      if (p1) {
-        final int c = -n0.compareTo(n1);
-        if (0 <= c) { n = n0.subtractFrom(n1); p = true; }
-        else { n = n0.subtract(n1); p = false; } }
-      else { n = n0.add(n1); p = false; } } 
-
-    return valueOf(p,n,UnNatural.ONE); }
+    Debug.println("p0=" + p0);
+    Debug.println("n0=" + n0);
+    Debug.println("p1=" + p1);
+    Debug.println("n1=" + n1);
+        if (p0) {
+      if (p1) { 
+        return valueOf(true,n0.add(n1)); }
+      final int c = n0.compareTo(n1);
+      if (0 == c) { return ZERO; }
+      if (0 < c) { return valueOf(true,n0.subtract(n1)); }
+      return valueOf(false,n0.subtractFrom(n1)); }
+    if (p1) { //p0==false
+      final int c = -n0.compareTo(n1);
+      if (0 == c) { return ZERO; }
+      if (0 < c) { return valueOf(true,n0.subtractFrom(n1)); }
+      return valueOf(false,n0.subtract(n1)); }
+    return valueOf(false,n0.add(n1)); }
 
   // common denominator, 0 exponent in double
 
@@ -180,20 +182,34 @@ implements Ringlike<Rational> {
                                      final boolean p1,
                                      final long n1,
                                      final int e1) {
-    if (0 == e1 ) { return add(p0,n0,d0,p1,n1); }
+    Debug.println("p0=" + p0);
+    Debug.println("n0=" + n0);
+    Debug.println("d0=" + d0);
+    Debug.println("p1=" + p1);
+    Debug.println("n1=" + Long.toHexString(n1));
+    Debug.println("e1=" + e1);
+    if (0 == e1) { 
+      if (UnNatural.ONE.equals(d0)) { return add(p0,n0,p1,n1); }
+      return add(p0,n0,d0,p1,n1); }
     if (0 < e1) { 
       if (UnNatural.ONE.equals(d0)) {
         return add(p0,n0,p1,UnNatural.valueOf(n1,e1)); }
       return add(p0,n0,d0,p1,d0.multiply(n1,e1)); }
     return add(p0,n0.shiftLeft(-e1),d0,p1,d0.multiply(n1)); }
 
-  private final Rational add (final boolean n1,
+  private final Rational add (final boolean p1,
                               final long t1,
                               final int e1) {
     if (0 == t1) { return this; }
+    
+    // TODO: tests fail without this, but it shouldn't be necessary...
+    final int shift = Numbers.loBit(t1);
+    final long t2 = (t1 >>> shift);
+    final int e2 = e1 + shift;
+    
     return add(
       nonNegative(),numerator(),denominator(),
-      n1,t1,e1); }
+      p1,t2,e2); }
 
   public final Rational add (final double z) {
     assert Double.isFinite(z);
