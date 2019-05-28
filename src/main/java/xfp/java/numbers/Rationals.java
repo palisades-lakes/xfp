@@ -25,7 +25,7 @@ import xfp.java.prng.Generators;
  * <code>Rational</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-11
+ * @version 2019-05-27
  */
 @SuppressWarnings("unchecked")
 public final class Rationals implements Set {
@@ -240,9 +240,12 @@ public final class Rationals implements Set {
       public Object next () {
         final boolean edge = choose.sample() > dp;
         if (edge) { return edgeCases.sample(); }
-        return Rational.valueOf(
-          (BigInteger) g0.next(),
-          (BigInteger) g1.next()); } }; }
+        final BigInteger z0 = (BigInteger) g0.next();
+        final BigInteger z1 = (BigInteger) g1.next();
+        return RationalFloat.valueOf(
+          0<=z0.signum(),
+          UnNatural.valueOf(z0.abs()),
+          UnNatural.valueOf(z1)); } }; } 
 
   // Is this characteristic of most inputs?
   public static final Generator

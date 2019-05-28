@@ -18,7 +18,7 @@ import xfp.java.exceptions.Exceptions;
  * arithmetic on them faster.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-19
+ * @version 2019-05-27
  */
 
 public final class RationalFloatBI extends Number
@@ -276,12 +276,13 @@ implements Ringlike<RationalFloatBI> {
     return
       numerator().divide(denominator()).shiftLeft(exponent()); }
 
-  public final Rational rationalValue () {
-    if (0 <= exponent()) {
-      return Rational.valueOf(
-        numerator().shiftLeft(exponent()),denominator()); }
-    return Rational.valueOf(
-      numerator(),denominator().shiftLeft(-exponent())); }
+//  public final Rational rationalValue () {
+//    if (0 <= exponent()) {
+//      return Rational.valueOf(
+//        numerator
+//        numerator().shiftLeft(exponent()),denominator()); }
+//    return Rational.valueOf(
+//      numerator(),denominator().shiftLeft(-exponent())); }
 
   //--------------------------------------------------------------
   /** Half-even rounding from {@link BigInteger} ratio to

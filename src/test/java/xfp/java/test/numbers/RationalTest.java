@@ -1,12 +1,12 @@
 package xfp.java.test.numbers;
 
-import java.math.BigInteger;
 import java.util.function.BinaryOperator;
 
 import org.junit.jupiter.api.Test;
 
 import xfp.java.numbers.Numbers;
 import xfp.java.numbers.Rational;
+import xfp.java.numbers.UnNatural;
 import xfp.java.test.Common;
 
 //----------------------------------------------------------------
@@ -17,7 +17,7 @@ import xfp.java.test.Common;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-29
+ * @version 2019-05-27
  */
 
 public final class RationalTest {
@@ -33,42 +33,59 @@ public final class RationalTest {
     final Rational[] f =
     {
      Rational.valueOf(
-       new BigInteger("-2366052b8b801d",0x10),
-       BigInteger.ONE.shiftLeft(22)),
+       false,
+       UnNatural.valueOf("2366052b8b801d",0x10),
+       UnNatural.ONE.shiftLeft(22)),
      Rational.valueOf(
-       new BigInteger("2366052b8b801d",0x10),
-       BigInteger.ONE.shiftLeft(22)),
+       true,
+       UnNatural.valueOf("2366052b8b801d",0x10),
+       UnNatural.ONE.shiftLeft(22)),
      Rational.valueOf(
-       new BigInteger("232330747ceeab",0x10),
-       BigInteger.ONE.shiftLeft(23)),
+       true,
+       UnNatural.valueOf("232330747ceeab",0x10),
+       UnNatural.ONE.shiftLeft(23)),
      Rational.valueOf(
-       new BigInteger("-232330747ceeab",0x10),
-       BigInteger.ONE.shiftLeft(23)),
+       false,
+       UnNatural.valueOf("232330747ceeab",0x10),
+       UnNatural.ONE.shiftLeft(23)),
      Rational.valueOf(
-       new BigInteger("-21ab528c4dbc181",0x10),
-       BigInteger.ONE.shiftLeft(26)),
+       false,
+       UnNatural.valueOf("21ab528c4dbc181",0x10),
+       UnNatural.ONE.shiftLeft(26)),
      Rational.valueOf(
-       new BigInteger("8d9814ae2e0074",0x10),
-       BigInteger.ONE.shiftLeft(25)),
+       true,
+       UnNatural.valueOf("8d9814ae2e0074",0x10),
+       UnNatural.ONE.shiftLeft(25)),
      Rational.valueOf(
-       new BigInteger("2c94d1dcb123a56b9c1",0x10),
-       BigInteger.ONE.shiftLeft(43)), };
+       true,
+       UnNatural.valueOf("2c94d1dcb123a56b9c1",0x10),
+       UnNatural.ONE.shiftLeft(43)), };
     for (final Rational fi : f) {
       Common.doubleRoundingTest(
-        Rational::valueOf, Numbers::doubleValue, dist,
+        Rational::valueOf, 
+        Numbers::doubleValue, 
+        dist,
         Object::toString, fi);
       Common.floatRoundingTest(
-        Rational::valueOf, Numbers::floatValue, dist,
+        Rational::valueOf, 
+        Numbers::floatValue, 
+        dist,
         Object::toString, fi);  }
     //Debug.DEBUG = false;
 
     Common.doubleRoundingTests(
-      Rational::valueOf,Rational::valueOf,Numbers::doubleValue,
-      dist, Object::toString);
+      Rational::valueOf,
+      Rational::valueOf,
+      Numbers::doubleValue,
+      dist, 
+      Object::toString);
 
     Common.floatRoundingTests(
-      Rational::valueOf, Rational::valueOf, Numbers::floatValue,
-      dist, Object::toString); }
+      Rational::valueOf, 
+      Rational::valueOf, 
+      Numbers::floatValue,
+      dist, 
+      Object::toString); }
 
   //--------------------------------------------------------------
 }

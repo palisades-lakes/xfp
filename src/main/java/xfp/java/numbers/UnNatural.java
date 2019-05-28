@@ -98,6 +98,13 @@ implements Ringlike<UnNatural> {
     if (ONE.equals(this)) { return UnNatural.valueOf(that); }
     return unsafe(Bei.multiply(_mag,that)); }
 
+  // TODO: multiply by shifted long
+  public final UnNatural multiply (final long that,
+                                   final int shift) {
+    if (ONE.equals(this)) { 
+      return UnNatural.valueOf(that,shift); }
+    return multiply(UnNatural.valueOf(that,shift)); }
+
   @Override
   public final UnNatural multiply (final UnNatural that) {
     if (ONE.equals(this)) { return that; }
