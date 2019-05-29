@@ -19,7 +19,7 @@ import xfp.java.test.Common;
 
 public final class SumTest {
 
-  private static final int DIM = 16 * 1024;
+  private static final int DIM = 1 * 1024;
 
   @SuppressWarnings("static-method")
   @Test

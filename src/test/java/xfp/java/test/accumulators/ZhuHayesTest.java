@@ -25,7 +25,7 @@ public final class ZhuHayesTest {
     List.of(
       "xfp.java.accumulators.ZhuHayesAccumulator");
 
-  private static final int TEST_DIM = (1 * 64 * 1024) - 1;
+  private static final int TEST_DIM = (1 * 8 * 1024) - 1;
 
   @SuppressWarnings("static-method")
   @Test

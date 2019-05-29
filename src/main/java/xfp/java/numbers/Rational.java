@@ -98,9 +98,68 @@ implements Ringlike<Rational> {
 
   //--------------------------------------------------------------
 
+  private static final Rational add (final boolean p0,
+                                     final UnNatural n0,
+                                     final UnNatural d0,
+                                     final boolean p1,
+                                     final UnNatural n1) {
+    final UnNatural n0d1 = n0;
+    final UnNatural n1d0 = n1.multiply(d0);
+    final boolean p;
+    final UnNatural n;
+    if (p0) {
+      if (p1) { n = n0d1.add(n1d0); p = true; }
+      else {
+        final int c = n0d1.compareTo(n1d0);
+        if (0 == c) { return ZERO; }
+        if (0 < c) { n = n0d1.subtract(n1d0); p = true; }
+        else { n = n1d0.subtract(n0d1); p = false; } } }
+    else { 
+      if (p1) {
+        final int c = n1d0.compareTo(n0d1);
+        if (0 == c) { return ZERO; }
+        if (0 < c) { n = n1d0.subtract(n0d1); p = true; }
+        else { n = n0d1.subtract(n1d0); p = false; } }
+      else { n = n0d1.add(n1d0); p = false; } } 
+    final UnNatural d = d0;
+    return valueOf(p,n,d); }
+
+  private final Rational add (final boolean p,
+                              final UnNatural n) {
+    return add(nonNegative(),numerator(),denominator(),p,n); }  
+
+  //--------------------------------------------------------------
+
+  //  public final Rational add (final double z) {
+  //    assert Double.isFinite(z);
+  //    return add(valueOf(z)); }
+
+  //  public final Rational add (final double z) {
+  //    final long t = Doubles.significand(z);
+  //    final int e = Doubles.exponent(z);
+  //    final boolean nonNegative = Doubles.nonNegative(z);
+  //    assert Double.isFinite(z);
+  //    if (0L == t) { return ZERO; }
+  //    assert 0L < t;
+  //    final UnNatural n0 = UnNatural.valueOf(t);
+  //    if (0 == e) {  return add(valueOf(nonNegative,n0)); }
+  //    if (0 < e) { return add(valueOf(nonNegative,n0.shiftLeft(e))); }
+  //    return add(valueOf(nonNegative,n0,UnNatural.ZERO.setBit(-e))); }
+
   public final Rational add (final double z) {
+    // TODO: do this for BigFloat and RationalFloat?
+    final long t0 = Doubles.significand(z);
+    final int shift = Numbers.loBit(t0);
+    final long t = (t0 >>> shift);
+    final int e = Doubles.exponent(z) + shift;
+    final boolean nonNegative = Doubles.nonNegative(z);
     assert Double.isFinite(z);
-    return add(valueOf(z)); }
+    if (0L == t) { return ZERO; }
+    assert 0L < t;
+    final UnNatural n0 = UnNatural.valueOf(t);
+    if (0 == e) { return add(nonNegative,n0); }
+    if (0 < e) { return add(nonNegative,n0.shiftLeft(e)); }
+    return add(nonNegative,n0,UnNatural.ZERO.setBit(-e)); }
 
   //--------------------------------------------------------------
 
@@ -167,15 +226,15 @@ implements Ringlike<Rational> {
   public final long longValue () {
     return bigIntegerValue().longValue(); }
 
- /** Returns the truncated quotient.
- *
- * TODO: should it round instead? Or
- * should there be more explicit round, floor, ceil, etc.?
- */
-public final BigInteger bigIntegerValue () {
-  final BigInteger x = 
-    numerator().divide(denominator()).bigIntegerValue(); 
-  return (nonNegative() ? x : x.negate()); }
+  /** Returns the truncated quotient.
+   *
+   * TODO: should it round instead? Or
+   * should there be more explicit round, floor, ceil, etc.?
+   */
+  public final BigInteger bigIntegerValue () {
+    final BigInteger x = 
+      numerator().divide(denominator()).bigIntegerValue(); 
+    return (nonNegative() ? x : x.negate()); }
 
   //--------------------------------------------------------------
   /** Half-even rounding to <code>float</code>.
