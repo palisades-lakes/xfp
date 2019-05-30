@@ -10,7 +10,7 @@ import java.util.List;
 /** immutable arbitrary-precision non-negative integers.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-27
+ * @version 2019-05-29
  */
 
 public final class UnNatural extends Number
@@ -204,12 +204,39 @@ implements Ringlike<UnNatural> {
   @Override
   public final UnNatural gcd (final UnNatural that) {
     if (that.isZero()) { return this; }
-    else if (isZero()) { return that; }
+    if (isZero()) { return that; }
     final MutableUnNatural a = MutableUnNatural.valueOf(_mag);
     final MutableUnNatural b = MutableUnNatural.valueOf(that._mag);
     final MutableUnNatural result = a.hybridGCD(b);
     return valueOf(result.getValue()); }
 
+  // remove common factors as if numerator and denominator
+//  public static final UnNatural[] reduce (final UnNatural n0,
+//                                          final UnNatural d0) {
+//    final MutableUnNatural[] nd =
+//      MutableUnNatural.reduce(
+//        MutableUnNatural.valueOf(n0._mag),
+//        MutableUnNatural.valueOf(d0._mag));
+//    return new UnNatural[] 
+//      { valueOf(nd[0].getValue()), 
+//        valueOf(nd[1].getValue()), }; }
+
+    public static final UnNatural[] reduce (final UnNatural n0,
+                                          final UnNatural d0) {
+    final int shift = 
+      Math.min(Numbers.loBit(n0),Numbers.loBit(d0));
+    final UnNatural n = (shift != 0) ? n0.shiftRight(shift) : n0;
+    final UnNatural d = (shift != 0) ? d0.shiftRight(shift) : d0;
+    if (n.equals(d)) { 
+      return new UnNatural[] { ONE, ONE, }; }
+    if (UnNatural.ONE.equals(d)) { 
+      return new UnNatural[] { n, ONE, }; }
+    if (UnNatural.ONE.equals(n)) {
+      return new UnNatural[] { ONE, d, }; }
+    final UnNatural gcd = n.gcd(d);
+    if (gcd.compareTo(ONE) > 0) {
+      return new UnNatural[] { n.divide(gcd), d.divide(gcd), }; } 
+    return new UnNatural[] { n, d, }; }
 
   //--------------------------------------------------------------
   // Bit Operations

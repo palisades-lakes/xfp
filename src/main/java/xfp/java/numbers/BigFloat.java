@@ -104,11 +104,18 @@ implements Ringlike<BigFloat> {
   //--------------------------------------------------------------
 
   public final BigFloat add (final double z) {
-    //assert Double.isFinite(z);
+    assert Double.isFinite(z);
     return add(
       Doubles.nonNegative(z),
       Doubles.significand(z),
       Doubles.exponent(z)); }
+
+//  public final BigFloat add (final double z) {
+//    assert Double.isFinite(z);
+//    return add(
+//      Doubles.nonNegative(z),
+//      Doubles.significand(z),
+//      Doubles.exponent(z)); }
 
   //--------------------------------------------------------------
 

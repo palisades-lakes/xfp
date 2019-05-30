@@ -81,7 +81,7 @@ public final class MutableUnNatural {
 
   private final void reset () { offset = intLen = 0; }
 
-  private final int getLowestSetBit() {
+  public final int getLowestSetBit () {
     if (intLen == 0) { return -1; }
     int j, b;
     for (j=intLen-1; (j > 0) && (value[j+offset] == 0); j--) { }
@@ -89,6 +89,9 @@ public final class MutableUnNatural {
     if (b == 0) { return -1; }
     return ((intLen-1-j)<<5) + Integer.numberOfTrailingZeros(b); }
 
+  private static final int loBit (final MutableUnNatural m) {
+    return m.getLowestSetBit(); }
+  
   private final void normalize () {
     if (intLen == 0) { offset = 0; return; }
     int index = offset;
@@ -111,7 +114,7 @@ public final class MutableUnNatural {
   // bit operations
   //--------------------------------------------------------------
 
-  private final long bitLength() {
+  public final long bitLength () {
     if (intLen == 0) { return 0; }
     return 
       (intLen*32L) 
@@ -208,7 +211,7 @@ public final class MutableUnNatural {
   /** {@code n} can be zero.
    */
 
-  private final void safeLeftShift(final int n) {
+  private final void safeLeftShift (final int n) {
     if (n > 0) { leftShift(n); } }
 
   //--------------------------------------------------------------
@@ -924,9 +927,6 @@ public final class MutableUnNatural {
     ri.rightShift(sigma);   
     return ri; }
 
-
-
-
   /** This method is used for division. It multiplies an n word 
    * input a by one word input x, and subtracts the n word product 
    * from q. This is needed when subtracting qhat*divisor from 
@@ -971,14 +971,12 @@ public final class MutableUnNatural {
         (unsigned(~(int)product))) ? 1:0); }
     return (int) carry; }
 
-
-
   /**
    * This method divides a long quantity by an int to estimate
    * qhat for two multi precision numbers. It is used when
    * the signed value of n is less than zero.
-   * Returns long value where high 32 bits contain remainder value and
-   * low 32 bits contain quotient value.
+   * Returns long value where high 32 bits contain remainder value
+   * and low 32 bits contain quotient value.
    */
   private static final long divWord(final long n, final int d) {
     final long dLong = unsigned(d);
@@ -1009,9 +1007,9 @@ public final class MutableUnNatural {
   //-------------------------------------------------------------
   // gcd
   //-------------------------------------------------------------
-
   /** a and b interpreted as unsigned integers.
    */
+
   private static final int binaryGcd (int a, int b) {
     if (b == 0) { return a; }
     if (a == 0) { return b; }
@@ -1040,14 +1038,9 @@ public final class MutableUnNatural {
   private final int difference (MutableUnNatural b) {
     MutableUnNatural a = this;
     final int sign = a.compareTo(b);
-    if (sign == 0) {
-      return 0;
-    }
+    if (sign == 0) { return 0; }
     if (sign < 0) {
-      final MutableUnNatural tmp = a;
-      a = b;
-      b = tmp;
-    }
+      final MutableUnNatural tmp = a; a = b; b = tmp; }
 
     long diff = 0;
     int x = a.intLen;
@@ -1078,10 +1071,7 @@ public final class MutableUnNatural {
     final int s1 = u.getLowestSetBit();
     final int s2 = v.getLowestSetBit();
     final int k = (s1 < s2) ? s1 : s2;
-    if (k != 0) {
-      u.rightShift(k);
-      v.rightShift(k);
-    }
+    if (k != 0) { u.rightShift(k); v.rightShift(k); }
 
     // step B2
     final boolean uOdd = (k == s1);
@@ -1093,12 +1083,8 @@ public final class MutableUnNatural {
       // steps B3 and B4
       t.rightShift(lb);
       // step B5
-      if (tsign > 0) {
-        u = t;
-      }
-      else {
-        v = t;
-      }
+      if (tsign > 0) { u = t; }
+      else { v = t; }
 
       // Special case one word numbers
       if ((u.intLen < 2) && (v.intLen < 2)) {
@@ -1108,40 +1094,54 @@ public final class MutableUnNatural {
         r.value[0] = x;
         r.intLen = 1;
         r.offset = 0;
-        if (k > 0) {
-          r.leftShift(k);
-        }
-        return r;
-      }
+        if (k > 0) { r.leftShift(k); }
+        return r; }
 
       // step B6
       if ((tsign = u.difference(v)) == 0) { break; }
-      t = (tsign >= 0) ? u : v;
-    }
+      t = ((tsign >= 0) ? u : v); }
 
-    if (k > 0) {
-      u.leftShift(k);
-    }
-    return u;
-  }
+    if (k > 0) { u.leftShift(k); }
+    return u; }
 
   //-------------------------------------------------------------
+  // Use Euclid's algorithm until the numbers are approximately the
+  // same length, then use the binary GCD algorithm to find the GCD.
 
-  public final MutableUnNatural hybridGCD(MutableUnNatural b) {
-    // Use Euclid's algorithm until the numbers are approximately the
-    // same length, then use the binary GCD algorithm to find the GCD.
+  public final MutableUnNatural hybridGCD (final MutableUnNatural d) {
+    MutableUnNatural b = d;
     MutableUnNatural a = this;
     final MutableUnNatural q = new MutableUnNatural();
-
     while (b.intLen != 0) {
       if (Math.abs(a.intLen - b.intLen) < 2) {
-        return a.binaryGCD(b);
-      }
-
+        return a.binaryGCD(b); }
       final MutableUnNatural r = a.divide(b, q, true);
       a = b;
       b = r; }
     return a; }
+
+  // remove common factors as if numerator and denominator
+  public static final MutableUnNatural[] 
+    reduce (MutableUnNatural n,
+            MutableUnNatural d) {
+    final int shift = Math.min(loBit(n),loBit(d));
+    if (0 != shift) {
+      n.rightShift(shift);
+      d.rightShift(shift); }
+//    if (n.equals(d)) { 
+//      return new MutableUnNatural[] { ONE, ONE, }; }
+//    if (MutableUnNatural.ONE.equals(d)) { 
+//      return new MutableUnNatural[] { n, ONE, }; }
+//    if (UnNatural.ONE.equals(n)) {
+//      return new MutableUnNatural[] { ONE, d, }; }
+    final MutableUnNatural gcd = n.hybridGCD(d);
+    if (gcd.compareTo(ONE) > 0) {
+      final MutableUnNatural[] nd = { new MutableUnNatural(),
+                                      new MutableUnNatural(), };
+      n.divide(gcd,nd[0],false);
+      d.divide(gcd,nd[1],false);
+      return nd; } 
+    return new MutableUnNatural[] { n, d, }; }
 
   //-------------------------------------------------------------
   // pseudo-Comparable, not Comparable due to mutability

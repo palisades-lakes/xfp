@@ -107,6 +107,16 @@ public final class Numbers implements Set {
     return i.bitLength(); }
 
   /** inclusive */
+  public static final int loBit (final MutableUnNatural i) {
+    return i.getLowestSetBit(); }
+
+  /** exclusive */
+  public static final int hiBit (final MutableUnNatural i) {
+    final long n = i.bitLength();
+    assert n <= Integer.MAX_VALUE;
+    return (int) n; }
+
+  /** inclusive */
   public static final int loBit (final UnNatural i) {
     return i.getLowestSetBit(); }
 
