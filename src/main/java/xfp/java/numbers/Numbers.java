@@ -125,14 +125,6 @@ public final class Numbers implements Set {
     return i.bitLength(); }
 
   /** inclusive */
-  public static final int loBit (final UnNatural0 i) {
-    return i.getLowestSetBit(); }
-
-  /** exclusive */
-  public static final int hiBit (final UnNatural0 i) {
-    return i.bitLength(); }
-
-  /** inclusive */
   public static final int loBit (final int i) {
     return Integer.numberOfTrailingZeros(i); }
 
