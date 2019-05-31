@@ -17,7 +17,7 @@ import xfp.java.exceptions.Exceptions;
  * arithmetic on them faster.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-29
+ * @version 2019-05-31
  */
 
 public final class RationalFloat extends Number
@@ -169,7 +169,7 @@ implements Ringlike<RationalFloat> {
 
   //--------------------------------------------------------------
   // 0 leftShift
-  
+
   private static final RationalFloat add (final boolean n0,
                                           final UnNatural t0,
                                           final int e,
@@ -209,9 +209,20 @@ implements Ringlike<RationalFloat> {
     return valueOf(n0,t0.add(t1,leftShift),e); }
 
   private final RationalFloat add (final boolean n1,
-                                   final long t1,
-                                   final int e1) {
-    if (0 == t1) { return this; }
+                                   final long t11,
+                                   final int e11) {
+    if (0 == t11) { return this; }
+
+    //final long t1 = t11;
+    //final int e1 = e11;
+
+    final int shift = Numbers.loBit(t11);
+    //Debug.println("shift=" + shift);
+    final long t1;
+    final int e1;
+    if (0 == shift) { t1=t11; e1=e11; }
+    else { t1 = (t11 >>> shift); e1 = e11 + shift; }
+
     if (UnNatural.ONE.equals(denominator())) {
       //assert 0 < t1;
 
@@ -585,8 +596,8 @@ implements Ringlike<RationalFloat> {
 
   private static final RationalFloat
   reduce (final boolean nonNegative,
-           final UnNatural n,
-           final int e) {
+          final UnNatural n,
+          final int e) {
 
     if (n.isZero()) { return ZERO; }
 
@@ -602,9 +613,9 @@ implements Ringlike<RationalFloat> {
 
   private static final RationalFloat
   reduce (final boolean nonNegative,
-           final UnNatural n,
-           final UnNatural d,
-           final int e) {
+          final UnNatural n,
+          final UnNatural d,
+          final int e) {
 
     if (n.isZero()) { return ZERO; }
 

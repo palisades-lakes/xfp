@@ -15,7 +15,7 @@ import java.util.Objects;
  * TODO: ensure no leading zeros in inputs
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-22
+ * @version 2019-05-31
  */
 
 public final class Bei {
@@ -128,50 +128,155 @@ public final class Bei {
                                    final int[] m1) {
     return -compare(m1,m0); }
 
-  // assuming m0 has no leading zeros
+  //--------------------------------------------------------------
+  /** Truncated number of whole <code>int</code> words required to 
+   * shift up (left) <code>bitShift</code> bits.
+   */
+
+  private static final int intShift (final int bitShift) {
+    return bitShift >>> 5; }
+
+  /** Remaining bits to shift up (left) after
+   */
+
+  private static final int remShift (final int bitShift) {
+    return bitShift & 0x1f; }
+
+  /** How many <code>int</code> words does it take to hold
+   * the non-zero bits of <code>k</code> shifted up (left)
+   * <code>shift</code> bits.
+   */
+
+  private static final int nWords (final long k,
+                                   final int shift) {
+    final int hi = hiBit(k) + shift;
+    if (64 < hi) { return 3; }
+    if (32 < hi) { return 2; }
+    return 1; }
+
+  /** The value of <code>k</code> shifted up (left) may require 
+   * up to 3 <code>int/code>s to represent. This is the most 
+   * significant word.
+   */
+
+  private static final long hiPart (final long k,
+                                    final int shift) {
+    assert 64 > shift;
+    return k >>> (64 - shift); }
+
+  // TODO: is it worth complicating the code by computing 
+  // mid and low parts with just one shift?
+
+  /** The value of <code>k</code> shifted up (left) may require 
+   * up to 3 <code>int/code>s to represent. This is the 2nd most
+   * significant word.
+   */
+
+  private static final long midPart (final long k,
+                                     final int shift) {
+    assert 64 > shift;
+    final long ks = (k << shift);
+    return hiWord(ks); }
+
+  /** The value of <code>k</code> shifted up (left) may require 
+   * up to 3 <code>int/code>s to represent. This is the least
+   * significant word.
+   */
+
+  private static final long loPart (final long k,
+                                    final int shift) {
+    assert 64 > shift;
+    final long ks = (k << shift);
+    return loWord(ks); }
+
+  //--------------------------------------------------------------
+  // WARNING: unsafe, assuming m0 has no leading zeros
+
   public static final int compare (final int[] m0,
                                    final long m1,
                                    final int bitShift) {
     if (0==bitShift) { return compare(m0,m1); }
-    assert 0 < bitShift : "bitShift=" + bitShift;
+    assert 0<bitShift : "bitShift=" + bitShift;
     if (m1 < 0L) { return 1; }
     final int n0 = m0.length;
-    final int intShift = bitShift >>> 5;
-    final int remShift = bitShift & 0x1f;
-    final boolean carry = (64 < (remShift + hiBit(m1)));
-    final int n1 = intShift + (carry ? 3 : 2);
+
+    final int intShift = intShift(bitShift);
+    final int remShift = remShift(bitShift);
+    final int nwords = nWords(m1,remShift);
+    final int n1 = intShift + nwords;
     if (n0<n1) { return -1; }
     if (n0>n1) { return 1; }
+
+    // most significant word in m0
     final long m00 = unsigned(m0[0]);
-    if (carry) {
-      final long m10 = (m1 >>> (64 - remShift));
+
+    if (3==nwords) {
+      final long m10 = hiPart(m1,remShift);
       if (m00<m10) { return -1; }
       if (m00>m10) { return 1; }
       final long m01 = unsigned(m0[1]);
-      final long m1s = (m1 << remShift);
-      final long m11 = hiWord(m1s);
+      final long m11 = midPart(m1,remShift);
       if (m01<m11) { return -1; }
       if (m01>m11) { return 1; }
       final long m02 = unsigned(m0[2]);
-      final long m12 = loWord(m1s);
+      final long m12 = loPart(m1,remShift);
       if (m02<m12) { return -1; }
       if (m02>m12) { return 1; }
       for (int i=3;i<n0;i++) { if (0!=m0[i]) { return 1; } }
       return 0; }
-    // no carry
-    final long m1s = (m1 << remShift);
-    final long m10 = hiWord(m1s);
+
+    if (2==nwords) {
+      final long m10 = midPart(m1,remShift);
+      if (m00<m10) { return -1; }
+      if (m00>m10) { return 1; }
+      final long m01 = unsigned(m0[1]);
+      final long m11 = loPart(m1,remShift);
+      if (m01<m11) { return -1; }
+      if (m01>m11) { return 1; }
+      for (int i=2;i<n0;i++) { if (0!=m0[i]) { return 1; } }
+      return 0; }
+
+    // 1 nonzero word after shifting
+    assert 1==nwords;
+    final long m10 = loPart(m1,remShift);
     if (m00<m10) { return -1; }
     if (m00>m10) { return 1; }
-    final long m01 = unsigned(m0[1]);
-    final long m11 = loWord(m1s);
-    if (m01<m11) { return -1; }
-    if (m01>m11) { return 1; }
-    for (int i=2;i<n0;i++) { if (0!=m0[i]) { return 1; } }
+    for (int i=1;i<n0;i++) { if (0!=m0[i]) { return 1; } }
     return 0; }
+
 
   //--------------------------------------------------------------
   // add
+  //--------------------------------------------------------------
+
+  public static final int[] add (final int[] m0,
+                                 final int[] m1) {
+    // If m0 is shorter, swap the two arrays
+    if (m0.length < m1.length) { return add(m1,m0); }
+    int i0 = m0.length;
+    int i1 = m1.length;
+    final int result[] = new int[i0];
+    long sum = 0;
+    if (i1 == 1) {
+      sum = unsigned(m0[--i0]) + unsigned(m1[0]);
+      result[i0] = (int) sum; }
+    else {
+      while (i1 > 0) {
+        sum =
+          unsigned(m0[--i0]) + unsigned(m1[--i1])
+          + (sum >>> 32);
+        result[i0] = (int) sum; } }
+    boolean carry = ((sum >>> 32) != 0);
+    while ((i0 > 0) && carry) {
+      carry = ((result[--i0] = m0[i0] + 1) == 0); }
+    while (i0 > 0) { result[--i0] = m0[i0]; }
+    if (carry) {
+      final int[] bigger = new int[result.length + 1];
+      System.arraycopy(result,0,bigger,1,result.length);
+      bigger[0] = 0x01;
+      return bigger; }
+    return result; }
+
   //--------------------------------------------------------------
 
   public static final int[] add (final int[] m0,
@@ -207,86 +312,72 @@ public final class Bei {
   //return stripLeadingZeros(result); }
 
   //--------------------------------------------------------------
-
-  public static final int[] add (final int[] m0,
-                                 final int[] m1) {
-    // If m0 is shorter, swap the two arrays
-    if (m0.length < m1.length) { return add(m1,m0); }
-    int i0 = m0.length;
-    int i1 = m1.length;
-    final int result[] = new int[i0];
-    long sum = 0;
-    if (i1 == 1) {
-      sum = unsigned(m0[--i0]) + unsigned(m1[0]);
-      result[i0] = (int) sum; }
-    else {
-      while (i1 > 0) {
-        sum =
-          unsigned(m0[--i0]) + unsigned(m1[--i1])
-          + (sum >>> 32);
-        result[i0] = (int) sum; } }
-    boolean carry = ((sum >>> 32) != 0);
-    while ((i0 > 0) && carry) {
-      carry = ((result[--i0] = m0[i0] + 1) == 0); }
-    while (i0 > 0) { result[--i0] = m0[i0]; }
-    if (carry) {
-      final int[] bigger = new int[result.length + 1];
-      System.arraycopy(result,0,bigger,1,result.length);
-      bigger[0] = 0x01;
-      return bigger; }
-    return result; }
-
-  //--------------------------------------------------------------
+  // UNSAFE: assuming m0 has no leading zeros
 
   public static final int[] add (final int[] m0,
                                  final long m1,
                                  final int bitShift)  {
-    //    if (isZero(m0)) {
-    //      return stripLeadingZeros(shiftLeft(m1,bitShift)); }
+    //Debug.println("Bei.add");
+    //Debug.println("m0=" + Arrays.toString(m0));
+    //Debug.println("m1=" + Long.toHexString(m1));
+    //Debug.println("m1=" + m1);
+    //Debug.println("bitShift=" + bitShift);
+
+    if (0L==m1) { return m0; }
+    if (isZero(m0)) { return shiftLeft(m1,bitShift); }
     assert 0L < m1;
     if (0 == bitShift) { return add(m0,m1); }
 
-    final int intShift = bitShift >>> 5;
-    final int remShift = bitShift & 0x1f;
-    final boolean yCarry = (64 < (remShift + Numbers.hiBit(m1)));
-    final int ny = intShift + (yCarry ? 3 : 2);
+    final int n0 = m0.length;
 
-    final int nx = m0.length;
-    int ix=nx-1;
+    //Debug.println("n0=" + n0);
 
-    final int nr = Math.max(nx,ny);
+    final int intShift = intShift(bitShift);
+    final int remShift = remShift(bitShift);
+    final int nwords = nWords(m1,remShift);
+    assert (1<=nwords) && (nwords<=3);
+    final int n1 = intShift + nwords;
+
+    //Debug.println("intShift=" + intShift);
+    //Debug.println("remShift=" + remShift);
+    //Debug.println("nwords=" + nwords);
+    //Debug.println("n1=" + n1);
+    //Debug.println("m1=[" + ((int) hiPart(m1,remShift))
+    //    + ", " + ((int) midPart(m1,remShift)) 
+    //    + ", " + ((int) loPart(m1,remShift))
+    //    + "]");
+
+    final int nr = Math.max(n0,n1);
     final int[] r0 = new int[nr];
-    int ir=nr-1;
-    final int iy=nr-intShift-1;
 
-    // copy unaffected low order x to result
-    while ((iy<ir) && (0<=ix)) { r0[ir--] = m0[ix--]; }
-    //Debug.println("r0=" + toHexString(r0));
-    ir = iy;
+    int ir=nr-1;
+    int i0=n0-1;
+    final int i1=nr-intShift-1;
+
+    // copy unaffected low order m0 to result
+    while ((i1<ir) && (0<=i0)) { r0[ir--] = m0[i0--]; }
+    ir = i1;
 
     long sum;
-    // add y words to x with carry
-    final long mid = (m1 << remShift);
-    sum = (mid & 0xFFFFFFFFL);
-    if (0<=ix) {
-      sum += unsigned(m0[ix--]); }
+
+    // add m1 words to m0 with carry
+    sum = loPart(m1,remShift);
+    if (0<=i0) { sum += unsigned(m0[i0--]); }
     r0[ir--] = (int) sum;
-    sum = (mid >>> 32) + (sum >>> 32);
-    if (0<=ix) {
-      sum += unsigned(m0[ix--]); }
-    r0[ir--] = (int) sum;
-    // TODO: i==0 implies remShift==0 ?
-    if ((0<=ir) && yCarry) {
-      sum = (m1 >>> (64 - remShift)) + (sum >>> 32);
-      if (0<=ix) {
-        sum += unsigned(m0[ix--]); }
+    if (2<=nwords) {
+      sum = midPart(m1,remShift) + (sum >>> 32);
+      if (0<=i0) { sum += unsigned(m0[i0--]); }
+      r0[ir--] = (int) sum; }
+    if (3==nwords) {
+      sum = hiPart(m1,remShift) + (sum >>> 32);
+      if (0<=i0) { sum += unsigned(m0[i0--]); }
       r0[ir--] = (int) sum; }
 
     // handle carry propagation
     boolean carry = ((sum >>> 32) != 0);
     while ((0<=ir) && carry) {
       sum = 0x01L;
-      if (0<=ix) { sum += unsigned(m0[ix--]); }
+      if (0<=i0) { sum += unsigned(m0[i0--]); }
       final int is = (int) sum;
       r0[ir--] = is;
       carry = (is == 0); }
@@ -299,14 +390,48 @@ public final class Bei {
       //return stripLeadingZeros(r1); }
       return r1; }
 
-    // copy remainder of x if any
-    while ((0<=ix) && (0<=ir)) { r0[ir--] = m0[ix--]; }
+    // copy remainder of m0 if any
+    while ((0<=i0) && (0<=ir)) { r0[ir--] = m0[i0--]; }
 
     return r0; }
-  //return stripLeadingZeros(r0); }
 
   //--------------------------------------------------------------
   // subtract -- only where answer is positive
+  //--------------------------------------------------------------
+
+  public static final int[] subtract (final int[] m0,
+                                      final int[] m1) {
+
+    //if (isZero(little)) { return stripLeadingZeros(big); }
+    //final int c = compare(m0,m1);
+    //assert 0L <= c;
+    //if (c == 0) { return ZERO; }
+    int bigIndex = m0.length;
+    final int result[] = new int[bigIndex];
+    int littleIndex = m1.length;
+    long difference = 0;
+
+    // Subtract common parts of both numbers
+    while (littleIndex > 0) {
+      difference =
+        (unsigned(m0[--bigIndex])
+          - unsigned(m1[--littleIndex]))
+        + (difference >> 32);
+      result[bigIndex] = (int) difference; }
+
+    // Subtract remainder of longer number while borrow propagates
+    boolean borrow = ((difference >> 32) != 0);
+    while ((bigIndex > 0) && borrow) {
+      borrow = ((result[--bigIndex] = m0[bigIndex] - 1) == -1); }
+
+    // Copy remainder of longer number
+    while (bigIndex > 0) {
+      result[--bigIndex] = m0[bigIndex]; }
+
+    final int[] r = stripLeadingZeros(result);
+    ////Debug.println("4result=\n" + Numbers.toHexString(r));
+    return r; }
+
   //--------------------------------------------------------------
   // only when m1 <= m0
 
@@ -372,41 +497,6 @@ public final class Bei {
     return result; }
 
   //--------------------------------------------------------------
-  // only valid when m1 <= m0
-
-  public static final int[] subtract (final int[] m0,
-                                      final int[] m1) {
-
-    //if (isZero(little)) { return stripLeadingZeros(big); }
-    //final int c = compare(m0,m1);
-    //assert 0L <= c;
-    //if (c == 0) { return ZERO; }
-    int bigIndex = m0.length;
-    final int result[] = new int[bigIndex];
-    int littleIndex = m1.length;
-    long difference = 0;
-
-    // Subtract common parts of both numbers
-    while (littleIndex > 0) {
-      difference =
-        (unsigned(m0[--bigIndex])
-          - unsigned(m1[--littleIndex]))
-        + (difference >> 32);
-      result[bigIndex] = (int) difference; }
-
-    // Subtract remainder of longer number while borrow propagates
-    boolean borrow = ((difference >> 32) != 0);
-    while ((bigIndex > 0) && borrow) {
-      borrow = ((result[--bigIndex] = m0[bigIndex] - 1) == -1); }
-
-    // Copy remainder of longer number
-    while (bigIndex > 0) {
-      result[--bigIndex] = m0[bigIndex]; }
-
-    final int[] r = stripLeadingZeros(result);
-    ////Debug.println("4result=\n" + Numbers.toHexString(r));
-    return r; }
-
   // assuming little*2<sup>bitShift</sup> <= big
   // big represents
   // sum<sub>i=0,n-1</sub> unsigned(big[n-1-i]) * 2 <sup>i*32</sup>
@@ -421,49 +511,101 @@ public final class Bei {
   // (xmi * 2<sup>(intShift+1)*32</sup) +
   // (xhi * 2<sup>(intShift+2)*32</sup)
 
+  // UNSAFE: assuming m0 has no leading zeros.
+  // assuming (m1 << bitShift) <= m0 
+
   public static final int[] subtract (final int[] m0,
                                       final long m1,
                                       final int bitShift) {
-    assert 0L <= m1;
-    //if (0L == m1) { return stripLeadingZeros(m0); }
-    //if (0L == m1) { return m0; }
+    //Debug.println("Bei.subtract");
+    //Debug.println("m0=" + Arrays.toString(m0));
+    //Debug.println("m1=" + Arrays.toString(valueOf(m1,bitShift)));
+    //Debug.println("m1=" + Long.toHexString(m1));
+    //Debug.println("m1=" + m1);
+    //Debug.println("bitShift=" + bitShift);
 
+    if (0L == m1) { return m0; }
+    assert 0L < m1;
     if (0 == bitShift) { return subtract(m0,m1); }
-    final int intShift = bitShift >>> 5;
+
     final int n0 = m0.length;
-    final int result[] = new int[n0];
-    int i=n0-1;
-    // copy unaffected low order ints
-    for (;i>(n0-intShift-1);i--) { result[i] = m0[i]; }
 
-    final int remShift = bitShift & 0x1f;
-    final long mid = (m1 << remShift);
+    //Debug.println("n0=" + n0);
 
-    long difference = 0;
+    final int intShift = intShift(bitShift);
+    final int remShift = remShift(bitShift);
+    final int nwords = nWords(m1,remShift);
+    assert (1<=nwords) && (nwords<=3);
+    final int n1 = intShift + nwords;
+    assert n1 <= n0; // because (m1 << bitShift) <= m0 
 
-    // Subtract common parts of both numbers
-    difference = (unsigned(m0[i]) - loWord(mid));
-    result[i] = (int) difference;
-    i--;
-    difference = (unsigned(m0[i]) - hiWord(mid))
-      + (difference >> 32);
-    result[i] = (int) difference;
-    i--;
-    // TODO: i==0 implies remShift==0 ?
-    if ((0<=i) && (0<remShift)) {
-      difference =
-        (unsigned(m0[i]) - (m1 >>> (64 - remShift)))
-        + (difference >> 32);
-      result[i] = (int) difference;
-      i--; }
+    //Debug.println("intShift=" + intShift);
+    //Debug.println("remShift=" + remShift);
+    //Debug.println("nwords=" + nwords);
+    //Debug.println("n1=" + n1);
+    //Debug.println("m1=[" + ((int) hiPart(m1,remShift))
+    //  + ", " + ((int) midPart(m1,remShift)) 
+    //  + ", " + ((int) loPart(m1,remShift))
+    //  + "]");
 
-    // Subtract remainder of longer number while borrow propagates
-    boolean borrow = ((difference >> 32) != 0);
-    while ((0<=i) && borrow) {
-      borrow = ((result[i] = m0[i] - 1) == -1); i--;}
-    // Copy remainder of longer number
-    while (0<=i) { result[i] = m0[i]; i--; }
-    return stripLeadingZeros(result); }
+    final int r0[] = new int[n0];
+    int i0=n0-1;
+    final int i1=n0-intShift-1;
+    assert 0<=i1;
+
+    // copy unaffected low order m0 to result
+    while ((i1<i0) && (0<=i0)) { 
+      r0[i0] = m0[i0]; i0--; 
+      //Debug.println("r0=" + Arrays.toString(r0));
+    }
+    i0 = i1;
+    //Debug.println("i0,i1=" + i0 + "," + i1);
+    long dif = 0;
+
+    // subtract m1 words from m0 with borrow
+    dif -= loPart(m1,remShift);
+    if (0<=i0) { 
+      dif += unsigned(m0[i0]); 
+      r0[i0] = (int) dif; 
+      i0--; 
+      dif = (dif >> 32); }
+    //Debug.println("i0,i1=" + i0 + "," + i1);
+    //Debug.println("r0=" + Arrays.toString(r0));
+
+    if (2<=nwords) { dif -= midPart(m1,remShift); }
+    if (0<=i0) { 
+      dif += unsigned(m0[i0]); 
+      r0[i0] = (int) dif; i0--; 
+      dif = (dif >> 32); }
+    //Debug.println("i0,i1=" + i0 + "," + i1);
+    //Debug.println("r0=" + Arrays.toString(r0));
+    
+    if (3==nwords) { dif -= hiPart(m1,remShift); }
+    if (0<=i0) { 
+      dif += unsigned(m0[i0]); 
+      r0[i0] = (int) dif; 
+      i0--; } 
+    //Debug.println("i0,i1=" + i0 + "," + i1);
+    //Debug.println("r0=" + Arrays.toString(r0));
+
+    // handle borrow propagation
+    boolean borrow = ((dif >> 32) != 0);
+    while ((0<=i0) && borrow) {
+      r0[i0] = m0[i0]-1;
+      borrow = (r0[i0] == -1); 
+      i0--; }
+
+    // copy remainder of m0 if any
+    while (0<=i0) { r0[i0] = m0[i0]; i0--; }
+
+    final int[] r1 = stripLeadingZeros(r0); 
+//    final int[] r2 = subtract0(m0,m1,bitShift); 
+//
+//    assert Arrays.equals(r1,r2) :
+//      "r1=" + Arrays.toString(r1)
+//      + "\nr2=" + Arrays.toString(r2);
+
+    return r1; }
 
   //--------------------------------------------------------------
   // only when big <= (val << leftShift)
@@ -471,13 +613,10 @@ public final class Bei {
   public static final int[] subtract (final long m0,
                                       final int shift,
                                       final int[] m1) {
-    assert 0L <= m0;
-    if (0L == m0) {
-      assert isZero(m1);
-      return ZERO; }
-    //if (isZero(big)) {
-    //  return stripLeadingZeros(shiftLeft(m0,leftShift)); }
-    return stripLeadingZeros(subtract(shiftLeft(m0,shift),m1)); }
+    if (0L == m0) { assert isZero(m1); return ZERO; }
+    assert 0L < m0;
+    if (isZero(m1)) { return shiftLeft(m0,shift); }
+    return subtract(shiftLeft(m0,shift),m1); }
 
   //--------------------------------------------------------------
   // squaring --- used in multiplication

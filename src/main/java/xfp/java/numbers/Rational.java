@@ -6,13 +6,12 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Objects;
 
-import xfp.java.Debug;
 import xfp.java.exceptions.Exceptions;
 
 /** Ratios of {@link UnNatural}.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-30
+ * @version 2019-05-31
  */
 
 public final class Rational extends Number
@@ -523,7 +522,7 @@ implements Ringlike<Rational> {
     final UnNatural[] nd = UnNatural.reduce(n0,d0);
     return new Rational(nonNegative,nd[0],nd[1]); }
   
-  private final Rational reduce () {
+  public final Rational reduce () {
     return reduce(nonNegative(),numerator(),denominator()); }
 
   //  private static final Rational reduce (final boolean nonNegative,

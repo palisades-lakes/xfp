@@ -336,8 +336,8 @@ public final class Common {
                final BigInteger z1) {
     assert 0 <= z0.signum();
     assert 0 <= z1.signum();
-    //    Debug.println("z0=" + z0.toString(0x10));
-    //    Debug.println("z1=" + z1.toString(0x10));
+    //    //Debug.println("z0=" + z0.toString(0x10));
+    //    //Debug.println("z1=" + z1.toString(0x10));
     hexRoundTrip(fromBI,valueOf,z0);
     hexRoundTrip(fromBI,valueOf,z1);
     biRoundTrip(fromBI,toBI,z0);
@@ -1048,36 +1048,34 @@ public final class Common {
   addTest (final Generator g,
            final List<Accumulator> accumulators,
            final Accumulator exact) {
-    Debug.DEBUG=false;
     Assertions.assertTrue(exact.isExact());
     final double[] x = (double[]) g.next();
-    Debug.println(Classes.className(exact));
-    Debug.println(exact.toString());
+    //Debug.println(Classes.className(exact));
+    //Debug.println(exact.toString());
     //Debug.println(g.name());
     for (final Accumulator a : accumulators) {
       Accumulator e = exact.clear();
       Accumulator p = a.clear();
+      //Debug.println(Classes.className(p));
       for (final double xi : x) {
+        //Debug.println();
+        //Debug.println("xi=" + Double.toHexString(xi));
+        //Debug.println(Classes.className(e));
         e = e.add(xi);
         p = p.add(xi);
         final double truth = e.doubleValue();
         final double pred = p.doubleValue();
-        Debug.println();
-        Debug.println("xi=" + Double.toHexString(xi));
-        Debug.println(Classes.className(e));
-        Debug.println(Double.toHexString(truth));
-        Debug.println(Classes.className(p));
-        Debug.println(Double.toHexString(pred));
+        //Debug.println("truth=" + Double.toHexString(truth));
+        //Debug.println("pred=" + Double.toHexString(pred));
         if (a.isExact()) {
           Assertions.assertEquals(truth,pred,
             "\nexact: " + Classes.className(exact)
-            + " = " + Double.toHexString(truth)
+            + "\n= " + Double.toHexString(truth)
             + "\n= " + exact.value()
             + "\npred: " + Classes.className(a)
-            + " = " + Double.toHexString(pred)
+            + "\n= " + Double.toHexString(pred)
             + "\n= " + a.value()
-            + "\n"); } } }
-    Debug.DEBUG=false; }
+            + "\n"); } } } }
 
   private static final void
   addAllTest (final Generator g,
@@ -1088,15 +1086,15 @@ public final class Common {
     final double[] x = (double[]) g.next();
     //final Accumulator efinal = exact.clear().addAll(x);
     final Accumulator efinal = exact.clear().addAll(x);
-    Debug.println(Classes.className(exact));
-    Debug.println(exact.toString());
+    //Debug.println(Classes.className(exact));
+    //Debug.println(exact.toString());
     final double truth = efinal.doubleValue();
     //Debug.println(g.name());
     for (final Accumulator a : accumulators) {
       //final long t0 = System.nanoTime();
       final Accumulator pfinal = a.clear().addAll(x);
-      Debug.println(Classes.className(a));
-      Debug.println(pfinal.value().toString());
+      //Debug.println(Classes.className(a));
+      //Debug.println(pfinal.value().toString());
       final double pred = pfinal.doubleValue();
       //final long t1 = (System.nanoTime()-t0);
       if (a.isExact()) {
@@ -1110,7 +1108,7 @@ public final class Common {
           + "\n"); }
       //final double l1d = Math.abs(truth-pred);
       //final double l1n = Math.max(1.0,Math.abs(truth));
-      //      Debug.println(
+      //      //Debug.println(
       //        String.format("%32s %8.2fms ",Classes.className(a),
       //          Double.valueOf(t1*1.0e-6))
       //        + toHexString(l1d)

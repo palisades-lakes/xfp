@@ -1,10 +1,8 @@
 package xfp.java.numbers;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.Objects;
 
-import xfp.java.Debug;
 import xfp.java.exceptions.Exceptions;
 
 /** A sign times a {@link UnNatural} significand times 2 to a
@@ -74,12 +72,12 @@ implements Ringlike<BigFloat> {
                                      final boolean n1,
                                      final long t1,
                                      final int leftShift) {
+    //Debug.println("t0=" + Arrays.toString(t0.magnitude()));
+    //Debug.println("t1=" + Arrays.toString(Bei.valueOf(t1,leftShift)));
     //assert t0.signum() >= 0;
     if (n0 ^ n1) { // different signs
       final int c = t0.compareTo(t1,leftShift);
-      Debug.println("t0=" + Arrays.toString(t0.magnitude()));
-      Debug.println("t1=" + Arrays.toString(Bei.valueOf(t1,leftShift)));
-      Debug.println("c=" + c);
+      //Debug.println("c=" + c);
       if (0 == c) { return ZERO; }
       // t1 > t0
       if (0 > c) {
@@ -94,53 +92,53 @@ implements Ringlike<BigFloat> {
                               final long t11,
                               final int e11) {
 
-    Debug.println("n1=" + n1);
-    Debug.println("t11=" + Long.toHexString(t11));
-    Debug.println("e11=" + e11);
+    //Debug.println("n1=" + n1);
+    //Debug.println("t11=" + Long.toHexString(t11));
+    //Debug.println("e11=" + e11);
     if (0 == t11) { return this; }
     assert 0L < t11;
 
-        final long t1 = t11;
-        final int e1 = e11;
+        //final long t1 = t11;
+        //final int e1 = e11;
 
-//    final int shift = Numbers.loBit(t11);
-//    Debug.println("shift=" + shift);
-//    final long t1;
-//    final int e1;
-//    if (0 == shift) { t1=t11; e1=e11; }
-//    else { t1 = (t11 >>> shift); e1 = e11 + shift; }
+    final int shift = Numbers.loBit(t11);
+    //Debug.println("shift=" + shift);
+    final long t1;
+    final int e1;
+    if (0 == shift) { t1=t11; e1=e11; }
+    else { t1 = (t11 >>> shift); e1 = e11 + shift; }
 
-    Debug.println("t1=" + Long.toHexString(t1));
-    Debug.println("e1=" + e1);
+    //Debug.println("t1=" + Long.toHexString(t1));
+    //Debug.println("e1=" + e1);
 
     final boolean n0 = nonNegative();
     final UnNatural t0 = significand();
     final int e0 = exponent();
-    Debug.println("n0=" + n0);
-    Debug.println("t0=" + t0);
-    Debug.println("e0=" + e0);
+    //Debug.println("n0=" + n0);
+    //Debug.println("t0=" + t0);
+    //Debug.println("e0=" + e0);
 
     // adjust significands to the same exponent
     final int de = e1 - e0;
-    Debug.println("de=" + de);
+    //Debug.println("de=" + de);
     final BigFloat q;
     if (0 < de) { q = add(n0,t0,e0,n1,t1,de); }
     else if (0 == de) { q = add(n0,t0,e1,n1,t1); }
     else {
       final UnNatural ts = t0.shiftLeft(-de);
-      Debug.println("ts=" + ts);
+      //Debug.println("ts=" + ts);
       q = add(n0,ts,e1,n1,t1); }
-    Debug.println("q=" + q);
+    //Debug.println("q=" + q);
     return q; }
 
   //--------------------------------------------------------------
 
   public final BigFloat add (final double z) {
     assert Double.isFinite(z);
-    Debug.println();
-    Debug.println("BigFloat.add(double)");
-    Debug.println("this=" + toString());
-    Debug.println("z=" + Double.toHexString(z));
+    //Debug.println();
+    //Debug.println("BigFloat.add(double)");
+    //Debug.println("this=" + toString());
+    //Debug.println("z=" + Double.toHexString(z));
     return add(
       Doubles.nonNegative(z),
       Doubles.significand(z),

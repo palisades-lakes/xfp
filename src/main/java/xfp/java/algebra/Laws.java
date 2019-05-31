@@ -10,8 +10,6 @@ import java.util.function.UnaryOperator;
 
 import com.google.common.collect.ImmutableList;
 
-import xfp.java.Debug;
-
 /** Constructor methods for Predicates/BiPredicate closures on
  * sets and operations.
  *

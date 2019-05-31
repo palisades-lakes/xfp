@@ -10,7 +10,6 @@ import xfp.java.Debug;
 import xfp.java.accumulators.Accumulator;
 import xfp.java.accumulators.BigFloatAccumulator;
 import xfp.java.accumulators.DistilledAccumulator;
-import xfp.java.linear.Dn;
 import xfp.java.numbers.Doubles;
 import xfp.java.prng.Generator;
 import xfp.java.prng.PRNG;
@@ -55,7 +54,7 @@ public final class Distill {
       public final Generator apply (final int dim) {
         final UniformRandomProvider urp0 = PRNG.well44497b(SEED0);
         final int emax = Common.deMax(dim)/2;
-        Debug.println("emax=" + emax);
+        //Debug.println("emax=" + emax);
         return Doubles.finiteGenerator(dim,urp0,emax); }
     },
     "exponential",
@@ -91,28 +90,28 @@ public final class Distill {
 
   //--------------------------------------------------------------
 
-  private static final double uRatio (final double[] x) {
-    double umin = Double.POSITIVE_INFINITY;
-    double umax = 0.0;
-    for (final double xi : x) {
-      final double u = Math.ulp(xi);
-      if (u < umin) { umin = u; }
-      if (umax < u) { umax = u; } }
-    return umax / umin; }
-
-  private static final int eRange (final double[] x) {
-    int emin = Integer.MAX_VALUE;
-    int emax = Integer.MIN_VALUE;
-    for (final double xi : x) {
-      final int e = Doubles.exponent(xi);
-      if (e < emin) { emin = e; }
-      if (emax < e) { emax = e; } }
-    return emax - emin; }
-
-  private static final int used (final double[] x) {
-    for (int i=x.length;i>0;i--) {
-      if (0 != x[i-1]) { return i; } }
-    return 0; }
+//  private static final double uRatio (final double[] x) {
+//    double umin = Double.POSITIVE_INFINITY;
+//    double umax = 0.0;
+//    for (final double xi : x) {
+//      final double u = Math.ulp(xi);
+//      if (u < umin) { umin = u; }
+//      if (umax < u) { umax = u; } }
+//    return umax / umin; }
+//
+//  private static final int eRange (final double[] x) {
+//    int emin = Integer.MAX_VALUE;
+//    int emax = Integer.MIN_VALUE;
+//    for (final double xi : x) {
+//      final int e = Doubles.exponent(xi);
+//      if (e < emin) { emin = e; }
+//      if (emax < e) { emax = e; } }
+//    return emax - emin; }
+//
+//  private static final int used (final double[] x) {
+//    for (int i=x.length;i>0;i--) {
+//      if (0 != x[i-1]) { return i; } }
+//    return 0; }
 
   //--------------------------------------------------------------
 
@@ -128,22 +127,22 @@ public final class Distill {
   //--------------------------------------------------------------
 
   public static final void main (final String[] args) {
-    Debug.DEBUG=true;
+    Debug.DEBUG=false;
     final Accumulator bfa = BigFloatAccumulator.make();
     final Accumulator da = DistilledAccumulator.make();
     final int dim = (32 * 1024) - 1;
-    Debug.println("dim=" + dim);
-    Debug.println("bound=" + (64*dim));
+    //Debug.println("dim=" + dim);
+    //Debug.println("bound=" + (64*dim));
     Arrays.sort(generators);
     for (final String k : generators) {
       final Generator g = factories.get(k).apply(dim);
-      Debug.println();
-      Debug.println("generator= " + k);
+      //Debug.println();
+      //Debug.println("generator= " + k);
       final double[] x = (double[]) g.next();
-      Debug.println("used= " + used(x));
-      Debug.println("condition= " + Dn.conditionSum(x));
-      Debug.println("uRatio= " + uRatio(x));
-      Debug.println("eRange= " + eRange(x));
+      //Debug.println("used= " + used(x));
+      //Debug.println("condition= " + Dn.conditionSum(x));
+      //Debug.println("uRatio= " + uRatio(x));
+      //Debug.println("eRange= " + eRange(x));
       final double[] bfp = partials(bfa,x);
       final double[] dp = partials(da,x);
       assert Arrays.equals(bfp,dp); } }

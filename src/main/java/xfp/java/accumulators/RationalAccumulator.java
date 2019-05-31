@@ -1,6 +1,5 @@
 package xfp.java.accumulators;
 
-import xfp.java.Debug;
 import xfp.java.numbers.Rational;
 
 /** Naive sum of <code>double</code> values with a Rational-valued 

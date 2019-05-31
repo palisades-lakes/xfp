@@ -25,8 +25,8 @@ public final class SumTest {
   @Test
   public final void overflowSum () {
     Debug.DEBUG=false;
-    Debug.println();
-    Debug.println("overflow");
+    //Debug.println();
+    //Debug.println("overflow");
     Common.overflowTests(
       Common.makeAccumulators(Common.accumulators())); 
     Debug.DEBUG=false; }
@@ -35,8 +35,8 @@ public final class SumTest {
   @Test
   public final void infiniteSum () {
     Debug.DEBUG=false;
-    Debug.println();
-    Debug.println("infinite");
+    //Debug.println();
+    //Debug.println("infinite");
     Common.infinityTests(
       Common.makeAccumulators(Common.accumulators())); 
     Debug.DEBUG=false; }
@@ -45,8 +45,8 @@ public final class SumTest {
   @Test
   public final void zeroSum () {
     Debug.DEBUG=false;
-    Debug.println();
-    Debug.println("sum");
+    //Debug.println();
+    //Debug.println("sum");
     Common.zeroSumTests(
       Common.zeroSumGenerators(DIM),
       Common.makeAccumulators(Common.accumulators()));  
@@ -56,8 +56,8 @@ public final class SumTest {
   @Test
   public final void sum () {
     Debug.DEBUG=false;
-    Debug.println();
-    Debug.println("sum");
+    //Debug.println();
+    //Debug.println("sum");
     Common.sumTests(
       Common.generators(DIM),
       Common.makeAccumulators(Common.accumulators()),
@@ -68,8 +68,8 @@ public final class SumTest {
   @Test
   public final void l2 () {
     Debug.DEBUG=false;
-    Debug.println();
-    Debug.println("l2");
+    //Debug.println();
+    //Debug.println("l2");
     Common.l2Tests(
       Common.generators(DIM),
       Common.makeAccumulators(Common.accumulators()),
@@ -80,8 +80,8 @@ public final class SumTest {
   @Test
   public final void dot () {
     Debug.DEBUG=false;
-    Debug.println();
-    Debug.println("dot");
+    //Debug.println();
+    //Debug.println("dot");
     Common.dotTests(
       Common.generators(DIM),
       Common.makeAccumulators(Common.accumulators()),
@@ -93,8 +93,8 @@ public final class SumTest {
   //@Test
   //public final void nanSum () {
   //  Debug.DEBUG=false;
-  //  Debug.println();
-  //  Debug.println("nonFInite");
+  //  //Debug.println();
+  //  //Debug.println("nonFInite");
   //  Common.nonFiniteTests(
   //    Common.makeAccumulators(Common.accumulators())); }
 
