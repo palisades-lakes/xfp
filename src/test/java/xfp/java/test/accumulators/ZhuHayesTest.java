@@ -51,7 +51,7 @@ public final class ZhuHayesTest {
   @SuppressWarnings("static-method")
   @Test
   public final void l2 () {
-    Debug.DEBUG = false;
+    Debug.DEBUG=false;
     Debug.println();
     Debug.println("l2");
     Common.l2Tests(

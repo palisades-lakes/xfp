@@ -13,11 +13,11 @@ import xfp.java.test.Common;
 /** Test summation algorithms. 
  * <p>
  * <pre>
- * mvn -q test -Dtest=xfp/java/test/accumulators/RationalAccumulatorTest > RationalAccumulatorTest.txt
+ * mvn -q test -Dtest=xfp/java/test/accumulators/RationalAccumulatorTest > RAT.txt
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-28
+ * @version 2019-05-30
  */
 
 public final class RationalAccumulatorTest {
@@ -28,21 +28,22 @@ public final class RationalAccumulatorTest {
     List.of("xfp.java.accumulators.RationalAccumulator");
   @Test
   public final void tests () {
-    Debug.DEBUG = false;
+    Debug.DEBUG=false;
     Debug.println();
     Debug.println(Classes.className(this));
     Common.sumTests(
       Common.generators(DIM),
       Common.makeAccumulators(accumulators),
       BigFloatAccumulator.make()); 
-    Common.l2Tests(
-      Common.generators(DIM),
-      Common.makeAccumulators(accumulators),
-      BigFloatAccumulator.make()); 
-    Common.dotTests(
-      Common.generators(DIM),
-      Common.makeAccumulators(accumulators),
-      BigFloatAccumulator.make());
+//    Common.l2Tests(
+//      Common.generators(DIM),
+//      Common.makeAccumulators(accumulators),
+//      BigFloatAccumulator.make()); 
+//    Common.dotTests(
+//      Common.generators(DIM),
+//      Common.makeAccumulators(accumulators),
+//      BigFloatAccumulator.make());
+    Debug.DEBUG=false;
     }
 
   //--------------------------------------------------------------

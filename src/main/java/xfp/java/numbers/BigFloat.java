@@ -1,15 +1,17 @@
 package xfp.java.numbers;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Objects;
 
+import xfp.java.Debug;
 import xfp.java.exceptions.Exceptions;
 
 /** A sign times a {@link UnNatural} significand times 2 to a
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-27
+ * @version 2019-05-30
  */
 
 public final class BigFloat
@@ -49,7 +51,7 @@ implements Ringlike<BigFloat> {
 
   //--------------------------------------------------------------
   // 0 leftShift
-  
+
   private static final BigFloat add (final boolean n0,
                                      final UnNatural t0,
                                      final int e,
@@ -57,10 +59,10 @@ implements Ringlike<BigFloat> {
                                      final long t1) {
     //assert t0.signum() >= 0;
     if (n0 ^ n1) { // different signs
-      final int c01 = t0.compareTo(t1);
-      if (0 == c01) { return ZERO; }
+      final int c = t0.compareTo(t1);
+      if (0 == c) { return ZERO; }
       // t1 > t0
-      if (0 > c01) {
+      if (0 > c) {
         return valueOf(n1,t0.subtractFrom(t1),e); }
       // t0 > t1
       return valueOf(n0,t0.subtract(t1),e); }
@@ -74,11 +76,14 @@ implements Ringlike<BigFloat> {
                                      final int leftShift) {
     //assert t0.signum() >= 0;
     if (n0 ^ n1) { // different signs
-      final int c01 = t0.compareTo(t1,leftShift);
-      if (0 == c01) { return ZERO; }
+      final int c = t0.compareTo(t1,leftShift);
+      Debug.println("t0=" + Arrays.toString(t0.magnitude()));
+      Debug.println("t1=" + Arrays.toString(Bei.valueOf(t1,leftShift)));
+      Debug.println("c=" + c);
+      if (0 == c) { return ZERO; }
       // t1 > t0
-      if (0 > c01) {
-        return valueOf(n1, t0.subtractFrom(t1,leftShift), e); }
+      if (0 > c) {
+        return valueOf(n1,t0.subtractFrom(t1,leftShift),e); }
       // t0 > t1
       return valueOf(n0,t0.subtract(t1,leftShift),e); }
     return valueOf(n0,t0.add(t1,leftShift),e); }
@@ -86,36 +91,67 @@ implements Ringlike<BigFloat> {
   //--------------------------------------------------------------
 
   private final BigFloat add (final boolean n1,
-                              final long t1,
-                              final int e1) {
+                              final long t11,
+                              final int e11) {
 
-    if (0 == t1) { return this; }
-    //assert 0 < t1;
+    Debug.println("n1=" + n1);
+    Debug.println("t11=" + Long.toHexString(t11));
+    Debug.println("e11=" + e11);
+    if (0 == t11) { return this; }
+    assert 0L < t11;
+
+        final long t1 = t11;
+        final int e1 = e11;
+
+//    final int shift = Numbers.loBit(t11);
+//    Debug.println("shift=" + shift);
+//    final long t1;
+//    final int e1;
+//    if (0 == shift) { t1=t11; e1=e11; }
+//    else { t1 = (t11 >>> shift); e1 = e11 + shift; }
+
+    Debug.println("t1=" + Long.toHexString(t1));
+    Debug.println("e1=" + e1);
 
     final boolean n0 = nonNegative();
     final UnNatural t0 = significand();
     final int e0 = exponent();
+    Debug.println("n0=" + n0);
+    Debug.println("t0=" + t0);
+    Debug.println("e0=" + e0);
 
     // adjust significands to the same exponent
     final int de = e1 - e0;
-    if (de >= 0) { return add(n0,t0,e0,n1,t1,de); }
-    return add(n0,t0.shiftLeft(-de),e1,n1,t1); }
+    Debug.println("de=" + de);
+    final BigFloat q;
+    if (0 < de) { q = add(n0,t0,e0,n1,t1,de); }
+    else if (0 == de) { q = add(n0,t0,e1,n1,t1); }
+    else {
+      final UnNatural ts = t0.shiftLeft(-de);
+      Debug.println("ts=" + ts);
+      q = add(n0,ts,e1,n1,t1); }
+    Debug.println("q=" + q);
+    return q; }
 
   //--------------------------------------------------------------
 
   public final BigFloat add (final double z) {
     assert Double.isFinite(z);
+    Debug.println();
+    Debug.println("BigFloat.add(double)");
+    Debug.println("this=" + toString());
+    Debug.println("z=" + Double.toHexString(z));
     return add(
       Doubles.nonNegative(z),
       Doubles.significand(z),
       Doubles.exponent(z)); }
 
-//  public final BigFloat add (final double z) {
-//    assert Double.isFinite(z);
-//    return add(
-//      Doubles.nonNegative(z),
-//      Doubles.significand(z),
-//      Doubles.exponent(z)); }
+  //  public final BigFloat add (final double z) {
+  //    assert Double.isFinite(z);
+  //    return add(
+  //      Doubles.nonNegative(z),
+  //      Doubles.significand(z),
+  //      Doubles.exponent(z)); }
 
   //--------------------------------------------------------------
 
@@ -177,6 +213,16 @@ implements Ringlike<BigFloat> {
     return negate(); }
 
   //--------------------------------------------------------------
+
+  // used in Rational.addWithDenom()?
+  public static final BigFloat multiply (final UnNatural x0,
+                                         final boolean p1,
+                                         final long x1) {
+    final int e0 = Numbers.loBit(x0);
+    final int e1 = Numbers.loBit(x1);
+    final UnNatural y0 = ((0 == e0) ? x0 : x0.shiftRight(e0));
+    final long y1 = ((0 == e1) ? x1 : (x1 >>> e1));
+    return valueOf(p1,y0.multiply(y1),e0+e1); }
 
   private final BigFloat multiply (final boolean nonNegative,
                                    final UnNatural t,
@@ -491,30 +537,36 @@ implements Ringlike<BigFloat> {
   //--------------------------------------------------------------
 
   private static final BigFloat valueOf (final boolean nonNegative,
-                                         final int e0,
-                                         final long t0)  {
-    if (0L == t0) { return ZERO; }
-    return valueOf(nonNegative,UnNatural.valueOf(t0),e0); }
+                                         final long t0,
+                                         final int e0)  {
+    if (0L==t0) { return ZERO; }
+    assert 0L < t0;
+    final int shift = Numbers.loBit(t0);
+    final long t1;
+    final int e1;
+    if (0 == shift) { t1=t0; e1=e0; }
+    else { t1 = (t0 >>> shift); e1 = e0 + shift; }
+    return valueOf(nonNegative,UnNatural.valueOf(t1),e1); }
 
   public static final BigFloat valueOf (final double x)  {
     return valueOf(
       Doubles.nonNegative(x),
-      Doubles.exponent(x),
-      Doubles.significand(x)); }
+      Doubles.significand(x),
+      Doubles.exponent(x)); }
 
   //--------------------------------------------------------------
 
   private static final BigFloat valueOf (final boolean nonNegative,
-                                         final int e0,
-                                         final int t0)  {
+                                         final int t0,
+                                         final int e0)  {
     if (0 == t0) { return ZERO; }
     return valueOf(nonNegative,UnNatural.valueOf(t0),e0); }
 
   public static final BigFloat valueOf (final float x)  {
     return valueOf(
       Floats.nonNegative(x),
-      Floats.exponent(x),
-      Floats.significand(x)); }
+      Floats.significand(x),
+      Floats.exponent(x)); }
 
   //--------------------------------------------------------------
 

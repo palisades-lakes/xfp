@@ -488,7 +488,7 @@ public final class Common {
         BigInteger.valueOf(13),
         BigInteger.valueOf(11)));
 
-    // Debug.DEBUG = true;
+    Debug.DEBUG=false;
 
     floatRoundingTest(fromFloat,toFloat,dist,string,
       fromBigIntegers.apply(
@@ -500,7 +500,7 @@ public final class Common {
         BigInteger.valueOf(0x331c0c32d0072fL),
         BigInteger.valueOf(0x1000000L)));
 
-    //Debug.DEBUG = false;
+    Debug.DEBUG=false;
 
     floatRoundingTest(fromFloat,toFloat,dist,string,
       fromBigIntegers.apply(
@@ -519,14 +519,14 @@ public final class Common {
     final Generator gd =
       Generators.positiveBigIntegerGenerator(
         PRNG.well44497b("seeds/Well44497b-2019-01-07.txt"));
-    //Debug.DEBUG = true;
+    Debug.DEBUG=false;
     for (int i=0;i<TRYS;i++) {
       // some longs will not be exactly representable as floats
       final BigInteger n = (BigInteger) gn.next();
       final BigInteger d = (BigInteger) gd.next();
       floatRoundingTest(fromFloat,toFloat,dist,string,
         fromBigIntegers.apply(n,d)); }
-    //Debug.DEBUG = false;
+    Debug.DEBUG=false;
   }
 
   private static final void
@@ -687,7 +687,7 @@ public final class Common {
         BigInteger.valueOf(13),
         BigInteger.valueOf(11)));
 
-    // Debug.DEBUG = true;
+    Debug.DEBUG=false;
 
     doubleRoundingTest(fromDouble,toDouble,dist,string,
       fromBigIntegers.apply(
@@ -699,7 +699,7 @@ public final class Common {
         BigInteger.valueOf(0x331c0c32d0072fL),
         BigInteger.valueOf(0x1000000L)));
 
-    //Debug.DEBUG = false;
+    Debug.DEBUG=false;
 
     doubleRoundingTest(fromDouble,toDouble,dist,string,
       fromBigIntegers.apply(
@@ -1048,7 +1048,7 @@ public final class Common {
   addTest (final Generator g,
            final List<Accumulator> accumulators,
            final Accumulator exact) {
-    Debug.DEBUG = false;
+    Debug.DEBUG=false;
     Assertions.assertTrue(exact.isExact());
     final double[] x = (double[]) g.next();
     Debug.println(Classes.className(exact));
@@ -1077,13 +1077,13 @@ public final class Common {
             + " = " + Double.toHexString(pred)
             + "\n= " + a.value()
             + "\n"); } } }
-    Debug.DEBUG = false; }
+    Debug.DEBUG=false; }
 
   private static final void
   addAllTest (final Generator g,
               final List<Accumulator> accumulators,
               final Accumulator exact) {
-    Debug.DEBUG = false;
+    Debug.DEBUG=false;
     Assertions.assertTrue(exact.isExact());
     final double[] x = (double[]) g.next();
     //final Accumulator efinal = exact.clear().addAll(x);
@@ -1116,7 +1116,7 @@ public final class Common {
       //        + toHexString(l1d)
       //        + " / " + toHexString(l1n) + " = "
       //        + String.format("%8.2e",Double.valueOf(l1d/l1n)));
-      Debug.DEBUG = false;
+      Debug.DEBUG=false;
     } }
 
   public static final void

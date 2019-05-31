@@ -10,7 +10,7 @@ import java.util.List;
 /** immutable arbitrary-precision non-negative integers.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-29
+ * @version 2019-05-30
  */
 
 public final class UnNatural extends Number
@@ -19,6 +19,8 @@ implements Ringlike<UnNatural> {
   private static final long serialVersionUID = 1L;
 
   private final int[] _mag;
+  public final int[] magnitude () { 
+    return Arrays.copyOf(_mag,_mag.length); }
 
   public final boolean isZero () { return 0 == _mag.length; }
 
@@ -85,7 +87,7 @@ implements Ringlike<UnNatural> {
     return unsafe(Bei.subtract(Bei.shiftLeft(m,leftShift),_mag)); }
 
   // only when this <= m
-  
+
   public final UnNatural subtractFrom (final long m) {
     assert 0L <= m;
     if (0L == m) { assert isZero(); return ZERO; }
@@ -211,17 +213,17 @@ implements Ringlike<UnNatural> {
     return valueOf(result.getValue()); }
 
   // remove common factors as if numerator and denominator
-//  public static final UnNatural[] reduce (final UnNatural n0,
-//                                          final UnNatural d0) {
-//    final MutableUnNatural[] nd =
-//      MutableUnNatural.reduce(
-//        MutableUnNatural.valueOf(n0._mag),
-//        MutableUnNatural.valueOf(d0._mag));
-//    return new UnNatural[] 
-//      { valueOf(nd[0].getValue()), 
-//        valueOf(nd[1].getValue()), }; }
+  //  public static final UnNatural[] reduce (final UnNatural n0,
+  //                                          final UnNatural d0) {
+  //    final MutableUnNatural[] nd =
+  //      MutableUnNatural.reduce(
+  //        MutableUnNatural.valueOf(n0._mag),
+  //        MutableUnNatural.valueOf(d0._mag));
+  //    return new UnNatural[] 
+  //      { valueOf(nd[0].getValue()), 
+  //        valueOf(nd[1].getValue()), }; }
 
-    public static final UnNatural[] reduce (final UnNatural n0,
+  public static final UnNatural[] reduce (final UnNatural n0,
                                           final UnNatural d0) {
     final int shift = 
       Math.min(Numbers.loBit(n0),Numbers.loBit(d0));
@@ -265,8 +267,12 @@ implements Ringlike<UnNatural> {
   public final int getLowestSetBit () {
     return Bei.getLowestSetBit(_mag); }
 
+  public final int loBit () { return getLowestSetBit(); }
+  
   public final int bitLength () {
     return Bei.bitLength(_mag); }
+  
+  public final int hiBit () { return bitLength(); }
 
   public final int bitCount () {
     return Bei.bitCount(_mag); }

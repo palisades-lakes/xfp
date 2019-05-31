@@ -6,12 +6,13 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Objects;
 
+import xfp.java.Debug;
 import xfp.java.exceptions.Exceptions;
 
 /** Ratios of {@link UnNatural}.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-29
+ * @version 2019-05-30
  */
 
 public final class Rational extends Number
@@ -98,38 +99,6 @@ implements Ringlike<Rational> {
 
   //--------------------------------------------------------------
 
-  //  private static final Rational add (final boolean p0,
-  //                                     final UnNatural n0,
-  //                                     final UnNatural d0,
-  //                                     final boolean p1,
-  //                                     final UnNatural n1) {
-  //    final UnNatural n0d1 = n0;
-  //    final UnNatural n1d0 = n1.multiply(d0);
-  //    final boolean p;
-  //    final UnNatural n;
-  //    if (p0) {
-  //      if (p1) { n = n0d1.add(n1d0); p = true; }
-  //      else {
-  //        final int c = n0d1.compareTo(n1d0);
-  //        if (0 == c) { return ZERO; }
-  //        if (0 < c) { n = n0d1.subtract(n1d0); p = true; }
-  //        else { n = n1d0.subtract(n0d1); p = false; } } }
-  //    else { 
-  //      if (p1) {
-  //        final int c = n1d0.compareTo(n0d1);
-  //        if (0 == c) { return ZERO; }
-  //        if (0 < c) { n = n1d0.subtract(n0d1); p = true; }
-  //        else { n = n0d1.subtract(n1d0); p = false; } }
-  //      else { n = n0d1.add(n1d0); p = false; } } 
-  //    final UnNatural d = d0;
-  //    return valueOf(p,n,d); }
-
-  //  private final Rational add (final boolean p,
-  //                              final UnNatural n) {
-  //    return add(nonNegative(),numerator(),denominator(),p,n); }  
-
-  //--------------------------------------------------------------
-
   private static final Rational add (final boolean p0,
                                      final UnNatural n0,
                                      final UnNatural d0,
@@ -202,26 +171,49 @@ implements Ringlike<Rational> {
                                               final boolean p1,
                                               final long n1,
                                               final int e1) {
-    final UnNatural n0d1 = n0.shiftLeft(e1);
-    final UnNatural n1d0 = d0.multiply(n1);
-    final boolean p;
-    final UnNatural n;
-    if (p0) {
-      if (p1) { n = n0d1.add(n1d0); p = true; }
-      else {
-        final int c = n0d1.compareTo(n1d0);
-        if (0 == c) { return ZERO; }
-        if (0 < c) { n = n0d1.subtract(n1d0); p = true; }
-        else { n = n1d0.subtract(n0d1); p = false; } } }
-    else { 
-      if (p1) {
-        final int c = n1d0.compareTo(n0d1);
-        if (0 == c) { return ZERO; }
-        if (0 < c) { n = n1d0.subtract(n0d1); p = true; }
-        else { n = n0d1.subtract(n1d0); p = false; } }
-      else { n = n0d1.add(n1d0); p = false; } } 
-    final UnNatural d = d0.shiftLeft(e1);
-    return valueOf(p,n,d); }
+    //Debug.println("addWithDenom");
+    //Debug.println("p0=" + p0);
+    //Debug.println("n0=" + n0);
+    //Debug.println("d0=" + d0);
+    //Debug.println("p1=" + p1);
+    //Debug.println("n1=" + n1);
+    //Debug.println("e1=" + e1);
+    final BigFloat n0d1 = BigFloat.valueOf(p0,n0,e1);
+    final BigFloat n1d0 = BigFloat.multiply(d0,p1,n1);
+    final BigFloat n = n0d1.add(n1d0);
+    final BigFloat d = BigFloat.valueOf(true,d0,e1);
+    //Debug.println("n0d1=" + n0d1);
+    //Debug.println("n1d0=" + n1d0);
+    //Debug.println("n=" + n);
+    //Debug.println("d=" + d);
+    return valueOf(n,d); }
+
+  //  private static final Rational addWithDenom (final boolean p0,
+  //                                              final UnNatural n0,
+  //                                              final UnNatural d0,
+  //                                              final boolean p1,
+  //                                              final long n1,
+  //                                              final int e1) {
+  //    final UnNatural n0d1 = n0.shiftLeft(e1);
+  //    final UnNatural n1d0 = d0.multiply(n1);
+  //    final boolean p;
+  //    final UnNatural n;
+  //    if (p0) {
+  //      if (p1) { n = n0d1.add(n1d0); p = true; }
+  //      else {
+  //        final int c = n0d1.compareTo(n1d0);
+  //        if (0 == c) { return ZERO; }
+  //        if (0 < c) { n = n0d1.subtract(n1d0); p = true; }
+  //        else { n = n1d0.subtract(n0d1); p = false; } } }
+  //    else { 
+  //      if (p1) {
+  //        final int c = n1d0.compareTo(n0d1);
+  //        if (0 == c) { return ZERO; }
+  //        if (0 < c) { n = n1d0.subtract(n0d1); p = true; }
+  //        else { n = n0d1.subtract(n1d0); p = false; } }
+  //      else { n = n0d1.add(n1d0); p = false; } } 
+  //    final UnNatural d = d0.shiftLeft(e1);
+  //    return valueOf(p,n,d); }
 
   private final Rational addWithDenom (final boolean p,
                                        final long n,
@@ -515,13 +507,14 @@ implements Ringlike<Rational> {
                     final UnNatural numerator,
                     final UnNatural denominator) {
     //    super();
+    //assert (0 == numerator.loBit()) || (0 == denominator.loBit());
     _nonNegative = nonNegative;
     _numerator = numerator;
     _denominator = denominator; }
 
   //--------------------------------------------------------------
 
-  private static final Rational reduced (final boolean nonNegative,
+  private static final Rational reduce (final boolean nonNegative,
                                          final UnNatural n0,
                                          final UnNatural d0) {
     if (n0.isZero()) { return ZERO; }
@@ -529,42 +522,45 @@ implements Ringlike<Rational> {
       return new Rational(nonNegative,n0,UnNatural.ONE); }
     final UnNatural[] nd = UnNatural.reduce(n0,d0);
     return new Rational(nonNegative,nd[0],nd[1]); }
+  
+  private final Rational reduce () {
+    return reduce(nonNegative(),numerator(),denominator()); }
 
-//  private static final Rational reduced (final boolean nonNegative,
-//                                         final UnNatural n0,
-//                                         final UnNatural d0) {
-//    if (n0.isZero()) { return ZERO; }
-//    
-//    final int shift = 
-//      Math.min(Numbers.loBit(n0),Numbers.loBit(d0));
-//    
-//    final UnNatural n = (shift != 0) ? n0.shiftRight(shift) : n0;
-//    final UnNatural d = (shift != 0) ? d0.shiftRight(shift) : d0;
-//    
-//    if (n.equals(d)) { return (nonNegative ? ONE : MINUS_ONE); }
-//    if (UnNatural.ONE.equals(d)) {
-//      return new Rational(nonNegative,n,UnNatural.ONE); }
-//    if (UnNatural.ONE.equals(n)) {
-//      return new Rational(nonNegative,UnNatural.ONE,d); }
-//    final UnNatural gcd = n.gcd(d);
-//    if (gcd.compareTo(UnNatural.ONE) > 0) {
-//      return 
-//        new Rational(
-//          nonNegative,
-//          n.divide(gcd),
-//          d.divide(gcd)); }
-//    return new Rational(nonNegative,n,d); }
+  //  private static final Rational reduce (final boolean nonNegative,
+  //                                         final UnNatural n0,
+  //                                         final UnNatural d0) {
+  //    if (n0.isZero()) { return ZERO; }
+  //    
+  //    final int shift = 
+  //      Math.min(Numbers.loBit(n0),Numbers.loBit(d0));
+  //    
+  //    final UnNatural n = (shift != 0) ? n0.shiftRight(shift) : n0;
+  //    final UnNatural d = (shift != 0) ? d0.shiftRight(shift) : d0;
+  //    
+  //    if (n.equals(d)) { return (nonNegative ? ONE : MINUS_ONE); }
+  //    if (UnNatural.ONE.equals(d)) {
+  //      return new Rational(nonNegative,n,UnNatural.ONE); }
+  //    if (UnNatural.ONE.equals(n)) {
+  //      return new Rational(nonNegative,UnNatural.ONE,d); }
+  //    final UnNatural gcd = n.gcd(d);
+  //    if (gcd.compareTo(UnNatural.ONE) > 0) {
+  //      return 
+  //        new Rational(
+  //          nonNegative,
+  //          n.divide(gcd),
+  //          d.divide(gcd)); }
+  //    return new Rational(nonNegative,n,d); }
 
   //--------------------------------------------------------------
 
   public static final Rational valueOf (final boolean nonNegative,
                                         final UnNatural n,
                                         final UnNatural d) {
-    return reduced(nonNegative,n,d); }
+    return reduce(nonNegative,n,d); }
 
   public static final Rational valueOf (final boolean nonNegative,
                                         final UnNatural n) {
-    return reduced(nonNegative,n,UnNatural.ONE); }
+    return reduce(nonNegative,n,UnNatural.ONE); }
 
   // TODO: compute gcd and reduce longs
 
@@ -690,6 +686,34 @@ implements Ringlike<Rational> {
       0 <= (n.signum()),
       UnNatural.valueOf(n.abs())); }
 
+  public static final Rational valueOf (final BigFloat n0,
+                                        final BigFloat d0) {
+    //Debug.println("Rational.valueOf(BigFloat,BigFloat)");
+    //Debug.println("n0=" + n0);
+    //Debug.println("d0=" + d0);
+    final boolean p = ! (n0.nonNegative() ^ d0.nonNegative());
+    final UnNatural tn = n0.significand();
+    final int en = n0.exponent();
+    final UnNatural td = d0.significand();
+    final int ed = d0.exponent();
+    final int e = en - ed;
+//    if (0 < e) { return valueOf(p,tn.shiftLeft(e),td); }
+//    if (0 > e) { return valueOf(p,tn,td.shiftLeft(-e)); }
+//    return valueOf(p,tn,td); 
+    if (0 < e) { return new Rational(p,tn.shiftLeft(e),td); }
+    if (0 > e) { return new Rational(p,tn,td.shiftLeft(-e)); }
+    return new Rational(p,tn,td); }
+
+  public static final Rational valueOf (final BigFloat x) {
+    final UnNatural t = x.significand();
+    final int e = x.exponent();
+    if (0 < e) { 
+      return 
+        valueOf(x.nonNegative(),t.shiftLeft(e),UnNatural.ONE); }
+    if (0 > e) { 
+      return valueOf(x.nonNegative(),t,UnNatural.ZERO.setBit(-e)); }
+    return valueOf(x.nonNegative(),t,UnNatural.ONE); }
+
   public static final Rational valueOf (final Number x)  {
     if (x instanceof Rational) { return (Rational) x; }
     if (x instanceof Double) { return valueOf((Double) x); }
@@ -700,6 +724,7 @@ implements Ringlike<Rational> {
     if (x instanceof Long) { return valueOf((Long) x); }
     if (x instanceof UnNatural) { return valueOf((UnNatural) x); }
     if (x instanceof BigInteger) { return valueOf((BigInteger) x); }
+    if (x instanceof BigFloat) { return valueOf((BigFloat) x); }
     if (x instanceof BigDecimal) { return valueOf((BigDecimal) x); }
     throw Exceptions.unsupportedOperation(
       Rational.class,"valueOf",x); }

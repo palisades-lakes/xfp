@@ -22,7 +22,7 @@ import xfp.java.test.Common;
 public final class PartialSums {
 
   public static final void main (final String[] args) {
-    Debug.DEBUG = true;
+    Debug.DEBUG=true;
     final int n = (8*1024*1024) - 1;
     final UniformRandomProvider urp =
       PRNG.well44497b("seeds/Well44497b-2019-01-09.txt");

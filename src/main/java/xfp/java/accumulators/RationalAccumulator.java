@@ -44,8 +44,8 @@ implements Accumulator<RationalAccumulator> {
     assert Double.isFinite(z);
     //Debug.println("z=" + Double.toHexString(z));
     _sum = _sum.add(z);
-//    Debug.println("sum=" + _sum.toString());
-//    Debug.println("sum=" + Double.toHexString(_sum.doubleValue()));
+    //Debug.println("sum=" + _sum.toString());
+    //Debug.println("sum=" + Double.toHexString(_sum.doubleValue()));
     return this; }
 
   @Override

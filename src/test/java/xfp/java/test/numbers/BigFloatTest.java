@@ -4,6 +4,7 @@ import java.util.function.BinaryOperator;
 
 import org.junit.jupiter.api.Test;
 
+import xfp.java.Debug;
 import xfp.java.numbers.BigFloat;
 import xfp.java.numbers.Numbers;
 import xfp.java.numbers.UnNatural;
@@ -13,11 +14,11 @@ import xfp.java.test.Common;
 /** Test desired properties of BigFloat.
  * <p>
  * <pre>
- * mvn -q -Dtest=xfp/java/test/numbers/BigFloatTest test > BigFloatTest.txt
+ * mvn -q -Dtest=xfp/java/test/numbers/BigFloatTest test > BFT.txt
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-17
+ * @version 2019-05-30
  */
 
 public final class BigFloatTest {
@@ -28,7 +29,7 @@ public final class BigFloatTest {
     @SuppressWarnings({ "static-method" })
     @Test
     public final void testRounding () {
-      //Debug.DEBUG = true;
+      Debug.DEBUG=false;
       final BigFloat[] f =
       {
        BigFloat.valueOf(
@@ -50,7 +51,7 @@ public final class BigFloatTest {
         Common.floatRoundingTest(
           BigFloat::valueOf,Numbers::floatValue,dist,
           Object::toString,fi);  }
-      //Debug.DEBUG = false;
+      //Debug.DEBUG=false;
 
       Common.doubleRoundingTests(
         null,BigFloat::valueOf,Numbers::doubleValue,dist,
@@ -59,6 +60,7 @@ public final class BigFloatTest {
       Common.floatRoundingTests(
         null,BigFloat::valueOf,Numbers::floatValue,dist,
         Object::toString);
+      Debug.DEBUG=false;
     }
 
     //--------------------------------------------------------------

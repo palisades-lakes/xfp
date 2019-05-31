@@ -128,7 +128,7 @@ public final class Distill {
   //--------------------------------------------------------------
 
   public static final void main (final String[] args) {
-    Debug.DEBUG = true;
+    Debug.DEBUG=true;
     final Accumulator bfa = BigFloatAccumulator.make();
     final Accumulator da = DistilledAccumulator.make();
     final int dim = (32 * 1024) - 1;

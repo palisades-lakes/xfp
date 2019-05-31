@@ -29,10 +29,10 @@ import xfp.java.prng.PRNG;
 
 //----------------------------------------------------------------
 /** <pre>
- * mvn -q -Dtest=xfp/java/test/algebra/AlgebraicStructureTests test
+ * mvn -q -Dtest=xfp/java/test/algebra/AlgebraicStructureTests test > AST.txt
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-28
+ * @version 2019-05-30
  */
 
 @SuppressWarnings("unchecked")
@@ -63,16 +63,15 @@ public final class AlgebraicStructureTests {
   @Test
   public final void tests () {
 
+    Debug.DEBUG=false;
     structureTests(BigFloats.ADDITIVE_MAGMA,TRYS);
     structureTests(BigFloats.MULTIPLICATIVE_MAGMA,TRYS);
     structureTests(BigFloats.RING,TRYS);
 
     structureTests(RationalFloats.ADDITIVE_MAGMA,TRYS);
     structureTests(RationalFloats.MULTIPLICATIVE_MAGMA,TRYS);
-    Debug.DEBUG=false;
     structureTests(RationalFloats.FIELD,TRYS);
-    Debug.DEBUG=false;
-
+    
     structureTests(Rationals.ADDITIVE_MAGMA,TRYS);
     structureTests(Rationals.MULTIPLICATIVE_MAGMA,TRYS);
     structureTests(Rationals.FIELD,TRYS);
@@ -107,6 +106,7 @@ public final class AlgebraicStructureTests {
       structureTests(Dn.magma(n),SPACE_TRYS);
       structureTests(Dn.space(n),SPACE_TRYS);
     }
+    Debug.DEBUG=false;
   }
 
 

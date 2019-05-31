@@ -584,7 +584,7 @@ implements Ringlike<RationalFloat> {
   /** optimize denominator == 1 case. */
 
   private static final RationalFloat
-  reduced (final boolean nonNegative,
+  reduce (final boolean nonNegative,
            final UnNatural n,
            final int e) {
 
@@ -601,7 +601,7 @@ implements Ringlike<RationalFloat> {
 
 
   private static final RationalFloat
-  reduced (final boolean nonNegative,
+  reduce (final boolean nonNegative,
            final UnNatural n,
            final UnNatural d,
            final int e) {
@@ -609,7 +609,7 @@ implements Ringlike<RationalFloat> {
     if (n.isZero()) { return ZERO; }
 
     if (UnNatural.ONE.equals(d)) { 
-      return reduced(nonNegative,n,e); }
+      return reduce(nonNegative,n,e); }
 
     // TODO: is numerator 1 case worth optimizing?
     if (UnNatural.ONE.equals(n)) {
@@ -665,12 +665,12 @@ implements Ringlike<RationalFloat> {
                                              final UnNatural n,
                                              final UnNatural d,
                                              final int e) {
-    return reduced(nonNegative,n,d,e); }
+    return reduce(nonNegative,n,d,e); }
 
   public static final RationalFloat valueOf (final boolean nonNegative,
                                              final UnNatural n,
                                              final int e) {
-    return reduced(nonNegative,n,UnNatural.ONE,e); }
+    return reduce(nonNegative,n,UnNatural.ONE,e); }
 
   public static final RationalFloat valueOf (final boolean nonNegative,
                                              final UnNatural n,
@@ -718,17 +718,22 @@ implements Ringlike<RationalFloat> {
   //--------------------------------------------------------------
 
   private static final RationalFloat valueOf (final boolean nonNegative,
-                                              final int e,
-                                              final long t)  {
-    if (0L == t) { return ZERO; }
-    assert 0L < t;
-    return valueOf(nonNegative,UnNatural.valueOf(t),e); }
+                                              final long t0,
+                                              final int e0)  {
+    if (0L==t0) { return ZERO; }
+    assert 0L < t0;
+    final int shift = Numbers.loBit(t0);
+    final long t1;
+    final int e1;
+    if (0 == shift) { t1=t0; e1=e0; }
+    else { t1 = (t0 >>> shift); e1 = e0 + shift; }
+    return valueOf(nonNegative,UnNatural.valueOf(t1),e1); }
 
   public static final RationalFloat valueOf (final double x)  {
     return valueOf(
       Doubles.nonNegative(x),
-      Doubles.exponent(x),
-      Doubles.significand(x)); }
+      Doubles.significand(x),
+      Doubles.exponent(x)); }
 
   //--------------------------------------------------------------
 
