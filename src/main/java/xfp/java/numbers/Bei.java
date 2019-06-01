@@ -30,32 +30,35 @@ public final class Bei {
     (Integer.MAX_VALUE / Integer.SIZE) + 1; // (1 << 26)
 
   //--------------------------------------------------------------
-
+  // UNSAFE: assuming m has no leading zeros
+  
   public static final int[] shiftLeft (final int[] m,
-                                       final int n) {
+                                       final int bitShift) {
     if (isZero(m)) { return ZERO; }
-    if (n == 0) { return stripLeadingZeros(m); }
-    if (n < 0) { return shiftRightImpl(m,-n); }
-    final int nInts = n >>> 5;
-    final int nBits = n & 0x1f;
-    final int mLen = m.length;
-    int newMag[] = null;
-    if (nBits == 0) {
-      newMag = new int[mLen + nInts];
-      System.arraycopy(m,0,newMag,0,mLen); }
-    else {
-      int i = 0;
-      final int nBits2 = 32 - nBits;
-      final int highBits = m[0] >>> nBits2;
-      if (highBits != 0) {
-        newMag = new int[mLen + nInts + 1];
-        newMag[i++] = highBits; }
-      else { newMag = new int[mLen + nInts]; }
-      int j = 0;
-      while (j < (mLen - 1)) {
-        newMag[i++] = (m[j++] << nBits) | (m[j] >>> nBits2); }
-      newMag[i] = m[j] << nBits; }
-    return newMag; }
+    //if (n==0) { return stripLeadingZeros(m); }
+    if (bitShift==0) { return m; }
+    if (bitShift<0) { return shiftRightImpl(m,-bitShift); }
+    final int intShift = bitShift >>> 5;
+    final int remShift = bitShift & 0x1f;
+    final int n = m.length;
+    if (remShift==0) {
+      //final int[] newMag = new int[mLen + intShift];
+      //System.arraycopy(m,0,newMag,0,mLen); 
+      //return newMag;
+      return Arrays.copyOfRange(m,0,n+intShift); }
+    int m1[] = null;
+    int i = 0;
+    final int nBits2 = 32 - remShift;
+    final int highBits = m[0] >>> nBits2;
+    if (highBits != 0) {
+      m1 = new int[n + intShift + 1];
+      m1[i++] = highBits; }
+    else { m1 = new int[n + intShift]; }
+    int j = 0;
+    while (j < (n - 1)) {
+      m1[i++] = (m[j++] << remShift) | (m[j] >>> nBits2); }
+    m1[i] = m[j] << remShift; 
+    return m1; }
 
   public static final int[] shiftLeft (final long m,
                                        final int shift) {
@@ -63,12 +66,14 @@ public final class Bei {
                        (int) (m & 0xFFFFFFFFL), };
     return shiftLeft(m0,shift); }
 
+  //--------------------------------------------------------------
+  
   public static final int[] stripLeadingZeros (final int[] m) {
 
     final int n = m.length;
-    int keep = 0;
-    while ((keep < n) && (m[keep] == 0)) { keep++; }
-    return keep == 0 ? m : Arrays.copyOfRange(m,keep,n); }
+    int start = 0;
+    while ((start < n) && (m[start] == 0)) { start++; }
+    return (0==start) ? m : Arrays.copyOfRange(m,start,n); }
 
   public static final int[] stripLeadingZeros (final byte a[],
                                                final int off,
@@ -133,36 +138,36 @@ public final class Bei {
    * shift up (left) <code>bitShift</code> bits.
    */
 
-  private static final int intShift (final int bitShift) {
-    return bitShift >>> 5; }
+//  private static final int intShift (final int bitShift) {
+//    return bitShift >>> 5; }
 
   /** Remaining bits to shift up (left) after
    */
 
-  private static final int remShift (final int bitShift) {
-    return bitShift & 0x1f; }
+//  private static final int remShift (final int bitShift) {
+//    return bitShift & 0x1f; }
 
   /** How many <code>int</code> words does it take to hold
    * the non-zero bits of <code>k</code> shifted up (left)
    * <code>shift</code> bits.
    */
 
-  private static final int nWords (final long k,
-                                   final int shift) {
-    final int hi = hiBit(k) + shift;
-    if (64 < hi) { return 3; }
-    if (32 < hi) { return 2; }
-    return 1; }
+//  private static final int nWords (final long k,
+//                                   final int shift) {
+//    final int hi = hiBit(k) + shift;
+//    if (64 < hi) { return 3; }
+//    if (32 < hi) { return 2; }
+//    return 1; }
 
   /** The value of <code>k</code> shifted up (left) may require 
    * up to 3 <code>int/code>s to represent. This is the most 
    * significant word.
    */
 
-  private static final long hiPart (final long k,
-                                    final int shift) {
-    assert 64 > shift;
-    return k >>> (64 - shift); }
+//  private static final long hiPart (final long k,
+//                                    final int shift) {
+//    //assert 64 > shift;
+//    return k >>> (64 - shift); }
 
   // TODO: is it worth complicating the code by computing 
   // mid and low parts with just one shift?
@@ -172,22 +177,22 @@ public final class Bei {
    * significant word.
    */
 
-  private static final long midPart (final long k,
-                                     final int shift) {
-    assert 64 > shift;
-    final long ks = (k << shift);
-    return hiWord(ks); }
+//  private static final long midPart (final long k,
+//                                     final int shift) {
+//    //assert 64 > shift;
+//    final long ks = (k << shift);
+//    return hiWord(ks); }
 
   /** The value of <code>k</code> shifted up (left) may require 
    * up to 3 <code>int/code>s to represent. This is the least
    * significant word.
    */
 
-  private static final long loPart (final long k,
-                                    final int shift) {
-    assert 64 > shift;
-    final long ks = (k << shift);
-    return loWord(ks); }
+//  private static final long loPart (final long k,
+//                                    final int shift) {
+//    //assert 64 > shift;
+//    final long ks = (k << shift);
+//    return loWord(ks); }
 
   //--------------------------------------------------------------
   // WARNING: unsafe, assuming m0 has no leading zeros
@@ -195,55 +200,54 @@ public final class Bei {
   public static final int compare (final int[] m0,
                                    final long m1,
                                    final int bitShift) {
-    if (0==bitShift) { return compare(m0,m1); }
-    assert 0<bitShift : "bitShift=" + bitShift;
-    if (m1 < 0L) { return 1; }
+    //if (0==bitShift) { return compare(m0,m1); }
+    //assert 0<=m1
+    //assert 0<bitShift : "bitShift=" + bitShift;
+    //if (0L<m1) { return 1; }
+    
     final int n0 = m0.length;
 
-    final int intShift = intShift(bitShift);
-    final int remShift = remShift(bitShift);
-    final int nwords = nWords(m1,remShift);
+    //final int intShift = intShift(bitShift);
+    //final int remShift = remShift(bitShift);
+    //final int nwords = nWords(m1,remShift);
+    final int intShift = bitShift >>> 5;
+    final int remShift = bitShift & 0x1f;
+    final int nwords;
+    final int hi = hiBit(m1) + remShift;
+    if (64 < hi) { nwords = 3; }
+    else if (32 < hi) { nwords = 2; }
+    else { nwords = 1; }
+
     final int n1 = intShift + nwords;
     if (n0<n1) { return -1; }
     if (n0>n1) { return 1; }
 
     // most significant word in m0
-    final long m00 = unsigned(m0[0]);
-
+    int i = 0;
     if (3==nwords) {
-      final long m10 = hiPart(m1,remShift);
+      final long m00 = unsigned(m0[i++]);
+      //final long m10 = hiPart(m1,remShift);
+      final long m10 = m1 >>> (64-remShift);
       if (m00<m10) { return -1; }
-      if (m00>m10) { return 1; }
-      final long m01 = unsigned(m0[1]);
-      final long m11 = midPart(m1,remShift);
-      if (m01<m11) { return -1; }
-      if (m01>m11) { return 1; }
-      final long m02 = unsigned(m0[2]);
-      final long m12 = loPart(m1,remShift);
-      if (m02<m12) { return -1; }
-      if (m02>m12) { return 1; }
-      for (int i=3;i<n0;i++) { if (0!=m0[i]) { return 1; } }
-      return 0; }
+      if (m00>m10) { return 1; }  }
 
-    if (2==nwords) {
-      final long m10 = midPart(m1,remShift);
-      if (m00<m10) { return -1; }
-      if (m00>m10) { return 1; }
-      final long m01 = unsigned(m0[1]);
-      final long m11 = loPart(m1,remShift);
+    final long m1s = (m1 << remShift);
+    if (2<=nwords) {
+      final long m01 = unsigned(m0[i++]);
+      //final long m11 = midPart(m1,remShift);
+      final long m11 = hiWord(m1s);
       if (m01<m11) { return -1; }
-      if (m01>m11) { return 1; }
-      for (int i=2;i<n0;i++) { if (0!=m0[i]) { return 1; } }
-      return 0; }
+      if (m01>m11) { return 1; } }
 
     // 1 nonzero word after shifting
-    assert 1==nwords;
-    final long m10 = loPart(m1,remShift);
-    if (m00<m10) { return -1; }
-    if (m00>m10) { return 1; }
-    for (int i=1;i<n0;i++) { if (0!=m0[i]) { return 1; } }
+    final long m02 = unsigned(m0[i++]);
+    //final long m12 = loPart(m1,remShift);
+    final long m12 = loWord(m1s);
+    if (m02<m12) { return -1; }
+    if (m02>m12) { return 1; }
+    
+    while (i<n0) { if (0!=m0[i++]) { return 1; } }
     return 0; }
-
 
   //--------------------------------------------------------------
   // add
@@ -324,18 +328,27 @@ public final class Bei {
     //Debug.println("bitShift=" + bitShift);
 
     if (0L==m1) { return m0; }
-    if (isZero(m0)) { return shiftLeft(m1,bitShift); }
-    assert 0L < m1;
-    if (0 == bitShift) { return add(m0,m1); }
+    //if (isZero(m0)) { return shiftLeft(m1,bitShift); }
+    //assert 0L < m1;
+    
+    //if (0 == bitShift) { return add(m0,m1); }
 
     final int n0 = m0.length;
 
     //Debug.println("n0=" + n0);
 
-    final int intShift = intShift(bitShift);
-    final int remShift = remShift(bitShift);
-    final int nwords = nWords(m1,remShift);
-    assert (1<=nwords) && (nwords<=3);
+    //final int intShift = intShift(bitShift);
+    //final int remShift = remShift(bitShift);
+    //final int nwords = nWords(m1,remShift);
+    final int intShift = bitShift >>> 5;
+    final int remShift = bitShift & 0x1f;
+    final int nwords;
+    final int hi = hiBit(m1) + remShift;
+    if (64 < hi) { nwords = 3; }
+    else if (32 < hi) { nwords = 2; }
+    else { nwords = 1; }
+    //assert (1<=nwords) && (nwords<=3);
+
     final int n1 = intShift + nwords;
 
     //Debug.println("intShift=" + intShift);
@@ -361,15 +374,19 @@ public final class Bei {
     long sum;
 
     // add m1 words to m0 with carry
-    sum = loPart(m1,remShift);
+    //sum = loPart(m1,remShift);
+    final long m1s = (m1 << remShift);
+    sum = loWord(m1s);
     if (0<=i0) { sum += unsigned(m0[i0--]); }
     r0[ir--] = (int) sum;
     if (2<=nwords) {
-      sum = midPart(m1,remShift) + (sum >>> 32);
+      //sum = midPart(m1,remShift) + (sum >>> 32);
+      sum = hiWord(m1s) + (sum >>> 32);
       if (0<=i0) { sum += unsigned(m0[i0--]); }
       r0[ir--] = (int) sum; }
     if (3==nwords) {
-      sum = hiPart(m1,remShift) + (sum >>> 32);
+      //sum = hiPart(m1,remShift) + (sum >>> 32);
+      sum = (m1 >>> (64-remShift)) + (sum >>> 32);
       if (0<=i0) { sum += unsigned(m0[i0--]); }
       r0[ir--] = (int) sum; }
 
@@ -387,12 +404,9 @@ public final class Bei {
       final int r1[] = new int[nr + 1];
       System.arraycopy(r0,0,r1,1,nr);
       r1[0] = 0x01;
-      //return stripLeadingZeros(r1); }
       return r1; }
-
     // copy remainder of m0 if any
     while ((0<=i0) && (0<=ir)) { r0[ir--] = m0[i0--]; }
-
     return r0; }
 
   //--------------------------------------------------------------
@@ -437,13 +451,13 @@ public final class Bei {
 
   public static final int[] subtract (final int[] m0,
                                       final long m1) {
-    assert 0L <= m1;
+    //assert 0L <= m1;
     //if (0L == m1) { return stripLeadingZeros(m0); }
     if (0L == m1) { return m0; }
-    final int c = compare(m0,m1);
-    assert 0 <= c;
-    if (0 == c) { return ZERO; }
-    final int hi = (int) (m1 >>> 32);
+    //final int c = compare(m0,m1);
+    //assert 0 <= c;
+    //if (0 == c) { return ZERO; }
+    final long hi = hiWord(m1);
     int i0 = m0.length;
     final int result[] = new int[i0];
     long difference = 0;
@@ -454,8 +468,7 @@ public final class Bei {
       difference = unsigned(m0[--i0]) - loWord(m1);
       result[i0] = (int) difference;
       difference =
-        (unsigned(m0[--i0]) - unsigned(hi))
-        + (difference >> 32);
+        unsigned(m0[--i0]) - hi + (difference >> 32);
       result[i0] = (int) difference; }
     // Subtract remainder of longer number while borrow propagates
     boolean borrow = ((difference >> 32) != 0);
@@ -525,19 +538,27 @@ public final class Bei {
     //Debug.println("bitShift=" + bitShift);
 
     if (0L == m1) { return m0; }
-    assert 0L < m1;
-    if (0 == bitShift) { return subtract(m0,m1); }
+    //assert 0L < m1;
+    //if (0 == bitShift) { return subtract(m0,m1); }
 
     final int n0 = m0.length;
 
     //Debug.println("n0=" + n0);
 
-    final int intShift = intShift(bitShift);
-    final int remShift = remShift(bitShift);
-    final int nwords = nWords(m1,remShift);
-    assert (1<=nwords) && (nwords<=3);
-    final int n1 = intShift + nwords;
-    assert n1 <= n0; // because (m1 << bitShift) <= m0 
+    //final int intShift = intShift(bitShift);
+    //final int remShift = remShift(bitShift);
+    //final int nwords = nWords(m1,remShift);
+    final int intShift = bitShift >>> 5;
+    final int remShift = bitShift & 0x1f;
+    final int nwords;
+    final int hi = hiBit(m1) + remShift;
+    if (64 < hi) { nwords = 3; }
+    else if (32 < hi) { nwords = 2; }
+    else { nwords = 1; }
+    //assert (1<=nwords) && (nwords<=3);
+
+    //final int n1 = intShift + nwords;
+    //assert n1 <= n0; // because (m1 << bitShift) <= m0 
 
     //Debug.println("intShift=" + intShift);
     //Debug.println("remShift=" + remShift);
@@ -551,7 +572,7 @@ public final class Bei {
     final int r0[] = new int[n0];
     int i0=n0-1;
     final int i1=n0-intShift-1;
-    assert 0<=i1;
+    //assert 0<=i1;
 
     // copy unaffected low order m0 to result
     while ((i1<i0) && (0<=i0)) { 
@@ -563,7 +584,9 @@ public final class Bei {
     long dif = 0;
 
     // subtract m1 words from m0 with borrow
-    dif -= loPart(m1,remShift);
+    //dif -= loPart(m1,remShift);
+    final long m1s = (m1 << remShift);
+    dif -= loWord(m1s);
     if (0<=i0) { 
       dif += unsigned(m0[i0]); 
       r0[i0] = (int) dif; 
@@ -572,15 +595,19 @@ public final class Bei {
     //Debug.println("i0,i1=" + i0 + "," + i1);
     //Debug.println("r0=" + Arrays.toString(r0));
 
-    if (2<=nwords) { dif -= midPart(m1,remShift); }
+    if (2<=nwords) { 
+      //dif -= midPart(m1,remShift); }
+      dif -= hiWord(m1s); }
     if (0<=i0) { 
       dif += unsigned(m0[i0]); 
       r0[i0] = (int) dif; i0--; 
       dif = (dif >> 32); }
     //Debug.println("i0,i1=" + i0 + "," + i1);
     //Debug.println("r0=" + Arrays.toString(r0));
-    
-    if (3==nwords) { dif -= hiPart(m1,remShift); }
+
+    if (3==nwords) { 
+      //dif -= hiPart(m1,remShift); }
+      dif -= (m1 >>> (64-remShift)) ; }
     if (0<=i0) { 
       dif += unsigned(m0[i0]); 
       r0[i0] = (int) dif; 
@@ -599,11 +626,12 @@ public final class Bei {
     while (0<=i0) { r0[i0] = m0[i0]; i0--; }
 
     final int[] r1 = stripLeadingZeros(r0); 
-//    final int[] r2 = subtract0(m0,m1,bitShift); 
-//
-//    assert Arrays.equals(r1,r2) :
-//      "r1=" + Arrays.toString(r1)
-//      + "\nr2=" + Arrays.toString(r2);
+
+    //    final int[] r2 = subtract0(m0,m1,bitShift); 
+    //
+    //    assert Arrays.equals(r1,r2) :
+    //      "r1=" + Arrays.toString(r1)
+    //      + "\nr2=" + Arrays.toString(r2);
 
     return r1; }
 

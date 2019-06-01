@@ -61,10 +61,13 @@ implements Ringlike<BigFloat> {
       if (0 == c) { return ZERO; }
       // t1 > t0
       if (0 > c) {
-        return valueOf(n1,t0.subtractFrom(t1),e); }
+        final UnNatural t = t0.subtractFrom(t1);
+        return valueOf(n1,t,e); }
       // t0 > t1
-      return valueOf(n0,t0.subtract(t1),e); }
-    return valueOf(n0,t0.add(t1),e); }
+      final UnNatural t = t0.subtract(t1);
+      return valueOf(n0,t,e); }
+    final UnNatural t = t0.add(t1);
+       return valueOf(n0,t,e); }
 
   private static final BigFloat add (final boolean n0,
                                      final UnNatural t0,
@@ -81,10 +84,13 @@ implements Ringlike<BigFloat> {
       if (0 == c) { return ZERO; }
       // t1 > t0
       if (0 > c) {
-        return valueOf(n1,t0.subtractFrom(t1,leftShift),e); }
+        final UnNatural t = t0.subtractFrom(t1,leftShift);
+        return valueOf(n1,t,e); }
       // t0 > t1
-      return valueOf(n0,t0.subtract(t1,leftShift),e); }
-    return valueOf(n0,t0.add(t1,leftShift),e); }
+      final UnNatural t = t0.subtract(t1,leftShift);
+        return valueOf(n0,t,e); }
+    final UnNatural t = t0.add(t1,leftShift);
+    return valueOf(n0,t,e); }
 
   //--------------------------------------------------------------
 
@@ -96,7 +102,7 @@ implements Ringlike<BigFloat> {
     //Debug.println("t11=" + Long.toHexString(t11));
     //Debug.println("e11=" + e11);
     if (0 == t11) { return this; }
-    assert 0L < t11;
+    //assert 0L < t11;
 
         //final long t1 = t11;
         //final int e1 = e11;
@@ -106,7 +112,7 @@ implements Ringlike<BigFloat> {
     final long t1;
     final int e1;
     if (0 == shift) { t1=t11; e1=e11; }
-    else { t1 = (t11 >>> shift); e1 = e11 + shift; }
+    else { t1=(t11>>>shift); e1=e11+shift; }
 
     //Debug.println("t1=" + Long.toHexString(t1));
     //Debug.println("e1=" + e1);
@@ -512,7 +518,9 @@ implements Ringlike<BigFloat> {
       _exponent = e0; }
     else {
       _significand = t0.shiftRight(e1);
-      _exponent = Math.addExact(e0,e1); } }
+      //_exponent = Math.addExact(e0,e1);
+      _exponent = e0+e1;
+      } }
 
   //--------------------------------------------------------------
 
