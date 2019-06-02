@@ -7,15 +7,16 @@ import static xfp.java.numbers.Numbers.unsigned;
 
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.Objects;
 
 /** operations on <code>int[]</code>, interpreted
  * as big-endian arbitrary-precision non-negative integers.
  *
- * TODO: ensure no leading zeros in inputs
+ * TODO: should we get rid of the assumptions of no leading zeros,
+ * and leave it to callers to strip them as an optional 
+ * compression/optimization step?
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-31
+ * @version 2019-06-01
  */
 
 public final class Bei {
@@ -30,46 +31,11 @@ public final class Bei {
     (Integer.MAX_VALUE / Integer.SIZE) + 1; // (1 << 26)
 
   //--------------------------------------------------------------
-  // UNSAFE: assuming m has no leading zeros
-  
-  public static final int[] shiftLeft (final int[] m,
-                                       final int bitShift) {
-    if (isZero(m)) { return ZERO; }
-    //if (n==0) { return stripLeadingZeros(m); }
-    if (bitShift==0) { return m; }
-    if (bitShift<0) { return shiftRightImpl(m,-bitShift); }
-    final int intShift = bitShift >>> 5;
-    final int remShift = bitShift & 0x1f;
-    final int n = m.length;
-    if (remShift==0) {
-      //final int[] newMag = new int[mLen + intShift];
-      //System.arraycopy(m,0,newMag,0,mLen); 
-      //return newMag;
-      return Arrays.copyOfRange(m,0,n+intShift); }
-    int m1[] = null;
-    int i = 0;
-    final int nBits2 = 32 - remShift;
-    final int highBits = m[0] >>> nBits2;
-    if (highBits != 0) {
-      m1 = new int[n + intShift + 1];
-      m1[i++] = highBits; }
-    else { m1 = new int[n + intShift]; }
-    int j = 0;
-    while (j < (n - 1)) {
-      m1[i++] = (m[j++] << remShift) | (m[j] >>> nBits2); }
-    m1[i] = m[j] << remShift; 
-    return m1; }
 
-  public static final int[] shiftLeft (final long m,
-                                       final int shift) {
-    final int[] m0 = { (int) (m >>> 32),
-                       (int) (m & 0xFFFFFFFFL), };
-    return shiftLeft(m0,shift); }
+  private static final boolean leadingZero (final int[] m) {
+    return (0<m.length) && (0==m[0]); }
 
-  //--------------------------------------------------------------
-  
   public static final int[] stripLeadingZeros (final int[] m) {
-
     final int n = m.length;
     int start = 0;
     while ((start < n) && (m[start] == 0)) { start++; }
@@ -93,10 +59,50 @@ public final class Bei {
     return result; }
 
   //--------------------------------------------------------------
+  // UNSAFE: assuming m has no leading zeros
+
+  public static final int[] shiftLeft (final int[] m,
+                                       final int bitShift) {
+    assert (! leadingZero(m));
+    if (isZero(m)) { return ZERO; }
+    if (bitShift==0) { return m; }
+    if (bitShift<0) { return shiftRightImpl(m,-bitShift); }
+    final int intShift = bitShift >>> 5;
+        final int remShift = bitShift & 0x1f;
+        final int n = m.length;
+        if (remShift==0) {
+          return Arrays.copyOfRange(m,0,n+intShift); }
+        int m1[] = null;
+        int i = 0;
+        final int nBits2 = 32 - remShift;
+        final int highBits = m[0] >>> nBits2;
+      if (highBits != 0) {
+        m1 = new int[n + intShift + 1];
+        m1[i++] = highBits; }
+      else { m1 = new int[n + intShift]; }
+      int j = 0;
+      while (j < (n - 1)) {
+        m1[i++] = (m[j++] << remShift) | (m[j] >>> nBits2); }
+      m1[i] = m[j] << remShift; 
+      return m1; }
+
+  public static final int[] shiftLeft (final long m,
+                                       final int shift) {
+    final int m0 = (int) hiWord(m);
+    final int m1 = (int) loWord(m);
+    if (0==m0) {
+      if (0==m1) { return new int[0]; }
+      return shiftLeft(new int[] { m1 },shift); }
+    return shiftLeft(new int[] { m0, m1, },shift); }
+
+  //--------------------------------------------------------------
   // assuming m0 and m1 have no leading zeros
 
   public static final int compare (final int[] m0,
                                    final int[] m1) {
+    // TODO: assert necessary?
+    assert (! leadingZero(m0));
+    assert (! leadingZero(m1));
     final int n0 = m0.length;
     final int n1 = m1.length;
     if (n0<n1) { return -1; }
@@ -114,6 +120,8 @@ public final class Bei {
   // assuming m0 has no leading zeros
   public static final int compare (final int[] m0,
                                    final long m1) {
+    // TODO: assert necessary?
+    assert (! leadingZero(m0));
     if (m1 < 0L) { return 1; }
     final int n0 = m0.length;
     final long m10 = hiWord(m1);
@@ -138,36 +146,36 @@ public final class Bei {
    * shift up (left) <code>bitShift</code> bits.
    */
 
-//  private static final int intShift (final int bitShift) {
-//    return bitShift >>> 5; }
+  //  private static final int intShift (final int bitShift) {
+  //return bitShift >>> 5; }
 
   /** Remaining bits to shift up (left) after
    */
 
-//  private static final int remShift (final int bitShift) {
-//    return bitShift & 0x1f; }
+  //  private static final int remShift (final int bitShift) {
+  //return bitShift & 0x1f; }
 
   /** How many <code>int</code> words does it take to hold
    * the non-zero bits of <code>k</code> shifted up (left)
    * <code>shift</code> bits.
    */
 
-//  private static final int nWords (final long k,
-//                                   final int shift) {
-//    final int hi = hiBit(k) + shift;
-//    if (64 < hi) { return 3; }
-//    if (32 < hi) { return 2; }
-//    return 1; }
+  //  private static final int nWords (final long k,
+  //                               final int shift) {
+  //final int hi = hiBit(k) + shift;
+  //if (64 < hi) { return 3; }
+  //if (32 < hi) { return 2; }
+  //return 1; }
 
   /** The value of <code>k</code> shifted up (left) may require 
    * up to 3 <code>int/code>s to represent. This is the most 
    * significant word.
    */
 
-//  private static final long hiPart (final long k,
-//                                    final int shift) {
-//    //assert 64 > shift;
-//    return k >>> (64 - shift); }
+  //  private static final long hiPart (final long k,
+  //                                final int shift) {
+  ////assert 64 > shift;
+  //return k >>> (64 - shift); }
 
   // TODO: is it worth complicating the code by computing 
   // mid and low parts with just one shift?
@@ -177,34 +185,37 @@ public final class Bei {
    * significant word.
    */
 
-//  private static final long midPart (final long k,
-//                                     final int shift) {
-//    //assert 64 > shift;
-//    final long ks = (k << shift);
-//    return hiWord(ks); }
+  //  private static final long midPart (final long k,
+  //                                 final int shift) {
+  ////assert 64 > shift;
+  //final long ks = (k << shift);
+  //return hiWord(ks); }
 
   /** The value of <code>k</code> shifted up (left) may require 
    * up to 3 <code>int/code>s to represent. This is the least
    * significant word.
    */
 
-//  private static final long loPart (final long k,
-//                                    final int shift) {
-//    //assert 64 > shift;
-//    final long ks = (k << shift);
-//    return loWord(ks); }
+  //  private static final long loPart (final long k,
+  //                                final int shift) {
+  ////assert 64 > shift;
+  //final long ks = (k << shift);
+  //return loWord(ks); }
 
   //--------------------------------------------------------------
-  // WARNING: unsafe, assuming m0 has no leading zeros
 
   public static final int compare (final int[] m0,
                                    final long m1,
                                    final int bitShift) {
-    //if (0==bitShift) { return compare(m0,m1); }
-    //assert 0<=m1
-    //assert 0<bitShift : "bitShift=" + bitShift;
-    //if (0L<m1) { return 1; }
-    
+    // TODO: assert necessary?
+    assert (! leadingZero(m0));
+    if (0L==m1) {
+      if (isZero(m0)) { return 0; }
+      return 1; }
+    assert 0L<=m1;
+    if (0==bitShift) { return compare(m0,m1); }
+    assert 0<bitShift : "bitShift=" + bitShift;
+
     final int n0 = m0.length;
 
     //final int intShift = intShift(bitShift);
@@ -228,8 +239,8 @@ public final class Bei {
       final long m00 = unsigned(m0[i++]);
       //final long m10 = hiPart(m1,remShift);
       final long m10 = m1 >>> (64-remShift);
-      if (m00<m10) { return -1; }
-      if (m00>m10) { return 1; }  }
+    if (m00<m10) { return -1; }
+    if (m00>m10) { return 1; }  }
 
     final long m1s = (m1 << remShift);
     if (2<=nwords) {
@@ -245,7 +256,7 @@ public final class Bei {
     final long m12 = loWord(m1s);
     if (m02<m12) { return -1; }
     if (m02>m12) { return 1; }
-    
+
     while (i<n0) { if (0!=m0[i++]) { return 1; } }
     return 0; }
 
@@ -255,83 +266,88 @@ public final class Bei {
 
   public static final int[] add (final int[] m0,
                                  final int[] m1) {
+    // TODO: assert necessary?
+    assert (! leadingZero(m0));
+    assert (! leadingZero(m1));
     // If m0 is shorter, swap the two arrays
     if (m0.length < m1.length) { return add(m1,m0); }
     int i0 = m0.length;
     int i1 = m1.length;
-    final int result[] = new int[i0];
+    final int[] r0 = new int[i0];
     long sum = 0;
     if (i1 == 1) {
       sum = unsigned(m0[--i0]) + unsigned(m1[0]);
-      result[i0] = (int) sum; }
+      r0[i0] = (int) sum; }
     else {
       while (i1 > 0) {
         sum =
-          unsigned(m0[--i0]) + unsigned(m1[--i1])
+          unsigned(m0[--i0]) 
+          + unsigned(m1[--i1])
           + (sum >>> 32);
-        result[i0] = (int) sum; } }
+        r0[i0] = (int) sum; } }
     boolean carry = ((sum >>> 32) != 0);
     while ((i0 > 0) && carry) {
-      carry = ((result[--i0] = m0[i0] + 1) == 0); }
-    while (i0 > 0) { result[--i0] = m0[i0]; }
+      carry = ((r0[--i0] = m0[i0] + 1) == 0); }
+    while (i0 > 0) { r0[--i0] = m0[i0]; }
     if (carry) {
-      final int[] bigger = new int[result.length + 1];
-      System.arraycopy(result,0,bigger,1,result.length);
-      bigger[0] = 0x01;
-      return bigger; }
-    return result; }
+      final int[] r1 = new int[r0.length + 1];
+      System.arraycopy(r0,0,r1,1,r0.length);
+      r1[0] = 0x01;
+      return r1; }
+    return r0; }
 
   //--------------------------------------------------------------
 
   public static final int[] add (final int[] m0,
                                  final long m1) {
+    // TODO: assert necessary?
+    assert (! leadingZero(m0));
     assert 0L <= m1;
-    //if (0L == m1) { return stripLeadingZeros(m0); }
+    if (0L == m1) { return m0; }
     if (isZero(m0)) { return valueOf(m1); }
     long sum = 0;
     int n0 = m0.length;
     final int hi = (int) hiWord(m1);
     if (n0 == 1) { return valueOf(m1 + unsigned(m0[0])); }
-    final int[] result = new int[n0];
+    final int[] r0 = new int[n0];
     if (hi == 0) {
       sum = unsigned(m0[--n0]) + m1;
-      result[n0] = (int) sum; }
+      r0[n0] = (int) sum; }
     else {
       sum = unsigned(m0[--n0]) + loWord(m1);
-      result[n0] = (int) sum;
+      r0[n0] = (int) sum;
       sum = unsigned(m0[--n0]) + unsigned(hi) + (sum >>> 32);
-      result[n0] = (int) sum; }
+      r0[n0] = (int) sum; }
 
     boolean carry = (hiWord(sum) != 0L);
     while ((n0 > 0) && carry) {
-      carry = ((result[--n0] = m0[n0] + 1) == 0); }
-    while (n0 > 0) { result[--n0] = m0[n0]; }
+      carry = ((r0[--n0] = m0[n0] + 1) == 0); }
+    while (n0 > 0) { r0[--n0] = m0[n0]; }
     if (carry) {
-      final int[] bigger = new int[result.length+1];
-      System.arraycopy(result,0,bigger,1,result.length);
-      bigger[0] = 0x01;
-      return bigger; }
-    return result; }
-  //  return stripLeadingZeros(bigger); }
-  //return stripLeadingZeros(result); }
+      final int[] r1 = new int[r0.length+1];
+      System.arraycopy(r0,0,r1,1,r0.length);
+      r1[0] = 0x01;
+      return r1; }
+    return r0; }
 
   //--------------------------------------------------------------
-  // UNSAFE: assuming m0 has no leading zeros
 
   public static final int[] add (final int[] m0,
                                  final long m1,
                                  final int bitShift)  {
+    // TODO: assert necessary?
+    assert (! leadingZero(m0));
+    if (0L==m1) { return m0; }
+    assert 0L < m1;
+    if (isZero(m0)) { return shiftLeft(m1,bitShift); }
+    if (0 == bitShift) { return add(m0,m1); }
+    assert 0<bitShift;
+
     //Debug.println("Bei.add");
     //Debug.println("m0=" + Arrays.toString(m0));
     //Debug.println("m1=" + Long.toHexString(m1));
     //Debug.println("m1=" + m1);
     //Debug.println("bitShift=" + bitShift);
-
-    if (0L==m1) { return m0; }
-    //if (isZero(m0)) { return shiftLeft(m1,bitShift); }
-    //assert 0L < m1;
-    
-    //if (0 == bitShift) { return add(m0,m1); }
 
     final int n0 = m0.length;
 
@@ -356,9 +372,9 @@ public final class Bei {
     //Debug.println("nwords=" + nwords);
     //Debug.println("n1=" + n1);
     //Debug.println("m1=[" + ((int) hiPart(m1,remShift))
-    //    + ", " + ((int) midPart(m1,remShift)) 
-    //    + ", " + ((int) loPart(m1,remShift))
-    //    + "]");
+    //+ ", " + ((int) midPart(m1,remShift)) 
+    //+ ", " + ((int) loPart(m1,remShift))
+    //+ "]");
 
     final int nr = Math.max(n0,n1);
     final int[] r0 = new int[nr];
@@ -412,35 +428,83 @@ public final class Bei {
   //--------------------------------------------------------------
   // subtract -- only where answer is positive
   //--------------------------------------------------------------
+  // m0 <- m0 - m1 
+  // if leading zeros, return new array, otherwise return m0
+
+  public static final int[] subtractInPlace (final int[] m0,
+                                             final int[] m1) {
+
+    // TODO: assert necessary?
+    assert (! leadingZero(m0));
+    assert (! leadingZero(m1));
+    if (isZero(m1)) { return m0; }
+
+    //final int c = compare(m0,m1);
+    //assert 0L <= c;
+    //if (c == 0) { return ZERO; }
+
+    int i0 = m0.length;
+    int i1 = m1.length;
+    long dif = 0;
+
+    // Subtract common parts of both numbers
+    while (i1 > 0) {
+      dif =
+        unsigned(m0[--i0])
+        - unsigned(m1[--i1])
+        + (dif >> 32);
+      m0[i0] = (int) dif; }
+
+    // Subtract remainder of longer number while borrow propagates
+    boolean borrow = ((dif >> 32) != 0);
+    while ((i0 > 0) && borrow) {
+      i0--;
+      m0[i0] = m0[i0]-1;
+      borrow = (m0[i0] == -1); }
+
+    // Copy remainder of longer number
+    while (i0 > 0) {
+      m0[--i0] = m0[i0]; }
+
+    final int[] r = m0;
+    ////Debug.println("4result=\n" + Numbers.toHexString(r));
+    return r; }
+
+  //--------------------------------------------------------------
 
   public static final int[] subtract (final int[] m0,
                                       final int[] m1) {
 
-    //if (isZero(little)) { return stripLeadingZeros(big); }
+    // TODO: assert necessary?
+    assert (! leadingZero(m0));
+    assert (! leadingZero(m1));
+    if (isZero(m1)) { return m0; }
+
     //final int c = compare(m0,m1);
     //assert 0L <= c;
     //if (c == 0) { return ZERO; }
-    int bigIndex = m0.length;
-    final int result[] = new int[bigIndex];
-    int littleIndex = m1.length;
-    long difference = 0;
+
+    int i0 = m0.length;
+    final int result[] = new int[i0];
+    int i1 = m1.length;
+    long dif = 0;
 
     // Subtract common parts of both numbers
-    while (littleIndex > 0) {
-      difference =
-        (unsigned(m0[--bigIndex])
-          - unsigned(m1[--littleIndex]))
-        + (difference >> 32);
-      result[bigIndex] = (int) difference; }
+    while (i1 > 0) {
+      dif =
+        unsigned(m0[--i0])
+        - unsigned(m1[--i1])
+        + (dif >> 32);
+      result[i0] = (int) dif; }
 
     // Subtract remainder of longer number while borrow propagates
-    boolean borrow = ((difference >> 32) != 0);
-    while ((bigIndex > 0) && borrow) {
-      borrow = ((result[--bigIndex] = m0[bigIndex] - 1) == -1); }
+    boolean borrow = ((dif >> 32) != 0);
+    while ((i0 > 0) && borrow) {
+      borrow = ((result[--i0] = m0[i0] - 1) == -1); }
 
     // Copy remainder of longer number
-    while (bigIndex > 0) {
-      result[--bigIndex] = m0[bigIndex]; }
+    while (i0 > 0) {
+      result[--i0] = m0[i0]; }
 
     final int[] r = stripLeadingZeros(result);
     ////Debug.println("4result=\n" + Numbers.toHexString(r));
@@ -451,12 +515,15 @@ public final class Bei {
 
   public static final int[] subtract (final int[] m0,
                                       final long m1) {
-    //assert 0L <= m1;
-    //if (0L == m1) { return stripLeadingZeros(m0); }
+    // TODO: assert necessary?
+    assert (! leadingZero(m0));
     if (0L == m1) { return m0; }
+    assert 0L < m1;
+
     //final int c = compare(m0,m1);
     //assert 0 <= c;
     //if (0 == c) { return ZERO; }
+
     final long hi = hiWord(m1);
     int i0 = m0.length;
     final int result[] = new int[i0];
@@ -476,7 +543,7 @@ public final class Bei {
       borrow = ((result[--i0] = m0[i0] - 1) == -1); }
     // Copy remainder of longer number
     while (i0 > 0) { result[--i0] = m0[i0]; }
-    return stripLeadingZeros(result); }
+    return result; }
 
   //--------------------------------------------------------------
   // only valid when m1 <= m0
@@ -484,10 +551,13 @@ public final class Bei {
   public static final int[] subtract (final long m0,
                                       final int[] m1) {
     assert 0L <= m0;
+    assert (! leadingZero(m1));
     if (isZero(m1)) { return valueOf(m0); }
-    final int c = compare(m0,m1);
-    assert 0 <= c;
-    if (0 == c) { return ZERO; }
+
+    //final int c = compare(m0,m1);
+    //assert 0 <= c;
+    //if (0 == c) { return ZERO; }
+
     final int highWord = (int) hiWord(m0);
     if (highWord == 0) {
       final int result[] = new int[1];
@@ -530,16 +600,18 @@ public final class Bei {
   public static final int[] subtract (final int[] m0,
                                       final long m1,
                                       final int bitShift) {
+    assert (! leadingZero(m0));
+    if (0L == m1) { return m0; }
+    assert 0L < m1;
+    if (0==bitShift) { return subtract(m0,m1); }
+    assert 0<bitShift;
+
     //Debug.println("Bei.subtract");
     //Debug.println("m0=" + Arrays.toString(m0));
     //Debug.println("m1=" + Arrays.toString(valueOf(m1,bitShift)));
     //Debug.println("m1=" + Long.toHexString(m1));
     //Debug.println("m1=" + m1);
     //Debug.println("bitShift=" + bitShift);
-
-    if (0L == m1) { return m0; }
-    //assert 0L < m1;
-    //if (0 == bitShift) { return subtract(m0,m1); }
 
     final int n0 = m0.length;
 
@@ -627,24 +699,36 @@ public final class Bei {
 
     final int[] r1 = stripLeadingZeros(r0); 
 
-    //    final int[] r2 = subtract0(m0,m1,bitShift); 
+    //final int[] r2 = subtract0(m0,m1,bitShift); 
     //
-    //    assert Arrays.equals(r1,r2) :
-    //      "r1=" + Arrays.toString(r1)
-    //      + "\nr2=" + Arrays.toString(r2);
+    //assert Arrays.equals(r1,r2) :
+    //  "r1=" + Arrays.toString(r1)
+    //  + "\nr2=" + Arrays.toString(r2);
 
+    return r1; }
+
+  //--------------------------------------------------------------
+
+  public static final int[] subtract (final long m0,
+                                      final int bitShift,
+                                      final int[] m1) {
+    if (isZero(m1)) { return m1; }
+    assert 0L < m0;
+    if (0 == bitShift) { return subtract(m0,m1); }
+    final int[] r0 = shiftLeft(m0,bitShift);
+    final int[] r1 = subtractInPlace(r0,m1); 
     return r1; }
 
   //--------------------------------------------------------------
   // only when big <= (val << leftShift)
 
-  public static final int[] subtract (final long m0,
-                                      final int shift,
-                                      final int[] m1) {
-    if (0L == m0) { assert isZero(m1); return ZERO; }
-    assert 0L < m0;
-    if (isZero(m1)) { return shiftLeft(m0,shift); }
-    return subtract(shiftLeft(m0,shift),m1); }
+  //  public static final int[] subtract (final long m0,
+  //                                  final int shift,
+  //                                  final int[] m1) {
+  //if (0L == m0) { assert isZero(m1); return ZERO; }
+  //assert 0L < m0;
+  //if (isZero(m1)) { return shiftLeft(m0,shift); }
+  //return subtract(shiftLeft(m0,shift),m1); }
 
   //--------------------------------------------------------------
   // squaring --- used in multiplication
@@ -654,13 +738,15 @@ public final class Bei {
 
   private static final int TOOM_COOK_SQUARE_THRESHOLD = 216;
 
-  private static int bitLength (final int[] val,
+  private static int bitLength (final int[] m,
                                 final int len) {
+    assert (! leadingZero(m));
     if (len == 0) { return 0; }
-    return ((len - 1) << 5) + Numbers.bitLength(val[0]); }
+    return ((len - 1) << 5) + Numbers.bitLength(m[0]); }
 
   private static final int[] square (final int[] m,
                                      final boolean isRecursion) {
+    assert (! leadingZero(m));
     if (isZero(m)) { return ZERO; }
     final int len = m.length;
 
@@ -678,6 +764,8 @@ public final class Bei {
   private static final int[] squareToLen (final int[] m,
                                           final int len,
                                           int[] z) {
+    assert (! leadingZero(m));
+    assert (0<=len);
     final int zlen = len << 1;
     if ((z == null) || (z.length < zlen)) {
       z = new int[zlen]; }
@@ -723,10 +811,26 @@ public final class Bei {
       a[i] = (b << n) | (c >>> n2); }
     a[len - 1] <<= n; }
 
+  private static final int addOne (final int[] a,
+                                   int offset,
+                                   int mlen,
+                                   final int carry) {
+    offset = a.length - 1 - mlen - offset;
+    final long t = unsigned(a[offset]) + unsigned(carry);
+    a[offset] = (int) t;
+    if ((t >>> 32) == 0) { return 0; }
+    while (--mlen >= 0) {
+      if (--offset < 0) { // Carry out of number
+        return 1; }
+      a[offset]++;
+      if (a[offset] != 0) { return 0; } }
+    return 1; }
+
   private static final int[] implSquareToLen (final int[] x,
                                               final int len,
                                               final int[] z,
                                               final int zlen) {
+    assert (! leadingZero(x));
 
     // The algorithm used here is adapted from Colin Plumb's C
     // library.
@@ -784,6 +888,7 @@ public final class Bei {
     return z; }
 
   private static final int[] squareKaratsuba (final int[] m) {
+    assert (! leadingZero(m));
     final int half = (m.length + 1) / 2;
     final int[] xl = getLower(m,half);
     final int[] xh = getUpper(m,half);
@@ -809,6 +914,7 @@ public final class Bei {
                                            final int upperSize,
                                            final int slice,
                                            final int fullsize) {
+    assert (! leadingZero(m));
     final int len = m.length;
     final int offset = fullsize - len;
     int start;
@@ -831,6 +937,8 @@ public final class Bei {
     return stripLeadingZeros(intSlice); }
 
   private static final int[] squareToomCook3 (final int[] m) {
+    assert (! leadingZero(m));
+
     final int len = m.length;
 
     // k is the size (in ints) of the lower-order slices.
@@ -892,6 +1000,7 @@ public final class Bei {
 
   private static final int[] getLower (final int[] m,
                                        final int n) {
+    assert (! leadingZero(m));
     final int len = m.length;
     if (len <= n) { return m; }
     final int lowerInts[] = new int[n];
@@ -900,6 +1009,7 @@ public final class Bei {
 
   private static final int[] getUpper (final int[] m,
                                        final int n) {
+    assert (! leadingZero(m));
     final int len = m.length;
     if (len <= n) { return ZERO; }
     final int upperLen = len - n;
@@ -909,6 +1019,8 @@ public final class Bei {
 
   private static final int[] multiplyKaratsuba (final int[] x,
                                                 final int[] y) {
+    assert (! leadingZero(x));
+    assert (! leadingZero(y));
     final int xlen = x.length;
     final int ylen = y.length;
 
@@ -942,6 +1054,8 @@ public final class Bei {
     return result; }
 
   private static final int[] exactDivideBy3 (final int[] m) {
+    assert (! leadingZero(m));
+
     final int len = m.length;
     final int[] result = new int[len];
     long x, w, q, borrow;
@@ -964,12 +1078,15 @@ public final class Bei {
         if (q >= 0xAAAAAAABL) { borrow++; } } }
     return stripLeadingZeros(result); }
 
-  private static final int[] multiplyToomCook3 (final int[] a,
-                                                final int[] b) {
-    final int alen = a.length;
-    final int blen = b.length;
+  private static final int[] multiplyToomCook3 (final int[] m0,
+                                                final int[] m1) {
+    assert (! leadingZero(m0));
+    assert (! leadingZero(m1));
 
-    final int largest = Math.max(alen,blen);
+    final int n0 = m0.length;
+    final int n1 = m1.length;
+
+    final int largest = Math.max(n0,n1);
 
     // k is the size (in ints) of the lower-order slices.
     final int k = (largest + 2) / 3;   // Equal to ceil(largest/3)
@@ -980,12 +1097,12 @@ public final class Bei {
     // Obtain slices of the numbers. a2 and b2 are the most
     // significant bits of the numbers a and b, and a0 and b0 the
     // least significant.
-    final int[] a2 = getToomSlice(a,k,r,0,largest);
-    final int[] a1 = getToomSlice(a,k,r,1,largest);
-    final int[] a0 = getToomSlice(a,k,r,2,largest);
-    final int[] b2 = getToomSlice(b,k,r,0,largest);
-    final int[] b1 = getToomSlice(b,k,r,1,largest);
-    final int[] b0 = getToomSlice(b,k,r,2,largest);
+    final int[] a2 = getToomSlice(m0,k,r,0,largest);
+    final int[] a1 = getToomSlice(m0,k,r,1,largest);
+    final int[] a0 = getToomSlice(m0,k,r,2,largest);
+    final int[] b2 = getToomSlice(m1,k,r,0,largest);
+    final int[] b1 = getToomSlice(m1,k,r,1,largest);
+    final int[] b0 = getToomSlice(m1,k,r,2,largest);
     final int[] v0 = multiply(a0,b0,true);
     int[] da1 = add(a2,a0);
     int[] db1 = add(b2,b0);
@@ -1053,10 +1170,12 @@ public final class Bei {
 
   private static final int[] multiply (final int[] m0,
                                        final int m1) {
+    assert (! leadingZero(m0));
+    if (0==m1) { return ZERO; }
     if (Integer.bitCount(m1) == 1) {
-      return
-        stripLeadingZeros(
-          shiftLeft(m0,Integer.numberOfTrailingZeros(m1))); }
+      return shiftLeft(m0,Integer.numberOfTrailingZeros(m1)); }
+    //    stripLeadingZeros(
+    //      shiftLeft(m0,Integer.numberOfTrailingZeros(m1))); }
     final int xlen = m0.length;
     int[] rm = new int[xlen + 1];
     long carry = 0;
@@ -1074,8 +1193,10 @@ public final class Bei {
 
   public static final int[] multiply (final int[] m0,
                                       final long m1) {
-    assert 0L <= m1;
-    if (m1 == 0L) { return ZERO; }
+    assert (! leadingZero(m0));
+    if (0L==m1) { return ZERO; }
+    assert 0L < m1;
+
     final long dh = m1 >>> 32;      // higher order bits
     final long dl = loWord(m1); // lower order bits
     final int xlen = m0.length;
@@ -1107,10 +1228,10 @@ public final class Bei {
 
   private static final void multiplyToLenCheck (final int[] array,
                                                 final int length) {
-    // not an error because multiplyToLen won't execute
-    // if len <= 0
+    assert (! leadingZero(array));
+    // not an error because multiplyToLen won't execute if len<=0
     if (length <= 0) { return; }
-    Objects.requireNonNull(array);
+    //Objects.requireNonNull(array);
     if (length > array.length) {
       throw new ArrayIndexOutOfBoundsException(length-1); } }
 
@@ -1119,6 +1240,9 @@ public final class Bei {
                                                 final int[] m1,
                                                 final int n1,
                                                 int[] z) {
+    assert (! leadingZero(m0));
+    assert (! leadingZero(m1));
+
     final int xstart = n0 - 1;
     final int ystart = n1 - 1;
     if ((z == null) || (z.length < (n0 + n1))) {
@@ -1157,6 +1281,9 @@ public final class Bei {
   private static final int[] multiply (final int[] x,
                                        final int[] y,
                                        final boolean isRecursion) {
+    assert (! leadingZero(x));
+    assert (! leadingZero(y));
+
     if ((isZero(y)) || (isZero(x))) { return ZERO; }
     final int xlen = x.length;
     if ((y == x)
@@ -1240,6 +1367,8 @@ public final class Bei {
 
   public static final int[] multiply (final int[] x0,
                                       final int[] x1) {
+    assert (! leadingZero(x0));
+    assert (! leadingZero(x1));
     return multiply(x0,x1,false); }
 
   //--------------------------------------------------------------
@@ -1252,29 +1381,25 @@ public final class Bei {
   public static final boolean 
   useKnuthDivision (final int[] num,
                     final int[] den) {
+    assert (! leadingZero(num));
+    assert (! leadingZero(den));
+
     final int nn = num.length;
     final int nd = den.length;
     return 
       (nd < BURNIKEL_ZIEGLER_THRESHOLD)
-      || 
-      ((nn-nd) < BURNIKEL_ZIEGLER_OFFSET); }
+      || ((nn-nd) < BURNIKEL_ZIEGLER_OFFSET); }
 
   //--------------------------------------------------------------
   // Modular Arithmetic
   //--------------------------------------------------------------
 
-  private static final int mulAdd (final int[] out,
-                                   final int[] in,
-                                   final int offset,
-                                   final int len,
-                                   final int k) {
-    implMulAddCheck(out,in,offset,len);
-    return implMulAdd(out,in,offset,len,k); }
-
   private static final void implMulAddCheck (final int[] out,
                                              final int[] in,
                                              final int offset,
                                              final int len) {
+    assert (! leadingZero(in));
+
     if (len > in.length) {
       throw new IllegalArgumentException(
         "input length is out of bound: " + len + " > "
@@ -1308,34 +1433,19 @@ public final class Bei {
       carry = product >>> 32; }
     return (int) carry; }
 
-  private static final int addOne (final int[] a,
-                                   int offset,
-                                   int mlen,
-                                   final int carry) {
-    offset = a.length - 1 - mlen - offset;
-    final long t = unsigned(a[offset]) + unsigned(carry);
+  private static final int mulAdd (final int[] out,
+                                   final int[] in,
+                                   final int offset,
+                                   final int len,
+                                   final int k) {
+    assert (! leadingZero(in));
 
-    a[offset] = (int) t;
-    if ((t >>> 32) == 0) { return 0; }
-    while (--mlen >= 0) {
-      if (--offset < 0) { // Carry out of number
-        return 1; }
-      a[offset]++;
-      if (a[offset] != 0) { return 0; } }
-    return 1; }
+    implMulAddCheck(out,in,offset,len);
+    return implMulAdd(out,in,offset,len,k); }
 
   //--------------------------------------------------------------
   // Shift Operations
   //--------------------------------------------------------------
-
-  public static final int[] shiftRight (final int[] m,
-                                        final int n) {
-    //if (isZero(m)) { return ZERO; }
-    if (n > 0) { return shiftRightImpl(m,n); }
-    else if (n == 0) { return stripLeadingZeros(m); }
-    // Possible int overflow in {@code -n} is not a trouble,
-    // because shiftLeft considers its argument unsigned
-    else { return stripLeadingZeros(shiftLeft(m,-n)); } }
 
   private static final int[] shiftRightImpl (final int[] m,
                                              final int n) {
@@ -1365,49 +1475,52 @@ public final class Bei {
         newMag[i++] = (m[j++] << nBits2) | (m[j] >>> nBits); } }
     return newMag; }
 
+  public static final int[] shiftRight (final int[] m,
+                                        final int n) {
+    if (isZero(m)) { return ZERO; }
+    if (n > 0) { return shiftRightImpl(m,n); }
+    //if (n == 0) { return stripLeadingZeros(m); }
+    if (n == 0) { return m; }
+    return shiftLeft(m,-n); }
+
   //--------------------------------------------------------------
   // Bitwise Operations
   //--------------------------------------------------------------
 
   public static final boolean testBit (final int[] m,
                                        final int n) {
-    assert 0 <= n;
+    assert 0<=n;
     return (getInt(m,n >>> 5) & (1 << (n & 31))) != 0; }
 
   public static final int[] setBit (final int[] m,
                                     final int n) {
-    assert 0 < n;
-    final int intNum = n >>> 5;
-    final int[] result = new int[Math.max(intLength(m),intNum + 2)];
-
-    for (int i = 0; i < result.length; i++) {
-      result[result.length - i - 1] = getInt(m,i); }
-    result[result.length - intNum - 1] |= (1 << (n & 31));
-    return stripLeadingZeros(result); }
+    assert 0<n;
+    final int nTrunc = n >>> 5;
+    final int[] r = new int[Math.max(intLength(m),nTrunc+2)];
+    final int nr = r.length;
+    for (int i = 0; i < nr; i++) { r[nr-i-1] = getInt(m,i); }
+    r[nr-nTrunc-1] |= (1 << (n & 31));
+    return stripLeadingZeros(r); }
 
   public static final int[] clearBit (final int[] m,
                                       final int n) {
     assert 0 < n;
-    final int intNum = n >>> 5;
-    final int[] result =
-      new int[Math.max(intLength(m),((n + 1) >>> 5) + 1)];
-
-    for (int i = 0; i < result.length; i++) {
-      result[result.length - i - 1] = getInt(m,i); }
-
-    result[result.length - intNum - 1] &= ~(1 << (n & 31));
-    return stripLeadingZeros(result); }
+    final int nTrunc = n >>> 5;
+    final int[] r = new int[Math.max(intLength(m),((n+1)>>>5)+1)];
+    final int nr = r.length;
+    for (int i=0;i<nr;i++) { r[nr-i-1] = getInt(m,i); }
+    r[nr-nTrunc-1] &= ~(1 << (n & 31));
+    return stripLeadingZeros(r); }
 
   public static final int[] flipBit (final int[] m,
                                      final int n) {
     assert 0 < n;
     final int intNum = n >>> 5;
-    final int[] result =
-      new int[Math.max(intLength(m),intNum + 2)];
-    for (int i = 0; i < result.length; i++) {
-      result[result.length - i - 1] = getInt(m,i); }
-    result[result.length - intNum - 1] ^= (1 << (n & 31));
-    return stripLeadingZeros(result); }
+    final int[] r = new int[Math.max(intLength(m),intNum+2)];
+    for (int i = 0; i < r.length; i++) {
+      r[r.length - i - 1] = getInt(m,i); }
+    r[r.length - intNum - 1] ^= (1 << (n & 31));
+    return stripLeadingZeros(r); }
 
   public static final int getLowestSetBit (final int[] m) {
     int lsb = 0;
@@ -1492,7 +1605,8 @@ public final class Bei {
   //--------------------------------------------------------------
 
   public static final float floatValue (final int[] m) {
-    //if (isZero(m)) { return 0.0f; }
+    assert (! leadingZero(m));
+    if (isZero(m)) { return 0.0F; }
 
     final int exponent =
       (((m.length - 1) << 5) + Numbers.bitLength(m[0])) - 1;
@@ -1560,15 +1674,14 @@ public final class Bei {
     return Float.intBitsToFloat(bits); }
 
   public static final double doubleValue (final int[] m) {
-    //if (isZero(m)) { return 0.0; }
+    assert (! leadingZero(m));
+    if (isZero(m)) { return 0.0; }
 
     final int exponent =
       (((m.length - 1) << 5) + Numbers.bitLength(m[0])) - 1;
 
     // exponent == floor(log2(abs(this))Double)
-    if (exponent < (Long.SIZE - 1)) {
-      return longValue(m);
-    }
+    if (exponent < (Long.SIZE - 1)) { return longValue(m); }
     else if (exponent > Double.MAX_EXPONENT) {
       return Double.POSITIVE_INFINITY; }
 
@@ -1677,7 +1790,7 @@ public final class Bei {
   public static final int[] valueOf (final byte[] b,
                                      final int off,
                                      final int len) {
-    return stripLeadingZeros(stripLeadingZeros(b,off,len)); }
+    return stripLeadingZeros(b,off,len); }
 
   public static final int[] valueOf (final byte[] b) {
     return valueOf(b,0,b.length); }
@@ -1786,7 +1899,7 @@ public final class Bei {
                                      final int leftShift) {
     if (0L == x) { return ZERO; }
     assert 0L < x;
-    return stripLeadingZeros(shiftLeft(x,leftShift)); }
+    return shiftLeft(x,leftShift); }
 
   //--------------------------------------------------------------
   // disable constructor

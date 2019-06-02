@@ -17,7 +17,7 @@ import xfp.java.exceptions.Exceptions;
  * arithmetic on them faster.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-31
+ * @version 2019-06-01
  */
 
 public final class RationalFloat extends Number
@@ -198,6 +198,7 @@ implements Ringlike<RationalFloat> {
                                           final long t1,
                                           final int leftShift) {
     //assert t0.signum() >= 0;
+    if (0==leftShift) { return add(n0,t0,e,n1,t1); }
     if (n0 ^ n1) { // different signs
       final int c01 = t0.compareTo(t1,leftShift);
       if (0 == c01) { return ZERO; }
