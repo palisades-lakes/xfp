@@ -55,7 +55,9 @@ implements Accumulator<KahanAccumulator> {
 
   @Override
   public final KahanAccumulator addAll (final double[] z) { 
-    for (final double zi : z) { 
+    final int n = z.length;
+    for (int i=0;i<n;i++) {   
+      final double zi = z[i];
       assert Double.isFinite(zi);
       final double zz = zi - c;
       final double ss = s + zz;
@@ -74,7 +76,9 @@ implements Accumulator<KahanAccumulator> {
 
   @Override
   public final KahanAccumulator add2All (final double[] z) { 
-    for (final double zi : z) { 
+    final int n = z.length;
+    for (int i=0;i<n;i++) {   
+      final double zi = z[i];
       assert Double.isFinite(zi);
       final double zz = (zi*zi) -c;
       final double ss = s + zz;
@@ -87,7 +91,7 @@ implements Accumulator<KahanAccumulator> {
                                             final double z1) {
     assert Double.isFinite(z0);
     assert Double.isFinite(z1);
-    final double zz = (z0*z1) - c;
+    final double zz = Math.fma(z0,z1,-c);
     final double ss = s + zz;
     c = (ss - s) - zz;
     s = ss; 
@@ -101,7 +105,7 @@ implements Accumulator<KahanAccumulator> {
     for (int i=0;i<n;i++) {     
       assert Double.isFinite(z0[i]);
       assert Double.isFinite(z1[i]);
-      final double zz = (z0[i]*z1[i]) - c;
+      final double zz = Math.fma(z0[i],z1[i],-c);
       final double ss = s + zz;
       c = (ss - s) - zz;
       s = ss; 

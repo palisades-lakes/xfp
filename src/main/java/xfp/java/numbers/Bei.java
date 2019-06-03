@@ -59,14 +59,13 @@ public final class Bei {
     return result; }
 
   //--------------------------------------------------------------
-  // UNSAFE: assuming m has no leading zeros
 
   public static final int[] shiftLeft (final int[] m,
                                        final int bitShift) {
     assert (! leadingZero(m));
     if (isZero(m)) { return ZERO; }
     if (bitShift==0) { return m; }
-    if (bitShift<0) { return shiftRightImpl(m,-bitShift); }
+    if (bitShift<0) { return shiftRight0(m,-bitShift); }
     final int intShift = bitShift >>> 5;
         final int remShift = bitShift & 0x1f;
         final int n = m.length;
@@ -343,15 +342,7 @@ public final class Bei {
     if (0 == bitShift) { return add(m0,m1); }
     assert 0<bitShift;
 
-    //Debug.println("Bei.add");
-    //Debug.println("m0=" + Arrays.toString(m0));
-    //Debug.println("m1=" + Long.toHexString(m1));
-    //Debug.println("m1=" + m1);
-    //Debug.println("bitShift=" + bitShift);
-
     final int n0 = m0.length;
-
-    //Debug.println("n0=" + n0);
 
     //final int intShift = intShift(bitShift);
     //final int remShift = remShift(bitShift);
@@ -366,15 +357,6 @@ public final class Bei {
     //assert (1<=nwords) && (nwords<=3);
 
     final int n1 = intShift + nwords;
-
-    //Debug.println("intShift=" + intShift);
-    //Debug.println("remShift=" + remShift);
-    //Debug.println("nwords=" + nwords);
-    //Debug.println("n1=" + n1);
-    //Debug.println("m1=[" + ((int) hiPart(m1,remShift))
-    //+ ", " + ((int) midPart(m1,remShift)) 
-    //+ ", " + ((int) loPart(m1,remShift))
-    //+ "]");
 
     final int nr = Math.max(n0,n1);
     final int[] r0 = new int[nr];
@@ -467,7 +449,6 @@ public final class Bei {
       m0[--i0] = m0[i0]; }
 
     final int[] r = m0;
-    ////Debug.println("4result=\n" + Numbers.toHexString(r));
     return r; }
 
   //--------------------------------------------------------------
@@ -489,7 +470,6 @@ public final class Bei {
     int i1 = m1.length;
     long dif = 0;
 
-    // Subtract common parts of both numbers
     while (i1 > 0) {
       dif =
         unsigned(m0[--i0])
@@ -497,18 +477,13 @@ public final class Bei {
         + (dif >> 32);
       result[i0] = (int) dif; }
 
-    // Subtract remainder of longer number while borrow propagates
     boolean borrow = ((dif >> 32) != 0);
     while ((i0 > 0) && borrow) {
       borrow = ((result[--i0] = m0[i0] - 1) == -1); }
 
-    // Copy remainder of longer number
-    while (i0 > 0) {
-      result[--i0] = m0[i0]; }
+    while (i0 > 0) { result[--i0] = m0[i0]; }
 
-    final int[] r = stripLeadingZeros(result);
-    ////Debug.println("4result=\n" + Numbers.toHexString(r));
-    return r; }
+    return stripLeadingZeros(result); }
 
   //--------------------------------------------------------------
   // only when m1 <= m0
@@ -606,16 +581,7 @@ public final class Bei {
     if (0==bitShift) { return subtract(m0,m1); }
     assert 0<bitShift;
 
-    //Debug.println("Bei.subtract");
-    //Debug.println("m0=" + Arrays.toString(m0));
-    //Debug.println("m1=" + Arrays.toString(valueOf(m1,bitShift)));
-    //Debug.println("m1=" + Long.toHexString(m1));
-    //Debug.println("m1=" + m1);
-    //Debug.println("bitShift=" + bitShift);
-
     final int n0 = m0.length;
-
-    //Debug.println("n0=" + n0);
 
     //final int intShift = intShift(bitShift);
     //final int remShift = remShift(bitShift);
@@ -627,36 +593,18 @@ public final class Bei {
     if (64 < hi) { nwords = 3; }
     else if (32 < hi) { nwords = 2; }
     else { nwords = 1; }
-    //assert (1<=nwords) && (nwords<=3);
-
-    //final int n1 = intShift + nwords;
-    //assert n1 <= n0; // because (m1 << bitShift) <= m0 
-
-    //Debug.println("intShift=" + intShift);
-    //Debug.println("remShift=" + remShift);
-    //Debug.println("nwords=" + nwords);
-    //Debug.println("n1=" + n1);
-    //Debug.println("m1=[" + ((int) hiPart(m1,remShift))
-    //  + ", " + ((int) midPart(m1,remShift)) 
-    //  + ", " + ((int) loPart(m1,remShift))
-    //  + "]");
 
     final int r0[] = new int[n0];
     int i0=n0-1;
     final int i1=n0-intShift-1;
-    //assert 0<=i1;
+    assert 0<=i1;
 
     // copy unaffected low order m0 to result
-    while ((i1<i0) && (0<=i0)) { 
-      r0[i0] = m0[i0]; i0--; 
-      //Debug.println("r0=" + Arrays.toString(r0));
-    }
+    while ((i1<i0)) { r0[i0] = m0[i0]; i0--; }
     i0 = i1;
-    //Debug.println("i0,i1=" + i0 + "," + i1);
-    long dif = 0;
 
+    long dif = 0;
     // subtract m1 words from m0 with borrow
-    //dif -= loPart(m1,remShift);
     final long m1s = (m1 << remShift);
     dif -= loWord(m1s);
     if (0<=i0) { 
@@ -664,48 +612,28 @@ public final class Bei {
       r0[i0] = (int) dif; 
       i0--; 
       dif = (dif >> 32); }
-    //Debug.println("i0,i1=" + i0 + "," + i1);
-    //Debug.println("r0=" + Arrays.toString(r0));
 
-    if (2<=nwords) { 
-      //dif -= midPart(m1,remShift); }
-      dif -= hiWord(m1s); }
+    if (2<=nwords) { dif -= hiWord(m1s); }
     if (0<=i0) { 
       dif += unsigned(m0[i0]); 
       r0[i0] = (int) dif; i0--; 
       dif = (dif >> 32); }
-    //Debug.println("i0,i1=" + i0 + "," + i1);
-    //Debug.println("r0=" + Arrays.toString(r0));
-
-    if (3==nwords) { 
-      //dif -= hiPart(m1,remShift); }
-      dif -= (m1 >>> (64-remShift)) ; }
+ 
+    if (3==nwords) { dif -= (m1 >>> (64-remShift)) ; }
     if (0<=i0) { 
       dif += unsigned(m0[i0]); 
       r0[i0] = (int) dif; 
       i0--; } 
-    //Debug.println("i0,i1=" + i0 + "," + i1);
-    //Debug.println("r0=" + Arrays.toString(r0));
 
-    // handle borrow propagation
     boolean borrow = ((dif >> 32) != 0);
     while ((0<=i0) && borrow) {
       r0[i0] = m0[i0]-1;
       borrow = (r0[i0] == -1); 
       i0--; }
 
-    // copy remainder of m0 if any
     while (0<=i0) { r0[i0] = m0[i0]; i0--; }
 
-    final int[] r1 = stripLeadingZeros(r0); 
-
-    //final int[] r2 = subtract0(m0,m1,bitShift); 
-    //
-    //assert Arrays.equals(r1,r2) :
-    //  "r1=" + Arrays.toString(r1)
-    //  + "\nr2=" + Arrays.toString(r2);
-
-    return r1; }
+    return stripLeadingZeros(r0);  }
 
   //--------------------------------------------------------------
 
@@ -1446,39 +1374,97 @@ public final class Bei {
   //--------------------------------------------------------------
   // Shift Operations
   //--------------------------------------------------------------
+  // get the least significant int word of (m >>> shift)
 
-  private static final int[] shiftRightImpl (final int[] m,
-                                             final int n) {
-    final int nInts = n >>> 5;
-    final int nBits = n & 0x1f;
-    final int mLen = m.length;
-    int newMag[] = null;
+//  public static final int getShiftedInt (final int[] m,
+//                                         final int shift) {
+//    final int[] ms = shiftRight(m,shift);
+//    final int i = ms.length-1;
+//    return (0<=i) ? ms[i] : 0; } 
+
+  public static final int getShiftedInt (final int[] m,
+                                         final int shift) {
+    // leading zeros don't matter
+    final int intShift = shift >>> 5;
+    final int remShift = shift & 0x1f;
+    final int n = m.length;
+    if (intShift >= n) { return 0; }
+    final int i = n-intShift-1;
+    if (0==remShift) { return m[i]; }
+    final int r2 = 32-remShift;
+    final long lo = (unsigned(m[i]) >>> remShift);
+    final long hi = (0<i) ? (unsigned(m[i-1]) << r2) : 0;
+    return (int) (hi | lo); } 
+
+  // get the least significant two int words of (m >>> shift) as a
+  // long
+
+//  public static final long getShiftedLong (final int[] m,
+//                                         final int shift) {
+//    final int[] ms = shiftRight(m,shift);
+//    final int i = ms.length-1;
+//    if (0>i) { return 0L; }
+//    if (0==i) { return unsigned(ms[0]); }
+//    return 
+//      (unsigned(ms[i-1]) << 32) | unsigned(ms[i]); } 
+
+  public static final long getShiftedLong (final int[] m,
+                                           final int shift) {
+    // leading zeros don't matter
+    final int intShift = shift >>> 5;
+    final int remShift = shift & 0x1f;
+    final int n = m.length;
+    if (intShift >= n) { return 0L; }
+
+    final int i = n-intShift-1;
+
+    if (0==remShift) {
+      if (0==i) { return unsigned(m[0]); }
+      return (unsigned(m[i-1]) << 32) | unsigned(m[i]); }
+
+    final int r2 = 32-remShift;
+    final long lo0 = (unsigned(m[i]) >>> remShift);
+    final long lo1 = (0<i) ? (unsigned(m[i-1]) << r2) : 0L;
+    final long lo = lo1 | lo0;
+    final long hi0 = (0<i) ? (unsigned(m[i-1]) >>> remShift) : 0;
+    final long hi1 = (1<i) ? (unsigned(m[i-2]) << r2) : 0;
+    final long hi = hi1 | hi0;
+    return (hi << 32) | lo; } 
+
+  //--------------------------------------------------------------
+
+  private static final int[] shiftRight0 (final int[] m0,
+                                          final int n) {
+    final int intShift = n >>> 5;
+    final int remShift = n & 0x1f;
+    final int n0 = m0.length;
+    int m1[] = null;
 
     // Special case: entire contents shifted off the end
-    if (nInts >= mLen) { return ZERO; }
+    if (intShift >= n0) { return ZERO; }
 
-    if (nBits == 0) {
-      final int newMagLen = mLen - nInts;
-      newMag = Arrays.copyOf(m,newMagLen); }
+    if (remShift == 0) {
+      final int newMagLen = n0 - intShift;
+      m1 = Arrays.copyOf(m0,newMagLen); }
     else {
       int i = 0;
-      final int highBits = m[0] >>> nBits;
-      if (highBits != 0) {
-        newMag = new int[mLen - nInts];
-        newMag[i++] = highBits; }
-      else {
-        newMag = new int[mLen - nInts - 1]; }
+      final int highBits = m0[0] >>> remShift;
+    if (highBits != 0) {
+      m1 = new int[n0 - intShift];
+      m1[i++] = highBits; }
+    else {
+      m1 = new int[n0 - intShift - 1]; }
 
-      final int nBits2 = 32 - nBits;
-      int j = 0;
-      while (j < (mLen - nInts - 1)) {
-        newMag[i++] = (m[j++] << nBits2) | (m[j] >>> nBits); } }
-    return newMag; }
+    final int nBits2 = 32 - remShift;
+    int j = 0;
+    while (j < (n0 - intShift - 1)) {
+      m1[i++] = (m0[j++] << nBits2) | (m0[j] >>> remShift); } }
+    return m1; }
 
   public static final int[] shiftRight (final int[] m,
                                         final int n) {
     if (isZero(m)) { return ZERO; }
-    if (n > 0) { return shiftRightImpl(m,n); }
+    if (n > 0) { return shiftRight0(m,n); }
     //if (n == 0) { return stripLeadingZeros(m); }
     if (n == 0) { return m; }
     return shiftLeft(m,-n); }
@@ -1597,10 +1583,9 @@ public final class Bei {
     return getInt(m,0); }
 
   public static final long longValue (final int[] m) {
-    long result = 0;
-    for (int i = 1; i >= 0; i--) {
-      result = (result << 32) + unsigned(getInt(m,i)); }
-    return result; }
+    return 
+      (unsigned(getInt(m,1)) << 32)  
+      + unsigned(getInt(m,0)); }
 
   //--------------------------------------------------------------
 
@@ -1643,35 +1628,35 @@ public final class Bei {
           (m[0] << nBits2) | (m[1] >>> nBits); } }
 
     int signifFloor = twiceSignifFloor >> 1;
-    signifFloor &= Floats.STORED_SIGNIFICAND_MASK;
-    // We round up if either the fractional part of signif is
-    // strictly greater than 0.5 (which is true if the 0.5 bit is
-    // set and any lower bit is set), or if the fractional part of
-    // signif is >= 0.5 and signifFloor is odd (which is true if
-    // both the 0.5 bit and the 1 bit are set). This is equivalent
-    // to the desired HALF_EVEN rounding.
-    final boolean increment =
-      ((twiceSignifFloor
-        & 1) != 0) && (((signifFloor & 1) != 0)
-          || (getLowestSetBit(m) < shift));
-    final int signifRounded =
-      increment ? signifFloor + 1 : signifFloor;
-    int bits =
-      ((exponent
-        + Floats.EXPONENT_BIAS)) << (Floats.SIGNIFICAND_BITS - 1);
-    bits += signifRounded;
-    /*
-     * If signifRounded == 2^24, we'd need to set all of the
-     * significand
-     * bits to zero and add 1 to the exponent. This is exactly the
-     * behavior
-     * we get from just adding signifRounded to bits directly. If
-     * the
-     * exponent is Float.MAX_EXPONENT, we round up (correctly) to
-     * Float.POSITIVE_INFINITY.
-     */
-    bits |= 1 & Floats.SIGN_MASK;
-    return Float.intBitsToFloat(bits); }
+      signifFloor &= Floats.STORED_SIGNIFICAND_MASK;
+      // We round up if either the fractional part of signif is
+      // strictly greater than 0.5 (which is true if the 0.5 bit is
+      // set and any lower bit is set), or if the fractional part of
+      // signif is >= 0.5 and signifFloor is odd (which is true if
+      // both the 0.5 bit and the 1 bit are set). This is equivalent
+      // to the desired HALF_EVEN rounding.
+      final boolean increment =
+        ((twiceSignifFloor
+          & 1) != 0) && (((signifFloor & 1) != 0)
+            || (getLowestSetBit(m) < shift));
+      final int signifRounded =
+        increment ? signifFloor + 1 : signifFloor;
+      int bits =
+        ((exponent
+          + Floats.EXPONENT_BIAS)) << (Floats.SIGNIFICAND_BITS - 1);
+      bits += signifRounded;
+      /*
+       * If signifRounded == 2^24, we'd need to set all of the
+       * significand
+       * bits to zero and add 1 to the exponent. This is exactly the
+       * behavior
+       * we get from just adding signifRounded to bits directly. If
+       * the
+       * exponent is Float.MAX_EXPONENT, we round up (correctly) to
+       * Float.POSITIVE_INFINITY.
+       */
+      bits |= 1 & Floats.SIGN_MASK;
+      return Float.intBitsToFloat(bits); }
 
   public static final double doubleValue (final int[] m) {
     assert (! leadingZero(m));

@@ -4,6 +4,7 @@ import static xfp.java.numbers.Numbers.hiBit;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Objects;
 
 import xfp.java.exceptions.Exceptions;
@@ -17,7 +18,7 @@ import xfp.java.exceptions.Exceptions;
  * arithmetic on them faster.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-01
+ * @version 2019-06-02
  */
 
 public final class RationalFloat extends Number
@@ -241,6 +242,14 @@ implements Ringlike<RationalFloat> {
       n1,t1,e1); }
 
   public final RationalFloat add (final double z) {
+
+//    if (UnNatural.ONE.equals(denominator())) {
+//      final BigFloat sum = 
+//        BigFloat.valueOf(nonNegative(),numerator(),exponent())
+//        .add(z);
+//      return valueOf(
+//        sum.nonNegative(),sum.significand(),sum.exponent()); }
+    
     assert Double.isFinite(z);
     return add(
       Doubles.nonNegative(z),
@@ -291,6 +300,13 @@ implements Ringlike<RationalFloat> {
   //--------------------------------------------------------------
 
   public final RationalFloat add2 (final double z) {
+    if (UnNatural.ONE.equals(denominator())) {
+      final BigFloat sum = 
+        BigFloat.valueOf(nonNegative(),numerator(),exponent())
+        .add2(z);
+      return valueOf(
+        sum.nonNegative(),sum.significand(),sum.exponent()); }
+    
     assert Double.isFinite(z);
     final UnNatural n1 = 
       UnNatural.valueOf(Doubles.significand(z));
@@ -303,6 +319,13 @@ implements Ringlike<RationalFloat> {
 
   public final RationalFloat addProduct (final double z0,
                                          final double z1) {
+    if (UnNatural.ONE.equals(denominator())) {
+      final BigFloat sum = 
+        BigFloat.valueOf(nonNegative(),numerator(),exponent())
+        .addProduct(z0,z1);
+      return valueOf(
+        sum.nonNegative(),sum.significand(),sum.exponent()); }
+    
     assert Double.isFinite(z0);
     assert Double.isFinite(z1);
     final boolean p = 
@@ -442,10 +465,15 @@ implements Ringlike<RationalFloat> {
   @Override
   public final double doubleValue () {
     if (isZero()) { return 0.0; }
+    final UnNatural d0 = denominator();
+    if (UnNatural.ONE.equals(d0)) {
+      return 
+        BigFloat.valueOf(nonNegative(),numerator(),exponent())
+        .doubleValue(); }
+    
     final boolean neg = !nonNegative();
     final UnNatural n0 = numerator();
-    final UnNatural d0 = denominator();
-
+    
     // TODO: fix this hack
     final boolean large = (exponent() >= 0);
     final UnNatural n00 = large ? n0.shiftLeft(exponent()) : n0;
@@ -453,10 +481,10 @@ implements Ringlike<RationalFloat> {
 
     // choose exponent, and shift numerator and denominator so
     // quotient has the right number of bits.
-    final int e0 = hiBit(n00) - hiBit(d00) - 1;
+    final int e0 = hiBit(n00)-hiBit(d00)-1;
     final boolean small = (e0 > 0);
-    final UnNatural n1 = small ? n00 : n00.shiftLeft(-e0);
-    final UnNatural d1 = small ? d00.shiftLeft(e0) : d00;
+    final UnNatural n1 = (small ? n00 : n00.shiftLeft(-e0));
+    final UnNatural d1 = (small ? d00.shiftLeft(e0) : d00);
 
     // ensure numerator is less than 2x denominator
     final UnNatural d11 = d1.shiftLeft(1);
@@ -467,36 +495,30 @@ implements Ringlike<RationalFloat> {
 
     // check for out of range
     if (e2 > Double.MAX_EXPONENT) {
-      return neg ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY; }
+      return (neg 
+        ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY); }
     if (e2 < Doubles.MINIMUM_SUBNORMAL_EXPONENT) {
-      return neg ? -0.0 : 0.0; }
+      return (neg ? -0.0 : 0.0); }
 
     // subnormal numbers need slightly different handling
     final boolean sub = (e2 < Double.MIN_EXPONENT);
-    final int e3 = sub ? Double.MIN_EXPONENT : e2;
-    final UnNatural d3 = sub ? d2.shiftLeft(e3-e2) : d2;
-    final UnNatural n3 = n1.shiftLeft(Doubles.STORED_SIGNIFICAND_BITS);
+    final int e3 = (sub ? Double.MIN_EXPONENT : e2);
+    final UnNatural d3 = (sub ? d2.shiftLeft(e3-e2) : d2);
+    final UnNatural n3 = 
+      n1.shiftLeft(Doubles.STORED_SIGNIFICAND_BITS);
 
     final int e4 = e3 - Doubles.STORED_SIGNIFICAND_BITS;
 
-    //Debug.println("num=" + n3.toString(0x10));
-    //Debug.println("den=" + d3.toString(0x10));
-
-    final UnNatural[] qr = 
-      n3.divideAndRemainder(d3).toArray(new UnNatural[0]);
-
-    //(new Throwable()).printStackTrace();
-    //Debug.println("quo=" + qr[0].toString(0x10));
-    //Debug.println("quo=" + Long.toHexString(qr[0].longValue()));
-    //Debug.println("rem=" + qr[1].toString(0x10));
+    final List<UnNatural> qr = n3.divideAndRemainder(d3);
+    final UnNatural qr0 = qr.get(0);
+    final UnNatural qr1 = qr.get(1);
 
     // round down or up?
     // want to know if remainder/denominator is more or less than 1/2
     // comparing 2*remainder to denominator
     // TODO: faster way to do this?
-    final int c = qr[1].shiftLeft(1).compareTo(d3);
-    //Debug.println("c=" + c);
-    final long q4 = qr[0].longValue();
+    final int c = qr1.compareTo(1,d3);
+    final long q4 = qr0.longValue();
     final boolean even = (0x0L == (q4 & 0x1L));
     final boolean down = (c < 0) || ((c == 0) && even);
     final long q;
@@ -510,9 +532,6 @@ implements Ringlike<RationalFloat> {
       final boolean carry = (hiBit(q5) > Doubles.SIGNIFICAND_BITS);
       q = (carry ? q5 >>> 1 : q5);
       e = (sub ? (carry ? e4 : e4 - 1) : (carry ? e4 + 1 : e4)); }
-    //Debug.println("neg=" + neg);
-    //Debug.println("q=" + Long.toHexString(q));
-    //Debug.println("e=" + e);
     return Doubles.makeDouble(neg,e,q); }
 
   //--------------------------------------------------------------
@@ -582,11 +601,6 @@ implements Ringlike<RationalFloat> {
                          final UnNatural numerator,
                          final UnNatural denominator,
                          final int exponent) {
-    //    super();
-    //    assert 1 == denominator.signum() :
-    //      "\nn= " + numerator.toString(0x10)
-    //      + "\nd= " + denominator.toString(0x10)
-    //      + "\ne= " + exponent;
     _nonNegative = nonNegative;
     _numerator = numerator;
     _denominator = denominator;
@@ -646,30 +660,9 @@ implements Ringlike<RationalFloat> {
       return new RationalFloat(nonNegative,UnNatural.ONE,d0,e0); }
 
     final UnNatural gcd = n0.gcd(d0);
-    // TODO: any value in this test?
-    if (gcd.compareTo(UnNatural.ONE) > 0) {
-      final UnNatural n1 = n0.divide(gcd);
-      final UnNatural d1 = d0.divide(gcd);
-      // assert d1.signum() == 1 :
-      //   "non positive denominator:"
-      //   + "\nn= " + n.toString(0x10)
-      //   + "\nd= " + d.toString(0x10)
-      //   + "\ne= " + e
-      //   + "\n"
-      //   + "\nn0= " + n0.toString(0x10)
-      //   + "\nd0= " + d0.toString(0x10)
-      //   + "\ne0= " + e0
-      //   + "\n"
-      //   + "\ngcd= " + gcd.toString(0x10)
-      //   + "\n"
-      //   + "\nn1= " + n1.toString(0x10)
-      //   + "\nd1= " + d1.toString(0x10)
-      //   + "\ne1= " + e0
-      //   + "\n"
-      //   ;
-      return new RationalFloat(nonNegative,n1,d1,e0); }
-
-    return new RationalFloat(nonNegative,n0,d0,e0); }
+    final UnNatural n1 = n0.divide(gcd);
+    final UnNatural d1 = d0.divide(gcd);
+    return new RationalFloat(nonNegative,n1,d1,e0); }
 
   //--------------------------------------------------------------
 

@@ -1,6 +1,8 @@
 package xfp.java.numbers;
 
 import static xfp.java.numbers.Bei.compare;
+import static xfp.java.numbers.Numbers.hiWord;
+import static xfp.java.numbers.Numbers.loWord;
 import static xfp.java.numbers.Numbers.unsigned;
 
 import java.math.BigInteger;
@@ -104,6 +106,44 @@ implements Ringlike<UnNatural> {
 
   //--------------------------------------------------------------
 
+  public static final UnNatural multiply (final long t0,
+                                          final long t1) {
+    assert 0L<=t0;
+    assert 0L<=t1;
+    final long hi0 = hiWord(t0);
+    final long lo0 = loWord(t0);
+    final long hi1 = hiWord(t1);
+    final long lo1 = loWord(t1);
+    final long lolo = lo0*lo1;
+    final long hilo2 = (hi0*lo1) + (hi1*lo0);
+    final long hihi = hi0*hi1;
+    final int[] m = new int[4];
+    long sum = lolo;
+    m[3] = (int) sum;
+    sum = (sum >>> 32) + hilo2;
+    m[2] = (int) sum;
+    sum = (sum >>> 32) + hihi ;
+    m[1] = (int) sum;
+    m[0] = (int) (sum >>> 32);
+    return unsafe(Bei.stripLeadingZeros(m)); }
+
+  public static final UnNatural square (final long t) {
+    assert 0L<=t;
+    final long hi = hiWord(t);
+    final long lo = loWord(t);
+    final long lolo = lo*lo;
+    final long hilo2 = (hi*lo) << 1;
+    final long hihi = hi*hi;
+    final int[] m = new int[4];
+    long sum = lolo;
+    m[3] = (int) sum;
+    sum = (sum >>> 32) + hilo2;
+    m[2] = (int) sum;
+    sum = (sum >>> 32) + hihi ;
+    m[1] = (int) sum;
+    m[0] = (int) (sum >>> 32);
+    return unsafe(Bei.stripLeadingZeros(m)); }
+
   public final UnNatural multiply (final long that) {
     if (isZero()) { return ZERO; }
     if (ONE.equals(this)) { return valueOf(that); }
@@ -198,6 +238,7 @@ implements Ringlike<UnNatural> {
   public final UnNatural 
   divide (final UnNatural that) {
     assert (! that.isZero());
+    if (ONE.equals(that)) { return this; }
     if(isZero()) { return ZERO; }
     if (ONE.equals(that)) { return this; }
     if (useKnuthDivision(this,that)) { return divideKnuth(that); }
@@ -207,8 +248,8 @@ implements Ringlike<UnNatural> {
   public List<UnNatural> 
   divideAndRemainder (final UnNatural that) {
     assert (! that.isZero());
-    if(isZero()) { return List.of(ZERO,ZERO); }
     if (ONE.equals(that)) { return List.of(this,ZERO); }
+    if(isZero()) { return List.of(ZERO,ZERO); }
     if (useKnuthDivision(this,that)) {
       return Arrays.asList(divideAndRemainderKnuth(that)); }
     return 
@@ -282,6 +323,21 @@ implements Ringlike<UnNatural> {
     assert 0<n;
     return make(Bei.shiftRight(_mag,n)); }
 
+  // get the least significant int wordsof (m >>> shift)
+
+   public final int getShiftedInt (final int n) {
+    if (isZero()) { return 0; }
+    assert 0<=n;
+    return Bei.getShiftedInt(_mag,n); }
+
+  // get the least significant two int words of (m >>> shift) as a
+  // long
+
+  public final long getShiftedLong (final int n) {
+    if (isZero()) { return 0L; }
+    assert 0<=n;
+    return Bei.getShiftedLong(_mag,n); }
+
   public final boolean testBit (final int n) {
     return Bei.testBit(_mag,n); }
 
@@ -312,6 +368,11 @@ implements Ringlike<UnNatural> {
   @Override
   public final int compareTo (final UnNatural y) {
     return compare(_mag,y._mag); }
+
+  public final int compareTo (
+                              final int leftShift,
+                              final UnNatural y) {
+    return shiftLeft(leftShift).compareTo(y); }
 
   public final int compareTo (final long y) {
     if (y == 0L) {
@@ -385,12 +446,10 @@ implements Ringlike<UnNatural> {
     return Bei.bigIntegerValue(_mag); }
 
   @Override
-  public final int intValue () {
-    return Bei.intValue(_mag); }
+  public final int intValue () { return Bei.intValue(_mag); }
 
   @Override
-  public final long longValue () {
-    return Bei.longValue(_mag); }
+  public final long longValue () { return Bei.longValue(_mag); }
 
   //--------------------------------------------------------------
 
@@ -419,7 +478,7 @@ implements Ringlike<UnNatural> {
     return new UnNatural(m1); }
 
   // assume no leading zeros
-  private static final UnNatural unsafe (final int[] m) {
+  public static final UnNatural unsafe (final int[] m) {
     checkMagnitude(m);
     return new UnNatural(m); }
 

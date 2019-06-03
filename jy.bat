@@ -23,6 +23,6 @@ set CP=-cp lib/*
 set JAVA_HOME=%JAVA11%
 set JAVA="%JAVA_HOME%\bin\java"
 
-set CMD=%JAVA% %THRUPUT% -ea -dsa %GC% %XMX% %TRACE% %OPENS% %CP% %*
+set CMD=%JAVA% %THRUPUT% -ea -dsa %GC% %XMX% %TRACE% %PROF% %OPENS% %CP% %*
 ::echo %CMD%
 %CMD%

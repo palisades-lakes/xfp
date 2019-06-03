@@ -940,14 +940,13 @@ public final class MutableUnNatural {
     final long xLong = unsigned(x);
     long carry = 0;
     offset += len;
-    for (int j=len-1; j >= 0; j--) {
-      final long product = 
-        ((unsigned(a[j])) * xLong) + carry;
+    for (int j=len-1;j>=0;j--) {
+      final long product = (unsigned(a[j])*xLong) + carry;
       final long difference = q[offset] - product;
       q[offset--] = (int)difference;
       carry = (product >>> 32)
         + 
-        (((loWord(difference)) > (unsigned(~(int)product))) ?1:0); }
+        (((loWord(difference))>(unsigned(~(int)product)))?1:0); }
     return (int) carry; }
 
   /** The method is the same as {@link #mulsub}, except the fact 
@@ -971,8 +970,7 @@ public final class MutableUnNatural {
         (unsigned(~(int)product))) ? 1:0); }
     return (int) carry; }
 
-  /**
-   * This method divides a long quantity by an int to estimate
+  /** This method divides a long quantity by an int to estimate
    * qhat for two multi precision numbers. It is used when
    * the signed value of n is less than zero.
    * Returns long value where high 32 bits contain remainder value
