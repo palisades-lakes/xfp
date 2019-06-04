@@ -273,6 +273,18 @@ public final class Doubles implements Set {
     final double x = longBitsToDouble(s | e | t);
     return x; }
 
+  public static final double 
+  unsafeMergeBits (final int sign,
+                   final int exponent,
+                   final long significand) {
+    final int be = exponent + EXPONENT_BIAS;
+    final long s = ((long) sign) <<
+      (EXPONENT_BITS + STORED_SIGNIFICAND_BITS);
+    final long e = ((long) be) << STORED_SIGNIFICAND_BITS;
+    final long t = significand & STORED_SIGNIFICAND_MASK;
+    final double x = longBitsToDouble(s | e | t);
+    return x; }
+
   //--------------------------------------------------------------
   private static final long SIGN_0 = 0x0L;
   private static final long SIGN_1 =
@@ -889,7 +901,7 @@ public final class Doubles implements Set {
           t = u; }
         else {
           t = u + MIN_NORMAL_SIGNIFICAND; }
-        final double x = mergeBits(s,e,t);
+        final double x = unsafeMergeBits(s,e,t);
         return x;}
       @Override
       public final Object next () {

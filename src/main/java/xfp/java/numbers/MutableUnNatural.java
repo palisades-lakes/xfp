@@ -297,10 +297,10 @@ public final class MutableUnNatural {
    */
 
   private final void addShifted (final MutableUnNatural addend, 
-                                 final int n) {
+                                 final int shift) {
     if (addend.isZero()) { return; }
     int x = intLen;
-    int y = addend.intLen + n;
+    int y = addend.intLen + shift;
     int resultLen = (intLen > y ? intLen : y);
     int[] result = 
       (value.length < resultLen ? new int[resultLen] : value);

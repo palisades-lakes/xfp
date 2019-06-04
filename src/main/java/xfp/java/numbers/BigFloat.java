@@ -50,13 +50,15 @@ implements Ringlike<BigFloat> {
   //--------------------------------------------------------------
   // 0 leftShift
 
-  private static final BigFloat add (final boolean n0,
-                                     final UnNatural t0,
-                                     final int e,
-                                     final boolean n1,
-                                     final long t1) {
-    if (0L==t1) { return valueOf(n0,t0,e); }
-    assert 0L < t1;
+  private static final BigFloat addSameExponent (final boolean n0,
+                                                 final UnNatural t0,
+                                                 final int e,
+                                                 final boolean n1,
+                                                 final long t1) {
+    // as long as only called from add(boolean,long,int)
+    // we don't need to check these
+    //if (0L==t1) { return valueOf(n0,t0,e); }
+    //assert 0L < t1;
     if (n0 ^ n1) { // different signs
       final int c = t0.compareTo(t1);
       if (0 == c) { return ZERO; }
@@ -76,11 +78,13 @@ implements Ringlike<BigFloat> {
                                      final boolean n1,
                                      final long t1,
                                      final int leftShift) {
-    if (t0.isZero()) { return valueOf(n0,t0,e+leftShift); }
-    if (0L==t1) { return valueOf(n0,t0,e); }
-    assert 0L < t1;
-    if (0==leftShift) { return add(n0,t0,e,n1,t1); }
-    assert 0<leftShift;
+    // as long as only called from add(boolean,long,int)
+    // we don't need to check these
+    //if (t0.isZero()) { return valueOf(n1,t1,leftShift); }
+    //if (0L==t1) { return valueOf(n0,t0,e); }
+    //assert 0L < t1;
+    //if (0==leftShift) { return add(n0,t0,e,n1,t1); }
+    //assert 0<leftShift;
     if (n0 ^ n1) { // different signs
       final int c = t0.compareTo(t1,leftShift);
       if (0 == c) { return ZERO; }
@@ -99,9 +103,9 @@ implements Ringlike<BigFloat> {
   private final BigFloat add (final boolean n1,
                               final long t11,
                               final int e11) {
-    if (isZero()) { return valueOf(n1,t11,e11); }
     if (0 == t11) { return this; }
     assert 0L < t11;
+    if (isZero()) { return valueOf(n1,t11,e11); }
 
     final int shift = Numbers.loBit(t11);
     final long t1;
@@ -115,20 +119,22 @@ implements Ringlike<BigFloat> {
 
     // adjust significands to the same exponent
     final int de = e1-e0;
-    final BigFloat q;
-    if (0 < de) { q = add(n0,t0,e0,n1,t1,de); }
-    else if (0 == de) { q = add(n0,t0,e1,n1,t1); }
-    else {
-      final UnNatural ts = t0.shiftLeft(-de);
-      q = add(n0,ts,e1,n1,t1); }
-    return q; }
+    //final BigFloat q;
+    //if (0 < de) { q = add(n0,t0,e0,n1,t1,de); }
+    //else if (0 == de) { q = add(n0,t0,e1,n1,t1); }
+    //else {
+    //  final UnNatural ts = t0.shiftLeft(-de);
+    //  q = add(n0,ts,e1,n1,t1); }
+    //return q; }
+    if (0 < de) { return add(n0,t0,e0,n1,t1,de); }
+    if (0 == de) { return addSameExponent(n0,t0,e1,n1,t1); }
+    final UnNatural ts = t0.shiftLeft(-de);
+    return addSameExponent(n0,ts,e1,n1,t1); }
 
   //--------------------------------------------------------------
 
   public final BigFloat add (final double z) {
     assert Double.isFinite(z);
-    if (isZero()) { return valueOf(z); }
-    if (0.0==z) { return this; }
     return add(
       Doubles.nonNegative(z),
       Doubles.significand(z),
@@ -292,11 +298,11 @@ implements Ringlike<BigFloat> {
     return addProduct(p0,t0,e0,p1,t1,e1); }
 
   // TODO: optimize!
-//  public final BigFloat addProduct (final double z0,
-//                                    final double z1) {
-//    assert Double.isFinite(z0);
-//    assert Double.isFinite(z1);
-//    return (valueOf(z0).multiply(z1)); }
+  //  public final BigFloat addProduct (final double z0,
+  //                                    final double z1) {
+  //    assert Double.isFinite(z0);
+  //    assert Double.isFinite(z1);
+  //    return (valueOf(z0).multiply(z1)); }
 
   //--------------------------------------------------------------
   // Number methods
@@ -409,7 +415,8 @@ implements Ringlike<BigFloat> {
     final int sh = Numbers.hiBit(significand);
     if (sh > Doubles.SIGNIFICAND_BITS) {
       return (nonNegative
-        ? Double.POSITIVE_INFINITY : Double.NEGATIVE_INFINITY); }
+        ? Double.POSITIVE_INFINITY 
+          : Double.NEGATIVE_INFINITY); }
 
     final int e =
       ((sh == Doubles.SIGNIFICAND_BITS)
@@ -427,21 +434,13 @@ implements Ringlike<BigFloat> {
     final boolean nn = nonNegative();
     final UnNatural s0 = significand();
     final int e0 = exponent();
-    //Debug.println();
-    //Debug.println("nn= " + nn);
-    //Debug.println("s0= " + s0.toString(0x10));
-    //Debug.println("e0= " + e0);
     if (s0.isZero()) { return (nn ? 0.0 : -0.0); }
-    //assert (0 < s0.signum());
-
     final int eh = Numbers.hiBit(s0);
     final int es =
       Math.max(Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND - e0,
         Math.min(
           Doubles.MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND - e0 -1,
           eh - Doubles.SIGNIFICAND_BITS));
-    //Debug.println("eh=" + eh);
-    //Debug.println("es=" + es);
     if (0 == es) {
       return doubleMergeBits(nn,s0.longValue(),e0); }
     if (0 > es) {
@@ -451,25 +450,14 @@ implements Ringlike<BigFloat> {
     if (eh <= es) { return (nn ? 0.0 : -0.0); }
     // eh > es > 0
     final boolean up = roundUp(s0,es);
-    //Debug.println("up=" + up);
-    // TODO: faster way to select the right bits as a long?
-    //Debug.println("s1=" + s0.shiftRight(es).toString(0x10));
-    //final long s1 = s0.shiftRight(es).longValue();
     final long s1 = s0.getShiftedLong(es);
-    //Debug.println("s1=" + Long.toHexString(s1) + " (long)");
     final int e1 = e0 + es;
-    //Debug.println("e1=" + e1);
     if (up) {
       final long s2 = s1 + 1L;
-      //Debug.println("s2=" + Long.toHexString(s2));
-      //Debug.println("hiBit(s1)=" + Numbers.hiBit(s1));
-      //Debug.println("hiBit(s2)=" + Numbers.hiBit(s2));
       if (Numbers.hiBit(s2) > Doubles.SIGNIFICAND_BITS) { // carry
         // lost bit has to be zero, since there was just a carry
         final long s3 = (s2 >> 1);
         final int e3 = e1 + 1;
-        //Debug.println("s3=" + Long.toHexString(s3));
-        //Debug.println("hiBit(s3)=" + Numbers.hiBit(s3));
         return doubleMergeBits(nn,s3,e3); }
       // no carry
       return doubleMergeBits(nn,s2,e1); }

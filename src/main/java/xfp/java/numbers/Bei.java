@@ -366,12 +366,11 @@ public final class Bei {
     final int i1=nr-intShift-1;
 
     // copy unaffected low order m0 to result
-    while ((i1<ir) && (0<=i0)) { r0[ir--] = m0[i0--]; }
+    for (;(i1<ir) && (0<=i0);ir--,i0--) { r0[ir] = m0[i0]; }
     ir = i1;
 
     long sum;
 
-    // add m1 words to m0 with carry
     //sum = loPart(m1,remShift);
     final long m1s = (m1 << remShift);
     sum = loWord(m1s);
@@ -388,7 +387,6 @@ public final class Bei {
       if (0<=i0) { sum += unsigned(m0[i0--]); }
       r0[ir--] = (int) sum; }
 
-    // handle carry propagation
     boolean carry = ((sum >>> 32) != 0);
     while ((0<=ir) && carry) {
       sum = 0x01L;
@@ -397,14 +395,13 @@ public final class Bei {
       r0[ir--] = is;
       carry = (is == 0); }
 
-    // grow result if one more carry
     if (carry) {
       final int r1[] = new int[nr + 1];
       System.arraycopy(r0,0,r1,1,nr);
       r1[0] = 0x01;
       return r1; }
-    // copy remainder of m0 if any
-    while ((0<=i0) && (0<=ir)) { r0[ir--] = m0[i0--]; }
+
+    for (;(0<=i0) && (0<=ir);ir--,i0--) { r0[ir] = m0[i0]; }
     return r0; }
 
   //--------------------------------------------------------------
