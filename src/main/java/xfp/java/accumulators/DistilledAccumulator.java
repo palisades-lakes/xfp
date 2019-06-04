@@ -7,7 +7,7 @@ import java.util.Arrays;
  * Mutable! Not thread safe!
  * <p>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-02
+ * @version 2019-06-03
  */
 @SuppressWarnings("unchecked")
 public final class DistilledAccumulator
@@ -40,15 +40,8 @@ implements Accumulator<DistilledAccumulator> {
   //--------------------------------------------------------------
 
   private final boolean twoSum (final int i) {
-
     final double x1 = _sums[i];
-    //if (0.0 == x1) { return false; }
-
     final double x0 = _sums[i-1];
-
-    //if (0.0 == x0) {
-    //  _sums[i] = 0.0; _sums[i-1] = x1; return true; }
-
     final double s = x0 + x1;
     final double z = s - x0;
     final double e = (x0 - (s - z)) + (x1 - z);
@@ -58,10 +51,8 @@ implements Accumulator<DistilledAccumulator> {
 
   private final boolean distill () {
     if (! Double.isFinite(_sums[0])) { return false; }
-
     boolean changed = false;
-    for (int i=_end;i>0;i--) {
-      changed = changed || twoSum(i); }
+    for (int i=_end;i>0;i--) { changed = changed || twoSum(i); }
     return changed; }
 
   //--------------------------------------------------------------
@@ -95,9 +86,6 @@ implements Accumulator<DistilledAccumulator> {
 
   @Override
   public final DistilledAccumulator add (final double z) {
-    //Debug.println("add(" + z + ")");
-    //Debug.println(Arrays.toString(Arrays.copyOf(_sums,_end+1)));
-    //Debug.println(_end + "<" + _sums.length);
     if (Double.isFinite(_sums[0])) {
       addValue(z);
       while (distill()) { compact(); } }
@@ -107,17 +95,21 @@ implements Accumulator<DistilledAccumulator> {
   public final DistilledAccumulator add2 (final double z) {
     final double z2 = z*z;
     final double e = Math.fma(z,z,-z2);
-    add(z2);
-    add(e);
+    if (Double.isFinite(_sums[0])) {
+      addValue(z2);
+      addValue(e);
+      while (distill()) { compact(); } }
     return this; }
 
   @Override
   public final DistilledAccumulator addProduct (final double z0,
                                                 final double z1) {
-    final double z01 = z0*z1;
-    final double e = Math.fma(z0,z1,-z01);
-    add(z01);
-    add(e);
+    if (Double.isFinite(_sums[0])) {
+      final double z01 = z0*z1;
+      final double e = Math.fma(z0,z1,-z01);
+      addValue(z01);
+      addValue(e);
+      while (distill()) { compact(); } }
     return this; }
 
   //--------------------------------------------------------------
