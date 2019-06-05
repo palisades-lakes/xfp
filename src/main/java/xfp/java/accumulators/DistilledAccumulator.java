@@ -21,7 +21,7 @@ implements Accumulator<DistilledAccumulator> {
   private final void addValue (final double z) {
     _end++;
     if (_end >= _sums.length) {
-      final int newSize = Math.max(1,(int) (0.25*_sums.length));
+      final int newSize = Math.max(1,(int) (0.5*_sums.length));
       _sums = Arrays.copyOf(_sums,newSize+_sums.length); }
     _sums[_end] = z; }
 
