@@ -31,7 +31,7 @@ import xfp.java.prng.PRNG;
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-30
+ * @version 2019-06-04
  */
 @SuppressWarnings("unchecked")
 public final class Common {
@@ -47,11 +47,12 @@ public final class Common {
           { "xfp.java.accumulators.DoubleAccumulator",
             "xfp.java.accumulators.KahanAccumulator",
             "xfp.java.accumulators.DistilledAccumulator",
+            "xfp.java.accumulators.DistilledAccumulator2",
             "xfp.java.accumulators.ZhuHayesAccumulator",
             "xfp.java.accumulators.BigFloatAccumulator",
             "xfp.java.accumulators.RationalFloatAccumulator",
             "xfp.java.accumulators.RationalAccumulator", 
-          }); }
+            }); }
 
   //--------------------------------------------------------------
 

@@ -10,8 +10,8 @@ import java.util.Arrays;
  * @version 2019-06-04
  */
 @SuppressWarnings("unchecked")
-public final class DistilledAccumulator
-implements Accumulator<DistilledAccumulator> {
+public final class DistilledAccumulator2
+implements Accumulator<DistilledAccumulator2> {
 
   //--------------------------------------------------------------
 
@@ -21,13 +21,13 @@ implements Accumulator<DistilledAccumulator> {
   private final void addValue (final double z) {
     _end++;
     if (_end >= _sums.length) {
-      final int newSize = Math.max(1,(int) (0.25*_sums.length));
-      _sums = Arrays.copyOf(_sums,newSize+_sums.length); }
+      final int newSize = Math.max(1,(int) (0.5*_sums.length));
+      _sums = Arrays.copyOf(_sums,newSize + _sums.length); }
     _sums[_end] = z; }
 
   private final void compact () {
     int lastNonZero = _end;
-    while ((0.0==_sums[lastNonZero]) && (0 < lastNonZero)) {
+    while ((0.0 == _sums[lastNonZero]) && (0 < lastNonZero)) {
       lastNonZero--; }
     _end = lastNonZero; }
 
@@ -46,7 +46,8 @@ implements Accumulator<DistilledAccumulator> {
   private final boolean distill () {
     if (! Double.isFinite(_sums[0])) { return false; }
     boolean changed = false;
-    for (int i=_end;i>0;i--) { changed = changed || twoSum(i); }
+    for (int i=_end;i>0;i--) { 
+      changed = changed || twoSum(i); }
     return changed; }
 
   //--------------------------------------------------------------
@@ -73,20 +74,20 @@ implements Accumulator<DistilledAccumulator> {
     return (float) doubleValue(); }
 
   @Override
-  public final DistilledAccumulator clear () {
+  public final DistilledAccumulator2 clear () {
     Arrays.fill(_sums,0.0);
     _end = -1;
     return this; }
 
   @Override
-  public final DistilledAccumulator add (final double z) {
+  public final DistilledAccumulator2 add (final double z) {
     if (Double.isFinite(_sums[0])) {
       addValue(z);
       while (distill()) { compact(); } }
     return this; }
 
   @Override
-  public final DistilledAccumulator add2 (final double z) {
+  public final DistilledAccumulator2 add2 (final double z) {
     if (Double.isFinite(_sums[0])) {
       final double z2 = z*z;
       final double e = Math.fma(z,z,-z2);
@@ -96,8 +97,8 @@ implements Accumulator<DistilledAccumulator> {
     return this; }
 
   @Override
-  public final DistilledAccumulator addProduct (final double z0,
-                                                final double z1) {
+  public final DistilledAccumulator2 addProduct (final double z0,
+                                                 final double z1) {
     if (Double.isFinite(_sums[0])) {
       final double z01 = z0*z1;
       final double e = Math.fma(z0,z1,-z01);
@@ -110,10 +111,10 @@ implements Accumulator<DistilledAccumulator> {
   // construction
   //--------------------------------------------------------------
 
-  private DistilledAccumulator () { super(); clear(); }
+  private DistilledAccumulator2 () { super(); clear(); }
 
-  public static final DistilledAccumulator make () {
-    return new DistilledAccumulator(); }
+  public static final DistilledAccumulator2 make () {
+    return new DistilledAccumulator2(); }
 
   //--------------------------------------------------------------
 }

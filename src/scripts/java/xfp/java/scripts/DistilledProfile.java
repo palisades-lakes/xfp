@@ -11,7 +11,7 @@ import xfp.java.test.Common;
  * jy --source 11 src/scripts/java/xfp/java/scripts/DistilledProfile.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-03
+ * @version 2019-06-04
  */
 @SuppressWarnings("unchecked")
 public final class DistilledProfile {
