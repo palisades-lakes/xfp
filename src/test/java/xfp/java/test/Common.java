@@ -47,7 +47,6 @@ public final class Common {
           { "xfp.java.accumulators.DoubleAccumulator",
             "xfp.java.accumulators.KahanAccumulator",
             "xfp.java.accumulators.DistilledAccumulator",
-            "xfp.java.accumulators.DistilledAccumulator2",
             "xfp.java.accumulators.ZhuHayesAccumulator",
             "xfp.java.accumulators.BigFloatAccumulator",
             "xfp.java.accumulators.RationalFloatAccumulator",
