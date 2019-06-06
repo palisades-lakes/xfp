@@ -1,5 +1,7 @@
 package xfp.java.accumulators;
 
+import xfp.java.Classes;
+import xfp.java.Debug;
 import xfp.java.exceptions.Exceptions;
 
 /** Convenience interface for mutable, <em>non-</em>thread safe
@@ -13,7 +15,7 @@ import xfp.java.exceptions.Exceptions;
  * TODO: tighten this requirement.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-20
+ * @version 2019-06-05
  */
 
 @SuppressWarnings("unchecked")
@@ -93,6 +95,34 @@ public interface Accumulator<T extends Accumulator> {
     for (int i=0;i<n;i++) { addProduct(z0[i],z1[i]); }
     return (T) this; }
 
+  /** Add squared difference. */
+  public default T addL2 (final double z0,
+                          final double z1) {
+    throw
+    Exceptions.unsupportedOperation(this,"addL2",z0,z1); }
+
+  public default T addL2Distance (final double[] z0,
+                                  final double[] z1)  {
+    //Debug.println("addL2Distance");
+    //Debug.println(Classes.className(this));
+    final int n = z0.length;
+    assert n == z1.length;
+    for (int i=0;i<n;i++) { addL2(z0[i],z1[i]); }
+    return (T) this; }
+
+  /** Add absolute difference. */
+  public default T addL1 (final double z0,
+                          final double z1) {
+    throw
+    Exceptions.unsupportedOperation(this,"addL1",z0,z1); }
+
+  public default T addL1Distance (final double[] z0,
+                                  final double[] z1)  {
+    final int n = z0.length;
+    assert n == z1.length;
+    for (int i=0;i<n;i++) { addL1(z0[i],z1[i]); }
+    return (T) this; }
+
   //--------------------------------------------------------------
 
   public default double[] partialSums (final double[] x) {
@@ -100,6 +130,40 @@ public interface Accumulator<T extends Accumulator> {
     final double[] s = new double[n];
     clear();
     for (int i=0;i<n;i++) { s[i] = add(x[i]).doubleValue(); }
+    return s; }
+
+  public default double[] partialL2s (final double[] x) {
+    final int n = x.length;
+    final double[] s = new double[n];
+    clear();
+    for (int i=0;i<n;i++) { s[i] = add2(x[i]).doubleValue(); }
+    return s; }
+
+  public default double[] partialDots (final double[] x0,
+                                       final double[] x1) {
+    final int n = x0.length;
+    final double[] s = new double[n];
+    clear();
+    for (int i=0;i<n;i++) { 
+      s[i] = addProduct(x0[i],x1[i]).doubleValue(); }
+    return s; }
+
+  public default double[] partialL1Distances (final double[] x0,
+                                              final double[] x1) {
+    final int n = x0.length;
+    final double[] s = new double[n];
+    clear();
+    for (int i=0;i<n;i++) { 
+      s[i] = addL1(x0[i],x1[i]).doubleValue(); }
+    return s; }
+
+  public default double[] partialL2Distances (final double[] x0,
+                                              final double[] x1) {
+    final int n = x0.length;
+    final double[] s = new double[n];
+    clear();
+    for (int i=0;i<n;i++) { 
+      s[i] = addL2(x0[i],x1[i]).doubleValue(); }
     return s; }
 
   //--------------------------------------------------------------

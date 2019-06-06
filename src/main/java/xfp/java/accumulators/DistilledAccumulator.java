@@ -7,11 +7,11 @@ import java.util.Arrays;
  * Mutable! Not thread safe!
  * <p>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-04
+ * @version 2019-06-05
  */
 @SuppressWarnings("unchecked")
 public final class DistilledAccumulator
-implements Accumulator<DistilledAccumulator> {
+extends ExactAccumulator<DistilledAccumulator> {
 
   //--------------------------------------------------------------
 
@@ -53,10 +53,7 @@ implements Accumulator<DistilledAccumulator> {
   // Accumulator
   //--------------------------------------------------------------
 
-  @Override
-  public final boolean isExact () { return true; }
-
-  @Override
+   @Override
   public final boolean noOverflow () { return false; }
 
   @Override

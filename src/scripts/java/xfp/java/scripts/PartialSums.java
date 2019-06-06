@@ -37,8 +37,8 @@ public final class PartialSums {
     assert a.isExact();
     final long t = System.nanoTime();
     for (int i=0;i<trys;i++) {
-      Debug.println();
-      Debug.println(g.name());
+      //Debug.println();
+      //Debug.println(g.name());
       final double[] x = (double[]) g.next();
       final double[] z = a.partialSums(x);
       if (0.0 != z[z.length-1]) {

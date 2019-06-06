@@ -6,20 +6,17 @@ import xfp.java.numbers.RationalFloat;
  * accumulator (for testing).
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-28
+ * @version 2019-06-05
  */
 public final class RationalFloatAccumulator
 
-implements Accumulator<RationalFloatAccumulator> {
+extends ExactAccumulator<RationalFloatAccumulator> {
 
   private RationalFloat _sum;
 
   //--------------------------------------------------------------
 
-  @Override
-  public final boolean isExact () { return true; }
-
-  @Override
+   @Override
   public final boolean noOverflow () { return true; }
 
   @Override

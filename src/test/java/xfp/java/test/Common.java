@@ -51,7 +51,7 @@ public final class Common {
             "xfp.java.accumulators.BigFloatAccumulator",
             "xfp.java.accumulators.RationalFloatAccumulator",
             "xfp.java.accumulators.RationalAccumulator", 
-            }); }
+          }); }
 
   //--------------------------------------------------------------
 
@@ -71,7 +71,7 @@ public final class Common {
       | IllegalArgumentException
       | InvocationTargetException e) {
       // e.printStackTrace();
-      throw new RuntimeException(e); } }
+      throw new RuntimeException(className,e); } }
 
   //--------------------------------------------------------------
 
@@ -1156,6 +1156,79 @@ public final class Common {
 
     for (final Generator g : generators) {
       l2Test(g,accumulators,exact); } }
+
+  //--------------------------------------------------------------
+
+  private static final void 
+  l2DistanceTest (final Generator g,
+                  final List<Accumulator> accumulators,
+                  final Accumulator exact) {
+    Assertions.assertTrue(exact.isExact());
+    final double[] x0 = (double[]) g.next();
+    final double[] x1 = (double[]) g.next();
+    final double truth = 
+      exact.clear().addL2Distance(x0,x1).doubleValue();
+    //Debug.println(g.name());
+    for (final Accumulator a : accumulators) {
+      //final long t0 = System.nanoTime();
+      final double pred =
+        a.clear().addL2Distance(x0,x1).doubleValue();
+      //final long t1 = (System.nanoTime()-t0);
+      if (a.isExact()) { 
+        Assertions.assertEquals(truth,pred,Classes.className(a)); }
+      //final double l1d = Math.abs(truth - pred);
+      //final double l1n = Math.max(1.0,Math.abs(truth));
+      //Debug.println(
+      //  String.format("%32s %8.2fms ",
+      //    Classes.className(a),Double.valueOf(t1*1.0e-6))
+      //  + toHexString(l1d)
+      //  + " / " + toHexString(l1n) + " = "
+      //  + String.format("%8.2e",Double.valueOf(l1d/l1n))); 
+    } }
+
+  public static final void 
+  l2DistanceTests (final List<Generator> generators,
+                   final List<Accumulator> accumulators,
+                   final Accumulator exact) {
+
+    for (final Generator g : generators) {
+      l2DistanceTest(g,accumulators,exact); } }
+
+  //--------------------------------------------------------------
+
+  private static final void 
+  l1DistanceTest (final Generator g,
+                  final List<Accumulator> accumulators,
+                  final Accumulator exact) {
+    Assertions.assertTrue(exact.isExact());
+    final double[] x0 = (double[]) g.next();
+    final double[] x1 = (double[]) g.next();
+    final double truth = exact.clear().addL1Distance(x0,x1).doubleValue();
+    //Debug.println(g.name());
+    for (final Accumulator a : accumulators) {
+      //final long t0 = System.nanoTime();
+      final double pred = a.clear().addL1Distance(x0,x1).doubleValue();
+      //final long t1 = (System.nanoTime()-t0);
+      if (a.isExact()) { 
+        Assertions.assertEquals(truth,pred,
+          Classes.className(a)); }
+      //final double l1d = Math.abs(truth - pred);
+      //final double l1n = Math.max(1.0,Math.abs(truth));
+      //Debug.println(
+      //  String.format("%32s %8.2fms ",
+      //    Classes.className(a),Double.valueOf(t1*1.0e-6))
+      //  + toHexString(l1d)
+      //  + " / " + toHexString(l1n) + " = "
+      //  + String.format("%8.2e",Double.valueOf(l1d/l1n))); 
+    } }
+
+  public static final void 
+  l1DistanceTests (final List<Generator> generators,
+                   final List<Accumulator> accumulators,
+                   final Accumulator exact) {
+
+    for (final Generator g : generators) {
+      l1DistanceTest(g,accumulators,exact); } }
 
   //--------------------------------------------------------------
 

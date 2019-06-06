@@ -39,11 +39,11 @@ import xfp.java.numbers.Doubles;
  * <em>NOT</em> thread safe!
  * <p>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-02
+ * @version 2019-06-05
  */
 
 public final class ZhuHayesAccumulator
-implements Accumulator<ZhuHayesAccumulator> {
+extends ExactAccumulator<ZhuHayesAccumulator> {
 
   //--------------------------------------------------------------
 
@@ -282,9 +282,6 @@ implements Accumulator<ZhuHayesAccumulator> {
   //--------------------------------------------------------------
 
   @Override
-  public final boolean isExact () { return true; }
-
-  @Override
   public final boolean noOverflow () { return false; }
 
   //--------------------------------------------------------------
@@ -329,30 +326,6 @@ implements Accumulator<ZhuHayesAccumulator> {
     i += 1;
     // Step 4(6)
     if (i >= NADDS) { i = compact(); }
-    return this; }
-
-  //--------------------------------------------------------------
-
-  @Override
-  public final ZhuHayesAccumulator add2 (final double x) {
-    assert Double.isFinite(x);
-    final double x2 = x*x;
-    final double e = Math.fma(x,x,-x2);
-    add(x2);
-    add(e);
-    return this; }
-
-  //--------------------------------------------------------------
-
-  @Override
-  public final ZhuHayesAccumulator addProduct (final double x0,
-                                               final double x1) {
-    assert Double.isFinite(x0);
-    assert Double.isFinite(x1);
-    final double x01 = x0*x1;
-    final double e = Math.fma(x0,x1,-x01);
-    add(x01);
-    add(e);
     return this; }
 
   //--------------------------------------------------------------

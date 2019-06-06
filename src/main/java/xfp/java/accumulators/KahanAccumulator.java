@@ -15,7 +15,7 @@ package xfp.java.accumulators;
  *      Graillat, Langlois, and Louvet, Accurate dot products with FMA"</a>
  *      
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-21
+ * @version 2019-06-05
  */
 
 public final class KahanAccumulator 
@@ -37,7 +37,7 @@ implements Accumulator<KahanAccumulator> {
   public final Object value () { 
     return Double.valueOf(doubleValue()); }
 
- @Override
+  @Override
   public final double doubleValue () { return s; }
 
   @Override
@@ -66,12 +66,13 @@ implements Accumulator<KahanAccumulator> {
     return this; }
 
   @Override
-  public final KahanAccumulator add2 (final double z) {
-    assert Double.isFinite(z);
-    final double zz = (z*z) - c;
-    final double ss = s + zz;
-    c = (ss - s) - zz;
-    s = ss; 
+  public final KahanAccumulator add2 (final double x) {
+    assert Double.isFinite(x);
+    // preserve exactness using twoMul to convert to 2 adds.
+    final double x2 = x*x;
+    final double e = Math.fma(x,x,-x2);
+    add(x2);
+    add(e);
     return this; }
 
   @Override
@@ -87,14 +88,15 @@ implements Accumulator<KahanAccumulator> {
     return this; }
 
   @Override
-  public final KahanAccumulator addProduct (final double z0,
-                                            final double z1) {
-    assert Double.isFinite(z0);
-    assert Double.isFinite(z1);
-    final double zz = Math.fma(z0,z1,-c);
-    final double ss = s + zz;
-    c = (ss - s) - zz;
-    s = ss; 
+  public final KahanAccumulator addProduct (final double x0,
+                                            final double x1) {
+    assert Double.isFinite(x0);
+    assert Double.isFinite(x1);
+    // preserve exactness using twoMul to convert to 2 adds.
+    final double x01 = x0*x1;
+    final double e = Math.fma(x0,x1,-x01);
+    add(x01);
+    add(e);
     return this; }
 
   @Override
@@ -110,6 +112,53 @@ implements Accumulator<KahanAccumulator> {
       c = (ss - s) - zz;
       s = ss; 
     }
+    return this; }
+
+  @Override
+  public KahanAccumulator addL1 (final double x0,
+                                 final double x1) {
+    assert Double.isFinite(x0);
+    assert Double.isFinite(x1);
+    // preserve exactness using twoAdd and twoMul to convert to 2
+    // adds.
+    final double s01 = x0 - x1;
+    final double z = s01 - x0;
+    final double e = (x0 - (s01 - z)) + ((-x1) - z);
+    if (0<=s01) { 
+      if (0<=e) { add(s01); add(e); }
+      else if (Math.abs(e)<=Math.abs(s01)) { add(s01); add(e); }
+      else { add(-s01); add(-e); } } 
+    else { 
+      if (0>e) { add(-s01); add(-e); }
+      else if (Math.abs(e)<=Math.abs(s01)) { add(-s01); add(-e); }
+      else { add(s01); add(e); } } 
+    return this; }
+
+  @Override
+  public KahanAccumulator addL2 (final double x0,
+                                 final double x1) {
+    assert Double.isFinite(x0);
+    assert Double.isFinite(x1);
+    // preserve exactness using twoAdd and twoMul to convert to 8
+    // adds.
+    final double s01 = x0 - x1;
+    final double z = s01 - x0;
+    final double e = (x0 - (s01 - z)) + ((-x1) - z);
+    final double ss = s01*s01;
+    add(ss);
+    final double ess = Math.fma(s01,s01,-s01);
+    add(ess);
+    final double es = e*s01;
+    add(es);
+    add(es);
+    final double ees = Math.fma(e,s01,-es);
+    add(ees);
+    add(ees);
+    final double ee = e*e;
+    add(ee);
+    final double eee = Math.fma(e,e,-ee);
+    add(eee);
+
     return this; }
 
   //--------------------------------------------------------------

@@ -227,7 +227,7 @@ implements Ringlike<Rational> {
     assert Double.isFinite(z);
     // TODO: do this for BigFloat and RationalFloat?
     final long t0 = Doubles.significand(z);
-    if (0L == t0) { return ZERO; }
+    if (0L==t0) { return this; }
     final int shift = Numbers.loBit(t0);
     final long t = (t0 >>> shift);
     assert 0L < t;
@@ -236,21 +236,6 @@ implements Ringlike<Rational> {
     if (0 == e) { return add(nonNegative,t); }
     if (0 < e) { return add(nonNegative,t,e); }
     return addWithDenom(nonNegative,t,-e); }
-
-  //  public final Rational add (final double z) {
-  //    assert Double.isFinite(z);
-  //    // TODO: do this for BigFloat and RationalFloat?
-  //    final long t0 = Doubles.significand(z);
-  //    if (0L == t0) { return ZERO; }
-  //    final int shift = Numbers.loBit(t0);
-  //    final long t = (t0 >>> shift);
-  //    assert 0L < t;
-  //    final int e = Doubles.exponent(z) + shift;
-  //    final boolean nonNegative = Doubles.nonNegative(z);
-  //    if (0 == e) { return add(nonNegative,t); }
-  //    if (0 < e) { return add(nonNegative,t,e); }
-  //    final UnNatural n0 = UnNatural.valueOf(t);
-  //       return add(nonNegative,n0,UnNatural.ZERO.setBit(-e)); }
 
   //--------------------------------------------------------------
 

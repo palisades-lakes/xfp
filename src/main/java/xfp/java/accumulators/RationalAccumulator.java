@@ -1,23 +1,21 @@
 package xfp.java.accumulators;
 
+import xfp.java.Classes;
+import xfp.java.Debug;
 import xfp.java.numbers.Rational;
 
 /** Naive sum of <code>double</code> values with a Rational-valued 
- * accumulator (for testing).
+ * accumulator.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-28
+ * @version 2019-06-05
  */
 public final class RationalAccumulator 
-
-implements Accumulator<RationalAccumulator> {
+extends ExactAccumulator<RationalAccumulator> {
 
   private Rational _sum;
 
   //--------------------------------------------------------------
-
-  @Override
-  public final boolean isExact () { return true; }
 
   @Override
   public final boolean noOverflow () { return true; }
@@ -41,10 +39,11 @@ implements Accumulator<RationalAccumulator> {
   @Override
   public final RationalAccumulator add (final double z) { 
     assert Double.isFinite(z);
-    //Debug.println("z=" + Double.toHexString(z));
+    //Debug.println(Classes.className(this));
+    //Debug.println("sum=" + _sum);
+    //Debug.println("z=" + z);
     _sum = _sum.add(z);
-    //Debug.println("sum=" + _sum.toString());
-    //Debug.println("sum=" + Double.toHexString(_sum.doubleValue()));
+    //Debug.println("sum=" + _sum);
     return this; }
 
   @Override

@@ -3,21 +3,17 @@ package xfp.java.accumulators;
 import xfp.java.numbers.BigFloat;
 
 /** Naive sum of <code>double</code> values with a BigFloat-valued
- * accumulator (for testing).
+ * accumulator.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-24
+ * @version 2019-06-05
  */
 public final class BigFloatAccumulator
-
-implements Accumulator<BigFloatAccumulator> {
+extends ExactAccumulator<BigFloatAccumulator> {
 
   private BigFloat _sum;
 
   //--------------------------------------------------------------
-
-  @Override
-  public final boolean isExact () { return true; }
 
   @Override
   public final boolean noOverflow () { return true; }
