@@ -8,8 +8,8 @@ import xfp.java.numbers.BigFloat;
  * @author palisades dot lakes at gmail dot com
  * @version 2019-06-06
  */
-public final class BigFloatAccumulator
-extends ExactAccumulator<BigFloatAccumulator> {
+public final class BigFloatAccumulator1
+extends ExactAccumulator<BigFloatAccumulator1> {
 
   private BigFloat _sum;
 
@@ -30,38 +30,45 @@ extends ExactAccumulator<BigFloatAccumulator> {
     return _sum.floatValue(); }
 
   @Override
-  public final BigFloatAccumulator clear () {
+  public final BigFloatAccumulator1 clear () {
     _sum = BigFloat.ZERO;
     return this; }
 
   @Override
-  public final BigFloatAccumulator add (final double z) {
+  public final BigFloatAccumulator1 add (final double z) {
     assert Double.isFinite(z);
     _sum = _sum.add(z);
     return this; }
 
   @Override
-  public final BigFloatAccumulator add2 (final double z) {
+  public final BigFloatAccumulator1 add2 (final double z) {
     assert Double.isFinite(z);
     _sum = _sum.add2(z);
     return this; }
 
   @Override
-  public final BigFloatAccumulator addProduct (final double z0,
-                                               final double z1) {
+  public final BigFloatAccumulator1 addProduct (final double z0,
+                                                final double z1) {
     assert Double.isFinite(z0);
     assert Double.isFinite(z1);
     _sum = _sum.addProduct(z0,z1);
+    return this; }
+
+  @Override
+  public final BigFloatAccumulator1 addL2 (final double x0,
+                                           final double x1) {
+
+    _sum = _sum.addL2(x0,x1);
     return this; }
 
   //--------------------------------------------------------------
   // construction
   //--------------------------------------------------------------
 
-  private BigFloatAccumulator () { super(); clear(); }
+  private BigFloatAccumulator1 () { super(); clear(); }
 
-  public static final BigFloatAccumulator make () {
-    return new BigFloatAccumulator(); }
+  public static final BigFloatAccumulator1 make () {
+    return new BigFloatAccumulator1(); }
 
   //--------------------------------------------------------------
 }

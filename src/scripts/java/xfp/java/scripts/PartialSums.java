@@ -4,7 +4,7 @@ import org.apache.commons.rng.UniformRandomProvider;
 
 import xfp.java.Debug;
 import xfp.java.accumulators.Accumulator;
-import xfp.java.accumulators.BigFloatAccumulator;
+import xfp.java.accumulators.BigFloatAccumulator1;
 import xfp.java.numbers.Doubles;
 import xfp.java.prng.Generator;
 import xfp.java.prng.PRNG;
@@ -16,7 +16,7 @@ import xfp.java.test.Common;
  * jy --source 11 src/scripts/java/xfp/java/scripts/PartialSums.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-03
+ * @version 2019-06-06
  */
 @SuppressWarnings("unchecked")
 public final class PartialSums {
@@ -30,8 +30,8 @@ public final class PartialSums {
     final int emax = Common.deMax(n)/2;
     //Debug.println("emax=" + emax);
     final Generator g = Doubles.finiteGenerator(n,urp,emax);
-    final Accumulator a = BigFloatAccumulator.make();
-    //final Accumulator a = RationalFloatAccumulator.make();
+    final Accumulator a = BigFloatAccumulator1.make();
+    //final Accumulator a = RationalFloatAccumulator1.make();
     //final Accumulator a = ZhuHayesAccumulator.make();
     //final Accumulator a = DistilledAccumulator.make();
     assert a.isExact();
@@ -42,8 +42,8 @@ public final class PartialSums {
       final double[] x = (double[]) g.next();
       final double[] z = a.partialSums(x);
       if (0.0 != z[z.length-1]) {
-        Debug.println(Double.toHexString(0.0)
-          + " != " + Double.toHexString(z[n-1])); } 
+        //Debug.println(Double.toHexString(0.0) + " != " + Double.toHexString(z[n-1]));
+        } 
         }
     Debug.printf("total secs: %8.2f\n",
       (System.nanoTime()-t)*1.0e-9);

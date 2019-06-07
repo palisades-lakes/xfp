@@ -1,13 +1,11 @@
 package xfp.java.accumulators;
 
-import xfp.java.Classes;
-import xfp.java.Debug;
-
 /** Base class for some exact accumulators.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-05
+ * @version 2019-06-06
  */
+@SuppressWarnings("unchecked")
 public abstract class ExactAccumulator<T extends ExactAccumulator>
 implements Accumulator<T> {
 
@@ -61,31 +59,45 @@ implements Accumulator<T> {
   @Override
   public T addL2 (final double x0,
                   final double x1) {
+    //Debug.println(Classes.className(this)+".addL2");
+    //Debug.println("before=" + this);
+    //Debug.println("before=" + doubleValue());
     assert Double.isFinite(x0);
     assert Double.isFinite(x1);
     // preserve exactness using twoAdd and twoMul to convert to 8
     // adds.
+    // twoAdd (twoSub):
     final double s = x0-x1;
     final double z = s-x0;
     final double e = (x0-(s-z)) + ((-x1)-z);
+    // twoMul:
     final double ss = s*s;
+    final double ess = Math.fma(s,s,-ss);
     add(ss);
-    final double ess = Math.fma(s,s,-s);
     add(ess);
+    // twoMul:
     final double es = e*s;
-    add(es);
-    add(es);
     final double ees = Math.fma(e,s,-es);
-    add(ees);
-    add(ees);
+    add(es); add(es);
+    add(ees); add(ees);
+    // twoMul:
     final double ee = e*e;
-    add(ee);
     final double eee = Math.fma(e,e,-ee);
+    add(ee);
     add(eee);
     //Debug.println("x0,x1=" + x0+ ", " + x1);
     //Debug.println("x0-x1=" + (x0-x1));
     //Debug.println("(x0-x1)^2=" + (x0-x1)*(x0-x1));
-    //Debug.println("s=" + doubleValue());
+    //Debug.println("s=" + s);
+    //Debug.println("z=" + z);
+    //Debug.println("e=" + e);
+    //Debug.println("ss=" + ss);
+    //Debug.println("ess=" + ess);
+    //Debug.println("es=" + es);
+    //Debug.println("ees=" + ees);
+    //Debug.println("ee=" + ee);
+    //Debug.println("eee=" + eee);
+    //Debug.println("after=" + doubleValue());
     return (T) this; }
 
   //--------------------------------------------------------------

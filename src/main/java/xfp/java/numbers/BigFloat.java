@@ -9,7 +9,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-02
+ * @version 2019-06-06
  */
 
 public final class BigFloat
@@ -191,6 +191,9 @@ implements Ringlike<BigFloat> {
       q.significand(),
       q.exponent()); }
 
+  public final BigFloat subtract (final double z) {
+    return add(-z); }
+
   //--------------------------------------------------------------
 
   @Override
@@ -235,6 +238,11 @@ implements Ringlike<BigFloat> {
     return
       multiply(q.nonNegative(),q.significand(),q.exponent()); }
 
+  public final BigFloat square () {
+    if (isZero() ) { return ZERO; }
+    if (isOne()) { return this; }
+    return multiply(nonNegative(),significand(),exponent()); }
+
   public final BigFloat multiply (final double z) {
     assert Double.isFinite(z);
     return
@@ -263,6 +271,26 @@ implements Ringlike<BigFloat> {
   //    assert Double.isFinite(z);
   //    final BigFloat q = valueOf(z);
   //    return add(q.multiply(q)); }
+
+//--------------------------------------------------------------
+
+  public final BigFloat addL2 (final double z0,
+                               final double z1) {
+    assert Double.isFinite(z0);
+    assert Double.isFinite(z1);
+    final BigFloat dz = valueOf(z0).subtract(z1);
+    final BigFloat dz2 = dz.square();
+    //Debug.println(Classes.className(this)+".addL2");
+    //Debug.println("z0, z1=" + z0 + ", " + z1);
+    //Debug.println("dz=" + dz);
+    //Debug.println("dz2=" + dz2);
+    //Debug.println("dz2=" + dz2.doubleValue());
+    //Debug.println("before=" + this);
+    //Debug.println("before=" + doubleValue());
+    final BigFloat after = add(dz2);
+    //Debug.println("after=" + after);
+    //Debug.println("after=" + after.doubleValue());
+    return after; }
 
   //--------------------------------------------------------------
 

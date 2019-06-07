@@ -36,9 +36,9 @@ extends ExactAccumulator<DistilledAccumulator> {
   private final boolean twoSum (final int i) {
     final double x1 = _sums[i];
     final double x0 = _sums[i-1];
-    final double s = x0 + x1;
-    final double z = s - x0;
-    final double e = (x0 - (s - z)) + (x1 - z);
+    final double s = x0+x1;
+    final double z = s-x0;
+    final double e = (x0-(s-z)) + (x1-z);
     _sums[i-1] = s;
     _sums[i] = e;
     return (x0 != s) || (x1 != e); }

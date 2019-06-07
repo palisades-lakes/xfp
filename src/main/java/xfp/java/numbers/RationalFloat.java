@@ -18,7 +18,7 @@ import xfp.java.exceptions.Exceptions;
  * arithmetic on them faster.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-02
+ * @version 2019-06-06
  */
 
 public final class RationalFloat extends Number
@@ -243,13 +243,13 @@ implements Ringlike<RationalFloat> {
 
   public final RationalFloat add (final double z) {
 
-//    if (UnNatural.ONE.equals(denominator())) {
-//      final BigFloat sum = 
-//        BigFloat.valueOf(nonNegative(),numerator(),exponent())
-//        .add(z);
-//      return valueOf(
-//        sum.nonNegative(),sum.significand(),sum.exponent()); }
-    
+    //    if (UnNatural.ONE.equals(denominator())) {
+    //      final BigFloat sum = 
+    //        BigFloat.valueOf(nonNegative(),numerator(),exponent())
+    //        .add(z);
+    //      return valueOf(
+    //        sum.nonNegative(),sum.significand(),sum.exponent()); }
+
     assert Double.isFinite(z);
     return add(
       Doubles.nonNegative(z),
@@ -267,6 +267,9 @@ implements Ringlike<RationalFloat> {
       q.numerator(),
       q.denominator(),
       q.exponent()); }
+
+  public final RationalFloat subtract (final double z) {
+    return add(-z); }
 
   @Override
   public final RationalFloat abs () {
@@ -297,6 +300,12 @@ implements Ringlike<RationalFloat> {
       q.denominator(),
       q.exponent()); }
 
+  public final RationalFloat square () {
+    if (isZero() ) { return ZERO; }
+    if (isOne()) { return this; }
+    return multiply(
+      nonNegative(),numerator(),denominator(),exponent()); }
+
   //--------------------------------------------------------------
 
   public final RationalFloat add2 (final double z) {
@@ -306,7 +315,7 @@ implements Ringlike<RationalFloat> {
         .add2(z);
       return valueOf(
         sum.nonNegative(),sum.significand(),sum.exponent()); }
-    
+
     assert Double.isFinite(z);
     final UnNatural n1 = 
       UnNatural.valueOf(Doubles.significand(z));
@@ -325,7 +334,7 @@ implements Ringlike<RationalFloat> {
         .addProduct(z0,z1);
       return valueOf(
         sum.nonNegative(),sum.significand(),sum.exponent()); }
-    
+
     assert Double.isFinite(z0);
     assert Double.isFinite(z1);
     final boolean p = 
@@ -336,6 +345,26 @@ implements Ringlike<RationalFloat> {
       .multiply(UnNatural.valueOf(Doubles.significand(z1)));
     final int e = Doubles.exponent(z0) + Doubles.exponent(z1);
     return add(p,n,UnNatural.ONE,e); }
+
+  //--------------------------------------------------------------
+
+  public final RationalFloat addL2 (final double z0,
+                                    final double z1) {
+    assert Double.isFinite(z0);
+    assert Double.isFinite(z1);
+    final RationalFloat dz = valueOf(z0).subtract(z1);
+    final RationalFloat dz2 = dz.square();
+    //Debug.println(Classes.className(this)+".addL2");
+    //Debug.println("z0, z1=" + z0 + ", " + z1);
+    //Debug.println("dz=" + dz);
+    //Debug.println("dz2=" + dz2);
+    //Debug.println("dz2=" + dz2.doubleValue());
+    //Debug.println("before=" + this);
+    //Debug.println("before=" + doubleValue());
+    final RationalFloat after = add(dz2);
+    //Debug.println("after=" + after);
+    //Debug.println("after=" + after.doubleValue());
+    return after; }
 
   //--------------------------------------------------------------
   // Number methods
@@ -470,10 +499,10 @@ implements Ringlike<RationalFloat> {
       return 
         BigFloat.valueOf(nonNegative(),numerator(),exponent())
         .doubleValue(); }
-    
+
     final boolean neg = !nonNegative();
     final UnNatural n0 = numerator();
-    
+
     // TODO: fix this hack
     final boolean large = (exponent() >= 0);
     final UnNatural n00 = large ? n0.shiftLeft(exponent()) : n0;

@@ -1,6 +1,6 @@
 package xfp.java.scripts;
 
-import xfp.java.accumulators.BigFloatAccumulator;
+import xfp.java.accumulators.BigFloatAccumulator1;
 import xfp.java.accumulators.DistilledAccumulator;
 import xfp.java.prng.Generator;
 import xfp.java.test.Common;
@@ -23,8 +23,8 @@ public final class DistilledProfile {
       System.out.println();
       System.out.println(g.name());
       final double[] x = (double[]) g.next();
-      final BigFloatAccumulator b = 
-        BigFloatAccumulator.make().add2All(x);
+      final BigFloatAccumulator1 b = 
+        BigFloatAccumulator1.make().add2All(x);
       final double z1 = b.doubleValue();
       final long t = System.nanoTime();
       for (int i=0;i<trys;i++) {

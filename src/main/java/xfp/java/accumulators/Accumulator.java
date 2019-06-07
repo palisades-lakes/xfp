@@ -1,7 +1,5 @@
 package xfp.java.accumulators;
 
-import xfp.java.Classes;
-import xfp.java.Debug;
 import xfp.java.exceptions.Exceptions;
 
 /** Convenience interface for mutable, <em>non-</em>thread safe
@@ -15,7 +13,7 @@ import xfp.java.exceptions.Exceptions;
  * TODO: tighten this requirement.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-05
+ * @version 2019-06-06
  */
 
 @SuppressWarnings("unchecked")

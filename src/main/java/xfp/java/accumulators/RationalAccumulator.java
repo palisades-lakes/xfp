@@ -1,14 +1,12 @@
 package xfp.java.accumulators;
 
-import xfp.java.Classes;
-import xfp.java.Debug;
 import xfp.java.numbers.Rational;
 
 /** Naive sum of <code>double</code> values with a Rational-valued 
  * accumulator.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-05
+ * @version 2019-06-06
  */
 public final class RationalAccumulator 
 extends ExactAccumulator<RationalAccumulator> {
