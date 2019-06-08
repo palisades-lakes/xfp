@@ -14,12 +14,12 @@ import xfp.java.test.Common;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-06
+ * @version 2019-06-07
  */
 
 public final class SumTest {
 
-  private static final int DIM = 3;// 1024;
+  private static final int DIM = 1024;
 
   @SuppressWarnings("static-method")
   @Test

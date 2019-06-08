@@ -210,46 +210,34 @@ implements Ringlike<RationalFloat> {
       return valueOf(n0,t0.subtract(t1,leftShift),e); }
     return valueOf(n0,t0.add(t1,leftShift),e); }
 
-  private final RationalFloat add (final boolean n1,
+  private final RationalFloat add (final boolean p1,
                                    final long t11,
                                    final int e11) {
     if (0 == t11) { return this; }
-
-    //final long t1 = t11;
-    //final int e1 = e11;
+    assert 0L<t11;
+    if (isZero()) { return valueOf(p1,t11,e11); }
 
     final int shift = Numbers.loBit(t11);
-    //Debug.println("shift=" + shift);
     final long t1;
     final int e1;
     if (0 == shift) { t1=t11; e1=e11; }
-    else { t1 = (t11 >>> shift); e1 = e11 + shift; }
+    else { t1=(t11>>>shift); e1=e11+shift; }
+
+    final boolean p0 = nonNegative();
+    final UnNatural t0 = numerator();
+    final int e0 = exponent();
 
     if (UnNatural.ONE.equals(denominator())) {
-      //assert 0 < t1;
-
-      final boolean n0 = nonNegative();
-      final UnNatural t0 = numerator();
-      final int e0 = exponent();
-
       // adjust significands to the same exponent
-      final int de = e1 - e0;
-      if (de >= 0) { return add(n0,t0,e0,n1,t1,de); }
-      return add(n0,t0.shiftLeft(-de),e1,n1,t1); } 
+      final int de = e1-e0;
+      if (0<de) { return add(p0,t0,e0,p1,t1,de); }
+      if (0==de) { return add(p0,t0,e0,p1,t1); }
+      final UnNatural ts = t0.shiftLeft(-de);
+      return add(p0,ts,e1,p1,t1); } 
 
-    return add(
-      nonNegative(),numerator(),denominator(),exponent(),
-      n1,t1,e1); }
+    return add(p0,t0,denominator(),e0,p1,t1,e1); }
 
   public final RationalFloat add (final double z) {
-
-    //    if (UnNatural.ONE.equals(denominator())) {
-    //      final BigFloat sum = 
-    //        BigFloat.valueOf(nonNegative(),numerator(),exponent())
-    //        .add(z);
-    //      return valueOf(
-    //        sum.nonNegative(),sum.significand(),sum.exponent()); }
-
     assert Double.isFinite(z);
     return add(
       Doubles.nonNegative(z),
@@ -751,7 +739,7 @@ implements Ringlike<RationalFloat> {
 
   //--------------------------------------------------------------
 
-  private static final RationalFloat valueOf (final boolean nonNegative,
+  private static final RationalFloat valueOf (final boolean p0,
                                               final long t0,
                                               final int e0)  {
     if (0L==t0) { return ZERO; }
@@ -761,7 +749,7 @@ implements Ringlike<RationalFloat> {
     final int e1;
     if (0 == shift) { t1=t0; e1=e0; }
     else { t1 = (t0 >>> shift); e1 = e0 + shift; }
-    return valueOf(nonNegative,UnNatural.valueOf(t1),e1); }
+    return valueOf(p0,UnNatural.valueOf(t1),e1); }
 
   public static final RationalFloat valueOf (final double x)  {
     return valueOf(

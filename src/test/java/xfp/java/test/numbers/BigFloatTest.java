@@ -2,12 +2,16 @@ package xfp.java.test.numbers;
 
 import java.util.function.BinaryOperator;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import xfp.java.Debug;
 import xfp.java.numbers.BigFloat;
+import xfp.java.numbers.BigFloats;
 import xfp.java.numbers.Numbers;
 import xfp.java.numbers.UnNatural;
+import xfp.java.prng.Generator;
+import xfp.java.prng.PRNG;
 import xfp.java.test.Common;
 
 //----------------------------------------------------------------
@@ -18,7 +22,7 @@ import xfp.java.test.Common;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-30
+ * @version 2019-06-07
  */
 
 public final class BigFloatTest {
@@ -60,8 +64,19 @@ public final class BigFloatTest {
       Common.floatRoundingTests(
         null,BigFloat::valueOf,Numbers::floatValue,dist,
         Object::toString);
-      Debug.DEBUG=false;
-    }
+      Debug.DEBUG=false; }
+
+    private static final int TRYS = 1024*1024;
+    @SuppressWarnings("static-method")
+    public final void squareTest () {
+      final Generator g =
+        BigFloats.fromBigIntegerGenerator(
+          PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
+      for (int i=0;i<TRYS;i++) {
+        final BigFloat x = (BigFloat) g.next();
+        final BigFloat x2 = x.square();
+        final BigFloat xx = x.multiply(x);
+        Assertions.assertEquals(x2,xx); } }
 
     //--------------------------------------------------------------
 }

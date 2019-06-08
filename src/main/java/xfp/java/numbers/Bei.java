@@ -260,6 +260,40 @@ public final class Bei {
     return 0; }
 
   //--------------------------------------------------------------
+
+  public static final int compare (final long m0,
+                                   final long m1,
+                                   final int bitShift) {
+    assert 0L<=m0;
+    assert 0L<=m1;
+    assert 0<bitShift : "bitShift=" + bitShift;
+    if (0L==m1) {
+      if (0L==m0) { return 0; }
+      return 1; }
+    if (0L==m0) { return -1; }
+    final int hiBit0 = hiBit(m0);
+    final int hiBit1 = hiBit(m1) + bitShift;
+    if (hiBit0<hiBit1) { return -1; }
+    if (hiBit0>hiBit1) { return 1; }
+    // shifted m1 must fit in one long, since hiBit0 < 64
+    final long m11 = (m1<<bitShift);
+    if (m0<m11) { return -1; }
+    if (m0>m11) { return 1; }
+    return 0; }
+
+  public static final int compare (final long m0,
+                                   final int e0,
+                                   final long m1,
+                                   final int e1) {
+    if (e0<e1) { return -compare(m1,m0,e1-e0); }
+    if (e0>e1) { return compare(m0,m1,e0-e1); }
+    assert 0L<=m0;
+    assert 0L<=m1;
+    if (m0<m1) { return -1; }
+    if (m0>m1) { return 1; }
+    return 0; }
+  
+  //--------------------------------------------------------------
   // add
   //--------------------------------------------------------------
 
@@ -328,6 +362,24 @@ public final class Bei {
       r1[0] = 0x01;
       return r1; }
     return r0; }
+
+  //--------------------------------------------------------------
+
+  public static final int[] add (final long m0,
+                                 final long m1) {
+    assert 0L<=m0;
+    assert 0L<=m1;
+    long sum = loWord(m0) + loWord(m1);
+    final int lo = (int) sum;
+    sum = hiWord(m0) + hiWord(m1) + hiWord(sum);
+    final int mid = (int) sum;
+    final int hi = (int) hiWord(sum);
+    if (0==hi) {
+      if (0==mid) {
+        if (0==lo) { return ZERO; }
+        return new int[] { lo, }; } 
+      return new int[] { mid, lo, }; } 
+    return new int[] { hi, mid, lo, }; } 
 
   //--------------------------------------------------------------
 
@@ -615,7 +667,7 @@ public final class Bei {
       dif += unsigned(m0[i0]); 
       r0[i0] = (int) dif; i0--; 
       dif = (dif >> 32); }
- 
+
     if (3==nwords) { dif -= (m1 >>> (64-remShift)) ; }
     if (0<=i0) { 
       dif += unsigned(m0[i0]); 
@@ -644,18 +696,7 @@ public final class Bei {
     final int[] r1 = subtractInPlace(r0,m1); 
     return r1; }
 
-  //--------------------------------------------------------------
-  // only when big <= (val << leftShift)
-
-  //  public static final int[] subtract (final long m0,
-  //                                  final int shift,
-  //                                  final int[] m1) {
-  //if (0L == m0) { assert isZero(m1); return ZERO; }
-  //assert 0L < m0;
-  //if (isZero(m1)) { return shiftLeft(m0,shift); }
-  //return subtract(shiftLeft(m0,shift),m1); }
-
-  //--------------------------------------------------------------
+   //--------------------------------------------------------------
   // squaring --- used in multiplication
   //--------------------------------------------------------------
 
@@ -669,7 +710,7 @@ public final class Bei {
     if (len == 0) { return 0; }
     return ((len - 1) << 5) + Numbers.bitLength(m[0]); }
 
-  private static final int[] square (final int[] m,
+  public static final int[] square (final int[] m,
                                      final boolean isRecursion) {
     assert (! leadingZero(m));
     if (isZero(m)) { return ZERO; }
@@ -1373,11 +1414,11 @@ public final class Bei {
   //--------------------------------------------------------------
   // get the least significant int word of (m >>> shift)
 
-//  public static final int getShiftedInt (final int[] m,
-//                                         final int shift) {
-//    final int[] ms = shiftRight(m,shift);
-//    final int i = ms.length-1;
-//    return (0<=i) ? ms[i] : 0; } 
+  //  public static final int getShiftedInt (final int[] m,
+  //                                         final int shift) {
+  //    final int[] ms = shiftRight(m,shift);
+  //    final int i = ms.length-1;
+  //    return (0<=i) ? ms[i] : 0; } 
 
   public static final int getShiftedInt (final int[] m,
                                          final int shift) {
@@ -1396,14 +1437,14 @@ public final class Bei {
   // get the least significant two int words of (m >>> shift) as a
   // long
 
-//  public static final long getShiftedLong (final int[] m,
-//                                         final int shift) {
-//    final int[] ms = shiftRight(m,shift);
-//    final int i = ms.length-1;
-//    if (0>i) { return 0L; }
-//    if (0==i) { return unsigned(ms[0]); }
-//    return 
-//      (unsigned(ms[i-1]) << 32) | unsigned(ms[i]); } 
+  //  public static final long getShiftedLong (final int[] m,
+  //                                         final int shift) {
+  //    final int[] ms = shiftRight(m,shift);
+  //    final int i = ms.length-1;
+  //    if (0>i) { return 0L; }
+  //    if (0==i) { return unsigned(ms[0]); }
+  //    return 
+  //      (unsigned(ms[i-1]) << 32) | unsigned(ms[i]); } 
 
   public static final long getShiftedLong (final int[] m,
                                            final int shift) {
@@ -1870,10 +1911,13 @@ public final class Bei {
   public static final int[] ZERO = new int[0];
 
   public static final int[] valueOf (final long val) {
-    assert 0 <= val;
-    if (val == 0) { return ZERO; }
-    final int[] m = { (int) (val >>> 32), (int) val, };
-    return stripLeadingZeros(m); }
+    assert 0<=val;
+    final int hi = (int) (val>>>32);
+    final int lo = (int) val;
+    if (0==hi) {
+      if (0==lo) { return ZERO; }
+      return new int[] { lo, }; }
+    return new int[] { hi, lo, }; }
 
   //--------------------------------------------------------------
 

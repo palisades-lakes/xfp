@@ -10,7 +10,7 @@ import xfp.java.test.Common;
  * jy --source 11 src/scripts/java/xfp/java/scripts/BigFloatProfile.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-09
+ * @version 2019-06-07
  */
 @SuppressWarnings("unchecked")
 public final class BigFloatProfile {
@@ -21,11 +21,12 @@ public final class BigFloatProfile {
     for (final Generator g : Common.generators(dim)) {
       System.out.println();
       System.out.println(g.name());
-      final double[] x = (double[]) g.next();
+      final double[] x0 = (double[]) g.next();
+      final double[] x1 = (double[]) g.next();
       final long t = System.nanoTime();
       for (int i=0;i<trys;i++) {
         BigFloat a = BigFloat.ZERO;
-        for (final double xi : x) { a = a.add(xi); }
+        for (int j=0;j<dim;j++) { a = a.addL2(x0[j],x1[j]); }
         final double z0 = a.doubleValue();
         if (0.0 != z0) {
           System.out.println(Double.toHexString(0.0)
