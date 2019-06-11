@@ -220,7 +220,7 @@ implements Ringlike<RationalFloat> {
     final int shift = Numbers.loBit(t11);
     final long t1;
     final int e1;
-    if (0 == shift) { t1=t11; e1=e11; }
+    if ((0==shift)||(64==shift)) { t1=t11; e1=e11; }
     else { t1=(t11>>>shift); e1=e11+shift; }
 
     final boolean p0 = nonNegative();
@@ -747,7 +747,7 @@ implements Ringlike<RationalFloat> {
     final int shift = Numbers.loBit(t0);
     final long t1;
     final int e1;
-    if (0 == shift) { t1=t0; e1=e0; }
+    if ((0==shift)||(64==shift)) { t1=t0; e1=e0; }
     else { t1 = (t0 >>> shift); e1 = e0 + shift; }
     return valueOf(p0,UnNatural.valueOf(t1),e1); }
 

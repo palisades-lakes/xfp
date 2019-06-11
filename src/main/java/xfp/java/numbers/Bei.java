@@ -62,28 +62,29 @@ public final class Bei {
 
   public static final int[] shiftLeft (final int[] m,
                                        final int bitShift) {
-    assert (! leadingZero(m));
+    assert 0<=bitShift;
+    //assert (! leadingZero(m));
     if (isZero(m)) { return ZERO; }
     if (bitShift==0) { return m; }
-    if (bitShift<0) { return shiftRight0(m,-bitShift); }
-    final int intShift = bitShift >>> 5;
-        final int remShift = bitShift & 0x1f;
-        final int n = m.length;
-        if (remShift==0) {
-          return Arrays.copyOfRange(m,0,n+intShift); }
-        int m1[] = null;
-        int i = 0;
-        final int nBits2 = 32 - remShift;
-        final int highBits = m[0] >>> nBits2;
-      if (highBits != 0) {
-        m1 = new int[n + intShift + 1];
-        m1[i++] = highBits; }
-      else { m1 = new int[n + intShift]; }
-      int j = 0;
-      while (j < (n - 1)) {
-        m1[i++] = (m[j++] << remShift) | (m[j] >>> nBits2); }
-      m1[i] = m[j] << remShift; 
-      return m1; }
+    //if (bitShift<0) { return shiftRight0(m,-bitShift); }
+    final int intShift = (bitShift >>> 5);
+    final int remShift = (bitShift & 0x1f);
+    final int n = m.length;
+    if (remShift==0) {
+      return Arrays.copyOfRange(m,0,n+intShift); }
+    int m1[] = null;
+    int i = 0;
+    final int nBits2 = 32 - remShift;
+    final int highBits = (m[0] >>> nBits2);
+    if (highBits != 0) {
+      m1 = new int[n + intShift + 1];
+      m1[i++] = highBits; }
+    else { m1 = new int[n + intShift]; }
+    int j = 0;
+    while (j < (n - 1)) {
+      m1[i++] = (m[j++] << remShift) | (m[j] >>> nBits2); }
+    m1[i] = m[j] << remShift; 
+    return m1; }
 
   public static final int[] shiftLeft (final long m,
                                        final int shift) {
@@ -292,7 +293,7 @@ public final class Bei {
     if (m0<m1) { return -1; }
     if (m0>m1) { return 1; }
     return 0; }
-  
+
   //--------------------------------------------------------------
   // add
   //--------------------------------------------------------------
@@ -696,7 +697,7 @@ public final class Bei {
     final int[] r1 = subtractInPlace(r0,m1); 
     return r1; }
 
-   //--------------------------------------------------------------
+  //--------------------------------------------------------------
   // squaring --- used in multiplication
   //--------------------------------------------------------------
 
@@ -711,7 +712,7 @@ public final class Bei {
     return ((len - 1) << 5) + Numbers.bitLength(m[0]); }
 
   public static final int[] square (final int[] m,
-                                     final boolean isRecursion) {
+                                    final boolean isRecursion) {
     assert (! leadingZero(m));
     if (isZero(m)) { return ZERO; }
     final int len = m.length;

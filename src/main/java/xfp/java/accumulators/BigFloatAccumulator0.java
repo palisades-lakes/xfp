@@ -1,17 +1,17 @@
 package xfp.java.accumulators;
 
-import xfp.java.numbers.BigFloat;
+import xfp.java.numbers.BigFloat0;
 
-/** Naive sum of <code>double</code> values with a BigFloat-valued
+/** Naive sum of <code>double</code> values with a BigFloat0-valued
  * accumulator.
  *
  * @author palisades dot lakes at gmail dot com
  * @version 2019-06-10
  */
-public final class BigFloatAccumulator1
-extends ExactAccumulator<BigFloatAccumulator1> {
+public final class BigFloatAccumulator0
+extends ExactAccumulator<BigFloatAccumulator0> {
 
-  private BigFloat _sum;
+  private BigFloat0 _sum;
 
   //--------------------------------------------------------------
 
@@ -30,24 +30,24 @@ extends ExactAccumulator<BigFloatAccumulator1> {
     return _sum.floatValue(); }
 
   @Override
-  public final BigFloatAccumulator1 clear () {
-    _sum = BigFloat.ZERO;
+  public final BigFloatAccumulator0 clear () {
+    _sum = BigFloat0.ZERO;
     return this; }
 
   @Override
-  public final BigFloatAccumulator1 add (final double z) {
+  public final BigFloatAccumulator0 add (final double z) {
     assert Double.isFinite(z);
     _sum = _sum.add(z);
     return this; }
 
   @Override
-  public final BigFloatAccumulator1 add2 (final double z) {
+  public final BigFloatAccumulator0 add2 (final double z) {
     assert Double.isFinite(z);
     _sum = _sum.add2(z);
     return this; }
 
   @Override
-  public final BigFloatAccumulator1 addProduct (final double z0,
+  public final BigFloatAccumulator0 addProduct (final double z0,
                                                 final double z1) {
     assert Double.isFinite(z0);
     assert Double.isFinite(z1);
@@ -55,7 +55,7 @@ extends ExactAccumulator<BigFloatAccumulator1> {
     return this; }
 
   @Override
-  public final BigFloatAccumulator1 addL1 (final double x0,
+  public final BigFloatAccumulator0 addL1 (final double x0,
                                            final double x1) {
 
     assert Double.isFinite(x0);
@@ -64,7 +64,7 @@ extends ExactAccumulator<BigFloatAccumulator1> {
     return this; }
 
   @Override
-  public final BigFloatAccumulator1 addL2 (final double x0,
+  public final BigFloatAccumulator0 addL2 (final double x0,
                                            final double x1) {
     assert Double.isFinite(x0);
     assert Double.isFinite(x1);
@@ -75,10 +75,10 @@ extends ExactAccumulator<BigFloatAccumulator1> {
   // construction
   //--------------------------------------------------------------
 
-  private BigFloatAccumulator1 () { super(); clear(); }
+  private BigFloatAccumulator0 () { super(); clear(); }
 
-  public static final BigFloatAccumulator1 make () {
-    return new BigFloatAccumulator1(); }
+  public static final BigFloatAccumulator0 make () {
+    return new BigFloatAccumulator0(); }
 
   //--------------------------------------------------------------
 }

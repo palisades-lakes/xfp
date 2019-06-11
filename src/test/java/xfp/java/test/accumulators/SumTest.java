@@ -14,7 +14,7 @@ import xfp.java.test.Common;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-07
+ * @version 2019-06-10
  */
 
 public final class SumTest {
@@ -40,6 +40,31 @@ public final class SumTest {
     //Debug.println();
     //Debug.println("l2");
     Common.l1DistanceTests(
+      Common.generators(DIM),
+      Common.makeAccumulators(Common.accumulators()),
+      BigFloatAccumulator1.make());  
+    Debug.DEBUG=false; }
+
+  @SuppressWarnings("static-method")
+  @Test
+  public final void dot () {
+    Debug.DEBUG=false;
+    //Debug.println();
+    //Debug.println("dot");
+    Common.dotTests(
+      Common.generators(DIM),
+      Common.makeAccumulators(Common.accumulators()),
+      BigFloatAccumulator1.make());  
+    Debug.DEBUG=false; }
+
+
+  @SuppressWarnings("static-method")
+  @Test
+  public final void l2 () {
+    Debug.DEBUG=false;
+    //Debug.println();
+    //Debug.println("l2");
+    Common.l2Tests(
       Common.generators(DIM),
       Common.makeAccumulators(Common.accumulators()),
       BigFloatAccumulator1.make());  
@@ -83,30 +108,6 @@ public final class SumTest {
     //Debug.println();
     //Debug.println("sum");
     Common.sumTests(
-      Common.generators(DIM),
-      Common.makeAccumulators(Common.accumulators()),
-      BigFloatAccumulator1.make());  
-    Debug.DEBUG=false; }
-
-  @SuppressWarnings("static-method")
-  @Test
-  public final void l2 () {
-    Debug.DEBUG=false;
-    //Debug.println();
-    //Debug.println("l2");
-    Common.l2Tests(
-      Common.generators(DIM),
-      Common.makeAccumulators(Common.accumulators()),
-      BigFloatAccumulator1.make());  
-    Debug.DEBUG=false; }
-
-  @SuppressWarnings("static-method")
-  @Test
-  public final void dot () {
-    Debug.DEBUG=false;
-    //Debug.println();
-    //Debug.println("dot");
-    Common.dotTests(
       Common.generators(DIM),
       Common.makeAccumulators(Common.accumulators()),
       BigFloatAccumulator1.make());  
