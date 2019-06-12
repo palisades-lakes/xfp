@@ -1,6 +1,5 @@
 package xfp.java.numbers;
 
-import static xfp.java.numbers.Bei.compare;
 import static xfp.java.numbers.Numbers.hiWord;
 import static xfp.java.numbers.Numbers.loWord;
 import static xfp.java.numbers.Numbers.unsigned;
@@ -14,7 +13,7 @@ import java.util.List;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-07
+ * @version 2019-06-12
  */
 
 public final class UnNatural extends Number
@@ -52,24 +51,22 @@ implements Ringlike<UnNatural> {
 
   public static final UnNatural add (final long t0,
                                      final long t1,
-                                     final int e1) {
+                                     final int bitShift) {
     assert 0L<=t0;
     assert 0L<=t1;
-    //if (0L==t0) { return unsafe(Bei.shiftLeft(t1,e1)); }
-    //if (0L==t1) { return valueOf(t0); }
-    final int[] u = Bei.add(Bei.shiftLeft(t1,e1),t0);
+    assert 0<=bitShift;
+    final int[] u = Bei.add(t0,t1,bitShift);
     return unsafe(u); }
 
   public final UnNatural add (final long m,
                               final int shift) {
     assert 0L<=m;
-    //if (0L==m) { return this; }
-    //if (isZero()) { return unsafe(Bei.shiftLeft(m,shift)); }
     final int[] u = Bei.add(_mag,m,shift);
     return unsafe(u); }
 
   //--------------------------------------------------------------
   // only when val <= this
+
   public final UnNatural subtract (final long m) {
     assert 0L<=m;
     //if (0L==m) { return this; }
@@ -80,6 +77,7 @@ implements Ringlike<UnNatural> {
     return unsafe(u); }
 
   // only when val <= this
+  
   @Override
   public final UnNatural subtract (final UnNatural m) {
     //if (m.isZero()) { return this; }
@@ -101,8 +99,9 @@ implements Ringlike<UnNatural> {
                                           final long m1,
                                           final int leftShift) {
     assert 0L<=m0;
-    //if (0L==m1) { return valueOf(m0); }
-    final int[] u = Bei.subtract(m0,Bei.valueOf(m1,leftShift));
+    assert 0L<=m1;
+    assert 0<=leftShift;
+    final int[] u = Bei.subtract(m0,m1,leftShift);
     return unsafe(u); }
 
   // only when (m1 << leftShift) <= m0
@@ -120,10 +119,16 @@ implements Ringlike<UnNatural> {
   public final UnNatural subtractFrom (final long m,
                                        final int leftShift) {
     assert 0L<=m;
-    //if (0L==m) { assert isZero(); return ZERO; }
-    //if (isZero()) { return unsafe(Bei.shiftLeft(m,leftShift)); }
     final int[] ms = Bei.shiftLeft(m,leftShift);
     final int[] u = Bei.subtract(ms,_mag);
+    return unsafe(u); }
+
+  public static final UnNatural subtractFrom (final long m0,
+                                              final long m1,
+                                              final int leftShift) {
+    assert 0L<=m1;
+    final int[] ms = Bei.shiftLeft(m1,leftShift);
+    final int[] u = Bei.subtract(ms,Bei.valueOf(m0));
     return unsafe(u); }
 
   // only when this <= m
@@ -134,6 +139,15 @@ implements Ringlike<UnNatural> {
     //if (isZero()) { return valueOf(m); }
     final int[] u = Bei.subtract(m,_mag);
     return unsafe(u); }
+
+  //--------------------------------------------------------------
+
+  public static final UnNatural absDifference (final UnNatural u0,
+                                               final UnNatural u1) {
+    final int c01 = u0.compareTo(u1);
+    if (0<c01) { return u0.subtract(u1); }
+    if (0>c01) { return u1.subtract(u0); }
+    return ZERO; }
 
   //--------------------------------------------------------------
 
@@ -148,15 +162,18 @@ implements Ringlike<UnNatural> {
     final long lolo = lo0*lo1;
     final long hilo2 = (hi0*lo1) + (hi1*lo0);
     final long hihi = hi0*hi1;
-    final int[] m = new int[4];
     long sum = lolo;
-    m[3] = (int) sum;
+    final int m3 = (int) sum;
     sum = (sum >>> 32) + hilo2;
-    m[2] = (int) sum;
+    final int m2 = (int) sum;
     sum = (sum >>> 32) + hihi ;
-    m[1] = (int) sum;
-    m[0] = (int) (sum >>> 32);
-    return unsafe(Bei.stripLeadingZeros(m)); }
+    final int m1 = (int) sum;
+    final int m0 = (int) (sum >>> 32);
+    if (0!=m0) { return unsafe(new int[] { m0,m1,m2,m3, }); }
+    if (0!=m1) { return unsafe(new int[] { m1,m2,m3, }); }
+    if (0!=m2) { return unsafe(new int[] { m2,m3, }); }
+    if (0!=m3) { return unsafe(new int[] { m3, }); }
+    return ZERO; }
 
   public static final UnNatural square (final long t) {
     assert 0L<=t;
@@ -362,8 +379,8 @@ implements Ringlike<UnNatural> {
 
   // get the least significant int wordsof (m >>> shift)
 
-   public final int getShiftedInt (final int n) {
-     assert 0<=n;
+  public final int getShiftedInt (final int n) {
+    assert 0<=n;
     //if (isZero()) { return 0; }
     return Bei.getShiftedInt(_mag,n); }
 
@@ -391,9 +408,9 @@ implements Ringlike<UnNatural> {
     return Bei.getLowestSetBit(_mag); }
 
   public final int loBit () { return getLowestSetBit(); }
-  
+
   public final int bitLength () { return Bei.bitLength(_mag); }
-  
+
   public final int hiBit () { return bitLength(); }
 
   public final int bitCount () { return Bei.bitCount(_mag); }
@@ -404,7 +421,7 @@ implements Ringlike<UnNatural> {
 
   @Override
   public final int compareTo (final UnNatural y) {
-    return compare(_mag,y._mag); }
+    return Bei.compare(_mag,y._mag); }
 
   public final int compareTo (final int leftShift,
                               final UnNatural y) {
@@ -412,21 +429,11 @@ implements Ringlike<UnNatural> {
 
   public final int compareTo (final long y) {
     assert 0L<=y;
-    if (y==0L) {
-      if (isZero()) { return 0; }
-      return 1; }
-    if (isZero()) { return -1; }
-    return compare(_mag,y); }
+    return Bei.compare(_mag,y); }
 
   public final int compareTo (final long y,
                               final int leftShift) {
-    if (y==0L) {
-      if (isZero()) { return 0; }
-      return -1; }
-    if (0==leftShift) { return compareTo(y); }
-    assert 0L<y;
-    assert 0L<leftShift;
-    if (isZero()) { return -1; }
+    assert 0L<=y;
     return Bei.compare(_mag,y,leftShift); }
 
   //--------------------------------------------------------------

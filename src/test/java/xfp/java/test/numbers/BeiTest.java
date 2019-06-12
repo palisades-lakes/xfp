@@ -78,6 +78,34 @@ public final class BeiTest {
 
   @SuppressWarnings({ "static-method" })
   @Test
+  public final void testAddLong () {
+    Debug.DEBUG=false;
+
+    final int[] sum = new int[] { 301, };
+    final long a0 = 0xc9L;
+
+    final int[] c0 =  Bei.add(Bei.valueOf(a0), Bei.valueOf(0x19L, 2));
+    Assertions.assertArrayEquals(
+      sum, c0,
+      "\nsum=" + Arrays.toString(sum)
+      + "\nc0=" + Arrays.toString(c0));
+
+    final int[] c1 = Bei.add(a0, 0x19L, 2);
+    Assertions.assertArrayEquals(
+      sum, c1,
+      "\nsum=" + Arrays.toString(sum)
+      + "\nc1=" + Arrays.toString(c1));
+
+    final int[] c2 = Bei.add(a0, 25L, 2);
+    Assertions.assertArrayEquals(
+      sum,c2,
+      "\nsum=" + Arrays.toString(sum)
+      + "\nc2=" + Arrays.toString(c2));
+
+    Debug.DEBUG=false; }
+
+  @SuppressWarnings({ "static-method" })
+  @Test
   public final void testSubtract() {
     Debug.DEBUG=false;
 

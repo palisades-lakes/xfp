@@ -209,6 +209,7 @@ public final class Bei {
                                    final int bitShift) {
     // TODO: assert necessary?
     assert (! leadingZero(m0));
+    if (0==bitShift) { return compare(m0,m1); }
     if (0L==m1) {
       if (isZero(m0)) { return 0; }
       return 1; }
@@ -267,7 +268,8 @@ public final class Bei {
                                    final int bitShift) {
     assert 0L<=m0;
     assert 0L<=m1;
-    assert 0<bitShift : "bitShift=" + bitShift;
+    assert 0<=bitShift : "bitShift=" + bitShift;
+    if (0==bitShift) { return Long.compare(m0,m1); }
     if (0L==m1) {
       if (0L==m0) { return 0; }
       return 1; }
@@ -278,21 +280,17 @@ public final class Bei {
     if (hiBit0>hiBit1) { return 1; }
     // shifted m1 must fit in one long, since hiBit0 < 64
     final long m11 = (m1<<bitShift);
-    if (m0<m11) { return -1; }
-    if (m0>m11) { return 1; }
-    return 0; }
+    return Long.compare(m0,m11); }
 
   public static final int compare (final long m0,
                                    final int e0,
                                    final long m1,
                                    final int e1) {
-    if (e0<e1) { return -compare(m1,m0,e1-e0); }
-    if (e0>e1) { return compare(m0,m1,e0-e1); }
     assert 0L<=m0;
     assert 0L<=m1;
-    if (m0<m1) { return -1; }
-    if (m0>m1) { return 1; }
-    return 0; }
+    if (e0<e1) { return -compare(m1,m0,e1-e0); }
+    if (e0>e1) { return compare(m0,m1,e0-e1); }
+    return Long.compare(m0,m1); }
 
   //--------------------------------------------------------------
   // add
@@ -455,6 +453,73 @@ public final class Bei {
       return r1; }
 
     for (;(0<=i0) && (0<=ir);ir--,i0--) { r0[ir] = m0[i0]; }
+    return r0; }
+
+  //--------------------------------------------------------------
+
+  public static final int[] add (final long m0,
+                                 final long m1,
+                                 final int bitShift)  {
+    assert 0L<=m0;
+    assert 0L<=m1;
+    assert 0<=bitShift;
+
+    if (0L==m0) { return shiftLeft(m1,bitShift); }
+    if (0L==m1) { return valueOf(m0); }
+    if (0==bitShift) { return add(m0,m1); }
+
+    final int hi0 = (int) hiWord(m0);
+    final int lo0 = (int) loWord(m0);
+    final int n0 = ((0==hi0) ? ((0==lo0) ? 0 : 1) : 2);
+
+    final int intShift = bitShift >>> 5;
+    final int remShift = bitShift & 0x1f;
+    final int nwords1;
+    final int hi1 = hiBit(m1) + remShift;
+    if (64 < hi1) { nwords1 = 3; }
+    else if (32 < hi1) { nwords1 = 2; }
+    else { nwords1 = 1; }
+
+    final int n1 = intShift + nwords1;
+    final int nr = Math.max(n0,n1);
+    final int[] r0 = new int[nr];
+
+    // copy m0 to result
+    int i = nr-1;
+    if (0<=i) { r0[i--] = lo0; }
+    if (0<=i) { r0[i--] = hi0; }
+
+    // add shifted m1 to r0 in place
+    long sum;
+    i=nr-intShift-1;
+    final long m1s = (m1 << remShift);
+    sum = loWord(m1s);
+    if (0<=i) { sum += unsigned(r0[i]); }
+    r0[i--] = (int) sum;
+    if (2<=nwords1) {
+      //sum = midPart(m1,remShift) + (sum >>> 32);
+      sum = hiWord(m1s) + (sum >>> 32);
+      if (0<=i) { sum += unsigned(r0[i]); }
+      r0[i--] = (int) sum; }
+    if (3==nwords1) {
+      //sum = hiPart(m1,remShift) + (sum >>> 32);
+      sum = (m1 >>> (64-remShift)) + (sum >>> 32);
+      if (0<=i) { sum += unsigned(r0[i]); }
+      r0[i] = (int) sum; }
+
+    boolean carry = ((sum >>> 32) != 0);
+    while ((0<=i) && carry) {
+      sum = 0x01L;
+      if (0<=i) { sum += unsigned(r0[i]); }
+      final int is = (int) sum;
+      r0[i--] = is;
+      carry = (is == 0); }
+
+    if (carry) {
+      final int r1[] = new int[nr + 1];
+      System.arraycopy(r0,0,r1,1,nr);
+      r1[0] = 0x01;
+      return r1; }
     return r0; }
 
   //--------------------------------------------------------------
@@ -684,6 +749,23 @@ public final class Bei {
     while (0<=i0) { r0[i0] = m0[i0]; i0--; }
 
     return stripLeadingZeros(r0);  }
+
+  public static final int[] subtract (final long m0,
+                                      final long m1) {
+    assert 0L<=m1;
+    assert m1<=m0;
+    return valueOf(m0-m1); } 
+
+  // only when m0 >= (m1<<bitShift)
+  public static final int[] subtract (final long m0,
+                                      final long m1,
+                                      final int bitShift) {
+    assert 0L<=m0;
+    assert 0L<=m1;
+    assert 0<=bitShift;
+    final long dm = m0 - (m1<<bitShift);
+    assert 0L<=dm;
+    return valueOf(dm); }
 
   //--------------------------------------------------------------
 
