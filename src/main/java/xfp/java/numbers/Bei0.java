@@ -19,7 +19,7 @@ import java.util.Arrays;
  * @version 2019-06-13
  */
 
-public final class Bei {
+public final class Bei0 {
 
   public static final boolean isZero (final int[] z) {
     return 0 == z.length; }
@@ -2014,7 +2014,7 @@ public final class Bei {
   // disable constructor
   //--------------------------------------------------------------
 
-  private Bei () {
+  private Bei0 () {
     throw new UnsupportedOperationException(
       "can't instantiate " + getClass()); }
 

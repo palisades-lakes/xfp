@@ -19,7 +19,7 @@ import xfp.java.prng.Generators;
 /** Utilities for Object and primitive numbers.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-18
+ * @version 2019-06-13
  */
 @SuppressWarnings("unchecked")
 public final class Numbers implements Set {
@@ -116,12 +116,28 @@ public final class Numbers implements Set {
     assert n <= Integer.MAX_VALUE;
     return (int) n; }
 
+  /** inclusive, big-endian */
+  public static final int loBit (final int[] i) {
+    return Bei.getLowestSetBit(i); }
+
   /** inclusive */
   public static final int loBit (final UnNatural i) {
     return i.getLowestSetBit(); }
 
+  /** inclusive */
+  public static final int loBit (final UnNatural0 i) {
+    return i.getLowestSetBit(); }
+
+  /** exclusive, big-endian */
+  public static final int hiBit (final int[] i) {
+    return Bei.bitLength(i); }
+
   /** exclusive */
   public static final int hiBit (final UnNatural i) {
+    return i.bitLength(); }
+
+  /** exclusive */
+  public static final int hiBit (final UnNatural0 i) {
     return i.bitLength(); }
 
   /** inclusive */
