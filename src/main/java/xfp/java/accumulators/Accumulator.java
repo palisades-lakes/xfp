@@ -13,7 +13,7 @@ import xfp.java.exceptions.Exceptions;
  * TODO: tighten this requirement.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-06
+ * @version 2019-06-14
  */
 
 @SuppressWarnings("unchecked")
@@ -66,6 +66,14 @@ public interface Accumulator<T extends Accumulator> {
 
   public default T addAll (final double[] z)  {
     for (final double zi : z) { add(zi); }
+    return (T) this; }
+
+  public default T addAbs (final double z) {
+    add(Math.abs(z));     
+    return (T) this; }
+
+  public default T addAbsAll (final double[] z)  {
+    for (final double zi : z) { addAbs(zi); }
     return (T) this; }
 
   /** add <code>z<sup>2</sup></code> to the accumulator. */

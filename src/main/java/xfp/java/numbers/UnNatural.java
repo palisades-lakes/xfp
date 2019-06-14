@@ -13,7 +13,7 @@ import java.util.List;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-12
+ * @version 2019-06-14
  */
 
 public final class UnNatural extends Number
@@ -36,6 +36,10 @@ implements Ringlike<UnNatural> {
     //if (m.isZero()) { return this; }
     //if (isZero()) { return m; }
     return unsafe(Bei.add(_mag,m._mag)); }
+
+  public final UnNatural add (final UnNatural m,
+                              final int leftShift) {
+    return unsafe(Bei.add(_mag,m._mag,leftShift)); }
 
   public final UnNatural add (final long m) {
     assert 0L<=m;

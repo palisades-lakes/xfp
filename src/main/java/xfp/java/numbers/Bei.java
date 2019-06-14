@@ -8,6 +8,8 @@ import static xfp.java.numbers.Numbers.unsigned;
 import java.math.BigInteger;
 import java.util.Arrays;
 
+import xfp.java.Debug;
+
 /** operations on <code>int[]</code>, interpreted
  * as big-endian arbitrary-precision non-negative integers.
  *
@@ -59,14 +61,43 @@ public final class Bei {
     return result; }
 
   //--------------------------------------------------------------
+  /** Overwrite elements of m0 with shifted bits from m, if big
+   * enough.
+   */
+  public static final int[] shiftLeftInto (final int[] m0,
+                                           final int[] m1,
+                                           final int bitShift) {
+    assert 0<=bitShift;
+    final int n0 = m0.length;
+    final int n1 = m1.length;
+    final int n1s = length(m1,bitShift);
+    //Debug.println("n0=" + n0);
+    //Debug.println("n1=" + n1);
+    //Debug.println("n1s=" + n1s);
+    assert n1s<=n0;
+    final int lShift = (bitShift & 0x1f);
+    //Debug.println("n0=" + n0);
+    //Debug.println("n1=" + n1);
+    //Debug.println("n1s=" + n1s);
+    //Debug.println("lShift=" + lShift);
+    if (lShift==0) {
+      System.arraycopy(m1,0,m0,n0-n1s,n1);  
+      return m0; }
+    final int rShift = 32 - lShift;
+    final int hi = (m1[0] >>> rShift);
+    int i = n0-n1s;
+    if (0!=hi) { m0[i++] = hi; }
+    int j = 0;
+    while (j < (n1-1)) {
+      m0[i++] = (m1[j++] << lShift) | (m1[j] >>> rShift); }
+    m0[i] = m1[j] << lShift; 
+    return m0; }
 
   public static final int[] shiftLeft (final int[] m,
                                        final int bitShift) {
     assert 0<=bitShift;
-    //assert (! leadingZero(m));
-    if (isZero(m)) { return ZERO; }
     if (bitShift==0) { return m; }
-    //if (bitShift<0) { return shiftRight0(m,-bitShift); }
+    if (isZero(m)) { return ZERO; }
     final int intShift = (bitShift >>> 5);
     final int remShift = (bitShift & 0x1f);
     final int n = m.length;
@@ -88,12 +119,12 @@ public final class Bei {
 
   public static final int[] shiftLeft (final long m,
                                        final int shift) {
-    final int m0 = (int) hiWord(m);
-    final int m1 = (int) loWord(m);
-    if (0==m0) {
-      if (0==m1) { return new int[0]; }
-      return shiftLeft(new int[] { m1 },shift); }
-    return shiftLeft(new int[] { m0, m1, },shift); }
+    final int hi = (int) hiWord(m);
+    final int lo = (int) loWord(m);
+    if (0==hi) {
+      if (0==lo) { return new int[0]; }
+      return shiftLeft(new int[] { lo },shift); }
+    return shiftLeft(new int[] { hi, lo, },shift); }
 
   //--------------------------------------------------------------
   // assuming m0 and m1 have no leading zeros
@@ -296,6 +327,36 @@ public final class Bei {
   // add
   //--------------------------------------------------------------
 
+  //  public static final int[] add (final int[] m0,
+  //                                 final int[] m1) {
+  //    // TODO: assert necessary?
+  //    assert (! leadingZero(m0));
+  //    assert (! leadingZero(m1));
+  //    // If m0 is shorter, swap the two arrays
+  //    if (m0.length < m1.length) { return add(m1,m0); }
+  //    int i0 = m0.length;
+  //    int i1 = m1.length;
+  //    final int[] r = new int[i0+1];
+  //    long sum = 0;
+  //    if (i1 == 1) {
+  //      i0--;
+  //      sum = unsigned(m0[i0]) + unsigned(m1[0]);
+  //      r[i0+1] = (int) sum; }
+  //    else {
+  //      while (0<i1) {
+  //        i0--; i1--;
+  //        sum = unsigned(m0[i0]) + unsigned(m1[i1]) + (sum >>> 32);
+  //        r[i0+1] = (int) sum; } }
+  //    boolean carry = ((sum >>> 32) != 0);
+  //    while ((i0 > 0) && carry) {
+  //      i0--;
+  //      final int s = m0[i0] + 1;
+  //      r[i0+1] = s;
+  //      carry = (0==s); }
+  //    while (i0 > 0) { i0--; r[i0+1] = m0[i0]; }
+  //    r[0] = (carry ? 0x01 : 0x00);
+  //    return stripLeadingZeros(r); }
+
   public static final int[] add (final int[] m0,
                                  final int[] m1) {
     // TODO: assert necessary?
@@ -305,58 +366,108 @@ public final class Bei {
     if (m0.length < m1.length) { return add(m1,m0); }
     int i0 = m0.length;
     int i1 = m1.length;
-    final int[] r = new int[i0+1];
+    final int[] r0 = new int[i0];
     long sum = 0;
     if (i1 == 1) {
-      i0--;
-      sum = unsigned(m0[i0]) + unsigned(m1[0]);
-      r[i0+1] = (int) sum; }
+      sum = unsigned(m0[--i0]) + unsigned(m1[0]);
+      r0[i0] = (int) sum; }
     else {
-      while (0<i1) {
-        i0--; i1--;
-        sum = unsigned(m0[i0]) + unsigned(m1[i1]) + (sum >>> 32);
-        r[i0+1] = (int) sum; } }
+      while (i1 > 0) {
+        sum =
+          unsigned(m0[--i0]) 
+          + unsigned(m1[--i1])
+          + (sum >>> 32);
+        r0[i0] = (int) sum; } }
     boolean carry = ((sum >>> 32) != 0);
     while ((i0 > 0) && carry) {
-      i0--;
-      final int s = m0[i0] + 1;
-      r[i0+1] = s;
-      carry = (0==s); }
-    while (i0 > 0) { i0--; r[i0+1] = m0[i0]; }
-    r[0] = (carry ? 0x01 : 0x00);
-    return stripLeadingZeros(r); }
+      carry = ((r0[--i0] = m0[i0] + 1) == 0); }
+    while (i0 > 0) { r0[--i0] = m0[i0]; }
+    if (carry) {
+      final int[] r1 = new int[r0.length + 1];
+      System.arraycopy(r0,0,r1,1,r0.length);
+      r1[0] = 0x01;
+      return r1; }
+    return r0; }
 
-//  public static final int[] add (final int[] m0,
-//                                 final int[] m1) {
-//    // TODO: assert necessary?
-//    assert (! leadingZero(m0));
-//    assert (! leadingZero(m1));
-//    // If m0 is shorter, swap the two arrays
-//    if (m0.length < m1.length) { return add(m1,m0); }
-//    int i0 = m0.length;
-//    int i1 = m1.length;
-//    final int[] r0 = new int[i0];
-//    long sum = 0;
-//    if (i1 == 1) {
-//      sum = unsigned(m0[--i0]) + unsigned(m1[0]);
-//      r0[i0] = (int) sum; }
-//    else {
-//      while (i1 > 0) {
-//        sum =
-//          unsigned(m0[--i0]) 
-//          + unsigned(m1[--i1])
-//          + (sum >>> 32);
-//        r0[i0] = (int) sum; } }
-//    boolean carry = ((sum >>> 32) != 0);
-//    while ((i0 > 0) && carry) {
-//      carry = ((r0[--i0] = m0[i0] + 1) == 0); }
-//    while (i0 > 0) { r0[--i0] = m0[i0]; }
-//    if (carry) {
-//      final int[] r1 = new int[r0.length + 1];
-//      System.arraycopy(r0,0,r1,1,r0.length);
-//      r1[0] = 0x01;
-//      return r1; }
-//    return r0; }
+  /** How big an array do we need to hold m shifted up (left)
+   * bitShift bits?
+   */
+  public static final int length (final int[] m, 
+                                  final int bitShift) {
+    // other wise we would need to find the first nonzero element
+    // wouldn't little endian be easier?
+    assert !leadingZero(m);
+    final int n = m.length + (bitShift >>> 5);
+    final int remShift = (bitShift & 0x1f);
+    if (0==remShift) { return n; }
+    final int rShift = 32 - (bitShift & 0x1f);
+    final int hi = (m[0] >>> rShift);
+    Debug.println("rShift=" + rShift);
+    Debug.println("hi=" + hi);
+    Debug.println("intShift=" + (bitShift >>> 5));
+    return n + ((0!=hi) ? 1 : 0); }
+
+  //  /** return the <code>i</code>th word of 
+  //   * <code>m</code> shifted left by 
+  //   * <code>32*intShift + bitShift</code> bits.
+  //   */
+  //  private static final int word (final int[] m, 
+  //                                 final int bitShift,
+  //                                 final int i) {
+  //    assert 0<bitShift;
+  //    final int n0 = m.length;
+  //    final int n1 = length(m,bitShift);
+  //    assert 0<=i; 
+  //    assert i<n1;
+  //    final int intShift = (bitShift >>> 5);
+  //    final int remShift = (bitShift & 0x1f);
+  //    final int rightShift = 32 - remShift;
+  //    final int j = i - intShift;
+  //    assert j<n0;
+  //    if (0>j) { return 0; }
+  //    final int hi = ((j<n0-1) ? (m[j+1] << remShift) : 0);
+  //    final int lo = (m[j] >>> rightShift);
+  //    return hi | lo; }
+
+  /** If possible, overwrite m0 with m0+m1. */
+  private static final int[] increment (final int[] m0,
+                                        final int[] m1) {
+    int i0 = m0.length;
+    int i1 = m1.length;
+    assert (i1<=i0);
+    long sum = 0;
+    if (i1 == 1) {
+      sum = unsigned(m0[--i0]) + unsigned(m1[0]);
+      m0[i0] = (int) sum; }
+    else {
+      while ((0<i0) && (0<i1)) {
+        sum = 
+          unsigned(m0[--i0]) 
+          + unsigned(m1[--i1])
+          + (sum >>> 32);
+        m0[i0] = (int) sum; } }
+    boolean carry = ((sum >>> 32) != 0);
+    while ((i0 > 0) && carry) {
+      carry = ((m0[--i0] = m0[i0] + 1) == 0); }
+    if (carry) {
+      final int[] r1 = new int[m0.length + 1];
+      System.arraycopy(m0,0,r1,1,m0.length);
+      r1[0] = 0x01;
+      return r1; }
+    return m0; }
+
+  public static final int[] add (final int[] m0,
+                                 final int[] m1,
+                                 final int bitShift) {
+    assert 0<=bitShift;
+    if (0==bitShift) { return add(m0,m1); }
+    if (isZero(m0)) { return shiftLeft(m1,bitShift); }
+    if (isZero(m1)) { return m0; }
+    final int n0 = m0.length;
+    final int n1s = length(m1,bitShift);
+    final int n = Math.max(n0,n1s);
+    final int[] m11 = shiftLeftInto(new int[n],m1,bitShift);
+    return increment(m11,m0); }
 
   //--------------------------------------------------------------
 

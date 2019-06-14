@@ -15,14 +15,75 @@ import xfp.java.numbers.Bei;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-31
+ * @version 2019-06-14
  */
 
 public final class BeiTest {
 
   @SuppressWarnings({ "static-method" })
   @Test
-  public final void testSubtractFrom() {
+  public final void testShiftInto () {
+    Debug.DEBUG=false;
+    
+    final int[] shifts = { 0, 32, 15, 31, 33, 67, };
+    
+    for (final int shift : shifts) {
+      final int[] a0 = new int[] { 0xf0f0f0f0, 0xd0d0e0e0, };
+      final int[] b0 = Bei.shiftLeft(a0, shift);
+      final int[] b1 = new int[Bei.length(a0,shift) + 3];
+      final int[] b2 = Bei.shiftLeftInto(b1,a0,shift);
+      final int[] b3 = Arrays.copyOfRange(b2,3,b2.length);
+      Assertions.assertArrayEquals(
+        b0, b3,
+        "shift=" + shift
+        + "\na0=" + Arrays.toString(a0)
+        + "\nb0=" + Arrays.toString(b0)
+        + "\nb2=" + Arrays.toString(b2)
+        + "\nb3=" + Arrays.toString(b3)); }
+
+    for (final int shift : shifts) {
+      final int[] a0 = new int[] { 100, 100, };
+      final int[] b0 = Bei.shiftLeft(a0, shift);
+      final int[] b1 = new int[Bei.length(a0,shift) + 3];
+      final int[] b2 = Bei.shiftLeftInto(b1,a0,shift);
+      final int[] b3 = Arrays.copyOfRange(b2,3,b2.length);
+      Assertions.assertArrayEquals(
+        b0, b3,
+        "shift=" + shift
+        + "\na0=" + Arrays.toString(a0)
+        + "\nb0=" + Arrays.toString(b0)
+        + "\nb2=" + Arrays.toString(b2)
+        + "\nb3=" + Arrays.toString(b3)); }
+
+    for (final int shift : shifts) {
+      final int[] a0 = new int[] { 0xf0f0f0f0, 0xd0d0e0e0, };
+      final int[] b0 = Bei.shiftLeft(a0, shift);
+      final int[] b1 = new int[Bei.length(a0,shift)];
+      final int[] b2 = Bei.shiftLeftInto(b1,a0,shift);
+      Assertions.assertArrayEquals(
+        b0, b2,
+        "shift=" + shift
+        + "\na0=" + Arrays.toString(a0)
+        + "\nb0=" + Arrays.toString(b0)
+        + "\nb2=" + Arrays.toString(b2)); }
+
+    for (final int shift : shifts) {
+      final int[] a0 = new int[] { 100, 100, };
+      final int[] b0 = Bei.shiftLeft(a0, shift);
+      final int[] b1 = new int[Bei.length(a0,shift)];
+      final int[] b2 = Bei.shiftLeftInto(b1,a0,shift);
+      Assertions.assertArrayEquals(
+        b0, b2,
+        "shift=" + shift
+        + "\na0=" + Arrays.toString(a0)
+        + "\nb0=" + Arrays.toString(b0)
+        + "\nb2=" + Arrays.toString(b2)); }
+
+    Debug.DEBUG=false; }
+
+  @SuppressWarnings({ "static-method" })
+  @Test
+  public final void testSubtractFrom () {
     Debug.DEBUG=false;
 
     final int[] dif = new int[] { 300, };

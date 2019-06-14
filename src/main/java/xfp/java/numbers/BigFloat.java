@@ -57,17 +57,15 @@ implements Ringlike<BigFloat> {
        final UnNatural t1,
        final int e1) {
 
-    final UnNatural t02,t12;
-    final int e2;
-    final int de = e1-e0;
-    if (de > 0) {
-      t02 = t0; t12 = t1.shiftLeft(de); e2 = e0; }
-    else if (de < 0) {
-      t02 = t0.shiftLeft(-de); t12 = t1; e2 = e1; }
-    else {
-      t02 = t0; t12 = t1; e2 = e1; }
-
     if (p0 ^ p1) { // different signs
+      final UnNatural t02,t12;
+      final int e2;
+      if (e0<e1) {
+        t02 = t0; t12 = t1.shiftLeft(e1-e0); e2 = e0; }
+      else if (e0>e1) {
+        t02 = t0.shiftLeft(e0-e1); t12 = t1; e2 = e1; }
+      else {
+        t02 = t0; t12 = t1; e2 = e1; }
       final int c01 = t02.compareTo(t12);
       if (0==c01) { return ZERO; }
       // t12 > t02
@@ -75,7 +73,9 @@ implements Ringlike<BigFloat> {
       // t02 > t12
       return valueOf(p0,t02.subtract(t12),e2); }
 
-    return valueOf(p0,t02.add(t12),e2); }
+    if (e0<e1) { return valueOf(p0,t0.add(t1,e1-e0),e0);}
+    if (e0>e1) { return valueOf(p0,t1.add(t0,e0-e1),e1);}
+    return valueOf(p0,t0.add(t1),e0);}
 
   //--------------------------------------------------------------
 
@@ -315,17 +315,17 @@ implements Ringlike<BigFloat> {
   add2 (final long tt,
         final int e0) {
     assert 0L<=tt;
-    
+
     final int s = Numbers.loBit(tt);
     final long t;
     final int e;
     if ((0==s) || (64==s)) { t=tt; e=e0; }
     else { t=(tt>>>s); e=e0+s; }
-    
+
     final UnNatural t2 = UnNatural.square(t);
     //assert 0==Numbers.loBit(t2);
     final int e2 = (e<<1);
-    
+
     return add(
       nonNegative(),
       significand(),
