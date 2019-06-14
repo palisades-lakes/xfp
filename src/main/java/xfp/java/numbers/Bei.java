@@ -305,28 +305,58 @@ public final class Bei {
     if (m0.length < m1.length) { return add(m1,m0); }
     int i0 = m0.length;
     int i1 = m1.length;
-    final int[] r0 = new int[i0];
+    final int[] r = new int[i0+1];
     long sum = 0;
     if (i1 == 1) {
-      sum = unsigned(m0[--i0]) + unsigned(m1[0]);
-      r0[i0] = (int) sum; }
+      i0--;
+      sum = unsigned(m0[i0]) + unsigned(m1[0]);
+      r[i0+1] = (int) sum; }
     else {
-      while (i1 > 0) {
-        sum =
-          unsigned(m0[--i0]) 
-          + unsigned(m1[--i1])
-          + (sum >>> 32);
-        r0[i0] = (int) sum; } }
+      while (0<i1) {
+        i0--; i1--;
+        sum = unsigned(m0[i0]) + unsigned(m1[i1]) + (sum >>> 32);
+        r[i0+1] = (int) sum; } }
     boolean carry = ((sum >>> 32) != 0);
     while ((i0 > 0) && carry) {
-      carry = ((r0[--i0] = m0[i0] + 1) == 0); }
-    while (i0 > 0) { r0[--i0] = m0[i0]; }
-    if (carry) {
-      final int[] r1 = new int[r0.length + 1];
-      System.arraycopy(r0,0,r1,1,r0.length);
-      r1[0] = 0x01;
-      return r1; }
-    return r0; }
+      i0--;
+      final int s = m0[i0] + 1;
+      r[i0+1] = s;
+      carry = (0==s); }
+    while (i0 > 0) { i0--; r[i0+1] = m0[i0]; }
+    r[0] = (carry ? 0x01 : 0x00);
+    return stripLeadingZeros(r); }
+
+//  public static final int[] add (final int[] m0,
+//                                 final int[] m1) {
+//    // TODO: assert necessary?
+//    assert (! leadingZero(m0));
+//    assert (! leadingZero(m1));
+//    // If m0 is shorter, swap the two arrays
+//    if (m0.length < m1.length) { return add(m1,m0); }
+//    int i0 = m0.length;
+//    int i1 = m1.length;
+//    final int[] r0 = new int[i0];
+//    long sum = 0;
+//    if (i1 == 1) {
+//      sum = unsigned(m0[--i0]) + unsigned(m1[0]);
+//      r0[i0] = (int) sum; }
+//    else {
+//      while (i1 > 0) {
+//        sum =
+//          unsigned(m0[--i0]) 
+//          + unsigned(m1[--i1])
+//          + (sum >>> 32);
+//        r0[i0] = (int) sum; } }
+//    boolean carry = ((sum >>> 32) != 0);
+//    while ((i0 > 0) && carry) {
+//      carry = ((r0[--i0] = m0[i0] + 1) == 0); }
+//    while (i0 > 0) { r0[--i0] = m0[i0]; }
+//    if (carry) {
+//      final int[] r1 = new int[r0.length + 1];
+//      System.arraycopy(r0,0,r1,1,r0.length);
+//      r1[0] = 0x01;
+//      return r1; }
+//    return r0; }
 
   //--------------------------------------------------------------
 
