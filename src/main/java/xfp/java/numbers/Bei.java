@@ -8,8 +8,6 @@ import static xfp.java.numbers.Numbers.unsigned;
 import java.math.BigInteger;
 import java.util.Arrays;
 
-import xfp.java.Debug;
-
 /** operations on <code>int[]</code>, interpreted
  * as big-endian arbitrary-precision non-negative integers.
  *
@@ -18,7 +16,7 @@ import xfp.java.Debug;
  * compression/optimization step?
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-13
+ * @version 2019-06-14
  */
 
 public final class Bei {
@@ -61,8 +59,8 @@ public final class Bei {
     return result; }
 
   //--------------------------------------------------------------
-  /** Overwrite elements of m0 with shifted bits from m, if big
-   * enough.
+  /** Overwrite some elements of m0 with shifted bits from m, 
+   * if big enough. Otherwise throw an exception.
    */
   public static final int[] shiftLeftInto (final int[] m0,
                                            final int[] m1,
@@ -84,13 +82,17 @@ public final class Bei {
       System.arraycopy(m1,0,m0,n0-n1s,n1);  
       return m0; }
     final int rShift = 32 - lShift;
-    final int hi = (m1[0] >>> rShift);
+    final int hi0 = (m1[0] >>> rShift);
     int i = n0-n1s;
-    if (0!=hi) { m0[i++] = hi; }
+    if (0!=hi0) { m0[i++] = hi0; }
     int j = 0;
+    int m1j = m1[j];
     while (j < (n1-1)) {
-      m0[i++] = (m1[j++] << lShift) | (m1[j] >>> rShift); }
-    m0[i] = m1[j] << lShift; 
+      final int hi = (m1j << lShift);
+      m1j =  m1[++j];
+      final int lo = (m1j >>> rShift);
+      m0[i++] = (hi | lo); }
+    m0[i] = m1j << lShift; 
     return m0; }
 
   public static final int[] shiftLeft (final int[] m,
@@ -402,9 +404,9 @@ public final class Bei {
     if (0==remShift) { return n; }
     final int rShift = 32 - (bitShift & 0x1f);
     final int hi = (m[0] >>> rShift);
-    Debug.println("rShift=" + rShift);
-    Debug.println("hi=" + hi);
-    Debug.println("intShift=" + (bitShift >>> 5));
+    //Debug.println("rShift=" + rShift);
+    //Debug.println("hi=" + hi);
+    //Debug.println("intShift=" + (bitShift >>> 5));
     return n + ((0!=hi) ? 1 : 0); }
 
   //  /** return the <code>i</code>th word of 
@@ -437,20 +439,21 @@ public final class Bei {
     assert (i1<=i0);
     long sum = 0;
     if (i1 == 1) {
-      sum = unsigned(m0[--i0]) + unsigned(m1[0]);
+      i0--;
+      sum = unsigned(m0[i0]) + unsigned(m1[0]);
       m0[i0] = (int) sum; }
     else {
       while ((0<i0) && (0<i1)) {
-        sum = 
-          unsigned(m0[--i0]) 
-          + unsigned(m1[--i1])
-          + (sum >>> 32);
+        i0--; i1--;
+        sum = unsigned(m0[i0]) + unsigned(m1[i1]) + (sum >>> 32);
         m0[i0] = (int) sum; } }
     boolean carry = ((sum >>> 32) != 0);
-    while ((i0 > 0) && carry) {
-      carry = ((m0[--i0] = m0[i0] + 1) == 0); }
+    while ((0<i0) && carry) {
+      i0--;
+      m0[i0]++;
+      carry = (m0[i0]==0); }
     if (carry) {
-      final int[] r1 = new int[m0.length + 1];
+      final int[] r1 = new int[m0.length+1];
       System.arraycopy(m0,0,r1,1,m0.length);
       r1[0] = 0x01;
       return r1; }
@@ -459,12 +462,22 @@ public final class Bei {
   public static final int[] add (final int[] m0,
                                  final int[] m1,
                                  final int bitShift) {
+    assert !leadingZero(m0);
+    assert !leadingZero(m1);
     assert 0<=bitShift;
     if (0==bitShift) { return add(m0,m1); }
     if (isZero(m0)) { return shiftLeft(m1,bitShift); }
     if (isZero(m1)) { return m0; }
     final int n0 = m0.length;
-    final int n1s = length(m1,bitShift);
+    final int n1 = m1.length + (bitShift >>> 5);
+    final int lShift = (bitShift & 0x1f);
+    final int n1s;
+    if (0==lShift) { n1s = n1; }
+    else {
+      final int rShift = 32 - (bitShift & 0x1f);
+      final int hi = (m1[0] >>> rShift);
+      n1s = n1 + ((0!=hi) ? 1 : 0); }
+      //n1s = length(m1,bitShift); 
     final int n = Math.max(n0,n1s);
     final int[] m11 = shiftLeftInto(new int[n],m1,bitShift);
     return increment(m11,m0); }
