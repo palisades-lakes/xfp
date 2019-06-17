@@ -15,10 +15,25 @@ import xfp.java.numbers.Bei;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-14
+ * @version 2019-06-16
  */
 
 public final class BeiTest {
+
+  /** How big an array do we need to hold m shifted up (left)
+   * bitShift bits?
+   */
+  private static final int length (final int[] m, 
+                                  final int bitShift) {
+    // other wise we would need to find the first nonzero element
+    // wouldn't little endian be easier?
+    assert !Bei.leadingZero(m);
+    final int n = m.length + (bitShift >>> 5);
+    final int remShift = (bitShift & 0x1f);
+    if (0==remShift) { return n; }
+    final int rShift = 32 - remShift;
+    final int hi = (m[0] >>> rShift);
+    return n + ((0!=hi) ? 1 : 0); }
 
   @SuppressWarnings({ "static-method" })
   @Test
@@ -30,7 +45,7 @@ public final class BeiTest {
     for (final int shift : shifts) {
       final int[] a0 = new int[] { 0xf0f0f0f0, 0xd0d0e0e0, };
       final int[] b0 = Bei.shiftLeft(a0, shift);
-      final int[] b1 = new int[Bei.length(a0,shift) + 3];
+      final int[] b1 = new int[length(a0,shift) + 3];
       final int[] b2 = Bei.shiftLeftInto(b1,a0,shift);
       final int[] b3 = Arrays.copyOfRange(b2,3,b2.length);
       Assertions.assertArrayEquals(
@@ -44,7 +59,7 @@ public final class BeiTest {
     for (final int shift : shifts) {
       final int[] a0 = new int[] { 100, 100, };
       final int[] b0 = Bei.shiftLeft(a0, shift);
-      final int[] b1 = new int[Bei.length(a0,shift) + 3];
+      final int[] b1 = new int[length(a0,shift) + 3];
       final int[] b2 = Bei.shiftLeftInto(b1,a0,shift);
       final int[] b3 = Arrays.copyOfRange(b2,3,b2.length);
       Assertions.assertArrayEquals(
@@ -58,7 +73,7 @@ public final class BeiTest {
     for (final int shift : shifts) {
       final int[] a0 = new int[] { 0xf0f0f0f0, 0xd0d0e0e0, };
       final int[] b0 = Bei.shiftLeft(a0, shift);
-      final int[] b1 = new int[Bei.length(a0,shift)];
+      final int[] b1 = new int[length(a0,shift)];
       final int[] b2 = Bei.shiftLeftInto(b1,a0,shift);
       Assertions.assertArrayEquals(
         b0, b2,
@@ -70,7 +85,7 @@ public final class BeiTest {
     for (final int shift : shifts) {
       final int[] a0 = new int[] { 100, 100, };
       final int[] b0 = Bei.shiftLeft(a0, shift);
-      final int[] b1 = new int[Bei.length(a0,shift)];
+      final int[] b1 = new int[length(a0,shift)];
       final int[] b2 = Bei.shiftLeftInto(b1,a0,shift);
       Assertions.assertArrayEquals(
         b0, b2,

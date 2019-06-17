@@ -8,7 +8,7 @@ import xfp.java.test.Common;
  * jy --source 11 src/scripts/java/xfp/java/scripts/BFProfile.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-13
+ * @version 2019-06-16
  */
 @SuppressWarnings("unchecked")
 public final class BFProfile {
@@ -24,8 +24,8 @@ public final class BFProfile {
       final long t = System.nanoTime();
       for (int i=0;i<trys;i++) {
         BigFloat a = BigFloat.ZERO;
-        for (int j=0;j<dim;j++) { a = a.add2(x0[j]).add2(x1[j]); }
-        //for (int j=0;j<dim;j++) { a = a.addL1(x0[j],x1[j]); }
+        //for (int j=0;j<dim;j++) { a = a.add2(x0[j]).add2(x1[j]); }
+        for (int j=0;j<dim;j++) { a = a.addL1(x0[j],x1[j]); }
         //for (int j=0;j<dim;j++) { a = a.addL2(x0[j],x1[j]); }
         final double z0 = a.doubleValue();
         if (0.0 != z0) {

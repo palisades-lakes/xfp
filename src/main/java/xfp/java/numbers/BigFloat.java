@@ -73,6 +73,7 @@ implements Ringlike<BigFloat> {
       // t02 > t12
       return valueOf(p0,t02.subtract(t12),e2); }
 
+    // same signs
     if (e0<e1) { return valueOf(p0,t0.add(t1,e1-e0),e0);}
     if (e0>e1) { return valueOf(p0,t1.add(t0,e0-e1),e1);}
     return valueOf(p0,t0.add(t1),e0);}
@@ -138,18 +139,18 @@ implements Ringlike<BigFloat> {
                    final long t0,
                    final boolean n1,
                    final long t1,
-                   final int leftShift,
+                   final int lShift,
                    final int e) {
     if (n0 ^ n1) { // different signs
-      final int c = Bei.compare(t0,t1,leftShift);
+      final int c = Bei.compare(t0,t1,lShift);
       if (0==c) { return ZERO; }
       if (0>c) { // t1 > t0
-        final UnNatural t = UnNatural.subtractFrom(t0,t1,leftShift);
+        final UnNatural t = UnNatural.subtractFrom(t0,t1,lShift);
         return valueOf(n1,t,e); }
       // t0 > t1
-      final UnNatural t = UnNatural.subtract(t0,t1,leftShift);
+      final UnNatural t = UnNatural.subtract(t0,t1,lShift);
       return valueOf(n0,t,e); }
-    final UnNatural t = UnNatural.add(t0,t1,leftShift);
+    final UnNatural t = UnNatural.add(t0,t1,lShift);
     return valueOf(n0,t,e); }
 
   //--------------------------------------------------------------
@@ -186,28 +187,25 @@ implements Ringlike<BigFloat> {
        final long t11,
        final int e11) {
 
-    assert 0L<=t00;
-    assert 0L<=t11;
+    //assert 0L<=t00;
+    //assert 0L<=t11;
 
     // minimize long bits
     final int shift0 = Numbers.loBit(t00);
-    final long t0;
-    final int e0;
     // 64==shift0 if t00 is zero
-    if (0==shift0) { t0=t00; e0=e00; }
-    else if (64==shift0) { t0=0L; e0=0; }
-    else { t0=(t00>>>shift0); e0=e00+shift0; }
+    if (64==shift0) { return valueOf(p1,t11,e11); }
+    final long t0=(t00>>>shift0); 
+    final int e0=e00+shift0; 
 
     final int shift1 = Numbers.loBit(t11);
-    final long t1;
-    final int e1;
     // 64==shift1 if t11 is zero
-    if (0==shift1) { t1=t11; e1=e11; }
-    else if (64==shift1) { t1=0L; e1=0; }
-    else { t1=(t11>>>shift1); e1=e11+shift1; }
+    if (64==shift1) { return valueOf(p0,t0,e0); }
+    final long t1=(t11>>>shift1); 
+    final int e1=e11+shift1; 
 
-    if (e0<=e1) { return addSameExponent(p0,t0,p1,t1,e1-e0,e0); }
-    return addSameExponent(p1,t1,p0,t0,e0-e1,e1); }
+    final int de = e1-e0;
+    if (0<=de) { return addSameExponent(p0,t0,p1,t1,de,e0); }
+    return addSameExponent(p1,t1,p0,t0,-de,e1); }
 
   //--------------------------------------------------------------
 
@@ -311,21 +309,18 @@ implements Ringlike<BigFloat> {
 
   //--------------------------------------------------------------
 
-  private final BigFloat 
-  add2 (final long tt,
-        final int e0) {
-    assert 0L<=tt;
-
-    final int s = Numbers.loBit(tt);
+  public final BigFloat 
+  add2 (final double z) {
+    assert Double.isFinite(z);
+    final long tz = Doubles.significand(z);
+    final int ez = Doubles.exponent(z);
+    final int s = Numbers.loBit(tz);
     final long t;
     final int e;
-    if ((0==s) || (64==s)) { t=tt; e=e0; }
-    else { t=(tt>>>s); e=e0+s; }
-
+    if ((0==s) || (64==s)) { t=tz; e=ez; }
+    else { t=(tz>>>s); e=ez+s; }
     final UnNatural t2 = UnNatural.square(t);
-    //assert 0==Numbers.loBit(t2);
     final int e2 = (e<<1);
-
     return add(
       nonNegative(),
       significand(),
@@ -334,26 +329,39 @@ implements Ringlike<BigFloat> {
       t2,
       e2); }
 
-  public final BigFloat 
-  add2 (final double z) {
-    assert Double.isFinite(z);
-    return add2(Doubles.significand(z),Doubles.exponent(z)); }
-
   //--------------------------------------------------------------
 
-  public final BigFloat 
-  addL1 (final double z0,
-         final double z1) {
-    assert Double.isFinite(z0);
-    assert Double.isFinite(z1);
-    final BigFloat dz = subtract(z0,z1);
-    return add(
-      nonNegative(),
-      significand(),
-      exponent(),
-      true,
-      dz.significand(),
-      dz.exponent()); }
+  //  public final BigFloat 
+  //  addL1 (final double z0,
+  //         final double z1) {
+  //    assert Double.isFinite(z0);
+  //    assert Double.isFinite(z1);
+  //    final BigFloat dz = subtract(z0,z1);
+  //    return add(
+  //      nonNegative(),
+  //      significand(),
+  //      exponent(),
+  //      true,
+  //      dz.significand(),
+  //      dz.exponent()); }
+
+  public BigFloat addL1 (final double z0,
+                         final double z1) {
+    // later adds should catch non-finite inputs
+    //assert Double.isFinite(z0);
+    //assert Double.isFinite(z1);
+    // preserve exactness using twoAdd to convert to 2 adds.
+    final double dz = z0 - z1;
+    final double ddz = dz - z0;
+    final double e = (z0 - (dz - ddz)) + ((-z1) - ddz);
+    if (0<=dz) { 
+      if (0<=e) { return add(dz).add(e); }
+      if (Math.abs(e)<=Math.abs(dz)) { return add(dz).add(e); }
+      return add(-dz).add(-e); }
+    // 0>dz
+    if (0>e) { return add(-dz).add(-e); }
+    if (Math.abs(e)<=Math.abs(dz)) { return add(-dz).add(-e); }
+    return add(dz).add(e); }
 
   //--------------------------------------------------------------
 

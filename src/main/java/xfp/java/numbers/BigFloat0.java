@@ -313,21 +313,18 @@ implements Ringlike<BigFloat0> {
 
   //--------------------------------------------------------------
 
-  private final BigFloat0 
-  add2 (final long tt,
-        final int ee) {
-    assert 0L<=tt;
-    
-    final int s = Numbers.loBit(tt);
+  public final BigFloat0 
+  add2 (final double z) {
+    assert Double.isFinite(z);
+    final long tz = Doubles.significand(z);
+    final int ez = Doubles.exponent(z);
+    final int s = Numbers.loBit(tz);
     final long t;
     final int e;
-    if ((0==s) || (64==s)) { t=tt; e=ee; }
-    else { t=(tt>>>s); e=ee+s; }
-    
+    if ((0==s) || (64==s)) { t=tz; e=ez; }
+    else { t=(tz>>>s); e=ez+s; }
     final UnNatural0 t2 = UnNatural0.square(t);
-    //assert 0==Numbers.loBit(t2);
     final int e2 = (e<<1);
-    
     return add(
       nonNegative(),
       significand(),
@@ -335,11 +332,6 @@ implements Ringlike<BigFloat0> {
       true,
       t2,
       e2); }
-
-  public final BigFloat0 
-  add2 (final double z) {
-    assert Double.isFinite(z);
-    return add2(Doubles.significand(z),Doubles.exponent(z)); }
 
   //--------------------------------------------------------------
 

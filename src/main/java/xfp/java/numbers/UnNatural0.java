@@ -27,26 +27,16 @@ implements Ringlike<UnNatural0> {
 
   public final boolean isZero () { return 0==_mag.length; }
 
-  /** This constant limits {@code mag.length} of Naturals to
-   * the supported range.
-   */
-  private static final int MAX_MAG_LENGTH =
-    (Integer.MAX_VALUE / Integer.SIZE) + 1; // (1 << 26)
-
   //--------------------------------------------------------------
   // arithmetic
   //--------------------------------------------------------------
 
   @Override
   public final UnNatural0 add (final UnNatural0 m) {
-    //if (m.isZero()) { return this; }
-    //if (isZero()) { return m; }
     return unsafe(Bei0.add(_mag,m._mag)); }
 
   public final UnNatural0 add (final long m) {
     assert 0L<=m;
-    //if (0L==m) { return this; }
-    //if (isZero()) { return valueOf(m); }
     return unsafe(Bei0.add(_mag,m)); }
 
   public static final UnNatural0 add (final long t0,
@@ -69,10 +59,6 @@ implements Ringlike<UnNatural0> {
 
   public final UnNatural0 subtract (final long m) {
     assert 0L<=m;
-    //if (0L==m) { return this; }
-    //final int c = compareTo(m);
-    //assert 0 <= c;
-    //if (0==c) { return ZERO; }
     final int[] u = Bei0.subtract(_mag,m);
     return unsafe(u); }
 
@@ -80,17 +66,12 @@ implements Ringlike<UnNatural0> {
   
   @Override
   public final UnNatural0 subtract (final UnNatural0 m) {
-    //if (m.isZero()) { return this; }
-    //final int c = compareTo(m);
-    //assert 0L <= c;
-    //if (c==0) { return ZERO; }
     return unsafe(Bei0.subtract(_mag,m._mag)); }
 
   // only when (m << leftShift) <= this
   public final UnNatural0 subtract (final long m,
                                    final int leftShift) {
     assert 0L<=m;
-    //if (0L==m) { return this; }
     final int[] u = Bei0.subtract(_mag,m,leftShift);
     return unsafe(u); }
 
@@ -109,7 +90,6 @@ implements Ringlike<UnNatural0> {
                                           final int leftShift,
                                           final long m1) {
     assert 0L<=m0;
-    //if (0L==m1) { return valueOf(m0,leftShift); }
     final int[] u = Bei0.subtract(Bei0.valueOf(m0,leftShift),m1);
     return unsafe(u); }
 
@@ -135,8 +115,6 @@ implements Ringlike<UnNatural0> {
 
   public final UnNatural0 subtractFrom (final long m) {
     assert 0L<=m;
-    //if (0L==m) { assert isZero(); return ZERO; }
-    //if (isZero()) { return valueOf(m); }
     final int[] u = Bei0.subtract(m,_mag);
     return unsafe(u); }
 
@@ -199,28 +177,16 @@ implements Ringlike<UnNatural0> {
 
   public final UnNatural0 multiply (final long that) {
     assert 1L<=that;
-    //if (isZero()) { return ZERO; }
-    //if (ONE.equals(this)) { return valueOf(that); }
-    //if (0L==that) { return ZERO; }
-    //if (1L==that) { return this; }
     return unsafe(Bei0.multiply(_mag,that)); }
 
   // TODO: multiply by shifted long
   public final UnNatural0 multiply (final long that,
                                    final int shift) {
     assert 1L<=that;
-    //if (isZero()) { return ZERO; }
-    //if (ONE.equals(this)) { return valueOf(that,shift); }
-    //if (0L==that) { return ZERO; }
-    //if (1L==that) { return this; }
     return multiply(valueOf(that,shift)); }
 
   @Override
   public final UnNatural0 multiply (final UnNatural0 that) {
-    //if (isZero()) { return ZERO; }
-    //if (that.isZero()) { return ZERO; }
-    //if (ONE.equals(this)) { return that; }
-    //if (ONE.equals(that)) { return this; }
     return unsafe(Bei0.multiply(_mag,that._mag)); }
 
   //--------------------------------------------------------------
@@ -292,8 +258,6 @@ implements Ringlike<UnNatural0> {
   public final UnNatural0 
   divide (final UnNatural0 that) {
     assert (! that.isZero());
-    //if (ONE.equals(that)) { return this; }
-    //if(isZero()) { return ZERO; }
     if (ONE.equals(that)) { return this; }
     if (useKnuthDivision(this,that)) { return divideKnuth(that); }
     return divideBurnikelZiegler(that); }
@@ -302,8 +266,6 @@ implements Ringlike<UnNatural0> {
   public List<UnNatural0> 
   divideAndRemainder (final UnNatural0 that) {
     assert (! that.isZero());
-    //if (ONE.equals(that)) { return List.of(this,ZERO); }
-    //if(isZero()) { return List.of(ZERO,ZERO); }
     if (useKnuthDivision(this,that)) {
       return Arrays.asList(divideAndRemainderKnuth(that)); }
     return 
@@ -312,8 +274,6 @@ implements Ringlike<UnNatural0> {
   @Override
   public final UnNatural0 remainder (final UnNatural0 that) {
     assert (! that.isZero());
-    //if(isZero()) { return ZERO; }
-    //if (ONE.equals(that)) { return ZERO; }
     if (useKnuthDivision(this,that)) {
       return remainderKnuth(that); }
     return remainderBurnikelZiegler(that); }
@@ -324,10 +284,6 @@ implements Ringlike<UnNatural0> {
 
   @Override
   public final UnNatural0 gcd (final UnNatural0 that) {
-    //if (that.isZero()) { return this; }
-    //if (isZero()) { return that; }
-    //if (ONE.equals(that)) { return ONE; }
-    //if (ONE.equals(this)) { return ONE; }
     final MutableUnNatural a = MutableUnNatural.valueOf(_mag);
     final MutableUnNatural b = MutableUnNatural.valueOf(that._mag);
     final MutableUnNatural result = a.hybridGCD(b);
@@ -367,21 +323,16 @@ implements Ringlike<UnNatural0> {
 
   public final UnNatural0 shiftLeft (final int n) {
     assert 0<=n;
-    //if (isZero()) { return ZERO; }
-    //if (0==n) { return this; }
-    return make(Bei0.shiftLeft(_mag,n)); }
+    return unsafe(Bei0.shiftLeft(_mag,n)); }
 
   public final UnNatural0 shiftRight (final int n) {
     assert 0<=n;
-    //if (isZero()) { return ZERO; }
-    //if (0==n) { return this; }
-    return make(Bei0.shiftRight(_mag,n)); }
+    return unsafe(Bei0.shiftRight(_mag,n)); }
 
   // get the least significant int words of (m >>> shift)
 
   public final int getShiftedInt (final int n) {
     assert 0<=n;
-    //if (isZero()) { return 0; }
     return Bei0.getShiftedInt(_mag,n); }
 
   // get the least significant two int words of (m >>> shift) as a
@@ -389,20 +340,19 @@ implements Ringlike<UnNatural0> {
 
   public final long getShiftedLong (final int n) {
     assert 0<=n;
-    //if (isZero()) { return 0L; }
     return Bei0.getShiftedLong(_mag,n); }
 
   public final boolean testBit (final int n) {
     return Bei0.testBit(_mag,n); }
 
   public final UnNatural0 setBit (final int n) {
-    return make(Bei0.setBit(_mag,n)); }
+    return unsafe(Bei0.setBit(_mag,n)); }
 
   public final UnNatural0 clearBit (final int n) {
-    return make(Bei0.clearBit(_mag,n)); }
+    return unsafe(Bei0.clearBit(_mag,n)); }
 
   public final UnNatural0 flipBit (final int n) {
-    return make(Bei0.flipBit(_mag,n)); }
+    return unsafe(Bei0.flipBit(_mag,n)); }
 
   public final int getLowestSetBit () {
     return Bei0.getLowestSetBit(_mag); }
@@ -508,30 +458,21 @@ implements Ringlike<UnNatural0> {
   // construction
   //-------------------------------------------------------------
 
-  private static final void checkMagnitude (final int[] m) {
-    assert m.length < MAX_MAG_LENGTH; }
-
-  //-------------------------------------------------------------
-
   private UnNatural0 (final int[] mag) { _mag = mag; }
-
-  private static final UnNatural0 make (final int[] m) {
-    final int[] m1 = Bei0.stripLeadingZeros(m);
-    checkMagnitude(m1);
-    return new UnNatural0(m1); }
 
   // assume no leading zeros
   public static final UnNatural0 unsafe (final int[] m) {
-    checkMagnitude(m);
     return new UnNatural0(m); }
 
+  // TODO: m may leak into UnNatural without copy!!
   public static final UnNatural0 valueOf (final int[] m) {
-    return make(Arrays.copyOf(m,m.length)); }
+    final int[] m1 = Bei0.stripLeadingZeros(m);
+    return new UnNatural0(m1); }
 
   public static final UnNatural0 valueOf (final byte[] b,
                                          final int off,
                                          final int len) {
-    return make(Bei0.stripLeadingZeros(b,off,len)); }
+    return unsafe(Bei0.stripLeadingZeros(b,off,len)); }
 
   public static final UnNatural0 valueOf (final byte[] b) {
     return valueOf(b,0,b.length); }
@@ -543,7 +484,7 @@ implements Ringlike<UnNatural0> {
 
   public static final UnNatural0 valueOf (final String s,
                                          final int radix) {
-    return make(Bei0.valueOf(s,radix)); }
+    return unsafe(Bei0.valueOf(s,radix)); }
 
   public static final UnNatural0 valueOf (final String s) {
     return valueOf(s,0x10); }
@@ -565,7 +506,7 @@ implements Ringlike<UnNatural0> {
     for (int i = 1; i <= MAX_CONSTANT; i++) {
       final int[] magnitude = new int[1];
       magnitude[0] = i;
-      posConst[i] = make(magnitude); }
+      posConst[i] = unsafe(magnitude); }
     // Initialize the cache of radix^(2^x) values used for base
     // conversion with just the very first value. Additional
     // values will be created on demand.
@@ -597,7 +538,7 @@ implements Ringlike<UnNatural0> {
                                          final int leftShift) {
     if (0L==x) { return ZERO; }
     assert 0L < x;
-    return make(Bei0.shiftLeft(x,leftShift)); }
+    return unsafe(Bei0.shiftLeft(x,leftShift)); }
 
   //--------------------------------------------------------------
 }

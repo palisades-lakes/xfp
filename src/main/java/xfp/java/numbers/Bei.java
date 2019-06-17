@@ -32,7 +32,7 @@ public final class Bei {
 
   //--------------------------------------------------------------
 
-  private static final boolean leadingZero (final int[] m) {
+  public static final boolean leadingZero (final int[] m) {
     return (0<m.length) && (0==m[0]); }
 
   public static final int[] stripLeadingZeros (final int[] m) {
@@ -66,23 +66,19 @@ public final class Bei {
                                            final int[] m1,
                                            final int bitShift) {
     assert 0<=bitShift;
+    assert !leadingZero(m1);
     final int n0 = m0.length;
     final int n1 = m1.length;
-    final int n1s = length(m1,bitShift);
-    //Debug.println("n0=" + n0);
-    //Debug.println("n1=" + n1);
-    //Debug.println("n1s=" + n1s);
-    assert n1s<=n0;
+    final int intShift = (bitShift >>> 5);
     final int lShift = (bitShift & 0x1f);
-    //Debug.println("n0=" + n0);
-    //Debug.println("n1=" + n1);
-    //Debug.println("n1s=" + n1s);
-    //Debug.println("lShift=" + lShift);
+    final int rShift = 32 - lShift;
+    final int hi0 = (m1[0] >>> rShift);
+    final int n1s = n1 + intShift +
+      (((0==lShift) || (0==hi0)) ? 0 : 1);
+    assert n1s<=n0;
     if (lShift==0) {
       System.arraycopy(m1,0,m0,n0-n1s,n1);  
       return m0; }
-    final int rShift = 32 - lShift;
-    final int hi0 = (m1[0] >>> rShift);
     int i = n0-n1s;
     if (0!=hi0) { m0[i++] = hi0; }
     int j = 0;
@@ -329,36 +325,6 @@ public final class Bei {
   // add
   //--------------------------------------------------------------
 
-  //  public static final int[] add (final int[] m0,
-  //                                 final int[] m1) {
-  //    // TODO: assert necessary?
-  //    assert (! leadingZero(m0));
-  //    assert (! leadingZero(m1));
-  //    // If m0 is shorter, swap the two arrays
-  //    if (m0.length < m1.length) { return add(m1,m0); }
-  //    int i0 = m0.length;
-  //    int i1 = m1.length;
-  //    final int[] r = new int[i0+1];
-  //    long sum = 0;
-  //    if (i1 == 1) {
-  //      i0--;
-  //      sum = unsigned(m0[i0]) + unsigned(m1[0]);
-  //      r[i0+1] = (int) sum; }
-  //    else {
-  //      while (0<i1) {
-  //        i0--; i1--;
-  //        sum = unsigned(m0[i0]) + unsigned(m1[i1]) + (sum >>> 32);
-  //        r[i0+1] = (int) sum; } }
-  //    boolean carry = ((sum >>> 32) != 0);
-  //    while ((i0 > 0) && carry) {
-  //      i0--;
-  //      final int s = m0[i0] + 1;
-  //      r[i0+1] = s;
-  //      carry = (0==s); }
-  //    while (i0 > 0) { i0--; r[i0+1] = m0[i0]; }
-  //    r[0] = (carry ? 0x01 : 0x00);
-  //    return stripLeadingZeros(r); }
-
   public static final int[] add (final int[] m0,
                                  final int[] m1) {
     // TODO: assert necessary?
@@ -390,46 +356,6 @@ public final class Bei {
       r1[0] = 0x01;
       return r1; }
     return r0; }
-
-  /** How big an array do we need to hold m shifted up (left)
-   * bitShift bits?
-   */
-  public static final int length (final int[] m, 
-                                  final int bitShift) {
-    // other wise we would need to find the first nonzero element
-    // wouldn't little endian be easier?
-    assert !leadingZero(m);
-    final int n = m.length + (bitShift >>> 5);
-    final int remShift = (bitShift & 0x1f);
-    if (0==remShift) { return n; }
-    final int rShift = 32 - (bitShift & 0x1f);
-    final int hi = (m[0] >>> rShift);
-    //Debug.println("rShift=" + rShift);
-    //Debug.println("hi=" + hi);
-    //Debug.println("intShift=" + (bitShift >>> 5));
-    return n + ((0!=hi) ? 1 : 0); }
-
-  //  /** return the <code>i</code>th word of 
-  //   * <code>m</code> shifted left by 
-  //   * <code>32*intShift + bitShift</code> bits.
-  //   */
-  //  private static final int word (final int[] m, 
-  //                                 final int bitShift,
-  //                                 final int i) {
-  //    assert 0<bitShift;
-  //    final int n0 = m.length;
-  //    final int n1 = length(m,bitShift);
-  //    assert 0<=i; 
-  //    assert i<n1;
-  //    final int intShift = (bitShift >>> 5);
-  //    final int remShift = (bitShift & 0x1f);
-  //    final int rightShift = 32 - remShift;
-  //    final int j = i - intShift;
-  //    assert j<n0;
-  //    if (0>j) { return 0; }
-  //    final int hi = ((j<n0-1) ? (m[j+1] << remShift) : 0);
-  //    final int lo = (m[j] >>> rightShift);
-  //    return hi | lo; }
 
   /** If possible, overwrite m0 with m0+m1. */
   private static final int[] increment (final int[] m0,
@@ -787,7 +713,7 @@ public final class Bei {
       borrow = ((result[--i0] = m0[i0] - 1) == -1); }
     // Copy remainder of longer number
     while (i0 > 0) { result[--i0] = m0[i0]; }
-    return result; }
+    return stripLeadingZeros(result); }
 
   //--------------------------------------------------------------
   // only valid when m1 <= m0
@@ -821,7 +747,7 @@ public final class Bei {
     difference =
       unsigned(highWord)-unsigned(m1[0])+(difference >> 32);
     result[0] = (int) difference;
-    return result; }
+    return stripLeadingZeros(result); }
 
   //--------------------------------------------------------------
   // assuming little*2<sup>bitShift</sup> <= big
@@ -931,7 +857,7 @@ public final class Bei {
     if (0 == bitShift) { return subtract(m0,m1); }
     final int[] r0 = shiftLeft(m0,bitShift);
     final int[] r1 = subtractInPlace(r0,m1); 
-    return r1; }
+    return stripLeadingZeros(r1); }
 
   //--------------------------------------------------------------
   // squaring --- used in multiplication
