@@ -109,14 +109,6 @@ implements Ringlike<UnNatural> {
     final int[] u = Bei.subtract(ms,_mag);
     return unsafe(u); }
 
-  public static final UnNatural subtractFrom (final long m0,
-                                              final long m1,
-                                              final int leftShift) {
-    assert 0L<=m1;
-    final int[] ms = Bei.shiftLeft(m1,leftShift);
-    final int[] u = Bei.subtract(ms,Bei.valueOf(m0));
-    return unsafe(u); }
-
   // only when this <= m
 
   public final UnNatural subtractFrom (final long m) {
@@ -135,6 +127,30 @@ implements Ringlike<UnNatural> {
 
   //--------------------------------------------------------------
 
+//  public static final UnNatural multiply (final long t0,
+//                                          final long t1) {
+//    assert 0L<=t0;
+//    assert 0L<=t1;
+//    final long hi0 = hiWord(t0);
+//    final long lo0 = loWord(t0);
+//    final long hi1 = hiWord(t1);
+//    final long lo1 = loWord(t1);
+//    final long lolo = lo0*lo1;
+//    final long hilo2 = (hi0*lo1) + (hi1*lo0);
+//    final long hihi = hi0*hi1;
+//    long sum = lolo;
+//    final int m3 = (int) sum;
+//    sum = (sum >>> 32) + hilo2;
+//    final int m2 = (int) sum;
+//    sum = (sum >>> 32) + hihi ;
+//    final int m1 = (int) sum;
+//    final int m0 = (int) (sum >>> 32);
+//    if (0!=m0) { return unsafe(new int[] { m0,m1,m2,m3, }); }
+//    if (0!=m1) { return unsafe(new int[] { m1,m2,m3, }); }
+//    if (0!=m2) { return unsafe(new int[] { m2,m3, }); }
+//    if (0!=m3) { return unsafe(new int[] { m3, }); }
+//    return ZERO; }
+
   public static final UnNatural multiply (final long t0,
                                           final long t1) {
     assert 0L<=t0;
@@ -146,18 +162,15 @@ implements Ringlike<UnNatural> {
     final long lolo = lo0*lo1;
     final long hilo2 = (hi0*lo1) + (hi1*lo0);
     final long hihi = hi0*hi1;
+    final int[] m = new int[4];
     long sum = lolo;
-    final int m3 = (int) sum;
+    m[3] = (int) sum;
     sum = (sum >>> 32) + hilo2;
-    final int m2 = (int) sum;
+    m[2] = (int) sum;
     sum = (sum >>> 32) + hihi ;
-    final int m1 = (int) sum;
-    final int m0 = (int) (sum >>> 32);
-    if (0!=m0) { return unsafe(new int[] { m0,m1,m2,m3, }); }
-    if (0!=m1) { return unsafe(new int[] { m1,m2,m3, }); }
-    if (0!=m2) { return unsafe(new int[] { m2,m3, }); }
-    if (0!=m3) { return unsafe(new int[] { m3, }); }
-    return ZERO; }
+    m[1] = (int) sum;
+    m[0] = (int) (sum >>> 32);
+    return unsafe(Bei.stripLeadingZeros(m)); }
 
   public static final UnNatural square (final long t) {
     assert 0L<=t;

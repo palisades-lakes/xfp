@@ -145,7 +145,7 @@ implements Ringlike<BigFloat> {
       final int c = Bei.compare(t0,t1,lShift);
       if (0==c) { return ZERO; }
       if (0>c) { // t1 > t0
-        final UnNatural t = UnNatural.subtractFrom(t0,t1,lShift);
+        final UnNatural t = UnNatural.subtract(t1,lShift,t0);
         return valueOf(n1,t,e); }
       // t0 > t1
       final UnNatural t = UnNatural.subtract(t0,t1,lShift);
