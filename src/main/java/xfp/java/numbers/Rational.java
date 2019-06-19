@@ -434,7 +434,7 @@ implements Ringlike<Rational> {
       final boolean carry = (hiBit(q5) > Doubles.SIGNIFICAND_BITS);
       q = carry ? q5 >>> 1 : q5;
     e = (sub ? (carry ? e4 : e4 - 1) : (carry ? e4 + 1 : e4)); }
-    return Doubles.makeDouble(neg,e,q); }
+    return Doubles.makeDouble(neg,q,e); }
 
   //--------------------------------------------------------------
   // Comparable methods

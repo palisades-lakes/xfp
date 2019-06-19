@@ -17,41 +17,6 @@ public final class DoublesTest {
 
   //--------------------------------------------------------------
 
-  //  private static final double makeDouble (final int s,
-  //                                         final int ue,
-  //                                         final long t) {
-  //    assert ((0 == s) || (1 ==s)) : "Invalid sign bit:" + s;
-  //    System.out.println(ue);
-  //    assert (SUBNORMAL_EXPONENT <= ue) && (ue <= MAX_EXPONENT) :
-  //      "invalid (unbiased) exponent:" + toHexString(ue);
-  //    final int e = ue + EXPONENT_BIAS;
-  //    assert (0 <= e) :
-  //      "Negative exponent:" + Integer.toHexString(e);
-  //    assert (e <= MAXIMUM_BIASED_EXPONENT) :
-  //      "Exponent too large:" + Integer.toHexString(e) +
-  //      ">" + Integer.toHexString(MAXIMUM_BIASED_EXPONENT);
-  //    assert (0 <= t) :
-  //      "Negative significand:" + Long.toHexString(t);
-  //    assert (t <= STORED_SIGNIFICAND_MASK) :
-  //      "Significand too large:" + Long.toHexString(t) +
-  //      ">" + Long.toHexString(STORED_SIGNIFICAND_MASK);
-  //
-  //    final long ss = ((long) s) << (EXPONENT_BITS + STORED_SIGNIFICAND_BITS);
-  //    final long se = ((long) e) << STORED_SIGNIFICAND_BITS;
-  //    assert (0L == (ss & se & t));
-  //    final double x = longBitsToDouble(ss | se | t);
-  //
-  ////    System.out.println("-1^" + s + "*" + Long.toHexString(t)
-  ////    + "*2^" + ue);
-  ////    System.out.println(toHexString(x));
-  ////    System.out.println(
-  ////      Integer.toHexString(biasedExponent(x)));
-  ////    System.out.println(
-  ////      Integer.toHexString(unbiasedExponent(x)));
-  ////    System.out.println();
-  //
-  //    return x; }
-
   public static final int maxExponent (final int dim) {
     final int d =
       //Floats.MAXIMUM_BIASED_EXPONENT

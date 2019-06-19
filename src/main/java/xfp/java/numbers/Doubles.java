@@ -34,7 +34,7 @@ import xfp.java.prng.GeneratorBase;
 /** Utilities for <code>double</code>, <code>double[]</code>.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-29
+ * @version 2019-06-19
  */
 public final class Doubles implements Set {
 
@@ -337,8 +337,8 @@ public final class Doubles implements Set {
    */
 
   public static final double makeDouble (final boolean negative,
-                                         final int exponent,
-                                         final long significand) {
+                                         final long significand,
+                                         final int exponent) {
 
     final int e = exponent + STORED_SIGNIFICAND_BITS;
     if (e > MAX_EXPONENT) {

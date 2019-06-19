@@ -204,37 +204,37 @@ implements Ringlike<NaturalBEI0> {
 
   private final NaturalBEI0 
   divideKnuth (final NaturalBEI0 that) {
-    final MutableNaturalBEI q = MutableNaturalBEI.make();
-    final MutableNaturalBEI num = MutableNaturalBEI.valueOf(this._mag);
-    final MutableNaturalBEI den = MutableNaturalBEI.valueOf(that._mag);
+    final MutableNaturalBEI0 q = MutableNaturalBEI0.make();
+    final MutableNaturalBEI0 num = MutableNaturalBEI0.valueOf(this._mag);
+    final MutableNaturalBEI0 den = MutableNaturalBEI0.valueOf(that._mag);
     num.divideKnuth(den,q,false);
     return valueOf(q.getValue()); }
 
   private final NaturalBEI0[] 
     divideAndRemainderKnuth (final NaturalBEI0 that) {
-    final MutableNaturalBEI q = MutableNaturalBEI.make();
-    final MutableNaturalBEI num = MutableNaturalBEI.valueOf(this._mag);
-    final MutableNaturalBEI den = MutableNaturalBEI.valueOf(that._mag);
-    final MutableNaturalBEI r = num.divideKnuth(den,q,true);
+    final MutableNaturalBEI0 q = MutableNaturalBEI0.make();
+    final MutableNaturalBEI0 num = MutableNaturalBEI0.valueOf(this._mag);
+    final MutableNaturalBEI0 den = MutableNaturalBEI0.valueOf(that._mag);
+    final MutableNaturalBEI0 r = num.divideKnuth(den,q,true);
     return new NaturalBEI0[] 
       { valueOf(q.getValue()),
         valueOf(r.getValue()), }; }
 
   private final NaturalBEI0 remainderKnuth (final NaturalBEI0 that) {
-    final MutableNaturalBEI q = MutableNaturalBEI.make();
-    final MutableNaturalBEI num = MutableNaturalBEI.valueOf(this._mag);
-    final MutableNaturalBEI den = MutableNaturalBEI.valueOf(that._mag);
-    final MutableNaturalBEI r = num.divideKnuth(den,q,true);
+    final MutableNaturalBEI0 q = MutableNaturalBEI0.make();
+    final MutableNaturalBEI0 num = MutableNaturalBEI0.valueOf(this._mag);
+    final MutableNaturalBEI0 den = MutableNaturalBEI0.valueOf(that._mag);
+    final MutableNaturalBEI0 r = num.divideKnuth(den,q,true);
     return valueOf(r.getValue()); }
 
   //--------------------------------------------------------------
 
   private final NaturalBEI0[] 
     divideAndRemainderBurnikelZiegler (final NaturalBEI0 that) {
-    final MutableNaturalBEI q = MutableNaturalBEI.make();
-    final MutableNaturalBEI num = MutableNaturalBEI.valueOf(this._mag);
-    final MutableNaturalBEI den = MutableNaturalBEI.valueOf(that._mag);
-    final MutableNaturalBEI r =
+    final MutableNaturalBEI0 q = MutableNaturalBEI0.make();
+    final MutableNaturalBEI0 num = MutableNaturalBEI0.valueOf(this._mag);
+    final MutableNaturalBEI0 den = MutableNaturalBEI0.valueOf(that._mag);
+    final MutableNaturalBEI0 r =
       num.divideAndRemainderBurnikelZiegler(den,q);
     final NaturalBEI0 qq = 
       q.isZero() ? ZERO : valueOf(q.getValue());
@@ -284,18 +284,18 @@ implements Ringlike<NaturalBEI0> {
 
   @Override
   public final NaturalBEI0 gcd (final NaturalBEI0 that) {
-    final MutableNaturalBEI a = MutableNaturalBEI.valueOf(_mag);
-    final MutableNaturalBEI b = MutableNaturalBEI.valueOf(that._mag);
-    final MutableNaturalBEI result = a.hybridGCD(b);
+    final MutableNaturalBEI0 a = MutableNaturalBEI0.valueOf(_mag);
+    final MutableNaturalBEI0 b = MutableNaturalBEI0.valueOf(that._mag);
+    final MutableNaturalBEI0 result = a.hybridGCD(b);
     return valueOf(result.getValue()); }
 
   // remove common factors as if numerator and denominator
   //  public static final NaturalBEI[] reduce (final NaturalBEI n0,
   //                                          final NaturalBEI d0) {
-  //    final MutableNaturalBEI[] nd =
-  //      MutableNaturalBEI.reduce(
-  //        MutableNaturalBEI.valueOf(n0._mag),
-  //        MutableNaturalBEI.valueOf(d0._mag));
+  //    final MutableNaturalBEI0[] nd =
+  //      MutableNaturalBEI0.reduce(
+  //        MutableNaturalBEI0.valueOf(n0._mag),
+  //        MutableNaturalBEI0.valueOf(d0._mag));
   //    return new NaturalBEI[] 
   //      { valueOf(nd[0].getValue()), 
   //        valueOf(nd[1].getValue()), }; }

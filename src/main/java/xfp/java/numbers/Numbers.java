@@ -107,11 +107,11 @@ public final class Numbers implements Set {
     return i.bitLength(); }
 
   /** inclusive */
-  public static final int loBit (final MutableNaturalBEI i) {
+  public static final int loBit (final NaturalBEIBuilder i) {
     return i.getLowestSetBit(); }
 
   /** exclusive */
-  public static final int hiBit (final MutableNaturalBEI i) {
+  public static final int hiBit (final NaturalBEIBuilder i) {
     final long n = i.bitLength();
     assert n <= Integer.MAX_VALUE;
     return (int) n; }
