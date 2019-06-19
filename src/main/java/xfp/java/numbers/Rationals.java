@@ -25,7 +25,7 @@ import xfp.java.prng.Generators;
  * <code>Rational</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-29
+ * @version 2019-06-18
  */
 @SuppressWarnings("unchecked")
 public final class Rationals implements Set {
@@ -214,7 +214,7 @@ public final class Rationals implements Set {
    * (see {@link xfp.java.prng.DoubleSampler})
    * and convert to <code></code>
    * with {@link #DOUBLE_P} probability;
-   * otherwise return {@link #ZERO} or
+   * otherwise return {@link #EMPTY} or
    * {@link #ONE}, {@link #MINUS_ONE},
    * with equal probability (these are potential edge cases).
    */
@@ -246,8 +246,8 @@ public final class Rationals implements Set {
         final BigInteger z1 = (BigInteger) g1.next();
         return RationalFloat.valueOf(
           0<=z0.signum(),
-          UnNatural.valueOf(z0.abs()),
-          UnNatural.valueOf(z1)); } }; } 
+          NaturalBEI.valueOf(z0.abs()),
+          NaturalBEI.valueOf(z1)); } }; } 
 
   // Is this characteristic of most inputs?
   public static final Generator

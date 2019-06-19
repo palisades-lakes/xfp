@@ -9,7 +9,7 @@ import xfp.java.Debug;
 import xfp.java.numbers.BigFloat;
 import xfp.java.numbers.BigFloats;
 import xfp.java.numbers.Numbers;
-import xfp.java.numbers.UnNatural;
+import xfp.java.numbers.NaturalBEI;
 import xfp.java.prng.Generator;
 import xfp.java.prng.PRNG;
 import xfp.java.test.Common;
@@ -22,7 +22,7 @@ import xfp.java.test.Common;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-07
+ * @version 2019-06-18
  */
 
 public final class BigFloatTest {
@@ -37,17 +37,17 @@ public final class BigFloatTest {
       final BigFloat[] f =
       {
        BigFloat.valueOf(
-         true,UnNatural.valueOf("232330747ceeab",0x10),-23),
+         true,NaturalBEI.valueOf("232330747ceeab",0x10),-23),
        BigFloat.valueOf(
-         false,UnNatural.valueOf("232330747ceeab",0x10),-23),
+         false,NaturalBEI.valueOf("232330747ceeab",0x10),-23),
        BigFloat.valueOf(
-         true,UnNatural.valueOf("2366052b8b801d",0x10),-22),
+         true,NaturalBEI.valueOf("2366052b8b801d",0x10),-22),
        BigFloat.valueOf(
-         false,UnNatural.valueOf("21ab528c4dbc181",0x10),-26),
+         false,NaturalBEI.valueOf("21ab528c4dbc181",0x10),-26),
        BigFloat.valueOf(
-         true,UnNatural.valueOf("8d9814ae2e0074",0x10),-25),
+         true,NaturalBEI.valueOf("8d9814ae2e0074",0x10),-25),
        BigFloat.valueOf(
-         true,UnNatural.valueOf("2c94d1dcb123a56b9c1",0x10),-43), };
+         true,NaturalBEI.valueOf("2c94d1dcb123a56b9c1",0x10),-43), };
       for (final BigFloat fi : f) {
         Common.doubleRoundingTest(
           BigFloat::valueOf,Numbers::doubleValue,dist,

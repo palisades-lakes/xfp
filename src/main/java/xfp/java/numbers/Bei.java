@@ -16,7 +16,7 @@ import java.util.Arrays;
  * compression/optimization step?
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-14
+ * @version 2019-06-18
  */
 
 public final class Bei {
@@ -95,7 +95,7 @@ public final class Bei {
                                        final int bitShift) {
     assert 0<=bitShift;
     if (bitShift==0) { return m; }
-    if (isZero(m)) { return ZERO; }
+    if (isZero(m)) { return EMPTY; }
     final int intShift = (bitShift >>> 5);
     final int remShift = (bitShift & 0x1f);
     final int n = m.length;
@@ -403,7 +403,7 @@ public final class Bei {
       final int rShift = 32 - (bitShift & 0x1f);
       final int hi = (m1[0] >>> rShift);
       n1s = n1 + ((0!=hi) ? 1 : 0); }
-      //n1s = length(m1,bitShift); 
+    //n1s = length(m1,bitShift); 
     final int n = Math.max(n0,n1s);
     final int[] m11 = shiftLeftInto(new int[n],m1,bitShift);
     return increment(m11,m0); }
@@ -416,11 +416,11 @@ public final class Bei {
     assert (! leadingZero(m0));
     assert 0L <= m1;
     if (0L == m1) { return m0; }
-    if (isZero(m0)) { return valueOf(m1); }
+    if (isZero(m0)) { return toInts(m1); }
     long sum = 0;
     int n0 = m0.length;
     final int hi = (int) hiWord(m1);
-    if (n0 == 1) { return valueOf(m1 + unsigned(m0[0])); }
+    if (n0 == 1) { return toInts(m1 + unsigned(m0[0])); }
     final int[] r0 = new int[n0];
     if (hi == 0) {
       sum = unsigned(m0[--n0]) + m1;
@@ -455,7 +455,7 @@ public final class Bei {
     final int hi = (int) hiWord(sum);
     if (0==hi) {
       if (0==mid) {
-        if (0==lo) { return ZERO; }
+        if (0==lo) { return EMPTY; }
         return new int[] { lo, }; } 
       return new int[] { mid, lo, }; } 
     return new int[] { hi, mid, lo, }; } 
@@ -545,7 +545,7 @@ public final class Bei {
     assert 0<=bitShift;
 
     if (0L==m0) { return shiftLeft(m1,bitShift); }
-    if (0L==m1) { return valueOf(m0); }
+    if (0L==m1) { return toInts(m0); }
     if (0==bitShift) { return add(m0,m1); }
 
     final int hi0 = (int) hiWord(m0);
@@ -618,7 +618,7 @@ public final class Bei {
 
     //final int c = compare(m0,m1);
     //assert 0L <= c;
-    //if (c == 0) { return ZERO; }
+    //if (c == 0) { return EMPTY; }
 
     int i0 = m0.length;
     int i1 = m1.length;
@@ -658,7 +658,7 @@ public final class Bei {
 
     //final int c = compare(m0,m1);
     //assert 0L <= c;
-    //if (c == 0) { return ZERO; }
+    //if (c == 0) { return EMPTY; }
 
     int i0 = m0.length;
     final int result[] = new int[i0];
@@ -692,7 +692,7 @@ public final class Bei {
 
     //final int c = compare(m0,m1);
     //assert 0 <= c;
-    //if (0 == c) { return ZERO; }
+    //if (0 == c) { return EMPTY; }
 
     final long hi = hiWord(m1);
     int i0 = m0.length;
@@ -722,11 +722,11 @@ public final class Bei {
                                       final int[] m1) {
     assert 0L <= m0;
     assert (! leadingZero(m1));
-    if (isZero(m1)) { return valueOf(m0); }
+    if (isZero(m1)) { return toInts(m0); }
 
     //final int c = compare(m0,m1);
     //assert 0 <= c;
-    //if (0 == c) { return ZERO; }
+    //if (0 == c) { return EMPTY; }
 
     final int highWord = (int) hiWord(m0);
     if (highWord == 0) {
@@ -834,7 +834,7 @@ public final class Bei {
                                       final long m1) {
     assert 0L<=m1;
     assert m1<=m0;
-    return valueOf(m0-m1); } 
+    return toInts(m0-m1); } 
 
   // only when m0 >= (m1<<bitShift)
   public static final int[] subtract (final long m0,
@@ -845,7 +845,7 @@ public final class Bei {
     assert 0<=bitShift;
     final long dm = m0 - (m1<<bitShift);
     assert 0L<=dm;
-    return valueOf(dm); }
+    return toInts(dm); }
 
   //--------------------------------------------------------------
 
@@ -876,7 +876,7 @@ public final class Bei {
   public static final int[] square (final int[] m,
                                     final boolean isRecursion) {
     assert (! leadingZero(m));
-    if (isZero(m)) { return ZERO; }
+    if (isZero(m)) { return EMPTY; }
     final int len = m.length;
 
     if (len < KARATSUBA_SQUARE_THRESHOLD) {
@@ -1055,9 +1055,9 @@ public final class Bei {
       start = (upperSize + ((slice - 1) * lowerSize)) - offset;
       end = (start + lowerSize) - 1; }
     if (start < 0) { start = 0; }
-    if (end < 0) { return ZERO; }
+    if (end < 0) { return EMPTY; }
     final int sliceSize = (end - start) + 1;
-    if (sliceSize <= 0) { return ZERO; }
+    if (sliceSize <= 0) { return EMPTY; }
     // While performing Toom-Cook, all slices are positive and
     // the sign is adjusted when the final number is composed.
     if ((start == 0) && (sliceSize >= len)) { return stripLeadingZeros(m); }
@@ -1140,7 +1140,7 @@ public final class Bei {
                                        final int n) {
     assert (! leadingZero(m));
     final int len = m.length;
-    if (len <= n) { return ZERO; }
+    if (len <= n) { return EMPTY; }
     final int upperLen = len - n;
     final int upperInts[] = new int[upperLen];
     System.arraycopy(m,0,upperInts,0,upperLen);
@@ -1300,7 +1300,7 @@ public final class Bei {
   private static final int[] multiply (final int[] m0,
                                        final int m1) {
     assert (! leadingZero(m0));
-    if (0==m1) { return ZERO; }
+    if (0==m1) { return EMPTY; }
     if (Integer.bitCount(m1) == 1) {
       return shiftLeft(m0,Integer.numberOfTrailingZeros(m1)); }
     //    stripLeadingZeros(
@@ -1323,7 +1323,7 @@ public final class Bei {
   public static final int[] multiply (final int[] m0,
                                       final long m1) {
     assert (! leadingZero(m0));
-    if (0L==m1) { return ZERO; }
+    if (0L==m1) { return EMPTY; }
     assert 0L < m1;
 
     final long dh = m1 >>> 32;      // higher order bits
@@ -1413,7 +1413,7 @@ public final class Bei {
     assert (! leadingZero(x));
     assert (! leadingZero(y));
 
-    if ((isZero(y)) || (isZero(x))) { return ZERO; }
+    if ((isZero(y)) || (isZero(x))) { return EMPTY; }
     final int xlen = x.length;
     if ((y == x)
       &&
@@ -1528,7 +1528,6 @@ public final class Bei {
                                              final int offset,
                                              final int len) {
     assert (! leadingZero(in));
-
     if (len > in.length) {
       throw new IllegalArgumentException(
         "input length is out of bound: " + len + " > "
@@ -1568,7 +1567,6 @@ public final class Bei {
                                    final int len,
                                    final int k) {
     assert (! leadingZero(in));
-
     implMulAddCheck(out,in,offset,len);
     return implMulAdd(out,in,offset,len,k); }
 
@@ -1576,12 +1574,6 @@ public final class Bei {
   // Shift Operations
   //--------------------------------------------------------------
   // get the least significant int word of (m >>> shift)
-
-  //  public static final int getShiftedInt (final int[] m,
-  //                                         final int shift) {
-  //    final int[] ms = shiftRight(m,shift);
-  //    final int i = ms.length-1;
-  //    return (0<=i) ? ms[i] : 0; } 
 
   public static final int getShiftedInt (final int[] m,
                                          final int shift) {
@@ -1596,18 +1588,6 @@ public final class Bei {
     final long lo = (unsigned(m[i]) >>> remShift);
     final long hi = (0<i) ? (unsigned(m[i-1]) << r2) : 0;
     return (int) (hi | lo); } 
-
-  // get the least significant two int words of (m >>> shift) as a
-  // long
-
-  //  public static final long getShiftedLong (final int[] m,
-  //                                         final int shift) {
-  //    final int[] ms = shiftRight(m,shift);
-  //    final int i = ms.length-1;
-  //    if (0>i) { return 0L; }
-  //    if (0==i) { return unsigned(ms[0]); }
-  //    return 
-  //      (unsigned(ms[i-1]) << 32) | unsigned(ms[i]); } 
 
   public static final long getShiftedLong (final int[] m,
                                            final int shift) {
@@ -1642,7 +1622,7 @@ public final class Bei {
     int m1[] = null;
 
     // Special case: entire contents shifted off the end
-    if (intShift >= n0) { return ZERO; }
+    if (intShift >= n0) { return EMPTY; }
 
     if (remShift == 0) {
       final int newMagLen = n0 - intShift;
@@ -1664,14 +1644,14 @@ public final class Bei {
 
   public static final int[] shiftRight (final int[] m,
                                         final int n) {
-    if (isZero(m)) { return ZERO; }
+    if (isZero(m)) { return EMPTY; }
     if (n > 0) { return shiftRight0(m,n); }
     //if (n == 0) { return stripLeadingZeros(m); }
     if (n == 0) { return m; }
     return shiftLeft(m,-n); }
 
   //--------------------------------------------------------------
-  // Bitwise Operations
+  // Bit Operations
   //--------------------------------------------------------------
 
   public static final boolean testBit (final int[] m,
@@ -1973,16 +1953,16 @@ public final class Bei {
 
   //-------------------------------------------------------------
 
-  public static final int[] valueOf (final byte[] b,
+  public static final int[] toInts (final byte[] b,
                                      final int off,
                                      final int len) {
     return stripLeadingZeros(b,off,len); }
 
-  public static final int[] valueOf (final byte[] b) {
-    return valueOf(b,0,b.length); }
+  public static final int[] toInts (final byte[] b) {
+    return toInts(b,0,b.length); }
 
-  public static final int[] valueOf (final BigInteger bi) {
-    return valueOf(bi.toByteArray()); }
+  public static final int[] toInts (final BigInteger bi) {
+    return toInts(bi.toByteArray()); }
 
   //-------------------------------------------------------------
   // string parsing
@@ -2020,7 +2000,7 @@ public final class Bei {
 
   //-------------------------------------------------------------
 
-  public static final int[] valueOf (final String s,
+  public static final int[] toInts (final String s,
                                      final int radix) {
     final int len = s.length();
     assert 0 < len;
@@ -2034,7 +2014,7 @@ public final class Bei {
     while ((cursor < len)
       && (Character.digit(s.charAt(cursor),radix) == 0)) {
       cursor++; }
-    if (cursor == len) { return ZERO; }
+    if (cursor == len) { return EMPTY; }
 
     final int numDigits = len - cursor;
 
@@ -2065,28 +2045,28 @@ public final class Bei {
       destructiveMulAdd(m,superRadix,groupVal); }
     return stripLeadingZeros(m); }
 
-  public static final int[] valueOf (final String s) {
-    return valueOf(s,0x10); }
+  public static final int[] toInts (final String s) {
+    return toInts(s,0x10); }
 
   //--------------------------------------------------------------
 
   // immutable!
-  public static final int[] ZERO = new int[0];
+  public static final int[] EMPTY = new int[0];
 
-  public static final int[] valueOf (final long val) {
+  public static final int[] toInts (final long val) {
     assert 0<=val;
     final int hi = (int) (val>>>32);
     final int lo = (int) val;
     if (0==hi) {
-      if (0==lo) { return ZERO; }
+      if (0==lo) { return EMPTY; }
       return new int[] { lo, }; }
     return new int[] { hi, lo, }; }
 
   //--------------------------------------------------------------
 
-  public static final int[] valueOf (final long x,
-                                     final int leftShift) {
-    if (0L == x) { return ZERO; }
+  public static final int[] toInts (final long x,
+                                    final int leftShift) {
+    if (0L == x) { return EMPTY; }
     assert 0L < x;
     return shiftLeft(x,leftShift); }
 

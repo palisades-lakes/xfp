@@ -23,7 +23,7 @@ import xfp.java.prng.GeneratorBase;
  * <code>BigDecimal</code>.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-17
+ * @version 2019-06-18
  */
 @SuppressWarnings("unchecked")
 public final class BigDecimals implements Set {
@@ -181,7 +181,7 @@ public final class BigDecimals implements Set {
    * (see {@link xfp.java.prng.DoubleSampler})
    * and convert to <code>BigDecimal</code>
    * with {@link #DOUBLE_P} probability;
-   * otherwise return {@link BigDecimal#ZERO} or
+   * otherwise return {@link BigDecimal#EMPTY} or
    * {@link BigDecimal#ONE}, {@link BigDecimal#TEN},
    * with equal probability (these are potential edge cases).
    *

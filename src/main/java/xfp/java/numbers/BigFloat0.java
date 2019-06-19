@@ -5,11 +5,11 @@ import java.util.Objects;
 
 import xfp.java.exceptions.Exceptions;
 
-/** A sign times a {@link UnNatural0} significand times 2 to a
+/** A sign times a {@link NaturalBEI0} significand times 2 to a
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-13
+ * @version 2019-06-18
  */
 
 public final class BigFloat0
@@ -29,8 +29,8 @@ implements Ringlike<BigFloat0> {
   public final int exponent () { return _exponent; }
 
   // must always be non-negative
-  private final UnNatural0 _significand;
-  public final UnNatural0 significand () { return _significand; }
+  private final NaturalBEI0 _significand;
+  public final NaturalBEI0 significand () { return _significand; }
 
   //--------------------------------------------------------------
 
@@ -51,13 +51,13 @@ implements Ringlike<BigFloat0> {
 
   private static final BigFloat0 
   add (final boolean p0,
-       final UnNatural0 t0,
+       final NaturalBEI0 t0,
        final int e0,
        final boolean p1,
-       final UnNatural0 t1,
+       final NaturalBEI0 t1,
        final int e1) {
 
-    final UnNatural0 t02,t12;
+    final NaturalBEI0 t02,t12;
     final int e2;
     final int de = e1-e0;
     if (de > 0) {
@@ -95,7 +95,7 @@ implements Ringlike<BigFloat0> {
 
   private static final BigFloat0 
   addSameExponent (final boolean p0,
-                   final UnNatural0 t0,
+                   final NaturalBEI0 t0,
                    final boolean p1,
                    final long t1,
                    final int e) {
@@ -105,17 +105,17 @@ implements Ringlike<BigFloat0> {
       if (0==c) { return ZERO; }
       // t1 > t0
       if (0 > c) {
-        final UnNatural0 t = t0.subtractFrom(t1);
+        final NaturalBEI0 t = t0.subtractFrom(t1);
         return valueOf(p1,t,e); }
       // t0 > t1
-      final UnNatural0 t = t0.subtract(t1);
+      final NaturalBEI0 t = t0.subtract(t1);
       return valueOf(p0,t,e); }
-    final UnNatural0 t = t0.add(t1);
+    final NaturalBEI0 t = t0.add(t1);
     return valueOf(p0,t,e); }
 
   private static final BigFloat0 
   addSameExponent (final boolean n0,
-                   final UnNatural0 t0,
+                   final NaturalBEI0 t0,
                    final boolean n1,
                    final long t1,
                    final int leftShift,
@@ -125,12 +125,12 @@ implements Ringlike<BigFloat0> {
       if (0==c) { return ZERO; }
       // t1 > t0
       if (0 > c) {
-        final UnNatural0 t = t0.subtractFrom(t1,leftShift);
+        final NaturalBEI0 t = t0.subtractFrom(t1,leftShift);
         return valueOf(n1,t,e); }
       // t0 > t1
-      final UnNatural0 t = t0.subtract(t1,leftShift);
+      final NaturalBEI0 t = t0.subtract(t1,leftShift);
       return valueOf(n0,t,e); }
-    final UnNatural0 t = t0.add(t1,leftShift);
+    final NaturalBEI0 t = t0.add(t1,leftShift);
     return valueOf(n0,t,e); }
 
   private static final BigFloat0 
@@ -141,22 +141,22 @@ implements Ringlike<BigFloat0> {
                    final int leftShift,
                    final int e) {
     if (n0 ^ n1) { // different signs
-      final int c = Bei.compare(t0,t1,leftShift);
+      final int c = Bei0.compare(t0,t1,leftShift);
       if (0==c) { return ZERO; }
       if (0>c) { // t1 > t0
-        final UnNatural0 t = UnNatural0.subtractFrom(t0,t1,leftShift);
+        final NaturalBEI0 t = NaturalBEI0.subtractFrom(t0,t1,leftShift);
         return valueOf(n1,t,e); }
       // t0 > t1
-      final UnNatural0 t = UnNatural0.subtract(t0,t1,leftShift);
+      final NaturalBEI0 t = NaturalBEI0.subtract(t0,t1,leftShift);
       return valueOf(n0,t,e); }
-    final UnNatural0 t = UnNatural0.add(t0,t1,leftShift);
+    final NaturalBEI0 t = NaturalBEI0.add(t0,t1,leftShift);
     return valueOf(n0,t,e); }
 
   //--------------------------------------------------------------
 
   private static final BigFloat0 
   add (final boolean p0,
-       final UnNatural0 t0,
+       final NaturalBEI0 t0,
        final int e0,
        final boolean p1,
        final long t11,
@@ -269,19 +269,19 @@ implements Ringlike<BigFloat0> {
   // used in Rational.addWithDenom()?
 
   public static final BigFloat0 
-  multiply (final UnNatural0 x0,
+  multiply (final NaturalBEI0 x0,
             final boolean p1,
             final long x1) {
     assert 0L<=x1;
     final int e0 = Numbers.loBit(x0);
     final int e1 = Numbers.loBit(x1);
-    final UnNatural0 y0 = ((0==e0) ? x0 : x0.shiftRight(e0));
+    final NaturalBEI0 y0 = ((0==e0) ? x0 : x0.shiftRight(e0));
     final long y1 = (((0==e1)||(64==e1)) ? x1 : (x1 >>> e1));
     return valueOf(p1,y0.multiply(y1),e0+e1); }
 
   private final BigFloat0 
   multiply (final boolean p,
-            final UnNatural0 t,
+            final NaturalBEI0 t,
             final int e) {
     return valueOf(
       (! (nonNegative() ^ p)),
@@ -300,14 +300,14 @@ implements Ringlike<BigFloat0> {
     return
       multiply(
         Doubles.nonNegative(z),
-        UnNatural0.valueOf(Doubles.significand(z)),
+        NaturalBEI0.valueOf(Doubles.significand(z)),
         Doubles.exponent(z)); }
 
   //--------------------------------------------------------------
 
   public final BigFloat0 
   square () {
-    //if (isZero() ) { return ZERO; }
+    //if (isZero() ) { return EMPTY; }
     //if (isOne()) { return ONE; }
     return valueOf(true,significand().square(),2*exponent()); }
 
@@ -323,7 +323,7 @@ implements Ringlike<BigFloat0> {
     final int e;
     if ((0==s) || (64==s)) { t=tz; e=ez; }
     else { t=(tz>>>s); e=ez+s; }
-    final UnNatural0 t2 = UnNatural0.square(t);
+    final NaturalBEI0 t2 = NaturalBEI0.square(t);
     final int e2 = (e<<1);
     return add(
       nonNegative(),
@@ -357,7 +357,7 @@ implements Ringlike<BigFloat0> {
     assert Double.isFinite(z0);
     assert Double.isFinite(z1);
     final BigFloat0 dz = subtract(z0,z1);
-    final UnNatural0 t2 = dz.significand().square();
+    final NaturalBEI0 t2 = dz.significand().square();
     final int e2 = 2*dz.exponent();
     return add(
       nonNegative(),
@@ -395,7 +395,7 @@ implements Ringlike<BigFloat0> {
         significand(),
         exponent(),
         ! (p0 ^ p1), 
-        UnNatural0.multiply(t00,t11), 
+        NaturalBEI0.multiply(t00,t11), 
         e00+e11); }
 
   public final BigFloat0 
@@ -434,7 +434,7 @@ implements Ringlike<BigFloat0> {
 
   //--------------------------------------------------------------
 
-  private static final boolean roundUp (final UnNatural0 s,
+  private static final boolean roundUp (final NaturalBEI0 s,
                                         final int e) {
     if (! s.testBit(e-1)) { return false; }
     for (int i=e-2;i>=0;i--) {
@@ -471,7 +471,7 @@ implements Ringlike<BigFloat0> {
   @Override
   public final float floatValue () {
     final boolean nn = nonNegative();
-    final UnNatural0 s0 = significand();
+    final NaturalBEI0 s0 = significand();
     final int e0 = exponent();
     if (s0.isZero()) { return (nn ? 0.0F : -0.0F); }
 
@@ -539,7 +539,7 @@ implements Ringlike<BigFloat0> {
   @Override
   public final double doubleValue () {
     final boolean nn = nonNegative();
-    final UnNatural0 s0 = significand();
+    final NaturalBEI0 s0 = significand();
     final int e0 = exponent();
     if (s0.isZero()) { return (nn ? 0.0 : -0.0); }
     final int eh = Numbers.hiBit(s0);
@@ -581,8 +581,8 @@ implements Ringlike<BigFloat0> {
     if (nonNegative() && (! q.nonNegative())) { return 1; }
     if ((! nonNegative()) && q.nonNegative()) { return -1; }
     // same signs
-    final UnNatural0 t0 = significand();
-    final UnNatural0 t1 = q.significand();
+    final NaturalBEI0 t0 = significand();
+    final NaturalBEI0 t1 = q.significand();
     final int e0 = exponent();
     final int e1 = q.exponent();
     final int c;
@@ -634,7 +634,7 @@ implements Ringlike<BigFloat0> {
   //--------------------------------------------------------------
 
   private BigFloat0 (final boolean nonNegative,
-                     final UnNatural0 t0,
+                     final NaturalBEI0 t0,
                      final int e0) {
     final int e1 = Math.max(0,Numbers.loBit(t0));
     _nonNegative = nonNegative;
@@ -648,7 +648,7 @@ implements Ringlike<BigFloat0> {
   //--------------------------------------------------------------
 
   public static final BigFloat0 valueOf (final boolean nonNegative,
-                                         final UnNatural0 t,
+                                         final NaturalBEI0 t,
                                          final int e) {
     if (t.isZero()) { return ZERO; }
     return new BigFloat0(nonNegative,t,e); }
@@ -657,14 +657,14 @@ implements Ringlike<BigFloat0> {
                                          final int e) {
     if (0L==t) { return ZERO; }
     if (0L < t) { 
-      return valueOf(true,UnNatural0.valueOf(t),e); }
-    return valueOf(false,UnNatural0.valueOf(-t),e); }
+      return valueOf(true,NaturalBEI0.valueOf(t),e); }
+    return valueOf(false,NaturalBEI0.valueOf(-t),e); }
 
   public static final BigFloat0 valueOf (final int t,
                                          final int e) {
     if (0==t) { return ZERO; }
-    if (0<t) { return valueOf(true,UnNatural0.valueOf(t),e); }
-    return valueOf(false,UnNatural0.valueOf(-t),e); }
+    if (0<t) { return valueOf(true,NaturalBEI0.valueOf(t),e); }
+    return valueOf(false,NaturalBEI0.valueOf(-t),e); }
 
   //--------------------------------------------------------------
 
@@ -678,7 +678,7 @@ implements Ringlike<BigFloat0> {
     final int e1;
     if ((0==shift)||(64==shift)) { t1=t0; e1=e0; }
     else { t1 = (t0 >>> shift); e1 = e0 + shift; }
-    return valueOf(nonNegative,UnNatural0.valueOf(t1),e1); }
+    return valueOf(nonNegative,NaturalBEI0.valueOf(t1),e1); }
 
   public static final BigFloat0 valueOf (final double z)  {
     return valueOf(
@@ -692,7 +692,7 @@ implements Ringlike<BigFloat0> {
                                           final int t0,
                                           final int e0)  {
     if (0==t0) { return ZERO; }
-    return valueOf(nonNegative,UnNatural0.valueOf(t0),e0); }
+    return valueOf(nonNegative,NaturalBEI0.valueOf(t0),e0); }
 
   public static final BigFloat0 valueOf (final float x)  {
     return valueOf(
@@ -703,20 +703,20 @@ implements Ringlike<BigFloat0> {
   //--------------------------------------------------------------
 
   public static final BigFloat0 valueOf (final byte t)  {
-    if (0<=t) { return valueOf(true,UnNatural0.valueOf(t),0); }
-    return valueOf(false,UnNatural0.valueOf(-t),0); }
+    if (0<=t) { return valueOf(true,NaturalBEI0.valueOf(t),0); }
+    return valueOf(false,NaturalBEI0.valueOf(-t),0); }
 
   public static final BigFloat0 valueOf (final short t)  {
-    if (0<=t) { return valueOf(true,UnNatural0.valueOf(t),0); }
-    return valueOf(false,UnNatural0.valueOf(-t),0); }
+    if (0<=t) { return valueOf(true,NaturalBEI0.valueOf(t),0); }
+    return valueOf(false,NaturalBEI0.valueOf(-t),0); }
 
   public static final BigFloat0 valueOf (final int t)  {
-    if (0<=t) { return valueOf(true,UnNatural0.valueOf(t),0); }
-    return valueOf(false,UnNatural0.valueOf(-t),0); }
+    if (0<=t) { return valueOf(true,NaturalBEI0.valueOf(t),0); }
+    return valueOf(false,NaturalBEI0.valueOf(-t),0); }
 
   public static final BigFloat0 valueOf (final long t)  {
-    if (0<=t) { return valueOf(true,UnNatural0.valueOf(t),0); }
-    return valueOf(false,UnNatural0.valueOf(-t),0); }
+    if (0<=t) { return valueOf(true,NaturalBEI0.valueOf(t),0); }
+    return valueOf(false,NaturalBEI0.valueOf(-t),0); }
 
   //--------------------------------------------------------------
 
@@ -740,9 +740,9 @@ implements Ringlike<BigFloat0> {
 
   public static final BigFloat0 valueOf (final BigDecimal x)  {
     throw Exceptions.unsupportedOperation(null,"valueOf",x); }
-  //    return valueOf(x, UnNatural0.ONE); }
+  //    return valueOf(x, NaturalBEI0.ONE); }
 
-  public static final BigFloat0 valueOf (final UnNatural0 x)  {
+  public static final BigFloat0 valueOf (final NaturalBEI0 x)  {
     return valueOf(true,x,0); }
 
   public static final BigFloat0 valueOf (final Number x)  {
@@ -753,7 +753,7 @@ implements Ringlike<BigFloat0> {
     if (x instanceof Short) { return valueOf((Short) x); }
     if (x instanceof Integer) { return valueOf((Integer) x); }
     if (x instanceof Long) { return valueOf((Long) x); }
-    if (x instanceof UnNatural0) { return valueOf((UnNatural0) x); }
+    if (x instanceof NaturalBEI0) { return valueOf((NaturalBEI0) x); }
     if (x instanceof BigDecimal) { return valueOf((BigDecimal) x); }
     throw Exceptions.unsupportedOperation(null,"valueOf",x); }
 
@@ -763,19 +763,19 @@ implements Ringlike<BigFloat0> {
   //--------------------------------------------------------------
 
   public static final BigFloat0 ZERO =
-    new BigFloat0(true,UnNatural0.ZERO,0);
+    new BigFloat0(true,NaturalBEI0.ZERO,0);
 
   public static final BigFloat0 ONE =
-    new BigFloat0(true,UnNatural0.ONE,0);
+    new BigFloat0(true,NaturalBEI0.ONE,0);
 
   public static final BigFloat0 TWO =
-    new BigFloat0(true,UnNatural0.ONE,1);
+    new BigFloat0(true,NaturalBEI0.ONE,1);
 
   public static final BigFloat0 TEN =
-    new BigFloat0(true,UnNatural0.valueOf(5),1);
+    new BigFloat0(true,NaturalBEI0.valueOf(5),1);
 
   public static final BigFloat0 MINUS_ONE =
-    new BigFloat0(false,UnNatural0.ONE,0);
+    new BigFloat0(false,NaturalBEI0.ONE,0);
 
   //--------------------------------------------------------------
 }

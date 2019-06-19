@@ -16,7 +16,7 @@ import java.util.Arrays;
  * compression/optimization step?
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-13
+ * @version 2019-06-18
  */
 
 public final class Bei0 {
@@ -538,7 +538,7 @@ public final class Bei0 {
 
     //final int c = compare(m0,m1);
     //assert 0L <= c;
-    //if (c == 0) { return ZERO; }
+    //if (c == 0) { return EMPTY; }
 
     int i0 = m0.length;
     int i1 = m1.length;
@@ -578,7 +578,7 @@ public final class Bei0 {
 
     //final int c = compare(m0,m1);
     //assert 0L <= c;
-    //if (c == 0) { return ZERO; }
+    //if (c == 0) { return EMPTY; }
 
     int i0 = m0.length;
     final int result[] = new int[i0];
@@ -612,7 +612,7 @@ public final class Bei0 {
 
     //final int c = compare(m0,m1);
     //assert 0 <= c;
-    //if (0 == c) { return ZERO; }
+    //if (0 == c) { return EMPTY; }
 
     final long hi = hiWord(m1);
     int i0 = m0.length;
@@ -646,7 +646,7 @@ public final class Bei0 {
 
     //final int c = compare(m0,m1);
     //assert 0 <= c;
-    //if (0 == c) { return ZERO; }
+    //if (0 == c) { return EMPTY; }
 
     final int highWord = (int) hiWord(m0);
     if (highWord == 0) {
@@ -1940,7 +1940,7 @@ public final class Bei0 {
 
   //-------------------------------------------------------------
 
-  public static final int[] valueOf (final String s,
+  public static final int[] toInts (final String s,
                                      final int radix) {
     final int len = s.length();
     assert 0 < len;
@@ -1985,8 +1985,8 @@ public final class Bei0 {
       destructiveMulAdd(m,superRadix,groupVal); }
     return stripLeadingZeros(m); }
 
-  public static final int[] valueOf (final String s) {
-    return valueOf(s,0x10); }
+  public static final int[] toInts (final String s) {
+    return toInts(s,0x10); }
 
   //--------------------------------------------------------------
 

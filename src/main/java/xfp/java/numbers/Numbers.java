@@ -19,7 +19,7 @@ import xfp.java.prng.Generators;
 /** Utilities for Object and primitive numbers.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-13
+ * @version 2019-06-18
  */
 @SuppressWarnings("unchecked")
 public final class Numbers implements Set {
@@ -107,37 +107,37 @@ public final class Numbers implements Set {
     return i.bitLength(); }
 
   /** inclusive */
-  public static final int loBit (final MutableUnNatural i) {
+  public static final int loBit (final MutableNaturalBEI i) {
     return i.getLowestSetBit(); }
 
   /** exclusive */
-  public static final int hiBit (final MutableUnNatural i) {
+  public static final int hiBit (final MutableNaturalBEI i) {
     final long n = i.bitLength();
     assert n <= Integer.MAX_VALUE;
     return (int) n; }
 
-  /** inclusive, big-endian */
-  public static final int loBit (final int[] i) {
-    return Bei.getLowestSetBit(i); }
+//  /** inclusive, big-endian */
+//  public static final int loBit (final int[] i) {
+//    return Bei.getLowestSetBit(i); }
 
   /** inclusive */
-  public static final int loBit (final UnNatural i) {
+  public static final int loBit (final NaturalBEI i) {
     return i.getLowestSetBit(); }
 
   /** inclusive */
-  public static final int loBit (final UnNatural0 i) {
+  public static final int loBit (final NaturalBEI0 i) {
     return i.getLowestSetBit(); }
 
-  /** exclusive, big-endian */
-  public static final int hiBit (final int[] i) {
-    return Bei.bitLength(i); }
+//  /** exclusive, big-endian */
+//  public static final int hiBit (final int[] i) {
+//    return Bei.bitLength(i); }
 
   /** exclusive */
-  public static final int hiBit (final UnNatural i) {
+  public static final int hiBit (final NaturalBEI i) {
     return i.bitLength(); }
 
   /** exclusive */
-  public static final int hiBit (final UnNatural0 i) {
+  public static final int hiBit (final NaturalBEI0 i) {
     return i.bitLength(); }
 
   /** inclusive */
@@ -321,7 +321,7 @@ public final class Numbers implements Set {
    * (see {@link xfp.java.prng.DoubleSampler})
    * and convert to <code>BigFraction</code>
    * with {@link #DOUBLE_P} probability;
-   * otherwise return {@link BigFraction#ZERO} or
+   * otherwise return {@link BigFraction#EMPTY} or
    * {@link BigFractrion#ONE}, {@link BigFractrion#MINUS_ONE},
    * with equal probability (these are potential edge cases).
    */

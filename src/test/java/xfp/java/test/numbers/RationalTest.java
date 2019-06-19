@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import xfp.java.Debug;
 import xfp.java.numbers.Numbers;
 import xfp.java.numbers.Rational;
-import xfp.java.numbers.UnNatural;
+import xfp.java.numbers.NaturalBEI;
 import xfp.java.test.Common;
 
 //----------------------------------------------------------------
@@ -18,7 +18,7 @@ import xfp.java.test.Common;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-30
+ * @version 2019-06-18
  */
 
 public final class RationalTest {
@@ -35,32 +35,32 @@ public final class RationalTest {
     {
      Rational.valueOf(
        false,
-       UnNatural.valueOf("2366052b8b801d",0x10),
-       UnNatural.ONE.shiftLeft(22)),
+       NaturalBEI.valueOf("2366052b8b801d",0x10),
+       NaturalBEI.ONE.shiftLeft(22)),
      Rational.valueOf(
        true,
-       UnNatural.valueOf("2366052b8b801d",0x10),
-       UnNatural.ONE.shiftLeft(22)),
+       NaturalBEI.valueOf("2366052b8b801d",0x10),
+       NaturalBEI.ONE.shiftLeft(22)),
      Rational.valueOf(
        true,
-       UnNatural.valueOf("232330747ceeab",0x10),
-       UnNatural.ONE.shiftLeft(23)),
+       NaturalBEI.valueOf("232330747ceeab",0x10),
+       NaturalBEI.ONE.shiftLeft(23)),
      Rational.valueOf(
        false,
-       UnNatural.valueOf("232330747ceeab",0x10),
-       UnNatural.ONE.shiftLeft(23)),
+       NaturalBEI.valueOf("232330747ceeab",0x10),
+       NaturalBEI.ONE.shiftLeft(23)),
      Rational.valueOf(
        false,
-       UnNatural.valueOf("21ab528c4dbc181",0x10),
-       UnNatural.ONE.shiftLeft(26)),
+       NaturalBEI.valueOf("21ab528c4dbc181",0x10),
+       NaturalBEI.ONE.shiftLeft(26)),
      Rational.valueOf(
        true,
-       UnNatural.valueOf("8d9814ae2e0074",0x10),
-       UnNatural.ONE.shiftLeft(25)),
+       NaturalBEI.valueOf("8d9814ae2e0074",0x10),
+       NaturalBEI.ONE.shiftLeft(25)),
      Rational.valueOf(
        true,
-       UnNatural.valueOf("2c94d1dcb123a56b9c1",0x10),
-       UnNatural.ONE.shiftLeft(43)), };
+       NaturalBEI.valueOf("2c94d1dcb123a56b9c1",0x10),
+       NaturalBEI.ONE.shiftLeft(43)), };
     for (final Rational fi : f) {
       Common.doubleRoundingTest(
         Rational::valueOf, 

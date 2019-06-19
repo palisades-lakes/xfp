@@ -1,14 +1,18 @@
 package xfp.java.numbers;
 
-import static xfp.java.numbers.Bei.BURNIKEL_ZIEGLER_THRESHOLD;
 import static xfp.java.numbers.Numbers.loWord;
 import static xfp.java.numbers.Numbers.unsigned;
 
 import java.util.Arrays;
 
-// Don't implement Comparable, because of mutability!
+/**
+ * Don't implement Comparable, because of mutability!
+ * 
+ * @author palisades dot lakes at gmail dot com
+ * @version 2019-06-18
+ */
 
-public final class MutableUnNatural {
+public final class MutableNaturalBEI {
 
   //--------------------------------------------------------------
   // mutable state
@@ -33,7 +37,7 @@ public final class MutableUnNatural {
    * low ints of this number.
    */
   private final int[] getLower (final int n) {
-    if (isZero()) { return Bei.ZERO; }
+    if (isZero()) { return NaturalBEI.EMPTY; }
     // TODO: copy here? DANGER!!!
     else if (intLen < n) { return getValue(); }
     else {
@@ -47,7 +51,7 @@ public final class MutableUnNatural {
 
   //--------------------------------------------------------------
   /** The number of ints of the value array that are currently 
-   * used to hold the magnitude of this MutableUnNatural. The 
+   * used to hold the magnitude of this MutableNaturalBEI. The 
    * magnitude starts at an offset and offset + intLen may be less 
    * than value.length.
    */
@@ -56,7 +60,7 @@ public final class MutableUnNatural {
 
   //--------------------------------------------------------------
   /** The offset into the value array where the magnitude of this
-   * MutableUnNatural begins.
+   * MutableNaturalBEI begins.
    */
 
   private int offset = 0;
@@ -89,7 +93,7 @@ public final class MutableUnNatural {
     if (b == 0) { return -1; }
     return ((intLen-1-j)<<5) + Integer.numberOfTrailingZeros(b); }
 
-  private static final int loBit (final MutableUnNatural m) {
+  private static final int loBit (final MutableNaturalBEI m) {
     return m.getLowestSetBit(); }
   
   private final void normalize () {
@@ -121,7 +125,7 @@ public final class MutableUnNatural {
       - Integer.numberOfLeadingZeros(value[offset]); }
 
   //--------------------------------------------------------------
-  /** Right shift this MutableUnNatural n bits, where n is
+  /** Right shift this MutableNaturalBEI n bits, where n is
    * less than 32. Assumes that intLen > 0, n > 0 for speed
    */
 
@@ -134,7 +138,7 @@ public final class MutableUnNatural {
       val[i] = (c << n2) | (b >>> n); }
     val[offset] >>>= n; }
 
-  /** The MutableUnNatural is left in normal form.
+  /** The MutableNaturalBEI is left in normal form.
    */
 
   private final void rightShift (final int n) {
@@ -157,7 +161,7 @@ public final class MutableUnNatural {
     else { rightShift(n); } }
 
   //--------------------------------------------------------------
-  /** Left shift this MutableUnNatural n bits, where n is
+  /** Left shift this MutableNaturalBEI n bits, where n is
    * less than 32. Assumes that intLen > 0, n > 0 for speed
    */
 
@@ -171,7 +175,7 @@ public final class MutableUnNatural {
     val[(offset+intLen)-1] <<= n; }
 
   private final void leftShift (final int n) {
-    // If there is enough storage space in this MutableUnNatural 
+    // If there is enough storage space in this MutableNaturalBEI 
     // already the available space will be used. Space to the 
     // right of the used ints in the value array is faster to 
     // utilize, so the extra space will be taken from the right if 
@@ -233,12 +237,12 @@ public final class MutableUnNatural {
   //--------------------------------------------------------------
   // addition
   //--------------------------------------------------------------
-  /** Adds the contents of two MutableUnNatural objects.The result
-   * is placed within this MutableUnNatural. The contents of the 
+  /** Adds the contents of two MutableNaturalBEI objects.The result
+   * is placed within this MutableNaturalBEI. The contents of the 
    * addend are not changed.
    */
 
-  private final void add (final MutableUnNatural addend) {
+  private final void add (final MutableNaturalBEI addend) {
     int x = intLen;
     int y = addend.intLen;
     int resultLen = 
@@ -296,7 +300,7 @@ public final class MutableUnNatural {
    * but doesn't change the value of {@code addend}.
    */
 
-  private final void addShifted (final MutableUnNatural addend, 
+  private final void addShifted (final MutableNaturalBEI addend, 
                                  final int shift) {
     if (addend.isZero()) { return; }
     int x = intLen;
@@ -355,12 +359,12 @@ public final class MutableUnNatural {
     intLen = resultLen;
     offset = result.length - resultLen; }
 
-  /** Like {@link #addShifted(MutableUnNatural, int)} but 
+  /** Like {@link #addShifted(MutableNaturalBEI, int)} but 
    * {@code this.intLen} must not be greater than {@code n}. In 
    * other words, concatenates {@code this} and {@code addend}.
    */
 
-  private final void addDisjoint (final MutableUnNatural addend, 
+  private final void addDisjoint (final MutableNaturalBEI addend, 
                                   final int n) {
     if (addend.isZero()) { return; }
     final int x = intLen;
@@ -389,9 +393,9 @@ public final class MutableUnNatural {
 
   /** Adds the low {@code n} ints of {@code addend}.
    */
-  private final void addLower (final MutableUnNatural addend, 
+  private final void addLower (final MutableNaturalBEI addend, 
                                final int n) {
-    final MutableUnNatural a = new MutableUnNatural(addend);
+    final MutableNaturalBEI a = new MutableNaturalBEI(addend);
     if ((a.offset + a.intLen) >= n) {
       a.offset = (a.offset + a.intLen) - n;
       a.intLen = n; }
@@ -402,16 +406,16 @@ public final class MutableUnNatural {
   // subtraction
   //--------------------------------------------------------------
   /** Subtracts the smaller of this and b from the larger and 
-   * places the result into this MutableUnNatural.
+   * places the result into this MutableNaturalBEI.
    */
 
-  private final int subtract (MutableUnNatural b) {
-    MutableUnNatural a = this;
+  private final int subtract (MutableNaturalBEI b) {
+    MutableNaturalBEI a = this;
     int[] result = value;
     final int sign = a.compareTo(b);
     if (sign == 0) { reset(); return 0; }
     if (sign < 0) {
-      final MutableUnNatural tmp = a; a = b; b = tmp; }
+      final MutableNaturalBEI tmp = a; a = b; b = tmp; }
     final int resultLen = a.intLen;
     if (result.length < resultLen) { result = new int[resultLen]; }
     long diff = 0;
@@ -448,7 +452,7 @@ public final class MutableUnNatural {
    */
 
   private final int divideOneWord (final int divisor, 
-                                   final MutableUnNatural quotient) {
+                                   final MutableNaturalBEI quotient) {
     final long divisorLong = unsigned(divisor);
     // Special case of one word dividend
     if (intLen == 1) {
@@ -511,14 +515,14 @@ public final class MutableUnNatural {
       carry = sum >>> 32; }
     return (int) carry; }
 
-  /** Divide this MutableUnNatural by the divisor.
+  /** Divide this MutableNaturalBEI by the divisor.
    * The quotient will be placed into the provided quotient object
    * and the remainder object is returned.
    */
 
-  private final MutableUnNatural 
-  divideMagnitude (final MutableUnNatural div,
-                   final MutableUnNatural quotient,
+  private final MutableNaturalBEI 
+  divideMagnitude (final MutableNaturalBEI div,
+                   final MutableNaturalBEI quotient,
                    final boolean needRemainder ) {
     assert div.intLen > 1;
     // D1 normalize the divisor
@@ -528,19 +532,19 @@ public final class MutableUnNatural {
     final int dlen = div.intLen;
     int[] divisor;
     // Remainder starts as dividend with space for a leading zero
-    MutableUnNatural rem; 
+    MutableNaturalBEI rem; 
     if (shift > 0) {
       divisor = new int[dlen];
       copyAndShift(div.value,div.offset,dlen,divisor,0,shift);
       if (Integer.numberOfLeadingZeros(value[offset]) >= shift) {
         final int[] remarr = new int[intLen + 1];
-        rem = new MutableUnNatural(remarr);
+        rem = new MutableNaturalBEI(remarr);
         rem.intLen = intLen;
         rem.offset = 1;
         copyAndShift(value,offset,intLen,remarr,1,shift); } 
       else {
         final int[] remarr = new int[intLen + 2];
-        rem = new MutableUnNatural(remarr);
+        rem = new MutableNaturalBEI(remarr);
         rem.intLen = intLen+1;
         rem.offset = 1;
         int rFrom = offset;
@@ -554,7 +558,7 @@ public final class MutableUnNatural {
     else {
       divisor = Arrays.copyOfRange(
         div.value, div.offset, div.offset + div.intLen);
-      rem = new MutableUnNatural(new int[intLen + 1]);
+      rem = new MutableNaturalBEI(new int[intLen + 1]);
       System.arraycopy(value, offset, rem.value, 1, intLen);
       rem.intLen = intLen;
       rem.offset = 1; }
@@ -695,7 +699,7 @@ public final class MutableUnNatural {
   private static final int KNUTH_POW2_THRESH_ZEROS = 3;
 
   /** Calculates the quotient of this div b and places the
-   * quotient in the provided MutableUnNatural objects and the
+   * quotient in the provided MutableNaturalBEI objects and the
    * remainder object is returned.
    *
    * Uses Algorithm D in Knuth section 4.3.1.
@@ -705,37 +709,37 @@ public final class MutableUnNatural {
    * b is not changed.
    */
 
-  public final MutableUnNatural
-  divideKnuth (final MutableUnNatural b,
-               final MutableUnNatural quotient,
+  public final MutableNaturalBEI
+  divideKnuth (final MutableNaturalBEI b,
+               final MutableNaturalBEI quotient,
                final boolean needRemainder) {
     assert 0 != b.intLen;
     // Dividend is zero
     if (intLen == 0) {
       quotient.intLen = 0;
       quotient.offset = 0;
-      return needRemainder ? new MutableUnNatural() : null; }
+      return needRemainder ? new MutableNaturalBEI() : null; }
 
     final int cmp = compareTo(b);
     // Dividend less than divisor
     if (cmp < 0) {
       quotient.intLen = 0;
       quotient.offset = 0;
-      return needRemainder ? new MutableUnNatural(this) : null; }
+      return needRemainder ? new MutableNaturalBEI(this) : null; }
     // Dividend equal to divisor
     if (cmp == 0) {
       quotient.value[0] = 1;
       quotient.intLen = 1;
       quotient.offset = 0;
-      return needRemainder ? new MutableUnNatural() : null; }
+      return needRemainder ? new MutableNaturalBEI() : null; }
 
     quotient.clear();
     // Special case one word divisor
     if (b.intLen == 1) {
       final int r = divideOneWord(b.value[b.offset], quotient);
       if(needRemainder) {
-        if (r == 0) { return new MutableUnNatural(); }
-        return new MutableUnNatural(r); }
+        if (r == 0) { return new MutableNaturalBEI(); }
+        return new MutableNaturalBEI(r); }
       return null; }
 
     // Cancel common powers of two if we're above the
@@ -744,11 +748,11 @@ public final class MutableUnNatural {
       final int trailingZeroBits =
         Math.min(getLowestSetBit(), b.getLowestSetBit());
       if (trailingZeroBits >= (KNUTH_POW2_THRESH_ZEROS*32)) {
-        final MutableUnNatural aa = new MutableUnNatural(this);
-        final MutableUnNatural bb = new MutableUnNatural(b);
+        final MutableNaturalBEI aa = new MutableNaturalBEI(this);
+        final MutableNaturalBEI bb = new MutableNaturalBEI(b);
         aa.rightShift(trailingZeroBits);
         bb.rightShift(trailingZeroBits);
-        final MutableUnNatural r = aa.divideKnuth(bb,quotient,true);
+        final MutableNaturalBEI r = aa.divideKnuth(bb,quotient,true);
         r.leftShift(trailingZeroBits);
         return r; } }
 
@@ -769,27 +773,27 @@ public final class MutableUnNatural {
    * @return {@code this%b}
    */
 
-  private final MutableUnNatural 
-  divide2n1n (final MutableUnNatural b, 
-              final MutableUnNatural quotient) {
+  private final MutableNaturalBEI 
+  divide2n1n (final MutableNaturalBEI b, 
+              final MutableNaturalBEI quotient) {
     final int n = b.intLen;
 
     // step 1: base case
-    if (((n%2) != 0) || (n < BURNIKEL_ZIEGLER_THRESHOLD)) {
+    if (((n%2) != 0) || (n < NaturalBEI.BURNIKEL_ZIEGLER_THRESHOLD)) {
       return divideKnuth(b,quotient,true); }
 
     // step 2: view this as [a1,a2,a3,a4] where each ai is n/2 ints or less
-    final MutableUnNatural aUpper = new MutableUnNatural(this);
+    final MutableNaturalBEI aUpper = new MutableNaturalBEI(this);
     aUpper.safeRightShift(32*(n/2));   // aUpper = [a1,a2,a3]
     keepLower(n/2);   // this = a4
 
     // step 3: q1=aUpper/b, r1=aUpper%b
-    final MutableUnNatural q1 = new MutableUnNatural();
-    final MutableUnNatural r1 = aUpper.divide3n2n(b, q1);
+    final MutableNaturalBEI q1 = new MutableNaturalBEI();
+    final MutableNaturalBEI r1 = aUpper.divide3n2n(b, q1);
 
     // step 4: quotient=[r1,this]/b, r2=[r1,this]%b
     addDisjoint(r1, n/2);   // this = [r1,this]
-    final MutableUnNatural r2 = divide3n2n(b, quotient);
+    final MutableNaturalBEI r2 = divide3n2n(b, quotient);
 
     // step 5: let quotient=[q1,quotient] and return r2
     quotient.addDisjoint(q1, n/2);
@@ -808,28 +812,28 @@ public final class MutableUnNatural {
    * @return {@code this%b}
    */
 
-  private final MutableUnNatural 
-  divide3n2n (final MutableUnNatural b,
-              final MutableUnNatural quotient) {
+  private final MutableNaturalBEI 
+  divide3n2n (final MutableNaturalBEI b,
+              final MutableNaturalBEI quotient) {
     final int n = b.intLen / 2;   // half the length of b in ints
 
     // step 1: view this as [a1,a2,a3] where each ai is n ints 
     // or less; let a12=[a1,a2]
-    final MutableUnNatural a12 = new MutableUnNatural(this);
+    final MutableNaturalBEI a12 = new MutableNaturalBEI(this);
     a12.safeRightShift(32*n);
 
     // step 2: view b as [b1,b2] where each bi is n ints or less
-    final MutableUnNatural b1 = new MutableUnNatural(b);
+    final MutableNaturalBEI b1 = new MutableNaturalBEI(b);
     b1.safeRightShift(n * 32);
     final int[] b2 = b.getLower(n);
-    MutableUnNatural r;
-    MutableUnNatural d;
+    MutableNaturalBEI r;
+    MutableNaturalBEI d;
     if (compareShifted(b, n) < 0) {
       // step 3a: if a1<b1, let quotient=a12/b1 and r=a12%b1
       r = a12.divide2n1n(b1, quotient);
       // step 4: d=quotient*b2
-      final int[] qu = Bei.multiply(quotient.getValue(),b2);
-      d = MutableUnNatural.valueOf(qu); } 
+      final int[] qu = NaturalBEI.multiply(quotient.getValue(),b2);
+      d = MutableNaturalBEI.valueOf(qu); } 
     else {
       // step 3b: if a1>=b1, let quotient=beta^n-1 
       //and r=a12-b1*2^n+b1
@@ -839,9 +843,9 @@ public final class MutableUnNatural {
       a12.subtract(b1);
       r = a12;
       // step 4: d=quotient*b2=(b2 << 32*n) - b2
-      d = MutableUnNatural.valueOf(b2);
+      d = MutableNaturalBEI.valueOf(b2);
       d.leftShift(32 * n);
-      d.subtract(MutableUnNatural.valueOf(b2)); }
+      d.subtract(MutableNaturalBEI.valueOf(b2)); }
     // step 5: r = r*beta^n + a3 - d (paper says a4)
     // However, don't subtract d until after the while loop 
     // so r doesn't become negative
@@ -850,7 +854,7 @@ public final class MutableUnNatural {
     // step 6: add b until r>=d
     while (r.compareTo(d) < 0) {
       r.add(b);
-      quotient.subtract(MutableUnNatural.ONE); }
+      quotient.subtract(MutableNaturalBEI.ONE); }
     r.subtract(d);
     return r; }
 
@@ -867,9 +871,9 @@ public final class MutableUnNatural {
    * @return the remainder
    */
 
-  public final MutableUnNatural
-  divideAndRemainderBurnikelZiegler (final MutableUnNatural b,
-                                     final MutableUnNatural quotient) {
+  public final MutableNaturalBEI
+  divideAndRemainderBurnikelZiegler (final MutableNaturalBEI b,
+                                     final MutableNaturalBEI quotient) {
     final int r = intLen;
     final int s = b.intLen;
 
@@ -877,18 +881,18 @@ public final class MutableUnNatural {
     quotient.offset = quotient.intLen = 0;
     if (r < s) { return this; }
     // step 1: let m = min{2^k | (2^k)*BURNIKEL_ZIEGLER_THRESHOLD > s}
-    final int m = 1
-      << (32-Integer.numberOfLeadingZeros(s/BURNIKEL_ZIEGLER_THRESHOLD));
+    final int s0 = s/NaturalBEI.BURNIKEL_ZIEGLER_THRESHOLD;
+    final int m = 1 << (32-Integer.numberOfLeadingZeros(s0));
 
     final int j = ((s+m)-1) / m; // step 2a: j = ceil(s/m)
     final int n = j * m; // step 2b: block length in 32-bit units
     final long n32 = 32L * n; // block length in bits
     // step 3: sigma = max{T | (2^T)*B < beta^n}
     final int sigma = (int) Math.max(0, n32 - b.bitLength());   
-    final MutableUnNatural bShifted = new MutableUnNatural(b);
+    final MutableNaturalBEI bShifted = new MutableNaturalBEI(b);
     // step 4a: shift b so its length is a multiple of n
     bShifted.safeLeftShift(sigma);   
-    final MutableUnNatural aShifted = new MutableUnNatural(this);
+    final MutableNaturalBEI aShifted = new MutableNaturalBEI(this);
     // step 4b: shift a by the same amount
     aShifted.safeLeftShift(sigma);     
 
@@ -899,17 +903,17 @@ public final class MutableUnNatural {
 
     // step 6: conceptually split a into blocks a[t-1], ..., a[0]
     // the most significant block of a
-    final MutableUnNatural a1 = aShifted.getBlock(t-1, t, n);   
+    final MutableNaturalBEI a1 = aShifted.getBlock(t-1, t, n);   
 
     // step 7: z[t-2] = [a[t-1], a[t-2]]
     // the second to most significant block
-    MutableUnNatural z = aShifted.getBlock(t-2, t, n);    
+    MutableNaturalBEI z = aShifted.getBlock(t-2, t, n);    
     z.addDisjoint(a1, n);   // z[t-2]
 
     // do schoolbook division on blocks, dividing 2-block numbers 
     // by 1-block numbers
-    final MutableUnNatural qi = new MutableUnNatural();
-    MutableUnNatural ri;
+    final MutableNaturalBEI qi = new MutableNaturalBEI();
+    MutableNaturalBEI ri;
     for (int i=t-2; i > 0; i--) {
       // step 8a: compute (qi,ri) such that z=b*qi+ri
       ri = z.divide2n1n(bShifted, qi);
@@ -993,12 +997,12 @@ public final class MutableUnNatural {
 
   //-------------------------------------------------------------
 
-  private final MutableUnNatural 
-  divide (final MutableUnNatural b, 
-          final MutableUnNatural quotient, 
+  private final MutableNaturalBEI 
+  divide (final MutableNaturalBEI b, 
+          final MutableNaturalBEI quotient, 
           final boolean needRemainder) {
-    if ((b.intLen < Bei.BURNIKEL_ZIEGLER_THRESHOLD) ||
-      ((intLen - b.intLen) < Bei.BURNIKEL_ZIEGLER_OFFSET)) {
+    if ((b.intLen < NaturalBEI.BURNIKEL_ZIEGLER_THRESHOLD) ||
+      ((intLen - b.intLen) < NaturalBEI.BURNIKEL_ZIEGLER_OFFSET)) {
       return divideKnuth(b, quotient, needRemainder); }
     return divideAndRemainderBurnikelZiegler(b, quotient); }
 
@@ -1033,12 +1037,12 @@ public final class MutableUnNatural {
    * the result into the larger. Returns 1 if the answer is in a, 
    * -1 if in b, 0 if no operation was performed.
    */
-  private final int difference (MutableUnNatural b) {
-    MutableUnNatural a = this;
+  private final int difference (MutableNaturalBEI b) {
+    MutableNaturalBEI a = this;
     final int sign = a.compareTo(b);
     if (sign == 0) { return 0; }
     if (sign < 0) {
-      final MutableUnNatural tmp = a; a = b; b = tmp; }
+      final MutableNaturalBEI tmp = a; a = b; b = tmp; }
 
     long diff = 0;
     int x = a.intLen;
@@ -1060,10 +1064,10 @@ public final class MutableUnNatural {
     a.normalize();
     return sign; }
 
-  private final MutableUnNatural binaryGCD(MutableUnNatural v) {
+  private final MutableNaturalBEI binaryGCD(MutableNaturalBEI v) {
     // Algorithm B from Knuth section 4.5.2
-    MutableUnNatural u = this;
-    final MutableUnNatural r = new MutableUnNatural();
+    MutableNaturalBEI u = this;
+    final MutableNaturalBEI r = new MutableNaturalBEI();
 
     // step B1
     final int s1 = u.getLowestSetBit();
@@ -1073,7 +1077,7 @@ public final class MutableUnNatural {
 
     // step B2
     final boolean uOdd = (k == s1);
-    MutableUnNatural t = uOdd ? v: u;
+    MutableNaturalBEI t = uOdd ? v: u;
     int tsign = uOdd ? -1 : 1;
 
     int lb;
@@ -1106,40 +1110,40 @@ public final class MutableUnNatural {
   // Use Euclid's algorithm until the numbers are approximately the
   // same length, then use the binary GCD algorithm to find the GCD.
 
-  public final MutableUnNatural hybridGCD (final MutableUnNatural d) {
-    MutableUnNatural b = d;
-    MutableUnNatural a = this;
-    final MutableUnNatural q = new MutableUnNatural();
+  public final MutableNaturalBEI hybridGCD (final MutableNaturalBEI d) {
+    MutableNaturalBEI b = d;
+    MutableNaturalBEI a = this;
+    final MutableNaturalBEI q = new MutableNaturalBEI();
     while (b.intLen != 0) {
       if (Math.abs(a.intLen - b.intLen) < 2) {
         return a.binaryGCD(b); }
-      final MutableUnNatural r = a.divide(b, q, true);
+      final MutableNaturalBEI r = a.divide(b, q, true);
       a = b;
       b = r; }
     return a; }
 
   // remove common factors as if numerator and denominator
-  public static final MutableUnNatural[] 
-    reduce (MutableUnNatural n,
-            MutableUnNatural d) {
+  public static final MutableNaturalBEI[] 
+    reduce (MutableNaturalBEI n,
+            MutableNaturalBEI d) {
     final int shift = Math.min(loBit(n),loBit(d));
     if (0 != shift) {
       n.rightShift(shift);
       d.rightShift(shift); }
 //    if (n.equals(d)) { 
-//      return new MutableUnNatural[] { ONE, ONE, }; }
-//    if (MutableUnNatural.ONE.equals(d)) { 
-//      return new MutableUnNatural[] { n, ONE, }; }
-//    if (UnNatural.ONE.equals(n)) {
-//      return new MutableUnNatural[] { ONE, d, }; }
-    final MutableUnNatural gcd = n.hybridGCD(d);
+//      return new MutableNaturalBEI[] { ONE, ONE, }; }
+//    if (MutableNaturalBEI.ONE.equals(d)) { 
+//      return new MutableNaturalBEI[] { n, ONE, }; }
+//    if (NaturalBEI.ONE.equals(n)) {
+//      return new MutableNaturalBEI[] { ONE, d, }; }
+    final MutableNaturalBEI gcd = n.hybridGCD(d);
     if (gcd.compareTo(ONE) > 0) {
-      final MutableUnNatural[] nd = { new MutableUnNatural(),
-                                      new MutableUnNatural(), };
+      final MutableNaturalBEI[] nd = { new MutableNaturalBEI(),
+                                      new MutableNaturalBEI(), };
       n.divide(gcd,nd[0],false);
       d.divide(gcd,nd[1],false);
       return nd; } 
-    return new MutableUnNatural[] { n, d, }; }
+    return new MutableNaturalBEI[] { n, d, }; }
 
   //-------------------------------------------------------------
   // pseudo-Comparable, not Comparable due to mutability
@@ -1153,7 +1157,7 @@ public final class MutableUnNatural {
                        final long two) {
     return (one+Long.MIN_VALUE) > (two+Long.MIN_VALUE); }
 
-  private final int compareTo (final MutableUnNatural b) {
+  private final int compareTo (final MutableNaturalBEI b) {
     final int blen = b.intLen;
     if (intLen < blen) { return -1; }
     if (intLen > blen) { return 1; }
@@ -1166,7 +1170,7 @@ public final class MutableUnNatural {
       if (b1 > b2) { return 1; } }
     return 0; }
 
-  private final int compareShifted (final MutableUnNatural b, 
+  private final int compareShifted (final MutableNaturalBEI b, 
                                     final int ints) {
     final int blen = b.intLen;
     final int alen = intLen - ints;
@@ -1187,32 +1191,32 @@ public final class MutableUnNatural {
 
   @Override
   public final String toString () {
-    return UnNatural.valueOf(getValue()).toString(); }
+    return NaturalBEI.valueOf(getValue()).toString(); }
 
   //--------------------------------------------------------------
   // construction
   //--------------------------------------------------------------
 
   // DANGER!! no copying
-  private MutableUnNatural (final int[] val) {
+  private MutableNaturalBEI (final int[] val) {
     value = val;
     intLen = val.length; }
 
-  private MutableUnNatural () { value = new int[1]; intLen = 0; }
+  private MutableNaturalBEI () { value = new int[1]; intLen = 0; }
 
-  private MutableUnNatural (final MutableUnNatural val) {
+  private MutableNaturalBEI (final MutableNaturalBEI val) {
     intLen = val.intLen;
     value =
       Arrays.copyOfRange(
         val.value,val.offset,val.offset+intLen); }
 
-  private MutableUnNatural (final int val) {
+  private MutableNaturalBEI (final int val) {
     value = new int[1];
     intLen = 1;
     value[0] = val; }
 
   //--------------------------------------------------------------
-  /** Returns a {@code MutableUnNatural} containing 
+  /** Returns a {@code MutableNaturalBEI} containing 
    * {@code blockLength} ints from {@code this} number, starting 
    * at {@code index*blockLength}.<br/>
    * Used by Burnikel-Ziegler division.
@@ -1222,38 +1226,38 @@ public final class MutableUnNatural {
    * @return
    */
 
-  private final MutableUnNatural getBlock (final int index, 
+  private final MutableNaturalBEI getBlock (final int index, 
                                            final int numBlocks, 
                                            final int blockLength) {
     final int blockStart = index * blockLength;
-    if (blockStart >= intLen) { return new MutableUnNatural(); }
+    if (blockStart >= intLen) { return new MutableNaturalBEI(); }
     int blockEnd;
     if (index == (numBlocks-1)) { blockEnd = intLen; } 
     else { blockEnd = (index+1) * blockLength; }
-    if (blockEnd > intLen) { return new MutableUnNatural(); }
+    if (blockEnd > intLen) { return new MutableNaturalBEI(); }
     final int[] newVal =
       Arrays.copyOfRange(
         value,
         (offset+intLen)-blockEnd,
         (offset+intLen)-blockStart);
-    return new MutableUnNatural(newVal); }
+    return new MutableNaturalBEI(newVal); }
 
   //--------------------------------------------------------------
 
-  public static final MutableUnNatural make () {
-    return new MutableUnNatural(); }
+  public static final MutableNaturalBEI make () {
+    return new MutableNaturalBEI(); }
 
   //DANGER!!
-  public static final MutableUnNatural unsafe (final int[] val) {
-    return new MutableUnNatural(val); }
+  public static final MutableNaturalBEI unsafe (final int[] val) {
+    return new MutableNaturalBEI(val); }
 
-  public static final MutableUnNatural valueOf (final int[] val) {
+  public static final MutableNaturalBEI valueOf (final int[] val) {
     return unsafe(Arrays.copyOf(val,val.length)); }
 
   //--------------------------------------------------------------
 
-  private static final MutableUnNatural ONE = 
-    new MutableUnNatural(1);
+  private static final MutableNaturalBEI ONE = 
+    new MutableNaturalBEI(1);
 
   //--------------------------------------------------------------
 }

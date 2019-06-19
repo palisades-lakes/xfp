@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import xfp.java.Debug;
 import xfp.java.numbers.Numbers;
 import xfp.java.numbers.RationalFloat;
-import xfp.java.numbers.UnNatural;
+import xfp.java.numbers.NaturalBEI;
 import xfp.java.test.Common;
 
 //----------------------------------------------------------------
@@ -18,7 +18,7 @@ import xfp.java.test.Common;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-23
+ * @version 2019-06-18
  */
 
 public final class RationalFloatTest {
@@ -33,19 +33,19 @@ public final class RationalFloatTest {
     final RationalFloat[] f =
     {
      RationalFloat.valueOf(
-       false,UnNatural.valueOf("2366052b8b801d",0x10),-22),
+       false,NaturalBEI.valueOf("2366052b8b801d",0x10),-22),
      RationalFloat.valueOf(
-       true,UnNatural.valueOf("2366052b8b801d",0x10),-22),
+       true,NaturalBEI.valueOf("2366052b8b801d",0x10),-22),
      RationalFloat.valueOf(
-       true,UnNatural.valueOf("232330747ceeab",0x10),-23),
+       true,NaturalBEI.valueOf("232330747ceeab",0x10),-23),
      RationalFloat.valueOf(
-       false,UnNatural.valueOf("232330747ceeab",0x10),-23),
+       false,NaturalBEI.valueOf("232330747ceeab",0x10),-23),
      RationalFloat.valueOf(
-       false,UnNatural.valueOf("21ab528c4dbc181",0x10),-26),
+       false,NaturalBEI.valueOf("21ab528c4dbc181",0x10),-26),
      RationalFloat.valueOf(
-       true,UnNatural.valueOf("8d9814ae2e0074",0x10),-25),
+       true,NaturalBEI.valueOf("8d9814ae2e0074",0x10),-25),
      RationalFloat.valueOf(
-       true,UnNatural.valueOf("2c94d1dcb123a56b9c1",0x10),-43), };
+       true,NaturalBEI.valueOf("2c94d1dcb123a56b9c1",0x10),-43), };
     for (final RationalFloat fi : f) {
       //Debug.println(fi.toString());
       Common.doubleRoundingTest(

@@ -15,7 +15,7 @@ import xfp.java.numbers.Bei;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-16
+ * @version 2019-06-18
  */
 
 public final class BeiTest {
@@ -104,7 +104,7 @@ public final class BeiTest {
     final int[] dif = new int[] { 300, };
     final int[] a0 = new int[] { 100, };
 
-    final int[] c0 =  Bei.subtract(Bei.valueOf(0x19L, 4), a0);
+    final int[] c0 =  Bei.subtract(Bei.toInts(0x19L, 4), a0);
     Assertions.assertArrayEquals(
       dif, c0,
       "\ndif=" + Arrays.toString(dif)
@@ -132,7 +132,7 @@ public final class BeiTest {
     final int[] sum = new int[] { 301, };
     final int[] a0 = new int[] {0xc9,};
 
-    final int[] c0 =  Bei.add(a0, Bei.valueOf(0x19L, 2));
+    final int[] c0 =  Bei.add(a0, Bei.toInts(0x19L, 2));
     Assertions.assertArrayEquals(
       sum, c0,
       "\nsum=" + Arrays.toString(sum)
@@ -160,7 +160,8 @@ public final class BeiTest {
     final int[] sum = new int[] { 301, };
     final long a0 = 0xc9L;
 
-    final int[] c0 =  Bei.add(Bei.valueOf(a0), Bei.valueOf(0x19L, 2));
+    final int[] c0 =  
+      Bei.add(Bei.toInts(a0), Bei.toInts(0x19L, 2));
     Assertions.assertArrayEquals(
       sum, c0,
       "\nsum=" + Arrays.toString(sum)
@@ -188,7 +189,7 @@ public final class BeiTest {
     final int[] dif = new int[] { 101, };
     final int[] a0 = new int[] { 0xc9, };
 
-    final int[] c0 =  Bei.subtract(a0, Bei.valueOf(0x19L, 2));
+    final int[] c0 =  Bei.subtract(a0, Bei.toInts(0x19L, 2));
     Assertions.assertArrayEquals(
       dif, c0,
       "\ndif=" + Arrays.toString(dif)
@@ -216,7 +217,7 @@ public final class BeiTest {
 
     Assertions.assertEquals(
       1,
-      Bei.compare(new int[] {0xc9,}, Bei.valueOf(0x19L, 2)));
+      Bei.compare(new int[] {0xc9,}, Bei.toInts(0x19L, 2)));
 
     Assertions.assertEquals(
       1,

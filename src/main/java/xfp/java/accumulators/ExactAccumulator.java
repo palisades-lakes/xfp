@@ -25,14 +25,14 @@ implements Accumulator<T> {
     return (T) this; }
 
   @Override
-  public T addProduct (final double x0,
-                       final double x1) {
-    assert Double.isFinite(x0);
-    assert Double.isFinite(x1);
+  public T addProduct (final double z0,
+                       final double z1) {
+    assert Double.isFinite(z0);
+    assert Double.isFinite(z1);
     // preserve exactness using twoMul to convert to 2 adds.
-    final double x01 = x0*x1;
-    final double e = Math.fma(x0,x1,-x01);
-    add(x01);
+    final double z01 = z0*z1;
+    final double e = Math.fma(z0,z1,-z01);
+    add(z01);
     add(e);
     return (T) this; }
 

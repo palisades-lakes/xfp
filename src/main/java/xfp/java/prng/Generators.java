@@ -8,7 +8,7 @@ import org.apache.commons.rng.sampling.CollectionSampler;
 import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
 import org.apache.commons.rng.sampling.distribution.ContinuousUniformSampler;
 
-import xfp.java.numbers.UnNatural;
+import xfp.java.numbers.NaturalBEI;
 
 /** Generators of primitives or Objects as zero-arity 'functions'
  * that return different values on each call.
@@ -187,15 +187,15 @@ public final class Generators {
         new CollectionSampler(
           urp,
           List.of(
-            UnNatural.ZERO,
-            UnNatural.ONE,
-            UnNatural.TWO,
-            UnNatural.TEN));
+            NaturalBEI.ZERO,
+            NaturalBEI.ONE,
+            NaturalBEI.TWO,
+            NaturalBEI.TEN));
       @Override
       public Object next () {
         final boolean edge = choose.sample() > dp;
         if (edge) { return edgeCases.sample(); }
-        return UnNatural.valueOf(nextBytes(urp,1024)); } }; }
+        return NaturalBEI.valueOf(nextBytes(urp,1024)); } }; }
 
   public static final Generator
   unnaturalGenerator (final int n,
@@ -204,8 +204,8 @@ public final class Generators {
       final Generator g = unnaturalGenerator(urp);
       @Override
       public final Object next () {
-        final UnNatural[] z = new UnNatural[n];
-        for (int i=0;i<n;i++) { z[i] = (UnNatural) g.next(); }
+        final NaturalBEI[] z = new NaturalBEI[n];
+        for (int i=0;i<n;i++) { z[i] = (NaturalBEI) g.next(); }
         return z; } }; }
 
   /** Intended primarily for testing. <b>
@@ -214,37 +214,37 @@ public final class Generators {
    */
 
   public static final Generator
-  nonzeroUnNaturalGenerator (final UniformRandomProvider urp) {
+  nonzeroNaturalBEIGenerator (final UniformRandomProvider urp) {
     final double dp = 0.99;
-    return new GeneratorBase ("nonzeroUnNaturalGenerator") {
+    return new GeneratorBase ("nonzeroNaturalBEIGenerator") {
       private final ContinuousSampler choose =
         new ContinuousUniformSampler(urp,0.0,1.0);
       private final CollectionSampler edgeCases =
         new CollectionSampler(
           urp,
           List.of(
-            UnNatural.ONE,
-            UnNatural.TWO,
-            UnNatural.TEN));
+            NaturalBEI.ONE,
+            NaturalBEI.TWO,
+            NaturalBEI.TEN));
       @Override
       public Object next () {
         final boolean edge = choose.sample() > dp;
         if (edge) { return edgeCases.sample(); }
         // TODO: bound infinite loop?
         for (;;) {
-          final UnNatural b =
-            UnNatural.valueOf(nextBytes(urp,1024));
+          final NaturalBEI b =
+            NaturalBEI.valueOf(nextBytes(urp,1024));
           if (! b.isZero()) { return b; } } } }; }
 
   public static final Generator
-  nonzeroUnNaturalGenerator (final int n,
+  nonzeroNaturalBEIGenerator (final int n,
                              final UniformRandomProvider urp) {
-    return new GeneratorBase ("nonzeroUnNaturalGenerator:" + n) {
-      final Generator g = nonzeroUnNaturalGenerator(urp);
+    return new GeneratorBase ("nonzeroNaturalBEIGenerator:" + n) {
+      final Generator g = nonzeroNaturalBEIGenerator(urp);
       @Override
       public final Object next () {
-        final UnNatural[] z = new UnNatural[n];
-        for (int i=0;i<n;i++) { z[i] = (UnNatural) g.next(); }
+        final NaturalBEI[] z = new NaturalBEI[n];
+        for (int i=0;i<n;i++) { z[i] = (NaturalBEI) g.next(); }
         return z; } }; }
 
   //--------------------------------------------------------------
