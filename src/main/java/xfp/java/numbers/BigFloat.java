@@ -137,8 +137,8 @@ implements Ringlike<BigFloat> {
     return valueOf(n0,t,e); }
 
   private static final int compare (final long m0,
-                                   final long m1,
-                                   final int bitShift) {
+                                    final long m1,
+                                    final int bitShift) {
     assert 0L<=m0;
     assert 0L<=m1;
     assert 0<=bitShift : "bitShift=" + bitShift;
@@ -399,51 +399,41 @@ implements Ringlike<BigFloat> {
 
   //--------------------------------------------------------------
 
-//  private final BigFloat 
-//  addProduct (final boolean p0,
-//              final long t0,
-//              final int e0,
-//              final boolean p1,
-//              final long t1,
-//              final int e1) {
-//    if (0L==t0) { return valueOf(p1,t1,e1); }
-//    if (0L==t1) { return valueOf(p0,t0,e0); }
-//    final int shift0 = Numbers.loBit(t0);
-//    final long t00 = (t0>>>shift0);
-//    final int e00 = e0+shift0;
-//    final int shift1 = Numbers.loBit(t1);
-//    final long t11 = (t1>>>shift1);
-//    final int e11=e1+shift1;
-//    return 
-//      add(
-//        nonNegative(),
-//        significand(),
-//        exponent(),
-//        ! (p0 ^ p1), 
-//        NaturalBEI.multiply(t00,t11), 
-//        e00+e11); }
-//
-//  public final BigFloat 
-//  addProduct (final double z0,
-//              final double z1) {
-//    assert Double.isFinite(z0);
-//    assert Double.isFinite(z1);
-//    return addProduct(
-//      Doubles.nonNegative(z0),
-//      Doubles.significand(z0),
-//      Doubles.exponent(z0),
-//      Doubles.nonNegative(z1),
-//      Doubles.significand(z1),
-//      Doubles.exponent(z1)); }
-
   public final BigFloat 
   addProduct (final double z0,
               final double z1) {
-    // use twoMul to convert exactly to 2 adds.
-    final double z01 = z0*z1;
-    assert Double.isFinite(z01);
-    final double e = Math.fma(z0,z1,-z01);
-    return add(z01).add(e); }
+    if ((0.0==z0) || (0.0==z1)) { return this; }
+    assert Double.isFinite(z0);
+    assert Double.isFinite(z1);
+    final boolean p0 = Doubles.nonNegative(z0);
+    final long t0 = Doubles.significand(z0);
+    final int e0 = Doubles.exponent(z0);
+    final boolean p1 = Doubles.nonNegative(z1);
+    final long t1 = Doubles.significand(z1);
+    final int e1 = Doubles.exponent(z1);
+    final int shift0 = Numbers.loBit(t0);
+    final long t00 = (t0>>>shift0);
+    final int e00 = e0+shift0;
+    final int shift1 = Numbers.loBit(t1);
+    final long t11 = (t1>>>shift1);
+    final int e11=e1+shift1;
+    return 
+      add(
+        nonNegative(),
+        significand(),
+        exponent(),
+        ! (p0 ^ p1), 
+        NaturalBEI.multiply(t00,t11), 
+        e00+e11); }
+
+  //  public final BigFloat 
+  //  addProduct (final double z0,
+  //              final double z1) {
+  //    // use twoMul to convert exactly to 2 adds.
+  //    final double z01 = z0*z1;
+  //    assert Double.isFinite(z01);
+  //    final double e = Math.fma(z0,z1,-z01);
+  //    return add(z01).add(e); }
 
   //--------------------------------------------------------------
   // Number methods
