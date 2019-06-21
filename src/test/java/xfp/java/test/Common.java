@@ -1051,6 +1051,7 @@ public final class Common {
   addTest (final Generator g,
            final List<Accumulator> accumulators,
            final Accumulator exact) {
+    Debug.DEBUG=false;
     Assertions.assertTrue(exact.isExact());
     final double[] x = (double[]) g.next();
     //Debug.println(Classes.className(exact));
@@ -1078,7 +1079,9 @@ public final class Common {
             + "\npred: " + Classes.className(a)
             + "\n= " + Double.toHexString(pred)
             + "\n= " + a.value()
-            + "\n"); } } } }
+            + "\n"); } } } 
+    Debug.DEBUG=false;
+    }
 
   private static final void
   addAllTest (final Generator g,

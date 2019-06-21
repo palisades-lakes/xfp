@@ -1,5 +1,7 @@
 package xfp.java;
 
+import static xfp.java.numbers.Numbers.unsigned;
+
 import java.io.PrintStream;
 
 /** Debugging output.
@@ -11,7 +13,7 @@ import java.io.PrintStream;
  * Static methods only; no state.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-27
+ * @version 2019-06-21
  */
 
 public final class Debug {
@@ -32,6 +34,23 @@ public final class Debug {
     return
       Long.toHexString(Double.doubleToLongBits(x))
       .toUpperCase(); }
+
+  //--------------------------------------------------------------
+  /** hex string. */
+
+  public static final String toHexString (final int[] m) {
+    //final StringBuilder b = new StringBuilder("0x");
+    final StringBuilder b = new StringBuilder("[");
+    final int n = m.length;
+    if (0 == n) { b.append('0'); }
+    else {
+      b.append(String.format("%x",Long.valueOf(unsigned(m[0]))));
+      for (int i=1;i<n;i++) {
+        b.append(" ");
+        b.append(
+          String.format("%08x",Long.valueOf(unsigned(m[i])))); } }
+    b.append("]");
+    return b.toString(); }
 
   //--------------------------------------------------------------
 

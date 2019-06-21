@@ -1661,21 +1661,6 @@ public final class Bei0 {
     return bc + 1; }
 
   //--------------------------------------------------------------
-  /** hex string. */
-
-  public static final String toHexString (final int[] m) {
-    //final StringBuilder b = new StringBuilder("0x");
-    final StringBuilder b = new StringBuilder("");
-    final int n = m.length;
-    if (0 == n) { b.append('0'); }
-    else {
-      b.append(String.format("%x",Long.valueOf(unsigned(m[0]))));
-      for (int i=1;i<n;i++) {
-        b.append(
-          String.format("%08x",Long.valueOf(unsigned(m[i])))); } }
-    return b.toString(); }
-
-  //--------------------------------------------------------------
   // Number interface+
   //--------------------------------------------------------------
 

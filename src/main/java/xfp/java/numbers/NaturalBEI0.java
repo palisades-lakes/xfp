@@ -1,6 +1,5 @@
 package xfp.java.numbers;
 
-import static xfp.java.numbers.Numbers.hiWord;
 import static xfp.java.numbers.Numbers.loWord;
 import static xfp.java.numbers.Numbers.unsigned;
 
@@ -8,12 +7,14 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 
+import xfp.java.Debug;
+
 /** immutable arbitrary-precision non-negative integers
  * (natural number) represented by big-endian
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-20
+ * @version 2019-06-21
  */
 
 public final class NaturalBEI0 extends Number
@@ -30,12 +31,10 @@ implements Natural<NaturalBEI0> {
 
   @Override
   public final int word (final int i) {
-    if (i<_words.length) { return _words[i]; }
+    final int n = _words.length;
+    final int ii = n-i-1;
+    if ((0<=ii) && (ii<n)) { return _words[ii]; }
     return 0; }
-
-  @Override
-  public final long uword (final int i) {
-    return unsigned(word(i)); }
 
   @Override
   public final int startWord () { return 0; }
@@ -141,27 +140,27 @@ implements Natural<NaturalBEI0> {
 
   //--------------------------------------------------------------
 
-  public static final NaturalBEI0 absDifference (final NaturalBEI0 u0,
-                                                 final NaturalBEI0 u1) {
-    final int c01 = u0.compareTo(u1);
-    if (0<c01) { return u0.subtract(u1); }
-    if (0>c01) { return u1.subtract(u0); }
+  @Override
+  public final NaturalBEI0 absDiff (final NaturalBEI0 u) {
+    final int c01 = compareTo(u);
+    if (0<c01) { return subtract(u); }
+    if (0>c01) { return u.subtract(this); }
     return ZERO; }
 
   //--------------------------------------------------------------
 
   @Override
   public final boolean isOne () { return equals(ONE); }
-  
+
   //--------------------------------------------------------------
 
   public static final NaturalBEI0 multiply (final long t0,
                                             final long t1) {
     assert 0L<=t0;
     assert 0L<=t1;
-    final long hi0 = hiWord(t0);
+    final long hi0 = Numbers.hiWord(t0);
     final long lo0 = loWord(t0);
-    final long hi1 = hiWord(t1);
+    final long hi1 = Numbers.hiWord(t1);
     final long lo1 = loWord(t1);
     final long lolo = lo0*lo1;
     final long hilo2 = (hi0*lo1) + (hi1*lo0);
@@ -181,7 +180,7 @@ implements Natural<NaturalBEI0> {
 
   public static final NaturalBEI0 square (final long t) {
     assert 0L<=t;
-    final long hi = hiWord(t);
+    final long hi = Numbers.hiWord(t);
     final long lo = loWord(t);
     final long lolo = lo*lo;
     final long hilo2 = (hi*lo) << 1;
@@ -457,13 +456,13 @@ implements Natural<NaturalBEI0> {
 
   /** hex string. */
   @Override
-  public String toString () { return Bei0.toHexString(_words); }
+  public String toString () { return Debug.toHexString(_words); }
 
   /** hex string. */
   @Override
   public String toString (final int radix) {
     assert radix==0x10;
-    return Bei0.toHexString(_words); }
+    return Debug.toHexString(_words); }
 
   //--------------------------------------------------------------
   // Number interface+

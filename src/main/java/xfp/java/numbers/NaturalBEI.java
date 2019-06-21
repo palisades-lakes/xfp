@@ -1,6 +1,5 @@
 package xfp.java.numbers;
 
-import static xfp.java.numbers.Numbers.hiWord;
 import static xfp.java.numbers.Numbers.loWord;
 import static xfp.java.numbers.Numbers.unsigned;
 
@@ -8,12 +7,14 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 
+import xfp.java.Debug;
+
 /** immutable arbitrary-precision non-negative integers
  * (natural number) represented by big-endian
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-20
+ * @version 2019-06-21
  */
 
 public final class NaturalBEI extends Number
@@ -239,67 +240,48 @@ implements Natural<NaturalBEI> {
     for (final int mi : m) { bc += Integer.bitCount(mi); }
     return bc + 1; }
 
-  private static final int bitLength (final int[] m) {
-    final int len = m.length;
-    if (len == 0) { return(0); }
-    // Calculate the bit length of the magnitude
-    final int n = ((len - 1) << 5) + Numbers.bitLength(m[0]);
-    return n; }
-
-  private static final int getLowestSetBit (final int[] m) {
-    int lsb = 0;
-    if (isZero(m)) { lsb -= 1; }
-    else {
-      // Search for lowest order nonzero int
-      int i, b;
-      for (i = 0; (b = getInt(m,i)) == 0; i++) { }
-      lsb += (i << 5) + Integer.numberOfTrailingZeros(b); }
-    return lsb; }
+//  private static final int getLowestSetBit (final int[] m) {
+//    int lsb = 0;
+//    if (isZero(m)) { lsb -= 1; }
+//    else {
+//      // Search for lowest order nonzero int
+//      int i, b;
+//      for (i = 0; (b = getInt(m,i)) == 0; i++) { }
+//      lsb += (i << 5) + Integer.numberOfTrailingZeros(b); }
+//    return lsb; }
 
   private static final int intLength (final int[] m) {
     return (bitLength(m) >>> 5) + 1; }
-
-  private static final int getInt (final int[] m,
-                                   final int n) {
-    if (n < 0) { return 0; }
-    if (n >= m.length) { return 0; }
-    final int mInt = m[m.length - n - 1];
-    return mInt; }
-
-  private static final boolean testBit (final int[] m,
-                                        final int n) {
-    assert 0<=n;
-    return (getInt(m,n >>> 5) & (1 << (n & 31))) != 0; }
 
   private static final int[] setBit (final int[] m,
                                      final int n) {
     assert 0<n;
     final int nTrunc = n >>> 5;
-    final int[] r = new int[Math.max(intLength(m),nTrunc+2)];
-    final int nr = r.length;
-    for (int i = 0; i < nr; i++) { r[nr-i-1] = getInt(m,i); }
-    r[nr-nTrunc-1] |= (1 << (n & 31));
-    return stripLeadingZeros(r); }
+      final int[] r = new int[Math.max(intLength(m),nTrunc+2)];
+      final int nr = r.length;
+      for (int i = 0; i < nr; i++) { r[nr-i-1] = getInt(m,i); }
+      r[nr-nTrunc-1] |= (1 << (n & 31));
+      return stripLeadingZeros(r); }
 
   private static final int[] clearBit (final int[] m,
                                        final int n) {
     assert 0 < n;
     final int nTrunc = n >>> 5;
-    final int[] r = new int[Math.max(intLength(m),((n+1)>>>5)+1)];
-    final int nr = r.length;
-    for (int i=0;i<nr;i++) { r[nr-i-1] = getInt(m,i); }
-    r[nr-nTrunc-1] &= ~(1 << (n & 31));
-    return stripLeadingZeros(r); }
+      final int[] r = new int[Math.max(intLength(m),((n+1)>>>5)+1)];
+      final int nr = r.length;
+      for (int i=0;i<nr;i++) { r[nr-i-1] = getInt(m,i); }
+      r[nr-nTrunc-1] &= ~(1 << (n & 31));
+      return stripLeadingZeros(r); }
 
   private static final int[] flipBit (final int[] m,
                                       final int n) {
     assert 0 < n;
     final int intNum = n >>> 5;
-    final int[] r = new int[Math.max(intLength(m),intNum+2)];
-    for (int i = 0; i < r.length; i++) {
-      r[r.length - i - 1] = getInt(m,i); }
-    r[r.length - intNum - 1] ^= (1 << (n & 31));
-    return stripLeadingZeros(r); }
+      final int[] r = new int[Math.max(intLength(m),intNum+2)];
+      for (int i = 0; i < r.length; i++) {
+        r[r.length - i - 1] = getInt(m,i); }
+      r[r.length - intNum - 1] ^= (1 << (n & 31));
+      return stripLeadingZeros(r); }
 
   //--------------------------------------------------------------
   // shifts
@@ -368,7 +350,7 @@ implements Natural<NaturalBEI> {
 
   private static final int[] shiftLeft (final long m,
                                         final int shift) {
-    final int hi = (int) hiWord(m);
+    final int hi = (int) Numbers.hiWord(m);
     final int lo = (int) loWord(m);
     if (0==hi) {
       if (0==lo) { return new int[0]; }
@@ -411,46 +393,6 @@ implements Natural<NaturalBEI> {
     assert 0<=n;
     if (0==n) { return stripLeadingZeros(m); }
     return shiftRight0(m,n); }
-
-  //--------------------------------------------------------------
-  // get the least significant int word of (m >>> shift)
-
-  private static final int getShiftedInt (final int[] m,
-                                          final int shift) {
-    // leading zeros don't matter
-    final int intShift = shift >>> 5;
-    final int remShift = shift & 0x1f;
-    final int n = m.length;
-    if (intShift >= n) { return 0; }
-    final int i = n-intShift-1;
-    if (0==remShift) { return m[i]; }
-    final int r2 = 32-remShift;
-    final long lo = (unsigned(m[i]) >>> remShift);
-    final long hi = (0<i) ? (unsigned(m[i-1]) << r2) : 0;
-    return (int) (hi | lo); }
-
-  private static final long getShiftedLong (final int[] m,
-                                            final int shift) {
-    // leading zeros don't matter
-    final int intShift = shift >>> 5;
-    final int remShift = shift & 0x1f;
-    final int n = m.length;
-    if (intShift >= n) { return 0L; }
-
-    final int i = n-intShift-1;
-
-    if (0==remShift) {
-      if (0==i) { return unsigned(m[0]); }
-      return (unsigned(m[i-1]) << 32) | unsigned(m[i]); }
-
-    final int r2 = 32-remShift;
-    final long lo0 = (unsigned(m[i]) >>> remShift);
-    final long lo1 = (0<i) ? (unsigned(m[i-1]) << r2) : 0L;
-    final long lo = lo1 | lo0;
-    final long hi0 = (0<i) ? (unsigned(m[i-1]) >>> remShift) : 0;
-    final long hi1 = (1<i) ? (unsigned(m[i-2]) << r2) : 0;
-    final long hi = hi1 | hi0;
-    return (hi << 32) | lo; }
 
   //--------------------------------------------------------------
   // addition
@@ -1164,12 +1106,14 @@ implements Natural<NaturalBEI> {
 
   @Override
   public final int word (final int i) {
-    if (i<_words.length) { return words()[i]; }
+    final int n = words().length;
+    final int ii = n-i-1;
+    if ((0<=ii) && (ii<n)) { return words()[ii]; }
     return 0; }
 
-  @Override
-  public final long uword (final int i) {
-    return unsigned(word(i)); }
+//  @Override
+//  public final long uword (final int i) {
+//    return unsigned(word(i)); }
 
   @Override
   public final int startWord () { return 0; }
@@ -1197,16 +1141,16 @@ implements Natural<NaturalBEI> {
     final int[] r0 = new int[i0];
     long sum = 0;
     if (i1 == 1) {
-      sum = uword(--i0) + m.uword(0);
+      sum = unsigned(_words[--i0]) + unsigned(m._words[0]);
       r0[i0] = (int) sum; }
     else {
       while (i1 > 0) {
-        sum = uword(--i0) + m.uword(--i1) + (sum >>> 32);
+        sum = unsigned(_words[--i0]) + unsigned(m._words[--i1]) + (sum >>> 32);
         r0[i0] = (int) sum; } }
     boolean carry = ((sum >>> 32) != 0);
     while ((i0 > 0) && carry) {
-      carry = ((r0[--i0] = word(i0) + 1) == 0); }
-    while (i0 > 0) { r0[--i0] = word(i0); }
+      carry = ((r0[--i0] = _words[i0] + 1) == 0); }
+    while (i0 > 0) { r0[--i0] = _words[i0]; }
     if (carry) {
       final int[] r1 = new int[r0.length + 1];
       System.arraycopy(r0,0,r1,1,r0.length);
@@ -1231,7 +1175,7 @@ implements Natural<NaturalBEI> {
     if (0==lShift) { n1s = n1; }
     else {
       final int rShift = 32 - (bitShift & 0x1f);
-      final int hi = (u.word(0) >>> rShift);
+      final int hi = (u._words[0] >>> rShift);
       n1s = n1 + ((0!=hi) ? 1 : 0); }
     final int n = Math.max(n0,n1s);
     final int[] m11 = shiftLeftInto(new int[n],u.words(),bitShift);
@@ -1246,22 +1190,22 @@ implements Natural<NaturalBEI> {
     if (isZero()) { return valueOf(m1); }
     long sum = 0;
     int n0 = length();
-    final int hi = (int) hiWord(m1);
-    if (n0 == 1) { return valueOf(m1 + uword(0)); }
+    final int hi = (int) Numbers.hiWord(m1);
+    if (n0 == 1) { return valueOf(m1 + unsigned(_words[0])); }
     final int[] r0 = new int[n0];
     if (hi == 0) {
-      sum = uword(--n0) + m1;
+      sum = unsigned(_words[--n0]) + m1;
       r0[n0] = (int) sum; }
     else {
-      sum = uword(--n0) + loWord(m1);
+      sum = unsigned(_words[--n0]) + loWord(m1);
       r0[n0] = (int) sum;
-      sum = uword(--n0) + unsigned(hi) + (sum >>> 32);
+      sum = unsigned(_words[--n0]) + unsigned(hi) + (sum >>> 32);
       r0[n0] = (int) sum; }
 
-    boolean carry = (hiWord(sum) != 0L);
+    boolean carry = (Numbers.hiWord(sum) != 0L);
     while ((n0 > 0) && carry) {
-      carry = ((r0[--n0] = word(n0) + 1) == 0); }
-    while (n0 > 0) { r0[--n0] = word(n0); }
+      carry = ((r0[--n0] = _words[n0] + 1) == 0); }
+    while (n0 > 0) { r0[--n0] = _words[n0]; }
     if (carry) {
       final int[] r1 = new int[r0.length+1];
       System.arraycopy(r0,0,r1,1,r0.length);
@@ -1277,9 +1221,9 @@ implements Natural<NaturalBEI> {
     assert 0L<=m1;
     long sum = loWord(m0) + loWord(m1);
     final int lo = (int) sum;
-    sum = hiWord(m0) + hiWord(m1) + hiWord(sum);
+    sum = Numbers.hiWord(m0) + Numbers.hiWord(m1) + Numbers.hiWord(sum);
     final int mid = (int) sum;
-    final int hi = (int) hiWord(sum);
+    final int hi = (int) Numbers.hiWord(sum);
     if (0==hi) {
       if (0==mid) {
         if (0==lo) { return ZERO; }
@@ -1300,7 +1244,7 @@ implements Natural<NaturalBEI> {
     if (0L==m1) { return valueOf(m0); }
     if (0==bitShift) { return add(m0,m1); }
 
-    final int hi0 = (int) hiWord(m0);
+    final int hi0 = (int) Numbers.hiWord(m0);
     final int lo0 = (int) loWord(m0);
     final int n0 = ((0==hi0) ? ((0==lo0) ? 0 : 1) : 2);
 
@@ -1330,7 +1274,7 @@ implements Natural<NaturalBEI> {
     r0[i--] = (int) sum;
     if (2<=nwords1) {
       //sum = midPart(m1,remShift) + (sum >>> 32);
-      sum = hiWord(m1s) + (sum >>> 32);
+      sum = Numbers.hiWord(m1s) + (sum >>> 32);
       if (0<=i) { sum += unsigned(r0[i]); }
       r0[i--] = (int) sum; }
     if (3==nwords1) {
@@ -1396,23 +1340,23 @@ implements Natural<NaturalBEI> {
     //sum = loPart(m1,remShift);
     final long m1s = (m1 << remShift);
     sum = loWord(m1s);
-    if (0<=i0) { sum += uword(i0--); }
+    if (0<=i0) { sum += unsigned(_words[i0--]); }
     r0[ir--] = (int) sum;
     if (2<=nwords) {
       //sum = midPart(m1,remShift) + (sum >>> 32);
-      sum = hiWord(m1s) + (sum >>> 32);
-      if (0<=i0) { sum += uword(i0--); }
+      sum = Numbers.hiWord(m1s) + (sum >>> 32);
+      if (0<=i0) { sum += unsigned(_words[i0--]); }
       r0[ir--] = (int) sum; }
     if (3==nwords) {
       //sum = hiPart(m1,remShift) + (sum >>> 32);
       sum = (m1 >>> (64-remShift)) + (sum >>> 32);
-      if (0<=i0) { sum += uword(i0--); }
+      if (0<=i0) { sum += unsigned(_words[i0--]); }
       r0[ir--] = (int) sum; }
 
     boolean carry = ((sum >>> 32) != 0);
     while ((0<=ir) && carry) {
       sum = 0x01L;
-      if (0<=i0) { sum += uword(i0--); }
+      if (0<=i0) { sum += unsigned(_words[i0--]); }
       final int is = (int) sum;
       r0[ir--] = is;
       carry = (is == 0); }
@@ -1434,25 +1378,25 @@ implements Natural<NaturalBEI> {
     assert 0L<=m1;
     if (0L == m1) { return this; }
 
-    final long hi = hiWord(m1);
+    final long hi = Numbers.hiWord(m1);
     int i0 = length();
     final int r[] = new int[i0];
     long difference = 0;
     if (hi == 0) {
-      difference = uword(--i0) - m1;
+      difference = unsigned(_words[--i0]) - m1;
       r[i0] = (int) difference; }
     else {
-      difference = uword(--i0) - loWord(m1);
+      difference = unsigned(_words[--i0]) - loWord(m1);
       r[i0] = (int) difference;
       difference =
-        (uword(--i0) - hi) + (difference >> 32);
+        (unsigned(_words[--i0]) - hi) + (difference >> 32);
       r[i0] = (int) difference; }
     // Subtract remainder of longer number while borrow propagates
     boolean borrow = ((difference >> 32) != 0);
     while ((i0 > 0) && borrow) {
-      borrow = ((r[--i0] = word(i0)-1) == -1); }
+      borrow = ((r[--i0] = _words[i0]-1) == -1); }
     // Copy remainder of longer number
-    while (i0 > 0) { r[--i0] = word(i0); }
+    while (i0 > 0) { r[--i0] = _words[i0]; }
     return unsafe(stripLeadingZeros(r)); }
 
   /** only valid when m <= this !!! */
@@ -1467,7 +1411,7 @@ implements Natural<NaturalBEI> {
     int i1 = m1.length;
     long dif = 0;
     while (i1 > 0) {
-      dif = (uword(--i0) - m.uword(--i1)) + (dif >> 32);
+      dif = (unsigned(_words[--i0]) - unsigned(m._words[--i1])) + (dif >> 32);
       result[i0] = (int) dif; }
     boolean borrow = ((dif >> 32) != 0);
     while ((i0 > 0) && borrow) {
@@ -1512,20 +1456,20 @@ implements Natural<NaturalBEI> {
     final long m1s = (m1 << remShift);
     dif -= loWord(m1s);
     if (0<=i0) {
-      dif += uword(i0);
+      dif += unsigned(_words[i0]);
       r0[i0] = (int) dif;
       i0--;
       dif = (dif >> 32); }
 
-    if (2<=nwords) { dif -= hiWord(m1s); }
+    if (2<=nwords) { dif -= Numbers.hiWord(m1s); }
     if (0<=i0) {
-      dif += uword(i0);
+      dif += unsigned(_words[i0]);
       r0[i0] = (int) dif; i0--;
       dif = (dif >> 32); }
 
     if (3==nwords) { dif -= (m1 >>> (64-remShift)) ; }
     if (0<=i0) {
-      dif += uword(i0);
+      dif += unsigned(_words[i0]);
       r0[i0] = (int) dif;
       i0--; }
 
@@ -1576,33 +1520,40 @@ implements Natural<NaturalBEI> {
     assert 0L<=m;
     if (isZero()) { return valueOf(m); }
 
-    final int hi = (int) hiWord(m);
+    final int hi = (int) Numbers.hiWord(m);
     if (hi == 0) {
       final int result[] = new int[1];
-      result[0] = (int) (m - uword(0));
+      result[0] = (int) (m - unsigned(_words[0]));
       return unsafe(result); }
     final int r[] = new int[2];
     if (length() == 1) {
-      final long dif = loWord(m) - uword(0);
+      final long dif = loWord(m) - unsigned(_words[0]);
       r[1] = (int) dif;
       final boolean borrow = ((dif >> 32) != 0);
       if (borrow) { r[0] = hi - 1; }
       // Copy remainder of longer number
       else { r[0] = hi; }
       return unsafe(r); }
-    long dif = loWord(m) - uword(1);
+    long dif = loWord(m) - unsigned(_words[1]);
     r[1] = (int) dif;
-    dif = (unsigned(hi)-uword(0))+(dif >> 32);
+    dif = (unsigned(hi)-unsigned(_words[0]))+(dif >> 32);
     r[0] = (int) dif;
     return unsafe(stripLeadingZeros(r)); }
 
   //--------------------------------------------------------------
 
-  public static final NaturalBEI absDifference (final NaturalBEI u0,
-                                                final NaturalBEI u1) {
-    final int c01 = u0.compareTo(u1);
-    if (0<c01) { return u0.subtract(u1); }
-    if (0>c01) { return u1.subtract(u0); }
+  //  public static final NaturalBEI absDiff (final NaturalBEI u0,
+  //                                          final NaturalBEI u1) {
+  //    final int c01 = u0.compareTo(u1);
+  //    if (0<c01) { return u0.subtract(u1); }
+  //    if (0>c01) { return u1.subtract(u0); }
+  //    return ZERO; }
+
+  @Override
+  public final NaturalBEI absDiff (final NaturalBEI u) {
+    final int c01 = compareTo(u);
+    if (0<c01) { return subtract(u); }
+    if (0>c01) { return u.subtract(this); }
     return ZERO; }
 
   //--------------------------------------------------------------
@@ -1611,7 +1562,7 @@ implements Natural<NaturalBEI> {
 
   public static final NaturalBEI square (final long t) {
     assert 0L<=t;
-    final long hi = hiWord(t);
+    final long hi = Numbers.hiWord(t);
     final long lo = loWord(t);
     final long lolo = lo*lo;
     final long hilo2 = (hi*lo) << 1;
@@ -1638,16 +1589,16 @@ implements Natural<NaturalBEI> {
 
   @Override
   public final boolean isOne () { return equals(ONE); }
-  
+
   //--------------------------------------------------------------
 
   public static final NaturalBEI multiply (final long t0,
                                            final long t1) {
     assert 0L<=t0;
     assert 0L<=t1;
-    final long hi0 = hiWord(t0);
+    final long hi0 = Numbers.hiWord(t0);
     final long lo0 = loWord(t0);
-    final long hi1 = hiWord(t1);
+    final long hi1 = Numbers.hiWord(t1);
     final long lo1 = loWord(t1);
     final long lolo = lo0*lo1;
     final long hilo2 = (hi0*lo1) + (hi1*lo0);
@@ -1823,22 +1774,88 @@ implements Natural<NaturalBEI> {
 
   // get the least significant int words of (m >>> shift)
 
-  @Override
-  public final int getShiftedInt (final int n) {
-    assert 0<=n;
-    return getShiftedInt(words(),n); }
+  //--------------------------------------------------------------
+  // get the least significant int word of (m >>> shift)
 
+  //  private static final int getShiftedInt (final int[] m,
+  //                                          final int shift) {
+  //    // leading zeros don't matter
+  //    final int intShift = shift >>> 5;
+  //    final int remShift = shift & 0x1f;
+  //    final int n = m.length;
+  //    if (intShift >= n) { return 0; }
+  //    final int i = n-intShift-1;
+  //    if (0==remShift) { return m[i]; }
+  //    final int r2 = 32-remShift;
+  //    final long lo = (unsigned(m[i]) >>> remShift);
+  //    final long hi = (0<i) ? (unsigned(m[i-1]) << r2) : 0;
+  //    return (int) (hi | lo); }
+  //
+  //  @Override
+  //  public final int getShiftedInt (final int n) {
+  //    assert 0<=n;
+  //    final int i0 = Natural.super.getShiftedInt(n);
+  //    final int i1 = getShiftedInt(words(),n); 
+  //    assert i0==i1;
+  //    return i0; }
+
+  //--------------------------------------------------------------
   // get the least significant two int words of (m >>> shift) as a
   // long
 
-  @Override
-  public final long getShiftedLong (final int n) {
-    assert 0<=n;
-    return getShiftedLong(words(),n); }
+//  private static final long getShiftedLong (final int[] m,
+//                                            final int shift) {
+//    // leading zeros don't matter
+//    final int intShift = shift >>> 5;
+//    final int remShift = shift & 0x1f;
+//    final int n = m.length;
+//    if (intShift >= n) { return 0L; }
+//
+//    final int i = n-intShift-1;
+//
+//    if (0==remShift) {
+//      if (0==i) { return unsigned(m[0]); }
+//      return (unsigned(m[i-1]) << 32) | unsigned(m[i]); }
+//
+//    final int r2 = 32-remShift;
+//    final long lo0 = (unsigned(m[i]) >>> remShift);
+//    final long lo1 = (0<i) ? (unsigned(m[i-1]) << r2) : 0L;
+//    final long lo = lo1 | lo0;
+//    final long hi0 = (0<i) ? (unsigned(m[i-1]) >>> remShift) : 0;
+//    final long hi1 = (1<i) ? (unsigned(m[i-2]) << r2) : 0;
+//    final long hi = hi1 | hi0;
+//    return (hi << 32) | lo; }
+//
+//  @Override
+//  public final long getShiftedLong (final int n) {
+//    assert 0<=n;
+//    final long i0 = Natural.super.getShiftedLong(n);
+//    final long i1 = getShiftedLong(words(),n); 
+//    assert i0==i1 :
+//      "\ni0=" + Long.toHexString(i0)
+//      + "\ni1=" + Long.toHexString(i1)
+//      + "\nwords=" + Debug.toHexString(_words)
+//      + "\nn=" + n;
+//    return i0; }
 
-  @Override
-  public final boolean testBit (final int n) {
-    return testBit(words(),n); }
+  private static final int getInt (final int[] m,
+                                   final int n) {
+    if (n < 0) { return 0; }
+    if (n >= m.length) { return 0; }
+    final int mInt = m[m.length - n - 1];
+    return mInt; }
+
+//  private static final boolean testBit (final int[] m,
+//                                        final int n) {
+//    assert 0<=n;
+//    return (getInt(m,n >>> 5) & (1 << (n & 31))) != 0; }
+//
+//  @Override
+//  public final boolean testBit (final int n) {
+//    final boolean tf0 = testBit(words(),n); 
+//    final boolean tf1 = Natural.super.testBit( n);
+//    assert tf0==tf1 : "tf0=" + tf0 + "; " + "tf1=" + tf1; 
+//    return tf1; }
 
   @Override
   public final NaturalBEI setBit (final int n) {
@@ -1852,12 +1869,28 @@ implements Natural<NaturalBEI> {
   public final NaturalBEI flipBit (final int n) {
     return unsafe(flipBit(words(),n)); }
 
-  @Override
-  public final int loBit () {
-    return getLowestSetBit(words()); }
+  //  @Override
+  //  public final int loBit () {
+  //    final int i = Natural.super.loBit();
+  //    assert i==getLowestSetBit(words()) : 
+  //      i + "!=" + getLowestSetBit(words()); 
+  //    return i; }
 
-  @Override
-  public final int hiBit () { return bitLength(words()); }
+  private static final int bitLength (final int[] m) {
+    final int len = m.length;
+    if (len == 0) { return(0); }
+    // Calculate the bit length of the magnitude
+    Debug.println("m[0]=" + Integer.toHexString(m[0]));
+    final int n = ((len - 1) << 5) + Numbers.bitLength(m[0]);
+    return n; }
+
+  //  @Override
+  //  public final int hiBit () { 
+  //    final int i = Natural.super.hiBit();
+  //    //Debug.println("words=" + Arrays.toString(words()));
+  //    assert i==bitLength(words()) :
+  //      i + "!=" + bitLength(words()); 
+  //    return i; }
 
   public final int bitCount () { return bitCount(words()); }
 
@@ -1865,94 +1898,106 @@ implements Natural<NaturalBEI> {
   // Comparable interface+
   //--------------------------------------------------------------
 
-  @Override
-  public final int compareTo (final NaturalBEI m) {
-    // TODO: should really compare hiBits
-    final int n0 = length();
-    final int n1 = m.length();
-    if (n0<n1) { return -1; }
-    if (n0>n1) { return 1; }
-    for (int i=0;i<n0;i++) {
-      final long m0i = uword(i);
-      final long m1i = m.uword(i);
-      if (m0i<m1i) { return -1; }
-      if (m0i>m1i) { return 1; } }
-    return 0; }
+//  @Override
+//  public final int compareTo (final NaturalBEI m) {
+//    // TODO: should really compare hiBits
+//    final int n0 = length();
+//    final int n1 = m.length();
+//    if (n0<n1) { return -1; }
+//    if (n0>n1) { return 1; }
+//    for (int i=0;i<n0;i++) {
+//      final long m0i = unsigned(_words[i]);
+//      final long m1i = unsigned(m._words[i]);
+//      if (m0i<m1i) { return -1; }
+//      if (m0i>m1i) { return 1; } }
+//    return 0; }
 
-  @Override
-  public final int compareTo (final int leftShift,
-                              final NaturalBEI m) {
-    return shiftLeft(leftShift).compareTo(m); }
+//  @Override
+//  public final int compareTo (final int leftShift,
+//                              final NaturalBEI m) {
+//    return shiftLeft(leftShift).compareTo(m); }
 
-  @Override
-  public final int compareTo (final long m1) {
-    assert 0L<=m1;
-    if (m1 < 0L) { return 1; }
-    final int n0 = length();
-    final long m10 = hiWord(m1);
-    final long m11 = loWord(m1);
-    final int n1 = (0L!=m10) ? 2 : ((0L!=m11) ? 1 : 0);
-    if (n0<n1) { return -1; }
-    if (n0>n1) { return 1; }
-    final long m00 = uword(0);
-    if (m00<m10) { return -1; }
-    if (m00>m10) { return 1; }
-    final long m01 = uword(1);
-    if (m01<m11) { return -1; }
-    if (m01>m11) { return 1; }
-    return 0; }
+//  public static final int compareTo (final NaturalBEI u0,
+//                                     final long u1) {
+//    assert 0L<=u1;
+//    final int n0 = u0.length();
+//    final long m10 = Numbers.hiWord(u1);
+//    final long m11 = Numbers.loWord(u1);
+//    final int n1 = (0L!=m10) ? 2 : ((0L!=m11) ? 1 : 0);
+//    if (n0<n1) { return -1; }
+//    if (n0>n1) { return 1; }
+//    final long m00 = unsigned(u0._words[0]);
+//    if (m00<m10) { return -1; }
+//    if (m00>m10) { return 1; }
+//    final long m01 = unsigned(u0._words[1]);
+//    if (m01<m11) { return -1; }
+//    if (m01>m11) { return 1; }
+//    return 0; }
+//
+//  @Override
+//  public final int compareTo (final long u) {
+//    assert 0L<=u;
+//    final int c0 = Natural.super.compareTo(u);
+//    final int c1 = compareTo(this,u);
+//     assert c0 == c1 :
+//       "\n" + c0 + "!=" + c1
+//       + "\nwords=" + Debug.toHexString(_words)
+//       + "\nthis=" + Long.toHexString(getLong())
+//       + "\nthis=" + getLong()
+//       + "\nu=" + Long.toHexString(u);
+//    return c0; }
 
-  @Override
-  public final int compareTo (final long m1,
-                              final int bitShift) {
-    assert 0L<=m1;
-    assert 0<=bitShift : "bitShift=" + bitShift;
-    if (0==bitShift) { return compareTo(m1); }
-    if (0L==m1) {
-      if (isZero()) { return 0; }
-      return 1; }
-
-    final int n0 = endWord()-startWord();
-
-    final int intShift = bitShift >>> 5;
-    final int remShift = bitShift & 0x1f;
-    final int nwords;
-    final int hi = Numbers.hiBit(m1) + remShift;
-    if (64 < hi) { nwords = 3; }
-    else if (32 < hi) { nwords = 2; }
-    else { nwords = 1; }
-
-    final int n1 = intShift + nwords;
-    if (n0<n1) { return -1; }
-    if (n0>n1) { return 1; }
-
-    final int[] m0 = words();
-    // most significant word in m0
-    int i = 0;
-    if (3==nwords) {
-      final long m00 = uword(i++);
-      //final long m10 = hiPart(m1,remShift);
-      final long m10 = m1 >>> (64-remShift);
-    if (m00<m10) { return -1; }
-    if (m00>m10) { return 1; }  }
-
-    final long m1s = (m1 << remShift);
-    if (2<=nwords) {
-      final long m01 = uword(i++);
-      //final long m11 = midPart(m1,remShift);
-      final long m11 = hiWord(m1s);
-      if (m01<m11) { return -1; }
-      if (m01>m11) { return 1; } }
-
-    // 1 nonzero word after shifting
-    final long m02 = uword(i++);
-    //final long m12 = loPart(m1,remShift);
-    final long m12 = loWord(m1s);
-    if (m02<m12) { return -1; }
-    if (m02>m12) { return 1; }
-
-    while (i<n0) { if (0!=m0[i++]) { return 1; } }
-    return 0; }
+//  @Override
+//  public final int compareTo (final long u,
+//                              final int leftShift) {
+//    assert 0L<=u;
+//    assert 0<=leftShift : "leftShift=" + leftShift;
+//    if (0==leftShift) { return compareTo(u); }
+//    if (0L==u) {
+//      if (isZero()) { return 0; }
+//      return 1; }
+//
+//    final int n0 = endWord()-startWord();
+//
+//    final int intShift = leftShift >>> 5;
+//    final int remShift = leftShift & 0x1f;
+//    final int nwords;
+//    final int hi = Numbers.hiBit(u) + remShift;
+//    if (64 < hi) { nwords = 3; }
+//    else if (32 < hi) { nwords = 2; }
+//    else { nwords = 1; }
+//
+//    final int n1 = intShift + nwords;
+//    if (n0<n1) { return -1; }
+//    if (n0>n1) { return 1; }
+//
+//    final int[] m0 = words();
+//    // most significant word in m0
+//    int i = 0;
+//    if (3==nwords) {
+//      final long m00 = unsigned(_words[i++]);
+//      //final long m10 = hiPart(m1,remShift);
+//      final long m10 = u >>> (64-remShift);
+//    if (m00<m10) { return -1; }
+//    if (m00>m10) { return 1; }  }
+//
+//    final long m1s = (u << remShift);
+//    if (2<=nwords) {
+//      final long m01 = unsigned(_words[i++]);
+//      //final long m11 = midPart(m1,remShift);
+//      final long m11 = Numbers.hiWord(m1s);
+//      if (m01<m11) { return -1; }
+//      if (m01>m11) { return 1; } }
+//
+//    // 1 nonzero word after shifting
+//    final long m02 = unsigned(_words[i++]);
+//    //final long m12 = loPart(m1,remShift);
+//    final long m12 = loWord(m1s);
+//    if (m02<m12) { return -1; }
+//    if (m02>m12) { return 1; }
+//
+//    while (i<n0) { if (0!=m0[i++]) { return 1; } }
+//    return 0; }
 
   //--------------------------------------------------------------
 
@@ -2021,7 +2066,7 @@ implements Natural<NaturalBEI> {
     if (isZero()) { return 0.0F; }
 
     final int exponent =
-      (((length() - 1) << 5) + Numbers.bitLength(word(0))) - 1;
+      (((length() - 1) << 5) + Numbers.bitLength(_words[0])) - 1;
 
     // exponent == floor(log2(abs(this)))
     if (exponent < (Long.SIZE - 1)) { return longValue(); }
@@ -2047,12 +2092,12 @@ implements Natural<NaturalBEI> {
     final int nBits = shift & 0x1f;
     final int nBits2 = 32 - nBits;
 
-    if (nBits == 0) { twiceSignifFloor = word(0); }
+    if (nBits == 0) { twiceSignifFloor = _words[0]; }
     else {
-      twiceSignifFloor = word(0) >>> nBits;
+      twiceSignifFloor = _words[0] >>> nBits;
       if (twiceSignifFloor == 0) {
         twiceSignifFloor =
-          (word(0) << nBits2) | (word(1) >>> nBits); } }
+          (_words[0] << nBits2) | (_words[1] >>> nBits); } }
 
     int signifFloor = (twiceSignifFloor >> 1);
     signifFloor &= Floats.STORED_SIGNIFICAND_MASK;
@@ -2092,7 +2137,7 @@ implements Natural<NaturalBEI> {
     if (isZero()) { return 0.0; }
 
     final int exponent =
-      (((length() - 1) << 5) + Numbers.bitLength(word(0))) - 1;
+      (((length() - 1) << 5) + Numbers.bitLength(_words[0])) - 1;
 
     // exponent == floor(log2(abs(this))Double)
     if (exponent < (Long.SIZE - 1)) { return longValue(); }
@@ -2121,14 +2166,14 @@ implements Natural<NaturalBEI> {
     int highBits;
     int lowBits;
     if (nBits == 0) {
-      highBits = word(0);
-      lowBits = word(1); }
+      highBits = _words[0];
+      lowBits = _words[1]; }
     else {
-      highBits = word(0) >>> nBits;
-      lowBits = (word(0) << nBits2) | (word(1) >>> nBits);
+      highBits = _words[0] >>> nBits;
+      lowBits = (_words[0] << nBits2) | (_words[1] >>> nBits);
       if (highBits == 0) {
         highBits = lowBits;
-        lowBits = (word(1) << nBits2) | (word(2) >>> nBits); } }
+        lowBits = (_words[1] << nBits2) | (_words[2] >>> nBits); } }
 
     twiceSignifFloor =
       (unsigned(highBits) << 32) | unsigned(lowBits);

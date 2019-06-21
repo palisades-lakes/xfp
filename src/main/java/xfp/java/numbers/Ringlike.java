@@ -11,7 +11,7 @@ import xfp.java.exceptions.Exceptions;
  * (eq associativity).
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-20
+ * @version 2019-06-21
  */
 
 @SuppressWarnings("unchecked")
@@ -61,9 +61,8 @@ extends Comparable<T>{
   public default T one () {
     throw Exceptions.unsupportedOperation(this,"one"); }
 
-  boolean isOne ();
-//  public default boolean isOne() {
-//    throw Exceptions.unsupportedOperation(this,"isOne"); }
+  public default boolean isOne() {
+    throw Exceptions.unsupportedOperation(this,"isOne"); }
 
   public default List<T> divideAndRemainder (final T x) {
     final T d = divide(x);
