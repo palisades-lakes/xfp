@@ -69,7 +69,7 @@ public interface Accumulator<T extends Accumulator> {
     return (T) this; }
 
   public default T addAbs (final double z) {
-    add(Math.abs(z));     
+    add(Math.abs(z));
     return (T) this; }
 
   public default T addAbsAll (final double[] z)  {
@@ -150,7 +150,7 @@ public interface Accumulator<T extends Accumulator> {
     final int n = x0.length;
     final double[] s = new double[n];
     clear();
-    for (int i=0;i<n;i++) { 
+    for (int i=0;i<n;i++) {
       s[i] = addProduct(x0[i],x1[i]).doubleValue(); }
     return s; }
 
@@ -159,7 +159,7 @@ public interface Accumulator<T extends Accumulator> {
     final int n = x0.length;
     final double[] s = new double[n];
     clear();
-    for (int i=0;i<n;i++) { 
+    for (int i=0;i<n;i++) {
       s[i] = addL1(x0[i],x1[i]).doubleValue(); }
     return s; }
 
@@ -168,7 +168,7 @@ public interface Accumulator<T extends Accumulator> {
     final int n = x0.length;
     final double[] s = new double[n];
     clear();
-    for (int i=0;i<n;i++) { 
+    for (int i=0;i<n;i++) {
       s[i] = addL2(x0[i],x1[i]).doubleValue(); }
     return s; }
 

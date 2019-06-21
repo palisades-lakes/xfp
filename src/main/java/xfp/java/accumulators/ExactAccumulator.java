@@ -46,14 +46,14 @@ implements Accumulator<T> {
     final double s = x0 - x1;
     final double z = s - x0;
     final double e = (x0 - (s - z)) + ((-x1) - z);
-    if (0<=s) { 
+    if (0<=s) {
       if (0<=e) { add(s); add(e); }
       else if (Math.abs(e)<=Math.abs(s)) { add(s); add(e); }
-      else { add(-s); add(-e); } } 
-    else { 
+      else { add(-s); add(-e); } }
+    else {
       if (0>e) { add(-s); add(-e); }
       else if (Math.abs(e)<=Math.abs(s)) { add(-s); add(-e); }
-      else { add(s); add(e); } } 
+      else { add(s); add(e); } }
     return (T) this; }
 
   @Override

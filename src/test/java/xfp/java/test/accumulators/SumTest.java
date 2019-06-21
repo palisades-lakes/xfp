@@ -30,7 +30,7 @@ public final class SumTest {
     Common.l2DistanceTests(
       Common.generators(DIM),
       Common.makeAccumulators(Common.accumulators()),
-      BigFloatAccumulator1.make());  
+      BigFloatAccumulator1.make());
     Debug.DEBUG=false; }
 
   @SuppressWarnings("static-method")
@@ -42,7 +42,7 @@ public final class SumTest {
     Common.l1DistanceTests(
       Common.generators(DIM),
       Common.makeAccumulators(Common.accumulators()),
-      BigFloatAccumulator1.make());  
+      BigFloatAccumulator1.make());
     Debug.DEBUG=false; }
 
   @SuppressWarnings("static-method")
@@ -54,7 +54,7 @@ public final class SumTest {
     Common.dotTests(
       Common.generators(DIM),
       Common.makeAccumulators(Common.accumulators()),
-      BigFloatAccumulator1.make());  
+      BigFloatAccumulator1.make());
     Debug.DEBUG=false; }
 
 
@@ -67,7 +67,7 @@ public final class SumTest {
     Common.l2Tests(
       Common.generators(DIM),
       Common.makeAccumulators(Common.accumulators()),
-      BigFloatAccumulator1.make());  
+      BigFloatAccumulator1.make());
     Debug.DEBUG=false; }
 
   @SuppressWarnings("static-method")
@@ -77,7 +77,7 @@ public final class SumTest {
     //Debug.println();
     //Debug.println("overflow");
     Common.overflowTests(
-      Common.makeAccumulators(Common.accumulators())); 
+      Common.makeAccumulators(Common.accumulators()));
     Debug.DEBUG=false; }
 
   @SuppressWarnings("static-method")
@@ -87,7 +87,7 @@ public final class SumTest {
     //Debug.println();
     //Debug.println("infinite");
     Common.infinityTests(
-      Common.makeAccumulators(Common.accumulators())); 
+      Common.makeAccumulators(Common.accumulators()));
     Debug.DEBUG=false; }
 
   @SuppressWarnings("static-method")
@@ -98,7 +98,7 @@ public final class SumTest {
     //Debug.println("sum");
     Common.zeroSumTests(
       Common.zeroSumGenerators(DIM),
-      Common.makeAccumulators(Common.accumulators()));  
+      Common.makeAccumulators(Common.accumulators()));
     Debug.DEBUG=false; }
 
   @SuppressWarnings("static-method")
@@ -110,7 +110,7 @@ public final class SumTest {
     Common.sumTests(
       Common.generators(DIM),
       Common.makeAccumulators(Common.accumulators()),
-      BigFloatAccumulator1.make());  
+      BigFloatAccumulator1.make());
     Debug.DEBUG=false; }
 
   // TODO: choose expected behavior with non-finite input

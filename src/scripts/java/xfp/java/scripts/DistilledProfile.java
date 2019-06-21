@@ -23,7 +23,7 @@ public final class DistilledProfile {
       System.out.println();
       System.out.println(g.name());
       final double[] x = (double[]) g.next();
-      final BigFloatAccumulator1 b = 
+      final BigFloatAccumulator1 b =
         BigFloatAccumulator1.make().add2All(x);
       final double z1 = b.doubleValue();
       final long t = System.nanoTime();

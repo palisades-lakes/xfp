@@ -43,11 +43,11 @@ public final class PartialSums {
       final double[] z = a.partialSums(x);
       if (0.0 != z[z.length-1]) {
         //Debug.println(Double.toHexString(0.0) + " != " + Double.toHexString(z[n-1]));
-        } 
-        }
+      }
+    }
     Debug.printf("total secs: %8.2f\n",
       (System.nanoTime()-t)*1.0e-9);
-    }
+  }
 
   //--------------------------------------------------------------
 }

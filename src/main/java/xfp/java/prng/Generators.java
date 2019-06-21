@@ -238,7 +238,7 @@ public final class Generators {
 
   public static final Generator
   nonzeroNaturalBEIGenerator (final int n,
-                             final UniformRandomProvider urp) {
+                              final UniformRandomProvider urp) {
     return new GeneratorBase ("nonzeroNaturalBEIGenerator:" + n) {
       final Generator g = nonzeroNaturalBEIGenerator(urp);
       @Override

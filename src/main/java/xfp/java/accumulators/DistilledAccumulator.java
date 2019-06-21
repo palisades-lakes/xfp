@@ -53,7 +53,7 @@ extends ExactAccumulator<DistilledAccumulator> {
   // Accumulator
   //--------------------------------------------------------------
 
-   @Override
+  @Override
   public final boolean noOverflow () { return false; }
 
   @Override

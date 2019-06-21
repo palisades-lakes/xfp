@@ -46,9 +46,9 @@ public final class MutableNaturalBEI0 {
           value, (offset+intLen)-len, offset+intLen); } }
 
   //--------------------------------------------------------------
-  /** The number of ints of the value array that are currently 
-   * used to hold the magnitude of this MutableNaturalBEI0. The 
-   * magnitude starts at an offset and offset + intLen may be less 
+  /** The number of ints of the value array that are currently
+   * used to hold the magnitude of this MutableNaturalBEI0. The
+   * magnitude starts at an offset and offset + intLen may be less
    * than value.length.
    */
 
@@ -91,13 +91,13 @@ public final class MutableNaturalBEI0 {
 
   private static final int loBit (final MutableNaturalBEI0 m) {
     return m.getLowestSetBit(); }
-  
+
   private final void normalize () {
     if (intLen == 0) { offset = 0; return; }
     int index = offset;
     if (value[index] != 0) { return; }
     final int indexBound = index+intLen;
-    do { index++; } 
+    do { index++; }
     while((index < indexBound) && (value[index] == 0));
     final int numZeros = index - offset;
     intLen -= numZeros;
@@ -116,8 +116,8 @@ public final class MutableNaturalBEI0 {
 
   public final long bitLength () {
     if (intLen == 0) { return 0; }
-    return 
-      (intLen*32L) 
+    return
+      (intLen*32L)
       - Integer.numberOfLeadingZeros(value[offset]); }
 
   //--------------------------------------------------------------
@@ -146,14 +146,14 @@ public final class MutableNaturalBEI0 {
     final int bitsInHighWord = Numbers.bitLength(value[offset]);
     if (nBits >= bitsInHighWord) {
       this.primitiveLeftShift(32 - nBits);
-      this.intLen--; } 
+      this.intLen--; }
     else { primitiveRightShift(nBits); } }
 
   /** {@code n} can be greater than the length of the number.
    */
 
   private final void safeRightShift (final int n) {
-    if ((n/32) >= intLen) { reset(); } 
+    if ((n/32) >= intLen) { reset(); }
     else { rightShift(n); } }
 
   //--------------------------------------------------------------
@@ -171,10 +171,10 @@ public final class MutableNaturalBEI0 {
     val[(offset+intLen)-1] <<= n; }
 
   private final void leftShift (final int n) {
-    // If there is enough storage space in this MutableNaturalBEI0 
-    // already the available space will be used. Space to the 
-    // right of the used ints in the value array is faster to 
-    // utilize, so the extra space will be taken from the right if 
+    // If there is enough storage space in this MutableNaturalBEI0
+    // already the available space will be used. Space to the
+    // right of the used ints in the value array is faster to
+    // utilize, so the extra space will be taken from the right if
     // possible.
     if (intLen == 0) { return; }
     final int nInts = n >>> 5;
@@ -192,11 +192,11 @@ public final class MutableNaturalBEI0 {
       final int[] result = new int[newLen];
       for (int i=0; i < intLen; i++) {
         result[i] = value[offset+i]; }
-      setValue(result, newLen); } 
+      setValue(result, newLen); }
     else if ((value.length - offset) >= newLen) {
       // Use space on right
       for(int i=0; i < (newLen - intLen); i++) {
-        value[offset+intLen+i] = 0; } } 
+        value[offset+intLen+i] = 0; } }
     else {
       // Must use space on left
       for (int i=0;i<intLen;i++) { value[i] = value[offset+i]; }
@@ -234,16 +234,16 @@ public final class MutableNaturalBEI0 {
   // addition
   //--------------------------------------------------------------
   /** Adds the contents of two MutableNaturalBEI0 objects.The result
-   * is placed within this MutableNaturalBEI0. The contents of the 
+   * is placed within this MutableNaturalBEI0. The contents of the
    * addend are not changed.
    */
 
   private final void add (final MutableNaturalBEI0 addend) {
     int x = intLen;
     int y = addend.intLen;
-    int resultLen = 
+    int resultLen =
       (intLen > addend.intLen ? intLen : addend.intLen);
-    int[] result = 
+    int[] result =
       (value.length < resultLen ? new int[resultLen] : value);
 
     int rstart = result.length-1;
@@ -253,8 +253,8 @@ public final class MutableNaturalBEI0 {
     // Add common parts of both numbers
     while((x > 0) && (y > 0)) {
       x--; y--;
-      sum = unsigned(value[x+offset]) 
-        + unsigned(addend.value[y+addend.offset]) 
+      sum = unsigned(value[x+offset])
+        + unsigned(addend.value[y+addend.offset])
         + carry;
       result[rstart--] = (int)sum;
       carry = sum >>> 32; }
@@ -262,8 +262,8 @@ public final class MutableNaturalBEI0 {
     // Add remainder of the longer number
     while(x > 0) {
       x--;
-      if ((carry == 0) 
-        && (result == value) 
+      if ((carry == 0)
+        && (result == value)
         && (rstart == (x + offset))) {
         return; }
       sum = unsigned(value[x+offset]) + carry;
@@ -283,26 +283,26 @@ public final class MutableNaturalBEI0 {
         // bits into new result.
         System.arraycopy(result, 0, temp, 1, result.length);
         temp[0] = 1;
-        result = temp; } 
+        result = temp; }
       else { result[rstart--] = 1; } }
 
     value = result;
     intLen = resultLen;
     offset = result.length - resultLen; }
 
-  /** Adds the value of {@code addend} shifted {@code n} ints to 
-   * the left. Has the same effect as 
+  /** Adds the value of {@code addend} shifted {@code n} ints to
+   * the left. Has the same effect as
    * {@code addend.leftShift(32*ints); add(addend);}
    * but doesn't change the value of {@code addend}.
    */
 
-  private final void addShifted (final MutableNaturalBEI0 addend, 
+  private final void addShifted (final MutableNaturalBEI0 addend,
                                  final int shift) {
     if (addend.isZero()) { return; }
     int x = intLen;
     int y = addend.intLen + shift;
     int resultLen = (intLen > y ? intLen : y);
-    int[] result = 
+    int[] result =
       (value.length < resultLen ? new int[resultLen] : value);
 
     int rstart = result.length-1;
@@ -312,9 +312,9 @@ public final class MutableNaturalBEI0 {
     // Add common parts of both numbers
     while ((x > 0) && (y > 0)) {
       x--; y--;
-      final int bval = 
-        (y+addend.offset) < addend.value.length 
-        ? addend.value[y+addend.offset] 
+      final int bval =
+        (y+addend.offset) < addend.value.length
+        ? addend.value[y+addend.offset]
           : 0;
         sum = unsigned(value[x+offset]) +
           (unsigned(bval)) + carry;
@@ -324,8 +324,8 @@ public final class MutableNaturalBEI0 {
     // Add remainder of the longer number
     while (x > 0) {
       x--;
-      if ((carry == 0) 
-        && (result == value) 
+      if ((carry == 0)
+        && (result == value)
         && (rstart == (x + offset))) {
         return; }
       sum = unsigned(value[x+offset]) + carry;
@@ -333,8 +333,8 @@ public final class MutableNaturalBEI0 {
       carry = sum >>> 32; }
     while (y > 0) {
       y--;
-      final int bval = ((y+addend.offset) < addend.value.length 
-        ? addend.value[y+addend.offset] 
+      final int bval = ((y+addend.offset) < addend.value.length
+        ? addend.value[y+addend.offset]
           : 0);
       sum = (unsigned(bval)) + carry;
       result[rstart--] = (int)sum;
@@ -355,12 +355,12 @@ public final class MutableNaturalBEI0 {
     intLen = resultLen;
     offset = result.length - resultLen; }
 
-  /** Like {@link #addShifted(MutableNaturalBEI0, int)} but 
-   * {@code this.intLen} must not be greater than {@code n}. In 
+  /** Like {@link #addShifted(MutableNaturalBEI0, int)} but
+   * {@code this.intLen} must not be greater than {@code n}. In
    * other words, concatenates {@code this} and {@code addend}.
    */
 
-  private final void addDisjoint (final MutableNaturalBEI0 addend, 
+  private final void addDisjoint (final MutableNaturalBEI0 addend,
                                   final int n) {
     if (addend.isZero()) { return; }
     final int x = intLen;
@@ -378,7 +378,7 @@ public final class MutableNaturalBEI0 {
     rstart -= x;
     final int len = Math.min(y, addend.value.length-addend.offset);
     System.arraycopy(
-      addend.value, addend.offset, 
+      addend.value, addend.offset,
       result, (rstart+1)-y, len);
     // zero the gap
     for (int i=((rstart+1)-y)+len; i < (rstart+1); i++) {
@@ -389,7 +389,7 @@ public final class MutableNaturalBEI0 {
 
   /** Adds the low {@code n} ints of {@code addend}.
    */
-  private final void addLower (final MutableNaturalBEI0 addend, 
+  private final void addLower (final MutableNaturalBEI0 addend,
                                final int n) {
     final MutableNaturalBEI0 a = new MutableNaturalBEI0(addend);
     if ((a.offset + a.intLen) >= n) {
@@ -401,7 +401,7 @@ public final class MutableNaturalBEI0 {
   //--------------------------------------------------------------
   // subtraction
   //--------------------------------------------------------------
-  /** Subtracts the smaller of this and b from the larger and 
+  /** Subtracts the smaller of this and b from the larger and
    * places the result into this MutableNaturalBEI0.
    */
 
@@ -421,14 +421,14 @@ public final class MutableNaturalBEI0 {
     // Subtract common parts of both numbers
     while (y > 0) {
       x--; y--;
-      diff = unsigned(a.value[x+a.offset]) 
-        - unsigned(b.value[y+b.offset]) 
+      diff = unsigned(a.value[x+a.offset])
+        - unsigned(b.value[y+b.offset])
         - ((int)-(diff>>32));
       result[rstart--] = (int)diff; }
     // Subtract remainder of longer number
     while (x > 0) {
       x--;
-      diff = unsigned(a.value[x+a.offset]) 
+      diff = unsigned(a.value[x+a.offset])
         - ((int)-(diff>>32));
       result[rstart--] = (int) diff; }
 
@@ -441,13 +441,13 @@ public final class MutableNaturalBEI0 {
   //--------------------------------------------------------------
   // division
   //--------------------------------------------------------------
-  /** This method is used for division of an n word dividend by a 
-   * one word divisor. The quotient is placed into quotient. The 
+  /** This method is used for division of an n word dividend by a
+   * one word divisor. The quotient is placed into quotient. The
    * one word divisor is specified by divisor.
    * @return the remainder of the division.
    */
 
-  private final int divideOneWord (final int divisor, 
+  private final int divideOneWord (final int divisor,
                                    final MutableNaturalBEI0 quotient) {
     final long divisorLong = unsigned(divisor);
     // Special case of one word dividend
@@ -469,7 +469,7 @@ public final class MutableNaturalBEI0 {
     final int shift = Integer.numberOfLeadingZeros(divisor);
     int rem = value[offset];
     long remLong = unsigned(rem);
-    if (remLong < divisorLong) { quotient.value[0] = 0; } 
+    if (remLong < divisorLong) { quotient.value[0] = 0; }
     else {
       quotient.value[0] = (int)(remLong / divisorLong);
       rem = (int) (remLong - (quotient.value[0] * divisorLong));
@@ -481,7 +481,7 @@ public final class MutableNaturalBEI0 {
       int q;
       if (dividendEstimate >= 0) {
         q = (int) (dividendEstimate / divisorLong);
-        rem = (int) (dividendEstimate - (q * divisorLong)); } 
+        rem = (int) (dividendEstimate - (q * divisorLong)); }
       else {
         final long tmp = divWord(dividendEstimate, divisor);
         q = (int) Numbers.loWord(tmp);
@@ -494,18 +494,18 @@ public final class MutableNaturalBEI0 {
     return rem; }
 
   //--------------------------------------------------------------
-  /** A primitive used for division. This method adds in one 
-   * multiple of the divisor a back to the dividend result at a 
-   * specified offset. It is used when qhat was estimated too 
+  /** A primitive used for division. This method adds in one
+   * multiple of the divisor a back to the dividend result at a
+   * specified offset. It is used when qhat was estimated too
    * large, and must be adjusted.
    */
 
-  private static final int divadd (final int[] a, 
-                                   final int[] result, 
+  private static final int divadd (final int[] a,
+                                   final int[] result,
                                    final int offset) {
     long carry = 0;
     for (int j=a.length-1; j >= 0; j--) {
-      final long sum = 
+      final long sum =
         (unsigned(a[j])) + unsigned(result[j+offset]) + carry;
       result[j+offset] = (int)sum;
       carry = sum >>> 32; }
@@ -516,19 +516,19 @@ public final class MutableNaturalBEI0 {
    * and the remainder object is returned.
    */
 
-  private final MutableNaturalBEI0 
+  private final MutableNaturalBEI0
   divideMagnitude (final MutableNaturalBEI0 div,
                    final MutableNaturalBEI0 quotient,
                    final boolean needRemainder ) {
     assert div.intLen > 1;
     // D1 normalize the divisor
-    final int shift = 
+    final int shift =
       Integer.numberOfLeadingZeros(div.value[div.offset]);
     // Copy divisor value to protect divisor
     final int dlen = div.intLen;
     int[] divisor;
     // Remainder starts as dividend with space for a leading zero
-    MutableNaturalBEI0 rem; 
+    MutableNaturalBEI0 rem;
     if (shift > 0) {
       divisor = new int[dlen];
       copyAndShift(div.value,div.offset,dlen,divisor,0,shift);
@@ -537,7 +537,7 @@ public final class MutableNaturalBEI0 {
         rem = new MutableNaturalBEI0(remarr);
         rem.intLen = intLen;
         rem.offset = 1;
-        copyAndShift(value,offset,intLen,remarr,1,shift); } 
+        copyAndShift(value,offset,intLen,remarr,1,shift); }
       else {
         final int[] remarr = new int[intLen + 2];
         rem = new MutableNaturalBEI0(remarr);
@@ -550,7 +550,7 @@ public final class MutableNaturalBEI0 {
           final int b = c;
           c = value[rFrom];
           remarr[i] = (b << shift) | (c >>> n2); }
-        remarr[intLen+1] = c << shift; } } 
+        remarr[intLen+1] = c << shift; } }
     else {
       divisor = Arrays.copyOfRange(
         div.value, div.offset, div.offset + div.intLen);
@@ -591,13 +591,13 @@ public final class MutableNaturalBEI0 {
       if (nh == dh) {
         qhat = ~0;
         qrem = nh + nm;
-        skipCorrection = (qrem + 0x80000000) < nh2; } 
+        skipCorrection = (qrem + 0x80000000) < nh2; }
       else {
-        final long nChunk = 
+        final long nChunk =
           (((long)nh) << 32) | (unsigned(nm));
         if (nChunk >= 0) {
           qhat = (int) (nChunk / dhLong);
-          qrem = (int) (nChunk - (qhat * dhLong)); } 
+          qrem = (int) (nChunk - (qhat * dhLong)); }
         else {
           final long tmp = divWord(nChunk, dh);
           qhat = (int) (loWord(tmp));
@@ -617,7 +617,7 @@ public final class MutableNaturalBEI0 {
               qhat--; } } } }
       // D4 Multiply and subtract
       rem.value[j+rem.offset] = 0;
-      final int borrow = 
+      final int borrow =
         mulsub(rem.value, divisor, qhat, dlen, j+rem.offset);
       // D5 Test remainder
       if ((borrow + 0x80000000) > nh2) {
@@ -628,7 +628,7 @@ public final class MutableNaturalBEI0 {
       q[j] = qhat; } // D7 loop on j
 
     // D3 Calculate qhat
-    // 1st estimate 
+    // 1st estimate
     int qhat = 0;
     int qrem = 0;
     boolean skipCorrection = false;
@@ -638,20 +638,20 @@ public final class MutableNaturalBEI0 {
     if (nh == dh) {
       qhat = ~0;
       qrem = nh + nm;
-      skipCorrection = (qrem + 0x80000000) < nh2; } 
+      skipCorrection = (qrem + 0x80000000) < nh2; }
     else {
       final long nChunk = (((long) nh) << 32) | (unsigned(nm));
       if (nChunk >= 0) {
         qhat = (int) (nChunk / dhLong);
-        qrem = (int) (nChunk - (qhat * dhLong)); } 
+        qrem = (int) (nChunk - (qhat * dhLong)); }
       else {
         final long tmp = divWord(nChunk, dh);
         qhat = (int) (loWord(tmp));
         qrem = (int) (tmp >>> 32); } }
     // 2nd correction
     if (qhat != 0) {
-      if (!skipCorrection) { 
-        final long nl = 
+      if (!skipCorrection) {
+        final long nl =
           unsigned(rem.value[limit + 1 + rem.offset]);
         long rs = ((unsigned(qrem)) << 32) | nl;
         long estProduct = (unsigned(dl)) * (unsigned(qhat));
@@ -666,11 +666,11 @@ public final class MutableNaturalBEI0 {
       int borrow;
       rem.value[(limit - 1) + rem.offset] = 0;
       if(needRemainder) {
-        borrow = 
+        borrow =
           mulsub(
             rem.value,divisor,qhat,dlen,(limit-1)+rem.offset); }
       else {
-        borrow = 
+        borrow =
           mulsubBorrow
           (rem.value,divisor,qhat,dlen,(limit-1)+rem.offset); }
       // D5 Test remainder
@@ -688,7 +688,7 @@ public final class MutableNaturalBEI0 {
       rem.normalize(); }
     quotient.normalize();
     return needRemainder ? rem : null; }
-  
+
   //--------------------------------------------------------------
 
   private static final int KNUTH_POW2_THRESH_LEN = 6;
@@ -757,20 +757,20 @@ public final class MutableNaturalBEI0 {
   //--------------------------------------------------------------
   // Burnikel-Ziegler
   //--------------------------------------------------------------
-  /** This method implements algorithm 1 from pg. 4 of the 
+  /** This method implements algorithm 1 from pg. 4 of the
    * Burnikel-Ziegler paper. It divides a 2n-digit number by an
    * n-digit number.<br/>
-   * The parameter beta is 2<sup>32</sup> so all shifts are 
+   * The parameter beta is 2<sup>32</sup> so all shifts are
    * multiples of 32 bits. <br/>
-   * {@code this} must be a nonnegative number such that 
+   * {@code this} must be a nonnegative number such that
    * {@code this.bitLength() <= 2*b.bitLength()}
    * @param b a positive number such that {@code b.bitLength()} is even
    * @param quotient output parameter for {@code this/b}
    * @return {@code this%b}
    */
 
-  private final MutableNaturalBEI0 
-  divide2n1n (final MutableNaturalBEI0 b, 
+  private final MutableNaturalBEI0
+  divide2n1n (final MutableNaturalBEI0 b,
               final MutableNaturalBEI0 quotient) {
     final int n = b.intLen;
 
@@ -796,24 +796,24 @@ public final class MutableNaturalBEI0 {
     return r2; }
 
   //--------------------------------------------------------------
-  /** This method implements algorithm 2 from pg. 5 of the 
-   * Burnikel-Ziegler paper. It divides a 3n-digit number by a 
+  /** This method implements algorithm 2 from pg. 5 of the
+   * Burnikel-Ziegler paper. It divides a 3n-digit number by a
    * 2n-digit number.<br/>
-   * The parameter beta is 2<sup>32</sup> so all shifts are 
+   * The parameter beta is 2<sup>32</sup> so all shifts are
    * multiples of 32 bits.<br/>
    * <br/>
-   * {@code this} must be a nonnegative number such that 
+   * {@code this} must be a nonnegative number such that
    * {@code 2*this.bitLength() <= 3*b.bitLength()}
    * @param quotient output parameter for {@code this/b}
    * @return {@code this%b}
    */
 
-  private final MutableNaturalBEI0 
+  private final MutableNaturalBEI0
   divide3n2n (final MutableNaturalBEI0 b,
               final MutableNaturalBEI0 quotient) {
     final int n = b.intLen / 2;   // half the length of b in ints
 
-    // step 1: view this as [a1,a2,a3] where each ai is n ints 
+    // step 1: view this as [a1,a2,a3] where each ai is n ints
     // or less; let a12=[a1,a2]
     final MutableNaturalBEI0 a12 = new MutableNaturalBEI0(this);
     a12.safeRightShift(32*n);
@@ -829,9 +829,9 @@ public final class MutableNaturalBEI0 {
       r = a12.divide2n1n(b1, quotient);
       // step 4: d=quotient*b2
       final int[] qu = Bei0.multiply(quotient.getValue(),b2);
-      d = MutableNaturalBEI0.valueOf(qu); } 
+      d = MutableNaturalBEI0.valueOf(qu); }
     else {
-      // step 3b: if a1>=b1, let quotient=beta^n-1 
+      // step 3b: if a1>=b1, let quotient=beta^n-1
       //and r=a12-b1*2^n+b1
       quotient.ones(n);
       a12.add(b1);
@@ -843,7 +843,7 @@ public final class MutableNaturalBEI0 {
       d.leftShift(32 * n);
       d.subtract(MutableNaturalBEI0.valueOf(b2)); }
     // step 5: r = r*beta^n + a3 - d (paper says a4)
-    // However, don't subtract d until after the while loop 
+    // However, don't subtract d until after the while loop
     // so r doesn't become negative
     r.leftShift(32 * n);
     r.addLower(this, n);
@@ -856,10 +856,10 @@ public final class MutableNaturalBEI0 {
 
   //--------------------------------------------------------------
   /** Computes {@code this/b} and {@code this%b} using the
-   * <a href="http://cr.yp.to/bib/1998/burnikel.ps"> 
-   * Burnikel-Ziegler algorithm</a>. This method implements 
+   * <a href="http://cr.yp.to/bib/1998/burnikel.ps">
+   * Burnikel-Ziegler algorithm</a>. This method implements
    * algorithm 3 from pg. 9 of the Burnikel-Ziegler paper.
-   * The parameter beta was chosen to b 2<sup>32</sup> so almost 
+   * The parameter beta was chosen to b 2<sup>32</sup> so almost
    * all shifts are multiples of 32 bits.<br/>
    * {@code this} and {@code b} must be nonnegative.
    * @param b the divisor
@@ -884,29 +884,29 @@ public final class MutableNaturalBEI0 {
     final int n = j * m; // step 2b: block length in 32-bit units
     final long n32 = 32L * n; // block length in bits
     // step 3: sigma = max{T | (2^T)*B < beta^n}
-    final int sigma = (int) Math.max(0, n32 - b.bitLength());   
+    final int sigma = (int) Math.max(0, n32 - b.bitLength());
     final MutableNaturalBEI0 bShifted = new MutableNaturalBEI0(b);
     // step 4a: shift b so its length is a multiple of n
-    bShifted.safeLeftShift(sigma);   
+    bShifted.safeLeftShift(sigma);
     final MutableNaturalBEI0 aShifted = new MutableNaturalBEI0(this);
     // step 4b: shift a by the same amount
-    aShifted.safeLeftShift(sigma);     
+    aShifted.safeLeftShift(sigma);
 
-    // step 5: t is the number of blocks needed to accommodate a 
+    // step 5: t is the number of blocks needed to accommodate a
     // plus one additional bit
     int t = (int) ((aShifted.bitLength()+n32) / n32);
     if (t < 2) { t = 2; }
 
     // step 6: conceptually split a into blocks a[t-1], ..., a[0]
     // the most significant block of a
-    final MutableNaturalBEI0 a1 = aShifted.getBlock(t-1, t, n);   
+    final MutableNaturalBEI0 a1 = aShifted.getBlock(t-1, t, n);
 
     // step 7: z[t-2] = [a[t-1], a[t-2]]
     // the second to most significant block
-    MutableNaturalBEI0 z = aShifted.getBlock(t-2, t, n);    
+    MutableNaturalBEI0 z = aShifted.getBlock(t-2, t, n);
     z.addDisjoint(a1, n);   // z[t-2]
 
-    // do schoolbook division on blocks, dividing 2-block numbers 
+    // do schoolbook division on blocks, dividing 2-block numbers
     // by 1-block numbers
     final MutableNaturalBEI0 qi = new MutableNaturalBEI0();
     MutableNaturalBEI0 ri;
@@ -919,23 +919,23 @@ public final class MutableNaturalBEI0 {
       z.addDisjoint(ri, n);
       // update q (part of step 9)
       quotient.addShifted(qi, i*n); }
-    // final iteration of step 8: do the loop one more time 
+    // final iteration of step 8: do the loop one more time
     // for i=0 but leave z unchanged
     ri = z.divide2n1n(bShifted, qi);
     quotient.add(qi);
     // step 9: a and b were shifted, so shift back
-    ri.rightShift(sigma);   
+    ri.rightShift(sigma);
     return ri; }
 
-  /** This method is used for division. It multiplies an n word 
-   * input a by one word input x, and subtracts the n word product 
-   * from q. This is needed when subtracting qhat*divisor from 
+  /** This method is used for division. It multiplies an n word
+   * input a by one word input x, and subtracts the n word product
+   * from q. This is needed when subtracting qhat*divisor from
    * the dividend.
    */
-  private static final int mulsub (final int[] q, 
-                                   final int[] a, 
-                                   final int x, 
-                                   final int len, 
+  private static final int mulsub (final int[] q,
+                                   final int[] a,
+                                   final int x,
+                                   final int len,
                                    int offset) {
     final long xLong = unsigned(x);
     long carry = 0;
@@ -945,18 +945,18 @@ public final class MutableNaturalBEI0 {
       final long difference = q[offset] - product;
       q[offset--] = (int)difference;
       carry = (product >>> 32)
-        + 
+        +
         (((loWord(difference))>(unsigned(~(int)product)))?1:0); }
     return (int) carry; }
 
-  /** The method is the same as {@link #mulsub}, except the fact 
-   * that q array is not updated, the only result of the method is 
+  /** The method is the same as {@link #mulsub}, except the fact
+   * that q array is not updated, the only result of the method is
    * borrow flag.
    */
-  private static final int mulsubBorrow (final int[] q, 
-                                         final int[] a, 
-                                         final int x, 
-                                         final int len, 
+  private static final int mulsubBorrow (final int[] q,
+                                         final int[] a,
+                                         final int x,
+                                         final int len,
                                          int offset) {
     final long xLong = unsigned(x);
     long carry = 0;
@@ -993,9 +993,9 @@ public final class MutableNaturalBEI0 {
 
   //-------------------------------------------------------------
 
-  private final MutableNaturalBEI0 
-  divide (final MutableNaturalBEI0 b, 
-          final MutableNaturalBEI0 quotient, 
+  private final MutableNaturalBEI0
+  divide (final MutableNaturalBEI0 b,
+          final MutableNaturalBEI0 quotient,
           final boolean needRemainder) {
     if ((b.intLen < Bei0.BURNIKEL_ZIEGLER_THRESHOLD) ||
       ((intLen - b.intLen) < Bei0.BURNIKEL_ZIEGLER_OFFSET)) {
@@ -1023,14 +1023,14 @@ public final class MutableNaturalBEI0 {
     while (a != b) {
       if ((a+0x80000000) > (b+0x80000000)) {  // a > b as unsigned
         a -= b;
-        a >>>= Integer.numberOfTrailingZeros(a); } 
+        a >>>= Integer.numberOfTrailingZeros(a); }
       else {
         b -= a;
         b >>>= Integer.numberOfTrailingZeros(b); } }
     return a<<t; }
 
-  /** Subtracts the smaller of a and b from the larger and places 
-   * the result into the larger. Returns 1 if the answer is in a, 
+  /** Subtracts the smaller of a and b from the larger and places
+   * the result into the larger. Returns 1 if the answer is in a,
    * -1 if in b, 0 if no operation was performed.
    */
   private final int difference (MutableNaturalBEI0 b) {
@@ -1047,9 +1047,9 @@ public final class MutableNaturalBEI0 {
     // Subtract common parts of both numbers
     while (y > 0) {
       x--; y--;
-      diff = 
-        unsigned(a.value[a.offset+ x]) 
-        - unsigned(b.value[b.offset+ y]) 
+      diff =
+        unsigned(a.value[a.offset+ x])
+        - unsigned(b.value[b.offset+ y])
         - ((int)-(diff>>32));
       a.value[a.offset+x] = (int) diff; }
     // Subtract remainder of longer number
@@ -1119,26 +1119,26 @@ public final class MutableNaturalBEI0 {
     return a; }
 
   // remove common factors as if numerator and denominator
-  public static final MutableNaturalBEI0[] 
-    reduce (MutableNaturalBEI0 n,
-            MutableNaturalBEI0 d) {
+  public static final MutableNaturalBEI0[]
+    reduce (final MutableNaturalBEI0 n,
+            final MutableNaturalBEI0 d) {
     final int shift = Math.min(loBit(n),loBit(d));
     if (0 != shift) {
       n.rightShift(shift);
       d.rightShift(shift); }
-//    if (n.equals(d)) { 
-//      return new MutableNaturalBEI0[] { ONE, ONE, }; }
-//    if (MutableNaturalBEI0.ONE.equals(d)) { 
-//      return new MutableNaturalBEI0[] { n, ONE, }; }
-//    if (NaturalBEI.ONE.equals(n)) {
-//      return new MutableNaturalBEI0[] { ONE, d, }; }
+    //    if (n.equals(d)) {
+    //      return new MutableNaturalBEI0[] { ONE, ONE, }; }
+    //    if (MutableNaturalBEI0.d.isOne()) {
+    //      return new MutableNaturalBEI0[] { n, ONE, }; }
+    //    if (NaturalBEI.n.isOne()) {
+    //      return new MutableNaturalBEI0[] { ONE, d, }; }
     final MutableNaturalBEI0 gcd = n.hybridGCD(d);
     if (gcd.compareTo(ONE) > 0) {
       final MutableNaturalBEI0[] nd = { new MutableNaturalBEI0(),
-                                      new MutableNaturalBEI0(), };
+                                        new MutableNaturalBEI0(), };
       n.divide(gcd,nd[0],false);
       d.divide(gcd,nd[1],false);
-      return nd; } 
+      return nd; }
     return new MutableNaturalBEI0[] { n, d, }; }
 
   //-------------------------------------------------------------
@@ -1148,7 +1148,7 @@ public final class MutableNaturalBEI0 {
    * Returns true iff one is bigger than two.
    */
 
-  private static final boolean 
+  private static final boolean
   unsignedLongCompare (final long one,
                        final long two) {
     return (one+Long.MIN_VALUE) > (two+Long.MIN_VALUE); }
@@ -1166,7 +1166,7 @@ public final class MutableNaturalBEI0 {
       if (b1 > b2) { return 1; } }
     return 0; }
 
-  private final int compareShifted (final MutableNaturalBEI0 b, 
+  private final int compareShifted (final MutableNaturalBEI0 b,
                                     final int ints) {
     final int blen = b.intLen;
     final int alen = intLen - ints;
@@ -1212,23 +1212,23 @@ public final class MutableNaturalBEI0 {
     value[0] = val; }
 
   //--------------------------------------------------------------
-  /** Returns a {@code MutableNaturalBEI0} containing 
-   * {@code blockLength} ints from {@code this} number, starting 
+  /** Returns a {@code MutableNaturalBEI0} containing
+   * {@code blockLength} ints from {@code this} number, starting
    * at {@code index*blockLength}.<br/>
    * Used by Burnikel-Ziegler division.
    * @param index the block index
-   * @param numBlocks the total number of blocks in {@code this} 
+   * @param numBlocks the total number of blocks in {@code this}
    * @param blockLength length of one block in units of 32 bits
    * @return
    */
 
-  private final MutableNaturalBEI0 getBlock (final int index, 
-                                           final int numBlocks, 
-                                           final int blockLength) {
+  private final MutableNaturalBEI0 getBlock (final int index,
+                                             final int numBlocks,
+                                             final int blockLength) {
     final int blockStart = index * blockLength;
     if (blockStart >= intLen) { return new MutableNaturalBEI0(); }
     int blockEnd;
-    if (index == (numBlocks-1)) { blockEnd = intLen; } 
+    if (index == (numBlocks-1)) { blockEnd = intLen; }
     else { blockEnd = (index+1) * blockLength; }
     if (blockEnd > intLen) { return new MutableNaturalBEI0(); }
     final int[] newVal =
@@ -1252,7 +1252,7 @@ public final class MutableNaturalBEI0 {
 
   //--------------------------------------------------------------
 
-  private static final MutableNaturalBEI0 ONE = 
+  private static final MutableNaturalBEI0 ONE =
     new MutableNaturalBEI0(1);
 
   //--------------------------------------------------------------

@@ -2,7 +2,7 @@ package xfp.java.accumulators;
 
 import xfp.java.numbers.RationalFloat;
 
-/** Naive sum of <code>double</code> values with a 
+/** Naive sum of <code>double</code> values with a
  * {@link RationalFloat}-valued
  * accumulator.
  *

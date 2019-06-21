@@ -12,7 +12,7 @@ import java.util.Arrays;
  * as big-endian arbitrary-precision non-negative integers.
  *
  * TODO: should we get rid of the assumptions of no leading zeros,
- * and leave it to callers to strip them as an optional 
+ * and leave it to callers to strip them as an optional
  * compression/optimization step?
  *
  * @author palisades dot lakes at gmail dot com
@@ -83,7 +83,7 @@ public final class Bei0 {
     int j = 0;
     while (j < (n - 1)) {
       m1[i++] = (m[j++] << remShift) | (m[j] >>> rightShift); }
-    m1[i] = m[j] << remShift; 
+    m1[i] = m[j] << remShift;
     return m1; }
 
   public static final int[] shiftLeft (final long m,
@@ -142,7 +142,7 @@ public final class Bei0 {
     return -compare(m1,m0); }
 
   //--------------------------------------------------------------
-  /** Truncated number of whole <code>int</code> words required to 
+  /** Truncated number of whole <code>int</code> words required to
    * shift up (left) <code>bitShift</code> bits.
    */
 
@@ -167,8 +167,8 @@ public final class Bei0 {
   //if (32 < hi) { return 2; }
   //return 1; }
 
-  /** The value of <code>k</code> shifted up (left) may require 
-   * up to 3 <code>int/code>s to represent. This is the most 
+  /** The value of <code>k</code> shifted up (left) may require
+   * up to 3 <code>int/code>s to represent. This is the most
    * significant word.
    */
 
@@ -177,10 +177,10 @@ public final class Bei0 {
   ////assert 64 > shift;
   //return k >>> (64 - shift); }
 
-  // TODO: is it worth complicating the code by computing 
+  // TODO: is it worth complicating the code by computing
   // mid and low parts with just one shift?
 
-  /** The value of <code>k</code> shifted up (left) may require 
+  /** The value of <code>k</code> shifted up (left) may require
    * up to 3 <code>int/code>s to represent. This is the 2nd most
    * significant word.
    */
@@ -191,7 +191,7 @@ public final class Bei0 {
   //final long ks = (k << shift);
   //return hiWord(ks); }
 
-  /** The value of <code>k</code> shifted up (left) may require 
+  /** The value of <code>k</code> shifted up (left) may require
    * up to 3 <code>int/code>s to represent. This is the least
    * significant word.
    */
@@ -313,7 +313,7 @@ public final class Bei0 {
     else {
       while (i1 > 0) {
         sum =
-          unsigned(m0[--i0]) 
+          unsigned(m0[--i0])
           + unsigned(m1[--i1])
           + (sum >>> 32);
         r0[i0] = (int) sum; } }
@@ -376,9 +376,9 @@ public final class Bei0 {
     if (0==hi) {
       if (0==mid) {
         if (0==lo) { return ZERO; }
-        return new int[] { lo, }; } 
-      return new int[] { mid, lo, }; } 
-    return new int[] { hi, mid, lo, }; } 
+        return new int[] { lo, }; }
+      return new int[] { mid, lo, }; }
+    return new int[] { hi, mid, lo, }; }
 
   //--------------------------------------------------------------
 
@@ -525,7 +525,7 @@ public final class Bei0 {
   //--------------------------------------------------------------
   // subtract -- only where answer is positive
   //--------------------------------------------------------------
-  // m0 <- m0 - m1 
+  // m0 <- m0 - m1
   // if leading zeros, return new array, otherwise return m0
 
   public static final int[] subtractInPlace (final int[] m0,
@@ -547,8 +547,8 @@ public final class Bei0 {
     // Subtract common parts of both numbers
     while (i1 > 0) {
       dif =
-        unsigned(m0[--i0])
-        - unsigned(m1[--i1])
+        (unsigned(m0[--i0])
+          - unsigned(m1[--i1]))
         + (dif >> 32);
       m0[i0] = (int) dif; }
 
@@ -587,8 +587,8 @@ public final class Bei0 {
 
     while (i1 > 0) {
       dif =
-        unsigned(m0[--i0])
-        - unsigned(m1[--i1])
+        (unsigned(m0[--i0])
+          - unsigned(m1[--i1]))
         + (dif >> 32);
       result[i0] = (int) dif; }
 
@@ -625,7 +625,7 @@ public final class Bei0 {
       difference = unsigned(m0[--i0]) - loWord(m1);
       result[i0] = (int) difference;
       difference =
-        unsigned(m0[--i0]) - hi + (difference >> 32);
+        (unsigned(m0[--i0]) - hi) + (difference >> 32);
       result[i0] = (int) difference; }
     // Subtract remainder of longer number while borrow propagates
     boolean borrow = ((difference >> 32) != 0);
@@ -665,7 +665,7 @@ public final class Bei0 {
     long difference = loWord(m0) - unsigned(m1[1]);
     result[1] = (int) difference;
     difference =
-      unsigned(highWord)-unsigned(m1[0])+(difference >> 32);
+      (unsigned(highWord)-unsigned(m1[0]))+(difference >> 32);
     result[0] = (int) difference;
     return result; }
 
@@ -685,7 +685,7 @@ public final class Bei0 {
   // (xhi * 2<sup>(intShift+2)*32</sup)
 
   // UNSAFE: assuming m0 has no leading zeros.
-  // assuming (m1 << bitShift) <= m0 
+  // assuming (m1 << bitShift) <= m0
 
   public static final int[] subtract (final int[] m0,
                                       final long m1,
@@ -722,28 +722,28 @@ public final class Bei0 {
     // subtract m1 words from m0 with borrow
     final long m1s = (m1 << remShift);
     dif -= loWord(m1s);
-    if (0<=i0) { 
-      dif += unsigned(m0[i0]); 
-      r0[i0] = (int) dif; 
-      i0--; 
+    if (0<=i0) {
+      dif += unsigned(m0[i0]);
+      r0[i0] = (int) dif;
+      i0--;
       dif = (dif >> 32); }
 
     if (2<=nwords) { dif -= hiWord(m1s); }
-    if (0<=i0) { 
-      dif += unsigned(m0[i0]); 
-      r0[i0] = (int) dif; i0--; 
+    if (0<=i0) {
+      dif += unsigned(m0[i0]);
+      r0[i0] = (int) dif; i0--;
       dif = (dif >> 32); }
 
     if (3==nwords) { dif -= (m1 >>> (64-remShift)) ; }
-    if (0<=i0) { 
-      dif += unsigned(m0[i0]); 
-      r0[i0] = (int) dif; 
-      i0--; } 
+    if (0<=i0) {
+      dif += unsigned(m0[i0]);
+      r0[i0] = (int) dif;
+      i0--; }
 
     boolean borrow = ((dif >> 32) != 0);
     while ((0<=i0) && borrow) {
       r0[i0] = m0[i0]-1;
-      borrow = (r0[i0] == -1); 
+      borrow = (r0[i0] == -1);
       i0--; }
 
     while (0<=i0) { r0[i0] = m0[i0]; i0--; }
@@ -754,7 +754,7 @@ public final class Bei0 {
                                       final long m1) {
     assert 0L<=m1;
     assert m1<=m0;
-    return valueOf(m0-m1); } 
+    return valueOf(m0-m1); }
 
   // only when m0 >= (m1<<bitShift)
   public static final int[] subtract (final long m0,
@@ -776,7 +776,7 @@ public final class Bei0 {
     assert 0L < m0;
     if (0 == bitShift) { return subtract(m0,m1); }
     final int[] r0 = shiftLeft(m0,bitShift);
-    final int[] r1 = subtractInPlace(r0,m1); 
+    final int[] r1 = subtractInPlace(r0,m1);
     return r1; }
 
   //--------------------------------------------------------------
@@ -1427,7 +1427,7 @@ public final class Bei0 {
   public static final int BURNIKEL_ZIEGLER_THRESHOLD = 80;
   public static final int BURNIKEL_ZIEGLER_OFFSET = 40;
 
-  public static final boolean 
+  public static final boolean
   useKnuthDivision (final int[] num,
                     final int[] den) {
     assert (! leadingZero(num));
@@ -1435,7 +1435,7 @@ public final class Bei0 {
 
     final int nn = num.length;
     final int nd = den.length;
-    return 
+    return
       (nd < BURNIKEL_ZIEGLER_THRESHOLD)
       || ((nn-nd) < BURNIKEL_ZIEGLER_OFFSET); }
 
@@ -1501,7 +1501,7 @@ public final class Bei0 {
   //                                         final int shift) {
   //    final int[] ms = shiftRight(m,shift);
   //    final int i = ms.length-1;
-  //    return (0<=i) ? ms[i] : 0; } 
+  //    return (0<=i) ? ms[i] : 0; }
 
   public static final int getShiftedInt (final int[] m,
                                          final int shift) {
@@ -1515,7 +1515,7 @@ public final class Bei0 {
     final int r2 = 32-remShift;
     final long lo = (unsigned(m[i]) >>> remShift);
     final long hi = (0<i) ? (unsigned(m[i-1]) << r2) : 0;
-    return (int) (hi | lo); } 
+    return (int) (hi | lo); }
 
   // get the least significant two int words of (m >>> shift) as a
   // long
@@ -1526,8 +1526,8 @@ public final class Bei0 {
   //    final int i = ms.length-1;
   //    if (0>i) { return 0L; }
   //    if (0==i) { return unsigned(ms[0]); }
-  //    return 
-  //      (unsigned(ms[i-1]) << 32) | unsigned(ms[i]); } 
+  //    return
+  //      (unsigned(ms[i-1]) << 32) | unsigned(ms[i]); }
 
   public static final long getShiftedLong (final int[] m,
                                            final int shift) {
@@ -1550,7 +1550,7 @@ public final class Bei0 {
     final long hi0 = (0<i) ? (unsigned(m[i-1]) >>> remShift) : 0;
     final long hi1 = (1<i) ? (unsigned(m[i-2]) << r2) : 0;
     final long hi = hi1 | hi0;
-    return (hi << 32) | lo; } 
+    return (hi << 32) | lo; }
 
   //--------------------------------------------------------------
 
@@ -1704,8 +1704,8 @@ public final class Bei0 {
     return getInt(m,0); }
 
   public static final long longValue (final int[] m) {
-    return 
-      (unsigned(getInt(m,1)) << 32)  
+    return
+      (unsigned(getInt(m,1)) << 32)
       + unsigned(getInt(m,0)); }
 
   //--------------------------------------------------------------
@@ -1941,7 +1941,7 @@ public final class Bei0 {
   //-------------------------------------------------------------
 
   public static final int[] toInts (final String s,
-                                     final int radix) {
+                                    final int radix) {
     final int len = s.length();
     assert 0 < len;
     assert Character.MIN_RADIX <= radix;

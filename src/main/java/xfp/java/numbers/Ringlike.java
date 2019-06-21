@@ -11,7 +11,7 @@ import xfp.java.exceptions.Exceptions;
  * (eq associativity).
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-21
+ * @version 2019-06-20
  */
 
 @SuppressWarnings("unchecked")
@@ -19,6 +19,7 @@ public interface
 Ringlike<T extends Ringlike>
 extends Comparable<T>{
 
+  //--------------------------------------------------------------
   // TODO: fma?
   //--------------------------------------------------------------
 
@@ -34,12 +35,19 @@ extends Comparable<T>{
   public default T zero () {
     throw Exceptions.unsupportedOperation(this,"zero"); }
 
+  public default boolean isZero () {
+    throw Exceptions.unsupportedOperation(this,"isZero"); }
+
   public default T abs () {
     throw Exceptions.unsupportedOperation(this,"abs"); }
 
-  public default T absDiff (final T x) { return (T) subtract(x).abs(); }
+  public default T absDiff (final T x) {
+    return (T) subtract(x).abs(); }
 
   //--------------------------------------------------------------
+
+  public default T square () {
+    throw Exceptions.unsupportedOperation(this,"square"); }
 
   public default T multiply (final T x) {
     throw Exceptions.unsupportedOperation(this,"multiply",x); }
@@ -52,6 +60,10 @@ extends Comparable<T>{
 
   public default T one () {
     throw Exceptions.unsupportedOperation(this,"one"); }
+
+  boolean isOne ();
+//  public default boolean isOne() {
+//    throw Exceptions.unsupportedOperation(this,"isOne"); }
 
   public default List<T> divideAndRemainder (final T x) {
     final T d = divide(x);

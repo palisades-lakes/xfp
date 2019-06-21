@@ -116,29 +116,29 @@ public final class Numbers implements Set {
     assert n <= Integer.MAX_VALUE;
     return (int) n; }
 
-//  /** inclusive, big-endian */
-//  public static final int loBit (final int[] i) {
-//    return Bei.getLowestSetBit(i); }
+  //  /** inclusive, big-endian */
+  //  public static final int loBit (final int[] i) {
+  //    return Bei.getLowestSetBit(i); }
 
   /** inclusive */
   public static final int loBit (final NaturalBEI i) {
-    return i.getLowestSetBit(); }
+    return i.loBit(); }
 
   /** inclusive */
   public static final int loBit (final NaturalBEI0 i) {
-    return i.getLowestSetBit(); }
+    return i.loBit(); }
 
-//  /** exclusive, big-endian */
-//  public static final int hiBit (final int[] i) {
-//    return Bei.bitLength(i); }
+  //  /** exclusive, big-endian */
+  //  public static final int hiBit (final int[] i) {
+  //    return Bei.bitLength(i); }
 
   /** exclusive */
   public static final int hiBit (final NaturalBEI i) {
-    return i.bitLength(); }
+    return i.hiBit(); }
 
   /** exclusive */
   public static final int hiBit (final NaturalBEI0 i) {
-    return i.bitLength(); }
+    return i.hiBit(); }
 
   /** inclusive */
   public static final int loBit (final int i) {

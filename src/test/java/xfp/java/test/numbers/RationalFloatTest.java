@@ -5,9 +5,9 @@ import java.util.function.BinaryOperator;
 import org.junit.jupiter.api.Test;
 
 import xfp.java.Debug;
+import xfp.java.numbers.NaturalBEI;
 import xfp.java.numbers.Numbers;
 import xfp.java.numbers.RationalFloat;
-import xfp.java.numbers.NaturalBEI;
 import xfp.java.test.Common;
 
 //----------------------------------------------------------------

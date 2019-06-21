@@ -5,9 +5,9 @@ import java.util.function.BinaryOperator;
 import org.junit.jupiter.api.Test;
 
 import xfp.java.Debug;
+import xfp.java.numbers.NaturalBEI;
 import xfp.java.numbers.Numbers;
 import xfp.java.numbers.Rational;
-import xfp.java.numbers.NaturalBEI;
 import xfp.java.test.Common;
 
 //----------------------------------------------------------------
@@ -63,13 +63,13 @@ public final class RationalTest {
        NaturalBEI.ONE.shiftLeft(43)), };
     for (final Rational fi : f) {
       Common.doubleRoundingTest(
-        Rational::valueOf, 
-        Numbers::doubleValue, 
+        Rational::valueOf,
+        Numbers::doubleValue,
         dist,
         Object::toString, fi);
       Common.floatRoundingTest(
-        Rational::valueOf, 
-        Numbers::floatValue, 
+        Rational::valueOf,
+        Numbers::floatValue,
         dist,
         Object::toString, fi);  }
     Debug.DEBUG=false;
@@ -78,14 +78,14 @@ public final class RationalTest {
       Rational::valueOf,
       Rational::valueOf,
       Numbers::doubleValue,
-      dist, 
+      dist,
       Object::toString);
 
     Common.floatRoundingTests(
-      Rational::valueOf, 
-      Rational::valueOf, 
+      Rational::valueOf,
+      Rational::valueOf,
       Numbers::floatValue,
-      dist, 
+      dist,
       Object::toString); }
 
   //--------------------------------------------------------------

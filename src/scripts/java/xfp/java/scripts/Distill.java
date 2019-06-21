@@ -90,28 +90,28 @@ public final class Distill {
 
   //--------------------------------------------------------------
 
-//  private static final double uRatio (final double[] x) {
-//    double umin = Double.POSITIVE_INFINITY;
-//    double umax = 0.0;
-//    for (final double xi : x) {
-//      final double u = Math.ulp(xi);
-//      if (u < umin) { umin = u; }
-//      if (umax < u) { umax = u; } }
-//    return umax / umin; }
-//
-//  private static final int eRange (final double[] x) {
-//    int emin = Integer.MAX_VALUE;
-//    int emax = Integer.MIN_VALUE;
-//    for (final double xi : x) {
-//      final int e = Doubles.exponent(xi);
-//      if (e < emin) { emin = e; }
-//      if (emax < e) { emax = e; } }
-//    return emax - emin; }
-//
-//  private static final int used (final double[] x) {
-//    for (int i=x.length;i>0;i--) {
-//      if (0 != x[i-1]) { return i; } }
-//    return 0; }
+  //  private static final double uRatio (final double[] x) {
+  //    double umin = Double.POSITIVE_INFINITY;
+  //    double umax = 0.0;
+  //    for (final double xi : x) {
+  //      final double u = Math.ulp(xi);
+  //      if (u < umin) { umin = u; }
+  //      if (umax < u) { umax = u; } }
+  //    return umax / umin; }
+  //
+  //  private static final int eRange (final double[] x) {
+  //    int emin = Integer.MAX_VALUE;
+  //    int emax = Integer.MIN_VALUE;
+  //    for (final double xi : x) {
+  //      final int e = Doubles.exponent(xi);
+  //      if (e < emin) { emin = e; }
+  //      if (emax < e) { emax = e; } }
+  //    return emax - emin; }
+  //
+  //  private static final int used (final double[] x) {
+  //    for (int i=x.length;i>0;i--) {
+  //      if (0 != x[i-1]) { return i; } }
+  //    return 0; }
 
   //--------------------------------------------------------------
 

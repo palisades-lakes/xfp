@@ -9,7 +9,7 @@ import xfp.java.accumulators.BigFloatAccumulator1;
 import xfp.java.test.Common;
 
 //----------------------------------------------------------------
-/** Test summation algorithms. 
+/** Test summation algorithms.
  * <p>
  * <pre>
  * mvn -q test -Dtest=xfp/java/test/accumulators/RationalAccumulatorTest > RAT.txt
@@ -25,7 +25,7 @@ public final class RationalAccumulatorTest {
   private static final int DIM = 256;
   private static final List<String> accumulators =
     List.of("xfp.java.accumulators.RationalAccumulator");
-  
+
   @SuppressWarnings("static-method")
   @Test
   public final void tests () {
@@ -35,17 +35,17 @@ public final class RationalAccumulatorTest {
     Common.sumTests(
       Common.generators(DIM),
       Common.makeAccumulators(accumulators),
-      BigFloatAccumulator1.make()); 
+      BigFloatAccumulator1.make());
     Common.l2Tests(
       Common.generators(DIM),
       Common.makeAccumulators(accumulators),
-      BigFloatAccumulator1.make()); 
+      BigFloatAccumulator1.make());
     Common.dotTests(
       Common.generators(DIM),
       Common.makeAccumulators(accumulators),
       BigFloatAccumulator1.make());
     Debug.DEBUG=false;
-    }
+  }
 
   //--------------------------------------------------------------
 }

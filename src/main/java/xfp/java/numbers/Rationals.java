@@ -160,7 +160,7 @@ public final class Rationals implements Set {
   public final BinaryOperator<Rational> multiplier () {
     return new BinaryOperator<Rational>() {
       @Override
-      public final String toString () { 
+      public final String toString () {
         return "Rationals.multiply()"; }
       @Override
       public final Rational apply (final Rational q0,
@@ -184,7 +184,7 @@ public final class Rationals implements Set {
   public final UnaryOperator<Rational> multiplicativeInverse () {
     return new UnaryOperator<Rational> () {
       @Override
-      public final String toString () { 
+      public final String toString () {
         return "Rationals.inverse()"; }
       @Override
       public final Rational apply (final Rational q) {
@@ -247,7 +247,7 @@ public final class Rationals implements Set {
         return RationalFloat.valueOf(
           0<=z0.signum(),
           NaturalBEI.valueOf(z0.abs()),
-          NaturalBEI.valueOf(z1)); } }; } 
+          NaturalBEI.valueOf(z1)); } }; }
 
   // Is this characteristic of most inputs?
   public static final Generator

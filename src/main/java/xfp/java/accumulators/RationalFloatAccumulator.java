@@ -16,7 +16,7 @@ extends ExactAccumulator<RationalFloatAccumulator> {
 
   //--------------------------------------------------------------
 
-   @Override
+  @Override
   public final boolean noOverflow () { return true; }
 
   @Override

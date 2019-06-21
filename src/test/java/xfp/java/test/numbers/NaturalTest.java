@@ -36,12 +36,12 @@ public final class NaturalTest {
       NaturalBEI::valueOf,
       NaturalBEI::valueOf,
       (z) -> ((NaturalBEI) z).bigIntegerValue(),
-      z0,z1); 
+      z0,z1);
 
     Common.naturalTest(
       NaturalBEI::valueOf,
       NaturalBEI::valueOf,
-      (z) -> ((NaturalBEI) z).bigIntegerValue()); 
+      (z) -> ((NaturalBEI) z).bigIntegerValue());
 
     Debug.DEBUG=false; }
 

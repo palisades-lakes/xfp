@@ -9,20 +9,20 @@ import java.util.Arrays;
 import java.util.List;
 
 /** immutable arbitrary-precision non-negative integers
- * (natural number) represented by big-endian 
+ * (natural number) represented by big-endian
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-19
+ * @version 2019-06-20
  */
 
 public final class NaturalBEI extends Number
-implements Ringlike<NaturalBEI> {
+implements Natural<NaturalBEI> {
 
   private static final long serialVersionUID = 1L;
 
   //--------------------------------------------------------------
-  // int[] ops 
+  // int[] ops
   //--------------------------------------------------------------
 
   static final int[] EMPTY = new int[0];
@@ -182,7 +182,7 @@ implements Ringlike<NaturalBEI> {
     return stripLeadingZeros(upperInts); }
 
   //--------------------------------------------------------------
-  /** hex string. 
+  /** hex string.
    * TODO: move, useful as a general array op.
    */
 
@@ -225,7 +225,7 @@ implements Ringlike<NaturalBEI> {
     return getInt(m,0); }
 
   private static final long longValue (final int[] m) {
-    return 
+    return
       (unsigned(getInt(m,1)) << 32)  + unsigned(getInt(m,0)); }
 
   //--------------------------------------------------------------
@@ -326,11 +326,11 @@ implements Ringlike<NaturalBEI> {
     int j = 0;
     while (j < (n - 1)) {
       m1[i++] = (m[j++] << remShift) | (m[j] >>> rightShift); }
-    m1[i] = m[j] << remShift; 
+    m1[i] = m[j] << remShift;
     return m1; }
 
   //--------------------------------------------------------------
-  /** Overwrite some elements of m0 with shifted bits from m1, 
+  /** Overwrite some elements of m0 with shifted bits from m1,
    * if big enough. Otherwise throw an exception.
    */
   public static final int[] shiftLeftInto (final int[] m0,
@@ -348,7 +348,7 @@ implements Ringlike<NaturalBEI> {
       (((0==lShift) || (0==hi0)) ? 0 : 1);
     assert n1s<=n0;
     if (lShift==0) {
-      System.arraycopy(m1,0,m0,n0-n1s,n1);  
+      System.arraycopy(m1,0,m0,n0-n1s,n1);
       return m0; }
     int i = n0-n1s;
     if (0!=hi0) { m0[i++] = hi0; }
@@ -356,12 +356,12 @@ implements Ringlike<NaturalBEI> {
     int m1j = m1[j];
     while (j < (n1-1)) {
       final int hi = (m1j << lShift);
-      j++; 
+      j++;
       m1j = m1[j];
       final int lo = (m1j >>> rShift);
-      m0[i] = (hi | lo); 
+      m0[i] = (hi | lo);
       i++; }
-    m0[i] = m1j << lShift; 
+    m0[i] = m1j << lShift;
     return m0; }
 
   //--------------------------------------------------------------
@@ -427,7 +427,7 @@ implements Ringlike<NaturalBEI> {
     final int r2 = 32-remShift;
     final long lo = (unsigned(m[i]) >>> remShift);
     final long hi = (0<i) ? (unsigned(m[i-1]) << r2) : 0;
-    return (int) (hi | lo); } 
+    return (int) (hi | lo); }
 
   private static final long getShiftedLong (final int[] m,
                                             final int shift) {
@@ -450,7 +450,7 @@ implements Ringlike<NaturalBEI> {
     final long hi0 = (0<i) ? (unsigned(m[i-1]) >>> remShift) : 0;
     final long hi1 = (1<i) ? (unsigned(m[i-2]) << r2) : 0;
     final long hi = hi1 | hi0;
-    return (hi << 32) | lo; } 
+    return (hi << 32) | lo; }
 
   //--------------------------------------------------------------
   // addition
@@ -473,7 +473,7 @@ implements Ringlike<NaturalBEI> {
     else {
       while (i1 > 0) {
         sum =
-          unsigned(m0[--i0]) 
+          unsigned(m0[--i0])
           + unsigned(m1[--i1])
           + (sum >>> 32);
         r0[i0] = (int) sum; } }
@@ -541,8 +541,8 @@ implements Ringlike<NaturalBEI> {
 
     while (i1 > 0) {
       dif =
-        unsigned(m0[--i0])
-        - unsigned(m1[--i1])
+        (unsigned(m0[--i0])
+          - unsigned(m1[--i1]))
         + (dif >> 32);
       result[i0] = (int) dif; }
 
@@ -711,8 +711,8 @@ implements Ringlike<NaturalBEI> {
     // Thus, the sum is 2 * (off the diagonal) + diagonal.
     // This is accumulated beginning with the diagonal (which
     // consist of the squares of the digits of the input), which
-    // is then divided by two, the off-diagonal added, and 
-    // multiplied by two again. The low bit is simply a copy of 
+    // is then divided by two, the off-diagonal added, and
+    // multiplied by two again. The low bit is simply a copy of
     // the low bit of the input, so it doesn't need special care.
 
     // Store the squares, right shifted one bit (i.e., divided by
@@ -1095,7 +1095,7 @@ implements Ringlike<NaturalBEI> {
       int[] result = multiplyToLen(x,xlen,y,ylen,null);
       result = stripLeadingZeros(result);
       return result; }
-    if ((xlen < TOOM_COOK_THRESHOLD) 
+    if ((xlen < TOOM_COOK_THRESHOLD)
       && (ylen < TOOM_COOK_THRESHOLD)) {
       return multiplyKaratsuba(x,y); }
     return multiplyToomCook3(x,y); }
@@ -1142,7 +1142,7 @@ implements Ringlike<NaturalBEI> {
   static final int BURNIKEL_ZIEGLER_THRESHOLD = 80;
   static final int BURNIKEL_ZIEGLER_OFFSET = 40;
 
-  private static final boolean 
+  private static final boolean
   useKnuthDivision (final int[] n,
                     final int[] d) {
     //assert (! leadingZero(n));
@@ -1150,9 +1150,9 @@ implements Ringlike<NaturalBEI> {
 
     final int nn = n.length;
     final int nd = d.length;
-    return 
-      (nd < BURNIKEL_ZIEGLER_THRESHOLD) 
-      || 
+    return
+      (nd < BURNIKEL_ZIEGLER_THRESHOLD)
+      ||
       ((nn-nd) < BURNIKEL_ZIEGLER_OFFSET); }
 
   //--------------------------------------------------------------
@@ -1162,22 +1162,27 @@ implements Ringlike<NaturalBEI> {
   private final int[] _words;
   private final int[] words () { return _words; }
 
-  private final int iword (final int i) { 
+  @Override
+  public final int word (final int i) {
     if (i<_words.length) { return words()[i]; }
     return 0; }
-  
-  private final long word (final int i) { 
-    return unsigned(iword(i)); }
 
-  @SuppressWarnings("static-method")
-  private final int start () { return 0; }
-  private final int end () { return words().length; }
-  public final int length () { return end()-start(); }
+  @Override
+  public final long uword (final int i) {
+    return unsigned(word(i)); }
 
-  public final int[] copyWords () { 
-    return Arrays.copyOfRange(words(),start(),end()); }
+  @Override
+  public final int startWord () { return 0; }
+  @Override
+  public final int endWord () { return words().length; }
 
-  public final boolean isZero () { return start()==end(); }
+  public final int length () { return endWord()-startWord(); }
+
+  public final int[] copyWords () {
+    return Arrays.copyOfRange(words(),startWord(),endWord()); }
+
+  @Override
+  public final boolean isZero () { return startWord()==endWord(); }
 
   //--------------------------------------------------------------
   // arithmetic
@@ -1187,21 +1192,21 @@ implements Ringlike<NaturalBEI> {
   public final NaturalBEI add (final NaturalBEI m) {
     // If this is shorter, swap the two arrays
     if (length() < m.length()) { return m.add(this); }
-    int i0 = end();
-    int i1 = m.end();
+    int i0 = endWord();
+    int i1 = m.endWord();
     final int[] r0 = new int[i0];
     long sum = 0;
     if (i1 == 1) {
-      sum = word(--i0) + m.word(0);
+      sum = uword(--i0) + m.uword(0);
       r0[i0] = (int) sum; }
     else {
       while (i1 > 0) {
-        sum = word(--i0) + m.word(--i1) + (sum >>> 32);
+        sum = uword(--i0) + m.uword(--i1) + (sum >>> 32);
         r0[i0] = (int) sum; } }
     boolean carry = ((sum >>> 32) != 0);
     while ((i0 > 0) && carry) {
-      carry = ((r0[--i0] = iword(i0) + 1) == 0); }
-    while (i0 > 0) { r0[--i0] = iword(i0); }
+      carry = ((r0[--i0] = word(i0) + 1) == 0); }
+    while (i0 > 0) { r0[--i0] = word(i0); }
     if (carry) {
       final int[] r1 = new int[r0.length + 1];
       System.arraycopy(r0,0,r1,1,r0.length);
@@ -1211,6 +1216,7 @@ implements Ringlike<NaturalBEI> {
 
   //--------------------------------------------------------------
 
+  @Override
   public final NaturalBEI add (final NaturalBEI u,
                                final int bitShift) {
     assert 0<=bitShift;
@@ -1225,7 +1231,7 @@ implements Ringlike<NaturalBEI> {
     if (0==lShift) { n1s = n1; }
     else {
       final int rShift = 32 - (bitShift & 0x1f);
-      final int hi = (u.iword(0) >>> rShift);
+      final int hi = (u.word(0) >>> rShift);
       n1s = n1 + ((0!=hi) ? 1 : 0); }
     final int n = Math.max(n0,n1s);
     final int[] m11 = shiftLeftInto(new int[n],u.words(),bitShift);
@@ -1233,6 +1239,7 @@ implements Ringlike<NaturalBEI> {
 
   //--------------------------------------------------------------
 
+  @Override
   public final NaturalBEI add (final long m1) {
     assert 0L <= m1;
     if (0L == m1) { return this; }
@@ -1240,21 +1247,21 @@ implements Ringlike<NaturalBEI> {
     long sum = 0;
     int n0 = length();
     final int hi = (int) hiWord(m1);
-    if (n0 == 1) { return valueOf(m1 + word(0)); }
+    if (n0 == 1) { return valueOf(m1 + uword(0)); }
     final int[] r0 = new int[n0];
     if (hi == 0) {
-      sum = word(--n0) + m1;
+      sum = uword(--n0) + m1;
       r0[n0] = (int) sum; }
     else {
-      sum = word(--n0) + loWord(m1);
+      sum = uword(--n0) + loWord(m1);
       r0[n0] = (int) sum;
-      sum = word(--n0) + unsigned(hi) + (sum >>> 32);
+      sum = uword(--n0) + unsigned(hi) + (sum >>> 32);
       r0[n0] = (int) sum; }
 
     boolean carry = (hiWord(sum) != 0L);
     while ((n0 > 0) && carry) {
-      carry = ((r0[--n0] = iword(n0) + 1) == 0); }
-    while (n0 > 0) { r0[--n0] = iword(n0); }
+      carry = ((r0[--n0] = word(n0) + 1) == 0); }
+    while (n0 > 0) { r0[--n0] = word(n0); }
     if (carry) {
       final int[] r1 = new int[r0.length+1];
       System.arraycopy(r0,0,r1,1,r0.length);
@@ -1276,9 +1283,9 @@ implements Ringlike<NaturalBEI> {
     if (0==hi) {
       if (0==mid) {
         if (0==lo) { return ZERO; }
-        return unsafe(new int[] { lo, }); } 
-      return unsafe(new int[] { mid, lo, }); } 
-    return unsafe(new int[] { hi, mid, lo, }); } 
+        return unsafe(new int[] { lo, }); }
+      return unsafe(new int[] { mid, lo, }); }
+    return unsafe(new int[] { hi, mid, lo, }); }
 
   //--------------------------------------------------------------
 
@@ -1349,6 +1356,7 @@ implements Ringlike<NaturalBEI> {
 
   //--------------------------------------------------------------
 
+  @Override
   public final NaturalBEI add (final long m1,
                                final int shift) {
     assert 0L<=m1;
@@ -1358,7 +1366,7 @@ implements Ringlike<NaturalBEI> {
     if (0 == shift) { return add(m1); }
     assert 0<shift;
 
-    final int n0 = end()-start();
+    final int n0 = endWord()-startWord();
 
     final int intShift = shift >>> 5;
     final int remShift = shift & 0x1f;
@@ -1388,23 +1396,23 @@ implements Ringlike<NaturalBEI> {
     //sum = loPart(m1,remShift);
     final long m1s = (m1 << remShift);
     sum = loWord(m1s);
-    if (0<=i0) { sum += word(i0--); }
+    if (0<=i0) { sum += uword(i0--); }
     r0[ir--] = (int) sum;
     if (2<=nwords) {
       //sum = midPart(m1,remShift) + (sum >>> 32);
       sum = hiWord(m1s) + (sum >>> 32);
-      if (0<=i0) { sum += word(i0--); }
+      if (0<=i0) { sum += uword(i0--); }
       r0[ir--] = (int) sum; }
     if (3==nwords) {
       //sum = hiPart(m1,remShift) + (sum >>> 32);
       sum = (m1 >>> (64-remShift)) + (sum >>> 32);
-      if (0<=i0) { sum += word(i0--); }
+      if (0<=i0) { sum += uword(i0--); }
       r0[ir--] = (int) sum; }
 
     boolean carry = ((sum >>> 32) != 0);
     while ((0<=ir) && carry) {
       sum = 0x01L;
-      if (0<=i0) { sum += word(i0--); }
+      if (0<=i0) { sum += uword(i0--); }
       final int is = (int) sum;
       r0[ir--] = is;
       carry = (is == 0); }
@@ -1421,6 +1429,7 @@ implements Ringlike<NaturalBEI> {
   //--------------------------------------------------------------
   // only when val <= this
 
+  @Override
   public final NaturalBEI subtract (final long m1) {
     assert 0L<=m1;
     if (0L == m1) { return this; }
@@ -1430,20 +1439,20 @@ implements Ringlike<NaturalBEI> {
     final int r[] = new int[i0];
     long difference = 0;
     if (hi == 0) {
-      difference = word(--i0) - m1;
+      difference = uword(--i0) - m1;
       r[i0] = (int) difference; }
     else {
-      difference = word(--i0) - loWord(m1);
+      difference = uword(--i0) - loWord(m1);
       r[i0] = (int) difference;
       difference =
-        word(--i0) - hi + (difference >> 32);
+        (uword(--i0) - hi) + (difference >> 32);
       r[i0] = (int) difference; }
     // Subtract remainder of longer number while borrow propagates
     boolean borrow = ((difference >> 32) != 0);
     while ((i0 > 0) && borrow) {
-      borrow = ((r[--i0] = iword(i0)-1) == -1); }
+      borrow = ((r[--i0] = word(i0)-1) == -1); }
     // Copy remainder of longer number
-    while (i0 > 0) { r[--i0] = iword(i0); }
+    while (i0 > 0) { r[--i0] = word(i0); }
     return unsafe(stripLeadingZeros(r)); }
 
   /** only valid when m <= this !!! */
@@ -1458,7 +1467,7 @@ implements Ringlike<NaturalBEI> {
     int i1 = m1.length;
     long dif = 0;
     while (i1 > 0) {
-      dif = word(--i0) - m.word(--i1) + (dif >> 32);
+      dif = (uword(--i0) - m.uword(--i1)) + (dif >> 32);
       result[i0] = (int) dif; }
     boolean borrow = ((dif >> 32) != 0);
     while ((i0 > 0) && borrow) {
@@ -1469,6 +1478,7 @@ implements Ringlike<NaturalBEI> {
   //--------------------------------------------------------------
   // only when (m << leftShift) <= this
 
+  @Override
   public final NaturalBEI subtract (final long m1,
                                     final int bitShift) {
     assert 0L<=m1;
@@ -1477,7 +1487,7 @@ implements Ringlike<NaturalBEI> {
     if (0==bitShift) { return subtract(m1); }
     assert 0<bitShift;
 
-    final int n0 = end()-start();
+    final int n0 = endWord()-startWord();
 
     final int intShift = bitShift >>> 5;
     final int remShift = bitShift & 0x1f;
@@ -1501,28 +1511,28 @@ implements Ringlike<NaturalBEI> {
     // subtract m1 words from m0 with borrow
     final long m1s = (m1 << remShift);
     dif -= loWord(m1s);
-    if (0<=i0) { 
-      dif += word(i0); 
-      r0[i0] = (int) dif; 
-      i0--; 
+    if (0<=i0) {
+      dif += uword(i0);
+      r0[i0] = (int) dif;
+      i0--;
       dif = (dif >> 32); }
 
     if (2<=nwords) { dif -= hiWord(m1s); }
-    if (0<=i0) { 
-      dif += word(i0); 
-      r0[i0] = (int) dif; i0--; 
+    if (0<=i0) {
+      dif += uword(i0);
+      r0[i0] = (int) dif; i0--;
       dif = (dif >> 32); }
 
     if (3==nwords) { dif -= (m1 >>> (64-remShift)) ; }
-    if (0<=i0) { 
-      dif += word(i0); 
-      r0[i0] = (int) dif; 
-      i0--; } 
+    if (0<=i0) {
+      dif += uword(i0);
+      r0[i0] = (int) dif;
+      i0--; }
 
     boolean borrow = ((dif >> 32) != 0);
     while ((0<=i0) && borrow) {
       r0[i0] = m0[i0]-1;
-      borrow = (r0[i0] == -1); 
+      borrow = (r0[i0] == -1);
       i0--; }
 
     while (0<=i0) { r0[i0] = m0[i0]; i0--; }
@@ -1553,6 +1563,7 @@ implements Ringlike<NaturalBEI> {
   //--------------------------------------------------------------
   // only when this <= (m << leftShift)
 
+  @Override
   public final NaturalBEI subtractFrom (final long m,
                                         final int leftShift) {
     return valueOf(m,leftShift).subtract(this); }
@@ -1560,6 +1571,7 @@ implements Ringlike<NaturalBEI> {
   //--------------------------------------------------------------
   // only when this <= m
 
+  @Override
   public final NaturalBEI subtractFrom (final long m) {
     assert 0L<=m;
     if (isZero()) { return valueOf(m); }
@@ -1567,20 +1579,20 @@ implements Ringlike<NaturalBEI> {
     final int hi = (int) hiWord(m);
     if (hi == 0) {
       final int result[] = new int[1];
-      result[0] = (int) (m - word(0));
+      result[0] = (int) (m - uword(0));
       return unsafe(result); }
     final int r[] = new int[2];
     if (length() == 1) {
-      final long dif = loWord(m) - word(0);
+      final long dif = loWord(m) - uword(0);
       r[1] = (int) dif;
       final boolean borrow = ((dif >> 32) != 0);
       if (borrow) { r[0] = hi - 1; }
       // Copy remainder of longer number
       else { r[0] = hi; }
       return unsafe(r); }
-    long dif = loWord(m) - word(1);
+    long dif = loWord(m) - uword(1);
     r[1] = (int) dif;
-    dif = unsigned(hi)-word(0)+(dif >> 32);
+    dif = (unsigned(hi)-uword(0))+(dif >> 32);
     r[0] = (int) dif;
     return unsafe(stripLeadingZeros(r)); }
 
@@ -1614,13 +1626,19 @@ implements Ringlike<NaturalBEI> {
     m[0] = (int) (sum >>> 32);
     return unsafe(stripLeadingZeros(m)); }
 
+  @Override
   public final NaturalBEI square () {
     if (isZero()) { return ZERO; }
-    if (ONE.equals(this)) { return ONE; }
+    if (this.isOne()) { return ONE; }
     return unsafe(square(words())); }
 
   //--------------------------------------------------------------
   // multiplication
+  //--------------------------------------------------------------
+
+  @Override
+  public final boolean isOne () { return equals(ONE); }
+  
   //--------------------------------------------------------------
 
   public static final NaturalBEI multiply (final long t0,
@@ -1644,11 +1662,13 @@ implements Ringlike<NaturalBEI> {
     m[0] = (int) (sum >>> 32);
     return unsafe(stripLeadingZeros(m)); }
 
+  @Override
   public final NaturalBEI multiply (final long that) {
     assert 1L<=that;
     return unsafe(multiply(words(),that)); }
 
   // TODO: multiply by shifted long
+  @Override
   public final NaturalBEI multiply (final long that,
                                     final int shift) {
     assert 1L<=that;
@@ -1662,7 +1682,7 @@ implements Ringlike<NaturalBEI> {
   // Division
   //--------------------------------------------------------------
 
-  private static final boolean 
+  private static final boolean
   useKnuthDivision (final NaturalBEI n,
                     final NaturalBEI d) {
     return useKnuthDivision(n.words(),d.words()); }
@@ -1671,7 +1691,7 @@ implements Ringlike<NaturalBEI> {
   // Knuth algorithm
   //--------------------------------------------------------------
 
-  private final NaturalBEI 
+  private final NaturalBEI
   divideKnuth (final NaturalBEI that) {
     final NaturalBEIBuilder q = NaturalBEIBuilder.make();
     final NaturalBEIBuilder n = NaturalBEIBuilder.valueOf(words());
@@ -1679,7 +1699,7 @@ implements Ringlike<NaturalBEI> {
     n.divideKnuth(d,q,false);
     return q.build(); }
 
-  private final NaturalBEI[] 
+  private final NaturalBEI[]
     divideAndRemainderKnuth (final NaturalBEI that) {
     final NaturalBEIBuilder q = NaturalBEIBuilder.make();
     final NaturalBEIBuilder n = NaturalBEIBuilder.valueOf(words());
@@ -1696,7 +1716,7 @@ implements Ringlike<NaturalBEI> {
 
   //--------------------------------------------------------------
 
-  private final NaturalBEI[] 
+  private final NaturalBEI[]
     divideAndRemainderBurnikelZiegler (final NaturalBEI that) {
     final NaturalBEIBuilder q = NaturalBEIBuilder.make();
     final NaturalBEIBuilder n = NaturalBEIBuilder.valueOf(words());
@@ -1705,11 +1725,11 @@ implements Ringlike<NaturalBEI> {
       n.divideAndRemainderBurnikelZiegler(d,q);
     return new NaturalBEI[] {  q.build(), r.build(), }; }
 
-  private final NaturalBEI 
+  private final NaturalBEI
   divideBurnikelZiegler (final NaturalBEI that) {
     return divideAndRemainderBurnikelZiegler(that)[0]; }
 
-  private final NaturalBEI 
+  private final NaturalBEI
   remainderBurnikelZiegler (final NaturalBEI that) {
     return divideAndRemainderBurnikelZiegler(that)[1]; }
 
@@ -1718,24 +1738,24 @@ implements Ringlike<NaturalBEI> {
   //--------------------------------------------------------------
 
   @Override
-  public final NaturalBEI 
+  public final NaturalBEI
   divide (final NaturalBEI that) {
     assert (! that.isZero());
-    if (ONE.equals(that)) { return this; }
+    if (that.isOne()) { return this; }
     if (useKnuthDivision(this,that)) { return divideKnuth(that); }
     return divideBurnikelZiegler(that); }
 
   @Override
-  public List<NaturalBEI> 
+  public List<NaturalBEI>
   divideAndRemainder (final NaturalBEI that) {
     assert (! that.isZero());
     if (useKnuthDivision(this,that)) {
       return Arrays.asList(divideAndRemainderKnuth(that)); }
-    return 
+    return
       Arrays.asList(divideAndRemainderBurnikelZiegler(that)); }
 
   @Override
-  public final NaturalBEI 
+  public final NaturalBEI
   remainder (final NaturalBEI that) {
     assert (! that.isZero());
     if (useKnuthDivision(this,that)) {
@@ -1755,25 +1775,23 @@ implements Ringlike<NaturalBEI> {
 
   public static final NaturalBEI[] reduce (final NaturalBEI n0,
                                            final NaturalBEI d0) {
-    final int shift = 
-      Math.min(n0.getLowestSetBit(),d0.getLowestSetBit());
+    final int shift =
+      Math.min(n0.loBit(),d0.loBit());
     final NaturalBEI n = (shift != 0) ? n0.shiftRight(shift) : n0;
     final NaturalBEI d = (shift != 0) ? d0.shiftRight(shift) : d0;
-    if (n.equals(d)) { 
-      return new NaturalBEI[] { ONE, ONE, }; }
-    if (NaturalBEI.ONE.equals(d)) { 
-      return new NaturalBEI[] { n, ONE, }; }
-    if (NaturalBEI.ONE.equals(n)) {
-      return new NaturalBEI[] { ONE, d, }; }
+    if (n.equals(d)) { return new NaturalBEI[] { ONE, ONE, }; }
+    if (d.isOne()) { return new NaturalBEI[] { n, ONE, }; }
+    if (n.isOne()) { return new NaturalBEI[] { ONE, d, }; }
     final NaturalBEI gcd = n.gcd(d);
     if (gcd.compareTo(ONE) > 0) {
-      return new NaturalBEI[] { n.divide(gcd), d.divide(gcd), }; } 
+      return new NaturalBEI[] { n.divide(gcd), d.divide(gcd), }; }
     return new NaturalBEI[] { n, d, }; }
 
   //--------------------------------------------------------------
   // Bit Operations
   //--------------------------------------------------------------
 
+  @Override
   public final NaturalBEI shiftLeft (final int bitShift) {
     assert 0<=bitShift;
     if (bitShift==0) { return this; }
@@ -1795,15 +1813,17 @@ implements Ringlike<NaturalBEI> {
     int j = 0;
     while (j < (n0-1)) {
       m1[i++] = (m0[j++] << lShift) | (m0[j] >>> rShift); }
-    m1[i] = m0[j] << lShift; 
+    m1[i] = m0[j] << lShift;
     return unsafe(m1); }
 
+  @Override
   public final NaturalBEI shiftRight (final int n) {
     assert 0<=n;
     return unsafe(shiftRight(words(),n)); }
 
   // get the least significant int words of (m >>> shift)
 
+  @Override
   public final int getShiftedInt (final int n) {
     assert 0<=n;
     return getShiftedInt(words(),n); }
@@ -1811,30 +1831,33 @@ implements Ringlike<NaturalBEI> {
   // get the least significant two int words of (m >>> shift) as a
   // long
 
+  @Override
   public final long getShiftedLong (final int n) {
     assert 0<=n;
     return getShiftedLong(words(),n); }
 
+  @Override
   public final boolean testBit (final int n) {
     return testBit(words(),n); }
 
+  @Override
   public final NaturalBEI setBit (final int n) {
     return unsafe(setBit(words(),n)); }
 
+  @Override
   public final NaturalBEI clearBit (final int n) {
     return unsafe(clearBit(words(),n)); }
 
+  @Override
   public final NaturalBEI flipBit (final int n) {
     return unsafe(flipBit(words(),n)); }
 
-  public final int getLowestSetBit () {
+  @Override
+  public final int loBit () {
     return getLowestSetBit(words()); }
 
-  public final int loBit () { return getLowestSetBit(); }
-
-  public final int bitLength () { return bitLength(words()); }
-
-  public final int hiBit () { return bitLength(); }
+  @Override
+  public final int hiBit () { return bitLength(words()); }
 
   public final int bitCount () { return bitCount(words()); }
 
@@ -1850,16 +1873,18 @@ implements Ringlike<NaturalBEI> {
     if (n0<n1) { return -1; }
     if (n0>n1) { return 1; }
     for (int i=0;i<n0;i++) {
-      final long m0i = word(i);
-      final long m1i = m.word(i);
+      final long m0i = uword(i);
+      final long m1i = m.uword(i);
       if (m0i<m1i) { return -1; }
       if (m0i>m1i) { return 1; } }
     return 0; }
 
+  @Override
   public final int compareTo (final int leftShift,
                               final NaturalBEI m) {
     return shiftLeft(leftShift).compareTo(m); }
 
+  @Override
   public final int compareTo (final long m1) {
     assert 0L<=m1;
     if (m1 < 0L) { return 1; }
@@ -1869,14 +1894,15 @@ implements Ringlike<NaturalBEI> {
     final int n1 = (0L!=m10) ? 2 : ((0L!=m11) ? 1 : 0);
     if (n0<n1) { return -1; }
     if (n0>n1) { return 1; }
-    final long m00 = word(0);
+    final long m00 = uword(0);
     if (m00<m10) { return -1; }
     if (m00>m10) { return 1; }
-    final long m01 = word(1);
+    final long m01 = uword(1);
     if (m01<m11) { return -1; }
     if (m01>m11) { return 1; }
     return 0; }
 
+  @Override
   public final int compareTo (final long m1,
                               final int bitShift) {
     assert 0L<=m1;
@@ -1886,7 +1912,7 @@ implements Ringlike<NaturalBEI> {
       if (isZero()) { return 0; }
       return 1; }
 
-    final int n0 = end()-start();
+    final int n0 = endWord()-startWord();
 
     final int intShift = bitShift >>> 5;
     final int remShift = bitShift & 0x1f;
@@ -1904,7 +1930,7 @@ implements Ringlike<NaturalBEI> {
     // most significant word in m0
     int i = 0;
     if (3==nwords) {
-      final long m00 = word(i++);
+      final long m00 = uword(i++);
       //final long m10 = hiPart(m1,remShift);
       final long m10 = m1 >>> (64-remShift);
     if (m00<m10) { return -1; }
@@ -1912,14 +1938,14 @@ implements Ringlike<NaturalBEI> {
 
     final long m1s = (m1 << remShift);
     if (2<=nwords) {
-      final long m01 = word(i++);
+      final long m01 = uword(i++);
       //final long m11 = midPart(m1,remShift);
       final long m11 = hiWord(m1s);
       if (m01<m11) { return -1; }
       if (m01>m11) { return 1; } }
 
     // 1 nonzero word after shifting
-    final long m02 = word(i++);
+    final long m02 = uword(i++);
     //final long m12 = loPart(m1,remShift);
     final long m12 = loWord(m1s);
     if (m02<m12) { return -1; }
@@ -1966,7 +1992,7 @@ implements Ringlike<NaturalBEI> {
 
   /** hex string. */
   @Override
-  public String toString (final int radix) { 
+  public String toString (final int radix) {
     assert radix==0x10;
     return toHexString(words()); }
 
@@ -1974,9 +2000,11 @@ implements Ringlike<NaturalBEI> {
   // Number interface+
   //--------------------------------------------------------------
 
+  @Override
   public final byte[] toByteArray () {
     return toByteArray(words()); }
 
+  @Override
   public final BigInteger bigIntegerValue () {
     return bigIntegerValue(words()); }
 
@@ -1989,11 +2017,11 @@ implements Ringlike<NaturalBEI> {
   //--------------------------------------------------------------
 
   @Override
-  public final float floatValue () { 
+  public final float floatValue () {
     if (isZero()) { return 0.0F; }
 
     final int exponent =
-      (((length() - 1) << 5) + Numbers.bitLength(iword(0))) - 1;
+      (((length() - 1) << 5) + Numbers.bitLength(word(0))) - 1;
 
     // exponent == floor(log2(abs(this)))
     if (exponent < (Long.SIZE - 1)) { return longValue(); }
@@ -2019,12 +2047,12 @@ implements Ringlike<NaturalBEI> {
     final int nBits = shift & 0x1f;
     final int nBits2 = 32 - nBits;
 
-    if (nBits == 0) { twiceSignifFloor = iword(0); }
+    if (nBits == 0) { twiceSignifFloor = word(0); }
     else {
-      twiceSignifFloor = iword(0) >>> nBits;
+      twiceSignifFloor = word(0) >>> nBits;
       if (twiceSignifFloor == 0) {
         twiceSignifFloor =
-          (iword(0) << nBits2) | (iword(1) >>> nBits); } }
+          (word(0) << nBits2) | (word(1) >>> nBits); } }
 
     int signifFloor = (twiceSignifFloor >> 1);
     signifFloor &= Floats.STORED_SIGNIFICAND_MASK;
@@ -2037,7 +2065,7 @@ implements Ringlike<NaturalBEI> {
     final boolean increment =
       ((twiceSignifFloor
         & 1) != 0) && (((signifFloor & 1) != 0)
-          || (getLowestSetBit() < shift));
+          || (loBit() < shift));
     final int signifRounded =
       increment ? signifFloor + 1 : signifFloor;
     int bits =
@@ -2060,11 +2088,11 @@ implements Ringlike<NaturalBEI> {
   //--------------------------------------------------------------
 
   @Override
-  public final double doubleValue () { 
+  public final double doubleValue () {
     if (isZero()) { return 0.0; }
 
     final int exponent =
-      (((length() - 1) << 5) + Numbers.bitLength(iword(0))) - 1;
+      (((length() - 1) << 5) + Numbers.bitLength(word(0))) - 1;
 
     // exponent == floor(log2(abs(this))Double)
     if (exponent < (Long.SIZE - 1)) { return longValue(); }
@@ -2093,14 +2121,14 @@ implements Ringlike<NaturalBEI> {
     int highBits;
     int lowBits;
     if (nBits == 0) {
-      highBits = iword(0);
-      lowBits = iword(1); }
+      highBits = word(0);
+      lowBits = word(1); }
     else {
-      highBits = iword(0) >>> nBits;
-      lowBits = (iword(0) << nBits2) | (iword(1) >>> nBits);
+      highBits = word(0) >>> nBits;
+      lowBits = (word(0) << nBits2) | (word(1) >>> nBits);
       if (highBits == 0) {
         highBits = lowBits;
-        lowBits = (iword(1) << nBits2) | (iword(2) >>> nBits); } }
+        lowBits = (word(1) << nBits2) | (word(2) >>> nBits); } }
 
     twiceSignifFloor =
       (unsigned(highBits) << 32) | unsigned(lowBits);
@@ -2118,7 +2146,7 @@ implements Ringlike<NaturalBEI> {
     final boolean increment =
       ((twiceSignifFloor
         & 1) != 0) && (((signifFloor & 1) != 0)
-          || (getLowestSetBit() < shift));
+          || (loBit() < shift));
     final long signifRounded =
       increment ? signifFloor + 1 : signifFloor;
     long bits =

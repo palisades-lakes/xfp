@@ -9,23 +9,38 @@ import java.util.Arrays;
 import java.util.List;
 
 /** immutable arbitrary-precision non-negative integers
- * (natural number) represented by big-endian 
+ * (natural number) represented by big-endian
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-18
+ * @version 2019-06-20
  */
 
 public final class NaturalBEI0 extends Number
-implements Ringlike<NaturalBEI0> {
+implements Natural<NaturalBEI0> {
 
   private static final long serialVersionUID = 1L;
 
-  private final int[] _mag;
-  public final int[] copyWords () { 
-    return Arrays.copyOf(_mag,_mag.length); }
+  private final int[] _words;
+  public final int[] copyWords () {
+    return Arrays.copyOf(_words,_words.length); }
 
-  public final boolean isZero () { return 0==_mag.length; }
+  @Override
+  public final boolean isZero () { return 0==_words.length; }
+
+  @Override
+  public final int word (final int i) {
+    if (i<_words.length) { return _words[i]; }
+    return 0; }
+
+  @Override
+  public final long uword (final int i) {
+    return unsigned(word(i)); }
+
+  @Override
+  public final int startWord () { return 0; }
+  @Override
+  public final int endWord () { return _words.length; }
 
   //--------------------------------------------------------------
   // arithmetic
@@ -33,11 +48,12 @@ implements Ringlike<NaturalBEI0> {
 
   @Override
   public final NaturalBEI0 add (final NaturalBEI0 m) {
-    return unsafe(Bei0.add(_mag,m._mag)); }
+    return unsafe(Bei0.add(_words,m._words)); }
 
+  @Override
   public final NaturalBEI0 add (final long m) {
     assert 0L<=m;
-    return unsafe(Bei0.add(_mag,m)); }
+    return unsafe(Bei0.add(_words,m)); }
 
   public static final NaturalBEI0 add (final long t0,
                                        final long t1,
@@ -48,31 +64,34 @@ implements Ringlike<NaturalBEI0> {
     final int[] u = Bei0.add(t0,t1,bitShift);
     return unsafe(u); }
 
+  @Override
   public final NaturalBEI0 add (final long m,
                                 final int shift) {
     assert 0L<=m;
-    final int[] u = Bei0.add(_mag,m,shift);
+    final int[] u = Bei0.add(_words,m,shift);
     return unsafe(u); }
 
   //--------------------------------------------------------------
   // only when val <= this
 
+  @Override
   public final NaturalBEI0 subtract (final long m) {
     assert 0L<=m;
-    final int[] u = Bei0.subtract(_mag,m);
+    final int[] u = Bei0.subtract(_words,m);
     return unsafe(u); }
 
   // only when val <= this
 
   @Override
   public final NaturalBEI0 subtract (final NaturalBEI0 m) {
-    return unsafe(Bei0.subtract(_mag,m._mag)); }
+    return unsafe(Bei0.subtract(_words,m._words)); }
 
   // only when (m << leftShift) <= this
+  @Override
   public final NaturalBEI0 subtract (final long m,
                                      final int leftShift) {
     assert 0L<=m;
-    final int[] u = Bei0.subtract(_mag,m,leftShift);
+    final int[] u = Bei0.subtract(_words,m,leftShift);
     return unsafe(u); }
 
   // only when (m1 << leftShift) <= m0
@@ -96,11 +115,12 @@ implements Ringlike<NaturalBEI0> {
   //--------------------------------------------------------------
   // only when this <= (m << leftShift)
 
+  @Override
   public final NaturalBEI0 subtractFrom (final long m,
                                          final int leftShift) {
     assert 0L<=m;
     final int[] ms = Bei0.shiftLeft(m,leftShift);
-    final int[] u = Bei0.subtract(ms,_mag);
+    final int[] u = Bei0.subtract(ms,_words);
     return unsafe(u); }
 
   public static final NaturalBEI0 subtractFrom (final long m0,
@@ -113,9 +133,10 @@ implements Ringlike<NaturalBEI0> {
 
   // only when this <= m
 
+  @Override
   public final NaturalBEI0 subtractFrom (final long m) {
     assert 0L<=m;
-    final int[] u = Bei0.subtract(m,_mag);
+    final int[] u = Bei0.subtract(m,_words);
     return unsafe(u); }
 
   //--------------------------------------------------------------
@@ -127,6 +148,11 @@ implements Ringlike<NaturalBEI0> {
     if (0>c01) { return u1.subtract(u0); }
     return ZERO; }
 
+  //--------------------------------------------------------------
+
+  @Override
+  public final boolean isOne () { return equals(ONE); }
+  
   //--------------------------------------------------------------
 
   public static final NaturalBEI0 multiply (final long t0,
@@ -170,16 +196,19 @@ implements Ringlike<NaturalBEI0> {
     m[0] = (int) (sum >>> 32);
     return unsafe(Bei0.stripLeadingZeros(m)); }
 
+  @Override
   public final NaturalBEI0 square () {
     if (isZero()) { return ZERO; }
-    if (ONE.equals(this)) { return ONE; }
-    return unsafe(Bei0.square(_mag,false)); }
+    if (this.isOne()) { return ONE; }
+    return unsafe(Bei0.square(_words,false)); }
 
+  @Override
   public final NaturalBEI0 multiply (final long that) {
     assert 1L<=that;
-    return unsafe(Bei0.multiply(_mag,that)); }
+    return unsafe(Bei0.multiply(_words,that)); }
 
   // TODO: multiply by shifted long
+  @Override
   public final NaturalBEI0 multiply (final long that,
                                      final int shift) {
     assert 1L<=that;
@@ -187,66 +216,66 @@ implements Ringlike<NaturalBEI0> {
 
   @Override
   public final NaturalBEI0 multiply (final NaturalBEI0 that) {
-    return unsafe(Bei0.multiply(_mag,that._mag)); }
+    return unsafe(Bei0.multiply(_words,that._words)); }
 
   //--------------------------------------------------------------
   // Division
   //--------------------------------------------------------------
 
-  private static final boolean 
+  private static final boolean
   useKnuthDivision (final NaturalBEI0 num,
                     final NaturalBEI0 den) {
-    return Bei0.useKnuthDivision(num._mag,den._mag); }
+    return Bei0.useKnuthDivision(num._words,den._words); }
 
   //--------------------------------------------------------------
   // Knuth algorithm
   //--------------------------------------------------------------
 
-  private final NaturalBEI0 
+  private final NaturalBEI0
   divideKnuth (final NaturalBEI0 that) {
     final MutableNaturalBEI0 q = MutableNaturalBEI0.make();
-    final MutableNaturalBEI0 num = MutableNaturalBEI0.valueOf(this._mag);
-    final MutableNaturalBEI0 den = MutableNaturalBEI0.valueOf(that._mag);
+    final MutableNaturalBEI0 num = MutableNaturalBEI0.valueOf(this._words);
+    final MutableNaturalBEI0 den = MutableNaturalBEI0.valueOf(that._words);
     num.divideKnuth(den,q,false);
     return valueOf(q.getValue()); }
 
-  private final NaturalBEI0[] 
+  private final NaturalBEI0[]
     divideAndRemainderKnuth (final NaturalBEI0 that) {
     final MutableNaturalBEI0 q = MutableNaturalBEI0.make();
-    final MutableNaturalBEI0 num = MutableNaturalBEI0.valueOf(this._mag);
-    final MutableNaturalBEI0 den = MutableNaturalBEI0.valueOf(that._mag);
+    final MutableNaturalBEI0 num = MutableNaturalBEI0.valueOf(this._words);
+    final MutableNaturalBEI0 den = MutableNaturalBEI0.valueOf(that._words);
     final MutableNaturalBEI0 r = num.divideKnuth(den,q,true);
-    return new NaturalBEI0[] 
+    return new NaturalBEI0[]
       { valueOf(q.getValue()),
         valueOf(r.getValue()), }; }
 
   private final NaturalBEI0 remainderKnuth (final NaturalBEI0 that) {
     final MutableNaturalBEI0 q = MutableNaturalBEI0.make();
-    final MutableNaturalBEI0 num = MutableNaturalBEI0.valueOf(this._mag);
-    final MutableNaturalBEI0 den = MutableNaturalBEI0.valueOf(that._mag);
+    final MutableNaturalBEI0 num = MutableNaturalBEI0.valueOf(this._words);
+    final MutableNaturalBEI0 den = MutableNaturalBEI0.valueOf(that._words);
     final MutableNaturalBEI0 r = num.divideKnuth(den,q,true);
     return valueOf(r.getValue()); }
 
   //--------------------------------------------------------------
 
-  private final NaturalBEI0[] 
+  private final NaturalBEI0[]
     divideAndRemainderBurnikelZiegler (final NaturalBEI0 that) {
     final MutableNaturalBEI0 q = MutableNaturalBEI0.make();
-    final MutableNaturalBEI0 num = MutableNaturalBEI0.valueOf(this._mag);
-    final MutableNaturalBEI0 den = MutableNaturalBEI0.valueOf(that._mag);
+    final MutableNaturalBEI0 num = MutableNaturalBEI0.valueOf(this._words);
+    final MutableNaturalBEI0 den = MutableNaturalBEI0.valueOf(that._words);
     final MutableNaturalBEI0 r =
       num.divideAndRemainderBurnikelZiegler(den,q);
-    final NaturalBEI0 qq = 
+    final NaturalBEI0 qq =
       q.isZero() ? ZERO : valueOf(q.getValue());
-    final NaturalBEI0 rr = 
+    final NaturalBEI0 rr =
       r.isZero() ? ZERO : valueOf(r.getValue());
     return new NaturalBEI0[] { qq, rr }; }
 
-  private final NaturalBEI0 
+  private final NaturalBEI0
   divideBurnikelZiegler (final NaturalBEI0 that) {
     return divideAndRemainderBurnikelZiegler(that)[0]; }
 
-  private final NaturalBEI0 
+  private final NaturalBEI0
   remainderBurnikelZiegler (final NaturalBEI0 that) {
     return divideAndRemainderBurnikelZiegler(that)[1]; }
 
@@ -255,20 +284,20 @@ implements Ringlike<NaturalBEI0> {
   //--------------------------------------------------------------
 
   @Override
-  public final NaturalBEI0 
+  public final NaturalBEI0
   divide (final NaturalBEI0 that) {
     assert (! that.isZero());
-    if (ONE.equals(that)) { return this; }
+    if (that.isOne()) { return this; }
     if (useKnuthDivision(this,that)) { return divideKnuth(that); }
     return divideBurnikelZiegler(that); }
 
   @Override
-  public List<NaturalBEI0> 
+  public List<NaturalBEI0>
   divideAndRemainder (final NaturalBEI0 that) {
     assert (! that.isZero());
     if (useKnuthDivision(this,that)) {
       return Arrays.asList(divideAndRemainderKnuth(that)); }
-    return 
+    return
       Arrays.asList(divideAndRemainderBurnikelZiegler(that)); }
 
   @Override
@@ -284,8 +313,8 @@ implements Ringlike<NaturalBEI0> {
 
   @Override
   public final NaturalBEI0 gcd (final NaturalBEI0 that) {
-    final MutableNaturalBEI0 a = MutableNaturalBEI0.valueOf(_mag);
-    final MutableNaturalBEI0 b = MutableNaturalBEI0.valueOf(that._mag);
+    final MutableNaturalBEI0 a = MutableNaturalBEI0.valueOf(_words);
+    final MutableNaturalBEI0 b = MutableNaturalBEI0.valueOf(that._words);
     final MutableNaturalBEI0 result = a.hybridGCD(b);
     return valueOf(result.getValue()); }
 
@@ -296,76 +325,79 @@ implements Ringlike<NaturalBEI0> {
   //      MutableNaturalBEI0.reduce(
   //        MutableNaturalBEI0.valueOf(n0._mag),
   //        MutableNaturalBEI0.valueOf(d0._mag));
-  //    return new NaturalBEI[] 
-  //      { valueOf(nd[0].getValue()), 
+  //    return new NaturalBEI[]
+  //      { valueOf(nd[0].getValue()),
   //        valueOf(nd[1].getValue()), }; }
 
   public static final NaturalBEI0[] reduce (final NaturalBEI0 n0,
                                             final NaturalBEI0 d0) {
-    final int shift = 
+    final int shift =
       Math.min(
-        Bei0.getLowestSetBit(n0._mag),
-        Bei0.getLowestSetBit(d0._mag));
+        Bei0.getLowestSetBit(n0._words),
+        Bei0.getLowestSetBit(d0._words));
     final NaturalBEI0 n = (shift != 0) ? n0.shiftRight(shift) : n0;
     final NaturalBEI0 d = (shift != 0) ? d0.shiftRight(shift) : d0;
-    if (n.equals(d)) { 
-      return new NaturalBEI0[] { ONE, ONE, }; }
-    if (NaturalBEI0.ONE.equals(d)) { 
-      return new NaturalBEI0[] { n, ONE, }; }
-    if (NaturalBEI0.ONE.equals(n)) {
-      return new NaturalBEI0[] { ONE, d, }; }
+    if (n.equals(d)) { return new NaturalBEI0[] { ONE, ONE, }; }
+    if (d.isOne()) { return new NaturalBEI0[] { n, ONE, }; }
+    if (n.isOne()) { return new NaturalBEI0[] { ONE, d, }; }
     final NaturalBEI0 gcd = n.gcd(d);
     if (gcd.compareTo(ONE) > 0) {
-      return new NaturalBEI0[] { n.divide(gcd), d.divide(gcd), }; } 
+      return new NaturalBEI0[] { n.divide(gcd), d.divide(gcd), }; }
     return new NaturalBEI0[] { n, d, }; }
 
   //--------------------------------------------------------------
   // Bit Operations
   //--------------------------------------------------------------
 
+  @Override
   public final NaturalBEI0 shiftLeft (final int n) {
     assert 0<=n;
-    return unsafe(Bei0.shiftLeft(_mag,n)); }
+    return unsafe(Bei0.shiftLeft(_words,n)); }
 
+  @Override
   public final NaturalBEI0 shiftRight (final int n) {
     assert 0<=n;
-    return unsafe(Bei0.shiftRight(_mag,n)); }
+    return unsafe(Bei0.shiftRight(_words,n)); }
 
   // get the least significant int words of (m >>> shift)
 
+  @Override
   public final int getShiftedInt (final int n) {
     assert 0<=n;
-    return Bei0.getShiftedInt(_mag,n); }
+    return Bei0.getShiftedInt(_words,n); }
 
   // get the least significant two int words of (m >>> shift) as a
   // long
 
+  @Override
   public final long getShiftedLong (final int n) {
     assert 0<=n;
-    return Bei0.getShiftedLong(_mag,n); }
+    return Bei0.getShiftedLong(_words,n); }
 
+  @Override
   public final boolean testBit (final int n) {
-    return Bei0.testBit(_mag,n); }
+    return Bei0.testBit(_words,n); }
 
+  @Override
   public final NaturalBEI0 setBit (final int n) {
-    return unsafe(Bei0.setBit(_mag,n)); }
+    return unsafe(Bei0.setBit(_words,n)); }
 
+  @Override
   public final NaturalBEI0 clearBit (final int n) {
-    return unsafe(Bei0.clearBit(_mag,n)); }
+    return unsafe(Bei0.clearBit(_words,n)); }
 
+  @Override
   public final NaturalBEI0 flipBit (final int n) {
-    return unsafe(Bei0.flipBit(_mag,n)); }
+    return unsafe(Bei0.flipBit(_words,n)); }
 
-  public final int getLowestSetBit () {
-    return Bei0.getLowestSetBit(_mag); }
+  @Override
+  public final int loBit () {
+    return Bei0.getLowestSetBit(_words); }
 
-  public final int loBit () { return getLowestSetBit(); }
+  @Override
+  public final int hiBit () { return Bei0.bitLength(_words); }
 
-  public final int bitLength () { return Bei0.bitLength(_mag); }
-
-  public final int hiBit () { return bitLength(); }
-
-  public final int bitCount () { return Bei0.bitCount(_mag); }
+  public final int bitCount () { return Bei0.bitCount(_words); }
 
   //--------------------------------------------------------------
   // Comparable interface+
@@ -373,20 +405,23 @@ implements Ringlike<NaturalBEI0> {
 
   @Override
   public final int compareTo (final NaturalBEI0 y) {
-    return Bei0.compare(_mag,y._mag); }
+    return Bei0.compare(_words,y._words); }
 
+  @Override
   public final int compareTo (final int leftShift,
                               final NaturalBEI0 y) {
     return shiftLeft(leftShift).compareTo(y); }
 
+  @Override
   public final int compareTo (final long y) {
     assert 0L<=y;
-    return Bei0.compare(_mag,y); }
+    return Bei0.compare(_words,y); }
 
+  @Override
   public final int compareTo (final long y,
                               final int leftShift) {
     assert 0L<=y;
-    return Bei0.compare(_mag,y,leftShift); }
+    return Bei0.compare(_words,y,leftShift); }
 
   //--------------------------------------------------------------
 
@@ -403,7 +438,7 @@ implements Ringlike<NaturalBEI0> {
   @Override
   public int hashCode () {
     int hashCode = 0;
-    for (final int element : _mag) {
+    for (final int element : _words) {
       hashCode = (int) ((31 * hashCode) + unsigned(element)); }
     return hashCode; }
 
@@ -412,9 +447,9 @@ implements Ringlike<NaturalBEI0> {
     if (x==this) { return true; }
     if (!(x instanceof NaturalBEI0)) { return false; }
     final NaturalBEI0 xInt = (NaturalBEI0) x;
-    final int[] m = _mag;
+    final int[] m = _words;
     final int len = m.length;
-    final int[] xm = xInt._mag;
+    final int[] xm = xInt._words;
     if (len != xm.length) { return false; }
     for (int i = 0; i < len; i++) {
       if (xm[i] != m[i]) { return false; } }
@@ -422,45 +457,47 @@ implements Ringlike<NaturalBEI0> {
 
   /** hex string. */
   @Override
-  public String toString () { return Bei0.toHexString(_mag); }
+  public String toString () { return Bei0.toHexString(_words); }
 
   /** hex string. */
   @Override
-  public String toString (final int radix) { 
+  public String toString (final int radix) {
     assert radix==0x10;
-    return Bei0.toHexString(_mag); }
+    return Bei0.toHexString(_words); }
 
   //--------------------------------------------------------------
   // Number interface+
   //--------------------------------------------------------------
 
+  @Override
   public final byte[] toByteArray () {
-    return Bei0.toByteArray(_mag); }
+    return Bei0.toByteArray(_words); }
 
+  @Override
   public final BigInteger bigIntegerValue () {
-    return Bei0.bigIntegerValue(_mag); }
+    return Bei0.bigIntegerValue(_words); }
 
   @Override
-  public final int intValue () { return Bei0.intValue(_mag); }
+  public final int intValue () { return Bei0.intValue(_words); }
 
   @Override
-  public final long longValue () { return Bei0.longValue(_mag); }
+  public final long longValue () { return Bei0.longValue(_words); }
 
   //--------------------------------------------------------------
 
   @Override
   public final float floatValue () {
-    return Bei0.floatValue(_mag); }
+    return Bei0.floatValue(_words); }
 
   @Override
   public final double doubleValue () {
-    return Bei0.doubleValue(_mag); }
+    return Bei0.doubleValue(_words); }
 
   //--------------------------------------------------------------
   // construction
   //-------------------------------------------------------------
 
-  private NaturalBEI0 (final int[] mag) { _mag = mag; }
+  private NaturalBEI0 (final int[] mag) { _words = mag; }
 
   // assume no leading zeros
   public static final NaturalBEI0 unsafe (final int[] m) {

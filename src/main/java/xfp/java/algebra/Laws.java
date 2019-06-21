@@ -331,9 +331,9 @@ public final class Laws {
             System.out.println("a=" + a);
             System.out.println("b=" + b);
             System.out.println("c=" + c);
-            System.out.println("a*(b+c)    =" + left); 
+            System.out.println("a*(b+c)    =" + left);
             System.out.println("(a*b)+(a*c)=" + right);}
-    } 
+        }
         return pass; } }
     return new Distributive(); }
 

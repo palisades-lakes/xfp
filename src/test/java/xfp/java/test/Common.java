@@ -41,7 +41,7 @@ public final class Common {
   //--------------------------------------------------------------
 
   public static final List<String> accumulators () {
-    return 
+    return
       Arrays.asList(
         new String[]
           { "xfp.java.accumulators.DoubleAccumulator",
@@ -52,7 +52,7 @@ public final class Common {
             "xfp.java.accumulators.BigFloatAccumulator0",
             "xfp.java.accumulators.BigFloatAccumulator",
             "xfp.java.accumulators.RationalFloatAccumulator1",
-            "xfp.java.accumulators.RationalAccumulator", 
+            "xfp.java.accumulators.RationalAccumulator",
           }); }
 
   //--------------------------------------------------------------
@@ -88,46 +88,46 @@ public final class Common {
   //--------------------------------------------------------------
   // natural number/ integer tests
 
-  public static final void
-  hexRoundTrip (final Function<BigInteger,Ringlike> fromBI,
-                final Function<String,Ringlike> valueOf,
+  public static final <T extends Ringlike<T>> void
+  hexRoundTrip (final Function<BigInteger,T> fromBI,
+                final Function<String,T> valueOf,
                 final BigInteger z0) {
 
     final String zs = z0.toString(0x10);
     //Debug.println(zs);
 
-    final Ringlike r0 = fromBI.apply(z0);
+    final T r0 = fromBI.apply(z0);
     final String rs = r0.toString(0x10);
 
-    Assertions.assertEquals(zs,rs,() -> 
-    "\nzs=" + zs + "\nrs=" + rs); 
+    Assertions.assertEquals(zs,rs,() ->
+    "\nzs=" + zs + "\nrs=" + rs);
 
     //Debug.println("rs=" + rs);
 
-    final Ringlike r1 = valueOf.apply(rs);
+    final T r1 = valueOf.apply(rs);
     Assertions.assertEquals(r0,r1,() ->
     "\n" + rs + "\n" + r1.toString(0x10));  }
 
-  public static final void
-  biRoundTrip (final Function<BigInteger,Ringlike> fromBI,
-               final Function<Ringlike,BigInteger> toBI,
+  public static final <T extends Ringlike<T>> void
+  biRoundTrip (final Function<BigInteger,T> fromBI,
+               final Function<T,BigInteger> toBI,
                final BigInteger x0) {
-    final Ringlike y = fromBI.apply(x0);
+    final T y = fromBI.apply(x0);
     final BigInteger x1 = toBI.apply(y);
     Assertions.assertEquals(x0,x1,() ->
     "0x" + x0.toString(0x10)
     + "\n" + y.toString()
     + "\n0x" + x1.toString(0x10)); }
 
-  public static final void
-  add (final Function<BigInteger,Ringlike> fromBI,
-       final Function<Ringlike,BigInteger> toBI,
+  public static final <T extends Ringlike<T>> void
+  add (final Function<BigInteger,T> fromBI,
+       final Function<T,BigInteger> toBI,
        final BigInteger x0,
        final BigInteger x1) {
-    final Ringlike y0 = fromBI.apply(x0);
-    final Ringlike y1 = fromBI.apply(x1);
+    final T y0 = fromBI.apply(x0);
+    final T y1 = fromBI.apply(x1);
     final BigInteger x2 = x0.add(x1);
-    final Ringlike y2 = y0.add(y1);
+    final T y2 = y0.add(y1);
     final BigInteger x3 = toBI.apply( y2);
     Assertions.assertEquals(x2,x3,() ->
     x0.toString(0x10)
@@ -142,17 +142,17 @@ public final class Common {
     + "\n" + y2.toString(0x10)
     + "\n" + x3.toString(0x10)); }
 
-  public static final void
-  absDiff (final Function<BigInteger,Ringlike> fromBI,
-           final Function<Ringlike,BigInteger> toBI,
+  public static final <T extends Ringlike<T>> void
+  absDiff (final Function<BigInteger,T> fromBI,
+           final Function<T,BigInteger> toBI,
            final BigInteger z0,
            final BigInteger z1) {
     final BigInteger x0 = z0.max(z1);
     final BigInteger x1 = z0.min(z1);
-    final Ringlike y0 = fromBI.apply(x0);
-    final Ringlike y1 = fromBI.apply(x1);
+    final T y0 = fromBI.apply(x0);
+    final T y1 = fromBI.apply(x1);
     final BigInteger x2 = x0.subtract(x1);
-    final Ringlike y2 = y0.subtract(y1);
+    final T y2 = y0.subtract(y1);
     final BigInteger x3 = toBI.apply( y2);
     Assertions.assertEquals(x2,x3,() ->
     x0.toString(0x10)
@@ -167,15 +167,15 @@ public final class Common {
     + "\n" + y2.toString(0x10)
     + "\n" + x3.toString(0x10)); }
 
-  public static final void
-  subtract (final Function<BigInteger,Ringlike> fromBI,
-            final Function<Ringlike,BigInteger> toBI,
+  public static final <T extends Ringlike<T>> void
+  subtract (final Function<BigInteger,T> fromBI,
+            final Function<T,BigInteger> toBI,
             final BigInteger x0,
             final BigInteger x1) {
-    final Ringlike y0 = fromBI.apply(x0);
-    final Ringlike y1 = fromBI.apply(x1);
+    final T y0 = fromBI.apply(x0);
+    final T y1 = fromBI.apply(x1);
     final BigInteger x2 = x0.subtract(x1);
-    final Ringlike y2 = y0.subtract(y1);
+    final T y2 = y0.subtract(y1);
     final BigInteger x3 = toBI.apply( y2);
     Assertions.assertEquals(x2,x3,() ->
     x0.toString(0x10)
@@ -190,15 +190,15 @@ public final class Common {
     + "\n" + y2.toString(0x10)
     + "\n" + x3.toString(0x10)); }
 
-  public static final void
-  multiply (final Function<BigInteger,Ringlike> fromBI,
-            final Function<Ringlike,BigInteger> toBI,
+  public static final <T extends Ringlike<T>> void
+  multiply (final Function<BigInteger,T> fromBI,
+            final Function<T,BigInteger> toBI,
             final BigInteger x0,
             final BigInteger x1) {
-    final Ringlike y0 = fromBI.apply(x0);
-    final Ringlike y1 = fromBI.apply(x1);
+    final T y0 = fromBI.apply(x0);
+    final T y1 = fromBI.apply(x1);
     final BigInteger x2 = x0.multiply(x1);
-    final Ringlike y2 = y0.multiply(y1);
+    final T y2 = y0.multiply(y1);
     final BigInteger x3 = toBI.apply( y2);
     Assertions.assertEquals(x2,x3,() ->
     "0x" + x0.toString(0x10)
@@ -216,16 +216,16 @@ public final class Common {
     + "\n\n0x" + x2.subtract(x3).toString(0x10)
       ); }
 
-  public static final void
-  divide (final Function<BigInteger,Ringlike> fromBI,
-          final Function<Ringlike,BigInteger> toBI,
+  public static final <T extends Ringlike<T>> void
+  divide (final Function<BigInteger,T> fromBI,
+          final Function<T,BigInteger> toBI,
           final BigInteger x0,
           final BigInteger x1) {
     if (0 != x1.signum()) {
-      final Ringlike y0 = fromBI.apply(x0);
-      final Ringlike y1 = fromBI.apply(x1);
+      final T y0 = fromBI.apply(x0);
+      final T y1 = fromBI.apply(x1);
       final BigInteger x2 = x0.divide(x1);
-      final Ringlike y2 = y0.divide(y1);
+      final T y2 = y0.divide(y1);
       final BigInteger x3 = toBI.apply( y2);
       Assertions.assertEquals(x2,x3,() ->
       x0.toString(0x10)
@@ -249,7 +249,8 @@ public final class Common {
       final Ringlike y0 = fromBI.apply(x0);
       final Ringlike y1 = fromBI.apply(x1);
       final BigInteger[] x2 = x0.divideAndRemainder(x1);
-      final Ringlike[] y2 = (Ringlike[]) y0.divideAndRemainder(y1).toArray(new Ringlike[2]);
+      final Ringlike[] y2 =
+        (Ringlike[]) y0.divideAndRemainder(y1).toArray(new Ringlike[2]);
       final BigInteger[] x3 = { toBI.apply(y2[0]), toBI.apply(y2[1]),};
 
       Assertions.assertEquals(x2[0],x3[0],() ->
@@ -353,9 +354,9 @@ public final class Common {
     divide(fromBI,toBI,z0,z1);
     divide(fromBI,toBI,z0,z0);
     divideAndRemainder(fromBI,toBI,z0,z1);
-    divideAndRemainder(fromBI,toBI,z0,z0); 
+    divideAndRemainder(fromBI,toBI,z0,z0);
     remainder(fromBI,toBI,z0,z1);
-    remainder(fromBI,toBI,z0,z0); 
+    remainder(fromBI,toBI,z0,z0);
     gcd(fromBI,toBI,z0,z1);
     gcd(fromBI,toBI,z0,z0); }
 
@@ -369,7 +370,7 @@ public final class Common {
         PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
     for (int i=0;i<TRYS;i++) {
       naturalTest(valueOf,fromBI,toBI,
-        ((BigInteger) gn.next()).abs(), 
+        ((BigInteger) gn.next()).abs(),
         ((BigInteger) gn.next()).abs()); } }
 
   //--------------------------------------------------------------
@@ -432,7 +433,7 @@ public final class Common {
   floatRoundingTest (final FloatFunction<Comparable> fromFloat,
                      final ToFloatFunction toFloat,
                      final BinaryOperator<Comparable> dist,
-                     @SuppressWarnings("unused") 
+                     @SuppressWarnings("unused")
   final Function<Comparable,String> toString,
   final Comparable f) {
 
@@ -620,7 +621,7 @@ public final class Common {
   doubleRoundingTest (final DoubleFunction<Comparable> fromDouble,
                       final ToDoubleFunction toDouble,
                       final BinaryOperator<Comparable> dist,
-                      @SuppressWarnings("unused") 
+                      @SuppressWarnings("unused")
   final Function<Comparable,String> toString,
   final Comparable f) {
 
@@ -1032,7 +1033,7 @@ public final class Common {
       //  String.format("%32s %8.2fms ",Classes.className(a),
       //    Double.valueOf(t1*1.0e-6))
       //  + toHexString(l1d) + " = "
-      //  + String.format("%8.2e",Double.valueOf(l1d))); 
+      //  + String.format("%8.2e",Double.valueOf(l1d)));
     } }
 
   /** Assumes the generators create arrays whose exact sum is 0.0
@@ -1149,7 +1150,7 @@ public final class Common {
       //    Classes.className(a),Double.valueOf(t1*1.0e-6))
       //  + toHexString(l1d)
       //  + " / " + toHexString(l1n) + " = "
-      //  + String.format("%8.2e",Double.valueOf(l1d/l1n))); 
+      //  + String.format("%8.2e",Double.valueOf(l1d/l1n)));
     } }
 
   public static final void l2Tests (final List<Generator> generators,
@@ -1161,49 +1162,49 @@ public final class Common {
 
   //--------------------------------------------------------------
 
-  private static final void 
+  private static final void
   l2DistanceTest (final List<Accumulator> accumulators,
                   final Accumulator exact) {
     Assertions.assertTrue(exact.isExact());
     final double[] x0 = new double[4];
     final double[] x1 = new double[4];
     Arrays.fill(x0,1.0/3.0);
-    final double truth = 
+    final double truth =
       exact.clear().addL2Distance(x0,x1).doubleValue();
     Assertions.assertTrue(0.0<=truth,
-    "\n" + Classes.className(exact) + "\n");   
-//    Assertions.assertEquals(4.0,truth,
-//      "\n" + Classes.className(exact) + "\n");   
+      "\n" + Classes.className(exact) + "\n");
+    //    Assertions.assertEquals(4.0,truth,
+    //      "\n" + Classes.className(exact) + "\n");
     for (final Accumulator a : accumulators) {
       final double pred =
         a.clear().addL2Distance(x0,x1).doubleValue();
       Assertions.assertTrue(0.0<=pred,
         "\n" + Classes.className(a) + "\n");
-      if (a.isExact()) { 
+      if (a.isExact()) {
         Assertions.assertEquals(truth,pred,
           "\n" + Classes.className(a) + "\n"); } } }
 
-  private static final void 
+  private static final void
   l2DistanceTest (final Generator g,
                   final List<Accumulator> accumulators,
                   final Accumulator exact) {
     Assertions.assertTrue(exact.isExact());
     final double[] x0 = (double[]) g.next();
     final double[] x1 = (double[]) g.next();
-    final double truth = 
+    final double truth =
       exact.clear().addL2Distance(x0,x1).doubleValue();
     Assertions.assertTrue(0.0<=truth,
-      "\n" + Classes.className(exact) + "\n");   
+      "\n" + Classes.className(exact) + "\n");
     for (final Accumulator a : accumulators) {
       final double pred =
         a.clear().addL2Distance(x0,x1).doubleValue();
       Assertions.assertTrue(0.0<=pred,
         "\n" + Classes.className(a) + "\n");
-      if (a.isExact()) { 
+      if (a.isExact()) {
         Assertions.assertEquals(truth,pred,
           "\n" + Classes.className(a) + "\n"); } } }
 
-  public static final void 
+  public static final void
   l2DistanceTests (final List<Generator> generators,
                    final List<Accumulator> accumulators,
                    final Accumulator exact) {
@@ -1213,7 +1214,7 @@ public final class Common {
 
   //--------------------------------------------------------------
 
-  private static final void 
+  private static final void
   l1DistanceTest (final Generator g,
                   final List<Accumulator> accumulators,
                   final Accumulator exact) {
@@ -1226,7 +1227,7 @@ public final class Common {
       //final long t0 = System.nanoTime();
       final double pred = a.clear().addL1Distance(x0,x1).doubleValue();
       //final long t1 = (System.nanoTime()-t0);
-      if (a.isExact()) { 
+      if (a.isExact()) {
         Assertions.assertEquals(truth,pred,
           Classes.className(a)); }
       //final double l1d = Math.abs(truth - pred);
@@ -1236,10 +1237,10 @@ public final class Common {
       //    Classes.className(a),Double.valueOf(t1*1.0e-6))
       //  + toHexString(l1d)
       //  + " / " + toHexString(l1n) + " = "
-      //  + String.format("%8.2e",Double.valueOf(l1d/l1n))); 
+      //  + String.format("%8.2e",Double.valueOf(l1d/l1n)));
     } }
 
-  public static final void 
+  public static final void
   l1DistanceTests (final List<Generator> generators,
                    final List<Accumulator> accumulators,
                    final Accumulator exact) {
@@ -1270,7 +1271,7 @@ public final class Common {
       //    Classes.className(a),Double.valueOf(t1*1.0e-6))
       //  + toHexString(l1d)
       //  + " / " + toHexString(l1n) + " = "
-      //  + String.format("%8.2e",Double.valueOf(l1d/l1n))); 
+      //  + String.format("%8.2e",Double.valueOf(l1d/l1n)));
     } }
 
   public static final void dotTests (final List<Generator> generators,

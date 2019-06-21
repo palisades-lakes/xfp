@@ -273,7 +273,7 @@ public final class Doubles implements Set {
     final double x = longBitsToDouble(s | e | t);
     return x; }
 
-  public static final double 
+  public static final double
   unsafeMergeBits (final int sign,
                    final int exponent,
                    final long significand) {
