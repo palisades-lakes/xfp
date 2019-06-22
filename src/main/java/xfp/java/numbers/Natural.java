@@ -282,16 +282,12 @@ Natural<T extends Natural> extends Ringlike<T> {
   //--------------------------------------------------------------
 
   @Override
-  public default T negate () {
-    throw Exceptions.unsupportedOperation(this,"negate"); }
-
-  @Override
   public default T zero () {
     throw Exceptions.unsupportedOperation(this,"zero"); }
 
+  // Natural number sare nonnegative
   @Override
-  public default T abs () {
-    throw Exceptions.unsupportedOperation(this,"abs"); }
+  public default T abs () { return (T) this; }
 
   //--------------------------------------------------------------
 
