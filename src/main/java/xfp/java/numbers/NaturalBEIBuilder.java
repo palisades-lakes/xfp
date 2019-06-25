@@ -9,7 +9,7 @@ import java.util.Arrays;
  * Don't implement Comparable, because of mutability!
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-24
+ * @version 2019-06-25
  */
 
 public final class NaturalBEIBuilder 
@@ -28,7 +28,7 @@ implements NaturalBuilder<NaturalBEI> {
 
   @Override
   public final int endWord () { return nWords; }
-  
+
   /** The start into the words array where the magnitude of this
    * NaturalBEIBuilder begins.
    * 
@@ -47,6 +47,9 @@ implements NaturalBuilder<NaturalBEI> {
       return Arrays.copyOfRange(words, start, start + nWords); }
     // UNSAFE!!!
     return words; }
+
+  private final int[] copyWords () {
+    return Arrays.copyOfRange(words, start, start + nWords); }
 
   // TODO: useful to oversize array? or as an option?
   private final void setWords (final int[] v,
@@ -111,7 +114,8 @@ implements NaturalBuilder<NaturalBEI> {
    * extra array allocation if only building once.
    * </ul>
    * maybe 2 'build' operations, 'build', 'buildAndClaer'?
-   * */
+   */
+
   @Override
   public final NaturalBEI build () {
     // TODO: other constants?
@@ -151,10 +155,12 @@ implements NaturalBuilder<NaturalBEI> {
     start = 0;
     nWords = n; }
 
-  private final void clear () {
-    start = nWords = 0;
-    for (int index=0, n=words.length; index < n; index++) {
-      words[index] = 0; } }
+  @Override
+  public final NaturalBEIBuilder zero () {
+    start = 0;
+    nWords = 0;
+    Arrays.fill(words,0); 
+    return this; }
 
   private final void reset () { start = nWords = 0; }
 
@@ -184,8 +190,6 @@ implements NaturalBuilder<NaturalBEI> {
    */
   private final void keepLower (final int n) {
     if (nWords >= n) { start += nWords - n; nWords = n; } }
-
-  public final boolean isZero () { return (nWords == 0); }
 
   //--------------------------------------------------------------
   // bit operations
@@ -527,6 +531,756 @@ implements NaturalBuilder<NaturalBEI> {
     return sign; }
 
   //--------------------------------------------------------------
+  // square
+  //--------------------------------------------------------------
+
+  private static final int[] stripLeadingZeros (final int[] m) {
+    final int n = m.length;
+    int start = 0;
+    while ((start < n) && (m[start] == 0)) { start++; }
+    return (0==start) ? m : Arrays.copyOfRange(m,start,n); }
+
+  private static final int[] EMPTY = new int[0];
+  private static final boolean isZero (final int[] z) {
+    for (int i=0;i<z.length;i++) {
+      if (0!=z[i]) { return false; } }
+    return true; }
+
+
+  private static final int KARATSUBA_SQUARE_THRESHOLD = 128;
+  private static final int TOOM_COOK_SQUARE_THRESHOLD = 216;
+
+  private static void implSquareToLenChecks (final int[] x,
+                                             final int len,
+                                             final int[] z,
+                                             final int zlen) {
+    if (len < 1) {
+      throw new IllegalArgumentException(
+        "invalid input length: " + len); }
+    if (len > x.length) {
+      throw new IllegalArgumentException(
+        "input to long: " + len + " > " + x.length); }
+    if ((len * 2) > z.length) {
+      throw new IllegalArgumentException(
+        "input too long: " + (len * 2) + " > "
+          + z.length); }
+    if (zlen < 1) {
+      throw new IllegalArgumentException(
+        "invalid input length: " + zlen); }
+    if (zlen > z.length) {
+      throw new IllegalArgumentException(
+        "input to long: " + len + " > " + z.length); } }
+
+  // shifts a up to len left n bits assumes no leading zeros,
+  // 0<=n<32
+  private static void primitiveLeftShift (final int[] a,
+                                          final int len,
+                                          final int n) {
+    if ((len == 0) || (n == 0)) { return; }
+    final int n2 = 32 - n;
+    for (int i = 0, c = a[i], m = (i + len) - 1; i < m; i++) {
+      final int b = c;
+      c = a[i + 1];
+      a[i] = (b << n) | (c >>> n2); }
+    a[len - 1] <<= n; }
+
+  private static final int addOne (final int[] a,
+                                   int offset,
+                                   int mlen,
+                                   final int carry) {
+    offset = a.length - 1 - mlen - offset;
+    final long t = unsigned(a[offset]) + unsigned(carry);
+    a[offset] = (int) t;
+    if ((t >>> 32) == 0) { return 0; }
+    while (--mlen >= 0) {
+      if (--offset < 0) { // Carry out of number
+        return 1; }
+      a[offset]++;
+      if (a[offset] != 0) { return 0; } }
+    return 1; }
+
+  private static final int[] getLower (final int[] m,
+                                       final int n) {
+    //assert (! leadingZero(m));
+    final int len = m.length;
+    if (len <= n) { return m; }
+    final int lowerInts[] = new int[n];
+    System.arraycopy(m,len-n,lowerInts,0,n);
+    return stripLeadingZeros(lowerInts); }
+
+  private static final int[] getUpper (final int[] m,
+                                       final int n) {
+    //assert (! leadingZero(m));
+    final int len = m.length;
+    if (len <= n) { return EMPTY; }
+    final int upperLen = len - n;
+    final int upperInts[] = new int[upperLen];
+    System.arraycopy(m,0,upperInts,0,upperLen);
+    return stripLeadingZeros(upperInts); }
+
+  private static final int[] shiftUp (final int[] m,
+                                      final int bitShift) {
+    assert 0<=bitShift;
+    if (bitShift==0) { return m; }
+    if (isZero(m)) { return EMPTY; }
+    final int intShift = (bitShift >>> 5);
+    final int remShift = (bitShift & 0x1f);
+    final int n = m.length;
+    if (remShift==0) {
+      return Arrays.copyOfRange(m,0,n+intShift); }
+    int m1[] = null;
+    int i = 0;
+    final int downShift = 32 - remShift;
+    final int highBits = (m[0] >>> downShift);
+    if (highBits != 0) {
+      m1 = new int[n + intShift + 1];
+      m1[i++] = highBits; }
+    else { m1 = new int[n + intShift]; }
+    int j = 0;
+    while (j < (n - 1)) {
+      m1[i++] = (m[j++] << remShift) | (m[j] >>> downShift); }
+    m1[i] = m[j] << remShift;
+    return stripLeadingZeros(m1); }
+
+  //--------------------------------------------------------------
+
+  private static final int[] add (final int[] m0,
+                                  final int[] m1) {
+    // TODO: assert necessary?
+    //assert (! leadingZero(m0));
+    //assert (! leadingZero(m1));
+    // If m0 is shorter, swap the two arrays
+    if (m0.length < m1.length) { return add(m1,m0); }
+    int i0 = m0.length;
+    int i1 = m1.length;
+    final int[] r0 = new int[i0];
+    long sum = 0;
+    if (i1 == 1) {
+      sum = unsigned(m0[--i0]) + unsigned(m1[0]);
+      r0[i0] = (int) sum; }
+    else {
+      while (i1 > 0) {
+        sum =
+          unsigned(m0[--i0])
+          + unsigned(m1[--i1])
+          + (sum >>> 32);
+        r0[i0] = (int) sum; } }
+    boolean carry = ((sum >>> 32) != 0);
+    while ((i0 > 0) && carry) {
+      carry = ((r0[--i0] = m0[i0] + 1) == 0); }
+    while (i0 > 0) { r0[--i0] = m0[i0]; }
+    if (carry) {
+      final int[] r1 = new int[r0.length + 1];
+      System.arraycopy(r0,0,r1,1,r0.length);
+      r1[0] = 0x01;
+      return stripLeadingZeros(r1); }
+    return stripLeadingZeros(r0); }
+
+  private static final int[] subtract (final int[] m0,
+                                       final int[] m1) {
+
+    // TODO: assert necessary?
+    //assert (! leadingZero(m0));
+    //assert (! leadingZero(m1));
+    if (isZero(m1)) { return m0; }
+
+    //final int c = compare(m0,m1);
+    //assert 0L <= c;
+    //if (c == 0) { return EMPTY; }
+
+    int i0 = m0.length;
+    final int result[] = new int[i0];
+    int i1 = m1.length;
+    long dif = 0;
+
+    while (i1 > 0) {
+      dif =
+        (unsigned(m0[--i0])
+          - unsigned(m1[--i1]))
+        + (dif >> 32);
+      result[i0] = (int) dif; }
+
+    boolean borrow = ((dif >> 32) != 0);
+    while ((i0 > 0) && borrow) {
+      borrow = ((result[--i0] = m0[i0] - 1) == -1); }
+
+    while (i0 > 0) { result[--i0] = m0[i0]; }
+
+    return stripLeadingZeros(result); }
+
+  private static final int[] squareKaratsuba (final int[] m) {
+    //assert (! leadingZero(m));
+    final int half = (m.length + 1) / 2;
+    final int[] xl = getLower(m,half);
+    final int[] xh = getUpper(m,half);
+    final int[] xhs = square(xh);  // xhs = xh^2
+    final int[] xls = square(xl);  // xls = xl^2
+    // xh^2 << 64 + (((xl+xh)^2 - (xh^2 + xl^2)) << 32) + xl^2
+    final int h32 = half*32;
+    return
+      add(
+        shiftUp(
+          add(
+            shiftUp(xhs,h32),
+            subtract(square(add(xl,xh)),add(xhs,xls))),
+          h32),
+        xls); }
+
+  //--------------------------------------------------------------
+  // Modular Arithmetic
+  //--------------------------------------------------------------
+
+  private static final void implMulAddCheck (final int[] out,
+                                             final int[] in,
+                                             final int offset,
+                                             final int len) {
+    //assert (! leadingZero(in));
+    if (len > in.length) {
+      throw new IllegalArgumentException(
+        "input length is out of bound: " + len + " > "
+          + in.length); }
+    if (offset < 0) {
+      throw new IllegalArgumentException(
+        "input offset is invalid: " + offset); }
+    if (offset > (out.length - 1)) {
+      throw new IllegalArgumentException(
+        "input offset is out of bound: " + offset + " > "
+          + (out.length - 1)); }
+    if (len > (out.length - offset)) {
+      throw new IllegalArgumentException(
+        "input len is out of bound: " + len + " > "
+          + (out.length - offset)); } }
+
+  private static final int implMulAdd (final int[] out,
+                                       final int[] in,
+                                       int offset,
+                                       final int len,
+                                       final int k) {
+    final long kLong = loWord(k);
+    long carry = 0;
+
+    offset = out.length - offset - 1;
+    for (int j = len - 1; j >= 0; j--) {
+      final long product =
+        (unsigned(in[j]) * kLong) + unsigned(out[offset])
+        + carry;
+      out[offset--] = (int) product;
+      carry = product >>> 32; }
+    return (int) carry; }
+
+  private static final int mulAdd (final int[] out,
+                                   final int[] in,
+                                   final int offset,
+                                   final int len,
+                                   final int k) {
+    //assert (! leadingZero(in));
+    implMulAddCheck(out,in,offset,len);
+    return implMulAdd(out,in,offset,len,k); }
+
+  private static final int[] implSquareToLen (final int[] x,
+                                              final int len,
+                                              final int[] z,
+                                              final int zlen) {
+    //assert (! leadingZero(x));
+
+    // The algorithm used here is adapted from Colin Plumb's C
+    // library.
+    // Technique: Consider the partial products in the
+    // multiplication
+    // of "abcde" by itself:
+    // a b c d e
+    // * a b c d e
+    // ==================
+    // ae be ce de ee
+    // ad bd cd dd de
+    // ac bc cc cd ce
+    // ab bb bc bd be
+    // aa ab ac ad ae
+    // Note that everything above the main diagonal:
+    // ae be ce de = (abcd) * e
+    // ad bd cd = (abc) * d
+    // ac bc = (ab) * c
+    // ab = (a) * b
+    // is a copy of everything below the main diagonal:
+    // de
+    // cd ce
+    // bc bd be
+    // ab ac ad ae
+    // Thus, the sum is 2 * (off the diagonal) + diagonal.
+    // This is accumulated beginning with the diagonal (which
+    // consist of the squares of the digits of the input), which
+    // is then divided by two, the off-diagonal added, and
+    // multiplied by two again. The low bit is simply a copy of
+    // the low bit of the input, so it doesn't need special care.
+
+    // Store the squares, right shifted one bit (i.e., divided by
+    // 2)
+    int lastProductLowWord = 0;
+    for (int j = 0, i = 0; j < len; j++) {
+      final long piece = unsigned(x[j]);
+      final long product = piece * piece;
+      z[i++] =
+        (lastProductLowWord << 31) | (int) (product >>> 33);
+      z[i++] = (int) (product >>> 1);
+      lastProductLowWord = (int) product;
+    }
+
+    // Add in off-diagonal sums
+    for (int i = len, offset = 1; i > 0; i--, offset += 2) {
+      int t = x[i - 1];
+      t = mulAdd(z,x,offset,i - 1,t);
+      addOne(z,offset - 1,i,t); }
+
+    // Shift back up and set low bit
+    primitiveLeftShift(z,zlen,1);
+    z[zlen - 1] |= x[len - 1] & 1;
+
+    return stripLeadingZeros(z); }
+
+  private static final int[] squareToLen (final int[] m,
+                                          final int len,
+                                          int[] z) {
+    //assert (! leadingZero(m));
+    assert (0<=len);
+    final int zlen = len << 1;
+    if ((z == null) || (z.length < zlen)) {
+      z = new int[zlen]; }
+
+    // Execute checks before calling intrinsic method.
+    implSquareToLenChecks(m,len,z,zlen);
+    return implSquareToLen(m,len,z,zlen); }
+
+  private static final int[] getToomSlice (final int[] m,
+                                           final int lowerSize,
+                                           final int upperSize,
+                                           final int slice,
+                                           final int fullsize) {
+    //assert (! leadingZero(m));
+    final int len = m.length;
+    final int offset = fullsize - len;
+    int start;
+    final int end;
+    if (slice == 0) {
+      start = 0 - offset;
+      end = upperSize - 1 - offset; }
+    else {
+      start = (upperSize + ((slice - 1) * lowerSize)) - offset;
+      end = (start + lowerSize) - 1; }
+    if (start < 0) { start = 0; }
+    if (end < 0) { return EMPTY; }
+    final int sliceSize = (end - start) + 1;
+    if (sliceSize <= 0) { return EMPTY; }
+    // While performing Toom-Cook, all slices are positive and
+    // the sign is adjusted when the final number is composed.
+    if ((start == 0) && (sliceSize >= len)) { return stripLeadingZeros(m); }
+    final int intSlice[] = new int[sliceSize];
+    System.arraycopy(m,start,intSlice,0,sliceSize);
+    return stripLeadingZeros(intSlice); }
+
+  private static final int[] exactDivideBy3 (final int[] m) {
+    //assert (! leadingZero(m));
+    final int len = m.length;
+    final int[] result = new int[len];
+    long x, w, q, borrow;
+    borrow = 0L;
+    for (int i = len - 1; i >= 0; i--) {
+      x = unsigned(m[i]);
+      w = x - borrow;
+      if (borrow > x) { // Did we make the number go negative?
+        borrow = 1L; }
+      else { borrow = 0L; }
+      // 0xAAAAAAAB is the modular inverse of 3 (mod 2^32). Thus,
+      // the effect of this is to divide by 3 (mod 2^32).
+      // This is much faster than division on most architectures.
+      q = loWord(w * 0xAAAAAAABL);
+      result[i] = (int) q;
+      // Now check the borrow. The second check can of course be
+      // eliminated if the first fails.
+      if (q >= 0x55555556L) {
+        borrow++;
+        if (q >= 0xAAAAAAABL) { borrow++; } } }
+    return stripLeadingZeros(result); }
+
+  private static final int[] shiftDown0 (final int[] m0,
+                                         final int n) {
+    final int iShift = (n>>>5);
+    final int rShift = (n & 0x1f);
+    final int n0 = m0.length;
+    int m1[] = null;
+
+    // Special case: entire contents shifted off the end
+    if (iShift >= n0) { return EMPTY; }
+
+    if (rShift == 0) {
+      final int newMagLen = n0 - iShift;
+      m1 = Arrays.copyOf(m0,newMagLen); }
+    else {
+      int i = 0;
+      final int highBits = m0[0] >>> rShift;
+      if (highBits != 0) {
+        m1 = new int[n0 - iShift];
+        m1[i++] = highBits; }
+      else {
+        m1 = new int[n0 - iShift - 1]; }
+
+      final int nBits2 = 32 - rShift;
+      int j = 0;
+      while (j < (n0 - iShift - 1)) {
+        m1[i++] = (m0[j++] << nBits2) | (m0[j] >>> rShift); } }
+    return m1; }
+
+  private static final int[] shiftDown (final int[] m,
+                                        final int n) {
+    assert 0<=n;
+    if (isZero(m)) { return EMPTY; }
+    if (0==n) { return stripLeadingZeros(m); }
+    return shiftDown0(m,n); }
+
+  private static final int[] squareToomCook3 (final int[] m) {
+    //assert (! leadingZero(m));
+    final int len = m.length;
+    // k is the size (in ints) of the lower-order slices.
+    final int k = (len + 2) / 3;   // Equal to ceil(largest/3)
+
+    // r is the size (in ints) of the highest-order slice.
+    final int r = len - (2 * k);
+
+    // Obtain slices of the numbers. a2 is the most significant
+    // bits of the number, and a0 the least significant.
+    final int[] a2 = getToomSlice(m,k,r,0,len);
+    final int[] a1 = getToomSlice(m,k,r,1,len);
+    final int[] a0 = getToomSlice(m,k,r,2,len);
+    final int[] v0 = square(a0);
+    int[] da1 = add(a2,a0);
+    final int[] vm1 = square(subtract(da1,a1));
+    da1 = add(da1,a1);
+    final int[] v1 = square(da1);
+    final int[] vinf = square(a2);
+    final int[] v2 = square(subtract(shiftUp(add(da1,a2),1),a0));
+
+    // The algorithm requires two divisions by 2 and one by 3.
+    // All divisions are known to be exact, that is, they do not
+    // produce remainders, and all results are positive. The
+    // divisions by 2 are implemented as right shifts which are
+    // relatively efficient, leaving only a division by 3.
+    // The division by 3 is done by an optimized algorithm for
+    // this case.
+    int[] t2 = exactDivideBy3(subtract(v2,vm1));
+    int[] tm1 = shiftDown(subtract(v1,vm1),1);
+    int[] t1 = subtract(v1,v0);
+    t2 = shiftDown(subtract(t2,t1),1);
+    t1 = subtract(subtract(t1,tm1),vinf);
+    t2 = shiftUp(subtract(t2,vinf),1);
+    tm1 = subtract(tm1,t2);
+
+    // Number of bits to shift left.
+    final int ss = k * 32;
+
+    return
+      stripLeadingZeros(
+        add(
+          shiftUp(add(
+            shiftUp(add(
+              shiftUp(add(
+                shiftUp(vinf,ss),
+                t2),ss),
+              t1),ss),
+            tm1),ss),
+          v0)); }
+
+  private static final int[] square (final int[] m) {
+    //assert (! leadingZero(m));
+    if (isZero(m)) { return EMPTY; }
+    final int len = m.length;
+    if (len < KARATSUBA_SQUARE_THRESHOLD) {
+      final int[] z = squareToLen(m,len,null);
+      return stripLeadingZeros(z); }
+    if (len < TOOM_COOK_SQUARE_THRESHOLD) {
+      return squareKaratsuba(m); }
+    // For a discussion of overflow detection see multiply()
+    return squareToomCook3(m); }
+
+  //--------------------------------------------------------------
+
+  @Override
+  public final NaturalBEIBuilder square () {
+    setWords(square(copyWords()));
+    return this; }
+
+  //--------------------------------------------------------------
+  // multiplication
+  //--------------------------------------------------------------
+
+  private static final int MULTIPLY_SQUARE_THRESHOLD = 20;
+  private static final int KARATSUBA_THRESHOLD = 80;
+  private static final int TOOM_COOK_THRESHOLD = 240;
+
+  //--------------------------------------------------------------
+
+  private static final void multiplyToLenCheck (final int[] array,
+                                                final int length) {
+    //assert (! leadingZero(array));
+    // not an error because multiplyToLen won't execute if len<=0
+    if (length <= 0) { return; }
+    //Objects.requireNonNull(array);
+    if (length > array.length) {
+      throw new ArrayIndexOutOfBoundsException(length-1); } }
+
+  private static final int[] implMultiplyToLen (final int[] m0,
+                                                final int n0,
+                                                final int[] m1,
+                                                final int n1,
+                                                int[] z) {
+    //assert (! leadingZero(m0));
+    //assert (! leadingZero(m1));
+
+    final int xstart = n0 - 1;
+    final int ystart = n1 - 1;
+    if ((z == null) || (z.length < (n0 + n1))) {
+      z = new int[n0 + n1]; }
+    long carry = 0;
+    for (int j = ystart, k = ystart + 1 + xstart;
+      j >= 0;
+      j--, k--) {
+      final long product =
+        (unsigned(m1[j]) * unsigned(m0[xstart])) + carry;
+      z[k] = (int) product;
+      carry = product >>> 32; }
+    z[xstart] = (int) carry;
+    for (int i = xstart - 1; i >= 0; i--) {
+      carry = 0;
+      for (int j = ystart, k = ystart + 1 + i; j >= 0; j--, k--) {
+        final long product =
+          (unsigned(m1[j]) * unsigned(m0[i]))
+          + unsigned(z[k]) + carry;
+        z[k] = (int) product;
+        carry = product >>> 32; }
+      z[i] = (int) carry; }
+    return z; }
+
+  private static final int[] multiplyToLen (final int[] x,
+                                            final int xlen,
+                                            final int[] y,
+                                            final int ylen,
+                                            final int[] z) {
+    multiplyToLenCheck(x,xlen);
+    multiplyToLenCheck(y,ylen);
+    return implMultiplyToLen(x,xlen,y,ylen,z); }
+
+  //--------------------------------------------------------------
+
+  private static final int[] multiplyKaratsuba (final int[] x,
+                                                final int[] y) {
+    //assert (! leadingZero(x));
+    //assert (! leadingZero(y));
+    final int xlen = x.length;
+    final int ylen = y.length;
+
+    // The number of ints in each half of the number.
+    final int half = (Math.max(xlen,ylen) + 1) / 2;
+
+    // xl and yl are the lower halves of x and y respectively,
+    // xh and yh are the upper halves.
+    final int[] xl = getLower(x,half);
+    final int[] xh = getUpper(x,half);
+    final int[] yl = getLower(y,half);
+    final int[] yh = getUpper(y,half);
+
+    final int[] p1 = multiply(xh,yh);  // p1 = xh*yh
+    final int[] p2 = multiply(xl,yl);  // p2 = xl*yl
+
+    // p3=(xh+xl)*(yh+yl)
+    final int[] p3 = multiply(add(xh,xl),add(yh,yl));
+
+    // result = p1 * 2^(32*2*half) + (p3 - p1 - p2) * 2^(32*half)
+    // + p2
+    final int h32 = half*32;
+    final int[] result =
+      add(
+        shiftUp(add(
+          shiftUp(p1,h32),
+          subtract(subtract(p3,p1),p2)),
+          h32),
+        p2);
+
+    return result; }
+
+  //--------------------------------------------------------------
+
+  private static final int compare (final int[] m0,
+                                    final int[] m1) {
+    // TODO: assert necessary?
+    //assert (! leadingZero(m0));
+    //assert (! leadingZero(m1));
+    final int n0 = m0.length;
+    final int n1 = m1.length;
+    if (n0<n1) { return -1; }
+    if (n0>n1) { return 1; }
+    for (int i=0;i<n0;i++) {
+      final long m0i = unsigned(m0[i]);
+      final long m1i = unsigned(m1[i]);
+      if (m0i<m1i) { return -1; }
+      if (m0i>m1i) { return 1; } }
+    return 0; }
+
+  //--------------------------------------------------------------
+
+  private static final int[] multiplyToomCook3 (final int[] m0,
+                                                final int[] m1) {
+    //assert (! leadingZero(m0));
+    //assert (! leadingZero(m1));
+
+    final int n0 = m0.length;
+    final int n1 = m1.length;
+
+    final int largest = Math.max(n0,n1);
+
+    // k is the size (in ints) of the lower-order slices.
+    final int k = (largest + 2) / 3;   // Equal to ceil(largest/3)
+
+    // r is the size (in ints) of the highest-order slice.
+    final int r = largest - (2 * k);
+
+    // Obtain slices of the numbers. a2 and b2 are the most
+    // significant bits of the numbers a and b, and a0 and b0 the
+    // least significant.
+    final int[] a2 = getToomSlice(m0,k,r,0,largest);
+    final int[] a1 = getToomSlice(m0,k,r,1,largest);
+    final int[] a0 = getToomSlice(m0,k,r,2,largest);
+    final int[] b2 = getToomSlice(m1,k,r,0,largest);
+    final int[] b1 = getToomSlice(m1,k,r,1,largest);
+    final int[] b0 = getToomSlice(m1,k,r,2,largest);
+    final int[] v0 = multiply(a0,b0);
+    int[] da1 = add(a2,a0);
+    int[] db1 = add(b2,b0);
+
+    // might be negative
+    final int[] da1_a1;
+    final int ca = compare(da1,a1);
+    if (0 < ca) { da1_a1 = subtract(da1,a1); }
+    else { da1_a1 = subtract(a1,da1); }
+    // might be negative
+    final int[] db1_b1;
+    final int cb = compare(db1,b1);
+    if (0 < cb) { db1_b1 = subtract(db1,b1); }
+    else { db1_b1 = subtract(b1,db1); }
+    final int cv = ca * cb;
+    final int[] vm1 = multiply(da1_a1,db1_b1);
+
+    da1 = add(da1,a1);
+    db1 = add(db1,b1);
+    final int[] v1 = multiply(da1,db1);
+    final int[] v2 =
+      multiply(
+        subtract(shiftUp(add(da1,a2),1),a0),
+        subtract(shiftUp(add(db1,b2),1),b0));
+
+    final int[] vinf = multiply(a2,b2);
+
+    // The algorithm requires two divisions by 2 and one by 3.
+    // All divisions are known to be exact, that is, they do not
+    // produce remainders, and all results are positive. The
+    // divisions by 2 are implemented as right shifts which are
+    // relatively efficient, leaving only an exact division by 3,
+    // which is done by a specialized linear-time algorithm.
+    int[] t2;
+    // handle missing sign of vm1
+    if (0 < cv) { t2 = exactDivideBy3(subtract(v2,vm1)); }
+    else { t2 = exactDivideBy3(add(v2,vm1));}
+
+    int[] tm1;
+    // handle missing sign of vm1
+    if (0 < cv) { tm1 = shiftDown(subtract(v1,vm1),1); }
+    else { tm1 = shiftDown(add(v1,vm1),1); }
+
+    int[] t1 = subtract(v1,v0);
+    t2 = shiftDown(subtract(t2,t1),1);
+    t1 = subtract(subtract(t1,tm1),vinf);
+    t2 = subtract(t2,shiftUp(vinf,1));
+    tm1 = subtract(tm1,t2);
+
+    // Number of bits to shift left.
+    final int ss = k * 32;
+
+    final int[] result =
+      add(shiftUp(
+        add(shiftUp(
+          add(shiftUp(
+            add(shiftUp(vinf,ss),t2),
+            ss),t1),
+          ss),tm1),
+        ss),v0);
+    return stripLeadingZeros(result); }
+
+  //--------------------------------------------------------------
+
+  private static final int[] multiply (final int[] m0,
+                                       final long m1) {
+    //assert (! leadingZero(m0));
+    if (0L==m1) { return EMPTY; }
+    assert 0L < m1;
+
+    final long dh = m1 >>> 32;      // higher order bits
+    final long dl = loWord(m1); // lower order bits
+    final int xlen = m0.length;
+    final int[] value = m0;
+    int[] rm =
+      (dh == 0L) ? (new int[xlen + 1]) : (new int[xlen + 2]);
+      long carry = 0;
+      int rstart = rm.length - 1;
+      for (int i = xlen - 1; i >= 0; i--) {
+        final long product = (unsigned(value[i]) * dl) + carry;
+        rm[rstart--] = (int) product;
+        carry = product >>> 32; }
+      rm[rstart] = (int) carry;
+      if (dh != 0L) {
+        carry = 0;
+        rstart = rm.length - 2;
+        for (int i = xlen - 1; i >= 0; i--) {
+          final long product =
+            (unsigned(value[i]) * dh)
+            + unsigned(rm[rstart]) + carry;
+          rm[rstart--] = (int) product;
+          carry = product >>> 32; }
+        rm[0] = (int) carry; }
+      if (carry == 0L) {
+        rm = Arrays.copyOfRange(rm,1,rm.length); }
+      return stripLeadingZeros(rm); }
+
+  //--------------------------------------------------------------
+
+  private static final int[] multiply (final int[] x,
+                                       final int[] y) {
+    //assert (! leadingZero(x));
+    //assert (! leadingZero(y));
+
+    if ((isZero(y)) || (isZero(x))) { return EMPTY; }
+    final int xlen = x.length;
+    if ((y == x)
+      &&
+      (xlen > MULTIPLY_SQUARE_THRESHOLD)) {
+      return square(x); }
+
+    final int ylen = y.length;
+
+    if ((xlen < KARATSUBA_THRESHOLD)
+      || (ylen < KARATSUBA_THRESHOLD)) {
+      if (y.length == 1) { return multiply(x,unsigned(y[0])); }
+      if (x.length == 1) { return multiply(y,unsigned(x[0])); }
+      int[] result = multiplyToLen(x,xlen,y,ylen,null);
+      result = stripLeadingZeros(result);
+      return result; }
+    if ((xlen < TOOM_COOK_THRESHOLD)
+      && (ylen < TOOM_COOK_THRESHOLD)) {
+      return multiplyKaratsuba(x,y); }
+    return multiplyToomCook3(x,y); }
+
+  @Override
+  public final NaturalBEIBuilder multiply (final NaturalBEI u) {
+    setWords(multiply(copyWords(),u.copyWords()));
+    return this; }
+
+  //--------------------------------------------------------------
   // division
   //--------------------------------------------------------------
   /** This method is used for division of an n word dividend by a
@@ -817,7 +1571,7 @@ implements NaturalBuilder<NaturalBEI> {
       quotient.start = 0;
       return needRemainder ? new NaturalBEIBuilder() : null; }
 
-    quotient.clear();
+    quotient.zero();
     // Special case one word divisor
     if (b.nWords == 1) {
       final int r = divideOneWord(b.words[b.start], quotient);

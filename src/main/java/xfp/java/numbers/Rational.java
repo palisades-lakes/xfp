@@ -11,9 +11,10 @@ import xfp.java.exceptions.Exceptions;
 /** Ratios of {@link Natural}.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-20
+ * @version 2019-06-25
  */
 
+@SuppressWarnings("unchecked")
 public final class Rational extends Number
 implements Ringlike<Rational> {
 

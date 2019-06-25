@@ -30,7 +30,7 @@ import xfp.java.prng.PRNG;
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-24
+ * @version 2019-06-25
  */
 @SuppressWarnings("unchecked")
 public final class Common {
@@ -47,7 +47,6 @@ public final class Common {
             "xfp.java.accumulators.KahanAccumulator",
             "xfp.java.accumulators.DistilledAccumulator",
             "xfp.java.accumulators.ZhuHayesAccumulator",
-            "xfp.java.accumulators.BigFloatAccumulator1",
             "xfp.java.accumulators.BigFloatAccumulator0",
             "xfp.java.accumulators.BigFloatAccumulator",
             "xfp.java.accumulators.RationalFloatAccumulator",

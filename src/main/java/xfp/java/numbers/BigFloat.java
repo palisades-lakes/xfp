@@ -11,9 +11,10 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-18
+ * @version 2019-06-25
  */
 
+@SuppressWarnings("unchecked")
 public final class BigFloat
 extends Number
 implements Ringlike<BigFloat> {

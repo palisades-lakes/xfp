@@ -13,7 +13,7 @@ import xfp.java.exceptions.Exceptions;
  *  uword(i) * 2<sup>32*i</sup></code>.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-24
+ * @version 2019-06-25
  */
 
 @SuppressWarnings("unchecked")
@@ -23,7 +23,7 @@ Natural<T extends Natural> extends Ringlike<T> {
   //--------------------------------------------------------------
   // construction
   //--------------------------------------------------------------
-  
+
   public default NaturalBuilder<T> builder () {
     throw Exceptions.unsupportedOperation(this,"builder"); }
 
@@ -191,7 +191,7 @@ Natural<T extends Natural> extends Ringlike<T> {
     if (iShift >= endWord()) { return zero(); }
     return 
       (T) builder().set((T) this).shiftDown(shift).build(); }
- 
+
   public default T shiftUp (final int bitShift) {
     assert 0<=bitShift;
     if (isZero()) { return (T) this; }
@@ -279,24 +279,30 @@ Natural<T extends Natural> extends Ringlike<T> {
       final long lo1 = Numbers.loWord(us);
       if (lo0<lo1) { return -1; }
       if (lo0>lo1) { return 1; } }
-    
+
     // check this for any non-zero words in zeros of u<<upShift
     for (int i=iShift-1;i>=startWord();i--) { 
       if (0!=uword(i)) { return 1; } }
-    
+
     return 0; }
 
   //--------------------------------------------------------------
   // arithmetic
   //--------------------------------------------------------------
   // implementations usually return a pre-allocated constant
-  
+
   @Override
   public default T zero () {
     throw Exceptions.unsupportedOperation(this,"zero"); }
 
+  @Override
+  public default boolean isZero () { 
+    for (int i=startWord();i<endWord();i++) {
+      if (0!=word(i)) { return false; } }
+    return true; }
+
   // Natural numbers are nonnegative
-  
+
   @Override
   public default T abs () { return (T) this; }
 
@@ -307,97 +313,108 @@ Natural<T extends Natural> extends Ringlike<T> {
     if (endWord()<u.endWord()) { return (T) u.add(this); }
     if (isZero()) { return u; }
     if (u.isZero()) { return (T) this; }
-    return 
-      (T) builder().set((T) this).increment(u).build(); }
+    final T v = (T) builder().set((T) this).increment(u).build(); 
+    return v; }
 
-//  @Override
-//  public default T add (final T u) {
-//    throw Exceptions.unsupportedOperation(
-//      this,"add",u); }
-  
   public default T add (final T u,
-                        final int bitShift) {
-    assert 0<=bitShift;
-    throw Exceptions.unsupportedOperation(
-      this,"add",u,Integer.valueOf(bitShift)); }
+                        final int shift) {
+    assert 0<=shift;
+    if (isZero()) { return (T) u.shiftUp(shift); }
+    if (u.isZero()) { return (T) this; }
+    if (0==shift) { return add(u); }
+    // TODO: reduce to single builder op?
+    return 
+      (T) builder().shiftUp(u,shift).increment(this).build(); }
 
   public default T add (final long u) {
-    throw Exceptions.unsupportedOperation(this,"add",u); }
+    assert 0L <= u;
+    if (0L == u) { return (T) this; }
+    final T v = (T) builder().set((T) this).increment(u).build();
+    return v; }
 
   public default T add (final long u,
                         final int upShift) {
     assert 0L<=u;
     assert 0<=upShift;
-    throw Exceptions.unsupportedOperation(
-      this,"add",u,upShift); }
+    // TODO: reduce to single builder op?
+    return 
+      (T) builder().shiftUp(u,upShift).increment(this).build(); }
 
   //--------------------------------------------------------------
 
   @Override
   public default T subtract (final T u) {
-    throw Exceptions.unsupportedOperation(this,"subtract",u); }
+    assert 0<=compareTo(u);
+    if (u.isZero()) { return (T) this; }
+    final T v = (T) builder().set((T) this).decrement(u).build(); 
+    return v; }
 
   public default T subtract (final long u) {
     assert 0L<=u;
     assert 0<=compareTo(u);
-    throw Exceptions.unsupportedOperation(
-      this,"subtract",u); }
+    if (0L==u) { return (T) this; }
+    final T v = (T) builder().set((T) this).decrement(u).build(); 
+    return v; }
 
   public default T subtract (final long u,
                              final int upShift) {
     assert 0L<=u;
     assert 0<=upShift;
     assert compareTo(u,upShift)>=0;
-    throw Exceptions.unsupportedOperation(
-      this,"subtract",u,upShift); }
+    return subtract((T) builder().shiftUp(u,upShift).build()); }
 
   //--------------------------------------------------------------
 
   public default T subtractFrom (final long u) {
     assert 0L<=u;
     assert compareTo(u)<=0;
-    throw Exceptions.unsupportedOperation(
-      this,"subtractFrom",u); }
+    return (T) builder().set(u).build().subtract(this); }
 
   public default T subtractFrom (final long u,
                                  final int upShift) {
     assert 0L<=u;
     assert 0<=upShift;
     assert compareTo(u,upShift)<=0;
-    throw Exceptions.unsupportedOperation(
-      this,"subtractFrom",u,upShift); }
+    return 
+      (T) builder().shiftUp(u,upShift).build().subtract(this); }
 
   //--------------------------------------------------------------
 
   @Override
-  public default T absDiff (final T x) {
-    final int c = compareTo(x);
+  public default T absDiff (final T u) {
+    final int c = compareTo(u);
     if (c==0) { return zero(); }
-    if (c<0) { return (T) x.subtract(this); }
-    return subtract(x); }
+    if (c<0) { return (T) u.subtract(this); }
+    return subtract(u); }
 
   //--------------------------------------------------------------
 
   @Override
   public default T square () {
-    throw Exceptions.unsupportedOperation(this,"square"); }
+    return (T) builder().set((T) this).square().build(); }
 
   //--------------------------------------------------------------
 
   @Override
-  public default T multiply (final T x) {
-    throw Exceptions.unsupportedOperation(this,"multiply",x); }
+  public default boolean isOne () { 
+    if (1!=word(0)) { return false; }
+    for (int i=Math.max(1,startWord());i<endWord();i++) {
+      if (0!=word(i)) { return false; } }
+    return true; }
 
-  public default T multiply (final long x) {
-    assert 0L<=x;
-    throw Exceptions.unsupportedOperation(this,"multiply",x); }
+  @Override
+  public default T multiply (final T u) {
+    return (T) builder().set((T) this).multiply(u).build(); }
 
-  public default T multiply (final long x,
+  public default T multiply (final long u) {
+    assert 0L<=u;
+    return (T) builder().set(u).multiply(this).build(); }
+
+  public default T multiply (final long u,
                              final int upShift) {
-    assert 0L<=x;
+    assert 0L<=u;
     assert 0<=upShift;
-    throw Exceptions.unsupportedOperation(
-      this,"multiply",x,upShift); }
+    return (T) builder().shiftUp(u,upShift).multiply(this).build(); }
 
   //--------------------------------------------------------------
 
@@ -410,8 +427,8 @@ Natural<T extends Natural> extends Ringlike<T> {
     throw Exceptions.unsupportedOperation(this,"invert"); }
 
   @Override
-  public default T one () {
-    throw Exceptions.unsupportedOperation(this,"one"); }
+  public default T one () { 
+    return (T) builder().set(1L).build(); }
 
   @Override
   public default List<T> divideAndRemainder (final T x) {
@@ -452,18 +469,29 @@ Natural<T extends Natural> extends Ringlike<T> {
   public default double doubleValue () {
     throw Exceptions.unsupportedOperation(this,"doubleValue"); }
 
+//  public default String toHexString () {
+//    final StringBuilder b = new StringBuilder("");
+//    final int n = endWord();
+//    if (0 == n) { b.append('0'); }
+//    else {
+//      b.append("[");
+//      b.append(String.format("%08x",Long.valueOf(uword(0))));
+//      for (int i=1;i<n;i++) {
+//        b.append(" ");
+//        b.append(
+//          String.format("%08x",Long.valueOf(uword(i)))); } 
+//      b.append("]"); }
+//    return b.toString(); }
+
   public default String toHexString () {
     final StringBuilder b = new StringBuilder("");
-    final int n = endWord();
+    final int n = endWord()-1;
     if (0 == n) { b.append('0'); }
     else {
-      b.append("[");
-      b.append(String.format("%08x",Long.valueOf(uword(0))));
-      for (int i=1;i<n;i++) {
+      b.append(String.format("%x",Long.valueOf(uword(n))));
+      for (int i=n-1;i>=0;i--) {
         b.append(" ");
-        b.append(
-          String.format("%08x",Long.valueOf(uword(i)))); } 
-      b.append("]"); }
+        b.append(String.format("%08x",Long.valueOf(uword(i)))); } }
     return b.toString(); }
 
   //--------------------------------------------------------------

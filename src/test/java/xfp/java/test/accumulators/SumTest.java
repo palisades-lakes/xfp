@@ -9,16 +9,26 @@ import xfp.java.test.Common;
 /** Test summation algorithms.
  * <p>
  * <pre>
- * mvn -q -Dtest=xfp/java/test/accumulators/SumTest test > SumTest.txt
+ * mvn -q -Dtest=xfp/java/test/accumulators/SumTest test > Sum.txt
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-24
+ * @version 2019-06-25
  */
 
 public final class SumTest {
 
   private static final int DIM = 1024;
+
+  @SuppressWarnings("static-method")
+  @Test
+  public final void zeroSum () {
+    //Debug.DEBUG=true;
+    Common.zeroSumTests(
+      Common.zeroSumGenerators(DIM),
+      Common.makeAccumulators(Common.accumulators()));
+    //Debug.DEBUG=false; 
+    }
 
   @SuppressWarnings("static-method")
   @Test
@@ -91,18 +101,6 @@ public final class SumTest {
     //Debug.println();
     //Debug.println("infinite");
     Common.infinityTests(
-      Common.makeAccumulators(Common.accumulators()));
-    //Debug.DEBUG=false; 
-    }
-
-  @SuppressWarnings("static-method")
-  @Test
-  public final void zeroSum () {
-    //Debug.DEBUG=false;
-    //Debug.println();
-    //Debug.println("sum");
-    Common.zeroSumTests(
-      Common.zeroSumGenerators(DIM),
       Common.makeAccumulators(Common.accumulators()));
     //Debug.DEBUG=false; 
     }
