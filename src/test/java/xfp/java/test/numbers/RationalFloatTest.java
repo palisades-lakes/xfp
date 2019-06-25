@@ -4,7 +4,6 @@ import java.util.function.BinaryOperator;
 
 import org.junit.jupiter.api.Test;
 
-import xfp.java.Debug;
 import xfp.java.numbers.NaturalBEI;
 import xfp.java.numbers.Numbers;
 import xfp.java.numbers.RationalFloat;
@@ -18,7 +17,7 @@ import xfp.java.test.Common;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-18
+ * @version 2019-06-24
  */
 
 public final class RationalFloatTest {
@@ -29,7 +28,7 @@ public final class RationalFloatTest {
   @SuppressWarnings({ "static-method" })
   @Test
   public final void testRounding () {
-    Debug.DEBUG=false;
+    //Debug.DEBUG=false;
     final RationalFloat[] f =
     {
      RationalFloat.valueOf(
@@ -54,7 +53,7 @@ public final class RationalFloatTest {
       Common.floatRoundingTest(
         RationalFloat::valueOf, Numbers::floatValue, dist,
         Object::toString, fi);  }
-    Debug.DEBUG=false;
+    //Debug.DEBUG=false;
 
     Common.doubleRoundingTests(
       RationalFloat::valueOf, RationalFloat::valueOf,

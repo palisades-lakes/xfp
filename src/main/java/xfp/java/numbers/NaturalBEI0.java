@@ -14,7 +14,7 @@ import xfp.java.Debug;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-21
+ * @version 2019-06-24
  */
 
 public final class NaturalBEI0 extends Number

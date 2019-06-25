@@ -7,8 +7,6 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 
-import xfp.java.Debug;
-
 /** immutable arbitrary-precision non-negative integers
  * (natural number) represented by big-endian
  * unsigned <code>int[]</code>
@@ -1126,43 +1124,44 @@ implements Natural<NaturalBEI> {
   @Override
   public final int endWord () { return words().length; }
 
-  public final int length () { return endWord()-startWord(); }
-
   public final int[] copyWords () {
-    return Arrays.copyOfRange(words(),startWord(),endWord()); }
+    return Arrays.copyOfRange(words(),0,endWord()); }
 
   @Override
-  public final boolean isZero () { return startWord()==endWord(); }
+  public final boolean isZero () { 
+    for (int i=startWord();i<endWord();i++) {
+      if (0!=word(i)) { return false; } }
+    return true; }
 
   //--------------------------------------------------------------
   // arithmetic
   //--------------------------------------------------------------
 
-  @Override
-  public final NaturalBEI add (final NaturalBEI m) {
-    // If this is shorter, swap the two arrays
-    if (length() < m.length()) { return m.add(this); }
-    int i0 = endWord();
-    int i1 = m.endWord();
-    final int[] r0 = new int[i0];
-    long sum = 0;
-    if (i1 == 1) {
-      sum = unsigned(_words[--i0]) + unsigned(m._words[0]);
-      r0[i0] = (int) sum; }
-    else {
-      while (i1 > 0) {
-        sum = unsigned(_words[--i0]) + unsigned(m._words[--i1]) + (sum >>> 32);
-        r0[i0] = (int) sum; } }
-    boolean carry = ((sum >>> 32) != 0);
-    while ((i0 > 0) && carry) {
-      carry = ((r0[--i0] = _words[i0] + 1) == 0); }
-    while (i0 > 0) { r0[--i0] = _words[i0]; }
-    if (carry) {
-      final int[] r1 = new int[r0.length + 1];
-      System.arraycopy(r0,0,r1,1,r0.length);
-      r1[0] = 0x01;
-      return unsafe(r1); }
-    return unsafe(r0); }
+//  @Override
+//  public final NaturalBEI add (final NaturalBEI m) {
+//    // If this is shorter, swap the two arrays
+//    if (endWord() < m.endWord()) { return m.add(this); }
+//    int i0 = endWord();
+//    int i1 = m.endWord();
+//    final int[] r0 = new int[i0];
+//    long sum = 0;
+//    if (i1 == 1) {
+//      sum = unsigned(_words[--i0]) + unsigned(m._words[0]);
+//      r0[i0] = (int) sum; }
+//    else {
+//      while (i1 > 0) {
+//        sum = unsigned(_words[--i0]) + unsigned(m._words[--i1]) + (sum >>> 32);
+//        r0[i0] = (int) sum; } }
+//    boolean carry = ((sum >>> 32) != 0);
+//    while ((i0 > 0) && carry) {
+//      carry = ((r0[--i0] = _words[i0] + 1) == 0); }
+//    while (i0 > 0) { r0[--i0] = _words[i0]; }
+//    if (carry) {
+//      final int[] r1 = new int[r0.length + 1];
+//      System.arraycopy(r0,0,r1,1,r0.length);
+//      r1[0] = 0x01;
+//      return unsafe(r1); }
+//    return unsafe(r0); }
 
   //--------------------------------------------------------------
 
@@ -1174,8 +1173,8 @@ implements Natural<NaturalBEI> {
     if (u.isZero()) { return this; }
     if (0==bitShift) { return add(u); }
 
-    final int n0 = length();
-    final int n1 = u.length() + (bitShift >>> 5);
+    final int n0 = endWord();
+    final int n1 = u.endWord() + (bitShift >>> 5);
     final int lShift = (bitShift & 0x1f);
     final int n1s;
     if (0==lShift) { n1s = n1; }
@@ -1195,7 +1194,7 @@ implements Natural<NaturalBEI> {
     if (0L == m1) { return this; }
     if (isZero()) { return valueOf(m1); }
     long sum = 0;
-    int n0 = length();
+    int n0 = endWord();
     final int hi = (int) Numbers.hiWord(m1);
     if (n0 == 1) { return valueOf(m1 + unsigned(_words[0])); }
     final int[] r0 = new int[n0];
@@ -1385,7 +1384,7 @@ implements Natural<NaturalBEI> {
     if (0L == m1) { return this; }
 
     final long hi = Numbers.hiWord(m1);
-    int i0 = length();
+    int i0 = endWord();
     final int r[] = new int[i0];
     long difference = 0;
     if (hi == 0) {
@@ -1532,7 +1531,7 @@ implements Natural<NaturalBEI> {
       result[0] = (int) (m - unsigned(_words[0]));
       return unsafe(result); }
     final int r[] = new int[2];
-    if (length() == 1) {
+    if (endWord() == 1) {
       final long dif = loWord(m) - unsigned(_words[0]);
       r[1] = (int) dif;
       final boolean borrow = ((dif >> 32) != 0);
@@ -1838,7 +1837,7 @@ implements Natural<NaturalBEI> {
   //    assert i0==i1 :
   //      "\ni0=" + Long.toHexString(i0)
   //      + "\ni1=" + Long.toHexString(i1)
-  //      + "\nwords=" + Debug.toHexString(_words)
+  //      + "\nwords=" + //Debug.toHexString(_words)
   //      + "\nn=" + n;
   //    return i0; }
 
@@ -1884,7 +1883,7 @@ implements Natural<NaturalBEI> {
     final int len = m.length;
     if (len == 0) { return(0); }
     // Calculate the bit length of the magnitude
-    Debug.println("m[0]=" + Integer.toHexString(m[0]));
+    //Debug.println("m[0]=" + Integer.toHexString(m[0]));
     final int n = ((len - 1) << 5) + Numbers.bitLength(m[0]);
     return n; }
 
@@ -1905,8 +1904,8 @@ implements Natural<NaturalBEI> {
   //  @Override
   //  public final int compareTo (final NaturalBEI m) {
   //    // TODO: should really compare hiBits
-  //    final int n0 = length();
-  //    final int n1 = m.length();
+  //    final int n0 = endWord();
+  //    final int n1 = m.endWord();
   //    if (n0<n1) { return -1; }
   //    if (n0>n1) { return 1; }
   //    for (int i=0;i<n0;i++) {
@@ -1924,7 +1923,7 @@ implements Natural<NaturalBEI> {
   //  public static final int compareTo (final NaturalBEI u0,
   //                                     final long u1) {
   //    assert 0L<=u1;
-  //    final int n0 = u0.length();
+  //    final int n0 = u0.endWord();
   //    final long m10 = Numbers.hiWord(u1);
   //    final long m11 = Numbers.loWord(u1);
   //    final int n1 = (0L!=m10) ? 2 : ((0L!=m11) ? 1 : 0);
@@ -1945,7 +1944,7 @@ implements Natural<NaturalBEI> {
   //    final int c1 = compareTo(this,u);
   //     assert c0 == c1 :
   //       "\n" + c0 + "!=" + c1
-  //       + "\nwords=" + Debug.toHexString(_words)
+  //       + "\nwords=" + //Debug.toHexString(_words)
   //       + "\nthis=" + Long.toHexString(getLong())
   //       + "\nthis=" + getLong()
   //       + "\nu=" + Long.toHexString(u);
@@ -2070,7 +2069,7 @@ implements Natural<NaturalBEI> {
     if (isZero()) { return 0.0F; }
 
     final int exponent =
-      (((length() - 1) << 5) + Numbers.bitLength(_words[0])) - 1;
+      (((endWord() - 1) << 5) + Numbers.bitLength(_words[0])) - 1;
 
     // exponent == floor(log2(abs(this)))
     if (exponent < (Long.SIZE - 1)) { return longValue(); }
@@ -2141,7 +2140,7 @@ implements Natural<NaturalBEI> {
     if (isZero()) { return 0.0; }
 
     final int exponent =
-      (((length() - 1) << 5) + Numbers.bitLength(_words[0])) - 1;
+      (((endWord() - 1) << 5) + Numbers.bitLength(_words[0])) - 1;
 
     // exponent == floor(log2(abs(this))Double)
     if (exponent < (Long.SIZE - 1)) { return longValue(); }

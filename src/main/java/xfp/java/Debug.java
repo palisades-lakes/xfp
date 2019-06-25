@@ -8,7 +8,7 @@ import java.io.PrintStream;
  * Hacky substitute for mess of dependencies and
  * configuration needed by java logging libraries.
  * Intended only for use during development;
- * no Debug.* references should persist in 'production' code.
+ * no //Debug.* references should persist in 'production' code.
  *
  * Static methods only; no state.
  *

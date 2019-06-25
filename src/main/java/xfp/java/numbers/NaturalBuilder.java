@@ -88,35 +88,35 @@ public interface NaturalBuilder<T extends Natural> {
    * Usually the same object as <code>this</code>.
    */
 
-//  public default NaturalBuilder increment (final T u) {
-//    // TODO: optimize by summing over joint range 
-//    // and just carrying after that
-//    Debug.println();
-//    Debug.println("this=" + toHexString());
-//    Debug.println("this.end=" + endWord());
-//    Debug.println("u=" + u.toHexString());
-//    Debug.println("u.end=" + u.endWord());
-//    final int end = Math.max(endWord(),u.endWord());
-//    long sum = 0L;
-//    long carry = 0L;
-//    int i=0;
-//    for (;i<end;i++) {
-//      sum = uword(i) + u.uword(i) + carry;
-//      carry = (sum>>>32);
-//      setWord(i,(int) sum); 
-////      Debug.println("carry="+carry);
-////      Debug.println("i="+i);
-////      Debug.println("this=" + toHexString());
-//    }
-//    if (0L!=carry) { 
-//      setWord(i,(int) carry); 
-//      Debug.println("carried");
-//      Debug.println("carry="+carry);
-//      Debug.println("i="+i);
-//    }
-//    Debug.println("this=" + toHexString());
-//    Debug.println("this.end=" + endWord());
-//    return this; }
+  public default NaturalBuilder increment (final T u) {
+    // TODO: optimize by summing over joint range 
+    // and just carrying after that
+//    //Debug.println();
+//    //Debug.println("this=" + toHexString());
+//    //Debug.println("this.end=" + endWord());
+//    //Debug.println("u=" + u.toHexString());
+//    //Debug.println("u.end=" + u.endWord());
+    final int end = Math.max(endWord(),u.endWord());
+    long sum = 0L;
+    long carry = 0L;
+    int i=0;
+    for (;i<end;i++) {
+      sum = uword(i) + u.uword(i) + carry;
+      carry = (sum>>>32);
+      setWord(i,(int) sum); 
+//      //Debug.println("carry="+carry);
+//      //Debug.println("i="+i);
+//      //Debug.println("this=" + toHexString());
+    }
+    if (0L!=carry) { 
+      setWord(i,(int) carry); 
+//      //Debug.println("carried");
+//      //Debug.println("carry="+carry);
+//      //Debug.println("i="+i);
+    }
+//    //Debug.println("this=" + toHexString());
+//    //Debug.println("this.end=" + endWord());
+    return this; }
 
   //--------------------------------------------------------------
 

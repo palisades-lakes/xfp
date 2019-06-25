@@ -2,7 +2,6 @@ package xfp.java.scripts;
 
 import org.apache.commons.rng.UniformRandomProvider;
 
-import xfp.java.Debug;
 import xfp.java.accumulators.Accumulator;
 import xfp.java.accumulators.BigFloatAccumulator1;
 import xfp.java.numbers.Doubles;
@@ -16,13 +15,13 @@ import xfp.java.test.Common;
  * jy --source 11 src/scripts/java/xfp/java/scripts/PartialSums.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-06
+ * @version 2019-06-24
  */
 @SuppressWarnings("unchecked")
 public final class PartialSums {
 
   public static final void main (final String[] args) {
-    Debug.DEBUG=false;
+    //Debug.DEBUG=false;
     final int n = (8*1024*1024) - 1;
     final int trys = 1 * 1024;
     final UniformRandomProvider urp =
@@ -35,7 +34,6 @@ public final class PartialSums {
     //final Accumulator a = ZhuHayesAccumulator.make();
     //final Accumulator a = DistilledAccumulator.make();
     assert a.isExact();
-    final long t = System.nanoTime();
     for (int i=0;i<trys;i++) {
       //Debug.println();
       //Debug.println(g.name());
@@ -45,8 +43,7 @@ public final class PartialSums {
         //Debug.println(Double.toHexString(0.0) + " != " + Double.toHexString(z[n-1]));
       }
     }
-    Debug.printf("total secs: %8.2f\n",
-      (System.nanoTime()-t)*1.0e-9);
+    //Debug.printf("total secs: %8.2f\n",(System.nanoTime()-t)*1.0e-9);
   }
 
   //--------------------------------------------------------------

@@ -67,7 +67,7 @@ implements NaturalBuilder<NaturalBEI> {
       else {
         // TODO: more eager growth? 
         final int[] tmp = new int[i1];
-        System.arraycopy(words,start,tmp,0,nWords);
+        System.arraycopy(words,start,tmp,i1-nWords,nWords);
         words = tmp;
         start = 0;
         nWords = i1; } } }

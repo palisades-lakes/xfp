@@ -6,7 +6,6 @@ import java.util.function.IntFunction;
 
 import org.apache.commons.rng.UniformRandomProvider;
 
-import xfp.java.Debug;
 import xfp.java.accumulators.Accumulator;
 import xfp.java.accumulators.BigFloatAccumulator1;
 import xfp.java.accumulators.DistilledAccumulator;
@@ -21,7 +20,7 @@ import xfp.java.test.Common;
  * j --source 11 -ea src/scripts/java/xfp/java/scripts/Distill.java > distilled.txt
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-30
+ * @version 2019-06-24
  */
 @SuppressWarnings("unchecked")
 public final class Distill {
@@ -127,7 +126,7 @@ public final class Distill {
   //--------------------------------------------------------------
 
   public static final void main (final String[] args) {
-    Debug.DEBUG=false;
+    //Debug.DEBUG=false;
     final Accumulator bfa = BigFloatAccumulator1.make();
     final Accumulator da = DistilledAccumulator.make();
     final int dim = (32 * 1024) - 1;

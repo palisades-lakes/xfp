@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableMap;
 
-import xfp.java.Debug;
 import xfp.java.algebra.Set;
 import xfp.java.algebra.Structure;
 import xfp.java.linear.BigDecimalsN;
@@ -32,7 +31,7 @@ import xfp.java.prng.PRNG;
  * mvn -q -Dtest=xfp/java/test/algebra/AlgebraicStructureTests test > AST.txt
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-30
+ * @version 2019-06-24
  */
 
 @SuppressWarnings("unchecked")
@@ -63,7 +62,7 @@ public final class AlgebraicStructureTests {
   @Test
   public final void tests () {
 
-    Debug.DEBUG=false;
+    //Debug.DEBUG=false;
     structureTests(BigFloats.ADDITIVE_MAGMA,TRYS);
     structureTests(BigFloats.MULTIPLICATIVE_MAGMA,TRYS);
     structureTests(BigFloats.RING,TRYS);
@@ -106,7 +105,7 @@ public final class AlgebraicStructureTests {
       structureTests(Dn.magma(n),SPACE_TRYS);
       structureTests(Dn.space(n),SPACE_TRYS);
     }
-    Debug.DEBUG=false;
+    //Debug.DEBUG=false;
   }
 
 

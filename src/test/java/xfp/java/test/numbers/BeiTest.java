@@ -30,7 +30,7 @@ public final class BeiTest {
   //  @SuppressWarnings({ "static-method" })
   //  @Test
   //  public final void testShiftInto () {
-  //    Debug.DEBUG=false;
+  //    //Debug.DEBUG=false;
   //
   //    final int[] shifts = { 0, 32, 15, 31, 33, 67, };
   //
@@ -86,12 +86,12 @@ public final class BeiTest {
   //        + "\nb0=" + Arrays.toString(b0)
   //        + "\nb2=" + Arrays.toString(b2)); }
   //
-  //    Debug.DEBUG=false; }
+  //    //Debug.DEBUG=false; }
   //
   //  @SuppressWarnings({ "static-method" })
   //  @Test
   //  public final void testSubtractFrom () {
-  //    Debug.DEBUG=false;
+  //    //Debug.DEBUG=false;
   //
   //    final int[] dif = new int[] { 300, };
   //    final int[] a0 = new int[] { 100, };
@@ -114,12 +114,12 @@ public final class BeiTest {
   //      "\ndif=" + Arrays.toString(dif)
   //      + "\nc2=" + Arrays.toString(c2));
   //
-  //    Debug.DEBUG=false; }
+  //    //Debug.DEBUG=false; }
   //
   //  @SuppressWarnings({ "static-method" })
   //  @Test
   //  public final void testAdd () {
-  //    Debug.DEBUG=false;
+  //    //Debug.DEBUG=false;
   //
   //    final int[] sum = new int[] { 301, };
   //    final int[] a0 = new int[] {0xc9,};
@@ -142,12 +142,12 @@ public final class BeiTest {
   //      "\nsum=" + Arrays.toString(sum)
   //      + "\nc2=" + Arrays.toString(c2));
   //
-  //    Debug.DEBUG=false; }
+  //    //Debug.DEBUG=false; }
   //
   //  @SuppressWarnings({ "static-method" })
   //  @Test
   //  public final void testAddLong () {
-  //    Debug.DEBUG=false;
+  //    //Debug.DEBUG=false;
   //
   //    final int[] sum = new int[] { 301, };
   //    final long a0 = 0xc9L;
@@ -171,12 +171,12 @@ public final class BeiTest {
   //      "\nsum=" + Arrays.toString(sum)
   //      + "\nc2=" + Arrays.toString(c2));
   //
-  //    Debug.DEBUG=false; }
+  //    //Debug.DEBUG=false; }
   //
   //  @SuppressWarnings({ "static-method" })
   //  @Test
   //  public final void testSubtract() {
-  //    Debug.DEBUG=false;
+  //    //Debug.DEBUG=false;
   //
   //    final int[] dif = new int[] { 101, };
   //    final int[] a0 = new int[] { 0xc9, };
@@ -199,13 +199,13 @@ public final class BeiTest {
   //      "\ndif=" + Arrays.toString(dif)
   //      + "\nc2=" + Arrays.toString(c2));
   //
-  //    Debug.DEBUG=false; }
+  //    //Debug.DEBUG=false; }
   //
   //  // failing, need to handle long arg w < 52 bits
   //  @SuppressWarnings({ "static-method" })
   //  @Test
   //  public final void testCompare () {
-  //    Debug.DEBUG=false;
+  //    //Debug.DEBUG=false;
   //
   //    Assertions.assertEquals(
   //      1,
@@ -219,7 +219,7 @@ public final class BeiTest {
   //      1,
   //      Bei.compare(new int[] {201,}, 25L, 2));
   //
-  //    Debug.DEBUG=false;
+  //    //Debug.DEBUG=false;
   //  }
 
   //--------------------------------------------------------------
