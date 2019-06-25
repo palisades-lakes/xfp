@@ -64,9 +64,9 @@ implements Ringlike<BigFloat0> {
     final int e2;
     final int de = e1-e0;
     if (de > 0) {
-      t02 = t0; t12 = t1.shiftLeft(de); e2 = e0; }
+      t02 = t0; t12 = t1.shiftUp(de); e2 = e0; }
     else if (de < 0) {
-      t02 = t0.shiftLeft(-de); t12 = t1; e2 = e1; }
+      t02 = t0.shiftUp(-de); t12 = t1; e2 = e1; }
     else {
       t02 = t0; t12 = t1; e2 = e1; }
 
@@ -94,7 +94,7 @@ implements Ringlike<BigFloat0> {
       q.exponent()); }
 
   //--------------------------------------------------------------
-  // 0 leftShift on t1
+  // 0 upShift on t1
 
   private static final BigFloat0
   addSameExponent (final boolean p0,
@@ -121,19 +121,19 @@ implements Ringlike<BigFloat0> {
                    final NaturalBEI0 t0,
                    final boolean n1,
                    final long t1,
-                   final int leftShift,
+                   final int upShift,
                    final int e) {
     if (n0 ^ n1) { // different signs
-      final int c = t0.compareTo(t1,leftShift);
+      final int c = t0.compareTo(t1,upShift);
       if (0==c) { return ZERO; }
       // t1 > t0
       if (0 > c) {
-        final NaturalBEI0 t = t0.subtractFrom(t1,leftShift);
+        final NaturalBEI0 t = t0.subtractFrom(t1,upShift);
         return valueOf(n1,t,e); }
       // t0 > t1
-      final NaturalBEI0 t = t0.subtract(t1,leftShift);
+      final NaturalBEI0 t = t0.subtract(t1,upShift);
       return valueOf(n0,t,e); }
-    final NaturalBEI0 t = t0.add(t1,leftShift);
+    final NaturalBEI0 t = t0.add(t1,upShift);
     return valueOf(n0,t,e); }
 
   private static final BigFloat0
@@ -141,18 +141,18 @@ implements Ringlike<BigFloat0> {
                    final long t0,
                    final boolean n1,
                    final long t1,
-                   final int leftShift,
+                   final int upShift,
                    final int e) {
     if (n0 ^ n1) { // different signs
-      final int c = Bei0.compare(t0,t1,leftShift);
+      final int c = Bei0.compare(t0,t1,upShift);
       if (0==c) { return ZERO; }
       if (0>c) { // t1 > t0
-        final NaturalBEI0 t = NaturalBEI0.subtractFrom(t0,t1,leftShift);
+        final NaturalBEI0 t = NaturalBEI0.subtractFrom(t0,t1,upShift);
         return valueOf(n1,t,e); }
       // t0 > t1
-      final NaturalBEI0 t = NaturalBEI0.subtract(t0,t1,leftShift);
+      final NaturalBEI0 t = NaturalBEI0.subtract(t0,t1,upShift);
       return valueOf(n0,t,e); }
-    final NaturalBEI0 t = NaturalBEI0.add(t0,t1,leftShift);
+    final NaturalBEI0 t = NaturalBEI0.add(t0,t1,upShift);
     return valueOf(n0,t,e); }
 
   //--------------------------------------------------------------
@@ -177,7 +177,7 @@ implements Ringlike<BigFloat0> {
     else { t1=(t11>>>shift); e1=e11+shift; }
 
     if (e0<=e1) { return addSameExponent(p0,t0,p1,t1,e1-e0,e0); }
-    return addSameExponent(p0,t0.shiftLeft(e0-e1),p1,t1,e1); }
+    return addSameExponent(p0,t0.shiftUp(e0-e1),p1,t1,e1); }
 
   //--------------------------------------------------------------
 
@@ -278,7 +278,7 @@ implements Ringlike<BigFloat0> {
     assert 0L<=x1;
     final int e0 = Numbers.loBit(x0);
     final int e1 = Numbers.loBit(x1);
-    final NaturalBEI0 y0 = ((0==e0) ? x0 : x0.shiftRight(e0));
+    final NaturalBEI0 y0 = ((0==e0) ? x0 : x0.shiftDown(e0));
     final long y1 = (((0==e1)||(64==e1)) ? x1 : (x1 >>> e1));
     return valueOf(p1,y0.multiply(y1),e0+e1); }
 
@@ -495,7 +495,7 @@ implements Ringlike<BigFloat0> {
     // eh > es > 0
     final boolean up = roundUp(s0,es);
     // TODO: faster way to select the right bits as a int?
-    //final int s1 = s0.shiftRight(es).intValue();
+    //final int s1 = s0.shiftDown(es).intValue();
     final int s1 = s0.getShiftedInt(es);
     final int e1 = e0 + es;
     if (up) {
@@ -590,8 +590,8 @@ implements Ringlike<BigFloat0> {
     final int e0 = exponent();
     final int e1 = q.exponent();
     final int c;
-    if (e0 <= e1) { c = t0.compareTo(t1.shiftLeft(e1-e0)); }
-    else { c = t0.shiftLeft(e0-e1).compareTo(t1); }
+    if (e0 <= e1) { c = t0.compareTo(t1.shiftUp(e1-e0)); }
+    else { c = t0.shiftUp(e0-e1).compareTo(t1); }
     return (nonNegative() ? c : -c); }
 
   //--------------------------------------------------------------
@@ -646,7 +646,7 @@ implements Ringlike<BigFloat0> {
       _significand = t0;
       _exponent = e0; }
     else {
-      _significand = t0.shiftRight(e1);
+      _significand = t0.shiftDown(e1);
       _exponent = Math.addExact(e0,e1); } }
 
   //--------------------------------------------------------------

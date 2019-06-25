@@ -3,7 +3,7 @@ package xfp.java.test.accumulators;
 import org.junit.jupiter.api.Test;
 
 import xfp.java.Debug;
-import xfp.java.accumulators.BigFloatAccumulator1;
+import xfp.java.accumulators.BigFloatAccumulator0;
 import xfp.java.test.Common;
 
 //----------------------------------------------------------------
@@ -30,7 +30,7 @@ public final class SumTest {
     Common.l2DistanceTests(
       Common.generators(DIM),
       Common.makeAccumulators(Common.accumulators()),
-      BigFloatAccumulator1.make());
+      BigFloatAccumulator0.make());
     Debug.DEBUG=false; }
 
   @SuppressWarnings("static-method")
@@ -42,7 +42,7 @@ public final class SumTest {
     Common.l1DistanceTests(
       Common.generators(DIM),
       Common.makeAccumulators(Common.accumulators()),
-      BigFloatAccumulator1.make());
+      BigFloatAccumulator0.make());
     Debug.DEBUG=false; }
 
   @SuppressWarnings("static-method")
@@ -54,7 +54,7 @@ public final class SumTest {
     Common.dotTests(
       Common.generators(DIM),
       Common.makeAccumulators(Common.accumulators()),
-      BigFloatAccumulator1.make());
+      BigFloatAccumulator0.make());
     Debug.DEBUG=false; }
 
 
@@ -67,7 +67,7 @@ public final class SumTest {
     Common.l2Tests(
       Common.generators(DIM),
       Common.makeAccumulators(Common.accumulators()),
-      BigFloatAccumulator1.make());
+      BigFloatAccumulator0.make());
     Debug.DEBUG=false; }
 
   @SuppressWarnings("static-method")
@@ -110,7 +110,7 @@ public final class SumTest {
     Common.sumTests(
       Common.generators(DIM),
       Common.makeAccumulators(Common.accumulators()),
-      BigFloatAccumulator1.make());
+      BigFloatAccumulator0.make());
     Debug.DEBUG=false; }
 
   // TODO: choose expected behavior with non-finite input

@@ -31,7 +31,7 @@ public final class PartialSums {
     //Debug.println("emax=" + emax);
     final Generator g = Doubles.finiteGenerator(n,urp,emax);
     final Accumulator a = BigFloatAccumulator1.make();
-    //final Accumulator a = RationalFloatAccumulator1.make();
+    //final Accumulator a = RationalFloatAccumulator.make();
     //final Accumulator a = ZhuHayesAccumulator.make();
     //final Accumulator a = DistilledAccumulator.make();
     assert a.isExact();

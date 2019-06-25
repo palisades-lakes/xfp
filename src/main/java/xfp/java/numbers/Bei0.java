@@ -60,13 +60,13 @@ public final class Bei0 {
 
   //--------------------------------------------------------------
 
-  public static final int[] shiftLeft (final int[] m,
+  public static final int[] shiftUp (final int[] m,
                                        final int bitShift) {
     assert 0<=bitShift;
     //assert (! leadingZero(m));
     if (isZero(m)) { return ZERO; }
     if (bitShift==0) { return m; }
-    //if (bitShift<0) { return shiftRight0(m,-bitShift); }
+    //if (bitShift<0) { return shiftDown0(m,-bitShift); }
     final int intShift = (bitShift >>> 5);
     final int remShift = (bitShift & 0x1f);
     final int n = m.length;
@@ -74,26 +74,26 @@ public final class Bei0 {
       return Arrays.copyOfRange(m,0,n+intShift); }
     int m1[] = null;
     int i = 0;
-    final int rightShift = 32 - remShift;
-    final int highBits = (m[0] >>> rightShift);
+    final int downShift = 32 - remShift;
+    final int highBits = (m[0] >>> downShift);
     if (highBits != 0) {
       m1 = new int[n + intShift + 1];
       m1[i++] = highBits; }
     else { m1 = new int[n + intShift]; }
     int j = 0;
     while (j < (n - 1)) {
-      m1[i++] = (m[j++] << remShift) | (m[j] >>> rightShift); }
+      m1[i++] = (m[j++] << remShift) | (m[j] >>> downShift); }
     m1[i] = m[j] << remShift;
     return m1; }
 
-  public static final int[] shiftLeft (final long m,
+  public static final int[] shiftUp (final long m,
                                        final int shift) {
     final int m0 = (int) hiWord(m);
     final int m1 = (int) loWord(m);
     if (0==m0) {
       if (0==m1) { return new int[0]; }
-      return shiftLeft(new int[] { m1 },shift); }
-    return shiftLeft(new int[] { m0, m1, },shift); }
+      return shiftUp(new int[] { m1 },shift); }
+    return shiftUp(new int[] { m0, m1, },shift); }
 
   //--------------------------------------------------------------
   // assuming m0 and m1 have no leading zeros
@@ -389,7 +389,7 @@ public final class Bei0 {
     assert (! leadingZero(m0));
     if (0L==m1) { return m0; }
     assert 0L < m1;
-    if (isZero(m0)) { return shiftLeft(m1,bitShift); }
+    if (isZero(m0)) { return shiftUp(m1,bitShift); }
     if (0 == bitShift) { return add(m0,m1); }
     assert 0<bitShift;
 
@@ -464,7 +464,7 @@ public final class Bei0 {
     assert 0L<=m1;
     assert 0<=bitShift;
 
-    if (0L==m0) { return shiftLeft(m1,bitShift); }
+    if (0L==m0) { return shiftUp(m1,bitShift); }
     if (0L==m1) { return valueOf(m0); }
     if (0==bitShift) { return add(m0,m1); }
 
@@ -775,7 +775,7 @@ public final class Bei0 {
     if (isZero(m1)) { return m1; }
     assert 0L < m0;
     if (0 == bitShift) { return subtract(m0,m1); }
-    final int[] r0 = shiftLeft(m0,bitShift);
+    final int[] r0 = shiftUp(m0,bitShift);
     final int[] r1 = subtractInPlace(r0,m1);
     return r1; }
 
@@ -947,9 +947,9 @@ public final class Bei0 {
     final int h32 = half*32;
     return
       add(
-        shiftLeft(
+        shiftUp(
           add(
-            shiftLeft(xhs,h32),
+            shiftUp(xhs,h32),
             subtract(square(add(xl,xh),false),add(xhs,xls))),
           h32),
         xls); }
@@ -1007,7 +1007,7 @@ public final class Bei0 {
     da1 = add(da1,a1);
     final int[] v1 = square(da1,true);
     final int[] vinf = square(a2,true);
-    final int[] v2 = square(subtract(shiftLeft(add(da1,a2),1),a0),true);
+    final int[] v2 = square(subtract(shiftUp(add(da1,a2),1),a0),true);
 
     // The algorithm requires two divisions by 2 and one by 3.
     // All divisions are known to be exact, that is, they do not
@@ -1017,11 +1017,11 @@ public final class Bei0 {
     // The division by 3 is done by an optimized algorithm for
     // this case.
     int[] t2 = exactDivideBy3(subtract(v2,vm1));
-    int[] tm1 = shiftRight(subtract(v1,vm1),1);
+    int[] tm1 = shiftDown(subtract(v1,vm1),1);
     int[] t1 = subtract(v1,v0);
-    t2 = shiftRight(subtract(t2,t1),1);
+    t2 = shiftDown(subtract(t2,t1),1);
     t1 = subtract(subtract(t1,tm1),vinf);
-    t2 = shiftLeft(subtract(t2,vinf),1);
+    t2 = shiftUp(subtract(t2,vinf),1);
     tm1 = subtract(tm1,t2);
 
     // Number of bits to shift left.
@@ -1030,10 +1030,10 @@ public final class Bei0 {
     return
       stripLeadingZeros(
         add(
-          shiftLeft(add(
-            shiftLeft(add(
-              shiftLeft(add(
-                shiftLeft(vinf,ss),
+          shiftUp(add(
+            shiftUp(add(
+              shiftUp(add(
+                shiftUp(vinf,ss),
                 t2),ss),
               t1),ss),
             tm1),ss),
@@ -1094,8 +1094,8 @@ public final class Bei0 {
     final int h32 = half*32;
     final int[] result =
       add(
-        shiftLeft(add(
-          shiftLeft(p1,h32),
+        shiftUp(add(
+          shiftUp(p1,h32),
           subtract(subtract(p3,p1),p2)),
           h32),
         p2);
@@ -1174,8 +1174,8 @@ public final class Bei0 {
     final int[] v1 = multiply(da1,db1,true);
     final int[] v2 =
       multiply(
-        subtract(shiftLeft(add(da1,a2),1),a0),
-        subtract(shiftLeft(add(db1,b2),1),b0)
+        subtract(shiftUp(add(da1,a2),1),a0),
+        subtract(shiftUp(add(db1,b2),1),b0)
         ,true);
 
     final int[] vinf = multiply(a2,b2,true);
@@ -1193,23 +1193,23 @@ public final class Bei0 {
 
     int[] tm1;
     // handle missing sign of vm1
-    if (0 < cv) { tm1 = shiftRight(subtract(v1,vm1),1); }
-    else { tm1 = shiftRight(add(v1,vm1),1); }
+    if (0 < cv) { tm1 = shiftDown(subtract(v1,vm1),1); }
+    else { tm1 = shiftDown(add(v1,vm1),1); }
 
     int[] t1 = subtract(v1,v0);
-    t2 = shiftRight(subtract(t2,t1),1);
+    t2 = shiftDown(subtract(t2,t1),1);
     t1 = subtract(subtract(t1,tm1),vinf);
-    t2 = subtract(t2,shiftLeft(vinf,1));
+    t2 = subtract(t2,shiftUp(vinf,1));
     tm1 = subtract(tm1,t2);
 
     // Number of bits to shift left.
     final int ss = k * 32;
 
     final int[] result =
-      add(shiftLeft(
-        add(shiftLeft(
-          add(shiftLeft(
-            add(shiftLeft(vinf,ss),t2),
+      add(shiftUp(
+        add(shiftUp(
+          add(shiftUp(
+            add(shiftUp(vinf,ss),t2),
             ss),t1),
           ss),tm1),
         ss),v0);
@@ -1222,9 +1222,9 @@ public final class Bei0 {
     assert (! leadingZero(m0));
     if (0==m1) { return ZERO; }
     if (Integer.bitCount(m1) == 1) {
-      return shiftLeft(m0,Integer.numberOfTrailingZeros(m1)); }
+      return shiftUp(m0,Integer.numberOfTrailingZeros(m1)); }
     //    stripLeadingZeros(
-    //      shiftLeft(m0,Integer.numberOfTrailingZeros(m1))); }
+    //      shiftUp(m0,Integer.numberOfTrailingZeros(m1))); }
     final int xlen = m0.length;
     int[] rm = new int[xlen + 1];
     long carry = 0;
@@ -1499,7 +1499,7 @@ public final class Bei0 {
 
   //  public static final int getShiftedInt (final int[] m,
   //                                         final int shift) {
-  //    final int[] ms = shiftRight(m,shift);
+  //    final int[] ms = shiftDown(m,shift);
   //    final int i = ms.length-1;
   //    return (0<=i) ? ms[i] : 0; }
 
@@ -1522,7 +1522,7 @@ public final class Bei0 {
 
   //  public static final long getShiftedLong (final int[] m,
   //                                         final int shift) {
-  //    final int[] ms = shiftRight(m,shift);
+  //    final int[] ms = shiftDown(m,shift);
   //    final int i = ms.length-1;
   //    if (0>i) { return 0L; }
   //    if (0==i) { return unsigned(ms[0]); }
@@ -1554,7 +1554,7 @@ public final class Bei0 {
 
   //--------------------------------------------------------------
 
-  private static final int[] shiftRight0 (final int[] m0,
+  private static final int[] shiftDown0 (final int[] m0,
                                           final int n) {
     final int intShift = n >>> 5;
     final int remShift = n & 0x1f;
@@ -1582,13 +1582,13 @@ public final class Bei0 {
       m1[i++] = (m0[j++] << nBits2) | (m0[j] >>> remShift); } }
     return m1; }
 
-  public static final int[] shiftRight (final int[] m,
+  public static final int[] shiftDown (final int[] m,
                                         final int n) {
     if (isZero(m)) { return ZERO; }
-    if (n > 0) { return shiftRight0(m,n); }
+    if (n > 0) { return shiftDown0(m,n); }
     //if (n == 0) { return stripLeadingZeros(m); }
     if (n == 0) { return m; }
-    return shiftLeft(m,-n); }
+    return shiftUp(m,-n); }
 
   //--------------------------------------------------------------
   // Bitwise Operations
@@ -1719,7 +1719,7 @@ public final class Bei0 {
 
     int twiceSignifFloor;
     // twiceSignifFloor will be ==
-    // abs().shiftRight(shift).intValue()
+    // abs().shiftDown(shift).intValue()
     // We do the shift into an int directly to improve
     // performance.
 
@@ -1788,7 +1788,7 @@ public final class Bei0 {
 
     long twiceSignifFloor;
     // twiceSignifFloor will be ==
-    // abs().shiftRight(shift).longValue()
+    // abs().shiftDown(shift).longValue()
     // We do the shift into a long directly to improve
     // performance.
 
@@ -1990,10 +1990,10 @@ public final class Bei0 {
   //--------------------------------------------------------------
 
   public static final int[] valueOf (final long x,
-                                     final int leftShift) {
+                                     final int upShift) {
     if (0L == x) { return ZERO; }
     assert 0L < x;
-    return shiftLeft(x,leftShift); }
+    return shiftUp(x,upShift); }
 
   //--------------------------------------------------------------
   // disable constructor

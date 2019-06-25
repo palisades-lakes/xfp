@@ -308,7 +308,6 @@ extends ExactAccumulator<ZhuHayesAccumulator> {
     System.arraycopy(a2,0,v,a1.length,a2.length);
     // Step 6
     // for checking IFastSum
-    //return RationalFloatAccumulator1.make().addAll(x).doubleValue(); }
     final int[] n = new int[1];
     n[0] = v.length;
     return iFastSum(v,n,true); }

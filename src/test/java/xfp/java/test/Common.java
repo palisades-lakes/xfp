@@ -31,7 +31,7 @@ import xfp.java.prng.PRNG;
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-10
+ * @version 2019-06-24
  */
 @SuppressWarnings("unchecked")
 public final class Common {
@@ -51,7 +51,7 @@ public final class Common {
             "xfp.java.accumulators.BigFloatAccumulator1",
             "xfp.java.accumulators.BigFloatAccumulator0",
             "xfp.java.accumulators.BigFloatAccumulator",
-            "xfp.java.accumulators.RationalFloatAccumulator1",
+            "xfp.java.accumulators.RationalFloatAccumulator",
             "xfp.java.accumulators.RationalAccumulator",
           }); }
 
@@ -1136,24 +1136,14 @@ public final class Common {
   private static final void l2Test (final Generator g,
                                     final List<Accumulator> accumulators,
                                     final Accumulator exact) {
+    Debug.println("generator=" +g.name());
     Assertions.assertTrue(exact.isExact());
     final double[] x = (double[]) g.next();
     final double truth = exact.clear().add2All(x).doubleValue();
-    //Debug.println(g.name());
     for (final Accumulator a : accumulators) {
-      //final long t0 = System.nanoTime();
       final double pred =
         a.clear().add2All(x).doubleValue();
-      //final long t1 = (System.nanoTime()-t0);
       if (a.isExact()) { Assertions.assertEquals(truth,pred); }
-      //final double l1d = Math.abs(truth - pred);
-      //final double l1n = Math.max(1.0,Math.abs(truth));
-      //Debug.println(
-      //  String.format("%32s %8.2fms ",
-      //    Classes.className(a),Double.valueOf(t1*1.0e-6))
-      //  + toHexString(l1d)
-      //  + " / " + toHexString(l1n) + " = "
-      //  + String.format("%8.2e",Double.valueOf(l1d/l1n)));
     } }
 
   public static final void l2Tests (final List<Generator> generators,

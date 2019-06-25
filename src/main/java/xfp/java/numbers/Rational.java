@@ -195,7 +195,7 @@ implements Ringlike<Rational> {
   //                                              final boolean p1,
   //                                              final long n1,
   //                                              final int e1) {
-  //    final Natural n0d1 = n0.shiftLeft(e1);
+  //    final Natural n0d1 = n0.shiftUp(e1);
   //    final Natural n1d0 = d0.multiply(n1);
   //    final boolean p;
   //    final Natural n;
@@ -213,7 +213,7 @@ implements Ringlike<Rational> {
   //        if (0 < c) { n = n1d0.subtract(n0d1); p = true; }
   //        else { n = n0d1.subtract(n1d0); p = false; } }
   //      else { n = n0d1.add(n1d0); p = false; } }
-  //    final Natural d = d0.shiftLeft(e1);
+  //    final Natural d = d0.shiftUp(e1);
   //    return valueOf(p,n,d); }
 
   private final Rational addWithDenom (final boolean p,
@@ -332,11 +332,11 @@ implements Ringlike<Rational> {
     // quotient has the right number of bits.
     final int e0 = n0.hiBit() - d0.hiBit() - 1;
     final boolean small = (e0 > 0);
-    final Natural n1 = small ? n0 : n0.shiftLeft(-e0);
-    final Natural d1 = small ? d0.shiftLeft(e0) : d0;
+    final Natural n1 = small ? n0 : n0.shiftUp(-e0);
+    final Natural d1 = small ? d0.shiftUp(e0) : d0;
 
     // ensure numerator is less than 2x denominator
-    final Natural d11 = d1.shiftLeft(1);
+    final Natural d11 = d1.shiftUp(1);
     final Natural d2;
     final int e2;
     if (n1.compareTo(d11) < 0) { d2 = d1; e2 = e0;}
@@ -351,14 +351,14 @@ implements Ringlike<Rational> {
     // subnormal numbers need slightly different handling
     final boolean sub = (e2 < Float.MIN_EXPONENT);
     final int e3 = sub ? Float.MIN_EXPONENT : e2;
-    final Natural d3 = sub ? d2.shiftLeft(e3-e2) : d2;
-    final Natural n3 = n1.shiftLeft(Floats.STORED_SIGNIFICAND_BITS);
+    final Natural d3 = sub ? d2.shiftUp(e3-e2) : d2;
+    final Natural n3 = n1.shiftUp(Floats.STORED_SIGNIFICAND_BITS);
     final int e4 = e3 - Floats.STORED_SIGNIFICAND_BITS;
     final Natural[] qr =
       (Natural[]) n3.divideAndRemainder(d3).toArray(new Natural[0]);
 
     // round down or up? <= implies half-even (?)
-    final int c = qr[1].shiftLeft(1).compareTo(d3);
+    final int c = qr[1].shiftUp(1).compareTo(d3);
     final int q4 = qr[0].intValue();
     final boolean even = (0x0 == (q4 & 0x1));
     final boolean down = (c < 0) || ((c == 0) && even);
@@ -394,11 +394,11 @@ implements Ringlike<Rational> {
     // quotient has the right number of bits.
     final int e0 = n0.hiBit() - d0.hiBit() - 1;
     final boolean small = (e0 > 0);
-    final Natural n1 = small ? n0 : n0.shiftLeft(-e0);
-    final Natural d1 = small ? d0.shiftLeft(e0) : d0;
+    final Natural n1 = small ? n0 : n0.shiftUp(-e0);
+    final Natural d1 = small ? d0.shiftUp(e0) : d0;
 
     // ensure numerator is less than 2x denominator
-    final Natural d11 = d1.shiftLeft(1);
+    final Natural d11 = d1.shiftUp(1);
     final Natural d2;
     final int e2;
     if (n1.compareTo(d11) < 0) { d2 = d1; e2 = e0;}
@@ -413,14 +413,14 @@ implements Ringlike<Rational> {
     // subnormal numbers need slightly different handling
     final boolean sub = (e2 < Double.MIN_EXPONENT);
     final int e3 = sub ? Double.MIN_EXPONENT : e2;
-    final Natural d3 = sub ? d2.shiftLeft(e3-e2) : d2;
-    final Natural n3 = n1.shiftLeft(Doubles.STORED_SIGNIFICAND_BITS);
+    final Natural d3 = sub ? d2.shiftUp(e3-e2) : d2;
+    final Natural n3 = n1.shiftUp(Doubles.STORED_SIGNIFICAND_BITS);
     final int e4 = e3 - Doubles.STORED_SIGNIFICAND_BITS;
     final Natural[] qr =
       (Natural[]) n3.divideAndRemainder(d3).toArray(new Natural[0]);
 
     // round down or up? <= implies half-even (?)
-    final int c = qr[1].shiftLeft(1).compareTo(d3);
+    final int c = qr[1].shiftUp(1).compareTo(d3);
     final long q4 = qr[0].longValue();
     final boolean even = (0x0L == (q4 & 0x1L));
     final boolean down = (c < 0) || ((c == 0) && even);
@@ -521,8 +521,8 @@ implements Ringlike<Rational> {
   //    final int shift =
   //      Math.min(Numbers.loBit(n0),Numbers.loBit(d0));
   //
-  //    final Natural n = (shift != 0) ? n0.shiftRight(shift) : n0;
-  //    final Natural d = (shift != 0) ? d0.shiftRight(shift) : d0;
+  //    final Natural n = (shift != 0) ? n0.shiftDown(shift) : n0;
+  //    final Natural d = (shift != 0) ? d0.shiftDown(shift) : d0;
   //
   //    if (n.equals(d)) { return (nonNegative ? ONE : MINUS_ONE); }
   //    if (NaturalBEI.d.isOne()) {
@@ -581,7 +581,7 @@ implements Ringlike<Rational> {
     assert 0L < t;
     final Natural n0 = NaturalBEI.valueOf(t);
     if (0 == e) {  return valueOf(nonNegative,n0); }
-    if (0 < e) { return valueOf(nonNegative,n0.shiftLeft(e)); }
+    if (0 < e) { return valueOf(nonNegative,n0.shiftUp(e)); }
     return valueOf(nonNegative,n0,NaturalBEI.ZERO.setBit(-e)); }
 
   public static final Rational valueOf (final double x)  {
@@ -599,7 +599,7 @@ implements Ringlike<Rational> {
     assert 0 < t;
     final Natural n0 = NaturalBEI.valueOf(t);
     if (0 == e) {  return valueOf(nonNegative,n0); }
-    if (0 < e) { return valueOf(nonNegative,n0.shiftLeft(e)); }
+    if (0 < e) { return valueOf(nonNegative,n0.shiftUp(e)); }
     return valueOf(nonNegative,n0,NaturalBEI.ZERO.setBit(-e)); }
 
   public static final Rational valueOf (final float x)  {
@@ -684,11 +684,11 @@ implements Ringlike<Rational> {
     final Natural td = d0.significand();
     final int ed = d0.exponent();
     final int e = en - ed;
-    //    if (0 < e) { return valueOf(p,tn.shiftLeft(e),td); }
-    //    if (0 > e) { return valueOf(p,tn,td.shiftLeft(-e)); }
+    //    if (0 < e) { return valueOf(p,tn.shiftUp(e),td); }
+    //    if (0 > e) { return valueOf(p,tn,td.shiftUp(-e)); }
     //    return valueOf(p,tn,td);
-    if (0 < e) { return new Rational(p,tn.shiftLeft(e),td); }
-    if (0 > e) { return new Rational(p,tn,td.shiftLeft(-e)); }
+    if (0 < e) { return new Rational(p,tn.shiftUp(e),td); }
+    if (0 > e) { return new Rational(p,tn,td.shiftUp(-e)); }
     return new Rational(p,tn,td); }
 
   public static final Rational valueOf (final BigFloat x) {
@@ -696,7 +696,7 @@ implements Ringlike<Rational> {
     final int e = x.exponent();
     if (0 < e) {
       return
-        valueOf(x.nonNegative(),t.shiftLeft(e),NaturalBEI.ONE); }
+        valueOf(x.nonNegative(),t.shiftUp(e),NaturalBEI.ONE); }
     if (0 > e) {
       return valueOf(x.nonNegative(),t,NaturalBEI.ZERO.setBit(-e)); }
     return valueOf(x.nonNegative(),t,NaturalBEI.ONE); }

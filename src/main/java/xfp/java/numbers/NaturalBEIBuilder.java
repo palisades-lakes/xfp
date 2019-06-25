@@ -9,51 +9,118 @@ import java.util.Arrays;
  * Don't implement Comparable, because of mutability!
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-19
+ * @version 2019-06-24
  */
 
-public final class NaturalBEIBuilder {
+public final class NaturalBEIBuilder 
+implements NaturalBuilder<NaturalBEI> {
 
   //--------------------------------------------------------------
   // mutable state
   //--------------------------------------------------------------
-  /** The number of ints of the value array that are currently
+  /** The number of ints of the words array that are currently
    * used to hold the magnitude of this NaturalBEIBuilder. The
-   * magnitude starts at an offset and offset + intLen may be less
-   * than value.length.
+   * magnitude starts at an start and start + nWords may be less
+   * than words.length.
    */
 
-  private int intLen;
+  private int nWords;
 
-  /** The offset into the value array where the magnitude of this
+  @Override
+  public final int endWord () { return nWords; }
+  
+  /** The start into the words array where the magnitude of this
    * NaturalBEIBuilder begins.
+   * 
+   * <code>0&lt;=start</code>.
    */
 
-  private int offset = 0;
+  private int start = 0;
 
-  /** big endian order. may start at an offset. may end early...
+  /** big endian order. only a subsection used...
    */
 
-  private int[] value;
+  private int[] words;
 
-  /** Unsafe! Returns internal array. */
+  private final int[] getWords () {
+    if ((start > 0) || (words.length != nWords)) {
+      return Arrays.copyOfRange(words, start, start + nWords); }
+    // UNSAFE!!!
+    return words; }
 
-  private final int[] getValue () {
-    if ((offset > 0) || (value.length != intLen)) {
-      return Arrays.copyOfRange(value, offset, offset + intLen); }
-    return value; }
-
-  private final void setValue (final int[] val,
+  // TODO: useful to oversize array? or as an option?
+  private final void setWords (final int[] v,
                                final int length) {
-    value = val; intLen = length; offset = 0; }
+    assert length<=v.length;
+    words = v; nWords = length; start = 0; }
 
+  // Synchronize?
+  private final void compact () {
+    start = 0;
+    System.arraycopy(words,start,words,0,nWords); }
+
+  // Synchronize?
+  private final void expandTo (final int i) {
+    final int i1 = i+1;
+    if (nWords<i1) { 
+      if (i1<words.length) { compact(); nWords = i1; }
+      else {
+        // TODO: more eager growth? 
+        final int[] tmp = new int[i1];
+        System.arraycopy(words,start,tmp,0,nWords);
+        words = tmp;
+        start = 0;
+        nWords = i1; } } }
+
+  private final void setWords (final int[] v) {
+    setWords(v,v.length); }
+
+  private final int beIndex (final int i) {
+    return start+nWords-1-i; }
+
+  @Override
+  public final int word (final int i) {
+    assert 0<=i;
+    if (i>=nWords) { return 0; }
+    return words[beIndex(i)]; }
+
+  @Override
+  public final NaturalBuilder setWord (final int i,
+                                       final int w) {
+    assert 0<=i;
+    expandTo(i);
+    words[beIndex(i)] = w; 
+    return this; }
+
+  //--------------------------------------------------------------
+  /** copy state from <code></code> to this.
+   */
+
+  @Override
+  public final NaturalBEIBuilder set (final NaturalBEI u) {
+    setWords(u.copyWords());
+    return this; }
+
+  //--------------------------------------------------------------
+  /** safe but slow... 
+   * TODO: options are:
+   * <ul>
+   * <ui> return internal array and destroy references.
+   * prevents incremental builds.
+   * <ui> copy internal array and preserve internal state.
+   * extra array allocation if only building once.
+   * </ul>
+   * maybe 2 'build' operations, 'build', 'buildAndClaer'?
+   * */
+  @Override
   public final NaturalBEI build () {
-    final NaturalBEI u;
-    if (isZero()) { u = NaturalBEI.ZERO; }
-    else { u = NaturalBEI.unsafe(getValue()); }
-    setValue(null,0);
-    return u; }
+    // TODO: other constants?
+    if (isZero()) { return NaturalBEI.ZERO; }
+    return 
+      NaturalBEI.unsafe(
+        Arrays.copyOfRange(words, start, start + nWords)); }
 
+  //--------------------------------------------------------------
   /** Returns an <code>int[]</code>containing the {@code n}
    * low ints of this number.
    * TODO: wrap with a view object, no copying?
@@ -61,168 +128,179 @@ public final class NaturalBEIBuilder {
   private final int[] getLower (final int n) {
     if (isZero()) { return NaturalBEI.EMPTY; }
     // TODO: copy here? DANGER!!!
-    else if (intLen < n) { return getValue(); }
+    else if (nWords < n) { return getWords(); }
     else {
       // strip zeros
       int len = n;
-      while ((len > 0) && (value[(offset+intLen)-len] == 0)) {
+      while ((len > 0) && (words[(start+nWords)-len] == 0)) {
         len--; }
       return
         Arrays.copyOfRange(
-          value, (offset+intLen)-len, offset+intLen); } }
+          words, (start+nWords)-len, start+nWords); } }
 
   //--------------------------------------------------------------
   /** Makes this number an {@code n}-int number all of whose bits
    * are ones. Used by Burnikel-Ziegler division.
-   * @param n number of ints in the {@code value} array
+   * @param n number of ints in the {@code words} array
    * @return a number equal to {@code ((1<<(32*n)))-1}
    */
 
   private final void ones (final int n) {
-    if (n > value.length) { value = new int[n]; }
-    Arrays.fill(value, -1);
-    offset = 0;
-    intLen = n; }
+    if (n > words.length) { words = new int[n]; }
+    Arrays.fill(words, -1);
+    start = 0;
+    nWords = n; }
 
   private final void clear () {
-    offset = intLen = 0;
-    for (int index=0, n=value.length; index < n; index++) {
-      value[index] = 0; } }
+    start = nWords = 0;
+    for (int index=0, n=words.length; index < n; index++) {
+      words[index] = 0; } }
 
-  private final void reset () { offset = intLen = 0; }
+  private final void reset () { start = nWords = 0; }
 
   public final int getLowestSetBit () {
-    if (intLen == 0) { return -1; }
+    if (nWords == 0) { return -1; }
     int j, b;
-    for (j=intLen-1; (j > 0) && (value[j+offset] == 0); j--) { }
-    b = value[j+offset];
+    for (j=nWords-1; (j > 0) && (words[j+start] == 0); j--) { }
+    b = words[j+start];
     if (b == 0) { return -1; }
-    return ((intLen-1-j)<<5) + Integer.numberOfTrailingZeros(b); }
+    return ((nWords-1-j)<<5) + Integer.numberOfTrailingZeros(b); }
 
   private static final int loBit (final NaturalBEIBuilder m) {
     return m.getLowestSetBit(); }
 
   private final void normalize () {
-    if (intLen == 0) { offset = 0; return; }
-    int index = offset;
-    if (value[index] != 0) { return; }
-    final int indexBound = index+intLen;
+    if (nWords == 0) { start = 0; return; }
+    int index = start;
+    if (words[index] != 0) { return; }
+    final int indexBound = index+nWords;
     do { index++; }
-    while((index < indexBound) && (value[index] == 0));
-    final int numZeros = index - offset;
-    intLen -= numZeros;
-    offset = (intLen == 0 ?  0 : offset+numZeros); }
+    while((index < indexBound) && (words[index] == 0));
+    final int numZeros = index - start;
+    nWords -= numZeros;
+    start = (nWords == 0 ?  0 : start+numZeros); }
 
   /** Discards all ints whose index is greater than {@code n}.
    */
   private final void keepLower (final int n) {
-    if (intLen >= n) { offset += intLen - n; intLen = n; } }
+    if (nWords >= n) { start += nWords - n; nWords = n; } }
 
-  public final boolean isZero () { return (intLen == 0); }
+  public final boolean isZero () { return (nWords == 0); }
 
   //--------------------------------------------------------------
   // bit operations
   //--------------------------------------------------------------
 
   public final long bitLength () {
-    if (intLen == 0) { return 0; }
+    if (nWords == 0) { return 0; }
     return
-      (intLen*32L)
-      - Integer.numberOfLeadingZeros(value[offset]); }
+      (nWords*32L)
+      - Integer.numberOfLeadingZeros(words[start]); }
 
   //--------------------------------------------------------------
-  /** Right shift this NaturalBEIBuilder n bits, where n is
-   * less than 32. Assumes that intLen > 0, n > 0 for speed
+  /** Down shift this NaturalBEIBuilder n bits, where n is
+   * less than 32. Assumes that nWords > 0, n > 0 for speed
    */
 
-  private final void primitiveRightShift (final int n) {
-    final int[] val = value;
+  private final void primitiveDownShift (final int n) {
+    final int[] val = words;
     final int n2 = 32 - n;
-    for (int i=(offset+intLen)-1, c=val[i]; i > offset; i--) {
+    for (int i=(start+nWords)-1, c=val[i]; i > start; i--) {
       final int b = c;
       c = val[i-1];
       val[i] = (c << n2) | (b >>> n); }
-    val[offset] >>>= n; }
+    val[start] >>>= n; }
 
   /** The NaturalBEIBuilder is left in normal form.
    */
 
-  private final void rightShift (final int n) {
-    if (intLen == 0) { return; }
+  private final void downShift (final int n) {
+    if (nWords == 0) { return; }
     final int nInts = n >>> 5;
     final int nBits = n & 0x1F;
-    this.intLen -= nInts;
+    this.nWords -= nInts;
     if (nBits == 0) { return; }
-    final int bitsInHighWord = Numbers.bitLength(value[offset]);
+    final int bitsInHighWord = Numbers.bitLength(words[start]);
     if (nBits >= bitsInHighWord) {
-      this.primitiveLeftShift(32 - nBits);
-      this.intLen--; }
-    else { primitiveRightShift(nBits); } }
+      this.primitiveUpShift(32 - nBits);
+      this.nWords--; }
+    else { primitiveDownShift(nBits); } }
 
   /** {@code n} can be greater than the length of the number.
    */
 
-  private final void safeRightShift (final int n) {
-    if ((n/32) >= intLen) { reset(); }
-    else { rightShift(n); } }
+  private final void safeDownShift (final int n) {
+    if ((n/32) >= nWords) { reset(); }
+    else { downShift(n); } }
+
+  @Override
+  public final NaturalBEIBuilder shiftDown (final int shift) {
+    safeDownShift(shift);
+    return this; }
 
   //--------------------------------------------------------------
   /** Left shift this NaturalBEIBuilder n bits, where n is
-   * less than 32. Assumes that intLen > 0, n > 0 for speed
+   * less than 32. Assumes that nWords > 0, n > 0 for speed
    */
 
-  private final void primitiveLeftShift(final int n) {
-    final int[] val = value;
-    final int n2 = 32 - n;
-    for (int i=offset, c=val[i], m=(i+intLen)-1; i < m; i++) {
+  private final void primitiveUpShift (final int shift) {
+    final int[] val = words;
+    final int n2 = 32 - shift;
+    for (int i=start, c=val[i], m=(i+nWords)-1; i < m; i++) {
       final int b = c;
       c = val[i+1];
-      val[i] = (b << n) | (c >>> n2); }
-    val[(offset+intLen)-1] <<= n; }
+      val[i] = (b << shift) | (c >>> n2); }
+    val[(start+nWords)-1] <<= shift; }
 
-  private final void leftShift (final int n) {
+  private final void upShift (final int shift) {
     // If there is enough storage space in this NaturalBEIBuilder
     // already the available space will be used. Space to the
-    // right of the used ints in the value array is faster to
+    // right of the used ints in the words array is faster to
     // utilize, so the extra space will be taken from the right if
     // possible.
-    if (intLen == 0) { return; }
-    final int nInts = n >>> 5;
-    final int nBits = n&0x1F;
-    final int bitsInHighWord = Numbers.bitLength(value[offset]);
+    if (nWords == 0) { return; }
+    final int iShift = (shift>>>5);
+    final int rShift = (shift&0x1F);
+    final int bitsInHighWord = Numbers.bitLength(words[start]);
 
     // If shift can be done without moving words, do so
-    if (n <= (32-bitsInHighWord)) {
-      primitiveLeftShift(nBits); return; }
+    if (shift <= (32-bitsInHighWord)) {
+      primitiveUpShift(rShift); return; }
 
-    int newLen = intLen + nInts +1;
-    if (nBits <= (32-bitsInHighWord)) { newLen--; }
-    if (value.length < newLen) {
+    int newLen = nWords + iShift +1;
+    if (rShift <= (32-bitsInHighWord)) { newLen--; }
+    if (words.length < newLen) {
       // The array must grow
       final int[] result = new int[newLen];
-      for (int i=0; i < intLen; i++) {
-        result[i] = value[offset+i]; }
-      setValue(result, newLen); }
-    else if ((value.length - offset) >= newLen) {
+      for (int i=0; i < nWords; i++) {
+        result[i] = words[start+i]; }
+      setWords(result, newLen); }
+    else if ((words.length - start) >= newLen) {
       // Use space on right
-      for(int i=0; i < (newLen - intLen); i++) {
-        value[offset+intLen+i] = 0; } }
+      for(int i=0; i < (newLen - nWords); i++) {
+        words[start+nWords+i] = 0; } }
     else {
       // Must use space on left
-      for (int i=0;i<intLen;i++) { value[i] = value[offset+i]; }
-      for (int i=intLen; i<newLen; i++) { value[i] = 0; }
-      offset = 0; }
-    intLen = newLen;
-    if (nBits == 0) { return; }
-    if (nBits <= (32-bitsInHighWord)) {
-      primitiveLeftShift(nBits); }
-    else { primitiveRightShift(32 -nBits); } }
+      for (int i=0;i<nWords;i++) { words[i] = words[start+i]; }
+      for (int i=nWords; i<newLen; i++) { words[i] = 0; }
+      start = 0; }
+    nWords = newLen;
+    if (rShift == 0) { return; }
+    if (rShift <= (32-bitsInHighWord)) {
+      primitiveUpShift(rShift); }
+    else { primitiveDownShift(32 -rShift); } }
 
   /** {@code n} can be zero.
    */
 
-  private final void safeLeftShift (final int n) {
-    if (n > 0) { leftShift(n); } }
+  private final void safeUpShift (final int shift) {
+    if (shift > 0) { upShift(shift); } }
+
+  @Override
+  public final NaturalBEIBuilder shiftUp (final int shift) {
+    assert 0<=shift;
+    safeUpShift(shift);
+    return this; }
 
   //--------------------------------------------------------------
 
@@ -249,12 +327,12 @@ public final class NaturalBEIBuilder {
    */
 
   private final void add (final NaturalBEIBuilder addend) {
-    int x = intLen;
-    int y = addend.intLen;
+    int x = nWords;
+    int y = addend.nWords;
     int resultLen =
-      (intLen > addend.intLen ? intLen : addend.intLen);
+      (nWords > addend.nWords ? nWords : addend.nWords);
     int[] result =
-      (value.length < resultLen ? new int[resultLen] : value);
+      (words.length < resultLen ? new int[resultLen] : words);
 
     int rstart = result.length-1;
     long sum;
@@ -263,8 +341,8 @@ public final class NaturalBEIBuilder {
     // Add common parts of both numbers
     while((x > 0) && (y > 0)) {
       x--; y--;
-      sum = unsigned(value[x+offset])
-        + unsigned(addend.value[y+addend.offset])
+      sum = unsigned(words[x+start])
+        + unsigned(addend.words[y+addend.start])
         + carry;
       result[rstart--] = (int)sum;
       carry = sum >>> 32; }
@@ -273,15 +351,15 @@ public final class NaturalBEIBuilder {
     while(x > 0) {
       x--;
       if ((carry == 0)
-        && (result == value)
-        && (rstart == (x + offset))) {
+        && (result == words)
+        && (rstart == (x + start))) {
         return; }
-      sum = unsigned(value[x+offset]) + carry;
+      sum = unsigned(words[x+start]) + carry;
       result[rstart--] = (int)sum;
       carry = sum >>> 32; }
     while(y > 0) {
       y--;
-      sum = unsigned(addend.value[y+addend.offset]) + carry;
+      sum = unsigned(addend.words[y+addend.start]) + carry;
       result[rstart--] = (int)sum;
       carry = sum >>> 32; }
 
@@ -296,24 +374,24 @@ public final class NaturalBEIBuilder {
         result = temp; }
       else { result[rstart--] = 1; } }
 
-    value = result;
-    intLen = resultLen;
-    offset = result.length - resultLen; }
+    words = result;
+    nWords = resultLen;
+    start = result.length - resultLen; }
 
-  /** Adds the value of {@code addend} shifted {@code n} ints to
+  /** Adds the words of {@code addend} shifted {@code n} ints to
    * the left. Has the same effect as
-   * {@code addend.leftShift(32*ints); add(addend);}
-   * but doesn't change the value of {@code addend}.
+   * {@code addend.upShift(32*ints); add(addend);}
+   * but doesn't change the words of {@code addend}.
    */
 
   private final void addShifted (final NaturalBEIBuilder addend,
                                  final int shift) {
     if (addend.isZero()) { return; }
-    int x = intLen;
-    int y = addend.intLen + shift;
-    int resultLen = (intLen > y ? intLen : y);
+    int x = nWords;
+    int y = addend.nWords + shift;
+    int resultLen = (nWords > y ? nWords : y);
     int[] result =
-      (value.length < resultLen ? new int[resultLen] : value);
+      (words.length < resultLen ? new int[resultLen] : words);
 
     int rstart = result.length-1;
     long sum;
@@ -323,10 +401,10 @@ public final class NaturalBEIBuilder {
     while ((x > 0) && (y > 0)) {
       x--; y--;
       final int bval =
-        (y+addend.offset) < addend.value.length
-        ? addend.value[y+addend.offset]
+        (y+addend.start) < addend.words.length
+        ? addend.words[y+addend.start]
           : 0;
-        sum = unsigned(value[x+offset]) +
+        sum = unsigned(words[x+start]) +
           (unsigned(bval)) + carry;
         result[rstart--] = (int)sum;
         carry = sum >>> 32; }
@@ -335,16 +413,16 @@ public final class NaturalBEIBuilder {
     while (x > 0) {
       x--;
       if ((carry == 0)
-        && (result == value)
-        && (rstart == (x + offset))) {
+        && (result == words)
+        && (rstart == (x + start))) {
         return; }
-      sum = unsigned(value[x+offset]) + carry;
+      sum = unsigned(words[x+start]) + carry;
       result[rstart--] = (int)sum;
       carry = sum >>> 32; }
     while (y > 0) {
       y--;
-      final int bval = ((y+addend.offset) < addend.value.length
-        ? addend.value[y+addend.offset]
+      final int bval = ((y+addend.start) < addend.words.length
+        ? addend.words[y+addend.start]
           : 0);
       sum = (unsigned(bval)) + carry;
       result[rstart--] = (int)sum;
@@ -361,9 +439,9 @@ public final class NaturalBEIBuilder {
         result = temp; }
       else { result[rstart--] = 1; } }
 
-    value = result;
-    intLen = resultLen;
-    offset = result.length - resultLen; }
+    words = result;
+    nWords = resultLen;
+    start = result.length - resultLen; }
 
   /** Like {@link #addShifted(NaturalBEIBuilder, int)} but
    * {@code this.intLen} must not be greater than {@code n}. In
@@ -373,38 +451,38 @@ public final class NaturalBEIBuilder {
   private final void addDisjoint (final NaturalBEIBuilder addend,
                                   final int n) {
     if (addend.isZero()) { return; }
-    final int x = intLen;
-    int y = addend.intLen + n;
-    final int resultLen = (intLen > y ? intLen : y);
+    final int x = nWords;
+    int y = addend.nWords + n;
+    final int resultLen = (nWords > y ? nWords : y);
     int[] result;
-    if (value.length < resultLen) { result = new int[resultLen]; }
+    if (words.length < resultLen) { result = new int[resultLen]; }
     else {
-      result = value;
-      Arrays.fill(value, offset+intLen, value.length, 0); }
+      result = words;
+      Arrays.fill(words, start+nWords, words.length, 0); }
     int rstart = result.length-1;
     // copy from this if needed
-    System.arraycopy(value, offset, result, (rstart+1)-x, x);
+    System.arraycopy(words, start, result, (rstart+1)-x, x);
     y -= x;
     rstart -= x;
-    final int len = Math.min(y, addend.value.length-addend.offset);
+    final int len = Math.min(y, addend.words.length-addend.start);
     System.arraycopy(
-      addend.value, addend.offset,
+      addend.words, addend.start,
       result, (rstart+1)-y, len);
     // zero the gap
     for (int i=((rstart+1)-y)+len; i < (rstart+1); i++) {
       result[i] = 0; }
-    value = result;
-    intLen = resultLen;
-    offset = result.length - resultLen; }
+    words = result;
+    nWords = resultLen;
+    start = result.length - resultLen; }
 
   /** Adds the low {@code n} ints of {@code addend}.
    */
   private final void addLower (final NaturalBEIBuilder addend,
                                final int n) {
     final NaturalBEIBuilder a = new NaturalBEIBuilder(addend);
-    if ((a.offset + a.intLen) >= n) {
-      a.offset = (a.offset + a.intLen) - n;
-      a.intLen = n; }
+    if ((a.start + a.nWords) >= n) {
+      a.start = (a.start + a.nWords) - n;
+      a.nWords = n; }
     a.normalize();
     add(a); }
 
@@ -417,34 +495,34 @@ public final class NaturalBEIBuilder {
 
   private final int subtract (NaturalBEIBuilder b) {
     NaturalBEIBuilder a = this;
-    int[] result = value;
+    int[] result = words;
     final int sign = a.compareTo(b);
     if (sign == 0) { reset(); return 0; }
     if (sign < 0) {
       final NaturalBEIBuilder tmp = a; a = b; b = tmp; }
-    final int resultLen = a.intLen;
+    final int resultLen = a.nWords;
     if (result.length < resultLen) { result = new int[resultLen]; }
     long diff = 0;
-    int x = a.intLen;
-    int y = b.intLen;
+    int x = a.nWords;
+    int y = b.nWords;
     int rstart = result.length - 1;
     // Subtract common parts of both numbers
     while (y > 0) {
       x--; y--;
-      diff = unsigned(a.value[x+a.offset])
-        - unsigned(b.value[y+b.offset])
+      diff = unsigned(a.words[x+a.start])
+        - unsigned(b.words[y+b.start])
         - ((int)-(diff>>32));
       result[rstart--] = (int)diff; }
     // Subtract remainder of longer number
     while (x > 0) {
       x--;
-      diff = unsigned(a.value[x+a.offset])
+      diff = unsigned(a.words[x+a.start])
         - ((int)-(diff>>32));
       result[rstart--] = (int) diff; }
 
-    value = result;
-    intLen = resultLen;
-    offset = value.length - resultLen;
+    words = result;
+    nWords = resultLen;
+    start = words.length - resultLen;
     normalize();
     return sign; }
 
@@ -461,33 +539,33 @@ public final class NaturalBEIBuilder {
                                    final NaturalBEIBuilder quotient) {
     final long divisorLong = unsigned(divisor);
     // Special case of one word dividend
-    if (intLen == 1) {
-      final long dividendValue = unsigned(value[offset]);
+    if (nWords == 1) {
+      final long dividendValue = unsigned(words[start]);
       final int q = (int) (dividendValue / divisorLong);
       final int r = (int) (dividendValue - (q * divisorLong));
-      quotient.value[0] = q;
-      quotient.intLen = (q == 0) ? 0 : 1;
-      quotient.offset = 0;
+      quotient.words[0] = q;
+      quotient.nWords = (q == 0) ? 0 : 1;
+      quotient.start = 0;
       return r; }
 
-    if (quotient.value.length < intLen) {
-      quotient.value = new int[intLen]; }
-    quotient.offset = 0;
-    quotient.intLen = intLen;
+    if (quotient.words.length < nWords) {
+      quotient.words = new int[nWords]; }
+    quotient.start = 0;
+    quotient.nWords = nWords;
 
     // Normalize the divisor
     final int shift = Integer.numberOfLeadingZeros(divisor);
-    int rem = value[offset];
+    int rem = words[start];
     long remLong = unsigned(rem);
-    if (remLong < divisorLong) { quotient.value[0] = 0; }
+    if (remLong < divisorLong) { quotient.words[0] = 0; }
     else {
-      quotient.value[0] = (int)(remLong / divisorLong);
-      rem = (int) (remLong - (quotient.value[0] * divisorLong));
+      quotient.words[0] = (int)(remLong / divisorLong);
+      rem = (int) (remLong - (quotient.words[0] * divisorLong));
       remLong = unsigned(rem); }
-    int xlen = intLen;
+    int xlen = nWords;
     while (--xlen > 0) {
       final long dividendEstimate = (remLong << 32) |
-        unsigned(value[(offset + intLen) - xlen]);
+        unsigned(words[(start + nWords) - xlen]);
       int q;
       if (dividendEstimate >= 0) {
         q = (int) (dividendEstimate / divisorLong);
@@ -496,7 +574,7 @@ public final class NaturalBEIBuilder {
         final long tmp = divWord(dividendEstimate, divisor);
         q = (int) Numbers.loWord(tmp);
         rem = (int) (tmp >>> 32); }
-      quotient.value[intLen - xlen] = q;
+      quotient.words[nWords - xlen] = q;
       remLong = unsigned(rem); }
     quotient.normalize();
     // denormalize
@@ -506,18 +584,18 @@ public final class NaturalBEIBuilder {
   //--------------------------------------------------------------
   /** A primitive used for division. This method adds in one
    * multiple of the divisor a back to the dividend result at a
-   * specified offset. It is used when qhat was estimated too
+   * specified start. It is used when qhat was estimated too
    * large, and must be adjusted.
    */
 
   private static final int divadd (final int[] a,
                                    final int[] result,
-                                   final int offset) {
+                                   final int start) {
     long carry = 0;
     for (int j=a.length-1; j >= 0; j--) {
       final long sum =
-        (unsigned(a[j])) + unsigned(result[j+offset]) + carry;
-      result[j+offset] = (int)sum;
+        (unsigned(a[j])) + unsigned(result[j+start]) + carry;
+      result[j+start] = (int)sum;
       carry = sum >>> 32; }
     return (int) carry; }
 
@@ -530,60 +608,60 @@ public final class NaturalBEIBuilder {
   divideMagnitude (final NaturalBEIBuilder div,
                    final NaturalBEIBuilder quotient,
                    final boolean needRemainder ) {
-    assert div.intLen > 1;
+    assert div.nWords > 1;
     // D1 normalize the divisor
     final int shift =
-      Integer.numberOfLeadingZeros(div.value[div.offset]);
-    // Copy divisor value to protect divisor
-    final int dlen = div.intLen;
+      Integer.numberOfLeadingZeros(div.words[div.start]);
+    // Copy divisor words to protect divisor
+    final int dlen = div.nWords;
     int[] divisor;
     // Remainder starts as dividend with space for a leading zero
     NaturalBEIBuilder rem;
     if (shift > 0) {
       divisor = new int[dlen];
-      copyAndShift(div.value,div.offset,dlen,divisor,0,shift);
-      if (Integer.numberOfLeadingZeros(value[offset]) >= shift) {
-        final int[] remarr = new int[intLen + 1];
+      copyAndShift(div.words,div.start,dlen,divisor,0,shift);
+      if (Integer.numberOfLeadingZeros(words[start]) >= shift) {
+        final int[] remarr = new int[nWords + 1];
         rem = new NaturalBEIBuilder(remarr);
-        rem.intLen = intLen;
-        rem.offset = 1;
-        copyAndShift(value,offset,intLen,remarr,1,shift); }
+        rem.nWords = nWords;
+        rem.start = 1;
+        copyAndShift(words,start,nWords,remarr,1,shift); }
       else {
-        final int[] remarr = new int[intLen + 2];
+        final int[] remarr = new int[nWords + 2];
         rem = new NaturalBEIBuilder(remarr);
-        rem.intLen = intLen+1;
-        rem.offset = 1;
-        int rFrom = offset;
+        rem.nWords = nWords+1;
+        rem.start = 1;
+        int rFrom = start;
         int c=0;
         final int n2 = 32 - shift;
-        for (int i=1; i < (intLen+1); i++,rFrom++) {
+        for (int i=1; i < (nWords+1); i++,rFrom++) {
           final int b = c;
-          c = value[rFrom];
+          c = words[rFrom];
           remarr[i] = (b << shift) | (c >>> n2); }
-        remarr[intLen+1] = c << shift; } }
+        remarr[nWords+1] = c << shift; } }
     else {
       divisor = Arrays.copyOfRange(
-        div.value, div.offset, div.offset + div.intLen);
-      rem = new NaturalBEIBuilder(new int[intLen + 1]);
-      System.arraycopy(value, offset, rem.value, 1, intLen);
-      rem.intLen = intLen;
-      rem.offset = 1; }
+        div.words, div.start, div.start + div.nWords);
+      rem = new NaturalBEIBuilder(new int[nWords + 1]);
+      System.arraycopy(words, start, rem.words, 1, nWords);
+      rem.nWords = nWords;
+      rem.start = 1; }
 
-    final int nlen = rem.intLen;
+    final int nlen = rem.nWords;
 
     // Set the quotient size
     final int limit = (nlen - dlen) + 1;
-    if (quotient.value.length < limit) {
-      quotient.value = new int[limit];
-      quotient.offset = 0; }
-    quotient.intLen = limit;
-    final int[] q = quotient.value;
+    if (quotient.words.length < limit) {
+      quotient.words = new int[limit];
+      quotient.start = 0; }
+    quotient.nWords = limit;
+    final int[] q = quotient.words;
 
     // Must insert leading 0 in rem if its length did not change
-    if (rem.intLen == nlen) {
-      rem.offset = 0;
-      rem.value[0] = 0;
-      rem.intLen++; }
+    if (rem.nWords == nlen) {
+      rem.start = 0;
+      rem.words[0] = 0;
+      rem.nWords++; }
 
     final int dh = divisor[0];
     final long dhLong = unsigned(dh);
@@ -595,9 +673,9 @@ public final class NaturalBEIBuilder {
       int qhat = 0;
       int qrem = 0;
       boolean skipCorrection = false;
-      final int nh = rem.value[j+rem.offset];
+      final int nh = rem.words[j+rem.start];
       final int nh2 = nh + 0x80000000;
-      final int nm = rem.value[j+1+rem.offset];
+      final int nm = rem.words[j+1+rem.start];
       if (nh == dh) {
         qhat = ~0;
         qrem = nh + nm;
@@ -614,7 +692,7 @@ public final class NaturalBEIBuilder {
           qrem = (int) (tmp >>> 32); } }
       if (qhat == 0) { continue; }
       if (!skipCorrection) { // Correct qhat
-        final long nl = unsigned(rem.value[j+2+rem.offset]);
+        final long nl = unsigned(rem.words[j+2+rem.start]);
         long rs = (unsigned(qrem) << 32) | nl;
         long estProduct = unsigned(dl) * (unsigned(qhat));
         if (unsignedLongCompare(estProduct, rs)) {
@@ -626,13 +704,13 @@ public final class NaturalBEIBuilder {
             if (unsignedLongCompare(estProduct, rs)) {
               qhat--; } } } }
       // D4 Multiply and subtract
-      rem.value[j+rem.offset] = 0;
+      rem.words[j+rem.start] = 0;
       final int borrow =
-        mulsub(rem.value, divisor, qhat, dlen, j+rem.offset);
+        mulsub(rem.words, divisor, qhat, dlen, j+rem.start);
       // D5 Test remainder
       if ((borrow + 0x80000000) > nh2) {
         // D6 Add back
-        divadd(divisor, rem.value, j+1+rem.offset);
+        divadd(divisor, rem.words, j+1+rem.start);
         qhat--; }
       // Store the quotient digit
       q[j] = qhat; } // D7 loop on j
@@ -642,9 +720,9 @@ public final class NaturalBEIBuilder {
     int qhat = 0;
     int qrem = 0;
     boolean skipCorrection = false;
-    final int nh = rem.value[(limit - 1) + rem.offset];
+    final int nh = rem.words[(limit - 1) + rem.start];
     final int nh2 = nh + 0x80000000;
-    final int nm = rem.value[limit + rem.offset];
+    final int nm = rem.words[limit + rem.start];
     if (nh == dh) {
       qhat = ~0;
       qrem = nh + nm;
@@ -662,7 +740,7 @@ public final class NaturalBEIBuilder {
     if (qhat != 0) {
       if (!skipCorrection) {
         final long nl =
-          unsigned(rem.value[limit + 1 + rem.offset]);
+          unsigned(rem.words[limit + 1 + rem.start]);
         long rs = ((unsigned(qrem)) << 32) | nl;
         long estProduct = (unsigned(dl)) * (unsigned(qhat));
         if (unsignedLongCompare(estProduct, rs)) {
@@ -674,27 +752,27 @@ public final class NaturalBEIBuilder {
             if (unsignedLongCompare(estProduct, rs)) { qhat--; } } } }
       // D4 Multiply and subtract
       int borrow;
-      rem.value[(limit - 1) + rem.offset] = 0;
+      rem.words[(limit - 1) + rem.start] = 0;
       if(needRemainder) {
         borrow =
           mulsub(
-            rem.value,divisor,qhat,dlen,(limit-1)+rem.offset); }
+            rem.words,divisor,qhat,dlen,(limit-1)+rem.start); }
       else {
         borrow =
           mulsubBorrow
-          (rem.value,divisor,qhat,dlen,(limit-1)+rem.offset); }
+          (rem.words,divisor,qhat,dlen,(limit-1)+rem.start); }
       // D5 Test remainder
       if ((borrow + 0x80000000) > nh2) {
         // D6 Add back
         if(needRemainder) {
-          divadd(divisor,rem.value,(limit-1)+1+rem.offset); }
+          divadd(divisor,rem.words,(limit-1)+1+rem.start); }
         qhat--; }
       // Store the quotient digit
       q[(limit - 1)] = qhat; }
 
     if (needRemainder) {
       // D8 denormalize
-      if (shift > 0) { rem.rightShift(shift); }
+      if (shift > 0) { rem.downShift(shift); }
       rem.normalize(); }
     quotient.normalize();
     return needRemainder ? rem : null; }
@@ -719,30 +797,30 @@ public final class NaturalBEIBuilder {
   divideKnuth (final NaturalBEIBuilder b,
                final NaturalBEIBuilder quotient,
                final boolean needRemainder) {
-    assert 0 != b.intLen;
+    assert 0 != b.nWords;
     // Dividend is zero
-    if (intLen == 0) {
-      quotient.intLen = 0;
-      quotient.offset = 0;
+    if (nWords == 0) {
+      quotient.nWords = 0;
+      quotient.start = 0;
       return needRemainder ? new NaturalBEIBuilder() : null; }
 
     final int cmp = compareTo(b);
     // Dividend less than divisor
     if (cmp < 0) {
-      quotient.intLen = 0;
-      quotient.offset = 0;
+      quotient.nWords = 0;
+      quotient.start = 0;
       return needRemainder ? new NaturalBEIBuilder(this) : null; }
     // Dividend equal to divisor
     if (cmp == 0) {
-      quotient.value[0] = 1;
-      quotient.intLen = 1;
-      quotient.offset = 0;
+      quotient.words[0] = 1;
+      quotient.nWords = 1;
+      quotient.start = 0;
       return needRemainder ? new NaturalBEIBuilder() : null; }
 
     quotient.clear();
     // Special case one word divisor
-    if (b.intLen == 1) {
-      final int r = divideOneWord(b.value[b.offset], quotient);
+    if (b.nWords == 1) {
+      final int r = divideOneWord(b.words[b.start], quotient);
       if(needRemainder) {
         if (r == 0) { return new NaturalBEIBuilder(); }
         return new NaturalBEIBuilder(r); }
@@ -750,16 +828,16 @@ public final class NaturalBEIBuilder {
 
     // Cancel common powers of two if we're above the
     // KNUTH_POW2_* thresholds
-    if (intLen >= KNUTH_POW2_THRESH_LEN) {
+    if (nWords >= KNUTH_POW2_THRESH_LEN) {
       final int trailingZeroBits =
         Math.min(getLowestSetBit(), b.getLowestSetBit());
       if (trailingZeroBits >= (KNUTH_POW2_THRESH_ZEROS*32)) {
         final NaturalBEIBuilder aa = new NaturalBEIBuilder(this);
         final NaturalBEIBuilder bb = new NaturalBEIBuilder(b);
-        aa.rightShift(trailingZeroBits);
-        bb.rightShift(trailingZeroBits);
+        aa.downShift(trailingZeroBits);
+        bb.downShift(trailingZeroBits);
         final NaturalBEIBuilder r = aa.divideKnuth(bb,quotient,true);
-        r.leftShift(trailingZeroBits);
+        r.upShift(trailingZeroBits);
         return r; } }
 
     return divideMagnitude(b, quotient, needRemainder); }
@@ -782,7 +860,7 @@ public final class NaturalBEIBuilder {
   private final NaturalBEIBuilder
   divide2n1n (final NaturalBEIBuilder b,
               final NaturalBEIBuilder quotient) {
-    final int n = b.intLen;
+    final int n = b.nWords;
 
     // step 1: base case
     if (((n%2) != 0) || (n < NaturalBEI.BURNIKEL_ZIEGLER_THRESHOLD)) {
@@ -790,7 +868,7 @@ public final class NaturalBEIBuilder {
 
     // step 2: view this as [a1,a2,a3,a4] where each ai is n/2 ints or less
     final NaturalBEIBuilder aUpper = new NaturalBEIBuilder(this);
-    aUpper.safeRightShift(32*(n/2));   // aUpper = [a1,a2,a3]
+    aUpper.safeDownShift(32*(n/2));   // aUpper = [a1,a2,a3]
     keepLower(n/2);   // this = a4
 
     // step 3: q1=aUpper/b, r1=aUpper%b
@@ -821,16 +899,16 @@ public final class NaturalBEIBuilder {
   private final NaturalBEIBuilder
   divide3n2n (final NaturalBEIBuilder b,
               final NaturalBEIBuilder quotient) {
-    final int n = b.intLen / 2;   // half the length of b in ints
+    final int n = b.nWords / 2;   // half the length of b in ints
 
     // step 1: view this as [a1,a2,a3] where each ai is n ints
     // or less; let a12=[a1,a2]
     final NaturalBEIBuilder a12 = new NaturalBEIBuilder(this);
-    a12.safeRightShift(32*n);
+    a12.safeDownShift(32*n);
 
     // step 2: view b as [b1,b2] where each bi is n ints or less
     final NaturalBEIBuilder b1 = new NaturalBEIBuilder(b);
-    b1.safeRightShift(n * 32);
+    b1.safeDownShift(n * 32);
     final int[] b2 = b.getLower(n);
     NaturalBEIBuilder r;
     NaturalBEIBuilder d;
@@ -838,24 +916,24 @@ public final class NaturalBEIBuilder {
       // step 3a: if a1<b1, let quotient=a12/b1 and r=a12%b1
       r = a12.divide2n1n(b1, quotient);
       // step 4: d=quotient*b2
-      final int[] qu = NaturalBEI.multiply(quotient.getValue(),b2);
+      final int[] qu = NaturalBEI.multiply(quotient.getWords(),b2);
       d = NaturalBEIBuilder.valueOf(qu); }
     else {
       // step 3b: if a1>=b1, let quotient=beta^n-1
       //and r=a12-b1*2^n+b1
       quotient.ones(n);
       a12.add(b1);
-      b1.leftShift(32*n);
+      b1.upShift(32*n);
       a12.subtract(b1);
       r = a12;
       // step 4: d=quotient*b2=(b2 << 32*n) - b2
       d = NaturalBEIBuilder.valueOf(b2);
-      d.leftShift(32 * n);
+      d.upShift(32 * n);
       d.subtract(NaturalBEIBuilder.valueOf(b2)); }
     // step 5: r = r*beta^n + a3 - d (paper says a4)
     // However, don't subtract d until after the while loop
     // so r doesn't become negative
-    r.leftShift(32 * n);
+    r.upShift(32 * n);
     r.addLower(this, n);
     // step 6: add b until r>=d
     while (r.compareTo(d) < 0) {
@@ -880,11 +958,11 @@ public final class NaturalBEIBuilder {
   public final NaturalBEIBuilder
   divideAndRemainderBurnikelZiegler (final NaturalBEIBuilder b,
                                      final NaturalBEIBuilder quotient) {
-    final int r = intLen;
-    final int s = b.intLen;
+    final int r = nWords;
+    final int s = b.nWords;
 
     // Clear the quotient
-    quotient.offset = quotient.intLen = 0;
+    quotient.start = quotient.nWords = 0;
     if (r < s) { return this; }
     // step 1: let m = min{2^k | (2^k)*BURNIKEL_ZIEGLER_THRESHOLD > s}
     final int s0 = s/NaturalBEI.BURNIKEL_ZIEGLER_THRESHOLD;
@@ -897,10 +975,10 @@ public final class NaturalBEIBuilder {
     final int sigma = (int) Math.max(0, n32 - b.bitLength());
     final NaturalBEIBuilder bShifted = new NaturalBEIBuilder(b);
     // step 4a: shift b so its length is a multiple of n
-    bShifted.safeLeftShift(sigma);
+    bShifted.safeUpShift(sigma);
     final NaturalBEIBuilder aShifted = new NaturalBEIBuilder(this);
     // step 4b: shift a by the same amount
-    aShifted.safeLeftShift(sigma);
+    aShifted.safeUpShift(sigma);
 
     // step 5: t is the number of blocks needed to accommodate a
     // plus one additional bit
@@ -934,7 +1012,7 @@ public final class NaturalBEIBuilder {
     ri = z.divide2n1n(bShifted, qi);
     quotient.add(qi);
     // step 9: a and b were shifted, so shift back
-    ri.rightShift(sigma);
+    ri.downShift(sigma);
     return ri; }
 
   /** This method is used for division. It multiplies an n word
@@ -946,14 +1024,14 @@ public final class NaturalBEIBuilder {
                                    final int[] a,
                                    final int x,
                                    final int len,
-                                   int offset) {
+                                   int start) {
     final long xLong = unsigned(x);
     long carry = 0;
-    offset += len;
+    start += len;
     for (int j=len-1;j>=0;j--) {
       final long product = (unsigned(a[j])*xLong) + carry;
-      final long difference = q[offset] - product;
-      q[offset--] = (int)difference;
+      final long difference = q[start] - product;
+      q[start--] = (int)difference;
       carry = (product >>> 32)
         +
         (((loWord(difference))>(unsigned(~(int)product)))?1:0); }
@@ -967,14 +1045,14 @@ public final class NaturalBEIBuilder {
                                          final int[] a,
                                          final int x,
                                          final int len,
-                                         int offset) {
+                                         int start) {
     final long xLong = unsigned(x);
     long carry = 0;
-    offset += len;
+    start += len;
     for (int j=len-1; j >= 0; j--) {
       final long product =
         ((unsigned(a[j])) * xLong) + carry;
-      final long difference = q[offset--] - product;
+      final long difference = q[start--] - product;
       carry = (product >>> 32)
         + (((loWord(difference)) >
         (unsigned(~(int)product))) ? 1:0); }
@@ -982,9 +1060,9 @@ public final class NaturalBEIBuilder {
 
   /** This method divides a long quantity by an int to estimate
    * qhat for two multi precision numbers. It is used when
-   * the signed value of n is less than zero.
-   * Returns long value where high 32 bits contain remainder value
-   * and low 32 bits contain quotient value.
+   * the signed words of n is less than zero.
+   * Returns long words where high 32 bits contain remainder words
+   * and low 32 bits contain quotient words.
    */
   private static final long divWord(final long n, final int d) {
     final long dLong = unsigned(d);
@@ -1007,8 +1085,8 @@ public final class NaturalBEIBuilder {
   divide (final NaturalBEIBuilder b,
           final NaturalBEIBuilder quotient,
           final boolean needRemainder) {
-    if ((b.intLen < NaturalBEI.BURNIKEL_ZIEGLER_THRESHOLD) ||
-      ((intLen - b.intLen) < NaturalBEI.BURNIKEL_ZIEGLER_OFFSET)) {
+    if ((b.nWords < NaturalBEI.BURNIKEL_ZIEGLER_THRESHOLD) ||
+      ((nWords - b.nWords) < NaturalBEI.BURNIKEL_ZIEGLER_OFFSET)) {
       return divideKnuth(b, quotient, needRemainder); }
     return divideAndRemainderBurnikelZiegler(b, quotient); }
 
@@ -1022,7 +1100,7 @@ public final class NaturalBEIBuilder {
     if (b == 0) { return a; }
     if (a == 0) { return b; }
 
-    // Right shift a & b till their last bits equal to 1.
+    // Down shift a & b till their last bits equal to 1.
     final int aZeros = Integer.numberOfTrailingZeros(a);
     final int bZeros = Integer.numberOfTrailingZeros(b);
     a >>>= aZeros;
@@ -1051,26 +1129,27 @@ public final class NaturalBEIBuilder {
       final NaturalBEIBuilder tmp = a; a = b; b = tmp; }
 
     long diff = 0;
-    int x = a.intLen;
-    int y = b.intLen;
+    int x = a.nWords;
+    int y = b.nWords;
 
     // Subtract common parts of both numbers
     while (y > 0) {
       x--; y--;
       diff =
-        unsigned(a.value[a.offset+ x])
-        - unsigned(b.value[b.offset+ y])
+        unsigned(a.words[a.start+ x])
+        - unsigned(b.words[b.start+ y])
         - ((int)-(diff>>32));
-      a.value[a.offset+x] = (int) diff; }
+      a.words[a.start+x] = (int) diff; }
     // Subtract remainder of longer number
     while (x > 0) {
       x--;
-      diff = unsigned(a.value[a.offset+ x]) - ((int)-(diff>>32));
-      a.value[a.offset+x] = (int)diff; }
+      diff = unsigned(a.words[a.start+ x]) - ((int)-(diff>>32));
+      a.words[a.start+x] = (int)diff; }
     a.normalize();
     return sign; }
 
-  private final NaturalBEIBuilder binaryGCD(NaturalBEIBuilder v) {
+  private final NaturalBEIBuilder 
+  binaryGCD (NaturalBEIBuilder v) {
     // Algorithm B from Knuth section 4.5.2
     NaturalBEIBuilder u = this;
     final NaturalBEIBuilder r = new NaturalBEIBuilder();
@@ -1079,7 +1158,7 @@ public final class NaturalBEIBuilder {
     final int s1 = u.getLowestSetBit();
     final int s2 = v.getLowestSetBit();
     final int k = (s1 < s2) ? s1 : s2;
-    if (k != 0) { u.rightShift(k); v.rightShift(k); }
+    if (k != 0) { u.downShift(k); v.downShift(k); }
 
     // step B2
     final boolean uOdd = (k == s1);
@@ -1089,27 +1168,27 @@ public final class NaturalBEIBuilder {
     int lb;
     while ((lb = t.getLowestSetBit()) >= 0) {
       // steps B3 and B4
-      t.rightShift(lb);
+      t.downShift(lb);
       // step B5
       if (tsign > 0) { u = t; }
       else { v = t; }
 
       // Special case one word numbers
-      if ((u.intLen < 2) && (v.intLen < 2)) {
-        int x = u.value[u.offset];
-        final int y = v.value[v.offset];
+      if ((u.nWords < 2) && (v.nWords < 2)) {
+        int x = u.words[u.start];
+        final int y = v.words[v.start];
         x  = binaryGcd(x, y);
-        r.value[0] = x;
-        r.intLen = 1;
-        r.offset = 0;
-        if (k > 0) { r.leftShift(k); }
+        r.words[0] = x;
+        r.nWords = 1;
+        r.start = 0;
+        if (k > 0) { r.upShift(k); }
         return r; }
 
       // step B6
       if ((tsign = u.difference(v)) == 0) { break; }
       t = ((tsign >= 0) ? u : v); }
 
-    if (k > 0) { u.leftShift(k); }
+    if (k > 0) { u.upShift(k); }
     return u; }
 
   //-------------------------------------------------------------
@@ -1120,8 +1199,8 @@ public final class NaturalBEIBuilder {
     NaturalBEIBuilder b = d;
     NaturalBEIBuilder a = this;
     final NaturalBEIBuilder q = new NaturalBEIBuilder();
-    while (b.intLen != 0) {
-      if (Math.abs(a.intLen - b.intLen) < 2) {
+    while (b.nWords != 0) {
+      if (Math.abs(a.nWords - b.nWords) < 2) {
         return a.binaryGCD(b); }
       final NaturalBEIBuilder r = a.divide(b, q, true);
       a = b;
@@ -1134,8 +1213,8 @@ public final class NaturalBEIBuilder {
             final NaturalBEIBuilder d) {
     final int shift = Math.min(loBit(n),loBit(d));
     if (0 != shift) {
-      n.rightShift(shift);
-      d.rightShift(shift); }
+      n.downShift(shift);
+      d.downShift(shift); }
     //    if (n.equals(d)) {
     //      return new NaturalBEIBuilder[] { ONE, ONE, }; }
     //    if (NaturalBEIBuilder.d.isOne()) {
@@ -1164,13 +1243,13 @@ public final class NaturalBEIBuilder {
     return (one+Long.MIN_VALUE) > (two+Long.MIN_VALUE); }
 
   private final int compareTo (final NaturalBEIBuilder b) {
-    final int blen = b.intLen;
-    if (intLen < blen) { return -1; }
-    if (intLen > blen) { return 1; }
+    final int blen = b.nWords;
+    if (nWords < blen) { return -1; }
+    if (nWords > blen) { return 1; }
     // TODO: is this faster than unsigned long conversion?
-    final int[] bval = b.value;
-    for (int i = offset, j = b.offset; i < (intLen + offset); i++, j++) {
-      final int b1 = value[i] + 0x80000000;
+    final int[] bval = b.words;
+    for (int i = start, j = b.start; i < (nWords + start); i++, j++) {
+      final int b1 = words[i] + 0x80000000;
       final int b2 = bval[j]  + 0x80000000;
       if (b1 < b2) { return -1; }
       if (b1 > b2) { return 1; } }
@@ -1178,14 +1257,14 @@ public final class NaturalBEIBuilder {
 
   private final int compareShifted (final NaturalBEIBuilder b,
                                     final int ints) {
-    final int blen = b.intLen;
-    final int alen = intLen - ints;
+    final int blen = b.nWords;
+    final int alen = nWords - ints;
     if (alen < blen) { return -1; }
     if (alen > blen) { return 1; }
     // TODO: is this faster than unsigned long conversion?
-    final int[] bval = b.value;
-    for (int i = offset, j = b.offset; i < (alen + offset); i++, j++) {
-      final int b1 = value[i] + 0x80000000;
+    final int[] bval = b.words;
+    for (int i = start, j = b.start; i < (alen + start); i++, j++) {
+      final int b1 = words[i] + 0x80000000;
       final int b2 = bval[j]  + 0x80000000;
       if (b1 < b2) { return -1; }
       if (b1 > b2) { return 1; } }
@@ -1197,7 +1276,7 @@ public final class NaturalBEIBuilder {
 
   @Override
   public final String toString () {
-    return NaturalBEI.valueOf(getValue()).toString(); }
+    return NaturalBEI.valueOf(getWords()).toString(); }
 
   //--------------------------------------------------------------
   // construction
@@ -1205,21 +1284,21 @@ public final class NaturalBEIBuilder {
 
   // DANGER!! no copying
   private NaturalBEIBuilder (final int[] val) {
-    value = val;
-    intLen = val.length; }
+    words = val;
+    nWords = val.length; }
 
-  private NaturalBEIBuilder () { value = new int[1]; intLen = 0; }
+  private NaturalBEIBuilder () { words = new int[1]; nWords = 0; }
 
   private NaturalBEIBuilder (final NaturalBEIBuilder val) {
-    intLen = val.intLen;
-    value =
+    nWords = val.nWords;
+    words =
       Arrays.copyOfRange(
-        val.value,val.offset,val.offset+intLen); }
+        val.words,val.start,val.start+nWords); }
 
   private NaturalBEIBuilder (final int val) {
-    value = new int[1];
-    intLen = 1;
-    value[0] = val; }
+    words = new int[1];
+    nWords = 1;
+    words[0] = val; }
 
   //--------------------------------------------------------------
   /** Returns a {@code NaturalBEIBuilder} containing
@@ -1236,16 +1315,16 @@ public final class NaturalBEIBuilder {
                                             final int numBlocks,
                                             final int blockLength) {
     final int blockStart = index * blockLength;
-    if (blockStart >= intLen) { return new NaturalBEIBuilder(); }
+    if (blockStart >= nWords) { return new NaturalBEIBuilder(); }
     int blockEnd;
-    if (index == (numBlocks-1)) { blockEnd = intLen; }
+    if (index == (numBlocks-1)) { blockEnd = nWords; }
     else { blockEnd = (index+1) * blockLength; }
-    if (blockEnd > intLen) { return new NaturalBEIBuilder(); }
+    if (blockEnd > nWords) { return new NaturalBEIBuilder(); }
     final int[] newVal =
       Arrays.copyOfRange(
-        value,
-        (offset+intLen)-blockEnd,
-        (offset+intLen)-blockStart);
+        words,
+        (start+nWords)-blockEnd,
+        (start+nWords)-blockStart);
     return new NaturalBEIBuilder(newVal); }
 
   //--------------------------------------------------------------
@@ -1260,8 +1339,13 @@ public final class NaturalBEIBuilder {
   public static final NaturalBEIBuilder make (final int n) {
     return new NaturalBEIBuilder(new int[n]); }
 
-  public static final NaturalBEIBuilder valueOf (final int[] val) {
+  public static final NaturalBEIBuilder 
+  valueOf (final int[] val) {
     return unsafe(Arrays.copyOf(val,val.length)); }
+
+  public static final NaturalBEIBuilder 
+  valueOf (final NaturalBEI u) {
+    return unsafe(u.copyWords()); }
 
   //--------------------------------------------------------------
 

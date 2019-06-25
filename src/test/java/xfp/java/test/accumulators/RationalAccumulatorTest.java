@@ -5,7 +5,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import xfp.java.Debug;
-import xfp.java.accumulators.BigFloatAccumulator1;
+import xfp.java.accumulators.BigFloatAccumulator0;
 import xfp.java.test.Common;
 
 //----------------------------------------------------------------
@@ -16,7 +16,7 @@ import xfp.java.test.Common;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-31
+ * @version 2019-06-24
  */
 
 public final class RationalAccumulatorTest {
@@ -29,21 +29,21 @@ public final class RationalAccumulatorTest {
   @SuppressWarnings("static-method")
   @Test
   public final void tests () {
-    Debug.DEBUG=false;
+    Debug.DEBUG=true;
     //Debug.println();
     //Debug.println(Classes.className(this));
-    Common.sumTests(
-      Common.generators(DIM),
-      Common.makeAccumulators(accumulators),
-      BigFloatAccumulator1.make());
     Common.l2Tests(
       Common.generators(DIM),
       Common.makeAccumulators(accumulators),
-      BigFloatAccumulator1.make());
-    Common.dotTests(
-      Common.generators(DIM),
-      Common.makeAccumulators(accumulators),
-      BigFloatAccumulator1.make());
+      BigFloatAccumulator0.make());
+//    Common.sumTests(
+//      Common.generators(DIM),
+//      Common.makeAccumulators(accumulators),
+//      BigFloatAccumulator.make());
+//    Common.dotTests(
+//      Common.generators(DIM),
+//      Common.makeAccumulators(accumulators),
+//      BigFloatAccumulator.make());
     Debug.DEBUG=false;
   }
 

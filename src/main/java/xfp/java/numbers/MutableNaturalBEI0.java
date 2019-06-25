@@ -137,7 +137,7 @@ public final class MutableNaturalBEI0 {
   /** The MutableNaturalBEI0 is left in normal form.
    */
 
-  private final void rightShift (final int n) {
+  private final void downShift (final int n) {
     if (intLen == 0) { return; }
     final int nInts = n >>> 5;
     final int nBits = n & 0x1F;
@@ -154,7 +154,7 @@ public final class MutableNaturalBEI0 {
 
   private final void safeRightShift (final int n) {
     if ((n/32) >= intLen) { reset(); }
-    else { rightShift(n); } }
+    else { downShift(n); } }
 
   //--------------------------------------------------------------
   /** Left shift this MutableNaturalBEI0 n bits, where n is
@@ -170,7 +170,7 @@ public final class MutableNaturalBEI0 {
       val[i] = (b << n) | (c >>> n2); }
     val[(offset+intLen)-1] <<= n; }
 
-  private final void leftShift (final int n) {
+  private final void upShift (final int n) {
     // If there is enough storage space in this MutableNaturalBEI0
     // already the available space will be used. Space to the
     // right of the used ints in the value array is faster to
@@ -212,7 +212,7 @@ public final class MutableNaturalBEI0 {
    */
 
   private final void safeLeftShift (final int n) {
-    if (n > 0) { leftShift(n); } }
+    if (n > 0) { upShift(n); } }
 
   //--------------------------------------------------------------
 
@@ -292,7 +292,7 @@ public final class MutableNaturalBEI0 {
 
   /** Adds the value of {@code addend} shifted {@code n} ints to
    * the left. Has the same effect as
-   * {@code addend.leftShift(32*ints); add(addend);}
+   * {@code addend.upShift(32*ints); add(addend);}
    * but doesn't change the value of {@code addend}.
    */
 
@@ -684,7 +684,7 @@ public final class MutableNaturalBEI0 {
 
     if (needRemainder) {
       // D8 denormalize
-      if (shift > 0) { rem.rightShift(shift); }
+      if (shift > 0) { rem.downShift(shift); }
       rem.normalize(); }
     quotient.normalize();
     return needRemainder ? rem : null; }
@@ -746,10 +746,10 @@ public final class MutableNaturalBEI0 {
       if (trailingZeroBits >= (KNUTH_POW2_THRESH_ZEROS*32)) {
         final MutableNaturalBEI0 aa = new MutableNaturalBEI0(this);
         final MutableNaturalBEI0 bb = new MutableNaturalBEI0(b);
-        aa.rightShift(trailingZeroBits);
-        bb.rightShift(trailingZeroBits);
+        aa.downShift(trailingZeroBits);
+        bb.downShift(trailingZeroBits);
         final MutableNaturalBEI0 r = aa.divideKnuth(bb,quotient,true);
-        r.leftShift(trailingZeroBits);
+        r.upShift(trailingZeroBits);
         return r; } }
 
     return divideMagnitude(b, quotient, needRemainder); }
@@ -835,17 +835,17 @@ public final class MutableNaturalBEI0 {
       //and r=a12-b1*2^n+b1
       quotient.ones(n);
       a12.add(b1);
-      b1.leftShift(32*n);
+      b1.upShift(32*n);
       a12.subtract(b1);
       r = a12;
       // step 4: d=quotient*b2=(b2 << 32*n) - b2
       d = MutableNaturalBEI0.valueOf(b2);
-      d.leftShift(32 * n);
+      d.upShift(32 * n);
       d.subtract(MutableNaturalBEI0.valueOf(b2)); }
     // step 5: r = r*beta^n + a3 - d (paper says a4)
     // However, don't subtract d until after the while loop
     // so r doesn't become negative
-    r.leftShift(32 * n);
+    r.upShift(32 * n);
     r.addLower(this, n);
     // step 6: add b until r>=d
     while (r.compareTo(d) < 0) {
@@ -924,7 +924,7 @@ public final class MutableNaturalBEI0 {
     ri = z.divide2n1n(bShifted, qi);
     quotient.add(qi);
     // step 9: a and b were shifted, so shift back
-    ri.rightShift(sigma);
+    ri.downShift(sigma);
     return ri; }
 
   /** This method is used for division. It multiplies an n word
@@ -1069,7 +1069,7 @@ public final class MutableNaturalBEI0 {
     final int s1 = u.getLowestSetBit();
     final int s2 = v.getLowestSetBit();
     final int k = (s1 < s2) ? s1 : s2;
-    if (k != 0) { u.rightShift(k); v.rightShift(k); }
+    if (k != 0) { u.downShift(k); v.downShift(k); }
 
     // step B2
     final boolean uOdd = (k == s1);
@@ -1079,7 +1079,7 @@ public final class MutableNaturalBEI0 {
     int lb;
     while ((lb = t.getLowestSetBit()) >= 0) {
       // steps B3 and B4
-      t.rightShift(lb);
+      t.downShift(lb);
       // step B5
       if (tsign > 0) { u = t; }
       else { v = t; }
@@ -1092,14 +1092,14 @@ public final class MutableNaturalBEI0 {
         r.value[0] = x;
         r.intLen = 1;
         r.offset = 0;
-        if (k > 0) { r.leftShift(k); }
+        if (k > 0) { r.upShift(k); }
         return r; }
 
       // step B6
       if ((tsign = u.difference(v)) == 0) { break; }
       t = ((tsign >= 0) ? u : v); }
 
-    if (k > 0) { u.leftShift(k); }
+    if (k > 0) { u.upShift(k); }
     return u; }
 
   //-------------------------------------------------------------
@@ -1124,8 +1124,8 @@ public final class MutableNaturalBEI0 {
             final MutableNaturalBEI0 d) {
     final int shift = Math.min(loBit(n),loBit(d));
     if (0 != shift) {
-      n.rightShift(shift);
-      d.rightShift(shift); }
+      n.downShift(shift);
+      d.downShift(shift); }
     //    if (n.equals(d)) {
     //      return new MutableNaturalBEI0[] { ONE, ONE, }; }
     //    if (MutableNaturalBEI0.d.isOne()) {

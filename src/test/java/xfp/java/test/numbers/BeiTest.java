@@ -36,9 +36,9 @@ public final class BeiTest {
   //
   //    for (final int shift : shifts) {
   //      final int[] a0 = new int[] { 0xf0f0f0f0, 0xd0d0e0e0, };
-  //      final int[] b0 = Bei.shiftLeft(a0, shift);
+  //      final int[] b0 = Bei.shiftUp(a0, shift);
   //      final int[] b1 = new int[length(a0,shift) + 3];
-  //      final int[] b2 = Bei.shiftLeftInto(b1,a0,shift);
+  //      final int[] b2 = Bei.shiftUpInto(b1,a0,shift);
   //      final int[] b3 = Arrays.copyOfRange(b2,3,b2.length);
   //      Assertions.assertArrayEquals(
   //        b0, b3,
@@ -50,9 +50,9 @@ public final class BeiTest {
   //
   //    for (final int shift : shifts) {
   //      final int[] a0 = new int[] { 100, 100, };
-  //      final int[] b0 = Bei.shiftLeft(a0, shift);
+  //      final int[] b0 = Bei.shiftUp(a0, shift);
   //      final int[] b1 = new int[length(a0,shift) + 3];
-  //      final int[] b2 = Bei.shiftLeftInto(b1,a0,shift);
+  //      final int[] b2 = Bei.shiftUpInto(b1,a0,shift);
   //      final int[] b3 = Arrays.copyOfRange(b2,3,b2.length);
   //      Assertions.assertArrayEquals(
   //        b0, b3,
@@ -64,9 +64,9 @@ public final class BeiTest {
   //
   //    for (final int shift : shifts) {
   //      final int[] a0 = new int[] { 0xf0f0f0f0, 0xd0d0e0e0, };
-  //      final int[] b0 = Bei.shiftLeft(a0, shift);
+  //      final int[] b0 = Bei.shiftUp(a0, shift);
   //      final int[] b1 = new int[length(a0,shift)];
-  //      final int[] b2 = Bei.shiftLeftInto(b1,a0,shift);
+  //      final int[] b2 = Bei.shiftUpInto(b1,a0,shift);
   //      Assertions.assertArrayEquals(
   //        b0, b2,
   //        "shift=" + shift
@@ -76,9 +76,9 @@ public final class BeiTest {
   //
   //    for (final int shift : shifts) {
   //      final int[] a0 = new int[] { 100, 100, };
-  //      final int[] b0 = Bei.shiftLeft(a0, shift);
+  //      final int[] b0 = Bei.shiftUp(a0, shift);
   //      final int[] b1 = new int[length(a0,shift)];
-  //      final int[] b2 = Bei.shiftLeftInto(b1,a0,shift);
+  //      final int[] b2 = Bei.shiftUpInto(b1,a0,shift);
   //      Assertions.assertArrayEquals(
   //        b0, b2,
   //        "shift=" + shift

@@ -1,7 +1,5 @@
 package xfp.java.numbers;
 
-import static xfp.java.numbers.Numbers.loWord;
-
 import java.math.BigInteger;
 import java.util.List;
 
@@ -15,12 +13,19 @@ import xfp.java.exceptions.Exceptions;
  *  uword(i) * 2<sup>32*i</sup></code>.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-20
+ * @version 2019-06-24
  */
 
 @SuppressWarnings("unchecked")
 public interface
 Natural<T extends Natural> extends Ringlike<T> {
+
+  //--------------------------------------------------------------
+  // construction
+  //--------------------------------------------------------------
+  
+  public default NaturalBuilder<T> builder () {
+    throw Exceptions.unsupportedOperation(this,"builder"); }
 
   //--------------------------------------------------------------
   // word ops
@@ -166,28 +171,32 @@ Natural<T extends Natural> extends Ringlike<T> {
 
   public default T setBit (final int n) {
     assert 0<=n;
-    throw Exceptions.unsupportedOperation(
-      this,"setBit",n); }
+    return (T) builder().set((T) this).setBit(n).build(); }
 
   public default T clearBit (final int n) {
     assert 0<=n;
-    throw Exceptions.unsupportedOperation(
-      this,"clearBit",n); }
+    return (T) builder().set((T) this).clearBit(n).build(); }
 
   public default T flipBit (final int n) {
     assert 0<=n;
-    throw Exceptions.unsupportedOperation(
-      this,"flipBit",n); }
+    return (T) builder().set((T) this).flipBit(n).build(); }
 
-  public default T shiftRight (final int bitShift) {
-    assert 0<=bitShift;
-    throw Exceptions.unsupportedOperation(
-      this,"shiftRight",bitShift); }
+  //--------------------------------------------------------------
 
-  public default T shiftLeft (final int bitShift) {
+  public default T shiftDown (final int shift) {
+    assert 0<=shift;
+    if (isZero()) { return (T) this; }
+    final int iShift = (shift>>>5);
+    // all non-zero bits shifted past zero
+    if (iShift >= endWord()) { return zero(); }
+    return 
+      (T) builder().set((T) this).shiftDown(shift).build(); }
+ 
+  public default T shiftUp (final int bitShift) {
     assert 0<=bitShift;
-    throw Exceptions.unsupportedOperation(
-      this,"shiftLeft",bitShift); }
+    if (isZero()) { return (T) this; }
+    return 
+      (T) builder().set((T) this).shiftUp(bitShift).build(); }
 
   //--------------------------------------------------------------
   // ordering
@@ -211,7 +220,7 @@ Natural<T extends Natural> extends Ringlike<T> {
 
   public default int compareTo (final int upShift,
                                 final T u) {
-    return shiftLeft(upShift).compareTo(u); }
+    return shiftUp(upShift).compareTo(u); }
 
   public default int compareTo (final long u) {
     assert 0L<=u;
@@ -267,7 +276,7 @@ Natural<T extends Natural> extends Ringlike<T> {
       if (mid0>mid1) { return 1; }
 
       final long lo0 = uword(iShift);
-      final long lo1 = loWord(us);
+      final long lo1 = Numbers.loWord(us);
       if (lo0<lo1) { return -1; }
       if (lo0>lo1) { return 1; } }
     
@@ -280,12 +289,14 @@ Natural<T extends Natural> extends Ringlike<T> {
   //--------------------------------------------------------------
   // arithmetic
   //--------------------------------------------------------------
-
+  // implementations usually return a pre-allocated constant
+  
   @Override
   public default T zero () {
     throw Exceptions.unsupportedOperation(this,"zero"); }
 
-  // Natural number sare nonnegative
+  // Natural numbers are nonnegative
+  
   @Override
   public default T abs () { return (T) this; }
 
@@ -293,7 +304,11 @@ Natural<T extends Natural> extends Ringlike<T> {
 
   @Override
   public default T add (final T u) {
-    throw Exceptions.unsupportedOperation(this,"add",u); }
+    if (endWord()<u.endWord()) { return (T) u.add(this); }
+    if (isZero()) { return u; }
+    if (u.isZero()) { return (T) this; }
+    return 
+      (T) builder().set((T) this).increment(u).build(); }
 
   public default T add (final T u,
                         final int bitShift) {
@@ -431,6 +446,20 @@ Natural<T extends Natural> extends Ringlike<T> {
 
   public default double doubleValue () {
     throw Exceptions.unsupportedOperation(this,"doubleValue"); }
+
+  public default String toHexString () {
+    final StringBuilder b = new StringBuilder("");
+    final int n = endWord();
+    if (0 == n) { b.append('0'); }
+    else {
+      b.append("[");
+      b.append(String.format("%08x",Long.valueOf(uword(0))));
+      for (int i=1;i<n;i++) {
+        b.append(" ");
+        b.append(
+          String.format("%08x",Long.valueOf(uword(i)))); } 
+      b.append("]"); }
+    return b.toString(); }
 
   //--------------------------------------------------------------
 }

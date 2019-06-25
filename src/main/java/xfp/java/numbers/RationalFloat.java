@@ -18,9 +18,10 @@ import xfp.java.exceptions.Exceptions;
  * arithmetic on them faster.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-20
+ * @version 2019-06-24
  */
 
+@SuppressWarnings("unchecked")
 public final class RationalFloat extends Number
 implements Ringlike<RationalFloat> {
 
@@ -94,8 +95,8 @@ implements Ringlike<RationalFloat> {
     final int e;
     if (e0 == e1) { a = n0d1; b = n1d0; e = e0; }
     else if (e0 > e1) {
-      a = n0d1.shiftLeft(e0-e1); b = n1d0; e = e1; }
-    else { a = n0d1; b = n1d0.shiftLeft(e1-e0); e = e0; }
+      a = n0d1.shiftUp(e0-e1); b = n1d0; e = e1; }
+    else { a = n0d1; b = n1d0.shiftUp(e1-e0); e = e0; }
 
     final boolean p;
     final Natural n;
@@ -149,9 +150,9 @@ implements Ringlike<RationalFloat> {
     final int e;
     if (e0 == e1) { a = n0; b = n1d0; e = e0; }
     else if (e0 > e1) {
-      a = n0.shiftLeft(e0-e1); b = n1d0; e = e1; }
+      a = n0.shiftUp(e0-e1); b = n1d0; e = e1; }
     else {
-      a = n0; b = n1d0.shiftLeft(e1-e0); e = e0; }
+      a = n0; b = n1d0.shiftUp(e1-e0); e = e0; }
 
     final boolean p;
     final Natural n;
@@ -171,7 +172,7 @@ implements Ringlike<RationalFloat> {
     return valueOf(p,n,d0,e); }
 
   //--------------------------------------------------------------
-  // 0 leftShift
+  // 0 upShift
 
   private static final RationalFloat add (final boolean n0,
                                           final Natural t0,
@@ -199,18 +200,18 @@ implements Ringlike<RationalFloat> {
                                           final int e,
                                           final boolean n1,
                                           final long t1,
-                                          final int leftShift) {
+                                          final int upShift) {
     //assert t0.signum() >= 0;
-    if (0==leftShift) { return add(n0,t0,e,n1,t1); }
+    if (0==upShift) { return add(n0,t0,e,n1,t1); }
     if (n0 ^ n1) { // different signs
-      final int c01 = t0.compareTo(t1,leftShift);
+      final int c01 = t0.compareTo(t1,upShift);
       if (0 == c01) { return ZERO; }
       // t1 > t0
       if (0 > c01) {
-        return valueOf(n1, t0.subtractFrom(t1,leftShift), e); }
+        return valueOf(n1, t0.subtractFrom(t1,upShift), e); }
       // t0 > t1
-      return valueOf(n0,t0.subtract(t1,leftShift),e); }
-    return valueOf(n0,t0.add(t1,leftShift),e); }
+      return valueOf(n0,t0.subtract(t1,upShift),e); }
+    return valueOf(n0,t0.add(t1,upShift),e); }
 
   private final RationalFloat add (final boolean p1,
                                    final long t11,
@@ -234,7 +235,7 @@ implements Ringlike<RationalFloat> {
       final int de = e1-e0;
       if (0<de) { return add(p0,t0,e0,p1,t1,de); }
       if (0==de) { return add(p0,t0,e0,p1,t1); }
-      final Natural ts = t0.shiftLeft(-de);
+      final Natural ts = t0.shiftUp(-de);
       return add(p0,ts,e1,p1,t1); }
 
     return add(p0,t0,denominator(),e0,p1,t1,e1); }
@@ -391,9 +392,9 @@ implements Ringlike<RationalFloat> {
   //  public final Rational rationalValue () {
   //    if (0 <= exponent()) {
   //      return Rational.valueOf(
-  //        numerator().shiftLeft(exponent()),denominator()); }
+  //        numerator().shiftUp(exponent()),denominator()); }
   //    return Rational.valueOf(
-  //      numerator(),denominator().shiftLeft(-exponent())); }
+  //      numerator(),denominator().shiftUp(-exponent())); }
 
   //--------------------------------------------------------------
   /** Half-even rounding from {@link Natural} ratio to
@@ -412,18 +413,18 @@ implements Ringlike<RationalFloat> {
 
     // TODO: fix this hack
     final boolean large = (exponent() >= 0);
-    final Natural n00 = large ? n0.shiftLeft(exponent()) : n0;
-    final Natural d00 = large ? d0 : d0.shiftLeft(-exponent());
+    final Natural n00 = large ? n0.shiftUp(exponent()) : n0;
+    final Natural d00 = large ? d0 : d0.shiftUp(-exponent());
 
     // choose exponent, and shift numerator and denominator so
     // quotient has the right number of bits.
     final int e0 = n00.hiBit() - d00.hiBit() - 1;
     final boolean small = (e0 > 0);
-    final Natural n1 = small ? n00 : n00.shiftLeft(-e0);
-    final Natural d1 = small ? d00.shiftLeft(e0) : d00;
+    final Natural n1 = small ? n00 : n00.shiftUp(-e0);
+    final Natural d1 = small ? d00.shiftUp(e0) : d00;
 
     // ensure numerator is less than 2x denominator
-    final Natural d11 = d1.shiftLeft(1);
+    final Natural d11 = d1.shiftUp(1);
     final Natural d2;
     final int e2;
     if (n1.compareTo(d11) < 0) { d2 = d1; e2 = e0;}
@@ -438,8 +439,8 @@ implements Ringlike<RationalFloat> {
     // subnormal numbers need slightly different handling
     final boolean sub = (e2 < Float.MIN_EXPONENT);
     final int e3 = sub ? Float.MIN_EXPONENT : e2;
-    final Natural d3 = sub ? d2.shiftLeft(e3-e2) : d2;
-    final Natural n3 = n1.shiftLeft(Floats.STORED_SIGNIFICAND_BITS);
+    final Natural d3 = sub ? d2.shiftUp(e3-e2) : d2;
+    final Natural n3 = n1.shiftUp(Floats.STORED_SIGNIFICAND_BITS);
 
     final int e4 = e3 - Floats.STORED_SIGNIFICAND_BITS;
 
@@ -457,7 +458,7 @@ implements Ringlike<RationalFloat> {
     // want to know if remainder/denominator is more or less than 1/2
     // comparing 2*remainder to denominator
     // TODO: faster way to do this?
-    final int c = qr[1].shiftLeft(1).compareTo(d3);
+    final int c = qr[1].shiftUp(1).compareTo(d3);
     final int q4 = qr[0].intValue();
     final boolean even = (0x0 == (q4 & 0x1));
     final boolean down = (c < 0) || ((c == 0) && even);
@@ -496,18 +497,18 @@ implements Ringlike<RationalFloat> {
 
     // TODO: fix this hack
     final boolean large = (exponent() >= 0);
-    final Natural n00 = large ? n0.shiftLeft(exponent()) : n0;
-    final Natural d00 = large ? d0 : d0.shiftLeft(-exponent());
+    final Natural n00 = large ? n0.shiftUp(exponent()) : n0;
+    final Natural d00 = large ? d0 : d0.shiftUp(-exponent());
 
     // choose exponent, and shift numerator and denominator so
     // quotient has the right number of bits.
     final int e0 = n00.hiBit()-d00.hiBit()-1;
     final boolean small = (e0 > 0);
-    final Natural n1 = (small ? n00 : n00.shiftLeft(-e0));
-    final Natural d1 = (small ? d00.shiftLeft(e0) : d00);
+    final Natural n1 = (small ? n00 : n00.shiftUp(-e0));
+    final Natural d1 = (small ? d00.shiftUp(e0) : d00);
 
     // ensure numerator is less than 2x denominator
-    final Natural d11 = d1.shiftLeft(1);
+    final Natural d11 = d1.shiftUp(1);
     final Natural d2;
     final int e2;
     if (n1.compareTo(d11) < 0) { d2 = d1; e2 = e0;}
@@ -523,9 +524,9 @@ implements Ringlike<RationalFloat> {
     // subnormal numbers need slightly different handling
     final boolean sub = (e2 < Double.MIN_EXPONENT);
     final int e3 = (sub ? Double.MIN_EXPONENT : e2);
-    final Natural d3 = (sub ? d2.shiftLeft(e3-e2) : d2);
+    final Natural d3 = (sub ? d2.shiftUp(e3-e2) : d2);
     final Natural n3 =
-      n1.shiftLeft(Doubles.STORED_SIGNIFICAND_BITS);
+      n1.shiftUp(Doubles.STORED_SIGNIFICAND_BITS);
 
     final int e4 = e3 - Doubles.STORED_SIGNIFICAND_BITS;
 
@@ -568,8 +569,8 @@ implements Ringlike<RationalFloat> {
     final int e0 = exponent();
     final int e1 = q.exponent();
     final int c;
-    if (e0 <= e1) { c = n0d1.compareTo(n1d0.shiftLeft(e1-e0)); }
-    else { c = n0d1.shiftLeft(e0-e1).compareTo(n1d0); }
+    if (e0 <= e1) { c = n0d1.compareTo(n1d0.shiftUp(e1-e0)); }
+    else { c = n0d1.shiftUp(e0-e1).compareTo(n1d0); }
     return (nonNegative() ? c : -c); }
 
   //--------------------------------------------------------------
@@ -641,7 +642,7 @@ implements Ringlike<RationalFloat> {
       return new RationalFloat(
         nonNegative,NaturalBEI.ONE,NaturalBEI.ONE,e); }
     final int en = n.loBit();
-    final Natural n0 = (en != 0) ? n.shiftRight(en) : n;
+    final Natural n0 = (en != 0) ? n.shiftDown(en) : n;
     final int e0 = (e + en);
     return new RationalFloat(nonNegative,n0,NaturalBEI.ONE,e0); }
 
@@ -660,14 +661,14 @@ implements Ringlike<RationalFloat> {
     // TODO: is numerator 1 case worth optimizing?
     if (n.isOne()) {
       final int ed = d.loBit();
-      final Natural d0 = (ed != 0) ? d.shiftRight(ed) : d;
+      final Natural d0 = (ed != 0) ? d.shiftDown(ed) : d;
       final int e0 = e - ed;
       return new RationalFloat(nonNegative,NaturalBEI.ONE,d0,e0); }
 
     final int en = n.loBit();
     final int ed = d.loBit();
-    final Natural n0 = (en != 0) ? n.shiftRight(en) : n;
-    final Natural d0 = (ed != 0) ? d.shiftRight(ed) : d;
+    final Natural n0 = (en != 0) ? n.shiftDown(en) : n;
+    final Natural d0 = (ed != 0) ? d.shiftDown(ed) : d;
     final int e0 = (e + en) - ed;
 
     // might have numerator or denominator 1 after shift

@@ -85,48 +85,48 @@ implements Natural<NaturalBEI0> {
   public final NaturalBEI0 subtract (final NaturalBEI0 m) {
     return unsafe(Bei0.subtract(_words,m._words)); }
 
-  // only when (m << leftShift) <= this
+  // only when (m << upShift) <= this
   @Override
   public final NaturalBEI0 subtract (final long m,
-                                     final int leftShift) {
+                                     final int upShift) {
     assert 0L<=m;
-    final int[] u = Bei0.subtract(_words,m,leftShift);
+    final int[] u = Bei0.subtract(_words,m,upShift);
     return unsafe(u); }
 
-  // only when (m1 << leftShift) <= m0
+  // only when (m1 << upShift) <= m0
   public static final NaturalBEI0 subtract (final long m0,
                                             final long m1,
-                                            final int leftShift) {
+                                            final int upShift) {
     assert 0L<=m0;
     assert 0L<=m1;
-    assert 0<=leftShift;
-    final int[] u = Bei0.subtract(m0,m1,leftShift);
+    assert 0<=upShift;
+    final int[] u = Bei0.subtract(m0,m1,upShift);
     return unsafe(u); }
 
-  // only when (m1 << leftShift) <= m0
+  // only when (m1 << upShift) <= m0
   public static final NaturalBEI0 subtract (final long m0,
-                                            final int leftShift,
+                                            final int upShift,
                                             final long m1) {
     assert 0L<=m0;
-    final int[] u = Bei0.subtract(Bei0.valueOf(m0,leftShift),m1);
+    final int[] u = Bei0.subtract(Bei0.valueOf(m0,upShift),m1);
     return unsafe(u); }
 
   //--------------------------------------------------------------
-  // only when this <= (m << leftShift)
+  // only when this <= (m << upShift)
 
   @Override
   public final NaturalBEI0 subtractFrom (final long m,
-                                         final int leftShift) {
+                                         final int upShift) {
     assert 0L<=m;
-    final int[] ms = Bei0.shiftLeft(m,leftShift);
+    final int[] ms = Bei0.shiftUp(m,upShift);
     final int[] u = Bei0.subtract(ms,_words);
     return unsafe(u); }
 
   public static final NaturalBEI0 subtractFrom (final long m0,
                                                 final long m1,
-                                                final int leftShift) {
+                                                final int upShift) {
     assert 0L<=m1;
-    final int[] ms = Bei0.shiftLeft(m1,leftShift);
+    final int[] ms = Bei0.shiftUp(m1,upShift);
     final int[] u = Bei0.subtract(ms,Bei0.valueOf(m0));
     return unsafe(u); }
 
@@ -334,8 +334,8 @@ implements Natural<NaturalBEI0> {
       Math.min(
         Bei0.getLowestSetBit(n0._words),
         Bei0.getLowestSetBit(d0._words));
-    final NaturalBEI0 n = (shift != 0) ? n0.shiftRight(shift) : n0;
-    final NaturalBEI0 d = (shift != 0) ? d0.shiftRight(shift) : d0;
+    final NaturalBEI0 n = (shift != 0) ? n0.shiftDown(shift) : n0;
+    final NaturalBEI0 d = (shift != 0) ? d0.shiftDown(shift) : d0;
     if (n.equals(d)) { return new NaturalBEI0[] { ONE, ONE, }; }
     if (d.isOne()) { return new NaturalBEI0[] { n, ONE, }; }
     if (n.isOne()) { return new NaturalBEI0[] { ONE, d, }; }
@@ -349,14 +349,14 @@ implements Natural<NaturalBEI0> {
   //--------------------------------------------------------------
 
   @Override
-  public final NaturalBEI0 shiftLeft (final int n) {
+  public final NaturalBEI0 shiftUp (final int n) {
     assert 0<=n;
-    return unsafe(Bei0.shiftLeft(_words,n)); }
+    return unsafe(Bei0.shiftUp(_words,n)); }
 
   @Override
-  public final NaturalBEI0 shiftRight (final int n) {
+  public final NaturalBEI0 shiftDown (final int n) {
     assert 0<=n;
-    return unsafe(Bei0.shiftRight(_words,n)); }
+    return unsafe(Bei0.shiftDown(_words,n)); }
 
   // get the least significant int words of (m >>> shift)
 
@@ -407,9 +407,9 @@ implements Natural<NaturalBEI0> {
     return Bei0.compare(_words,y._words); }
 
   @Override
-  public final int compareTo (final int leftShift,
+  public final int compareTo (final int upShift,
                               final NaturalBEI0 y) {
-    return shiftLeft(leftShift).compareTo(y); }
+    return shiftUp(upShift).compareTo(y); }
 
   @Override
   public final int compareTo (final long y) {
@@ -418,9 +418,9 @@ implements Natural<NaturalBEI0> {
 
   @Override
   public final int compareTo (final long y,
-                              final int leftShift) {
+                              final int upShift) {
     assert 0L<=y;
-    return Bei0.compare(_words,y,leftShift); }
+    return Bei0.compare(_words,y,upShift); }
 
   //--------------------------------------------------------------
 
@@ -573,10 +573,10 @@ implements Natural<NaturalBEI0> {
   //--------------------------------------------------------------
 
   public static final NaturalBEI0 valueOf (final long x,
-                                           final int leftShift) {
+                                           final int upShift) {
     if (0L==x) { return ZERO; }
     assert 0L < x;
-    return unsafe(Bei0.shiftLeft(x,leftShift)); }
+    return unsafe(Bei0.shiftUp(x,upShift)); }
 
   //--------------------------------------------------------------
 }
