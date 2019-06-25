@@ -302,14 +302,19 @@ Natural<T extends Natural> extends Ringlike<T> {
 
   //--------------------------------------------------------------
 
+//  @Override
+//  public default T add (final T u) {
+//    if (endWord()<u.endWord()) { return (T) u.add(this); }
+//    if (isZero()) { return u; }
+//    if (u.isZero()) { return (T) this; }
+//    return 
+//      (T) builder().set((T) this).increment(u).build(); }
+
   @Override
   public default T add (final T u) {
-    if (endWord()<u.endWord()) { return (T) u.add(this); }
-    if (isZero()) { return u; }
-    if (u.isZero()) { return (T) this; }
-    return 
-      (T) builder().set((T) this).increment(u).build(); }
-
+    throw Exceptions.unsupportedOperation(
+      this,"add",u); }
+  
   public default T add (final T u,
                         final int bitShift) {
     assert 0<=bitShift;

@@ -1,7 +1,5 @@
 package xfp.java.numbers;
 
-import xfp.java.Debug;
-
 /** {@link Natural} number builders. Mutable. Not thread safe.
  *
  * @author palisades dot lakes at gmail dot com
