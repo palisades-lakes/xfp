@@ -78,6 +78,30 @@ extends Comparable<T>{
     throw Exceptions.unsupportedOperation(this,"gcd",x); }
 
   //--------------------------------------------------------------
+  // 'Number' interface
+  //--------------------------------------------------------------
+
+  public default int intValue () { 
+  throw Exceptions.unsupportedOperation(this,"intValue"); }
+
+  public default long longValue () { 
+  throw Exceptions.unsupportedOperation(this,"longValue"); }
+
+  public default float floatValue () { 
+  throw Exceptions.unsupportedOperation(this,"floatValue"); }
+
+  public default double doubleValue () { 
+  throw Exceptions.unsupportedOperation(this,"doubleValue"); }
+
+  //--------------------------------------------------------------
+
+  public default T min (final T that) {
+    return (compareTo(that) < 0 ? (T) this : that); }
+
+  public default T max (final T that) {
+    return (compareTo(that) > 0 ? (T) this : that); }
+
+  //--------------------------------------------------------------
 
   public default String toString (final int radix) {
     throw Exceptions.unsupportedOperation(this,"toString",radix); }

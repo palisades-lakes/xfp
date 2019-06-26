@@ -244,10 +244,10 @@ public final class Rationals implements Set {
         if (edge) { return edgeCases.sample(); }
         final BigInteger z0 = (BigInteger) g0.next();
         final BigInteger z1 = (BigInteger) g1.next();
-        return RationalFloat.valueOf(
-          0<=z0.signum(),
-          NaturalBEI.valueOf(z0.abs()),
-          NaturalBEI.valueOf(z1)); } }; }
+        final Natural u0 = NaturalBEI.valueOf(z0.abs());
+        final Natural u1 = NaturalBEI.valueOf(z1.abs());
+        assert ! u1.isZero();
+        return RationalFloat.valueOf(0<=z0.signum(),u0,u1); } }; }
 
   // Is this characteristic of most inputs?
   public static final Generator

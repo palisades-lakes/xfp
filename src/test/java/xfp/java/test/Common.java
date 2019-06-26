@@ -30,7 +30,7 @@ import xfp.java.prng.PRNG;
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-25
+ * @version 2019-06-26
  */
 @SuppressWarnings("unchecked")
 public final class Common {
@@ -91,11 +91,13 @@ public final class Common {
                 final Function<String,T> valueOf,
                 final BigInteger z0) {
 
-    final String zs = z0.toString(0x10);
+    // TODO: ignore formatting characters of all kinds
+    // ignore spaces
+    final String zs = z0.toString(0x10).replace(" ","");
     //Debug.println(zs);
 
     final T r0 = fromBI.apply(z0);
-    final String rs = r0.toString(0x10);
+    final String rs = r0.toString(0x10).replace(" ","");
 
     Assertions.assertEquals(zs,rs,() ->
     "\nzs=" + zs + "\nrs=" + rs);

@@ -20,9 +20,12 @@ import xfp.java.prng.PRNG;
 
 //----------------------------------------------------------------
 /** Common code for testing sets.
- *
+ * <p>
+ * <pre>
+ * mvn -q -Dtest=xfp/java/test/algebra/SetTests test > Sets.txt
+ * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-22
+ * @version 2019-06-26
  */
 
 @SuppressWarnings("unchecked")

@@ -193,17 +193,17 @@ implements Natural<NaturalBEI> {
    * TODO: move, useful as a general array op.
    */
 
-  private static final String toHexString (final int[] m) {
-    //final StringBuilder b = new StringBuilder("0x");
-    final StringBuilder b = new StringBuilder("");
-    final int n = m.length;
-    if (0 == n) { b.append('0'); }
-    else {
-      b.append(String.format("%x",Long.valueOf(unsigned(m[0]))));
-      for (int i=1;i<n;i++) {
-        b.append(
-          String.format("%08x",Long.valueOf(unsigned(m[i])))); } }
-    return b.toString(); }
+//  private static final String toHexString (final int[] m) {
+//    //final StringBuilder b = new StringBuilder("0x");
+//    final StringBuilder b = new StringBuilder("");
+//    final int n = m.length;
+//    if (0 == n) { b.append('0'); }
+//    else {
+//      b.append(String.format("%x",Long.valueOf(unsigned(m[0]))));
+//      for (int i=1;i<n;i++) {
+//        b.append(
+//          String.format("%08x",Long.valueOf(unsigned(m[i])))); } }
+//    return b.toString(); }
 
   /** TODO: move, useful as a general array op.
    */
@@ -225,8 +225,8 @@ implements Natural<NaturalBEI> {
       byteArray[i] = (byte) nextInt; }
     return byteArray; }
 
-  private static final BigInteger bigIntegerValue (final int[] m) {
-    return new BigInteger(toByteArray(m)); }
+//  private static final BigInteger bigIntegerValue (final int[] m) {
+//    return new BigInteger(toByteArray(m)); }
 
   private static final int intValue (final int[] m) {
     return getInt(m,0); }
@@ -1996,58 +1996,39 @@ implements Natural<NaturalBEI> {
   //    return 0; }
 
   //--------------------------------------------------------------
-
-  public final NaturalBEI min (final NaturalBEI that) {
-    return (compareTo(that) < 0 ? this : that); }
-
-  public final NaturalBEI max (final NaturalBEI that) {
-    return (compareTo(that) > 0 ? this : that); }
-
-  //--------------------------------------------------------------
   // Object methods
   //--------------------------------------------------------------
 
   @Override
-  public int hashCode () {
-    int hashCode = 0;
-    for (final int element : words()) {
-      hashCode = (int) ((31 * hashCode) + unsigned(element)); }
-    return hashCode; }
+  public final int hashCode () { return defaultHashCode(); }
 
   @Override
-  public boolean equals (final Object x) {
+  public final boolean equals (final Object x) {
     if (x==this) { return true; }
-    if (!(x instanceof NaturalBEI)) { return false; }
-    final NaturalBEI xInt = (NaturalBEI) x;
-    final int[] m = words();
-    final int len = m.length;
-    final int[] xm = xInt.words();
-    if (len != xm.length) { return false; }
-    for (int i = 0; i < len; i++) {
-      if (xm[i] != m[i]) { return false; } }
-    return true; }
+    if (!(x instanceof Natural)) { return false; }
+    return equals((NaturalBEI) x); }
 
   /** hex string. */
   @Override
-  public String toString () { return toHexString(); }
+  public final String toString () { return toString(0x10); }
 
-  /** hex string. */
-  @Override
-  public String toString (final int radix) {
-    assert radix==0x10;
-    return toHexString(words()); }
+//  /** hex string. */
+//  @Override
+//  public String toString (final int radix) {
+//    assert radix==0x10;
+//    return toHexString(words()); }
 
   //--------------------------------------------------------------
-  // Number interface+
+  // 'Number' interface+
   //--------------------------------------------------------------
 
   @Override
   public final byte[] toByteArray () {
     return toByteArray(words()); }
 
-  @Override
-  public final BigInteger bigIntegerValue () {
-    return bigIntegerValue(words()); }
+//  @Override
+//  public final BigInteger bigIntegerValue () {
+//    return bigIntegerValue(words()); }
 
   @Override
   public final int intValue () { return intValue(words()); }

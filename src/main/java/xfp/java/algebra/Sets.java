@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.CollectionSampler;
 
+import xfp.java.Classes;
 import xfp.java.exceptions.Exceptions;
 
 /** Utilities merging <code>java.util.Set</code> and
@@ -16,7 +17,7 @@ import xfp.java.exceptions.Exceptions;
  * Static methods only; no state.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-02-26
+ * @version 2019-06-26
  */
 
 @SuppressWarnings("unchecked")
@@ -93,7 +94,16 @@ public final class Sets {
     assert elements.contains(a);
     final Object b = generator.get();
     assert elements.contains(b);
-    return equivalent.test(a,b) == equivalent.test(b,a); }
+    final boolean ab = equivalent.test(a,b);
+    final boolean ba = equivalent.test(b,a);
+    assert ab==ba :
+      "\nset=" + Classes.className(elements) + " " + elements
+      + "\nequivalent=" + Classes.className(equivalent) + " " + equivalent
+      + "\na=" + Classes.className(a) + " " + a
+      + "\nb=" + Classes.className(b) + " " + b
+      + "\na==b -> " + ab
+      + "\nb==a -> " + ba;
+    return ab == ba; }
 
   /** Is a = a?
    */

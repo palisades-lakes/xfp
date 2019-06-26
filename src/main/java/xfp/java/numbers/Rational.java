@@ -11,7 +11,7 @@ import xfp.java.exceptions.Exceptions;
 /** Ratios of {@link Natural}.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-25
+ * @version 2019-06-26
  */
 
 @SuppressWarnings("unchecked")
@@ -483,7 +483,8 @@ implements Ringlike<Rational> {
       (nonNegative() ? "" : "-")
       + "("
       + numerator().toString(0x10)
-      + " / " + denominator().toString(0x10)
+      + " / " 
+      + denominator().toString(0x10)
       + ")"; }
 
   //--------------------------------------------------------------
@@ -493,6 +494,7 @@ implements Ringlike<Rational> {
   private Rational (final boolean nonNegative,
                     final Natural numerator,
                     final Natural denominator) {
+    assert ! denominator.isZero();
     //    super();
     //assert (0 == numerator.loBit()) || (0 == denominator.loBit());
     _nonNegative = nonNegative;
@@ -544,6 +546,7 @@ implements Ringlike<Rational> {
   public static final Rational valueOf (final boolean nonNegative,
                                         final Natural n,
                                         final Natural d) {
+    assert ! d.isZero();
     return reduce(nonNegative,n,d); }
 
   public static final Rational valueOf (final boolean nonNegative,
@@ -664,6 +667,7 @@ implements Ringlike<Rational> {
 
   public static final Rational valueOf (final BigInteger n,
                                         final BigInteger d) {
+    assert ! BigInteger.ZERO.equals(d);
     return valueOf(
       0 <= (n.signum()*d.signum()),
       NaturalBEI.valueOf(n.abs()),
@@ -676,6 +680,7 @@ implements Ringlike<Rational> {
 
   public static final Rational valueOf (final BigFloat n0,
                                         final BigFloat d0) {
+    assert ! d0.isZero();
     //Debug.println("Rational.valueOf(BigFloat,BigFloat)");
     //Debug.println("n0=" + n0);
     //Debug.println("d0=" + d0);

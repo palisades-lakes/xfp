@@ -1,5 +1,7 @@
 package xfp.java.numbers;
 
+import xfp.java.exceptions.Exceptions;
+
 /** {@link Natural} number builders. Mutable. Not thread safe.
  *
  * @author palisades dot lakes at gmail dot com
@@ -13,7 +15,8 @@ public interface NaturalBuilder<T extends Natural> {
    * as this.
    */
 
-  T build ();
+  public default T build () {
+    throw Exceptions.unsupportedOperation(this,"build"); }
 
   //--------------------------------------------------------------
 
@@ -28,28 +31,33 @@ public interface NaturalBuilder<T extends Natural> {
    * allocated arrays if possible,
    */
 
-  NaturalBuilder zero (); 
+  public default NaturalBuilder zero () {
+    throw Exceptions.unsupportedOperation(this,"zero"); }
 
   //--------------------------------------------------------------
   /** Return a builder whose value is the same as <code>u</code>. 
    * Usually the same object as <code>this</code>.
    */
 
-  NaturalBuilder set (final T u); 
+  public default NaturalBuilder set (final T u) {
+    throw Exceptions.unsupportedOperation(this,"multiply",u); }
 
   //--------------------------------------------------------------
   /** Words from endWord on guaranteed to be zero
    * (exclusive bound). */
 
-  int endWord ();
+  public default int endWord () {
+    throw Exceptions.unsupportedOperation(this,"endWord"); }
 
-  int word (final int i);
+  public default int word (final int i) {
+    throw Exceptions.unsupportedOperation(this,"word",i); }
 
   public default long uword (final int i) {
     return Numbers.unsigned(word(i)); }
 
-  NaturalBuilder setWord (final int i,
-                          final int w);
+  public default NaturalBuilder setWord (final int i,
+                                         final int w) {
+    throw Exceptions.unsupportedOperation(this,"setWord",i,w); }
 
   //--------------------------------------------------------------
   /** Return a builder whose value is the same as <code>u</code>. 
@@ -101,7 +109,8 @@ public interface NaturalBuilder<T extends Natural> {
    * <code>0&lt;=shift</code>
    */
 
-  NaturalBuilder shiftDown (final int shift);
+  public default NaturalBuilder shiftDown (final int shift) {
+    throw Exceptions.unsupportedOperation(this,"shiftDown",shift); }
 
   /** Return a builder whose value is
    * <code>this * 2<sup>shift</sup></code>.
@@ -110,7 +119,8 @@ public interface NaturalBuilder<T extends Natural> {
    * <code>0&lt;=shift</code>
    */
 
-  NaturalBuilder shiftUp (final int shift);
+  public default NaturalBuilder shiftUp (final int shift) {
+    throw Exceptions.unsupportedOperation(this,"shiftUp",shift); }
 
   /** Return a builder whose value is
    * <code>u * 2<sup>shift</sup></code>.
@@ -224,10 +234,12 @@ public interface NaturalBuilder<T extends Natural> {
 
   //--------------------------------------------------------------
 
-  NaturalBuilder square ();
-  
-  NaturalBuilder multiply (T u);
-  
+  public default NaturalBuilder square () {
+    throw Exceptions.unsupportedOperation(this,"square"); }
+
+  public default NaturalBuilder multiply (T u) {
+    throw Exceptions.unsupportedOperation(this,"multiply",u); }
+
   //--------------------------------------------------------------
 
   public default String toHexString () {

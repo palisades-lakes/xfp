@@ -423,14 +423,6 @@ implements Natural<NaturalBEI0> {
     return Bei0.compare(_words,y,upShift); }
 
   //--------------------------------------------------------------
-
-  public final NaturalBEI0 min (final NaturalBEI0 that) {
-    return (compareTo(that) < 0 ? this : that); }
-
-  public final NaturalBEI0 max (final NaturalBEI0 that) {
-    return (compareTo(that) > 0 ? this : that); }
-
-  //--------------------------------------------------------------
   // Object methods
   //--------------------------------------------------------------
 

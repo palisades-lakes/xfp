@@ -297,7 +297,7 @@ Natural<T extends Natural> extends Ringlike<T> {
 
   @Override
   public default boolean isZero () { 
-    for (int i=startWord();i<endWord();i++) {
+    for (int i=0;i<endWord();i++) {
       if (0!=word(i)) { return false; } }
     return true; }
 
@@ -447,7 +447,7 @@ Natural<T extends Natural> extends Ringlike<T> {
     throw Exceptions.unsupportedOperation(this,"gcd",x); }
 
   //--------------------------------------------------------------
-  // conversions
+  // 'Number' interface
   //--------------------------------------------------------------
   // TODO: move to Ringlike?
 
@@ -455,44 +455,43 @@ Natural<T extends Natural> extends Ringlike<T> {
     throw Exceptions.unsupportedOperation(this,"toByteArray"); }
 
   public default BigInteger bigIntegerValue () {
-    throw Exceptions.unsupportedOperation(this,"bigIntegerValue"); }
-
-  public default int intValue () {
-    throw Exceptions.unsupportedOperation(this,"intValue"); }
-
-  public default long longValue () {
-    throw Exceptions.unsupportedOperation(this,"longValue"); }
-
-  public default float floatValue () {
-    throw Exceptions.unsupportedOperation(this,"floatValue"); }
-
-  public default double doubleValue () {
-    throw Exceptions.unsupportedOperation(this,"doubleValue"); }
-
-//  public default String toHexString () {
-//    final StringBuilder b = new StringBuilder("");
-//    final int n = endWord();
-//    if (0 == n) { b.append('0'); }
-//    else {
-//      b.append("[");
-//      b.append(String.format("%08x",Long.valueOf(uword(0))));
-//      for (int i=1;i<n;i++) {
-//        b.append(" ");
-//        b.append(
-//          String.format("%08x",Long.valueOf(uword(i)))); } 
-//      b.append("]"); }
-//    return b.toString(); }
+    return new BigInteger(toByteArray()); }
 
   public default String toHexString () {
     final StringBuilder b = new StringBuilder("");
     final int n = endWord()-1;
-    if (0 == n) { b.append('0'); }
+    if (0>n) { b.append('0'); }
     else {
       b.append(String.format("%x",Long.valueOf(uword(n))));
       for (int i=n-1;i>=0;i--) {
         b.append(" ");
         b.append(String.format("%08x",Long.valueOf(uword(i)))); } }
     return b.toString(); }
+
+  //--------------------------------------------------------------
+  // 'Object' interface
+  //--------------------------------------------------------------
+
+  public default int defaultHashCode () {
+    int hashCode = 0;
+    for (int i=0; i<endWord(); i++) {
+      hashCode = (int) ((31 * hashCode) + uword(i)); }
+    return hashCode; }
+
+  // DANGER: equality across classes
+  public default boolean equals (final T x) {
+    if (x==this) { return true; }
+    final Natural u = x;
+    final int n = Math.max(endWord(),u.endWord());
+    for (int i=0; i<n; i++) {
+      if (word(i)!=u.word(i)) { return false; } }
+    return true; }
+
+  /** hex string. */
+  @Override
+  public default String toString (final int radix) {
+    assert radix==0x10;
+    return toHexString(); }
 
   //--------------------------------------------------------------
 }
