@@ -9,11 +9,11 @@ import java.util.Arrays;
  * Don't implement Comparable, because of mutability!
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-25
+ * @version 2019-06-28
  */
 
 public final class NaturalBEIBuilder 
-implements NaturalBuilder<NaturalBEI> {
+implements Natural {
 
   //--------------------------------------------------------------
   // mutable state
@@ -25,6 +25,9 @@ implements NaturalBuilder<NaturalBEI> {
    */
 
   private int nWords;
+
+  @Override
+  public final int startWord () { return 0; }
 
   @Override
   public final int endWord () { return nWords; }
@@ -1276,8 +1279,8 @@ implements NaturalBuilder<NaturalBEI> {
     return multiplyToomCook3(x,y); }
 
   @Override
-  public final NaturalBEIBuilder multiply (final NaturalBEI u) {
-    setWords(multiply(copyWords(),u.copyWords()));
+  public final NaturalBEIBuilder multiply (final Natural u) {
+    setWords(multiply(copyWords(),((NaturalBEIBuilder) u).copyWords()));
     return this; }
 
   //--------------------------------------------------------------

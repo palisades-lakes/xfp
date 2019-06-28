@@ -12,19 +12,13 @@ import java.util.List;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-25
+ * @version 2019-06-28
  */
 
 public final class NaturalBEI extends Number
-implements Natural<NaturalBEI> {
+implements Natural {
 
   private static final long serialVersionUID = 1L;
-
-  //--------------------------------------------------------------
-
-  @Override
-  public final NaturalBuilder<NaturalBEI> builder () {
-    return NaturalBEIBuilder.make(); }
 
   //--------------------------------------------------------------
   // int[] ops
@@ -354,7 +348,7 @@ implements Natural<NaturalBEI> {
 
   //--------------------------------------------------------------
 
-  private static final int[] shiftUp (final long m,
+  private static final int[] shiftUpLong (final long m,
                                       final int shift) {
     final int hi = (int) Numbers.hiWord(m);
     final int lo = (int) loWord(m);

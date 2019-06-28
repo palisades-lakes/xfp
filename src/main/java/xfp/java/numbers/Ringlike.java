@@ -11,13 +11,12 @@ import xfp.java.exceptions.Exceptions;
  * (eq associativity).
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-21
+ * @version 2019-06-28
  */
 
 @SuppressWarnings("unchecked")
-public interface
-Ringlike<T extends Ringlike>
-extends Comparable<T>{
+public interface Ringlike<T extends Ringlike> 
+extends Comparable<Ringlike> {
 
   //--------------------------------------------------------------
   // TODO: fma?

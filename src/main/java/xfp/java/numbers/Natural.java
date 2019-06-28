@@ -13,197 +13,19 @@ import xfp.java.exceptions.Exceptions;
  *  uword(i) * 2<sup>32*i</sup></code>.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-25
+ * @version 2019-06-28
  */
 
 @SuppressWarnings("unchecked")
-public interface
-Natural<T extends Natural> extends Ringlike<T> {
-
-  //--------------------------------------------------------------
-  // construction
-  //--------------------------------------------------------------
-
-  public default NaturalBuilder<T> builder () {
-    throw Exceptions.unsupportedOperation(this,"builder"); }
-
-  //--------------------------------------------------------------
-  // word ops
-  //--------------------------------------------------------------
-  /** The <code>i</code>th word as an <code>int</code>. <br>
-   * <em>WARNING:</em> content used as unsigned.
-   */
-
-  int word (final int i);
-
-
-  /** The value of the unsigned <code>i</code>th word as a
-   * <code>long</code>.
-   */
-
-  public default long uword (final int i) {
-    return Numbers.unsigned(word(i)); }
-
-  /** Inclusive lower bound on non-zero words:
-   * <code>0L==uword(i)</code> for
-   * <code>startWord()>i</code>.
-   * Doesn't guarantee that <code>0L!=uword(i)</code> for
-   * <code>startWord()<=i</code>.
-   * Zero may have no words, in which case this may be -1.
-   * <p>
-   * TODO: should this guarantee the maximal lower bound?
-   */
-
-  int startWord ();
-
-  /** Exclusive upper bound for non-zero words:
-   * <code>0L==uword(i)</code> for
-   * <code>endWord()<=i</code>.
-   * Doesn't guarantee that <code>0L!=uword(i)</code> for
-   * <code>endWord()>i</code>.
-   * <p>
-   * TODO: should this guarantee the minimal upper bound?
-   */
-
-  int endWord ();
-
-  //--------------------------------------------------------------
-  // bit ops
-  //--------------------------------------------------------------
-
-  public default int loInt () {
-    // Search for lowest order nonzero int
-    // TODO: not necessary if startWord promises 
-    // maximal lower bound 
-    int i=startWord(); // might be -1
-    if (i<0) { return -1; } // no set ints
-    final int n = endWord(); // might be 0
-    while (i<n) {
-      final int w = word(i);
-      if (0!=w) { return i; }
-      i++; }
-    // all words are zero
-    return -1; }
-
-  public default int loBit () {
-    // Search for lowest order nonzero int
-    final int i=loInt(); // might be -1
-    if (i<0) { return -1; } // no set bits
-    return (i << 5) + Integer.numberOfTrailingZeros(word(i)); }
-
-  //--------------------------------------------------------------
-
-  // wouldn't need to do this if endWord()
-  // promised minimal upper bound
-
-  public default int hiInt () {
-    final int end = endWord();
-    //Debug.println("end=" + end);
-    if (0==end) { return(0); }
-    int n = end-1;
-    final int start = startWord();
-    //Debug.println("start=" + start);
-    while ((start<=n)&&(0==word(n))) { n--; }
-    return n+1; }
-
-  public default int hiBit () {
-    final int n = hiInt()-1;
-    //Debug.println("n=" + n);
-    //Debug.println("word(" + n + ")=" + Integer.toHexString(word(n)));
-    //Debug.println("bitlength(" + Integer.toHexString(word(n)) 
-    //+ ")=" + Numbers.bitLength(word(n)));
-    return (n<<5) + Numbers.bitLength(word(n)); }
-
-  //--------------------------------------------------------------
-
-  public default boolean testBit (final int n) {
-    assert 0<=n;
-    final int w = word(n>>>5);
-    final int b = (1 << (n&0x1F));
-    return 0!=(w&b); }
-
-  //--------------------------------------------------------------
-  /** get the least significant int words of (m >>> shift) */
-
-  public default int getShiftedInt (final int downShift) {
-    assert 0<=downShift;
-    final int iShift = (downShift>>>5);
-    if (endWord()<=iShift) { return 0; }
-    final int rShift = (downShift & 0x1f);
-    if (0==rShift) { return word(iShift); }
-    final int r2 = 32-rShift;
-    // TODO: optimize using startWord and endWord.
-    final long lo = (uword(iShift) >>> rShift);
-    final long hi = (uword(iShift+1) << r2);
-    return (int) (hi | lo); }
-
-  /** get the least significant two int words of (this >>> shift) 
-   * as a long.
-   */
-
-  public default long getShiftedLong (final int downShift) {
-    assert 0<=downShift;
-    final int iShift = (downShift>>>5);
-    if (endWord()<=iShift) { return 0L; }
-    final int rShift = (downShift & 0x1f);
-    if (0==rShift) { 
-      return ((uword(iShift+1)<<32) | uword(iShift)); }
-    // TODO: optimize using startWord and endWord.
-    final int r2 = 32-rShift;
-    final long lo0 = (uword(iShift)>>>rShift);
-    final long u1 = uword(iShift+1);
-    final long lo1 = (u1<<r2);
-    final long lo = lo1 | lo0;
-    final long hi0 = (u1>>>rShift);
-    final long hi1 = (uword(iShift+2)<<r2);
-    final long hi = hi1 | hi0;
-    return (hi << 32) | lo; }
-
-  /** get the least significant two int words of thios as
-   * a long.
-   */
-
-  public default long getLong () {
-    return (uword(1)<<32) | uword(0); }
-
-  //--------------------------------------------------------------
-  // TODO: need (builder?) api for constructing new Naturals
-
-  public default T setBit (final int n) {
-    assert 0<=n;
-    return (T) builder().set((T) this).setBit(n).build(); }
-
-  public default T clearBit (final int n) {
-    assert 0<=n;
-    return (T) builder().set((T) this).clearBit(n).build(); }
-
-  public default T flipBit (final int n) {
-    assert 0<=n;
-    return (T) builder().set((T) this).flipBit(n).build(); }
-
-  //--------------------------------------------------------------
-
-  public default T shiftDown (final int shift) {
-    assert 0<=shift;
-    if (isZero()) { return (T) this; }
-    final int iShift = (shift>>>5);
-    // all non-zero bits shifted past zero
-    if (iShift >= endWord()) { return zero(); }
-    return 
-      (T) builder().set((T) this).shiftDown(shift).build(); }
-
-  public default T shiftUp (final int bitShift) {
-    assert 0<=bitShift;
-    if (isZero()) { return (T) this; }
-    return 
-      (T) builder().set((T) this).shiftUp(bitShift).build(); }
+public interface Natural extends Uints, Ringlike<Natural> {
 
   //--------------------------------------------------------------
   // ordering
   //--------------------------------------------------------------
 
   @Override
-  public default int compareTo (final T u) {
+  public default int compareTo (final Ringlike r) {
+    final Natural u = (Natural) r;
     // TODO: should really compare hiBits
     final int b0 = hiBit();
     final int b1 = u.hiBit();
@@ -219,8 +41,8 @@ Natural<T extends Natural> extends Ringlike<T> {
     return 0; }
 
   public default int compareTo (final int upShift,
-                                final T u) {
-    return shiftUp(upShift).compareTo(u); }
+                                final Natural u) {
+    return ((Natural) shiftUp(upShift)).compareTo(u); }
 
   public default int compareTo (final long u) {
     assert 0L<=u;
@@ -292,7 +114,7 @@ Natural<T extends Natural> extends Ringlike<T> {
   // implementations usually return a pre-allocated constant
 
   @Override
-  public default T zero () {
+  public default Natural zero () {
     throw Exceptions.unsupportedOperation(this,"zero"); }
 
   @Override
@@ -304,94 +126,152 @@ Natural<T extends Natural> extends Ringlike<T> {
   // Natural numbers are nonnegative
 
   @Override
-  public default T abs () { return (T) this; }
+  public default Natural abs () { return this; }
 
   //--------------------------------------------------------------
 
   @Override
-  public default T add (final T u) {
-    if (endWord()<u.endWord()) { return (T) u.add(this); }
+  public default Natural add (final Natural u0) {
+    Natural t = (Natural) recyclable();
+    Natural u = u0;
     if (isZero()) { return u; }
-    if (u.isZero()) { return (T) this; }
-    final T v = (T) builder().set((T) this).increment(u).build(); 
-    return v; }
+    if (u.isZero()) { return this; }
+    // TODO: optimize by summing over joint range 
+    // and just carrying after that
+    final int end = Math.max(endWord(),u.endWord());
+    long sum = 0L;
+    long carry = 0L;
+    int i=0;
+    for (;i<end;i++) {
+      sum = uword(i) + u.uword(i) + carry;
+      carry = (sum>>>32);
+      t = (Natural) t.setWord(i,(int) sum); }
+    if (0L!=carry) { setWord(i,(int) carry); }
+    return (Natural) t.immutable(); }
 
-  public default T add (final T u,
-                        final int shift) {
+  public default Natural add (final Natural u,
+                              final int shift) {
     assert 0<=shift;
-    if (isZero()) { return (T) u.shiftUp(shift); }
-    if (u.isZero()) { return (T) this; }
+    if (isZero()) { return (Natural) u.shiftUp(shift); }
+    if (u.isZero()) { return this; }
     if (0==shift) { return add(u); }
     // TODO: reduce to single builder op?
-    return 
-      (T) builder().shiftUp(u,shift).increment(this).build(); }
+    return add((Natural) u.shiftUp(shift)); }
 
-  public default T add (final long u) {
-    assert 0L <= u;
-    if (0L == u) { return (T) this; }
-    final T v = (T) builder().set((T) this).increment(u).build();
-    return v; }
+  public default Natural add (final long u) {
+    assert 0L<=u;
+    if (0L==u) { return this; }
+    Uints v = (Uints) recyclable();
+    if (isZero()) { return (Natural) v.set(u); }
+    long sum = uword(0) + Numbers.loWord(u);
+    v = v.setWord(0,(int) sum);
+    long carry = (sum>>>32);
+    sum = uword(1) + Numbers.hiWord(u) + carry;
+    v = v.setWord(1,(int) sum);
+    carry = (sum>>>32);
+    int i=2;
+    final int n = endWord();
+    for (;(0L!=carry)&&(i<n);i++) {
+      sum = uword(i) + carry;
+      v = v.setWord(i,(int) sum);
+      carry = (sum>>>32); }
+    if (0L!=carry) { v = v.setWord(i,(int) carry); }
+    return (Natural) v.immutable(); }
 
-  public default T add (final long u,
-                        final int upShift) {
+  public default Natural add (final long u,
+                              final int upShift) {
     assert 0L<=u;
     assert 0<=upShift;
-    // TODO: reduce to single builder op?
-    return 
-      (T) builder().shiftUp(u,upShift).increment(this).build(); }
+    final Uints v = ((Uints) recyclable()).shiftUp(u,upShift);
+    final Natural w = ((Natural) v).add(this);
+    return (Natural) w.immutable(); }
 
   //--------------------------------------------------------------
 
   @Override
-  public default T subtract (final T u) {
+  public default Natural subtract (final Natural u) {
+    // TODO: fast correct check of u<=this
     assert 0<=compareTo(u);
-    if (u.isZero()) { return (T) this; }
-    final T v = (T) builder().set((T) this).decrement(u).build(); 
-    return v; }
+    if (u.isZero()) { return this; }
+    assert ! isZero();
+    Uints v = (Uints) recyclable();
+    long dif = 0L;
+    long borrow = 0L;
+    final int n = Math.max(endWord(),u.endWord());
+    int i=0;
+    // TODO: optimize by differencing over shared range
+    // and then just borrowing
+    for (;i<n;i++) {
+      dif = uword(i) - u.uword(i) + borrow;
+      borrow = (dif>>32);
+      v = v.setWord(i,(int) dif); }
+    assert 0L==borrow;
+    return (Natural) v.immutable(); }
 
-  public default T subtract (final long u) {
+  public default Natural subtract (final long u) {
     assert 0L<=u;
     assert 0<=compareTo(u);
-    if (0L==u) { return (T) this; }
-    final T v = (T) builder().set((T) this).decrement(u).build(); 
-    return v; }
+    if (0L==u) { return this; }
+    assert 0L<=u;
+    if (0L==u) { return this; }
+    assert ! isZero();
+    final long lo = Numbers.loWord(u);
+    final long hi = Numbers.hiWord(u);
+    if (0L!=hi) { assert 2<=endWord(); }
+    if (0L!=lo) { assert 1<=endWord(); }
+    Uints v = (Uints) recyclable();
+    long dif = uword(0)-lo;
+    v = v.setWord(0,(int) dif);
+    long borrow = (dif>>32);
+    dif = uword(1)-hi+borrow;
+    v = v.setWord(1,(int) dif);
+    borrow = (dif>>32);
+    int i=2;
+    final int n = endWord();
+    for (;(0L!=borrow)&&(i<n);i++) {
+      dif = uword(i)+borrow;
+      v = v.setWord(i,(int) dif);
+      borrow = (dif>>32); }
+    assert 0L==borrow : borrow;
+    return (Natural) v.immutable(); }
 
-  public default T subtract (final long u,
-                             final int upShift) {
+  public default Natural subtract (final long u,
+                                   final int upShift) {
     assert 0L<=u;
     assert 0<=upShift;
     assert compareTo(u,upShift)>=0;
-    return subtract((T) builder().shiftUp(u,upShift).build()); }
+    final Natural v = 
+    return subtract(builder().shiftUp(u,upShift).build()); }
 
   //--------------------------------------------------------------
 
-  public default T subtractFrom (final long u) {
+  public default Natural subtractFrom (final long u) {
     assert 0L<=u;
     assert compareTo(u)<=0;
-    return (T) builder().set(u).build().subtract(this); }
+    return builder().set(u).build().subtract(this); }
 
-  public default T subtractFrom (final long u,
-                                 final int upShift) {
+  public default Natural subtractFrom (final long u,
+                                       final int upShift) {
     assert 0L<=u;
     assert 0<=upShift;
     assert compareTo(u,upShift)<=0;
     return 
-      (T) builder().shiftUp(u,upShift).build().subtract(this); }
+      builder().shiftUp(u,upShift).build().subtract(this); }
 
   //--------------------------------------------------------------
 
   @Override
-  public default T absDiff (final T u) {
+  public default Natural absDiff (final Natural u) {
     final int c = compareTo(u);
     if (c==0) { return zero(); }
-    if (c<0) { return (T) u.subtract(this); }
+    if (c<0) { return u.subtract(this); }
     return subtract(u); }
 
   //--------------------------------------------------------------
 
   @Override
-  public default T square () {
-    return (T) builder().set((T) this).square().build(); }
+  public default Natural square () {
+    return builder().set(this).square().build(); }
 
   //--------------------------------------------------------------
 
@@ -403,47 +283,47 @@ Natural<T extends Natural> extends Ringlike<T> {
     return true; }
 
   @Override
-  public default T multiply (final T u) {
-    return (T) builder().set((T) this).multiply(u).build(); }
+  public default Natural multiply (final Natural u) {
+    return builder().set(this).multiply(u).build(); }
 
-  public default T multiply (final long u) {
+  public default Natural multiply (final long u) {
     assert 0L<=u;
-    return (T) builder().set(u).multiply(this).build(); }
+    return builder().set(u).multiply(this).build(); }
 
-  public default T multiply (final long u,
-                             final int upShift) {
+  public default Natural multiply (final long u,
+                                   final int upShift) {
     assert 0L<=u;
     assert 0<=upShift;
-    return (T) builder().shiftUp(u,upShift).multiply(this).build(); }
+    return builder().shiftUp(u,upShift).multiply(this).build(); }
 
   //--------------------------------------------------------------
 
   @Override
-  public default T divide (final T x) {
+  public default Natural divide (final Natural x) {
     throw Exceptions.unsupportedOperation(this,"divide",x); }
 
   @Override
-  public default T invert () {
+  public default Natural invert () {
     throw Exceptions.unsupportedOperation(this,"invert"); }
 
   @Override
-  public default T one () { 
-    return (T) builder().set(1L).build(); }
+  public default Natural one () { 
+    return builder().set(1L).build(); }
 
   @Override
-  public default List<T> divideAndRemainder (final T x) {
-    final T d = divide(x);
-    final T r = subtract((T) x.multiply(d));
+  public default List<Natural> divideAndRemainder (final Natural x) {
+    final Natural d = divide(x);
+    final Natural r = subtract(x.multiply(d));
     return List.of(d,r); }
 
   @Override
-  public default T remainder (final T x) {
-    final T d = divide(x);
-    final T r = subtract((T) x.multiply(d));
+  public default Natural remainder (final Natural x) {
+    final Natural d = divide(x);
+    final Natural r = subtract(x.multiply(d));
     return r; }
 
   @Override
-  public default T gcd (final T x) {
+  public default Natural gcd (final Natural x) {
     throw Exceptions.unsupportedOperation(this,"gcd",x); }
 
   //--------------------------------------------------------------
@@ -451,12 +331,15 @@ Natural<T extends Natural> extends Ringlike<T> {
   //--------------------------------------------------------------
   // TODO: move to Ringlike?
 
+  @Override
   public default byte[] toByteArray () {
     throw Exceptions.unsupportedOperation(this,"toByteArray"); }
 
+  @Override
   public default BigInteger bigIntegerValue () {
     return new BigInteger(toByteArray()); }
 
+  @Override
   public default String toHexString () {
     final StringBuilder b = new StringBuilder("");
     final int n = endWord()-1;
@@ -472,6 +355,7 @@ Natural<T extends Natural> extends Ringlike<T> {
   // 'Object' interface
   //--------------------------------------------------------------
 
+  @Override
   public default int defaultHashCode () {
     int hashCode = 0;
     for (int i=0; i<endWord(); i++) {
@@ -479,7 +363,8 @@ Natural<T extends Natural> extends Ringlike<T> {
     return hashCode; }
 
   // DANGER: equality across classes
-  public default boolean equals (final T x) {
+  @Override
+  public default boolean equals (final Natural x) {
     if (x==this) { return true; }
     final Natural u = x;
     final int n = Math.max(endWord(),u.endWord());
