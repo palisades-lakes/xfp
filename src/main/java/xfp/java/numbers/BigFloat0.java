@@ -10,7 +10,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-18
+ * @version 2019-07-01
  */
 
 public final class BigFloat0
@@ -74,11 +74,12 @@ implements Ringlike<BigFloat0> {
       final int c01 = t02.compareTo(t12);
       if (0==c01) { return ZERO; }
       // t12 > t02
-      if (0 > c01) { return valueOf(p1,t12.subtract(t02),e2); }
+      if (0 > c01) { 
+        return valueOf(p1,(NaturalBEI0) t12.subtract(t02),e2); }
       // t02 > t12
-      return valueOf(p0,t02.subtract(t12),e2); }
+      return valueOf(p0,(NaturalBEI0) t02.subtract(t12),e2); }
 
-    return valueOf(p0,t02.add(t12),e2); }
+    return valueOf(p0,(NaturalBEI0) t02.add(t12),e2); }
 
   //--------------------------------------------------------------
 
@@ -111,7 +112,7 @@ implements Ringlike<BigFloat0> {
         final NaturalBEI0 t = t0.subtractFrom(t1);
         return valueOf(p1,t,e); }
       // t0 > t1
-      final NaturalBEI0 t = t0.subtract(t1);
+      final NaturalBEI0 t = (NaturalBEI0) t0.subtract(t1);
       return valueOf(p0,t,e); }
     final NaturalBEI0 t = t0.add(t1);
     return valueOf(p0,t,e); }
@@ -288,7 +289,7 @@ implements Ringlike<BigFloat0> {
             final int e) {
     return valueOf(
       (! (nonNegative() ^ p)),
-      significand().multiply(t),
+      (NaturalBEI0) significand().multiply(t),
       Math.addExact(exponent(),e)); }
 
   @Override

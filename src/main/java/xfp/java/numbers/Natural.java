@@ -13,19 +13,19 @@ import xfp.java.exceptions.Exceptions;
  *  uword(i) * 2<sup>32*i</sup></code>.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-28
+ * @version 2019-07-01
  */
 
 @SuppressWarnings("unchecked")
-public interface Natural extends Uints, Ringlike<Natural> {
+public interface Natural 
+extends Uints, Ringlike<Natural>, Transience<Natural> {
 
   //--------------------------------------------------------------
   // ordering
   //--------------------------------------------------------------
 
   @Override
-  public default int compareTo (final Ringlike r) {
-    final Natural u = (Natural) r;
+  public default int compareTo (final Natural u) {
     // TODO: should really compare hiBits
     final int b0 = hiBit();
     final int b1 = u.hiBit();
@@ -131,9 +131,8 @@ public interface Natural extends Uints, Ringlike<Natural> {
   //--------------------------------------------------------------
 
   @Override
-  public default Natural add (final Natural u0) {
-    Natural t = (Natural) recyclable();
-    Natural u = u0;
+  public default Natural add (final Natural u) {
+    Natural t = recyclable();
     if (isZero()) { return u; }
     if (u.isZero()) { return this; }
     // TODO: optimize by summing over joint range 
@@ -147,7 +146,7 @@ public interface Natural extends Uints, Ringlike<Natural> {
       carry = (sum>>>32);
       t = (Natural) t.setWord(i,(int) sum); }
     if (0L!=carry) { setWord(i,(int) carry); }
-    return (Natural) t.immutable(); }
+    return t.immutable(); }
 
   public default Natural add (final Natural u,
                               final int shift) {
@@ -161,7 +160,7 @@ public interface Natural extends Uints, Ringlike<Natural> {
   public default Natural add (final long u) {
     assert 0L<=u;
     if (0L==u) { return this; }
-    Uints v = (Uints) recyclable();
+    Uints v = recyclable();
     if (isZero()) { return (Natural) v.set(u); }
     long sum = uword(0) + Numbers.loWord(u);
     v = v.setWord(0,(int) sum);
@@ -176,7 +175,7 @@ public interface Natural extends Uints, Ringlike<Natural> {
       v = v.setWord(i,(int) sum);
       carry = (sum>>>32); }
     if (0L!=carry) { v = v.setWord(i,(int) carry); }
-    return (Natural) v.immutable(); }
+    return ((Natural) v).immutable(); }
 
   public default Natural add (final long u,
                               final int upShift) {
@@ -184,7 +183,7 @@ public interface Natural extends Uints, Ringlike<Natural> {
     assert 0<=upShift;
     final Uints v = ((Uints) recyclable()).shiftUp(u,upShift);
     final Natural w = ((Natural) v).add(this);
-    return (Natural) w.immutable(); }
+    return w.immutable(); }
 
   //--------------------------------------------------------------
 
@@ -194,7 +193,7 @@ public interface Natural extends Uints, Ringlike<Natural> {
     assert 0<=compareTo(u);
     if (u.isZero()) { return this; }
     assert ! isZero();
-    Uints v = (Uints) recyclable();
+    Uints v = recyclable();
     long dif = 0L;
     long borrow = 0L;
     final int n = Math.max(endWord(),u.endWord());
@@ -206,7 +205,7 @@ public interface Natural extends Uints, Ringlike<Natural> {
       borrow = (dif>>32);
       v = v.setWord(i,(int) dif); }
     assert 0L==borrow;
-    return (Natural) v.immutable(); }
+    return ((Natural) v).immutable(); }
 
   public default Natural subtract (final long u) {
     assert 0L<=u;
@@ -219,7 +218,7 @@ public interface Natural extends Uints, Ringlike<Natural> {
     final long hi = Numbers.hiWord(u);
     if (0L!=hi) { assert 2<=endWord(); }
     if (0L!=lo) { assert 1<=endWord(); }
-    Uints v = (Uints) recyclable();
+    Uints v = recyclable();
     long dif = uword(0)-lo;
     v = v.setWord(0,(int) dif);
     long borrow = (dif>>32);
@@ -233,30 +232,28 @@ public interface Natural extends Uints, Ringlike<Natural> {
       v = v.setWord(i,(int) dif);
       borrow = (dif>>32); }
     assert 0L==borrow : borrow;
-    return (Natural) v.immutable(); }
+    return ((Natural) v).immutable(); }
 
   public default Natural subtract (final long u,
                                    final int upShift) {
     assert 0L<=u;
     assert 0<=upShift;
     assert compareTo(u,upShift)>=0;
-    final Natural v = 
-    return subtract(builder().shiftUp(u,upShift).build()); }
+    return subtract((Natural) from(u,upShift)); }
 
   //--------------------------------------------------------------
 
   public default Natural subtractFrom (final long u) {
     assert 0L<=u;
     assert compareTo(u)<=0;
-    return builder().set(u).build().subtract(this); }
+    return ((Natural) from(u)).subtract(this); }
 
   public default Natural subtractFrom (final long u,
                                        final int upShift) {
     assert 0L<=u;
     assert 0<=upShift;
     assert compareTo(u,upShift)<=0;
-    return 
-      builder().shiftUp(u,upShift).build().subtract(this); }
+    return ((Natural) from(u,upShift)).subtract(this); }
 
   //--------------------------------------------------------------
 
@@ -271,7 +268,7 @@ public interface Natural extends Uints, Ringlike<Natural> {
 
   @Override
   public default Natural square () {
-    return builder().set(this).square().build(); }
+    throw Exceptions.unsupportedOperation(this,"square"); }
 
   //--------------------------------------------------------------
 
@@ -284,17 +281,18 @@ public interface Natural extends Uints, Ringlike<Natural> {
 
   @Override
   public default Natural multiply (final Natural u) {
-    return builder().set(this).multiply(u).build(); }
+    throw Exceptions.unsupportedOperation(this,"multiply",u); }
 
   public default Natural multiply (final long u) {
     assert 0L<=u;
-    return builder().set(u).multiply(this).build(); }
+    throw Exceptions.unsupportedOperation(this,"multiply",u); }
 
   public default Natural multiply (final long u,
                                    final int upShift) {
     assert 0L<=u;
     assert 0<=upShift;
-    return builder().shiftUp(u,upShift).multiply(this).build(); }
+    throw Exceptions.unsupportedOperation(
+      this,"multiply",u,upShift); }
 
   //--------------------------------------------------------------
 
@@ -308,7 +306,7 @@ public interface Natural extends Uints, Ringlike<Natural> {
 
   @Override
   public default Natural one () { 
-    return builder().set(1L).build(); }
+    throw Exceptions.unsupportedOperation(this,"one"); }
 
   @Override
   public default List<Natural> divideAndRemainder (final Natural x) {
@@ -338,45 +336,6 @@ public interface Natural extends Uints, Ringlike<Natural> {
   @Override
   public default BigInteger bigIntegerValue () {
     return new BigInteger(toByteArray()); }
-
-  @Override
-  public default String toHexString () {
-    final StringBuilder b = new StringBuilder("");
-    final int n = endWord()-1;
-    if (0>n) { b.append('0'); }
-    else {
-      b.append(String.format("%x",Long.valueOf(uword(n))));
-      for (int i=n-1;i>=0;i--) {
-        b.append(" ");
-        b.append(String.format("%08x",Long.valueOf(uword(i)))); } }
-    return b.toString(); }
-
-  //--------------------------------------------------------------
-  // 'Object' interface
-  //--------------------------------------------------------------
-
-  @Override
-  public default int defaultHashCode () {
-    int hashCode = 0;
-    for (int i=0; i<endWord(); i++) {
-      hashCode = (int) ((31 * hashCode) + uword(i)); }
-    return hashCode; }
-
-  // DANGER: equality across classes
-  @Override
-  public default boolean equals (final Natural x) {
-    if (x==this) { return true; }
-    final Natural u = x;
-    final int n = Math.max(endWord(),u.endWord());
-    for (int i=0; i<n; i++) {
-      if (word(i)!=u.word(i)) { return false; } }
-    return true; }
-
-  /** hex string. */
-  @Override
-  public default String toString (final int radix) {
-    assert radix==0x10;
-    return toHexString(); }
 
   //--------------------------------------------------------------
 }

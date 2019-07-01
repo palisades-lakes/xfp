@@ -5,24 +5,23 @@ import xfp.java.exceptions.Exceptions;
 /** An interface for (im)mutable data structures.
  * <p>
  * This interface covers both mutable and immutable objects,
- * with 'mutating' methods returning a 
- * object that may or may not be new. Methods are free
- * to return a new instance while invalidating the target of the 
- * method (similar to the behavior of transient data structures
- * in Clojure).
+ * with 'mutating' methods returning an object that may or may not 
+ * be new. Methods are free to return a new instance 
+ * and may or may not invalidate the target of the method (similar
+ * to the behavior of transient data structures in Clojure).
  * 
  * TODO: compare to builder paradigm.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-28
+ * @version 2019-07-01
  */
 
 @SuppressWarnings("unchecked")
-public interface Transience {
+public interface Transience<T extends Transience>  {
 
   /** Like <code>(transient foo)</code> in Clojure.
    * <p>
-   * Return an equivalent sequence that acts like a 
+   * Return an equivalent object that acts like a 
    * <code>transient</code> data structure in Clojure,
    * in the sense that mutating operations return a new reference,
    * which may point to a new instance, and may invalidate the 
@@ -41,7 +40,7 @@ public interface Transience {
    * Clojure: Transient Data Structures</a>
    */
 
-  public default Transience recyclable () {
+  public default T recyclable () {
     throw Exceptions.unsupportedOperation(this,"recyclable"); }
 
   /** Like <code>(persistent! foo)</code> in Clojure.
@@ -61,8 +60,11 @@ public interface Transience {
    * Clojure: Transient Data Structures</a>
    */
 
-  public default Transience immutable () {
+  public default T immutable () {
     throw Exceptions.unsupportedOperation(this,"immutable"); }
+
+  public default boolean isImmutable () {
+    throw Exceptions.unsupportedOperation(this,"isImmutable"); }
 
   //--------------------------------------------------------------
 }

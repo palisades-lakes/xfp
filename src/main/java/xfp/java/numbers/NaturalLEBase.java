@@ -6,7 +6,7 @@ import xfp.java.exceptions.Exceptions;
 
 // TODO: wrap rather than inherit?
 
-/** Code common to {@link NaturalLE} and {@link NaturalLEBuilder}.
+/** Code common to {@link NaturalLE} and {@link NaturalLEMutable}.
  *
  * @author palisades dot lakes at gmail dot com
  * @version 2019-06-26
@@ -20,7 +20,7 @@ public abstract class NaturalLEBase extends Number {
   // fields
   //--------------------------------------------------------------
   /** This array is never modified in {@link NaturalLE}.
-   * Frequently modified in {@link NaturalLEBuilder}.
+   * Frequently modified in {@link NaturalLEMutable}.
    * <p>
    * It holds the value of this natural number as little endian 
    * <code>int</code> words, ignoring everything outside the

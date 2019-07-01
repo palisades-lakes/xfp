@@ -5,12 +5,12 @@ package xfp.java.numbers;
  * Don't implement Comparable, because of mutability!
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-26
+ * @version 2019-07-01
  */
 
-public final class NaturalLEBuilder 
+public final class NaturalLEMutable 
 extends NaturalLEBase
-implements NaturalBuilder<NaturalLE> {
+implements Natural {
 
   private static final long serialVersionUID = 1L;
 
@@ -22,18 +22,18 @@ implements NaturalBuilder<NaturalLE> {
   // construction
   //--------------------------------------------------------------
 
-  private NaturalLEBuilder (final int[] words,
+  private NaturalLEMutable (final int[] words,
                             final int i0,
                             final int i1,
                             final int startWord) {
     super(words,i0,i1,startWord); }
 
-  private NaturalLEBuilder () { super(new int[0],-1,0,-1); }
+  private NaturalLEMutable () { super(new int[0],-1,0,-1); }
 
   //--------------------------------------------------------------
 
-  public static final NaturalLEBuilder make () {
-    return new NaturalLEBuilder(); }
+  public static final NaturalLEMutable make () {
+    return new NaturalLEMutable(); }
 
   //--------------------------------------------------------------
 }

@@ -14,11 +14,11 @@ import xfp.java.Debug;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-24
+ * @version 2019-07-01
  */
 
 public final class NaturalBEI0 extends Number
-implements Natural<NaturalBEI0> {
+implements Natural {
 
   private static final long serialVersionUID = 1L;
 
@@ -46,8 +46,8 @@ implements Natural<NaturalBEI0> {
   //--------------------------------------------------------------
 
   @Override
-  public final NaturalBEI0 add (final NaturalBEI0 m) {
-    return unsafe(Bei0.add(_words,m._words)); }
+  public final Natural add (final Natural m) {
+    return unsafe(Bei0.add(_words,((NaturalBEI0) m)._words)); }
 
   @Override
   public final NaturalBEI0 add (final long m) {
@@ -74,7 +74,7 @@ implements Natural<NaturalBEI0> {
   // only when val <= this
 
   @Override
-  public final NaturalBEI0 subtract (final long m) {
+  public final Natural subtract (final long m) {
     assert 0L<=m;
     final int[] u = Bei0.subtract(_words,m);
     return unsafe(u); }
@@ -82,8 +82,9 @@ implements Natural<NaturalBEI0> {
   // only when val <= this
 
   @Override
-  public final NaturalBEI0 subtract (final NaturalBEI0 m) {
-    return unsafe(Bei0.subtract(_words,m._words)); }
+  public final Natural subtract (final Natural m) {
+    return unsafe(
+      Bei0.subtract(_words,((NaturalBEI0) m)._words)); }
 
   // only when (m << upShift) <= this
   @Override
@@ -141,7 +142,7 @@ implements Natural<NaturalBEI0> {
   //--------------------------------------------------------------
 
   @Override
-  public final NaturalBEI0 absDiff (final NaturalBEI0 u) {
+  public final Natural absDiff (final Natural u) {
     final int c01 = compareTo(u);
     if (0<c01) { return subtract(u); }
     if (0>c01) { return u.subtract(this); }
@@ -208,14 +209,15 @@ implements Natural<NaturalBEI0> {
 
   // TODO: multiply by shifted long
   @Override
-  public final NaturalBEI0 multiply (final long that,
+  public final Natural multiply (final long that,
                                      final int shift) {
     assert 1L<=that;
     return multiply(valueOf(that,shift)); }
 
   @Override
-  public final NaturalBEI0 multiply (final NaturalBEI0 that) {
-    return unsafe(Bei0.multiply(_words,that._words)); }
+  public final Natural multiply (final Natural that) {
+    return unsafe(
+      Bei0.multiply(_words,((NaturalBEI0) that)._words)); }
 
   //--------------------------------------------------------------
   // Division
@@ -283,37 +285,41 @@ implements Natural<NaturalBEI0> {
   //--------------------------------------------------------------
 
   @Override
-  public final NaturalBEI0
-  divide (final NaturalBEI0 that) {
+  public final Natural
+  divide (final Natural that) {
     assert (! that.isZero());
+    final NaturalBEI0 u = (NaturalBEI0) that;
     if (that.isOne()) { return this; }
-    if (useKnuthDivision(this,that)) { return divideKnuth(that); }
-    return divideBurnikelZiegler(that); }
+    if (useKnuthDivision(this,u)) { return divideKnuth(u); }
+    return divideBurnikelZiegler(u); }
 
   @Override
-  public List<NaturalBEI0>
-  divideAndRemainder (final NaturalBEI0 that) {
+  public List<Natural>
+  divideAndRemainder (final Natural that) {
     assert (! that.isZero());
-    if (useKnuthDivision(this,that)) {
-      return Arrays.asList(divideAndRemainderKnuth(that)); }
+    final NaturalBEI0 u = (NaturalBEI0) that;
+    if (useKnuthDivision(this,u)) {
+      return Arrays.asList(divideAndRemainderKnuth(u)); }
     return
-      Arrays.asList(divideAndRemainderBurnikelZiegler(that)); }
+      Arrays.asList(divideAndRemainderBurnikelZiegler(u)); }
 
   @Override
-  public final NaturalBEI0 remainder (final NaturalBEI0 that) {
+  public final Natural remainder (final Natural that) {
     assert (! that.isZero());
-    if (useKnuthDivision(this,that)) {
-      return remainderKnuth(that); }
-    return remainderBurnikelZiegler(that); }
+    final NaturalBEI0 u = (NaturalBEI0) that;
+    if (useKnuthDivision(this,u)) {
+      return remainderKnuth(u); }
+    return remainderBurnikelZiegler(u); }
 
   //--------------------------------------------------------------
   // gcd
   //--------------------------------------------------------------
 
   @Override
-  public final NaturalBEI0 gcd (final NaturalBEI0 that) {
+  public final Natural gcd (final Natural that) {
     final MutableNaturalBEI0 a = MutableNaturalBEI0.valueOf(_words);
-    final MutableNaturalBEI0 b = MutableNaturalBEI0.valueOf(that._words);
+    final NaturalBEI0 u = (NaturalBEI0) that;
+    final MutableNaturalBEI0 b = MutableNaturalBEI0.valueOf(u._words);
     final MutableNaturalBEI0 result = a.hybridGCD(b);
     return valueOf(result.getValue()); }
 
@@ -328,7 +334,7 @@ implements Natural<NaturalBEI0> {
   //      { valueOf(nd[0].getValue()),
   //        valueOf(nd[1].getValue()), }; }
 
-  public static final NaturalBEI0[] reduce (final NaturalBEI0 n0,
+  public static final Natural[] reduce (final NaturalBEI0 n0,
                                             final NaturalBEI0 d0) {
     final int shift =
       Math.min(
@@ -339,10 +345,10 @@ implements Natural<NaturalBEI0> {
     if (n.equals(d)) { return new NaturalBEI0[] { ONE, ONE, }; }
     if (d.isOne()) { return new NaturalBEI0[] { n, ONE, }; }
     if (n.isOne()) { return new NaturalBEI0[] { ONE, d, }; }
-    final NaturalBEI0 gcd = n.gcd(d);
+    final Natural gcd = n.gcd(d);
     if (gcd.compareTo(ONE) > 0) {
-      return new NaturalBEI0[] { n.divide(gcd), d.divide(gcd), }; }
-    return new NaturalBEI0[] { n, d, }; }
+      return new Natural[] { n.divide(gcd), d.divide(gcd), }; }
+    return new Natural[] { n, d, }; }
 
   //--------------------------------------------------------------
   // Bit Operations
@@ -403,13 +409,14 @@ implements Natural<NaturalBEI0> {
   //--------------------------------------------------------------
 
   @Override
-  public final int compareTo (final NaturalBEI0 y) {
-    return Bei0.compare(_words,y._words); }
+  public final int compareTo (final Natural that) {
+    final NaturalBEI0 u = (NaturalBEI0) that;
+    return Bei0.compare(_words,u._words); }
 
   @Override
   public final int compareTo (final int upShift,
-                              final NaturalBEI0 y) {
-    return shiftUp(upShift).compareTo(y); }
+                              final Natural that) {
+    return shiftUp(upShift).compareTo(that); }
 
   @Override
   public final int compareTo (final long y) {
@@ -417,10 +424,10 @@ implements Natural<NaturalBEI0> {
     return Bei0.compare(_words,y); }
 
   @Override
-  public final int compareTo (final long y,
+  public final int compareTo (final long that,
                               final int upShift) {
-    assert 0L<=y;
-    return Bei0.compare(_words,y,upShift); }
+    assert 0L<=that;
+    return Bei0.compare(_words,that,upShift); }
 
   //--------------------------------------------------------------
   // Object methods
@@ -450,11 +457,11 @@ implements Natural<NaturalBEI0> {
   @Override
   public String toString () { return Debug.toHexString(_words); }
 
-  /** hex string. */
-  @Override
-  public String toString (final int radix) {
-    assert radix==0x10;
-    return Debug.toHexString(_words); }
+//  /** hex string. */
+//  @Override
+//  public String toString (final int radix) {
+//    assert radix==0x10;
+//    return Debug.toHexString(_words); }
 
   //--------------------------------------------------------------
   // Number interface+

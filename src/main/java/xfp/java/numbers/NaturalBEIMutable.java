@@ -9,17 +9,17 @@ import java.util.Arrays;
  * Don't implement Comparable, because of mutability!
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-28
+ * @version 2019-07-01
  */
 
-public final class NaturalBEIBuilder 
+public final class NaturalBEIMutable 
 implements Natural {
 
   //--------------------------------------------------------------
   // mutable state
   //--------------------------------------------------------------
   /** The number of ints of the words array that are currently
-   * used to hold the magnitude of this NaturalBEIBuilder. The
+   * used to hold the magnitude of this NaturalBEIMutable. The
    * magnitude starts at an start and start + nWords may be less
    * than words.length.
    */
@@ -33,7 +33,7 @@ implements Natural {
   public final int endWord () { return nWords; }
 
   /** The start into the words array where the magnitude of this
-   * NaturalBEIBuilder begins.
+   * NaturalBEIMutable begins.
    * 
    * <code>0&lt;=start</code>.
    */
@@ -91,41 +91,12 @@ implements Natural {
     return words[beIndex(i)]; }
 
   @Override
-  public final NaturalBuilder setWord (final int i,
-                                       final int w) {
+  public final Natural setWord (final int i,
+                                final int w) {
     assert 0<=i;
     expandTo(i);
     words[beIndex(i)] = w; 
     return this; }
-
-  //--------------------------------------------------------------
-  /** copy state from <code></code> to this.
-   */
-
-  @Override
-  public final NaturalBEIBuilder set (final NaturalBEI u) {
-    setWords(u.copyWords());
-    return this; }
-
-  //--------------------------------------------------------------
-  /** safe but slow... 
-   * TODO: options are:
-   * <ul>
-   * <ui> return internal array and destroy references.
-   * prevents incremental builds.
-   * <ui> copy internal array and preserve internal state.
-   * extra array allocation if only building once.
-   * </ul>
-   * maybe 2 'build' operations, 'build', 'buildAndClaer'?
-   */
-
-  @Override
-  public final NaturalBEI build () {
-    // TODO: other constants?
-    if (isZero()) { return NaturalBEI.ZERO; }
-    return 
-      NaturalBEI.unsafe(
-        Arrays.copyOfRange(words, start, start + nWords)); }
 
   //--------------------------------------------------------------
   /** Returns an <code>int[]</code>containing the {@code n}
@@ -159,13 +130,14 @@ implements Natural {
     nWords = n; }
 
   @Override
-  public final NaturalBEIBuilder zero () {
+  public final Natural zero () {
     start = 0;
     nWords = 0;
     Arrays.fill(words,0); 
     return this; }
 
-  private final void reset () { start = nWords = 0; }
+  @Override
+  public final Natural clear () { return zero(); }
 
   public final int getLowestSetBit () {
     if (nWords == 0) { return -1; }
@@ -175,7 +147,7 @@ implements Natural {
     if (b == 0) { return -1; }
     return ((nWords-1-j)<<5) + Integer.numberOfTrailingZeros(b); }
 
-  private static final int loBit (final NaturalBEIBuilder m) {
+  private static final int loBit (final NaturalBEIMutable m) {
     return m.getLowestSetBit(); }
 
   private final void normalize () {
@@ -205,7 +177,7 @@ implements Natural {
       - Integer.numberOfLeadingZeros(words[start]); }
 
   //--------------------------------------------------------------
-  /** Down shift this NaturalBEIBuilder n bits, where n is
+  /** Down shift this NaturalBEIMutable n bits, where n is
    * less than 32. Assumes that nWords > 0, n > 0 for speed
    */
 
@@ -218,7 +190,7 @@ implements Natural {
       val[i] = (c << n2) | (b >>> n); }
     val[start] >>>= n; }
 
-  /** The NaturalBEIBuilder is left in normal form.
+  /** The NaturalBEIMutable is left in normal form.
    */
 
   private final void downShift (final int n) {
@@ -237,16 +209,16 @@ implements Natural {
    */
 
   private final void safeDownShift (final int n) {
-    if ((n/32) >= nWords) { reset(); }
+    if ((n/32) >= nWords) { clear(); }
     else { downShift(n); } }
 
   @Override
-  public final NaturalBEIBuilder shiftDown (final int shift) {
+  public final NaturalBEIMutable shiftDown (final int shift) {
     safeDownShift(shift);
     return this; }
 
   //--------------------------------------------------------------
-  /** Left shift this NaturalBEIBuilder n bits, where n is
+  /** Left shift this NaturalBEIMutable n bits, where n is
    * less than 32. Assumes that nWords > 0, n > 0 for speed
    */
 
@@ -260,7 +232,7 @@ implements Natural {
     val[(start+nWords)-1] <<= shift; }
 
   private final void upShift (final int shift) {
-    // If there is enough storage space in this NaturalBEIBuilder
+    // If there is enough storage space in this NaturalBEIMutable
     // already the available space will be used. Space to the
     // right of the used ints in the words array is faster to
     // utilize, so the extra space will be taken from the right if
@@ -304,7 +276,7 @@ implements Natural {
     if (shift > 0) { upShift(shift); } }
 
   @Override
-  public final NaturalBEIBuilder shiftUp (final int shift) {
+  public final NaturalBEIMutable shiftUp (final int shift) {
     assert 0<=shift;
     safeUpShift(shift);
     return this; }
@@ -328,12 +300,12 @@ implements Natural {
   //--------------------------------------------------------------
   // addition
   //--------------------------------------------------------------
-  /** Adds the contents of two NaturalBEIBuilder objects.The result
-   * is placed within this NaturalBEIBuilder. The contents of the
+  /** Adds the contents of two NaturalBEIMutable objects.The result
+   * is placed within this NaturalBEIMutable. The contents of the
    * addend are not changed.
    */
 
-  private final void add (final NaturalBEIBuilder addend) {
+  private final void add (final NaturalBEIMutable addend) {
     int x = nWords;
     int y = addend.nWords;
     int resultLen =
@@ -391,7 +363,7 @@ implements Natural {
    * but doesn't change the words of {@code addend}.
    */
 
-  private final void addShifted (final NaturalBEIBuilder addend,
+  private final void addShifted (final NaturalBEIMutable addend,
                                  final int shift) {
     if (addend.isZero()) { return; }
     int x = nWords;
@@ -450,12 +422,12 @@ implements Natural {
     nWords = resultLen;
     start = result.length - resultLen; }
 
-  /** Like {@link #addShifted(NaturalBEIBuilder, int)} but
+  /** Like {@link #addShifted(NaturalBEIMutable, int)} but
    * {@code this.intLen} must not be greater than {@code n}. In
    * other words, concatenates {@code this} and {@code addend}.
    */
 
-  private final void addDisjoint (final NaturalBEIBuilder addend,
+  private final void addDisjoint (final NaturalBEIMutable addend,
                                   final int n) {
     if (addend.isZero()) { return; }
     final int x = nWords;
@@ -484,9 +456,9 @@ implements Natural {
 
   /** Adds the low {@code n} ints of {@code addend}.
    */
-  private final void addLower (final NaturalBEIBuilder addend,
+  private final void addLower (final NaturalBEIMutable addend,
                                final int n) {
-    final NaturalBEIBuilder a = new NaturalBEIBuilder(addend);
+    final NaturalBEIMutable a = new NaturalBEIMutable(addend);
     if ((a.start + a.nWords) >= n) {
       a.start = (a.start + a.nWords) - n;
       a.nWords = n; }
@@ -497,16 +469,16 @@ implements Natural {
   // subtraction
   //--------------------------------------------------------------
   /** Subtracts the smaller of this and b from the larger and
-   * places the result into this NaturalBEIBuilder.
+   * places the result into this NaturalBEIMutable.
    */
 
-  private final int subtract (NaturalBEIBuilder b) {
-    NaturalBEIBuilder a = this;
+  private final int subtract (NaturalBEIMutable b) {
+    NaturalBEIMutable a = this;
     int[] result = words;
     final int sign = a.compareTo(b);
-    if (sign == 0) { reset(); return 0; }
+    if (sign == 0) { clear(); return 0; }
     if (sign < 0) {
-      final NaturalBEIBuilder tmp = a; a = b; b = tmp; }
+      final NaturalBEIMutable tmp = a; a = b; b = tmp; }
     final int resultLen = a.nWords;
     if (result.length < resultLen) { result = new int[resultLen]; }
     long diff = 0;
@@ -1006,7 +978,7 @@ implements Natural {
   //--------------------------------------------------------------
 
   @Override
-  public final NaturalBEIBuilder square () {
+  public final NaturalBEIMutable square () {
     setWords(square(copyWords()));
     return this; }
 
@@ -1279,8 +1251,9 @@ implements Natural {
     return multiplyToomCook3(x,y); }
 
   @Override
-  public final NaturalBEIBuilder multiply (final Natural u) {
-    setWords(multiply(copyWords(),((NaturalBEIBuilder) u).copyWords()));
+  public final NaturalBEIMutable multiply (final Natural u) {
+    setWords(
+      multiply(copyWords(),((NaturalBEIMutable) u).copyWords()));
     return this; }
 
   //--------------------------------------------------------------
@@ -1293,7 +1266,7 @@ implements Natural {
    */
 
   private final int divideOneWord (final int divisor,
-                                   final NaturalBEIBuilder quotient) {
+                                   final NaturalBEIMutable quotient) {
     final long divisorLong = unsigned(divisor);
     // Special case of one word dividend
     if (nWords == 1) {
@@ -1356,14 +1329,14 @@ implements Natural {
       carry = sum >>> 32; }
     return (int) carry; }
 
-  /** Divide this NaturalBEIBuilder by the divisor.
+  /** Divide this NaturalBEIMutable by the divisor.
    * The quotient will be placed into the provided quotient object
    * and the remainder object is returned.
    */
 
-  private final NaturalBEIBuilder
-  divideMagnitude (final NaturalBEIBuilder div,
-                   final NaturalBEIBuilder quotient,
+  private final NaturalBEIMutable
+  divideMagnitude (final NaturalBEIMutable div,
+                   final NaturalBEIMutable quotient,
                    final boolean needRemainder ) {
     assert div.nWords > 1;
     // D1 normalize the divisor
@@ -1373,19 +1346,19 @@ implements Natural {
     final int dlen = div.nWords;
     int[] divisor;
     // Remainder starts as dividend with space for a leading zero
-    NaturalBEIBuilder rem;
+    NaturalBEIMutable rem;
     if (shift > 0) {
       divisor = new int[dlen];
       copyAndShift(div.words,div.start,dlen,divisor,0,shift);
       if (Integer.numberOfLeadingZeros(words[start]) >= shift) {
         final int[] remarr = new int[nWords + 1];
-        rem = new NaturalBEIBuilder(remarr);
+        rem = new NaturalBEIMutable(remarr);
         rem.nWords = nWords;
         rem.start = 1;
         copyAndShift(words,start,nWords,remarr,1,shift); }
       else {
         final int[] remarr = new int[nWords + 2];
-        rem = new NaturalBEIBuilder(remarr);
+        rem = new NaturalBEIMutable(remarr);
         rem.nWords = nWords+1;
         rem.start = 1;
         int rFrom = start;
@@ -1399,7 +1372,7 @@ implements Natural {
     else {
       divisor = Arrays.copyOfRange(
         div.words, div.start, div.start + div.nWords);
-      rem = new NaturalBEIBuilder(new int[nWords + 1]);
+      rem = new NaturalBEIMutable(new int[nWords + 1]);
       System.arraycopy(words, start, rem.words, 1, nWords);
       rem.nWords = nWords;
       rem.start = 1; }
@@ -1540,7 +1513,7 @@ implements Natural {
   private static final int KNUTH_POW2_THRESH_ZEROS = 3;
 
   /** Calculates the quotient of this div b and places the
-   * quotient in the provided NaturalBEIBuilder objects and the
+   * quotient in the provided NaturalBEIMutable objects and the
    * remainder object is returned.
    *
    * Uses Algorithm D in Knuth section 4.3.1.
@@ -1550,37 +1523,37 @@ implements Natural {
    * b is not changed.
    */
 
-  public final NaturalBEIBuilder
-  divideKnuth (final NaturalBEIBuilder b,
-               final NaturalBEIBuilder quotient,
+  public final NaturalBEIMutable
+  divideKnuth (final NaturalBEIMutable b,
+               final NaturalBEIMutable quotient,
                final boolean needRemainder) {
     assert 0 != b.nWords;
     // Dividend is zero
     if (nWords == 0) {
       quotient.nWords = 0;
       quotient.start = 0;
-      return needRemainder ? new NaturalBEIBuilder() : null; }
+      return needRemainder ? new NaturalBEIMutable() : null; }
 
     final int cmp = compareTo(b);
     // Dividend less than divisor
     if (cmp < 0) {
       quotient.nWords = 0;
       quotient.start = 0;
-      return needRemainder ? new NaturalBEIBuilder(this) : null; }
+      return needRemainder ? new NaturalBEIMutable(this) : null; }
     // Dividend equal to divisor
     if (cmp == 0) {
       quotient.words[0] = 1;
       quotient.nWords = 1;
       quotient.start = 0;
-      return needRemainder ? new NaturalBEIBuilder() : null; }
+      return needRemainder ? new NaturalBEIMutable() : null; }
 
     quotient.zero();
     // Special case one word divisor
     if (b.nWords == 1) {
       final int r = divideOneWord(b.words[b.start], quotient);
       if(needRemainder) {
-        if (r == 0) { return new NaturalBEIBuilder(); }
-        return new NaturalBEIBuilder(r); }
+        if (r == 0) { return new NaturalBEIMutable(); }
+        return new NaturalBEIMutable(r); }
       return null; }
 
     // Cancel common powers of two if we're above the
@@ -1589,11 +1562,11 @@ implements Natural {
       final int trailingZeroBits =
         Math.min(getLowestSetBit(), b.getLowestSetBit());
       if (trailingZeroBits >= (KNUTH_POW2_THRESH_ZEROS*32)) {
-        final NaturalBEIBuilder aa = new NaturalBEIBuilder(this);
-        final NaturalBEIBuilder bb = new NaturalBEIBuilder(b);
+        final NaturalBEIMutable aa = new NaturalBEIMutable(this);
+        final NaturalBEIMutable bb = new NaturalBEIMutable(b);
         aa.downShift(trailingZeroBits);
         bb.downShift(trailingZeroBits);
-        final NaturalBEIBuilder r = aa.divideKnuth(bb,quotient,true);
+        final NaturalBEIMutable r = aa.divideKnuth(bb,quotient,true);
         r.upShift(trailingZeroBits);
         return r; } }
 
@@ -1614,9 +1587,9 @@ implements Natural {
    * @return {@code this%b}
    */
 
-  private final NaturalBEIBuilder
-  divide2n1n (final NaturalBEIBuilder b,
-              final NaturalBEIBuilder quotient) {
+  private final NaturalBEIMutable
+  divide2n1n (final NaturalBEIMutable b,
+              final NaturalBEIMutable quotient) {
     final int n = b.nWords;
 
     // step 1: base case
@@ -1624,17 +1597,17 @@ implements Natural {
       return divideKnuth(b,quotient,true); }
 
     // step 2: view this as [a1,a2,a3,a4] where each ai is n/2 ints or less
-    final NaturalBEIBuilder aUpper = new NaturalBEIBuilder(this);
+    final NaturalBEIMutable aUpper = new NaturalBEIMutable(this);
     aUpper.safeDownShift(32*(n/2));   // aUpper = [a1,a2,a3]
     keepLower(n/2);   // this = a4
 
     // step 3: q1=aUpper/b, r1=aUpper%b
-    final NaturalBEIBuilder q1 = new NaturalBEIBuilder();
-    final NaturalBEIBuilder r1 = aUpper.divide3n2n(b, q1);
+    final NaturalBEIMutable q1 = new NaturalBEIMutable();
+    final NaturalBEIMutable r1 = aUpper.divide3n2n(b, q1);
 
     // step 4: quotient=[r1,this]/b, r2=[r1,this]%b
     addDisjoint(r1, n/2);   // this = [r1,this]
-    final NaturalBEIBuilder r2 = divide3n2n(b, quotient);
+    final NaturalBEIMutable r2 = divide3n2n(b, quotient);
 
     // step 5: let quotient=[q1,quotient] and return r2
     quotient.addDisjoint(q1, n/2);
@@ -1653,28 +1626,28 @@ implements Natural {
    * @return {@code this%b}
    */
 
-  private final NaturalBEIBuilder
-  divide3n2n (final NaturalBEIBuilder b,
-              final NaturalBEIBuilder quotient) {
+  private final NaturalBEIMutable
+  divide3n2n (final NaturalBEIMutable b,
+              final NaturalBEIMutable quotient) {
     final int n = b.nWords / 2;   // half the length of b in ints
 
     // step 1: view this as [a1,a2,a3] where each ai is n ints
     // or less; let a12=[a1,a2]
-    final NaturalBEIBuilder a12 = new NaturalBEIBuilder(this);
+    final NaturalBEIMutable a12 = new NaturalBEIMutable(this);
     a12.safeDownShift(32*n);
 
     // step 2: view b as [b1,b2] where each bi is n ints or less
-    final NaturalBEIBuilder b1 = new NaturalBEIBuilder(b);
+    final NaturalBEIMutable b1 = new NaturalBEIMutable(b);
     b1.safeDownShift(n * 32);
     final int[] b2 = b.getLower(n);
-    NaturalBEIBuilder r;
-    NaturalBEIBuilder d;
+    NaturalBEIMutable r;
+    NaturalBEIMutable d;
     if (compareShifted(b, n) < 0) {
       // step 3a: if a1<b1, let quotient=a12/b1 and r=a12%b1
       r = a12.divide2n1n(b1, quotient);
       // step 4: d=quotient*b2
       final int[] qu = NaturalBEI.multiply(quotient.getWords(),b2);
-      d = NaturalBEIBuilder.valueOf(qu); }
+      d = NaturalBEIMutable.valueOf(qu); }
     else {
       // step 3b: if a1>=b1, let quotient=beta^n-1
       //and r=a12-b1*2^n+b1
@@ -1684,9 +1657,9 @@ implements Natural {
       a12.subtract(b1);
       r = a12;
       // step 4: d=quotient*b2=(b2 << 32*n) - b2
-      d = NaturalBEIBuilder.valueOf(b2);
+      d = NaturalBEIMutable.valueOf(b2);
       d.upShift(32 * n);
-      d.subtract(NaturalBEIBuilder.valueOf(b2)); }
+      d.subtract(NaturalBEIMutable.valueOf(b2)); }
     // step 5: r = r*beta^n + a3 - d (paper says a4)
     // However, don't subtract d until after the while loop
     // so r doesn't become negative
@@ -1695,7 +1668,7 @@ implements Natural {
     // step 6: add b until r>=d
     while (r.compareTo(d) < 0) {
       r.add(b);
-      quotient.subtract(NaturalBEIBuilder.ONE); }
+      quotient.subtract(NaturalBEIMutable.ONE); }
     r.subtract(d);
     return r; }
 
@@ -1712,9 +1685,9 @@ implements Natural {
    * @return the remainder
    */
 
-  public final NaturalBEIBuilder
-  divideAndRemainderBurnikelZiegler (final NaturalBEIBuilder b,
-                                     final NaturalBEIBuilder quotient) {
+  public final NaturalBEIMutable
+  divideAndRemainderBurnikelZiegler (final NaturalBEIMutable b,
+                                     final NaturalBEIMutable quotient) {
     final int r = nWords;
     final int s = b.nWords;
 
@@ -1730,10 +1703,10 @@ implements Natural {
     final long n32 = 32L * n; // block length in bits
     // step 3: sigma = max{T | (2^T)*B < beta^n}
     final int sigma = (int) Math.max(0, n32 - b.bitLength());
-    final NaturalBEIBuilder bShifted = new NaturalBEIBuilder(b);
+    final NaturalBEIMutable bShifted = new NaturalBEIMutable(b);
     // step 4a: shift b so its length is a multiple of n
     bShifted.safeUpShift(sigma);
-    final NaturalBEIBuilder aShifted = new NaturalBEIBuilder(this);
+    final NaturalBEIMutable aShifted = new NaturalBEIMutable(this);
     // step 4b: shift a by the same amount
     aShifted.safeUpShift(sigma);
 
@@ -1744,17 +1717,17 @@ implements Natural {
 
     // step 6: conceptually split a into blocks a[t-1], ..., a[0]
     // the most significant block of a
-    final NaturalBEIBuilder a1 = aShifted.getBlock(t-1, t, n);
+    final NaturalBEIMutable a1 = aShifted.getBlock(t-1, t, n);
 
     // step 7: z[t-2] = [a[t-1], a[t-2]]
     // the second to most significant block
-    NaturalBEIBuilder z = aShifted.getBlock(t-2, t, n);
+    NaturalBEIMutable z = aShifted.getBlock(t-2, t, n);
     z.addDisjoint(a1, n);   // z[t-2]
 
     // do schoolbook division on blocks, dividing 2-block numbers
     // by 1-block numbers
-    final NaturalBEIBuilder qi = new NaturalBEIBuilder();
-    NaturalBEIBuilder ri;
+    final NaturalBEIMutable qi = new NaturalBEIMutable();
+    NaturalBEIMutable ri;
     for (int i=t-2; i > 0; i--) {
       // step 8a: compute (qi,ri) such that z=b*qi+ri
       ri = z.divide2n1n(bShifted, qi);
@@ -1838,9 +1811,9 @@ implements Natural {
 
   //-------------------------------------------------------------
 
-  private final NaturalBEIBuilder
-  divide (final NaturalBEIBuilder b,
-          final NaturalBEIBuilder quotient,
+  private final NaturalBEIMutable
+  divide (final NaturalBEIMutable b,
+          final NaturalBEIMutable quotient,
           final boolean needRemainder) {
     if ((b.nWords < NaturalBEI.BURNIKEL_ZIEGLER_THRESHOLD) ||
       ((nWords - b.nWords) < NaturalBEI.BURNIKEL_ZIEGLER_OFFSET)) {
@@ -1878,12 +1851,12 @@ implements Natural {
    * the result into the larger. Returns 1 if the answer is in a,
    * -1 if in b, 0 if no operation was performed.
    */
-  private final int difference (NaturalBEIBuilder b) {
-    NaturalBEIBuilder a = this;
+  private final int difference (NaturalBEIMutable b) {
+    NaturalBEIMutable a = this;
     final int sign = a.compareTo(b);
     if (sign == 0) { return 0; }
     if (sign < 0) {
-      final NaturalBEIBuilder tmp = a; a = b; b = tmp; }
+      final NaturalBEIMutable tmp = a; a = b; b = tmp; }
 
     long diff = 0;
     int x = a.nWords;
@@ -1905,11 +1878,11 @@ implements Natural {
     a.normalize();
     return sign; }
 
-  private final NaturalBEIBuilder 
-  binaryGCD (NaturalBEIBuilder v) {
+  private final NaturalBEIMutable 
+  binaryGCD (NaturalBEIMutable v) {
     // Algorithm B from Knuth section 4.5.2
-    NaturalBEIBuilder u = this;
-    final NaturalBEIBuilder r = new NaturalBEIBuilder();
+    NaturalBEIMutable u = this;
+    final NaturalBEIMutable r = new NaturalBEIMutable();
 
     // step B1
     final int s1 = u.getLowestSetBit();
@@ -1919,7 +1892,7 @@ implements Natural {
 
     // step B2
     final boolean uOdd = (k == s1);
-    NaturalBEIBuilder t = uOdd ? v: u;
+    NaturalBEIMutable t = uOdd ? v: u;
     int tsign = uOdd ? -1 : 1;
 
     int lb;
@@ -1952,40 +1925,40 @@ implements Natural {
   // Use Euclid's algorithm until the numbers are approximately the
   // same length, then use the binary GCD algorithm to find the GCD.
 
-  public final NaturalBEIBuilder hybridGCD (final NaturalBEIBuilder d) {
-    NaturalBEIBuilder b = d;
-    NaturalBEIBuilder a = this;
-    final NaturalBEIBuilder q = new NaturalBEIBuilder();
+  public final NaturalBEIMutable hybridGCD (final NaturalBEIMutable d) {
+    NaturalBEIMutable b = d;
+    NaturalBEIMutable a = this;
+    final NaturalBEIMutable q = new NaturalBEIMutable();
     while (b.nWords != 0) {
       if (Math.abs(a.nWords - b.nWords) < 2) {
         return a.binaryGCD(b); }
-      final NaturalBEIBuilder r = a.divide(b, q, true);
+      final NaturalBEIMutable r = a.divide(b, q, true);
       a = b;
       b = r; }
     return a; }
 
   // remove common factors as if numerator and denominator
-  public static final NaturalBEIBuilder[]
-    reduce (final NaturalBEIBuilder n,
-            final NaturalBEIBuilder d) {
+  public static final NaturalBEIMutable[]
+    reduce (final NaturalBEIMutable n,
+            final NaturalBEIMutable d) {
     final int shift = Math.min(loBit(n),loBit(d));
     if (0 != shift) {
       n.downShift(shift);
       d.downShift(shift); }
     //    if (n.equals(d)) {
-    //      return new NaturalBEIBuilder[] { ONE, ONE, }; }
-    //    if (NaturalBEIBuilder.d.isOne()) {
-    //      return new NaturalBEIBuilder[] { n, ONE, }; }
+    //      return new NaturalBEIMutable[] { ONE, ONE, }; }
+    //    if (NaturalBEIMutable.d.isOne()) {
+    //      return new NaturalBEIMutable[] { n, ONE, }; }
     //    if (NaturalBEI.n.isOne()) {
-    //      return new NaturalBEIBuilder[] { ONE, d, }; }
-    final NaturalBEIBuilder gcd = n.hybridGCD(d);
+    //      return new NaturalBEIMutable[] { ONE, d, }; }
+    final NaturalBEIMutable gcd = n.hybridGCD(d);
     if (gcd.compareTo(ONE) > 0) {
-      final NaturalBEIBuilder[] nd = { new NaturalBEIBuilder(),
-                                       new NaturalBEIBuilder(), };
+      final NaturalBEIMutable[] nd = { new NaturalBEIMutable(),
+                                       new NaturalBEIMutable(), };
       n.divide(gcd,nd[0],false);
       d.divide(gcd,nd[1],false);
       return nd; }
-    return new NaturalBEIBuilder[] { n, d, }; }
+    return new NaturalBEIMutable[] { n, d, }; }
 
   //-------------------------------------------------------------
   // pseudo-Comparable, not Comparable due to mutability
@@ -1999,7 +1972,7 @@ implements Natural {
                        final long two) {
     return (one+Long.MIN_VALUE) > (two+Long.MIN_VALUE); }
 
-  private final int compareTo (final NaturalBEIBuilder b) {
+  private final int compareTo (final NaturalBEIMutable b) {
     final int blen = b.nWords;
     if (nWords < blen) { return -1; }
     if (nWords > blen) { return 1; }
@@ -2012,7 +1985,7 @@ implements Natural {
       if (b1 > b2) { return 1; } }
     return 0; }
 
-  private final int compareShifted (final NaturalBEIBuilder b,
+  private final int compareShifted (final NaturalBEIMutable b,
                                     final int ints) {
     final int blen = b.nWords;
     final int alen = nWords - ints;
@@ -2036,29 +2009,57 @@ implements Natural {
     return NaturalBEI.valueOf(getWords()).toString(); }
 
   //--------------------------------------------------------------
+  // Mutability
+  //-------------------------------------------------------------
+  /** safe but slow... 
+   * TODO: options are:
+   * <ul>
+   * <ui> return internal array and destroy references.
+   * prevents incremental builds.
+   * <ui> copy internal array and preserve internal state.
+   * extra array allocation if only building once.
+   * </ul>
+   * maybe 2 'build' operations, 'build', 'buildAndClaer'?
+   */
+
+  @Override
+  public final Natural immutable () {
+    // TODO: other constants?
+    if (isZero()) { return NaturalBEI.ZERO; }
+    return 
+      NaturalBEI.unsafe(
+        Arrays.copyOfRange(words, start, start + nWords)); }
+  
+  @Override
+  public final Natural recyclable () { return this; }
+  
+  @Override
+  public final boolean isImmutable () { return false; }
+  
+  //--------------------------------------------------------------
   // construction
   //--------------------------------------------------------------
 
   // DANGER!! no copying
-  private NaturalBEIBuilder (final int[] val) {
+  private NaturalBEIMutable (final int[] val) {
     words = val;
     nWords = val.length; }
 
-  private NaturalBEIBuilder () { words = new int[1]; nWords = 0; }
+  private NaturalBEIMutable () { words = new int[1]; nWords = 0; }
 
-  private NaturalBEIBuilder (final NaturalBEIBuilder val) {
+  private NaturalBEIMutable (final NaturalBEIMutable val) {
     nWords = val.nWords;
     words =
       Arrays.copyOfRange(
         val.words,val.start,val.start+nWords); }
 
-  private NaturalBEIBuilder (final int val) {
+  private NaturalBEIMutable (final int val) {
     words = new int[1];
     nWords = 1;
     words[0] = val; }
 
   //--------------------------------------------------------------
-  /** Returns a {@code NaturalBEIBuilder} containing
+  /** Returns a {@code NaturalBEIMutable} containing
    * {@code blockLength} ints from {@code this} number, starting
    * at {@code index*blockLength}.<br/>
    * Used by Burnikel-Ziegler division.
@@ -2068,46 +2069,46 @@ implements Natural {
    * @return
    */
 
-  private final NaturalBEIBuilder getBlock (final int index,
+  private final NaturalBEIMutable getBlock (final int index,
                                             final int numBlocks,
                                             final int blockLength) {
     final int blockStart = index * blockLength;
-    if (blockStart >= nWords) { return new NaturalBEIBuilder(); }
+    if (blockStart >= nWords) { return new NaturalBEIMutable(); }
     int blockEnd;
     if (index == (numBlocks-1)) { blockEnd = nWords; }
     else { blockEnd = (index+1) * blockLength; }
-    if (blockEnd > nWords) { return new NaturalBEIBuilder(); }
+    if (blockEnd > nWords) { return new NaturalBEIMutable(); }
     final int[] newVal =
       Arrays.copyOfRange(
         words,
         (start+nWords)-blockEnd,
         (start+nWords)-blockStart);
-    return new NaturalBEIBuilder(newVal); }
+    return new NaturalBEIMutable(newVal); }
 
   //--------------------------------------------------------------
 
-  public static final NaturalBEIBuilder make () {
-    return new NaturalBEIBuilder(); }
+  public static final NaturalBEIMutable make () {
+    return new NaturalBEIMutable(); }
 
   //DANGER!!
-  public static final NaturalBEIBuilder unsafe (final int[] val) {
-    return new NaturalBEIBuilder(val); }
+  public static final NaturalBEIMutable unsafe (final int[] val) {
+    return new NaturalBEIMutable(val); }
 
-  public static final NaturalBEIBuilder make (final int n) {
-    return new NaturalBEIBuilder(new int[n]); }
+  public static final NaturalBEIMutable make (final int n) {
+    return new NaturalBEIMutable(new int[n]); }
 
-  public static final NaturalBEIBuilder 
+  public static final NaturalBEIMutable 
   valueOf (final int[] val) {
     return unsafe(Arrays.copyOf(val,val.length)); }
 
-  public static final NaturalBEIBuilder 
+  public static final NaturalBEIMutable 
   valueOf (final NaturalBEI u) {
     return unsafe(u.copyWords()); }
 
   //--------------------------------------------------------------
 
-  private static final NaturalBEIBuilder ONE =
-    new NaturalBEIBuilder(1);
+  private static final NaturalBEIMutable ONE =
+    new NaturalBEIMutable(1);
 
   //--------------------------------------------------------------
 }

@@ -30,7 +30,7 @@ import xfp.java.prng.PRNG;
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-26
+ * @version 2019-07-01
  */
 @SuppressWarnings("unchecked")
 public final class Common {
@@ -97,7 +97,7 @@ public final class Common {
     //Debug.println(zs);
 
     final T r0 = fromBI.apply(z0);
-    final String rs = r0.toString(0x10).replace(" ","");
+    final String rs = r0.toString().replace(" ","");
 
     Assertions.assertEquals(zs,rs,() ->
     "\nzs=" + zs + "\nrs=" + rs);
@@ -106,7 +106,7 @@ public final class Common {
 
     final T r1 = valueOf.apply(rs);
     Assertions.assertEquals(r0,r1,() ->
-    "\n" + rs + "\n" + r1.toString(0x10));  }
+    "\n" + rs + "\n" + r1.toString());  }
 
   public static final <T extends Ringlike<T>> void
   biRoundTrip (final Function<BigInteger,T> fromBI,
@@ -135,11 +135,11 @@ public final class Common {
     + "\n" +  x1.toString(0x10)
     + "\n -> "
     + "\n" + x2.toString(0x10)
-    + "\n" + y0.toString(0x10)
+    + "\n" + y0.toString()
     + "\n + "
-    + "\n" +  y1.toString(0x10)
+    + "\n" +  y1.toString()
     + "\n -> "
-    + "\n" + y2.toString(0x10)
+    + "\n" + y2.toString()
     + "\n" + x3.toString(0x10)); }
 
   public static final <T extends Ringlike<T>> void
@@ -160,11 +160,11 @@ public final class Common {
     + "\n" +  x1.toString(0x10)
     + "\n -> "
     + "\n" + x2.toString(0x10)
-    + "\n" + y0.toString(0x10)
+    + "\n" + y0.toString()
     + "\n - "
-    + "\n" +  y1.toString(0x10)
+    + "\n" +  y1.toString()
     + "\n -> "
-    + "\n" + y2.toString(0x10)
+    + "\n" + y2.toString()
     + "\n" + x3.toString(0x10)); }
 
   public static final <T extends Ringlike<T>> void
@@ -183,11 +183,11 @@ public final class Common {
     + "\n" +  x1.toString(0x10)
     + "\n -> "
     + "\n" + x2.toString(0x10)
-    + "\n" + y0.toString(0x10)
+    + "\n" + y0.toString()
     + "\n - "
-    + "\n" +  y1.toString(0x10)
+    + "\n" +  y1.toString()
     + "\n -> "
-    + "\n" + y2.toString(0x10)
+    + "\n" + y2.toString()
     + "\n" + x3.toString(0x10)); }
 
   public static final <T extends Ringlike<T>> void
@@ -206,11 +206,11 @@ public final class Common {
     + "\n0x" +  x1.toString(0x10)
     + "\n -> "
     + "\n0x" + x2.toString(0x10)
-    + "\n" + y0.toString(0x10)
+    + "\n" + y0.toString()
     + "\n * "
-    + "\n" +  y1.toString(0x10)
+    + "\n" +  y1.toString()
     + "\n -> "
-    + "\n" + y2.toString(0x10)
+    + "\n" + y2.toString()
     + "\n\n0x" + x2.toString(0x10)
     + "\n0x" + x3.toString(0x10)
     + "\n\n0x" + x2.subtract(x3).toString(0x10)
@@ -233,11 +233,11 @@ public final class Common {
       + "\n" +  x1.toString(0x10)
       + "\n -> "
       + "\n" + x2.toString(0x10)
-      + "\n" + y0.toString(0x10)
+      + "\n" + y0.toString()
       + "\n / "
-      + "\n" +  y1.toString(0x10)
+      + "\n" +  y1.toString()
       + "\n -> "
-      + "\n" + y2.toString(0x10)
+      + "\n" + y2.toString()
       + "\n" + x3.toString(0x10)); } }
 
   public static final void
@@ -259,11 +259,11 @@ public final class Common {
       + "\n" +  x1.toString(0x10)
       + "\n -> "
       + "\n" + x2[0].toString(0x10)
-      + "\n" + y0.toString(0x10)
+      + "\n" + y0.toString()
       + "\n / "
-      + "\n" +  y1.toString(0x10)
+      + "\n" +  y1.toString()
       + "\n -> "
-      + "\n" + y2[0].toString(0x10)
+      + "\n" + y2[0].toString()
       + "\n" + x3[0].toString(0x10));
 
       Assertions.assertEquals(x2[1],x3[1],() ->
@@ -272,11 +272,11 @@ public final class Common {
       + "\n" +  x1.toString(0x10)
       + "\n -> "
       + "\n" + x2[1].toString(0x10)
-      + "\n" + y0.toString(0x10)
+      + "\n" + y0.toString()
       + "\n rem "
-      + "\n" +  y1.toString(0x10)
+      + "\n" +  y1.toString()
       + "\n -> "
-      + "\n" + y2[1].toString(0x10)
+      + "\n" + y2[1].toString()
       + "\n" + x3[1].toString(0x10)); } }
 
   public static final void
@@ -297,11 +297,11 @@ public final class Common {
       + "\n" +  x1.toString(0x10)
       + "\n -> "
       + "\n" + x2.toString(0x10)
-      + "\n" + y0.toString(0x10)
+      + "\n" + y0.toString()
       + "\n rem "
-      + "\n" +  y1.toString(0x10)
+      + "\n" +  y1.toString()
       + "\n -> "
-      + "\n" + y2.toString(0x10)
+      + "\n" + y2.toString()
       + "\n" + x3.toString(0x10)); } }
 
   public static final void
@@ -322,11 +322,11 @@ public final class Common {
       + "\n" +  x1.toString(0x10)
       + "\n -> "
       + "\n" + x2.toString(0x10)
-      + "\n" + y0.toString(0x10)
+      + "\n" + y0.toString()
       + "\n gcd "
-      + "\n" +  y1.toString(0x10)
+      + "\n" +  y1.toString()
       + "\n -> "
-      + "\n" + y2.toString(0x10)
+      + "\n" + y2.toString()
       + "\n" + x3.toString(0x10)); } }
 
   //--------------------------------------------------------------
@@ -423,9 +423,9 @@ public final class Common {
     // differentiate -0.0, 0.0 and handle NaN
     Assertions.assertEquals(0,Float.compare(x0,x1),
       () ->
-    Float.toHexString(x0)
+    Float.toString(x0)
     + "\n->" + f.toString()
-    + "\n->" + Float.toHexString(x1)); }
+    + "\n->" + Float.toString(x1)); }
 
   //--------------------------------------------------------------
 
@@ -440,7 +440,7 @@ public final class Common {
     //Debug.println("f=" + toString.apply(f));
 
     final float x = toFloat.applyAsFloat(f);
-    //Debug.println("x=" + Float.toHexString(x));
+    //Debug.println("x=" + Float.toString(x));
 
     // only check finite numbers for now
     if (Float.isFinite(x)) {
@@ -450,8 +450,8 @@ public final class Common {
 
       final float x1o = Math.nextDown(x);
       final float xhi = Math.nextUp(x);
-      //Debug.println("xlo=" + Float.toHexString(x1o));
-      //Debug.println("xhi=" + Float.toHexString(xhi));
+      //Debug.println("xlo=" + Float.toString(x1o));
+      //Debug.println("xhi=" + Float.toString(xhi));
 
       final Comparable flo = fromFloat.apply(x1o);
       final Comparable fhi = fromFloat.apply(xhi);
@@ -611,9 +611,9 @@ public final class Common {
     // differentiate -0.0, 0.0 and handle NaN
     Assertions.assertEquals(0,Double.compare(x0,x1),
       () ->
-    Double.toHexString(x0)
+    Double.toString(x0)
     + "\n->" + f.toString()
-    + "\n->" + Double.toHexString(x1)); }
+    + "\n->" + Double.toString(x1)); }
 
   //--------------------------------------------------------------
 
@@ -628,7 +628,7 @@ public final class Common {
     //Debug.println("f=" + toString.apply(f));
 
     final double x = toDouble.applyAsDouble(f);
-    //Debug.println("x=" + Double.toHexString(x));
+    //Debug.println("x=" + Double.toString(x));
 
     // only check finite numbers for now
     if (Double.isFinite(x)) {
@@ -636,9 +636,9 @@ public final class Common {
 
       final double x1o = Math.nextDown(x);
       final double xhi = Math.nextUp(x);
-      //Debug.println("xlo=" + Double.toHexString(x1o));
-      //Debug.println("x  =" + Double.toHexString(x));
-      //Debug.println("xhi=" + Double.toHexString(xhi));
+      //Debug.println("xlo=" + Double.toString(x1o));
+      //Debug.println("x  =" + Double.toString(x));
+      //Debug.println("xhi=" + Double.toString(xhi));
 
       final Comparable flo = fromDouble.apply(x1o);
       final Comparable fhi = fromDouble.apply(xhi);
@@ -669,9 +669,9 @@ public final class Common {
         Assertions.assertTrue(Doubles.isEven(x),
           () ->
         "not even!"
-        + "\nxlo=" + Double.toHexString(x1o)
-        + "\nx  =" + Double.toHexString(x)
-        + "\nxhi=" + Double.toHexString(xhi)
+        + "\nxlo=" + Double.toString(x1o)
+        + "\nx  =" + Double.toString(x)
+        + "\nxhi=" + Double.toString(xhi)
         + "\ndlo=" + dlo
         + "\ndx =" + dx
         + "\ndhi=" + dhi); } } }
@@ -1018,21 +1018,22 @@ public final class Common {
   private static final void
   zeroSumTest (final Generator g,
                final List<Accumulator> accumulators) {
+    //System.out.println(g.name());
     final double[] x = (double[]) g.next();
-    //Debug.println(g.name());
     for (final Accumulator a : accumulators) {
+      //System.out.println(Classes.className(a));
       //final long t0 = System.nanoTime();
       final double pred = a.clear().addAll(x).doubleValue();
       //final long t1 = (System.nanoTime()-t0);
       if (a.isExact()) {
         Assertions.assertEquals(0.0,pred,
           "sum not zero: " + Classes.className(a)
-          + " = " + Double.toHexString(pred) + "\n");  }
+          + " = " + Double.toString(pred) + "\n");  }
       //final double l1d = Math.abs(pred);
       //Debug.println(
       //  String.format("%32s %8.2fms ",Classes.className(a),
       //    Double.valueOf(t1*1.0e-6))
-      //  + toHexString(l1d) + " = "
+      //  + toString(l1d) + " = "
       //  + String.format("%8.2e",Double.valueOf(l1d)));
     } }
 
@@ -1063,21 +1064,21 @@ public final class Common {
       //Debug.println(Classes.className(p));
       for (final double xi : x) {
         //Debug.println();
-        //Debug.println("xi=" + Double.toHexString(xi));
+        //Debug.println("xi=" + Double.toString(xi));
         //Debug.println(Classes.className(e));
         e = e.add(xi);
         p = p.add(xi);
         final double truth = e.doubleValue();
         final double pred = p.doubleValue();
-        //Debug.println("truth=" + Double.toHexString(truth));
-        //Debug.println("pred=" + Double.toHexString(pred));
+        //Debug.println("truth=" + Double.toString(truth));
+        //Debug.println("pred=" + Double.toString(pred));
         if (a.isExact()) {
           Assertions.assertEquals(truth,pred,
             "\nexact: " + Classes.className(exact)
-            + "\n= " + Double.toHexString(truth)
+            + "\n= " + Double.toString(truth)
             + "\n= " + exact.value()
             + "\npred: " + Classes.className(a)
-            + "\n= " + Double.toHexString(pred)
+            + "\n= " + Double.toString(pred)
             + "\n= " + a.value()
             + "\n"); } } } 
     //Debug.DEBUG=false;
@@ -1106,10 +1107,10 @@ public final class Common {
       if (a.isExact()) {
         Assertions.assertEquals(truth,pred,
           "\nexact: " + Classes.className(exact)
-          + " = " + Double.toHexString(truth)
+          + " = " + Double.toString(truth)
           + "\n= " + exact.value()
           + "\npred: " + Classes.className(a)
-          + " = " + Double.toHexString(pred)
+          + " = " + Double.toString(pred)
           + "\n= " + a.value()
           + "\n"); }
       //final double l1d = Math.abs(truth-pred);
@@ -1117,8 +1118,8 @@ public final class Common {
       //      //Debug.println(
       //        String.format("%32s %8.2fms ",Classes.className(a),
       //          Double.valueOf(t1*1.0e-6))
-      //        + toHexString(l1d)
-      //        + " / " + toHexString(l1n) + " = "
+      //        + toString(l1d)
+      //        + " / " + toString(l1n) + " = "
       //        + String.format("%8.2e",Double.valueOf(l1d/l1n)));
       //Debug.DEBUG=false;
     } }
@@ -1228,8 +1229,8 @@ public final class Common {
       //Debug.println(
       //  String.format("%32s %8.2fms ",
       //    Classes.className(a),Double.valueOf(t1*1.0e-6))
-      //  + toHexString(l1d)
-      //  + " / " + toHexString(l1n) + " = "
+      //  + toString(l1d)
+      //  + " / " + toString(l1n) + " = "
       //  + String.format("%8.2e",Double.valueOf(l1d/l1n)));
     } }
 
@@ -1262,8 +1263,8 @@ public final class Common {
       //Debug.println(
       //  String.format("%32s %8.2fms ",
       //    Classes.className(a),Double.valueOf(t1*1.0e-6))
-      //  + toHexString(l1d)
-      //  + " / " + toHexString(l1n) + " = "
+      //  + toString(l1d)
+      //  + " / " + toString(l1n) + " = "
       //  + String.format("%8.2e",Double.valueOf(l1d/l1n)));
     } }
 

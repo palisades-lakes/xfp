@@ -19,7 +19,7 @@ import xfp.java.prng.Generators;
 /** Utilities for Object and primitive numbers.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-18
+ * @version 2019-07-01
  */
 @SuppressWarnings("unchecked")
 public final class Numbers implements Set {
@@ -79,6 +79,9 @@ public final class Numbers implements Set {
   public static final String toHexString (final double x) {
     return Double.toHexString(x); }
 
+  public static final String toHexString (final BigInteger x) {
+    return x.toString(0x10); }
+
   //--------------------------------------------------------------
   // useful class methods
   //--------------------------------------------------------------
@@ -107,11 +110,11 @@ public final class Numbers implements Set {
     return i.bitLength(); }
 
   /** inclusive */
-  public static final int loBit (final NaturalBEIBuilder i) {
+  public static final int loBit (final NaturalBEIMutable i) {
     return i.getLowestSetBit(); }
 
   /** exclusive */
-  public static final int hiBit (final NaturalBEIBuilder i) {
+  public static final int hiBit (final NaturalBEIMutable i) {
     final long n = i.bitLength();
     assert n <= Integer.MAX_VALUE;
     return (int) n; }

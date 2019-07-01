@@ -11,12 +11,12 @@ import xfp.java.exceptions.Exceptions;
  * (eq associativity).
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-28
+ * @version 2019-07-01
  */
 
 @SuppressWarnings("unchecked")
 public interface Ringlike<T extends Ringlike> 
-extends Comparable<Ringlike> {
+extends Comparable<T> {
 
   //--------------------------------------------------------------
   // TODO: fma?
@@ -81,16 +81,16 @@ extends Comparable<Ringlike> {
   //--------------------------------------------------------------
 
   public default int intValue () { 
-  throw Exceptions.unsupportedOperation(this,"intValue"); }
+    throw Exceptions.unsupportedOperation(this,"intValue"); }
 
   public default long longValue () { 
-  throw Exceptions.unsupportedOperation(this,"longValue"); }
+    throw Exceptions.unsupportedOperation(this,"longValue"); }
 
   public default float floatValue () { 
-  throw Exceptions.unsupportedOperation(this,"floatValue"); }
+    throw Exceptions.unsupportedOperation(this,"floatValue"); }
 
   public default double doubleValue () { 
-  throw Exceptions.unsupportedOperation(this,"doubleValue"); }
+    throw Exceptions.unsupportedOperation(this,"doubleValue"); }
 
   //--------------------------------------------------------------
 
@@ -99,11 +99,6 @@ extends Comparable<Ringlike> {
 
   public default T max (final T that) {
     return (compareTo(that) > 0 ? (T) this : that); }
-
-  //--------------------------------------------------------------
-
-  public default String toString (final int radix) {
-    throw Exceptions.unsupportedOperation(this,"toString",radix); }
 
   //--------------------------------------------------------------
 }

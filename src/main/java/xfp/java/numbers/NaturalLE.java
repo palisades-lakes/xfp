@@ -7,11 +7,11 @@ import java.util.Arrays;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-26
+ * @version 2019-07-01
  */
 
 public final class NaturalLE extends NaturalLEBase
-implements Natural<NaturalLE> {
+implements Natural {
 
   private static final long serialVersionUID = 1L;
 
@@ -43,7 +43,7 @@ implements Natural<NaturalLE> {
     super(words,i0,i1,startWord); }
 
   //-------------------------------------------------------------
-  // TODO: move these to NaturalLEBuilder?
+  // TODO: move these to NaturalLEMutable?
   /** Take args as given. */
 
   private static final NaturalLE literal (final int[] words,
@@ -81,8 +81,8 @@ implements Natural<NaturalLE> {
   //--------------------------------------------------------------
 
   @Override
-  public final NaturalBuilder<NaturalLE> builder () {
-    return NaturalLEBuilder.make(); }
+  public final Natural recyclable () {
+    return NaturalLEMutable.make(); }
 
 
   //  public static final NaturalLE valueOf (final byte[] b,

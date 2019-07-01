@@ -15,11 +15,11 @@ import xfp.java.exceptions.Exceptions;
  * in Clojure).
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-28
+ * @version 2019-07-01
  */
 
 @SuppressWarnings("unchecked")
-public interface Uints extends Transience {
+public interface Uints {
 
   //--------------------------------------------------------------
   // word ops
@@ -114,7 +114,7 @@ public interface Uints extends Transience {
     Uints x = clear();
     for (int i=u.startWord();i<u.endWord();i++) {
       x = x.setWord(i,u.word(i)); }
-    throw Exceptions.unsupportedOperation(this,"set",u); }
+    return this; }
 
   /** Return a Uints whose value is the same as <code>u</code>. 
    */
@@ -225,12 +225,14 @@ public interface Uints extends Transience {
   //--------------------------------------------------------------
 
   public default Uints shiftDown (final int bitShift) {
-    throw Exceptions.unsupportedOperation(this,"shiftUp",bitShift); }
+    throw 
+    Exceptions.unsupportedOperation(this,"shiftDown",bitShift); }
 
   public default Uints shiftUp (final int bitShift) {
-    throw Exceptions.unsupportedOperation(this,"shiftUp",bitShift); }
+    throw 
+    Exceptions.unsupportedOperation(this,"shiftUp",bitShift); }
 
-  /** Return a builder whose value is
+  /** Return a Uints whose value is
    * <code>u * 2<sup>shift</sup></code>.
    * Usually the same object as <code>this</code>.
    * 
@@ -242,7 +244,7 @@ public interface Uints extends Transience {
     // TODO: optimize as single op
     return set(u).shiftUp(shift); }
 
-  /** Return a builder whose value is
+  /** Return a Uints whose value is
    * <code>u * 2<sup>shift</sup></code>.
    * Usually the same object as <code>this</code>.
    * 
@@ -253,6 +255,29 @@ public interface Uints extends Transience {
                                 final int shift) {
     // TODO: optimize as single op
     return set(u).shiftUp(shift); }
+
+  //--------------------------------------------------------------
+  // construction
+  //--------------------------------------------------------------
+  /** Return a new Uints whose value is <code>u</code>.
+   * Does not modify <code>this</code>.
+   */
+
+  public default Uints from (final long u) {
+    throw Exceptions.unsupportedOperation(
+      this,"from",u); }
+
+  /** Return a new Uints whose value is
+   * <code>u * 2<sup>shift</sup></code>.
+   * Does not modify <code>this</code>.
+   * 
+   * <code>0&lt;=shift</code>
+   */
+
+  public default Uints from (final long u,
+                             final int shift) {
+    throw Exceptions.unsupportedOperation(
+      this,"from",u,shift); }
 
   //--------------------------------------------------------------
   // 'Number' interface
@@ -294,11 +319,6 @@ public interface Uints extends Transience {
     for (int i=0; i<n; i++) {
       if (word(i)!=u.word(i)) { return false; } }
     return true; }
-
-  /** hex string. */
-  public default String toString (final int radix) {
-    assert radix==0x10;
-    return toHexString(); }
 
   //--------------------------------------------------------------
 }

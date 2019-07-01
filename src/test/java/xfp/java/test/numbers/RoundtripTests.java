@@ -22,7 +22,7 @@ import xfp.java.prng.PRNG;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-28
+ * @version 2019-07-01
  */
 
 public final class RoundtripTests {
@@ -93,8 +93,8 @@ public final class RoundtripTests {
           Double.toHexString(xf) + " :xf\n\n" +
           f.numerator() + "\n" +
           f.denominator() + "\n\n" +
-          f.numerator().toString(0x10) + "\n" +
-          f.denominator().toString(0x10));
+          f.numerator().toHexString() + "\n" +
+          f.denominator().toHexString());
         return false; } }
     return true; }
 
@@ -121,8 +121,8 @@ public final class RoundtripTests {
           Double.toHexString(xf) + " :xf\n\n" +
           f.numerator() + "\n" +
           f.denominator() + "\n\n" +
-          f.numerator().toString(0x10) + "\n" +
-          f.denominator().toString(0x10));
+          f.numerator().toHexString() + "\n" +
+          f.denominator().toHexString());
         return false; } }
     return true; }
 
@@ -147,7 +147,7 @@ public final class RoundtripTests {
           + x + " :x\n" + xf + " : xf\n\n" +
           Double.toHexString(x) + " :x\n" +
           Double.toHexString(xf) + " :xf\n\n" +
-          f.toString(0x10));
+          f.toString());
         return false; } }
     return true; }
 
@@ -229,8 +229,8 @@ public final class RoundtripTests {
           Float.toHexString(xf) + " :xf\n\n" +
           f.numerator() + "\n" +
           f.denominator() + "\n\n" +
-          f.numerator().toString(0x10) + "\n" +
-          f.denominator().toString(0x10));
+          f.numerator().toHexString() + "\n" +
+          f.denominator().toHexString());
         return false; } }
     return true; }
 
@@ -257,8 +257,8 @@ public final class RoundtripTests {
           Float.toHexString(xf) + " :xf\n\n" +
           f.numerator() + "\n" +
           f.denominator() + "\n\n" +
-          f.numerator().toString(0x10) + "\n" +
-          f.denominator().toString(0x10));
+          f.numerator().toHexString() + "\n" +
+          f.denominator().toHexString());
         return false; } }
     return true; }
 

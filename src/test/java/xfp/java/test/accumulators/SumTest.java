@@ -13,7 +13,7 @@ import xfp.java.test.Common;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-25
+ * @version 2019-07-01
  */
 
 public final class SumTest {
