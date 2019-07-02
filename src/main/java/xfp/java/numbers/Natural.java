@@ -17,7 +17,7 @@ import xfp.java.exceptions.Exceptions;
  */
 
 @SuppressWarnings("unchecked")
-public interface Natural 
+public interface Natural
 extends Uints, Ringlike<Natural>, Transience<Natural> {
 
   //--------------------------------------------------------------
@@ -84,12 +84,12 @@ extends Uints, Ringlike<Natural>, Transience<Natural> {
       final long lo1 = Numbers.loWord(u);
       if (lo0<lo1) { return -1; }
       if (lo0>lo1) { return 1; } }
-    else {  
+    else {
       // most significant word in u << upShift
       final long hi0 = uword(iShift+2);
       final long hi1 = (u>>>(64-rShift));
       if (hi0<hi1) { return -1; }
-      if (hi0>hi1) { return 1; }  
+      if (hi0>hi1) { return 1; }
 
       final long us = (u << rShift);
       final long mid0 = uword(iShift+1);
@@ -103,7 +103,7 @@ extends Uints, Ringlike<Natural>, Transience<Natural> {
       if (lo0>lo1) { return 1; } }
 
     // check this for any non-zero words in zeros of u<<upShift
-    for (int i=iShift-1;i>=startWord();i--) { 
+    for (int i=iShift-1;i>=startWord();i--) {
       if (0!=uword(i)) { return 1; } }
 
     return 0; }
@@ -118,7 +118,7 @@ extends Uints, Ringlike<Natural>, Transience<Natural> {
     throw Exceptions.unsupportedOperation(this,"zero"); }
 
   @Override
-  public default boolean isZero () { 
+  public default boolean isZero () {
     for (int i=0;i<endWord();i++) {
       if (0!=word(i)) { return false; } }
     return true; }
@@ -135,7 +135,7 @@ extends Uints, Ringlike<Natural>, Transience<Natural> {
     Natural t = recyclable();
     if (isZero()) { return u; }
     if (u.isZero()) { return this; }
-    // TODO: optimize by summing over joint range 
+    // TODO: optimize by summing over joint range
     // and just carrying after that
     final int end = Math.max(endWord(),u.endWord());
     long sum = 0L;
@@ -201,7 +201,7 @@ extends Uints, Ringlike<Natural>, Transience<Natural> {
     // TODO: optimize by differencing over shared range
     // and then just borrowing
     for (;i<n;i++) {
-      dif = uword(i) - u.uword(i) + borrow;
+      dif = (uword(i) - u.uword(i)) + borrow;
       borrow = (dif>>32);
       v = v.setWord(i,(int) dif); }
     assert 0L==borrow;
@@ -222,7 +222,7 @@ extends Uints, Ringlike<Natural>, Transience<Natural> {
     long dif = uword(0)-lo;
     v = v.setWord(0,(int) dif);
     long borrow = (dif>>32);
-    dif = uword(1)-hi+borrow;
+    dif = (uword(1)-hi)+borrow;
     v = v.setWord(1,(int) dif);
     borrow = (dif>>32);
     int i=2;
@@ -273,7 +273,7 @@ extends Uints, Ringlike<Natural>, Transience<Natural> {
   //--------------------------------------------------------------
 
   @Override
-  public default boolean isOne () { 
+  public default boolean isOne () {
     if (1!=word(0)) { return false; }
     for (int i=Math.max(1,startWord());i<endWord();i++) {
       if (0!=word(i)) { return false; } }
@@ -305,7 +305,7 @@ extends Uints, Ringlike<Natural>, Transience<Natural> {
     throw Exceptions.unsupportedOperation(this,"invert"); }
 
   @Override
-  public default Natural one () { 
+  public default Natural one () {
     throw Exceptions.unsupportedOperation(this,"one"); }
 
   @Override

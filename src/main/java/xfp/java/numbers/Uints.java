@@ -4,13 +4,13 @@ import java.math.BigInteger;
 
 import xfp.java.exceptions.Exceptions;
 
-/** An interface for sequences of <code>int</code> words, 
+/** An interface for sequences of <code>int</code> words,
  * treated as unsigned.
  * <p>
  * This interface covers both mutable and immutable sequences,
- * with methods like {@link #setWord(int,int)} returning a 
+ * with methods like {@link #setWord(int,int)} returning a
  * sequence that may or may not be new. Methods are free
- * to return a new instance while invalidating the target of the 
+ * to return a new instance while invalidating the target of the
  * method (similar to the behavior of transient data structures
  * in Clojure).
  *
@@ -30,10 +30,10 @@ public interface Uints {
 
   int word (final int i);
 
-  /** Return a sequence where the <code>i</code>th word is 
+  /** Return a sequence where the <code>i</code>th word is
    * <code>w</code>.
    * May return a new sequence, or may modify <code>this</code>.
-   * Existing references to <code>this</code> may no longer be 
+   * Existing references to <code>this</code> may no longer be
    * valid.
    */
 
@@ -76,8 +76,8 @@ public interface Uints {
 
   public default int loInt () {
     // Search for lowest order nonzero int
-    // TODO: not necessary if startWord promises 
-    // maximal lower bound 
+    // TODO: not necessary if startWord promises
+    // maximal lower bound
     int i=startWord(); // might be -1
     if (i<0) { return -1; } // no set ints
     final int n = endWord(); // might be 0
@@ -104,7 +104,7 @@ public interface Uints {
     throw Exceptions.unsupportedOperation(this,"clear"); }
 
   //--------------------------------------------------------------
-  /** Return a sequence whose value is the same as <code>u</code>. 
+  /** Return a sequence whose value is the same as <code>u</code>.
    * May be the same object as <code>this</code>, if mutable.
    * May be <code>u</code>, if immutable.
    * May be a copy of <code>u</code>.
@@ -116,7 +116,7 @@ public interface Uints {
       x = x.setWord(i,u.word(i)); }
     return this; }
 
-  /** Return a Uints whose value is the same as <code>u</code>. 
+  /** Return a Uints whose value is the same as <code>u</code>.
    */
 
   public default Uints set (final long u) {
@@ -143,7 +143,7 @@ public interface Uints {
     final int n = hiInt()-1;
     //Debug.println("n=" + n);
     //Debug.println("word(" + n + ")=" + Integer.toHexString(word(n)));
-    //Debug.println("bitlength(" + Integer.toHexString(word(n)) 
+    //Debug.println("bitlength(" + Integer.toHexString(word(n))
     //+ ")=" + Numbers.bitLength(word(n)));
     return (n<<5) + Numbers.bitLength(word(n)); }
 
@@ -170,7 +170,7 @@ public interface Uints {
     final long hi = (uword(iShift+1) << r2);
     return (int) (hi | lo); }
 
-  /** get the least significant two int words of (this >>> shift) 
+  /** get the least significant two int words of (this >>> shift)
    * as a long.
    */
 
@@ -179,7 +179,7 @@ public interface Uints {
     final int iShift = (downShift>>>5);
     if (endWord()<=iShift) { return 0L; }
     final int rShift = (downShift & 0x1f);
-    if (0==rShift) { 
+    if (0==rShift) {
       return ((uword(iShift+1)<<32) | uword(iShift)); }
     // TODO: optimize using startWord and endWord.
     final int r2 = 32-rShift;
@@ -225,17 +225,17 @@ public interface Uints {
   //--------------------------------------------------------------
 
   public default Uints shiftDown (final int bitShift) {
-    throw 
+    throw
     Exceptions.unsupportedOperation(this,"shiftDown",bitShift); }
 
   public default Uints shiftUp (final int bitShift) {
-    throw 
+    throw
     Exceptions.unsupportedOperation(this,"shiftUp",bitShift); }
 
   /** Return a Uints whose value is
    * <code>u * 2<sup>shift</sup></code>.
    * Usually the same object as <code>this</code>.
-   * 
+   *
    * <code>0&lt;=shift</code>
    */
 
@@ -247,7 +247,7 @@ public interface Uints {
   /** Return a Uints whose value is
    * <code>u * 2<sup>shift</sup></code>.
    * Usually the same object as <code>this</code>.
-   * 
+   *
    * <code>0&lt;=shift</code>
    */
 
@@ -270,7 +270,7 @@ public interface Uints {
   /** Return a new Uints whose value is
    * <code>u * 2<sup>shift</sup></code>.
    * Does not modify <code>this</code>.
-   * 
+   *
    * <code>0&lt;=shift</code>
    */
 

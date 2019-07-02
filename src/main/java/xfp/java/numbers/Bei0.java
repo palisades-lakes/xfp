@@ -61,7 +61,7 @@ public final class Bei0 {
   //--------------------------------------------------------------
 
   public static final int[] shiftUp (final int[] m,
-                                       final int bitShift) {
+                                     final int bitShift) {
     assert 0<=bitShift;
     //assert (! leadingZero(m));
     if (isZero(m)) { return ZERO; }
@@ -87,7 +87,7 @@ public final class Bei0 {
     return m1; }
 
   public static final int[] shiftUp (final long m,
-                                       final int shift) {
+                                     final int shift) {
     final int m0 = (int) hiWord(m);
     final int m1 = (int) loWord(m);
     if (0==m0) {
@@ -1555,7 +1555,7 @@ public final class Bei0 {
   //--------------------------------------------------------------
 
   private static final int[] shiftDown0 (final int[] m0,
-                                          final int n) {
+                                         final int n) {
     final int intShift = n >>> 5;
     final int remShift = n & 0x1f;
     final int n0 = m0.length;
@@ -1583,7 +1583,7 @@ public final class Bei0 {
     return m1; }
 
   public static final int[] shiftDown (final int[] m,
-                                        final int n) {
+                                       final int n) {
     if (isZero(m)) { return ZERO; }
     if (n > 0) { return shiftDown0(m,n); }
     //if (n == 0) { return stripLeadingZeros(m); }
@@ -1734,35 +1734,35 @@ public final class Bei0 {
           (m[0] << nBits2) | (m[1] >>> nBits); } }
 
     int signifFloor = twiceSignifFloor >> 1;
-      signifFloor &= Floats.STORED_SIGNIFICAND_MASK;
-      // We round up if either the fractional part of signif is
-      // strictly greater than 0.5 (which is true if the 0.5 bit is
-      // set and any lower bit is set), or if the fractional part of
-      // signif is >= 0.5 and signifFloor is odd (which is true if
-      // both the 0.5 bit and the 1 bit are set). This is equivalent
-      // to the desired HALF_EVEN rounding.
-      final boolean increment =
-        ((twiceSignifFloor
-          & 1) != 0) && (((signifFloor & 1) != 0)
-            || (getLowestSetBit(m) < shift));
-      final int signifRounded =
-        increment ? signifFloor + 1 : signifFloor;
-      int bits =
-        ((exponent
-          + Floats.EXPONENT_BIAS)) << (Floats.SIGNIFICAND_BITS - 1);
-      bits += signifRounded;
-      /*
-       * If signifRounded == 2^24, we'd need to set all of the
-       * significand
-       * bits to zero and add 1 to the exponent. This is exactly the
-       * behavior
-       * we get from just adding signifRounded to bits directly. If
-       * the
-       * exponent is Float.MAX_EXPONENT, we round up (correctly) to
-       * Float.POSITIVE_INFINITY.
-       */
-      bits |= 1 & Floats.SIGN_MASK;
-      return Float.intBitsToFloat(bits); }
+    signifFloor &= Floats.STORED_SIGNIFICAND_MASK;
+    // We round up if either the fractional part of signif is
+    // strictly greater than 0.5 (which is true if the 0.5 bit is
+    // set and any lower bit is set), or if the fractional part of
+    // signif is >= 0.5 and signifFloor is odd (which is true if
+    // both the 0.5 bit and the 1 bit are set). This is equivalent
+    // to the desired HALF_EVEN rounding.
+    final boolean increment =
+      ((twiceSignifFloor
+        & 1) != 0) && (((signifFloor & 1) != 0)
+          || (getLowestSetBit(m) < shift));
+    final int signifRounded =
+      increment ? signifFloor + 1 : signifFloor;
+    int bits =
+      ((exponent
+        + Floats.EXPONENT_BIAS)) << (Floats.SIGNIFICAND_BITS - 1);
+    bits += signifRounded;
+    /*
+     * If signifRounded == 2^24, we'd need to set all of the
+     * significand
+     * bits to zero and add 1 to the exponent. This is exactly the
+     * behavior
+     * we get from just adding signifRounded to bits directly. If
+     * the
+     * exponent is Float.MAX_EXPONENT, we round up (correctly) to
+     * Float.POSITIVE_INFINITY.
+     */
+    bits |= 1 & Floats.SIGN_MASK;
+    return Float.intBitsToFloat(bits); }
 
   public static final double doubleValue (final int[] m) {
     assert (! leadingZero(m));

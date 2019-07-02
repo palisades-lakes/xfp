@@ -27,8 +27,8 @@ public final class SumTest {
     Common.zeroSumTests(
       Common.zeroSumGenerators(DIM),
       Common.makeAccumulators(Common.accumulators()));
-    //Debug.DEBUG=false; 
-    }
+    //Debug.DEBUG=false;
+  }
 
   @SuppressWarnings("static-method")
   @Test
@@ -40,8 +40,8 @@ public final class SumTest {
       Common.generators(DIM),
       Common.makeAccumulators(Common.accumulators()),
       BigFloatAccumulator0.make());
-    //Debug.DEBUG=false; 
-    }
+    //Debug.DEBUG=false;
+  }
 
   @SuppressWarnings("static-method")
   @Test
@@ -53,8 +53,8 @@ public final class SumTest {
       Common.generators(DIM),
       Common.makeAccumulators(Common.accumulators()),
       BigFloatAccumulator0.make());
-    //Debug.DEBUG=false; 
-    }
+    //Debug.DEBUG=false;
+  }
 
   @SuppressWarnings("static-method")
   @Test
@@ -66,8 +66,8 @@ public final class SumTest {
       Common.generators(DIM),
       Common.makeAccumulators(Common.accumulators()),
       BigFloatAccumulator0.make());
-    //Debug.DEBUG=false; 
-    }
+    //Debug.DEBUG=false;
+  }
 
 
   @SuppressWarnings("static-method")
@@ -81,7 +81,7 @@ public final class SumTest {
       Common.makeAccumulators(Common.accumulators()),
       BigFloatAccumulator0.make());
     //Debug.DEBUG=false;
-    }
+  }
 
   @SuppressWarnings("static-method")
   @Test
@@ -91,8 +91,8 @@ public final class SumTest {
     //Debug.println("overflow");
     Common.overflowTests(
       Common.makeAccumulators(Common.accumulators()));
-    //Debug.DEBUG=false; 
-    }
+    //Debug.DEBUG=false;
+  }
 
   @SuppressWarnings("static-method")
   @Test
@@ -102,8 +102,8 @@ public final class SumTest {
     //Debug.println("infinite");
     Common.infinityTests(
       Common.makeAccumulators(Common.accumulators()));
-    //Debug.DEBUG=false; 
-    }
+    //Debug.DEBUG=false;
+  }
 
   @SuppressWarnings("static-method")
   @Test
@@ -115,8 +115,8 @@ public final class SumTest {
       Common.generators(DIM),
       Common.makeAccumulators(Common.accumulators()),
       BigFloatAccumulator0.make());
-    //Debug.DEBUG=false; 
-    }
+    //Debug.DEBUG=false;
+  }
 
   // TODO: choose expected behavior with non-finite input
   //@SuppressWarnings("static-method")

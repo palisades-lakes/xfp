@@ -74,7 +74,7 @@ implements Ringlike<BigFloat0> {
       final int c01 = t02.compareTo(t12);
       if (0==c01) { return ZERO; }
       // t12 > t02
-      if (0 > c01) { 
+      if (0 > c01) {
         return valueOf(p1,(NaturalBEI0) t12.subtract(t02),e2); }
       // t02 > t12
       return valueOf(p0,(NaturalBEI0) t02.subtract(t12),e2); }

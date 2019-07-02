@@ -43,7 +43,7 @@ public final class NaturalTest {
       (z) -> ((NaturalBEI) z).bigIntegerValue());
 
     //Debug.DEBUG=false;
-    }
+  }
 
   //--------------------------------------------------------------
 }

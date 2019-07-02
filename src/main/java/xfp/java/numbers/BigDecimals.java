@@ -42,7 +42,7 @@ public final class BigDecimals implements Set {
     return q0.add(q1); }
 
   public final BinaryOperator<BigDecimal> adder () {
-    return new BinaryOperator<BigDecimal> () {
+    return new BinaryOperator<> () {
       @Override
       public final String toString () { return "BD.add()"; }
       @Override
@@ -66,7 +66,7 @@ public final class BigDecimals implements Set {
     return q.negate(); }
 
   public final UnaryOperator<BigDecimal> additiveInverse () {
-    return new UnaryOperator<BigDecimal> () {
+    return new UnaryOperator<> () {
       @Override
       public final String toString () { return "BD.negate()"; }
       @Override
@@ -82,7 +82,7 @@ public final class BigDecimals implements Set {
     return q0.multiply(q1); }
 
   public final BinaryOperator<BigDecimal> multiplier () {
-    return new BinaryOperator<BigDecimal>() {
+    return new BinaryOperator<>() {
       @Override
       public final String toString () { return "BD.multiply()"; }
       @Override
@@ -106,7 +106,7 @@ public final class BigDecimals implements Set {
 
 
   public final UnaryOperator<BigDecimal> multiplicativeInverse () {
-    return new UnaryOperator<BigDecimal> () {
+    return new UnaryOperator<> () {
       @Override
       public final String toString () { return "BD.inverse()"; }
       @Override

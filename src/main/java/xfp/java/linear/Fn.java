@@ -76,22 +76,22 @@ public final class Fn extends LinearSpaceLike {
 
   public static final float maxAbs (final float[] x) {
     float m = NEGATIVE_INFINITY;
-    for (int i=0;i<x.length;i++) {
-      m = Math.max(m,Math.abs(x[i])); }
+    for (final float element : x) {
+      m = Math.max(m,Math.abs(element)); }
     return m; }
 
   //--------------------------------------------------------------
 
   public static final float max (final float[] x) {
     float m = NEGATIVE_INFINITY;
-    for (int i=0;i<x.length;i++) { m = Math.max(m,x[i]); }
+    for (final float element : x) { m = Math.max(m,element); }
     return m; }
 
   //--------------------------------------------------------------
 
   public static final float min (final float[] x) {
     float m = POSITIVE_INFINITY;
-    for (int i=0;i<x.length;i++) { m = Math.min(m,x[i]); }
+    for (final float element : x) { m = Math.min(m,element); }
     return m; }
 
   //--------------------------------------------------------------

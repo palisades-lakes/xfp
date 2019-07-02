@@ -324,7 +324,7 @@ public final class Floats implements Set {
     return Float.valueOf(q0.floatValue() + q1.floatValue()); }
 
   public final BinaryOperator<Float> adder () {
-    return new BinaryOperator<Float> () {
+    return new BinaryOperator<> () {
       @Override
       public final String toString () { return "D.add()"; }
       @Override
@@ -350,7 +350,7 @@ public final class Floats implements Set {
     return  Float.valueOf(- q.floatValue()); }
 
   public final UnaryOperator<Float> additiveInverse () {
-    return new UnaryOperator<Float> () {
+    return new UnaryOperator<> () {
       @Override
       public final String toString () { return "D.negate()"; }
       @Override
@@ -367,7 +367,7 @@ public final class Floats implements Set {
     return Float.valueOf(q0.floatValue() * q1.floatValue()); }
 
   public final BinaryOperator<Float> multiplier () {
-    return new BinaryOperator<Float>() {
+    return new BinaryOperator<>() {
       @Override
       public final String toString () { return "D.multiply()"; }
       @Override
@@ -393,7 +393,7 @@ public final class Floats implements Set {
     return Float.valueOf(1.0F/z);  }
 
   public final UnaryOperator<Float> multiplicativeInverse () {
-    return new UnaryOperator<Float> () {
+    return new UnaryOperator<> () {
       @Override
       public final String toString () { return "D.inverse()"; }
       @Override

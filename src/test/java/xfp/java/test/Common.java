@@ -1080,9 +1080,9 @@ public final class Common {
             + "\npred: " + Classes.className(a)
             + "\n= " + Double.toString(pred)
             + "\n= " + a.value()
-            + "\n"); } } } 
+            + "\n"); } } }
     //Debug.DEBUG=false;
-    }
+  }
 
   private static final void
   addAllTest (final Generator g,

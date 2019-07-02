@@ -135,8 +135,8 @@ implements Natural {
   //--------------------------------------------------------------
 
   private static final boolean isZero (final int[] z) {
-    for (int i=0;i<z.length;i++) {
-      if (0!=z[i]) { return false; } }
+    for (final int element : z) {
+      if (0!=element) { return false; } }
     return true; }
 
   private static final boolean leadingZero (final int[] m) {
@@ -1143,8 +1143,8 @@ implements Natural {
       r0[i0] = (int) sum; }
     else {
       while (i1 > 0) {
-        sum = unsigned(_words[--i0]) 
-          + unsigned(u._words[--i1]) 
+        sum = unsigned(_words[--i0])
+          + unsigned(u._words[--i1])
           + (sum >>> 32);
         r0[i0] = (int) sum; } }
     boolean carry = ((sum >>> 32) != 0);
@@ -1385,8 +1385,8 @@ implements Natural {
     int i1 = m1.length;
     long dif = 0;
     while (i1 > 0) {
-      dif = (unsigned(_words[--i0]) 
-        - unsigned(u._words[--i1])) 
+      dif = (unsigned(_words[--i0])
+        - unsigned(u._words[--i1]))
         + (dif>>32);
       result[i0] = (int) dif; }
     boolean borrow = ((dif >> 32) != 0);
@@ -1733,9 +1733,9 @@ implements Natural {
   public static final Natural[] reduce (final NaturalBEI n0,
                                         final NaturalBEI d0) {
     final int shift = Math.min(n0.loBit(),d0.loBit());
-    final NaturalBEI n = 
+    final NaturalBEI n =
       (NaturalBEI) ((shift != 0) ? n0.shiftDown(shift) : n0);
-    final NaturalBEI d = 
+    final NaturalBEI d =
       (NaturalBEI) ((shift != 0) ? d0.shiftDown(shift) : d0);
     if (n.equals(d)) { return new NaturalBEI[] { ONE, ONE, }; }
     if (d.isOne()) { return new NaturalBEI[] { n, ONE, }; }
@@ -1800,7 +1800,7 @@ implements Natural {
   //  public final int getShiftedInt (final int n) {
   //    assert 0<=n;
   //    final int i0 = Natural.super.getShiftedInt(n);
-  //    final int i1 = getShiftedInt(words(),n); 
+  //    final int i1 = getShiftedInt(words(),n);
   //    assert i0==i1;
   //    return i0; }
 
@@ -1835,7 +1835,7 @@ implements Natural {
   //  public final long getShiftedLong (final int n) {
   //    assert 0<=n;
   //    final long i0 = Natural.super.getShiftedLong(n);
-  //    final long i1 = getShiftedLong(words(),n); 
+  //    final long i1 = getShiftedLong(words(),n);
   //    assert i0==i1 :
   //      "\ni0=" + Long.toHexString(i0)
   //      + "\ni1=" + Long.toHexString(i1)
@@ -1857,9 +1857,9 @@ implements Natural {
 
   @Override
   public final boolean testBit (final int n) {
-    final boolean tf0 = testBit(words(),n); 
+    final boolean tf0 = testBit(words(),n);
     final boolean tf1 = Natural.super.testBit( n);
-    assert tf0==tf1 : "tf0=" + tf0 + "; " + "tf1=" + tf1; 
+    assert tf0==tf1 : "tf0=" + tf0 + "; " + "tf1=" + tf1;
     return tf1; }
 
   @Override
@@ -1877,8 +1877,8 @@ implements Natural {
   @Override
   public final int loBit () {
     final int i = Natural.super.loBit();
-    assert i==loBit(words()) : 
-      i + "!=" + loBit(words()); 
+    assert i==loBit(words()) :
+      i + "!=" + loBit(words());
     return i; }
 
   private static final int hiBit (final int[] m) {
@@ -1890,11 +1890,11 @@ implements Natural {
     return n; }
 
   @Override
-  public final int hiBit () { 
+  public final int hiBit () {
     final int i = Natural.super.hiBit();
     //Debug.println("words=" + Arrays.toString(words()));
     assert i==hiBit(words()) :
-      i + "!=" + hiBit(words()); 
+      i + "!=" + hiBit(words());
     return i; }
 
   public final int bitCount () { return bitCount(words()); }

@@ -5,11 +5,11 @@ import xfp.java.exceptions.Exceptions;
 /** An interface for (im)mutable data structures.
  * <p>
  * This interface covers both mutable and immutable objects,
- * with 'mutating' methods returning an object that may or may not 
- * be new. Methods are free to return a new instance 
+ * with 'mutating' methods returning an object that may or may not
+ * be new. Methods are free to return a new instance
  * and may or may not invalidate the target of the method (similar
  * to the behavior of transient data structures in Clojure).
- * 
+ *
  * TODO: compare to builder paradigm.
  *
  * @author palisades dot lakes at gmail dot com
@@ -21,10 +21,10 @@ public interface Transience<T extends Transience>  {
 
   /** Like <code>(transient foo)</code> in Clojure.
    * <p>
-   * Return an equivalent object that acts like a 
+   * Return an equivalent object that acts like a
    * <code>transient</code> data structure in Clojure,
    * in the sense that mutating operations return a new reference,
-   * which may point to a new instance, and may invalidate the 
+   * which may point to a new instance, and may invalidate the
    * method's target instance.
    * In other words, only the returned reference is trustworthy.
    * <p>
@@ -32,7 +32,7 @@ public interface Transience<T extends Transience>  {
    * <pre>
    * Uints u = x.recyclable();
    * for (int i=0;i<13;i++) { u = u.setWord(i,i); }
-   * return u.immutable(); 
+   * return u.immutable();
    * </pre>
    * <p>
    * Optional method.

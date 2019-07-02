@@ -65,28 +65,28 @@ implements Ringlike<BigFloatNBEI> {
       final NaturalBEI t02,t12;
       final int e2;
       if (e0<e1) {
-        t02 = t0; 
-        t12 = (NaturalBEI) t1.shiftUp(e1-e0); 
+        t02 = t0;
+        t12 = (NaturalBEI) t1.shiftUp(e1-e0);
         e2 = e0; }
       else if (e0>e1) {
-        t02 = (NaturalBEI) t0.shiftUp(e0-e1); 
-        t12 = t1; 
+        t02 = (NaturalBEI) t0.shiftUp(e0-e1);
+        t12 = t1;
         e2 = e1; }
       else {
         t02 = t0; t12 = t1; e2 = e1; }
       final int c01 = t02.compareTo(t12);
       if (0==c01) { return ZERO; }
       // t12 > t02
-      if (0 > c01) { 
-        return valueOf(p1,(NaturalBEI) t12.subtract(t02),e2); }
+      if (0 > c01) {
+        return valueOf(p1,t12.subtract(t02),e2); }
       // t02 > t12
-      return valueOf(p0,(NaturalBEI) t02.subtract(t12),e2); }
+      return valueOf(p0,t02.subtract(t12),e2); }
 
     // same signs
-    if (e0<e1) { 
-      return valueOf(p0,(NaturalBEI) t0.add(t1,e1-e0),e0);}
-    if (e0>e1) { 
-      return valueOf(p0,(NaturalBEI) t1.add(t0,e0-e1),e1);}
+    if (e0<e1) {
+      return valueOf(p0,t0.add(t1,e1-e0),e0);}
+    if (e0>e1) {
+      return valueOf(p0,t1.add(t0,e0-e1),e1);}
     return valueOf(p0,(NaturalBEI) t0.add(t1),e0);}
 
   //--------------------------------------------------------------
@@ -117,12 +117,12 @@ implements Ringlike<BigFloatNBEI> {
       if (0==c) { return ZERO; }
       // t1 > t0
       if (0 > c) {
-        final NaturalBEI t = (NaturalBEI) t0.subtractFrom(t1);
+        final NaturalBEI t = t0.subtractFrom(t1);
         return valueOf(p1,t,e); }
       // t0 > t1
-      final NaturalBEI t = (NaturalBEI) t0.subtract(t1);
+      final NaturalBEI t = t0.subtract(t1);
       return valueOf(p0,t,e); }
-    final NaturalBEI t = (NaturalBEI) t0.add(t1);
+    final NaturalBEI t = t0.add(t1);
     return valueOf(p0,t,e); }
 
   private static final BigFloatNBEI
@@ -137,14 +137,14 @@ implements Ringlike<BigFloatNBEI> {
       if (0==c) { return ZERO; }
       // t1 > t0
       if (0 > c) {
-        final NaturalBEI t = 
-          (NaturalBEI) t0.subtractFrom(t1,upShift);
+        final NaturalBEI t =
+          t0.subtractFrom(t1,upShift);
         return valueOf(n1,t,e); }
       // t0 > t1
-      final NaturalBEI t = 
-        (NaturalBEI) t0.subtract(t1,upShift);
+      final NaturalBEI t =
+        t0.subtract(t1,upShift);
       return valueOf(n0,t,e); }
-    final NaturalBEI t = (NaturalBEI) t0.add(t1,upShift);
+    final NaturalBEI t = t0.add(t1,upShift);
     return valueOf(n0,t,e); }
 
   private static final int compare (final long m0,
@@ -177,7 +177,7 @@ implements Ringlike<BigFloatNBEI> {
       final int c = compare(t0,t1,lShift);
       if (0==c) { return ZERO; }
       if (0>c) { // t1 > t0
-        final NaturalBEI t = 
+        final NaturalBEI t =
           NaturalBEI.subtract(t1,lShift,t0);
         return valueOf(n1,t,e); }
       // t0 > t1
@@ -202,9 +202,9 @@ implements Ringlike<BigFloatNBEI> {
     final long t1 = (t11>>>shift);
     final int e1 = e11+shift;
 
-    if (e0<=e1) { 
+    if (e0<=e1) {
       return addSameExponent(p0,t0,p1,t1,e1-e0,e0); }
-    return 
+    return
       addSameExponent(p0,(NaturalBEI) t0.shiftUp(e0-e1),p1,t1,e1); }
 
   //--------------------------------------------------------------
@@ -303,10 +303,10 @@ implements Ringlike<BigFloatNBEI> {
     assert 0L<=x1;
     final int e0 = x0.loBit();
     final int e1 = Numbers.loBit(x1);
-    final NaturalBEI y0 = 
+    final NaturalBEI y0 =
       (NaturalBEI) ((0==e0) ? x0 : x0.shiftDown(e0));
     final long y1 = (((0==e1)||(64==e1)) ? x1 : (x1 >>> e1));
-    return valueOf(p1,(NaturalBEI) y0.multiply(y1),e0+e1); }
+    return valueOf(p1,y0.multiply(y1),e0+e1); }
 
   private final BigFloatNBEI
   multiply (final boolean p,
@@ -339,7 +339,7 @@ implements Ringlike<BigFloatNBEI> {
   square () {
     return valueOf(
       true,
-      (NaturalBEI) significand().square(),
+      significand().square(),
       (exponent()<<1)); }
 
   //--------------------------------------------------------------
@@ -406,7 +406,7 @@ implements Ringlike<BigFloatNBEI> {
     assert Double.isFinite(z0);
     assert Double.isFinite(z1);
     final BigFloatNBEI dz = subtract(z0,z1);
-    final NaturalBEI t2 = (NaturalBEI) dz.significand().square();
+    final NaturalBEI t2 = dz.significand().square();
     final int e2 = 2*dz.exponent();
     return add(
       nonNegative(),
@@ -629,9 +629,9 @@ implements Ringlike<BigFloatNBEI> {
     final int e0 = exponent();
     final int e1 = q.exponent();
     final int c;
-    if (e0 <= e1) { 
+    if (e0 <= e1) {
       c = t0.compareTo(t1.shiftUp(e1-e0)); }
-    else { 
+    else {
       c = ((NaturalBEI) t0.shiftUp(e0-e1)).compareTo(t1); }
     return (nonNegative() ? c : -c); }
 

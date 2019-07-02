@@ -15,7 +15,7 @@ import xfp.java.exceptions.Exceptions;
  */
 
 @SuppressWarnings("unchecked")
-public interface Ringlike<T extends Ringlike> 
+public interface Ringlike<T extends Ringlike>
 extends Comparable<T> {
 
   //--------------------------------------------------------------
@@ -80,16 +80,16 @@ extends Comparable<T> {
   // 'Number' interface
   //--------------------------------------------------------------
 
-  public default int intValue () { 
+  public default int intValue () {
     throw Exceptions.unsupportedOperation(this,"intValue"); }
 
-  public default long longValue () { 
+  public default long longValue () {
     throw Exceptions.unsupportedOperation(this,"longValue"); }
 
-  public default float floatValue () { 
+  public default float floatValue () {
     throw Exceptions.unsupportedOperation(this,"floatValue"); }
 
-  public default double doubleValue () { 
+  public default double doubleValue () {
     throw Exceptions.unsupportedOperation(this,"doubleValue"); }
 
   //--------------------------------------------------------------

@@ -73,22 +73,22 @@ public final class Dn extends LinearSpaceLike {
 
   public static final double maxAbs (final double[] x) {
     double m = NEGATIVE_INFINITY;
-    for (int i=0;i<x.length;i++) {
-      m = Math.max(m,Math.abs(x[i])); }
+    for (final double element : x) {
+      m = Math.max(m,Math.abs(element)); }
     return m; }
 
   //--------------------------------------------------------------
 
   public static final double max (final double[] x) {
     double m = NEGATIVE_INFINITY;
-    for (int i=0;i<x.length;i++) { m = Math.max(m,x[i]); }
+    for (final double element : x) { m = Math.max(m,element); }
     return m; }
 
   //--------------------------------------------------------------
 
   public static final double min (final double[] x) {
     double m = POSITIVE_INFINITY;
-    for (int i=0;i<x.length;i++) { m = Math.min(m,x[i]); }
+    for (final double element : x) { m = Math.min(m,element); }
     return m; }
 
   //--------------------------------------------------------------

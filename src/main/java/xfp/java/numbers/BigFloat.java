@@ -66,12 +66,12 @@ implements Ringlike<BigFloat> {
       final Natural t02,t12;
       final int e2;
       if (e0<e1) {
-        t02 = t0; 
-        t12 = (Natural) t1.shiftUp(e1-e0); 
+        t02 = t0;
+        t12 = (Natural) t1.shiftUp(e1-e0);
         e2 = e0; }
       else if (e0>e1) {
-        t02 = (Natural) t0.shiftUp(e0-e1); 
-        t12 = t1; 
+        t02 = (Natural) t0.shiftUp(e0-e1);
+        t12 = t1;
         e2 = e1; }
       else {
         t02 = t0; t12 = t1; e2 = e1; }
@@ -197,9 +197,9 @@ implements Ringlike<BigFloat> {
     final long t1 = (t11>>>shift);
     final int e1 = e11+shift;
 
-    if (e0<=e1) { 
+    if (e0<=e1) {
       return addSameExponent(p0,t0,p1,t1,e1-e0,e0); }
-    return 
+    return
       addSameExponent(p0,(Natural) t0.shiftUp(e0-e1),p1,t1,e1); }
 
   //--------------------------------------------------------------
@@ -620,9 +620,9 @@ implements Ringlike<BigFloat> {
     final int e0 = exponent();
     final int e1 = q.exponent();
     final int c;
-    if (e0 <= e1) { 
+    if (e0 <= e1) {
       c = t0.compareTo((Natural) t1.shiftUp(e1-e0)); }
-    else { 
+    else {
       c = ((Natural) t0.shiftUp(e0-e1)).compareTo(t1); }
     return (nonNegative() ? c : -c); }
 

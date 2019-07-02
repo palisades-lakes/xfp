@@ -483,7 +483,7 @@ implements Ringlike<Rational> {
       (nonNegative() ? "" : "-")
       + "("
       + numerator().toHexString()
-      + " / " 
+      + " / "
       + denominator().toHexString()
       + ")"; }
 
@@ -585,9 +585,9 @@ implements Ringlike<Rational> {
     assert 0L < t;
     final Natural n0 = NaturalBEI.valueOf(t);
     if (0 == e) {  return valueOf(nonNegative,n0); }
-    if (0 < e) { 
+    if (0 < e) {
       return valueOf(nonNegative,(Natural) n0.shiftUp(e)); }
-    return 
+    return
       valueOf(nonNegative,n0,NaturalBEI.ZERO.setBit(-e)); }
 
   public static final Rational valueOf (final double x)  {
@@ -605,9 +605,9 @@ implements Ringlike<Rational> {
     assert 0 < t;
     final Natural n0 = NaturalBEI.valueOf(t);
     if (0 == e) {  return valueOf(nonNegative,n0); }
-    if (0 < e) { 
+    if (0 < e) {
       return valueOf(nonNegative,(Natural) n0.shiftUp(e)); }
-    return 
+    return
       valueOf(nonNegative,n0,NaturalBEI.ZERO.setBit(-e)); }
 
   public static final Rational valueOf (final float x)  {
@@ -697,9 +697,9 @@ implements Ringlike<Rational> {
     //    if (0 < e) { return valueOf(p,tn.shiftUp(e),td); }
     //    if (0 > e) { return valueOf(p,tn,td.shiftUp(-e)); }
     //    return valueOf(p,tn,td);
-    if (0 < e) { 
+    if (0 < e) {
       return new Rational(p,(Natural) tn.shiftUp(e),td); }
-    if (0 > e) { 
+    if (0 > e) {
       return new Rational(p,tn,(Natural) td.shiftUp(-e)); }
     return new Rational(p,tn,td); }
 

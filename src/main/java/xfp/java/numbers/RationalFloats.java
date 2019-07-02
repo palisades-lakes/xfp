@@ -43,7 +43,7 @@ public final class RationalFloats implements Set {
     return q0.add(q1); }
 
   public final BinaryOperator<RationalFloat> adder () {
-    return new BinaryOperator<RationalFloat> () {
+    return new BinaryOperator<> () {
       @Override
       public final String toString () { return "RF.add()"; }
       @Override
@@ -67,7 +67,7 @@ public final class RationalFloats implements Set {
     return q.negate(); }
 
   public final UnaryOperator<RationalFloat> additiveInverse () {
-    return new UnaryOperator<RationalFloat> () {
+    return new UnaryOperator<> () {
       @Override
       public final String toString () { return "RF.negate()"; }
       @Override
@@ -83,7 +83,7 @@ public final class RationalFloats implements Set {
     return q0.multiply(q1); }
 
   public final BinaryOperator<RationalFloat> multiplier () {
-    return new BinaryOperator<RationalFloat>() {
+    return new BinaryOperator<>() {
       @Override
       public final String toString () { return "RF.multiply()"; }
       @Override
@@ -106,7 +106,7 @@ public final class RationalFloats implements Set {
     return q.reciprocal();  }
 
   public final UnaryOperator<RationalFloat> multiplicativeInverse () {
-    return new UnaryOperator<RationalFloat> () {
+    return new UnaryOperator<> () {
       @Override
       public final String toString () { return "RF.inverse()"; }
       @Override

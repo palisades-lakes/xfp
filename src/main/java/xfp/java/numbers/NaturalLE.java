@@ -55,16 +55,16 @@ implements Natural {
   /** Adjust i0, i1, and startWord to exclude zeros. */
 
   static final NaturalLE unsafe (final int[] words,
-                                         final int i0,
-                                         final int i1,
-                                         final int startWord) {
+                                 final int i0,
+                                 final int i1,
+                                 final int startWord) {
     int j0 = i0;
     while ((j0<i1)&&(0==words[j0])) { j0++; }
     int j1 = i1;
     while ((j0<j1)&&(0==words[j1-1])) { j1--; }
     return literal(words,j0,j1,startWord+j0);}
 
-  /** Copy non-zero elements from words to minimal size array. 
+  /** Copy non-zero elements from words to minimal size array.
    * This is safe, because it always copies the elements*/
 
   public static final NaturalLE make (final int[] words,

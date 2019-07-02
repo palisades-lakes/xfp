@@ -63,8 +63,8 @@ public final class BigFloatTest {
       Common.floatRoundingTests(
         null,BigFloat::valueOf,Numbers::floatValue,dist,
         Object::toString);
-      //Debug.DEBUG=false; 
-      }
+      //Debug.DEBUG=false;
+    }
 
     private static final int TRYS = 1024*1024;
     @SuppressWarnings("static-method")

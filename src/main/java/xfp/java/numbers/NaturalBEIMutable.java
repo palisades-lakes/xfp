@@ -12,7 +12,7 @@ import java.util.Arrays;
  * @version 2019-07-01
  */
 
-public final class NaturalBEIMutable 
+public final class NaturalBEIMutable
 implements Natural {
 
   //--------------------------------------------------------------
@@ -34,7 +34,7 @@ implements Natural {
 
   /** The start into the words array where the magnitude of this
    * NaturalBEIMutable begins.
-   * 
+   *
    * <code>0&lt;=start</code>.
    */
 
@@ -68,10 +68,10 @@ implements Natural {
   // Synchronize?
   private final void expandTo (final int i) {
     final int i1 = i+1;
-    if (nWords<i1) { 
+    if (nWords<i1) {
       if (i1<words.length) { compact(); nWords = i1; }
       else {
-        // TODO: more eager growth? 
+        // TODO: more eager growth?
         final int[] tmp = new int[i1];
         System.arraycopy(words,start,tmp,i1-nWords,nWords);
         words = tmp;
@@ -82,7 +82,7 @@ implements Natural {
     setWords(v,v.length); }
 
   private final int beIndex (final int i) {
-    return start+nWords-1-i; }
+    return (start+nWords)-1-i; }
 
   @Override
   public final int word (final int i) {
@@ -95,7 +95,7 @@ implements Natural {
                                 final int w) {
     assert 0<=i;
     expandTo(i);
-    words[beIndex(i)] = w; 
+    words[beIndex(i)] = w;
     return this; }
 
   //--------------------------------------------------------------
@@ -133,7 +133,7 @@ implements Natural {
   public final Natural zero () {
     start = 0;
     nWords = 0;
-    Arrays.fill(words,0); 
+    Arrays.fill(words,0);
     return this; }
 
   @Override
@@ -517,8 +517,8 @@ implements Natural {
 
   private static final int[] EMPTY = new int[0];
   private static final boolean isZero (final int[] z) {
-    for (int i=0;i<z.length;i++) {
-      if (0!=z[i]) { return false; } }
+    for (final int element : z) {
+      if (0!=element) { return false; } }
     return true; }
 
 
@@ -1878,7 +1878,7 @@ implements Natural {
     a.normalize();
     return sign; }
 
-  private final NaturalBEIMutable 
+  private final NaturalBEIMutable
   binaryGCD (NaturalBEIMutable v) {
     // Algorithm B from Knuth section 4.5.2
     NaturalBEIMutable u = this;
@@ -2011,7 +2011,7 @@ implements Natural {
   //--------------------------------------------------------------
   // Mutability
   //-------------------------------------------------------------
-  /** safe but slow... 
+  /** safe but slow...
    * TODO: options are:
    * <ul>
    * <ui> return internal array and destroy references.
@@ -2026,16 +2026,16 @@ implements Natural {
   public final Natural immutable () {
     // TODO: other constants?
     if (isZero()) { return NaturalBEI.ZERO; }
-    return 
+    return
       NaturalBEI.unsafe(
         Arrays.copyOfRange(words, start, start + nWords)); }
-  
+
   @Override
   public final Natural recyclable () { return this; }
-  
+
   @Override
   public final boolean isImmutable () { return false; }
-  
+
   //--------------------------------------------------------------
   // construction
   //--------------------------------------------------------------
@@ -2097,11 +2097,11 @@ implements Natural {
   public static final NaturalBEIMutable make (final int n) {
     return new NaturalBEIMutable(new int[n]); }
 
-  public static final NaturalBEIMutable 
+  public static final NaturalBEIMutable
   valueOf (final int[] val) {
     return unsafe(Arrays.copyOf(val,val.length)); }
 
-  public static final NaturalBEIMutable 
+  public static final NaturalBEIMutable
   valueOf (final NaturalBEI u) {
     return unsafe(u.copyWords()); }
 

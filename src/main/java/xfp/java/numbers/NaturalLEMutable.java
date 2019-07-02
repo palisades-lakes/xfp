@@ -8,14 +8,14 @@ package xfp.java.numbers;
  * @version 2019-07-01
  */
 
-public final class NaturalLEMutable 
+public final class NaturalLEMutable
 extends NaturalLEBase
 implements Natural {
 
   private static final long serialVersionUID = 1L;
 
   //--------------------------------------------------------------
-  // state 
+  // state
   //--------------------------------------------------------------
 
   //--------------------------------------------------------------

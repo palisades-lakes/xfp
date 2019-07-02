@@ -374,7 +374,7 @@ public final class Doubles implements Set {
     return Double.valueOf(q0.doubleValue() + q1.doubleValue()); }
 
   public final BinaryOperator<Double> adder () {
-    return new BinaryOperator<Double> () {
+    return new BinaryOperator<> () {
       @Override
       public final String toString () { return "D.add()"; }
       @Override
@@ -399,7 +399,7 @@ public final class Doubles implements Set {
     return  Double.valueOf(- q.doubleValue()); }
 
   public final UnaryOperator<Double> additiveInverse () {
-    return new UnaryOperator<Double> () {
+    return new UnaryOperator<> () {
       @Override
       public final String toString () { return "D.negate()"; }
       @Override
@@ -416,7 +416,7 @@ public final class Doubles implements Set {
     return Double.valueOf(q0.doubleValue() * q1.doubleValue()); }
 
   public final BinaryOperator<Double> multiplier () {
-    return new BinaryOperator<Double>() {
+    return new BinaryOperator<>() {
       @Override
       public final String toString () { return "D.multiply()"; }
       @Override
@@ -442,7 +442,7 @@ public final class Doubles implements Set {
     return Double.valueOf(1.0/z);  }
 
   public final UnaryOperator<Double> multiplicativeInverse () {
-    return new UnaryOperator<Double> () {
+    return new UnaryOperator<> () {
       @Override
       public final String toString () { return "D.inverse()"; }
       @Override

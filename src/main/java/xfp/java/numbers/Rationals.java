@@ -118,7 +118,7 @@ public final class Rationals implements Set {
     return q0.add(q1); }
 
   public final BinaryOperator<Rational> adder () {
-    return new BinaryOperator<Rational> () {
+    return new BinaryOperator<> () {
       @Override
       public final String toString () { return "Rationals.add()"; }
       @Override
@@ -142,7 +142,7 @@ public final class Rationals implements Set {
     return q.negate(); }
 
   public final UnaryOperator<Rational> additiveInverse () {
-    return new UnaryOperator<Rational> () {
+    return new UnaryOperator<> () {
       @Override
       public final String toString () { return "Rationals.negate()"; }
       @Override
@@ -158,7 +158,7 @@ public final class Rationals implements Set {
     return q0.multiply(q1); }
 
   public final BinaryOperator<Rational> multiplier () {
-    return new BinaryOperator<Rational>() {
+    return new BinaryOperator<>() {
       @Override
       public final String toString () {
         return "Rationals.multiply()"; }
@@ -182,7 +182,7 @@ public final class Rationals implements Set {
     return q.reciprocal();  }
 
   public final UnaryOperator<Rational> multiplicativeInverse () {
-    return new UnaryOperator<Rational> () {
+    return new UnaryOperator<> () {
       @Override
       public final String toString () {
         return "Rationals.inverse()"; }

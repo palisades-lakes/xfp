@@ -44,7 +44,7 @@ public final class BigFloats implements Set {
     return q0.add(q1); }
 
   public final BinaryOperator<BigFloat> adder () {
-    return new BinaryOperator<BigFloat> () {
+    return new BinaryOperator<> () {
       @Override
       public final String toString () { return "BF.add()"; }
       @Override
@@ -67,7 +67,7 @@ public final class BigFloats implements Set {
     return q.negate(); }
 
   public final UnaryOperator<BigFloat> additiveInverse () {
-    return new UnaryOperator<BigFloat> () {
+    return new UnaryOperator<> () {
       @Override
       public final String toString () { return "BF.negate()"; }
       @Override
@@ -83,7 +83,7 @@ public final class BigFloats implements Set {
     return q0.multiply(q1); }
 
   public final BinaryOperator<BigFloat> multiplier () {
-    return new BinaryOperator<BigFloat>() {
+    return new BinaryOperator<>() {
       @Override
       public final String toString () { return "BF.multiply"; }
       @Override

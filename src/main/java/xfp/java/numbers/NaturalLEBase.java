@@ -22,10 +22,10 @@ public abstract class NaturalLEBase extends Number {
   /** This array is never modified in {@link NaturalLE}.
    * Frequently modified in {@link NaturalLEMutable}.
    * <p>
-   * It holds the value of this natural number as little endian 
+   * It holds the value of this natural number as little endian
    * <code>int</code> words, ignoring everything outside the
    * <code>[i0,i1)</code> index range.
-   * The value in the <code>i</code>th element corresponds to 
+   * The value in the <code>i</code>th element corresponds to
    * <code>iword(i) * 2<sup>32*i+startWord()</sup></code>.
    */
 
@@ -37,13 +37,13 @@ public abstract class NaturalLEBase extends Number {
   protected final int _i1;
   private final int i1 () { return _i1; }
   private final int iLength () { return i1() - i0(); }
-  private final int iword (final int ii) { 
+  private final int iword (final int ii) {
     if (ii<i0()) { return 0; }
     if (i1()<=ii) { return 0; }
     return _words[ii]; }
 
   protected final int _startWord;
-  
+
   public final int startWord () { return _startWord; }
   public final int endWord () { return startWord() + iLength(); }
   public final int word (final int i) { return iword(i-startWord()); }
@@ -79,9 +79,9 @@ public abstract class NaturalLEBase extends Number {
   //-------------------------------------------------------------
 
   NaturalLEBase (final int[] words,
-                     final int i0,
-                     final int i1,
-                     final int startWord) {
+    final int i0,
+    final int i1,
+    final int startWord) {
     assert 0<=i0;
     assert i0<=i1;
     assert i1<words.length;

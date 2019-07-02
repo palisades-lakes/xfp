@@ -210,7 +210,7 @@ implements Natural {
   // TODO: multiply by shifted long
   @Override
   public final Natural multiply (final long that,
-                                     final int shift) {
+                                 final int shift) {
     assert 1L<=that;
     return multiply(valueOf(that,shift)); }
 
@@ -335,7 +335,7 @@ implements Natural {
   //        valueOf(nd[1].getValue()), }; }
 
   public static final Natural[] reduce (final NaturalBEI0 n0,
-                                            final NaturalBEI0 d0) {
+                                        final NaturalBEI0 d0) {
     final int shift =
       Math.min(
         Bei0.getLowestSetBit(n0._words),
@@ -457,11 +457,11 @@ implements Natural {
   @Override
   public String toString () { return Debug.toHexString(_words); }
 
-//  /** hex string. */
-//  @Override
-//  public String toString (final int radix) {
-//    assert radix==0x10;
-//    return Debug.toHexString(_words); }
+  //  /** hex string. */
+  //  @Override
+  //  public String toString (final int radix) {
+  //    assert radix==0x10;
+  //    return Debug.toHexString(_words); }
 
   //--------------------------------------------------------------
   // Number interface+

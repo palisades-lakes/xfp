@@ -35,14 +35,14 @@ public final class RationalAccumulatorTest {
       Common.generators(DIM),
       Common.makeAccumulators(accumulators),
       BigFloatAccumulator0.make());
-//    Common.sumTests(
-//      Common.generators(DIM),
-//      Common.makeAccumulators(accumulators),
-//      BigFloatAccumulator.make());
-//    Common.dotTests(
-//      Common.generators(DIM),
-//      Common.makeAccumulators(accumulators),
-//      BigFloatAccumulator.make());
+    //    Common.sumTests(
+    //      Common.generators(DIM),
+    //      Common.makeAccumulators(accumulators),
+    //      BigFloatAccumulator.make());
+    //    Common.dotTests(
+    //      Common.generators(DIM),
+    //      Common.makeAccumulators(accumulators),
+    //      BigFloatAccumulator.make());
     //Debug.DEBUG=false;
   }
 
