@@ -20,13 +20,13 @@ implements Natural {
   //--------------------------------------------------------------
 
   @Override
-  public final int hashCode () { return defaultHashCode(); }
+  public final int hashCode () { return uintsHashCode(); }
 
   @Override
   public final boolean equals (final Object x) {
     if (x==this) { return true; }
     if (!(x instanceof NaturalLE)) { return false; }
-    return equals((NaturalLE) x); }
+    return uintsEquals((NaturalLE) x); }
 
   /** hex string. */
   @Override

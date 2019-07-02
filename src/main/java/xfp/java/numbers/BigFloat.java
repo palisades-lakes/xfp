@@ -11,7 +11,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-01
+ * @version 2019-07-02
  */
 
 @SuppressWarnings("unchecked")
@@ -109,6 +109,7 @@ implements Ringlike<BigFloat> {
                    final boolean p1,
                    final long t1,
                    final int e) {
+    assert t0.isImmutable();
     assert 0L<=t1;
     if (p0 ^ p1) { // different signs
       final int c = t0.compareTo(t1);
@@ -121,6 +122,7 @@ implements Ringlike<BigFloat> {
       final Natural t = t0.subtract(t1);
       return valueOf(p0,t,e); }
     final Natural t = t0.add(t1);
+    assert t.isImmutable();
     return valueOf(p0,t,e); }
 
   private static final BigFloat
@@ -674,12 +676,17 @@ implements Ringlike<BigFloat> {
                     final int e0) {
     final int e1 = Math.max(0,t0.loBit());
     _nonNegative = nonNegative;
+    final Natural significand;
+    final int exponent;
     if (e1==0) {
-      _significand = t0;
-      _exponent = e0; }
+      significand = t0;
+      exponent = e0; }
     else {
-      _significand = (Natural) t0.shiftDown(e1);
-      _exponent = Math.addExact(e0,e1); } }
+      significand = (Natural) t0.shiftDown(e1);
+      exponent = Math.addExact(e0,e1); }
+    assert significand.isImmutable();
+    _significand = significand;
+    _exponent = exponent; }
 
   //--------------------------------------------------------------
 

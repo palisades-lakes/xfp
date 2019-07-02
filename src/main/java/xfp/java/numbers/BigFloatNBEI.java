@@ -78,16 +78,31 @@ implements Ringlike<BigFloatNBEI> {
       if (0==c01) { return ZERO; }
       // t12 > t02
       if (0 > c01) {
-        return valueOf(p1,t12.subtract(t02),e2); }
+        return valueOf(
+          p1,
+          t12.subtract(t02),
+          e2); }
       // t02 > t12
-      return valueOf(p0,t02.subtract(t12),e2); }
+      return valueOf(
+        p0,
+        t02.subtract(t12),
+        e2); }
 
     // same signs
     if (e0<e1) {
-      return valueOf(p0,t0.add(t1,e1-e0),e0);}
+      return valueOf(
+        p0,
+        t0.add(t1,e1-e0),
+        e0);}
     if (e0>e1) {
-      return valueOf(p0,t1.add(t0,e0-e1),e1);}
-    return valueOf(p0,(NaturalBEI) t0.add(t1),e0);}
+      return valueOf(
+        p0,
+        t1.add(t0,e0-e1),
+        e1);}
+    return valueOf(
+      p0,
+      t0.add(t1),
+      e0);}
 
   //--------------------------------------------------------------
 
@@ -117,12 +132,12 @@ implements Ringlike<BigFloatNBEI> {
       if (0==c) { return ZERO; }
       // t1 > t0
       if (0 > c) {
-        final NaturalBEI t = t0.subtractFrom(t1);
+        final NaturalBEI t = (NaturalBEI) t0.subtractFrom(t1);
         return valueOf(p1,t,e); }
       // t0 > t1
-      final NaturalBEI t = t0.subtract(t1);
+      final NaturalBEI t = (NaturalBEI) t0.subtract(t1);
       return valueOf(p0,t,e); }
-    final NaturalBEI t = t0.add(t1);
+    final NaturalBEI t = (NaturalBEI) t0.add(t1);
     return valueOf(p0,t,e); }
 
   private static final BigFloatNBEI
@@ -138,13 +153,13 @@ implements Ringlike<BigFloatNBEI> {
       // t1 > t0
       if (0 > c) {
         final NaturalBEI t =
-          t0.subtractFrom(t1,upShift);
+          (NaturalBEI) t0.subtractFrom(t1,upShift);
         return valueOf(n1,t,e); }
       // t0 > t1
       final NaturalBEI t =
-        t0.subtract(t1,upShift);
+        (NaturalBEI) t0.subtract(t1,upShift);
       return valueOf(n0,t,e); }
-    final NaturalBEI t = t0.add(t1,upShift);
+    final NaturalBEI t = (NaturalBEI) t0.add(t1,upShift);
     return valueOf(n0,t,e); }
 
   private static final int compare (final long m0,
@@ -178,12 +193,12 @@ implements Ringlike<BigFloatNBEI> {
       if (0==c) { return ZERO; }
       if (0>c) { // t1 > t0
         final NaturalBEI t =
-          NaturalBEI.subtract(t1,lShift,t0);
+          (NaturalBEI) NaturalBEI.subtract(t1,lShift,t0);
         return valueOf(n1,t,e); }
       // t0 > t1
-      final NaturalBEI t = NaturalBEI.subtract(t0,t1,lShift);
+      final NaturalBEI t = (NaturalBEI) NaturalBEI.subtract(t0,t1,lShift);
       return valueOf(n0,t,e); }
-    final NaturalBEI t = NaturalBEI.add(t0,t1,lShift);
+    final NaturalBEI t = (NaturalBEI) NaturalBEI.add(t0,t1,lShift);
     return valueOf(n0,t,e); }
 
   //--------------------------------------------------------------
@@ -354,14 +369,14 @@ implements Ringlike<BigFloatNBEI> {
     final int e;
     if ((0==s) || (64==s)) { t=tz; e=ez; }
     else { t=(tz>>>s); e=ez+s; }
-    final NaturalBEI t2 = NaturalBEI.square(t);
+    final Natural t2 = NaturalBEI.square(t);
     final int e2 = (e<<1);
     return add(
       nonNegative(),
       significand(),
       exponent(),
       true,
-      t2,
+      (NaturalBEI) t2,
       e2); }
 
   //--------------------------------------------------------------
@@ -406,14 +421,14 @@ implements Ringlike<BigFloatNBEI> {
     assert Double.isFinite(z0);
     assert Double.isFinite(z1);
     final BigFloatNBEI dz = subtract(z0,z1);
-    final NaturalBEI t2 = dz.significand().square();
+    final Natural t2 = dz.significand().square();
     final int e2 = 2*dz.exponent();
     return add(
       nonNegative(),
       significand(),
       exponent(),
       true,
-      t2,
+      (NaturalBEI) t2,
       e2); }
 
   //--------------------------------------------------------------
@@ -442,7 +457,7 @@ implements Ringlike<BigFloatNBEI> {
         significand(),
         exponent(),
         ! (p0 ^ p1),
-        NaturalBEI.multiply(t00,t11),
+        (NaturalBEI) NaturalBEI.multiply(t00,t11),
         e00+e11); }
 
   //  public final BigFloat
@@ -693,10 +708,10 @@ implements Ringlike<BigFloatNBEI> {
   //--------------------------------------------------------------
 
   public static final BigFloatNBEI valueOf (final boolean nonNegative,
-                                            final NaturalBEI t,
+                                            final Natural t,
                                             final int e) {
     if (t.isZero()) { return ZERO; }
-    return new BigFloatNBEI(nonNegative,t,e); }
+    return new BigFloatNBEI(nonNegative,(NaturalBEI) t,e); }
 
   public static final BigFloatNBEI valueOf (final long t,
                                             final int e) {
@@ -789,7 +804,7 @@ implements Ringlike<BigFloatNBEI> {
   public static final BigFloatNBEI valueOf (final NaturalBEI x)  {
     return valueOf(true,x,0); }
 
-  public static final BigFloatNBEI valueOf (final Number x)  {
+  public static final BigFloatNBEI valueOf (final Object x)  {
     if (x instanceof BigFloatNBEI) { return (BigFloatNBEI) x; }
     if (x instanceof Double) { return valueOf((Double) x); }
     if (x instanceof Float) { return valueOf((Float) x); }
@@ -800,9 +815,6 @@ implements Ringlike<BigFloatNBEI> {
     if (x instanceof NaturalBEI) { return valueOf((NaturalBEI) x); }
     if (x instanceof BigDecimal) { return valueOf((BigDecimal) x); }
     throw Exceptions.unsupportedOperation(null,"valueOf",x); }
-
-  public static final BigFloatNBEI valueOf (final Object x)  {
-    return valueOf((Number) x); }
 
   //--------------------------------------------------------------
 

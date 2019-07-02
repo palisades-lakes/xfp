@@ -15,7 +15,7 @@ import xfp.java.exceptions.Exceptions;
  * in Clojure).
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-01
+ * @version 2019-07-02
  */
 
 @SuppressWarnings("unchecked")
@@ -71,33 +71,6 @@ public interface Uints {
 
   int endWord ();
 
-  // wouldn't need these if startWord()/endWord()
-  // promised maximal/minimal bounds
-
-  public default int loInt () {
-    // Search for lowest order nonzero int
-    // TODO: not necessary if startWord promises
-    // maximal lower bound
-    int i=startWord(); // might be -1
-    if (i<0) { return -1; } // no set ints
-    final int n = endWord(); // might be 0
-    while (i<n) {
-      final int w = word(i);
-      if (0!=w) { return i; }
-      i++; }
-    // all words are zero
-    return -1; }
-
-  public default int hiInt () {
-    final int end = endWord();
-    //Debug.println("end=" + end);
-    if (0==end) { return(0); }
-    int n = end-1;
-    final int start = startWord();
-    //Debug.println("start=" + start);
-    while ((start<=n)&&(0==word(n))) { n--; }
-    return n+1; }
-
   //--------------------------------------------------------------
 
   public default Uints clear () {
@@ -130,6 +103,35 @@ public interface Uints {
     return this; }
 
   //--------------------------------------------------------------
+  // wouldn't need these if startWord()/endWord()
+  // promised maximal/minimal bounds
+
+  public default int loInt () {
+    // Search for lowest order nonzero int
+    // TODO: not necessary if startWord promises
+    // maximal lower bound
+    int i=startWord(); // might be -1
+    if (i<0) { return -1; } // no set ints
+    final int n = endWord(); // might be 0
+    while (i<n) {
+      final int w = word(i);
+      if (0!=w) { return i; }
+      i++; }
+    // all words are zero
+    return -1; }
+
+  public default int hiInt () {
+    final int end = endWord();
+    //Debug.println("hiInt end=" + end);
+    if (0==end) { return 0; }
+    int n = end-1;
+    final int start = startWord();
+    //Debug.println("hiInt start=" + start);
+    while ((start<n)&&(0==word(n))) { n--; }
+    //Debug.println("hiInt n=" + n);
+    return n+1; }
+
+  //--------------------------------------------------------------
   // bit ops
   //--------------------------------------------------------------
 
@@ -140,11 +142,12 @@ public interface Uints {
     return (i << 5) + Integer.numberOfTrailingZeros(word(i)); }
 
   public default int hiBit () {
+    //Debug.println("hiBit this=" + this);
     final int n = hiInt()-1;
-    //Debug.println("n=" + n);
-    //Debug.println("word(" + n + ")=" + Integer.toHexString(word(n)));
-    //Debug.println("bitlength(" + Integer.toHexString(word(n))
-    //+ ")=" + Numbers.bitLength(word(n)));
+    if (0>n) { return 0; }
+    //Debug.println("hiBit n=" + n);
+    //Debug.println("hiBit word(" + n + ")=" + Integer.toHexString(word(n)));
+    //Debug.println("hiBit bitlength(" + Integer.toHexString(word(n)) + ")=" + Numbers.bitLength(word(n)));
     return (n<<5) + Numbers.bitLength(word(n)); }
 
   //--------------------------------------------------------------
@@ -156,7 +159,7 @@ public interface Uints {
     return 0!=(w&b); }
 
   //--------------------------------------------------------------
-  /** get the least significant int words of (m >>> shift) */
+  /** get the least significant int word of (this >>> shift) */
 
   public default int getShiftedInt (final int downShift) {
     assert 0<=downShift;
@@ -201,11 +204,11 @@ public interface Uints {
 
   //--------------------------------------------------------------
 
-  public default Uints setBit (final int n) {
-    assert 0<=n;
-    final int iw = (n>>>5);
+  public default Uints setBit (final int i) {
+    assert 0<=i;
+    final int iw = (i>>>5);
     final int w = word(iw);
-    final int ib = (n&0x1F);
+    final int ib = (i&0x1F);
     return setWord(iw,(w|(1<<ib))); }
 
   public default Uints clearBit (final int n) {
@@ -305,14 +308,14 @@ public interface Uints {
   // 'Object' interface
   //--------------------------------------------------------------
 
-  public default int defaultHashCode () {
+  public default int uintsHashCode () {
     int hashCode = 0;
     for (int i=0; i<endWord(); i++) {
       hashCode = (int) ((31 * hashCode) + uword(i)); }
     return hashCode; }
 
   // DANGER: equality across classes
-  public default boolean equals (final Uints x) {
+  public default boolean uintsEquals (final Uints x) {
     if (x==this) { return true; }
     final Uints u = x;
     final int n = Math.max(endWord(),u.endWord());

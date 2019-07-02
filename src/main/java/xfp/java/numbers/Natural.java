@@ -1,6 +1,5 @@
 package xfp.java.numbers;
 
-import java.math.BigInteger;
 import java.util.List;
 
 import xfp.java.exceptions.Exceptions;
@@ -13,7 +12,7 @@ import xfp.java.exceptions.Exceptions;
  *  uword(i) * 2<sup>32*i</sup></code>.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-01
+ * @version 2019-07-02
  */
 
 @SuppressWarnings("unchecked")
@@ -71,8 +70,8 @@ extends Uints, Ringlike<Natural>, Transience<Natural> {
     if (n0<n1) { return -1; }
     if (n0>n1) { return 1; }
 
-    final int iShift = (upShift >>> 5);
-    final int rShift = (upShift & 0x1f);
+    final int iShift = (upShift>> 5);
+    final int rShift = (upShift&0x1f);
 
     // compare non-zero words from u<<upShift
     if (0==rShift) {
@@ -145,7 +144,7 @@ extends Uints, Ringlike<Natural>, Transience<Natural> {
       sum = uword(i) + u.uword(i) + carry;
       carry = (sum>>>32);
       t = (Natural) t.setWord(i,(int) sum); }
-    if (0L!=carry) { setWord(i,(int) carry); }
+    if (0L!=carry) { t = (Natural) t.setWord(i,(int) carry); }
     return t.immutable(); }
 
   public default Natural add (final Natural u,
@@ -155,13 +154,14 @@ extends Uints, Ringlike<Natural>, Transience<Natural> {
     if (u.isZero()) { return this; }
     if (0==shift) { return add(u); }
     // TODO: reduce to single builder op?
+    // TODO: shiftUp mutable version and add this to that
     return add((Natural) u.shiftUp(shift)); }
 
   public default Natural add (final long u) {
     assert 0L<=u;
-    if (0L==u) { return this; }
+    if (0L==u) { return immutable(); }
+    if (isZero()) { return ((Natural) from(u)).immutable(); }
     Uints v = recyclable();
-    if (isZero()) { return (Natural) v.set(u); }
     long sum = uword(0) + Numbers.loWord(u);
     v = v.setWord(0,(int) sum);
     long carry = (sum>>>32);
@@ -179,11 +179,11 @@ extends Uints, Ringlike<Natural>, Transience<Natural> {
 
   public default Natural add (final long u,
                               final int upShift) {
-    assert 0L<=u;
     assert 0<=upShift;
-    final Uints v = ((Uints) recyclable()).shiftUp(u,upShift);
-    final Natural w = ((Natural) v).add(this);
-    return w.immutable(); }
+    if (0==upShift) { return add(u); }
+    assert 0L<=u;
+    if (0L==u) { return immutable(); }
+    return add((Natural) from(u,upShift)).immutable(); }
 
   //--------------------------------------------------------------
 
@@ -329,13 +329,20 @@ extends Uints, Ringlike<Natural>, Transience<Natural> {
   //--------------------------------------------------------------
   // TODO: move to Ringlike?
 
-  @Override
-  public default byte[] toByteArray () {
-    throw Exceptions.unsupportedOperation(this,"toByteArray"); }
+  //  @Override
+  //  public default byte[] toByteArray () {
+  //    throw Exceptions.unsupportedOperation(this,"toByteArray"); }
+
+  //  @Override
+  //  public default BigInteger bigIntegerValue () {
+  //    return new BigInteger(toByteArray()); }
 
   @Override
-  public default BigInteger bigIntegerValue () {
-    return new BigInteger(toByteArray()); }
+  public default int intValue () { return word(0); }
+
+  @Override
+  public default long longValue () {
+    return (uword(1)<<32) | uword(0); }
 
   //--------------------------------------------------------------
 }

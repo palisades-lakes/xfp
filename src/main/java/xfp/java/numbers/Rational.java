@@ -588,7 +588,10 @@ implements Ringlike<Rational> {
     if (0 < e) {
       return valueOf(nonNegative,(Natural) n0.shiftUp(e)); }
     return
-      valueOf(nonNegative,n0,NaturalBEI.ZERO.setBit(-e)); }
+      valueOf(
+        nonNegative,
+        n0,
+        (Natural) NaturalBEI.ZERO.setBit(-e)); }
 
   public static final Rational valueOf (final double x)  {
     return valueOf(
@@ -606,9 +609,14 @@ implements Ringlike<Rational> {
     final Natural n0 = NaturalBEI.valueOf(t);
     if (0 == e) {  return valueOf(nonNegative,n0); }
     if (0 < e) {
-      return valueOf(nonNegative,(Natural) n0.shiftUp(e)); }
+      return valueOf(
+        nonNegative,
+        (Natural) n0.shiftUp(e)); }
     return
-      valueOf(nonNegative,n0,NaturalBEI.ZERO.setBit(-e)); }
+      valueOf(
+        nonNegative,
+        n0,
+        (Natural) NaturalBEI.ZERO.setBit(-e)); }
 
   public static final Rational valueOf (final float x)  {
     return valueOf(
@@ -716,7 +724,7 @@ implements Ringlike<Rational> {
       return valueOf(
         x.nonNegative(),
         t,
-        NaturalBEI.ZERO.setBit(-e)); }
+        (Natural) NaturalBEI.ZERO.setBit(-e)); }
     return valueOf(x.nonNegative(),t,NaturalBEI.ONE); }
 
   public static final Rational valueOf (final Number x)  {

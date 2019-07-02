@@ -12,8 +12,7 @@ import java.util.Arrays;
  * @version 2019-07-01
  */
 
-public final class NaturalBEIMutable
-implements Natural {
+public final class NaturalBEIMutable implements Natural {
 
   //--------------------------------------------------------------
   // mutable state
@@ -103,6 +102,7 @@ implements Natural {
    * low ints of this number.
    * TODO: wrap with a view object, no copying?
    */
+
   private final int[] getLower (final int n) {
     if (isZero()) { return NaturalBEI.EMPTY; }
     // TODO: copy here? DANGER!!!
@@ -2028,7 +2028,7 @@ implements Natural {
     if (isZero()) { return NaturalBEI.ZERO; }
     return
       NaturalBEI.unsafe(
-        Arrays.copyOfRange(words, start, start + nWords)); }
+        Arrays.copyOfRange(words,start,start+nWords)); }
 
   @Override
   public final Natural recyclable () { return this; }
@@ -2091,8 +2091,8 @@ implements Natural {
     return new NaturalBEIMutable(); }
 
   //DANGER!!
-  public static final NaturalBEIMutable unsafe (final int[] val) {
-    return new NaturalBEIMutable(val); }
+  public static final NaturalBEIMutable unsafe (final int[] u) {
+    return new NaturalBEIMutable(u); }
 
   public static final NaturalBEIMutable make (final int n) {
     return new NaturalBEIMutable(new int[n]); }
@@ -2104,6 +2104,28 @@ implements Natural {
   public static final NaturalBEIMutable
   valueOf (final NaturalBEI u) {
     return unsafe(u.copyWords()); }
+
+  public static final NaturalBEIMutable valueOf (final long u) {
+    if (0L==u) { return make(); }
+    assert 0L<u;
+    return unsafe(NaturalBEI.toInts(u)); }
+
+  public static final NaturalBEIMutable valueOf (final long u,
+                                                 final int upShift) {
+    assert 0L<=u;
+    assert 0<=upShift;
+    if (0==upShift) { return valueOf(u); }
+    if (0L==u) { return make(); }
+    return unsafe(NaturalBEI.shiftUpLong(u,upShift)); }
+
+  @Override
+  public final Natural from (final long u) {
+    return NaturalBEI.valueOf(u); }
+
+  @Override
+  public final Natural from (final long u,
+                             final int shift) {
+    return valueOf(u,shift); }
 
   //--------------------------------------------------------------
 

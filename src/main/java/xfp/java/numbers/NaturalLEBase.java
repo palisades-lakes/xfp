@@ -46,7 +46,8 @@ public abstract class NaturalLEBase extends Number {
 
   public final int startWord () { return _startWord; }
   public final int endWord () { return startWord() + iLength(); }
-  public final int word (final int i) { return iword(i-startWord()); }
+  public final int word (final int i) {
+    return iword(i-startWord()); }
 
   //--------------------------------------------------------------
   // Number methods

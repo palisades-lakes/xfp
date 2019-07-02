@@ -855,7 +855,7 @@ implements Ringlike<RationalFloat> {
     throw Exceptions.unsupportedOperation(null,"valueOf",x); }
   //    return valueOf(x, NaturalBEI.ONE); }
 
-  public static final RationalFloat valueOf (final Number x)  {
+  public static final RationalFloat valueOf (final Object x)  {
     if (x instanceof RationalFloat) { return (RationalFloat) x; }
     if (x instanceof Double) { return valueOf((Double) x); }
     if (x instanceof Float) { return valueOf((Float) x); }
@@ -866,9 +866,6 @@ implements Ringlike<RationalFloat> {
     if (x instanceof NaturalBEI) { return valueOf(x); }
     if (x instanceof BigDecimal) { return valueOf((BigDecimal) x); }
     throw Exceptions.unsupportedOperation(null,"valueOf",x); }
-
-  public static final RationalFloat valueOf (final Object x)  {
-    return valueOf((Number) x); }
 
   //--------------------------------------------------------------
   // Note: these need to be reduced.
