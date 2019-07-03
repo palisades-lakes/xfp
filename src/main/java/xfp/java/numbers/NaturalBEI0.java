@@ -199,7 +199,7 @@ implements Natural {
   @Override
   public final NaturalBEI0 square () {
     if (isZero()) { return ZERO; }
-    if (this.isOne()) { return ONE; }
+    if (isOne()) { return ONE; }
     return unsafe(Bei0.square(_words,false)); }
 
   @Override

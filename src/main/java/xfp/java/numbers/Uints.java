@@ -15,7 +15,7 @@ import xfp.java.exceptions.Exceptions;
  * in Clojure).
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-02
+ * @version 2019-07-03
  */
 
 @SuppressWarnings("unchecked")
@@ -300,7 +300,7 @@ public interface Uints {
     else {
       b.append(String.format("%x",Long.valueOf(uword(n))));
       for (int i=n-1;i>=0;i--) {
-        b.append(" ");
+        //b.append(" ");
         b.append(String.format("%08x",Long.valueOf(uword(i)))); } }
     return b.toString(); }
 

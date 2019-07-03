@@ -11,13 +11,39 @@ import xfp.java.exceptions.Exceptions;
  * to the behavior of transient data structures in Clojure).
  *
  * TODO: compare to builder paradigm.
- *
+ * 
+ * TODO: implement careful explicit recycle/invalidate.
+ * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-01
+ * @version 2019-07-03
  */
 
 @SuppressWarnings("unchecked")
 public interface Transience<T extends Transience>  {
+
+  /** If {@link #isImmutable()}, return this. <br>
+   * If not, invalidate <code>this</code> instance, and return a 
+   * new instance, reusing components of <code>this</code> as
+   * desired.
+   * 
+   * TODO: options argument?
+   * TODO: a more foolproof way to handle this? Use reflection to
+   * set all fields to <code>null</code>, <code>NaN</code>, etc.?
+   */
+
+  public default T recycle () {
+    throw Exceptions.unsupportedOperation(this,"recycle"); }
+
+  /** If <code>this</code> has been invalidated in recycling,
+   * and its possibly mutable components used elsewhere,
+   * return false.
+   * 
+   * TODO: a more foolproof way to handle this? Use reflection to
+   * set all fields to <code>null</code>, <code>NaN</code>, etc.?
+   */
+
+  public default boolean isValid () {
+    throw Exceptions.unsupportedOperation(this,"isValid"); }
 
   /** Like <code>(transient foo)</code> in Clojure.
    * <p>

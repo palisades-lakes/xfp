@@ -30,7 +30,7 @@ import xfp.java.prng.PRNG;
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-01
+ * @version 2019-07-03
  */
 @SuppressWarnings("unchecked")
 public final class Common {
@@ -191,30 +191,51 @@ public final class Common {
     + "\n" + x3.toString(0x10)); }
 
   public static final <T extends Ringlike<T>> void
+  square (final Function<BigInteger,T> fromBI,
+            final Function<T,BigInteger> toBI,
+            final BigInteger x0) {
+    final BigInteger x2 = x0.multiply(x0);
+    final T y0 = fromBI.apply(x0);
+    final T y2 = y0.square();
+    final BigInteger x3 = toBI.apply(y2);
+    final BigInteger dx = x2.subtract(x3);
+    Assertions.assertEquals(x2,x3,
+      () ->
+    "\n" + x0.toString(0x10)
+    + "\n square -> "
+    + "\n" + x2.toString(0x10)
+    + "\n\n" + y0.toString()
+    + "\n square -> "
+    + "\n" + y2.toString()
+    + "\n\n" + x3.toString(0x10)
+    + "\n" + x2.toString(0x10)
+    + "\n\n" + dx.toString(0x10)); }
+
+  public static final <T extends Ringlike<T>> void
   multiply (final Function<BigInteger,T> fromBI,
             final Function<T,BigInteger> toBI,
             final BigInteger x0,
             final BigInteger x1) {
+    final BigInteger x2 = x0.multiply(x1);
     final T y0 = fromBI.apply(x0);
     final T y1 = fromBI.apply(x1);
-    final BigInteger x2 = x0.multiply(x1);
     final T y2 = y0.multiply(y1);
-    final BigInteger x3 = toBI.apply( y2);
-    Assertions.assertEquals(x2,x3,() ->
-    "0x" + x0.toString(0x10)
+    final BigInteger x3 = toBI.apply(y2);
+    final BigInteger dx = x2.subtract(x3);
+    Assertions.assertEquals(x2,x3,
+      () ->
+    "\n" + x0.toString(0x10)
     + "\n * "
-    + "\n0x" +  x1.toString(0x10)
+    + "\n" +  x1.toString(0x10)
     + "\n -> "
-    + "\n0x" + x2.toString(0x10)
-    + "\n" + y0.toString()
+    + "\n" + x2.toString(0x10)
+    + "\n\n" + y0.toString()
     + "\n * "
     + "\n" +  y1.toString()
     + "\n -> "
     + "\n" + y2.toString()
-    + "\n\n0x" + x2.toString(0x10)
-    + "\n0x" + x3.toString(0x10)
-    + "\n\n0x" + x2.subtract(x3).toString(0x10)
-      ); }
+    + "\n\n" + x3.toString(0x10)
+    + "\n\n" + dx.toString(0x10)); }
 
   public static final <T extends Ringlike<T>> void
   divide (final Function<BigInteger,T> fromBI,
@@ -337,10 +358,10 @@ public final class Common {
                final Function<Ringlike,BigInteger> toBI,
                final BigInteger z0,
                final BigInteger z1) {
-    assert 0 <= z0.signum();
-    assert 0 <= z1.signum();
-    //    //Debug.println("z0=" + z0.toString(0x10));
-    //    //Debug.println("z1=" + z1.toString(0x10));
+    assert 0<=z0.signum();
+    assert 0<=z1.signum();
+    //Debug.println("z0=" + z0.toString(0x10));
+    //Debug.println("z1=" + z1.toString(0x10));
     hexRoundTrip(fromBI,valueOf,z0);
     hexRoundTrip(fromBI,valueOf,z1);
     biRoundTrip(fromBI,toBI,z0);
@@ -349,6 +370,9 @@ public final class Common {
     add(fromBI,toBI,z0,z0);
     absDiff(fromBI,toBI,z0,z1);
     absDiff(fromBI,toBI,z0,z0);
+    square(fromBI,toBI,z0);
+    square(fromBI,toBI,z1);
+    multiply(fromBI,toBI,z0,z0);
     multiply(fromBI,toBI,z0,z1);
     multiply(fromBI,toBI,z0,z0);
     divide(fromBI,toBI,z0,z1);
@@ -391,6 +415,8 @@ public final class Common {
     absDiff(fromBI,toBI,z0,z0);
     subtract(fromBI,toBI,z0,z1);
     subtract(fromBI,toBI,z0,z0);
+    square(fromBI,toBI,z0);
+    square(fromBI,toBI,z1);
     multiply(fromBI,toBI,z0,z1);
     multiply(fromBI,toBI,z0,z0);
     divide(fromBI,toBI,z0,z1);

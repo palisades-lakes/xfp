@@ -1,6 +1,8 @@
 package xfp.java.numbers;
 
 import static xfp.java.numbers.Numbers.hiBit;
+import static xfp.java.numbers.Numbers.loWord;
+import static xfp.java.numbers.Numbers.unsigned;
 
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -11,7 +13,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-01
+ * @version 2019-07-03
  */
 
 public final class BigFloatNBEI
@@ -181,6 +183,106 @@ implements Ringlike<BigFloatNBEI> {
     final long m11 = (m1<<bitShift);
     return Long.compare(m0,m11); }
 
+  //--------------------------------------------------------------
+  
+  private static final Natural add (final long m0,
+                                    final long m1) {
+    assert 0L<=m0;
+    assert 0L<=m1;
+    long sum = loWord(m0) + loWord(m1);
+    final int lo = (int) sum;
+    sum = Numbers.hiWord(m0) + Numbers.hiWord(m1) + Numbers.hiWord(sum);
+    final int mid = (int) sum;
+    final int hi = (int) Numbers.hiWord(sum);
+    if (0==hi) {
+      if (0==mid) {
+        if (0==lo) { return NaturalBEI.ZERO; }
+        return NaturalBEI.unsafe(new int[] { lo, }); }
+      return NaturalBEI.unsafe(new int[] { mid, lo, }); }
+    return NaturalBEI.unsafe(new int[] { hi, mid, lo, }); }
+
+  private static final Natural add (final long m0,
+                                   final long m1,
+                                   final int bitShift) {
+    assert 0L<=m0;
+    assert 0L<=m1;
+    assert 0<=bitShift;
+
+    if (0L==m0) { return NaturalBEI.valueOf(m1,bitShift); }
+    if (0L==m1) { return NaturalBEI.valueOf(m0); }
+    if (0==bitShift) { return add(m0,m1); }
+
+    final int hi0 = (int) Numbers.hiWord(m0);
+    final int lo0 = (int) loWord(m0);
+    final int n0 = ((0==hi0) ? ((0==lo0) ? 0 : 1) : 2);
+
+    final int intShift = bitShift >>> 5;
+    final int remShift = bitShift & 0x1f;
+    final int nwords1;
+    final int hi1 = Numbers.hiBit(m1) + remShift;
+    if (64 < hi1) { nwords1 = 3; }
+    else if (32 < hi1) { nwords1 = 2; }
+    else { nwords1 = 1; }
+
+    final int n1 = intShift + nwords1;
+    final int nr = Math.max(n0,n1);
+    final int[] r0 = new int[nr];
+
+    // copy m0 to result
+    int i = nr-1;
+    if (0<=i) { r0[i--] = lo0; }
+    if (0<=i) { r0[i--] = hi0; }
+
+    // add shifted m1 to r0 in place
+    long sum;
+    i=nr-intShift-1;
+    final long m1s = (m1 << remShift);
+    sum = loWord(m1s);
+    if (0<=i) { sum += unsigned(r0[i]); }
+    r0[i--] = (int) sum;
+    if (2<=nwords1) {
+      //sum = midPart(m1,remShift) + (sum >>> 32);
+      sum = Numbers.hiWord(m1s) + (sum >>> 32);
+      if (0<=i) { sum += unsigned(r0[i]); }
+      r0[i--] = (int) sum; }
+    if (3==nwords1) {
+      //sum = hiPart(m1,remShift) + (sum >>> 32);
+      sum = (m1 >>> (64-remShift)) + (sum >>> 32);
+      if (0<=i) { sum += unsigned(r0[i]); }
+      r0[i] = (int) sum; }
+
+    boolean carry = ((sum >>> 32) != 0);
+    while ((0<=i) && carry) {
+      sum = 0x01L;
+      if (0<=i) { sum += unsigned(r0[i]); }
+      final int is = (int) sum;
+      r0[i--] = is;
+      carry = (is == 0); }
+
+    if (carry) {
+      final int r1[] = new int[nr + 1];
+      System.arraycopy(r0,0,r1,1,nr);
+      r1[0] = 0x01;
+      return NaturalBEI.unsafe(r1); }
+    return NaturalBEI.unsafe(r0); }
+
+  private static final Natural subtract (final long m0,
+                                         final long m1,
+                                         final int bitShift) {
+     assert 0L<=m0;
+     assert 0L<=m1;
+     assert 0<=bitShift;
+     final long dm = m0 - (m1<<bitShift);
+     assert 0L<=dm;
+     return NaturalBEI.valueOf(dm); }
+
+   // only when (m1 << upShift) <= m0
+
+   private static final Natural subtract (final long m0,
+                                         final int bitShift,
+                                         final long m1) {
+     return NaturalBEI.valueOf(m0,bitShift).subtract(m1); }
+   
   private static final BigFloatNBEI
   addSameExponent (final boolean n0,
                    final long t0,
@@ -192,13 +294,12 @@ implements Ringlike<BigFloatNBEI> {
       final int c = compare(t0,t1,lShift);
       if (0==c) { return ZERO; }
       if (0>c) { // t1 > t0
-        final NaturalBEI t =
-          (NaturalBEI) NaturalBEI.subtract(t1,lShift,t0);
+        final NaturalBEI t = (NaturalBEI) subtract(t1,lShift,t0);
         return valueOf(n1,t,e); }
       // t0 > t1
-      final NaturalBEI t = (NaturalBEI) NaturalBEI.subtract(t0,t1,lShift);
+      final NaturalBEI t = (NaturalBEI) subtract(t0,t1,lShift);
       return valueOf(n0,t,e); }
-    final NaturalBEI t = (NaturalBEI) NaturalBEI.add(t0,t1,lShift);
+    final NaturalBEI t = (NaturalBEI) add(t0,t1,lShift);
     return valueOf(n0,t,e); }
 
   //--------------------------------------------------------------

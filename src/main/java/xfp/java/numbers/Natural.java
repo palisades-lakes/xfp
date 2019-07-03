@@ -11,8 +11,10 @@ import xfp.java.exceptions.Exceptions;
  * <code>sum<sub>i=startWord()</sub><sup>i&lt;endWord</sup>
  *  uword(i) * 2<sup>32*i</sup></code>.
  *
+ * TODO: utilities class to hide private stuff?
+ * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-02
+ * @version 2019-07-03
  */
 
 @SuppressWarnings("unchecked")
@@ -109,6 +111,8 @@ extends Uints, Ringlike<Natural>, Transience<Natural> {
 
   //--------------------------------------------------------------
   // arithmetic
+  //--------------------------------------------------------------
+  // additive group
   //--------------------------------------------------------------
   // implementations usually return a pre-allocated constant
 
@@ -265,11 +269,7 @@ extends Uints, Ringlike<Natural>, Transience<Natural> {
     return subtract(u); }
 
   //--------------------------------------------------------------
-
-  @Override
-  public default Natural square () {
-    throw Exceptions.unsupportedOperation(this,"square"); }
-
+  // multiplicative monoid
   //--------------------------------------------------------------
 
   @Override
@@ -279,20 +279,94 @@ extends Uints, Ringlike<Natural>, Transience<Natural> {
       if (0!=word(i)) { return false; } }
     return true; }
 
+  //--------------------------------------------------------------
+
+  @Override
+  public default Natural square () {
+    throw Exceptions.unsupportedOperation(this,"square"); }
+
+  //--------------------------------------------------------------
+  // multiply
+  //--------------------------------------------------------------
+
+  static final int MULTIPLY_SQUARE_THRESHOLD = 20;
+  static final int KARATSUBA_THRESHOLD = 80;
+  static final int TOOM_COOK_THRESHOLD = 240;
+
+  //--------------------------------------------------------------
+
+  //  private static Natural multiplyToLen (final Natural m0,
+  //                                        final int n0,
+  //                                        final Natural m1,
+  //                                        final int n1) {
+  //
+  //    final int xstart = n0-1;
+  //    final int ystart = n1-1;
+  //    if ((z == null) || (z.length < (n0 + n1))) {
+  //      z = new int[n0 + n1]; }
+  //    long carry = 0L;
+  //    for (int j = ystart, k = ystart + 1 + xstart;
+  //      j >= 0;
+  //      j--, k--) {
+  //      final long product = (m1.uword(j) * m0.uword(xstart)) + carry;
+  //      z[k] = (int) product;
+  //      carry = product >>> 32; }
+  //    z[xstart] = (int) carry;
+  //    for (int i = xstart - 1; i >= 0; i--) {
+  //      carry = 0;
+  //      for (int j = ystart, k = ystart + 1 + i; j >= 0; j--, k--) {
+  //        final long product = (m1.uword(j]) * m0.uword(i))
+  //          + unsigned(z[k]) + carry;
+  //        z[k] = (int) product;
+  //        carry = product >>> 32; }
+  //      z[i] = (int) carry; }
+  //    return z; }
+
+  //--------------------------------------------------------------
+
+  public default Natural multiplyLong (final long u) {
+    throw Exceptions.unsupportedOperation(this,"multiplyLong",u); }
+
+  public default Natural multiplyToLen (final Natural u) {
+    throw Exceptions.unsupportedOperation(this,"multiplyToLen",u); }
+
+  public default Natural multiplyKaratsuba (final Natural u) {
+    throw Exceptions.unsupportedOperation(this,"multiplyKaratsuba",u); }
+
+  public default Natural multiplyToomCook3 (final Natural u) {
+    throw Exceptions.unsupportedOperation(this,"multiplyKaratsuba",u); }
+
   @Override
   public default Natural multiply (final Natural u) {
     throw Exceptions.unsupportedOperation(this,"multiply",u); }
+//    if ((isZero()) || (u.isZero())) { return zero(); }
+//    final int n0 = endWord();
+//    if (equals(u) && (n0>MULTIPLY_SQUARE_THRESHOLD)) {
+//      return square(); }
+//    final int n1 = u.endWord();
+//    if ((n0<KARATSUBA_THRESHOLD) || (n1<KARATSUBA_THRESHOLD)) {
+//      //if (n1 == 1) { return multiplyLong(u.uword(0)); }
+//      //if (n0 == 1) { return u.multiplyLong(uword(0)); }
+//      return multiplyToLen(u); }
+//
+//    if ((n0 < TOOM_COOK_THRESHOLD) && (n1 < TOOM_COOK_THRESHOLD)) {
+//      return multiplyKaratsuba(u); }
+//    return multiplyToomCook3(u); }
+
+  //--------------------------------------------------------------
 
   public default Natural multiply (final long u) {
-    assert 0L<=u;
     throw Exceptions.unsupportedOperation(this,"multiply",u); }
+//    assert 0L<=u;
+//    return multiply((Natural) from(u)); }
 
   public default Natural multiply (final long u,
                                    final int upShift) {
-    assert 0L<=u;
-    assert 0<=upShift;
-    throw Exceptions.unsupportedOperation(
-      this,"multiply",u,upShift); }
+    throw Exceptions.unsupportedOperation(this,"multiply",u,upShift); }
+//    assert 0L<=u;
+//    assert 0<=upShift;
+//    //if (0==upShift) { return multiply(u); }
+//    return multiply((Natural) from(u,upShift)); }
 
   //--------------------------------------------------------------
 

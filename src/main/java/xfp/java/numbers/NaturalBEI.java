@@ -11,7 +11,7 @@ import java.util.Arrays;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-02
+ * @version 2019-07-03
  */
 
 public final class NaturalBEI //extends Number
@@ -134,8 +134,8 @@ implements Natural {
       if (0!=element) { return false; } }
     return true; }
 
-  private static final boolean leadingZero (final int[] m) {
-    return (0<m.length) && (0==m[0]); }
+  //  private static final boolean leadingZero (final int[] m) {
+  //    return (0<m.length) && (0==m[0]); }
 
   private static final int[] stripLeadingZeros (final int[] m) {
     final int n = m.length;
@@ -293,39 +293,39 @@ implements Natural {
     return m1; }
 
   //--------------------------------------------------------------
-  /** Overwrite some elements of m0 with shifted bits from m1,
-   * if big enough. Otherwise throw an exception.
-   */
-  public static final int[] shiftUpInto (final int[] m0,
-                                         final int[] m1,
-                                         final int shift) {
-    assert 0<=shift;
-    assert !leadingZero(m1);
-    final int n0 = m0.length;
-    final int n1 = m1.length;
-    final int iShift = (shift >>> 5);
-    final int lShift = (shift & 0x1f);
-    final int rShift = 32-lShift;
-    final int hi0 = (m1[0] >>> rShift);
-    final int n1s = n1 + iShift +
-      (((0==lShift) || (0==hi0)) ? 0 : 1);
-    assert n1s<=n0;
-    if (lShift==0) {
-      System.arraycopy(m1,0,m0,n0-n1s,n1);
-      return m0; }
-    int i = n0-n1s;
-    if (0!=hi0) { m0[i++] = hi0; }
-    int j = 0;
-    int m1j = m1[j];
-    while (j < (n1-1)) {
-      final int hi = (m1j << lShift);
-      j++;
-      m1j = m1[j];
-      final int lo = (m1j >>> rShift);
-      m0[i] = (hi | lo);
-      i++; }
-    m0[i] = m1j << lShift;
-    return m0; }
+  //  /** Overwrite some elements of m0 with shifted bits from m1,
+  //   * if big enough. Otherwise throw an exception.
+  //   */
+  //  private static final int[] shiftUpInto (final int[] m0,
+  //                                         final int[] m1,
+  //                                         final int shift) {
+  //    assert 0<=shift;
+  //    assert !leadingZero(m1);
+  //    final int n0 = m0.length;
+  //    final int n1 = m1.length;
+  //    final int iShift = (shift >>> 5);
+  //    final int lShift = (shift & 0x1f);
+  //    final int rShift = 32-lShift;
+  //    final int hi0 = (m1[0] >>> rShift);
+  //    final int n1s = n1 + iShift +
+  //      (((0==lShift) || (0==hi0)) ? 0 : 1);
+  //    assert n1s<=n0;
+  //    if (lShift==0) {
+  //      System.arraycopy(m1,0,m0,n0-n1s,n1);
+  //      return m0; }
+  //    int i = n0-n1s;
+  //    if (0!=hi0) { m0[i++] = hi0; }
+  //    int j = 0;
+  //    int m1j = m1[j];
+  //    while (j < (n1-1)) {
+  //      final int hi = (m1j << lShift);
+  //      j++;
+  //      m1j = m1[j];
+  //      final int lo = (m1j >>> rShift);
+  //      m0[i] = (hi | lo);
+  //      i++; }
+  //    m0[i] = m1j << lShift;
+  //    return m0; }
 
   //--------------------------------------------------------------
 
@@ -453,9 +453,9 @@ implements Natural {
     //assert (! leadingZero(m1));
     if (isZero(m1)) { return m0; }
 
-    //final int c = compare(m0,m1);
-    //assert 0L <= c;
-    //if (c == 0) { return EMPTY; }
+    final int c = compare(m0,m1);
+    assert 0L <= c;
+    if (c == 0) { return EMPTY; }
 
     int i0 = m0.length;
     final int result[] = new int[i0];
@@ -478,6 +478,20 @@ implements Natural {
     return stripLeadingZeros(result); }
 
   //--------------------------------------------------------------
+
+  public static final int[] absDiff (final int[] m0,
+                                     final int[] m1) {
+
+    if (isZero(m0)) { return m1; }
+    if (isZero(m1)) { return m0; }
+
+    final int c = compare(m0,m1);
+    if (c == 0) { return EMPTY; }
+    if (0<=c) { return subtract(m0,m1); }
+
+    return subtract(m1,m0); }
+
+ //--------------------------------------------------------------
   // Modular Arithmetic
   //--------------------------------------------------------------
 
@@ -742,11 +756,11 @@ implements Natural {
     final int[] a0 = getToomSlice(m,k,r,2,len);
     final int[] v0 = square(a0);
     int[] da1 = add(a2,a0);
-    final int[] vm1 = square(subtract(da1,a1));
+    final int[] vm1 = square(absDiff(da1,a1));
     da1 = add(da1,a1);
     final int[] v1 = square(da1);
     final int[] vinf = square(a2);
-    final int[] v2 = square(subtract(shiftUp(add(da1,a2),1),a0));
+    final int[] v2 = square(absDiff(shiftUp(add(da1,a2),1),a0));
 
     // The algorithm requires two divisions by 2 and one by 3.
     // All divisions are known to be exact, that is, they do not
@@ -755,13 +769,13 @@ implements Natural {
     // relatively efficient, leaving only a division by 3.
     // The division by 3 is done by an optimized algorithm for
     // this case.
-    int[] t2 = exactDivideBy3(subtract(v2,vm1));
-    int[] tm1 = shiftDown(subtract(v1,vm1),1);
-    int[] t1 = subtract(v1,v0);
-    t2 = shiftDown(subtract(t2,t1),1);
-    t1 = subtract(subtract(t1,tm1),vinf);
-    t2 = shiftUp(subtract(t2,vinf),1);
-    tm1 = subtract(tm1,t2);
+    int[] t2 = exactDivideBy3(absDiff(v2,vm1));
+    int[] tm1 = shiftDown(absDiff(v1,vm1),1);
+    int[] t1 = absDiff(v1,v0);
+    t2 = shiftDown(absDiff(t2,t1),1);
+    t1 = absDiff(absDiff(t1,tm1),vinf);
+    t2 = absDiff(t2,shiftUp(vinf,1));
+    tm1 = absDiff(tm1,t2);
 
     // Number of bits to shift left.
     final int ss = k * 32;
@@ -812,15 +826,13 @@ implements Natural {
   private static final int[] implMultiplyToLen (final int[] m0,
                                                 final int n0,
                                                 final int[] m1,
-                                                final int n1,
-                                                int[] z) {
+                                                final int n1) {
     //assert (! leadingZero(m0));
     //assert (! leadingZero(m1));
 
     final int xstart = n0 - 1;
     final int ystart = n1 - 1;
-    if ((z == null) || (z.length < (n0 + n1))) {
-      z = new int[n0 + n1]; }
+    final int[]  z = new int[n0 + n1]; 
     long carry = 0;
     for (int j = ystart, k = ystart + 1 + xstart;
       j >= 0;
@@ -842,13 +854,12 @@ implements Natural {
     return z; }
 
   private static final int[] multiplyToLen (final int[] x,
-                                            final int xlen,
-                                            final int[] y,
-                                            final int ylen,
-                                            final int[] z) {
-    multiplyToLenCheck(x,xlen);
-    multiplyToLenCheck(y,ylen);
-    return implMultiplyToLen(x,xlen,y,ylen,z); }
+                                            final int[] y) {
+    final int n0 = x.length;
+    final int n1 = y.length;
+    multiplyToLenCheck(x,n0);
+    multiplyToLenCheck(y,n1);
+    return implMultiplyToLen(x,n0,y,n1); }
 
   //--------------------------------------------------------------
 
@@ -882,7 +893,7 @@ implements Natural {
       add(
         shiftUp(add(
           shiftUp(p1,h32),
-          subtract(subtract(p3,p1),p2)),
+          absDiff(absDiff(p3,p1),p2)),
           h32),
         p2);
 
@@ -1015,7 +1026,7 @@ implements Natural {
       || (ylen < KARATSUBA_THRESHOLD)) {
       if (y.length == 1) { return multiply(x,unsigned(y[0])); }
       if (x.length == 1) { return multiply(y,unsigned(x[0])); }
-      int[] result = multiplyToLen(x,xlen,y,ylen,null);
+      int[] result = multiplyToLen(x,y);
       result = stripLeadingZeros(result);
       return result; }
     if ((xlen < TOOM_COOK_THRESHOLD)
@@ -1025,7 +1036,7 @@ implements Natural {
 
   //--------------------------------------------------------------
 
-  private static final int[] multiply (final int[] m0,
+  private static final int[] multiply (final int[] u,
                                        final long m1) {
     //assert (! leadingZero(m0));
     if (0L==m1) { return EMPTY; }
@@ -1033,14 +1044,13 @@ implements Natural {
 
     final long dh = Numbers.hiWord(m1);
     final long dl = Numbers.loWord(m1);
-    final int xlen = m0.length;
-    final int[] value = m0;
+    final int xlen = u.length;
     int[] rm =
       ((dh == 0L) ? (new int[xlen + 1]) : (new int[xlen + 2]));
     long carry = 0;
     int rstart = rm.length - 1;
     for (int i = xlen - 1; i >= 0; i--) {
-      final long product = (unsigned(value[i]) * dl) + carry;
+      final long product = (unsigned(u[i]) * dl) + carry;
       rm[rstart--] = (int) product;
       carry = product >>> 32; }
     rm[rstart] = (int) carry;
@@ -1049,7 +1059,7 @@ implements Natural {
       rstart = rm.length - 2;
       for (int i = xlen - 1; i >= 0; i--) {
         final long product =
-          (unsigned(value[i]) * dh)
+          (unsigned(u[i]) * dh)
           + unsigned(rm[rstart]) + carry;
         rm[rstart--] = (int) product;
         carry = product >>> 32; }
@@ -1290,91 +1300,6 @@ implements Natural {
 
   //--------------------------------------------------------------
 
-  private static final Natural add (final long m0,
-                                    final long m1) {
-    assert 0L<=m0;
-    assert 0L<=m1;
-    long sum = loWord(m0) + loWord(m1);
-    final int lo = (int) sum;
-    sum = Numbers.hiWord(m0) + Numbers.hiWord(m1) + Numbers.hiWord(sum);
-    final int mid = (int) sum;
-    final int hi = (int) Numbers.hiWord(sum);
-    if (0==hi) {
-      if (0==mid) {
-        if (0==lo) { return ZERO; }
-        return unsafe(new int[] { lo, }); }
-      return unsafe(new int[] { mid, lo, }); }
-    return unsafe(new int[] { hi, mid, lo, }); }
-
-  //--------------------------------------------------------------
-
-  public static final Natural add (final long m0,
-                                   final long m1,
-                                   final int bitShift) {
-    assert 0L<=m0;
-    assert 0L<=m1;
-    assert 0<=bitShift;
-
-    if (0L==m0) { return valueOf(m1,bitShift); }
-    if (0L==m1) { return valueOf(m0); }
-    if (0==bitShift) { return add(m0,m1); }
-
-    final int hi0 = (int) Numbers.hiWord(m0);
-    final int lo0 = (int) loWord(m0);
-    final int n0 = ((0==hi0) ? ((0==lo0) ? 0 : 1) : 2);
-
-    final int intShift = bitShift >>> 5;
-    final int remShift = bitShift & 0x1f;
-    final int nwords1;
-    final int hi1 = Numbers.hiBit(m1) + remShift;
-    if (64 < hi1) { nwords1 = 3; }
-    else if (32 < hi1) { nwords1 = 2; }
-    else { nwords1 = 1; }
-
-    final int n1 = intShift + nwords1;
-    final int nr = Math.max(n0,n1);
-    final int[] r0 = new int[nr];
-
-    // copy m0 to result
-    int i = nr-1;
-    if (0<=i) { r0[i--] = lo0; }
-    if (0<=i) { r0[i--] = hi0; }
-
-    // add shifted m1 to r0 in place
-    long sum;
-    i=nr-intShift-1;
-    final long m1s = (m1 << remShift);
-    sum = loWord(m1s);
-    if (0<=i) { sum += unsigned(r0[i]); }
-    r0[i--] = (int) sum;
-    if (2<=nwords1) {
-      //sum = midPart(m1,remShift) + (sum >>> 32);
-      sum = Numbers.hiWord(m1s) + (sum >>> 32);
-      if (0<=i) { sum += unsigned(r0[i]); }
-      r0[i--] = (int) sum; }
-    if (3==nwords1) {
-      //sum = hiPart(m1,remShift) + (sum >>> 32);
-      sum = (m1 >>> (64-remShift)) + (sum >>> 32);
-      if (0<=i) { sum += unsigned(r0[i]); }
-      r0[i] = (int) sum; }
-
-    boolean carry = ((sum >>> 32) != 0);
-    while ((0<=i) && carry) {
-      sum = 0x01L;
-      if (0<=i) { sum += unsigned(r0[i]); }
-      final int is = (int) sum;
-      r0[i--] = is;
-      carry = (is == 0); }
-
-    if (carry) {
-      final int r1[] = new int[nr + 1];
-      System.arraycopy(r0,0,r1,1,nr);
-      r1[0] = 0x01;
-      return unsafe(r1); }
-    return unsafe(r0); }
-
-  //--------------------------------------------------------------
-
   //  @Override
   //  public final Natural subtract (final Natural that) {
   //    final NaturalBEI u = (NaturalBEI) that;
@@ -1490,23 +1415,23 @@ implements Natural {
   //--------------------------------------------------------------
   // only when (m1 << upShift) <= m0
 
-  public static final Natural subtract (final long m0,
-                                        final long m1,
-                                        final int bitShift) {
-    assert 0L<=m0;
-    assert 0L<=m1;
-    assert 0<=bitShift;
-    final long dm = m0 - (m1<<bitShift);
-    assert 0L<=dm;
-    return valueOf(dm); }
+  //  private static final Natural subtract (final long m0,
+  //                                        final long m1,
+  //                                        final int bitShift) {
+  //    assert 0L<=m0;
+  //    assert 0L<=m1;
+  //    assert 0<=bitShift;
+  //    final long dm = m0 - (m1<<bitShift);
+  //    assert 0L<=dm;
+  //    return valueOf(dm); }
 
   //--------------------------------------------------------------
   // only when (m1 << upShift) <= m0
 
-  public static final Natural subtract (final long m0,
-                                        final int bitShift,
-                                        final long m1) {
-    return valueOf(m0,bitShift).subtract(m1); }
+  //  private static final Natural subtract (final long m0,
+  //                                        final int bitShift,
+  //                                        final long m1) {
+  //    return valueOf(m0,bitShift).subtract(m1); }
 
   //--------------------------------------------------------------
   // only when this <= (m << upShift)
@@ -1546,12 +1471,12 @@ implements Natural {
 
   //--------------------------------------------------------------
 
-  public static final Natural absDiff (final NaturalBEI u0,
-                                       final NaturalBEI u1) {
-    final int c01 = u0.compareTo(u1);
-    if (0<c01) { return u0.subtract(u1); }
-    if (0>c01) { return u1.subtract(u0); }
-    return ZERO; }
+  //  private static final Natural absDiff (final NaturalBEI u0,
+  //                                        final NaturalBEI u1) {
+  //    final int c01 = u0.compareTo(u1);
+  //    if (0<c01) { return u0.subtract(u1); }
+  //    if (0>c01) { return u1.subtract(u0); }
+  //    return ZERO; }
 
   //  @Override
   //  public final Natural absDiff (final Natural that) {
@@ -1584,8 +1509,8 @@ implements Natural {
 
   @Override
   public final Natural square () {
-    if (isZero()) { return ZERO; }
-    if (this.isOne()) { return ONE; }
+    if (isZero()) { return zero(); }
+    if (this.isOne()) { return this; }
     return unsafe(square(words())); }
 
   //--------------------------------------------------------------
@@ -1598,8 +1523,27 @@ implements Natural {
   //--------------------------------------------------------------
 
   @Override
+  public final Natural multiplyToLen (final Natural that) {
+    final NaturalBEI u = (NaturalBEI) that;
+    return unsafe(multiplyToLen(words(),u.words())); }
+
+  @Override
+  public final Natural multiplyKaratsuba (final Natural that) {
+    final NaturalBEI u = (NaturalBEI) that;
+    return unsafe(multiplyKaratsuba(words(),u.words())); }
+
+  @Override
+  public final Natural multiplyToomCook3 (final Natural that) {
+    final NaturalBEI u = (NaturalBEI) that;
+    return unsafe(multiplyToomCook3(words(),u.words())); }
+
+  @Override
   public final Natural multiply (final Natural that) {
     final NaturalBEI u = (NaturalBEI) that;
+    if ((isZero()) || (u.isZero())) { return zero(); }
+    final int n0 = endWord();
+    if (equals(u) && (n0>MULTIPLY_SQUARE_THRESHOLD)) {
+      return square(); }
     return unsafe(multiply(words(),u.words())); }
 
   @Override
@@ -1607,7 +1551,6 @@ implements Natural {
     assert 1L<=that;
     return unsafe(multiply(words(),that)); }
 
-  // TODO: multiply by shifted long
   @Override
   public final Natural multiply (final long that,
                                  final int shift) {
@@ -2018,8 +1961,21 @@ implements Natural {
   @Override
   public final boolean equals (final Object x) {
     if (x==this) { return true; }
-    if (!(x instanceof Natural)) { return false; }
+    if (!(x instanceof NaturalBEI)) { return false; }
     return uintsEquals((NaturalBEI) x); }
+
+//  @Override
+//  public boolean equals (final Object x) {
+//    if (x==this) { return true; }
+//    if (!(x instanceof NaturalBEI)) { return false; }
+//    final NaturalBEI xInt = (NaturalBEI) x;
+//    final int[] m = _words;
+//    final int len = m.length;
+//    final int[] xm = xInt._words;
+//    if (len != xm.length) { return false; }
+//    for (int i = 0; i < len; i++) {
+//      if (xm[i] != m[i]) { return false; } }
+//    return true; }
 
   /** hex string. */
   @Override
@@ -2280,6 +2236,12 @@ implements Natural {
   public static final NaturalBEI ONE = valueOf(1);
   public static final NaturalBEI TWO = valueOf(2);
   public static final NaturalBEI TEN = valueOf(10);
+
+  @Override
+  public final Natural zero () { return ZERO; }
+
+  @Override
+  public final Natural one () { return ONE; }
 
   //--------------------------------------------------------------
 

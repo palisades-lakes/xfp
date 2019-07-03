@@ -11,7 +11,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-02
+ * @version 2019-07-03
  */
 
 @SuppressWarnings("unchecked")
@@ -164,6 +164,36 @@ implements Ringlike<BigFloat> {
     final long m11 = (m1<<bitShift);
     return Long.compare(m0,m11); }
 
+  private static final Natural add (final long m0,
+                                    final long m1,
+                                    final int bitShift) {
+    assert 0L<=m0;
+    assert 0L<=m1;
+    assert 0<=bitShift;
+    return 
+      NaturalBEI.valueOf(m0)
+      .add(NaturalBEI.valueOf(m1,bitShift)); }
+
+  private static final Natural subtract (final long m0,
+                                         final int bitShift,
+                                         final long m1) {
+    assert 0L<=m0;
+    assert 0L<=m1;
+    assert 0<=bitShift;
+    return 
+      NaturalBEI.valueOf(m0,bitShift)
+      .subtract(NaturalBEI.valueOf(m1)); }
+
+  private static final Natural subtract (final long m0,
+                                         final long m1,
+                                         final int bitShift) {
+    assert 0L<=m0;
+    assert 0L<=m1;
+    assert 0<=bitShift;
+    final long dm = m0 - (m1<<bitShift);
+    assert 0L<=dm;
+    return NaturalBEI.valueOf(dm); }
+
   private static final BigFloat
   addSameExponent (final boolean n0,
                    final long t0,
@@ -175,12 +205,12 @@ implements Ringlike<BigFloat> {
       final int c = compare(t0,t1,lShift);
       if (0==c) { return ZERO; }
       if (0>c) { // t1 > t0
-        final Natural t = NaturalBEI.subtract(t1,lShift,t0);
+        final Natural t = subtract(t1,lShift,t0);
         return valueOf(n1,t,e); }
       // t0 > t1
-      final Natural t = NaturalBEI.subtract(t0,t1,lShift);
+      final Natural t = subtract(t0,t1,lShift);
       return valueOf(n0,t,e); }
-    final Natural t = NaturalBEI.add(t0,t1,lShift);
+    final Natural t = add(t0,t1,lShift);
     return valueOf(n0,t,e); }
 
   //--------------------------------------------------------------
