@@ -994,12 +994,6 @@ public final class NaturalBEIMutable implements Natural {
   // multiplication
   //--------------------------------------------------------------
 
-  private static final int MULTIPLY_SQUARE_THRESHOLD = 20;
-  private static final int KARATSUBA_THRESHOLD = 80;
-  private static final int TOOM_COOK_THRESHOLD = 240;
-
-  //--------------------------------------------------------------
-
   private static final void multiplyToLenCheck (final int[] array,
                                                 final int length) {
     //assert (! leadingZero(array));

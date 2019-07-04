@@ -5,6 +5,7 @@ import static xfp.java.numbers.Numbers.unsigned;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.List;
 
 /** immutable arbitrary-precision non-negative integers
  * (natural number) represented by big-endian
@@ -159,25 +160,6 @@ implements Natural {
       for (int j = 8; j <= (bytesToTransfer << 3); j += 8) {
         result[i] |= ((a[b--] & 0xff) << j); } }
     return result; }
-
-  private static final int[] getLower (final int[] m,
-                                       final int n) {
-    //assert (! leadingZero(m));
-    final int len = m.length;
-    if (len <= n) { return m; }
-    final int lowerInts[] = new int[n];
-    System.arraycopy(m,len-n,lowerInts,0,n);
-    return stripLeadingZeros(lowerInts); }
-
-  private static final int[] getUpper (final int[] m,
-                                       final int n) {
-    //assert (! leadingZero(m));
-    final int len = m.length;
-    if (len <= n) { return EMPTY; }
-    final int upperLen = len - n;
-    final int upperInts[] = new int[upperLen];
-    System.arraycopy(m,0,upperInts,0,upperLen);
-    return stripLeadingZeros(upperInts); }
 
   //--------------------------------------------------------------
   /** hex string.
@@ -806,12 +788,6 @@ implements Natural {
 
   //--------------------------------------------------------------
   // multiply
-  //--------------------------------------------------------------
-
-  private static final int MULTIPLY_SQUARE_THRESHOLD = 20;
-  private static final int KARATSUBA_THRESHOLD = 80;
-  private static final int TOOM_COOK_THRESHOLD = 240;
-
   //--------------------------------------------------------------
 
   private static final int compare (final int[] m0,
@@ -1492,6 +1468,25 @@ implements Natural {
 
   //--------------------------------------------------------------
   
+  private static final int[] getLower (final int[] m,
+                                       final int n) {
+    //assert (! leadingZero(m));
+    final int len = m.length;
+    if (len <= n) { return m; }
+    final int lowerInts[] = new int[n];
+    System.arraycopy(m,len-n,lowerInts,0,n);
+    return stripLeadingZeros(lowerInts); }
+
+  private static final int[] getUpper (final int[] m,
+                                       final int n) {
+    //assert (! leadingZero(m));
+    final int len = m.length;
+    if (len <= n) { return EMPTY; }
+    final int upperLen = len - n;
+    final int upperInts[] = new int[upperLen];
+    System.arraycopy(m,0,upperInts,0,upperLen);
+    return stripLeadingZeros(upperInts); }
+
   private static final int[] multiplyKaratsuba (final int[] x,
                                                 final int[] y) {
     //System.out.println("multiplyKaratsuba");
@@ -1530,14 +1525,43 @@ implements Natural {
     return result; }
 
   @Override
-  public final Natural multiplyKaratsuba (final Natural that) {
-    final NaturalBEI u = (NaturalBEI) that;
-    return unsafe(multiplyKaratsuba(words(),u.words())); }
+  public final List<Natural> split (final int n) {
+    final int[] w = words();
+    final Natural lower = unsafe(getLower(w,n));
+    final Natural upper = unsafe(getUpper(w,n));
+    return List.of(lower,upper); }
+
+//  @Override
+//  public final Natural multiplyKaratsuba (final Natural u) {
+//    System.out.println("multiplyKaratsuba");
+//    final int n0 = endWord();
+//    final int n1 = u.endWord();
+//    final int half = (Math.max(n0,n1) + 1) / 2;
+//    final List<Natural> s0 = split(half);
+//    final List<Natural> s1 = u.split(half);
+//    final Natural xl = s0.get(0);
+//    final Natural xh = s0.get(1);
+//    final Natural yl = s1.get(0);
+//    final Natural yh = s1.get(1);
+//    final Natural p1 = xh.multiply(yh); 
+//    final Natural p2 = xl.multiply(yl);
+//    final Natural p3 = xh.add(xl).multiply(yh.add(yl));
+//    final int h32 = half*32;
+//    final Natural p4 = (Natural) p1.shiftUp(h32);
+//    final Natural p5 = 
+//      (Natural) p4.add(p3.subtract(p1).subtract(p2)).shiftUp(h32);
+//    return p5.add(p2); }
+
+//  @Override
+//  public final Natural multiplyKaratsuba (final Natural that) {
+//    final NaturalBEI u = (NaturalBEI) that;
+//    return unsafe(multiplyKaratsuba(words(),u.words())); }
 
   //--------------------------------------------------------------
 
   @Override
   public final Natural multiplyToomCook3 (final Natural that) {
+    //System.out.println("multiplyToomCook3");
     final NaturalBEI u = (NaturalBEI) that;
     return unsafe(multiplyToomCook3(words(),u.words())); }
 

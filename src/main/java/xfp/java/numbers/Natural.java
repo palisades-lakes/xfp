@@ -291,11 +291,12 @@ extends Uints, Ringlike<Natural>, Transience<Natural> {
 
   static final int MULTIPLY_SQUARE_THRESHOLD = 20;
   static final int KARATSUBA_THRESHOLD = 80;
-  static final int TOOM_COOK_THRESHOLD = 240;
+  static final int TOOM_COOK_THRESHOLD = 1024*240;
 
   //--------------------------------------------------------------
 
   public default Natural multiplySimple (final Natural u) {
+    //System.out.println("multiplySimple");
     final int n0 = endWord();
     final int n1 = u.endWord();
     Uints v = recyclable(null); 
@@ -312,8 +313,36 @@ extends Uints, Ringlike<Natural>, Transience<Natural> {
       v = v.setWord(i2, (int) carry); }
     return ((Natural) v).immutable(); }
 
+  //--------------------------------------------------------------
+  /** Return a list of 2 <code>Natural</code> such that
+   * <code>this = get(0) + get(1) * 2<sup>32*n</code>. 
+   * For Karatsuba multiplication.
+   */
+  
+  public default List<Natural> split (final int n) {
+    throw Exceptions.unsupportedOperation(this,"split",n); }
+
   public default Natural multiplyKaratsuba (final Natural u) {
-    throw Exceptions.unsupportedOperation(this,"multiplyKaratsuba",u); }
+    //System.out.println("multiplyKaratsuba");
+    final int n0 = endWord();
+    final int n1 = u.endWord();
+    final int half = (Math.max(n0,n1) + 1) / 2;
+    final List<Natural> s0 = split(half);
+    final List<Natural> s1 = u.split(half);
+    final Natural xl = s0.get(0);
+    final Natural xh = s0.get(1);
+    final Natural yl = s1.get(0);
+    final Natural yh = s1.get(1);
+    final Natural p1 = xh.multiply(yh); 
+    final Natural p2 = xl.multiply(yl);
+    final Natural p3 = xh.add(xl).multiply(yh.add(yl));
+    final int h32 = half*32;
+    final Natural p4 = (Natural) p1.shiftUp(h32);
+    final Natural p5 = 
+      (Natural) p4.add(p3.subtract(p1).subtract(p2)).shiftUp(h32);
+    return p5.add(p2); }
+
+  //--------------------------------------------------------------
 
   public default Natural multiplyToomCook3 (final Natural u) {
     throw Exceptions.unsupportedOperation(this,"multiplyKaratsuba",u); }
