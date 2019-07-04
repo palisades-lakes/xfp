@@ -81,7 +81,8 @@ implements Natural {
   //--------------------------------------------------------------
 
   @Override
-  public final Natural recyclable () {
+  public final Natural recyclable (final Natural init) {
+    assert null==init;
     return NaturalLEMutable.make(); }
 
 

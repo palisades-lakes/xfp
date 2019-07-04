@@ -11,7 +11,7 @@ import java.util.Arrays;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-03
+ * @version 2019-07-04
  */
 
 public final class NaturalBEI //extends Number
@@ -814,95 +814,6 @@ implements Natural {
 
   //--------------------------------------------------------------
 
-  private static final void multiplyToLenCheck (final int[] array,
-                                                final int length) {
-    //assert (! leadingZero(array));
-    // not an error because multiplyToLen won't execute if len<=0
-    if (length <= 0) { return; }
-    //Objects.requireNonNull(array);
-    if (length > array.length) {
-      throw new ArrayIndexOutOfBoundsException(length-1); } }
-
-  private static final int[] implMultiplyToLen (final int[] m0,
-                                                final int n0,
-                                                final int[] m1,
-                                                final int n1) {
-    //System.out.println("implMultiplyToLen");
-    //assert (! leadingZero(m0));
-    //assert (! leadingZero(m1));
-
-    final int xstart = n0 - 1;
-    final int ystart = n1 - 1;
-    final int[]  z = new int[n0 + n1]; 
-    long carry = 0;
-    for (int j = ystart, k = ystart + 1 + xstart;
-      j >= 0;
-      j--, k--) {
-      final long product =
-        (unsigned(m1[j]) * unsigned(m0[xstart])) + carry;
-      z[k] = (int) product;
-      carry = product >>> 32; }
-    z[xstart] = (int) carry;
-    for (int i = xstart - 1; i >= 0; i--) {
-      carry = 0;
-      for (int j = ystart, k = ystart + 1 + i; j >= 0; j--, k--) {
-        final long product =
-          (unsigned(m1[j]) * unsigned(m0[i]))
-          + unsigned(z[k]) + carry;
-        z[k] = (int) product;
-        carry = product >>> 32; }
-      z[i] = (int) carry; }
-    return z; }
-
-  private static final int[] multiplyToLen (final int[] u0,
-                                            final int[] u1) {
-    final int n0 = u0.length;
-    final int n1 = u1.length;
-    multiplyToLenCheck(u0,n0);
-    multiplyToLenCheck(u1,n1);
-    return implMultiplyToLen(u0,n0,u1,n1); }
-
-  //--------------------------------------------------------------
-
-  private static final int[] multiplyKaratsuba (final int[] x,
-                                                final int[] y) {
-    //System.out.println("multiplyKaratsuba");
-    //assert (! leadingZero(x));
-    //assert (! leadingZero(y));
-    final int xlen = x.length;
-    final int ylen = y.length;
-
-    // The number of ints in each half of the number.
-    final int half = (Math.max(xlen,ylen) + 1) / 2;
-
-    // xl and yl are the lower halves of x and y respectively,
-    // xh and yh are the upper halves.
-    final int[] xl = getLower(x,half);
-    final int[] xh = getUpper(x,half);
-    final int[] yl = getLower(y,half);
-    final int[] yh = getUpper(y,half);
-
-    final int[] p1 = multiply(xh,yh);  // p1 = xh*yh
-    final int[] p2 = multiply(xl,yl);  // p2 = xl*yl
-
-    // p3=(xh+xl)*(yh+yl)
-    final int[] p3 = multiply(add(xh,xl),add(yh,yl));
-
-    // result = p1 * 2^(32*2*half) + (p3 - p1 - p2) * 2^(32*half)
-    // + p2
-    final int h32 = half*32;
-    final int[] result =
-      add(
-        shiftUp(add(
-          shiftUp(p1,h32),
-          absDiff(absDiff(p3,p1),p2)),
-          h32),
-        p2);
-
-    return result; }
-
-  //--------------------------------------------------------------
-
   private static final int compare (final int[] m0,
                                     final int[] m1) {
     // TODO: assert necessary?
@@ -1026,7 +937,7 @@ implements Natural {
     if ((n0<KARATSUBA_THRESHOLD) || (n1<KARATSUBA_THRESHOLD)) {
       if (n0 == 1) { return multiply(u0,unsigned(u1[0])); }
       if (n1 == 1) { return multiply(u1,unsigned(u0[0])); }
-      int[] result = multiplyToLen(u0,u1);
+      int[] result = multiplySimple(u0,u1);
       result = stripLeadingZeros(result);
       return result; }
     if ((n0<TOOM_COOK_THRESHOLD) && (n1<TOOM_COOK_THRESHOLD)) {
@@ -1102,16 +1013,6 @@ implements Natural {
     if ((0<=ii) && (ii<n)) { return words()[ii]; }
     return 0; }
 
-  //  private static final int[] setBit (final int[] m,
-  //                                     final int n) {
-  //    assert 0<n;
-  //    final int nTrunc = (n>>>5);
-  //    final int[] r = new int[Math.max(intLength(m),nTrunc+2)];
-  //    final int nr = r.length;
-  //    for (int i=0;i<nr;i++) { r[nr-i-1] = getInt(m,i); }
-  //    r[nr-nTrunc-1] |= (1 << (n & 31));
-  //    return stripLeadingZeros(r); }
-
   @Override
   public final Natural setWord (final int i,
                                 final int w) {
@@ -1123,6 +1024,16 @@ implements Natural {
     System.arraycopy(words(),0,ws,n1-n0,n0);
     ws[n1-1-i] = w;
     return unsafe(stripLeadingZeros(ws)); }
+
+  //  private static final int[] setBit (final int[] m,
+  //                                     final int n) {
+  //    assert 0<n;
+  //    final int nTrunc = (n>>>5);
+  //    final int[] r = new int[Math.max(intLength(m),nTrunc+2)];
+  //    final int nr = r.length;
+  //    for (int i=0;i<nr;i++) { r[nr-i-1] = getInt(m,i); }
+  //    r[nr-nTrunc-1] |= (1 << (n & 31));
+  //    return stripLeadingZeros(r); }
 
   //  @Override
   //  public final long uword (final int i) {
@@ -1513,7 +1424,7 @@ implements Natural {
     return unsafe(square(words())); }
 
   //--------------------------------------------------------------
-  // multiplication
+  // multiplication monoid
   //--------------------------------------------------------------
 
   //  @Override
@@ -1521,39 +1432,130 @@ implements Natural {
 
   //--------------------------------------------------------------
 
-  @Override
-  public final Natural multiplyToLen (final Natural that) {
-    final NaturalBEI u = (NaturalBEI) that;
-    return 
-      unsafe(
-        stripLeadingZeros(
-          multiplyToLen(words(),u.words()))); }
+  private static final void multiplySimpleCheck (final int[] array,
+                                                 final int length) {
+    //assert (! leadingZero(array));
+    // not an error because multiplyToLen won't execute if len<=0
+    if (length <= 0) { return; }
+    //Objects.requireNonNull(array);
+    if (length > array.length) {
+      throw new ArrayIndexOutOfBoundsException(length-1); } }
+
+  private static final int[] multiplySimple (final int[] u0,
+                                             final int[] u1) {
+    final int n0 = u0.length;
+    final int n1 = u1.length;
+    multiplySimpleCheck(u0,n0);
+    multiplySimpleCheck(u1,n1);
+    final int[] u2 = new int[n0+n1]; 
+    long carry = 0L;
+    for (int i0=n0-1;i0>=0;i0--) {
+      carry = 0L;
+      for (int i1=n1-1, i2=n1+i0; i1>=0; i1--,i2--) {
+        final long product =
+          (unsigned(u1[i1])*unsigned(u0[i0]))
+          + unsigned(u2[i2]) + carry;
+        u2[i2] = (int) product;
+        carry = product>>>32; }
+      u2[i0] = (int) carry; }
+    return u2; }
+
+//  @Override
+//  public final Natural multiplySimple (final Natural that) {
+//    final NaturalBEI u = (NaturalBEI) that;
+//    return 
+//      unsafe(
+//        stripLeadingZeros(
+//          multiplySimple(words(),u.words()))); }
+
+//    @Override
+//    public final Natural multiplySimple (final Natural that) {
+//      final Natural u0 = this;
+//      final Natural u1 = that;
+//      final int n0 = u0.endWord();
+//      final int n1 = u1.endWord();
+////      Uints u2 = NaturalBEI.valueOf(0L); 
+//     // Uints u2 = NaturalBEIMutable.make(); 
+//      Uints u2 = recyclable(null); 
+//      long carry = 0L;
+//      for (int i0=0;i0<n0;i0++) {
+//        carry = 0L;
+//        for (int i1=0;i1<n1;i1++) {
+//          final int i2 = i0+i1;
+//          final long product =
+//            (u1.uword(i1)*u0.uword(i0)) + u2.uword(i2) + carry;
+//          u2 = u2.setWord(i2, (int) product);
+//          carry = (product>>>32); }
+//        final int i2 = i0+n1;
+//        u2 = u2.setWord(i2, (int) carry); }
+//      return ((Natural) u2).immutable(); }
+
+  //--------------------------------------------------------------
+  
+  private static final int[] multiplyKaratsuba (final int[] x,
+                                                final int[] y) {
+    //System.out.println("multiplyKaratsuba");
+    //assert (! leadingZero(x));
+    //assert (! leadingZero(y));
+    final int xlen = x.length;
+    final int ylen = y.length;
+
+    // The number of ints in each half of the number.
+    final int half = (Math.max(xlen,ylen) + 1) / 2;
+
+    // xl and yl are the lower halves of x and y respectively,
+    // xh and yh are the upper halves.
+    final int[] xl = getLower(x,half);
+    final int[] xh = getUpper(x,half);
+    final int[] yl = getLower(y,half);
+    final int[] yh = getUpper(y,half);
+
+    final int[] p1 = multiply(xh,yh);  // p1 = xh*yh
+    final int[] p2 = multiply(xl,yl);  // p2 = xl*yl
+
+    // p3=(xh+xl)*(yh+yl)
+    final int[] p3 = multiply(add(xh,xl),add(yh,yl));
+
+    // result = p1 * 2^(32*2*half) + (p3 - p1 - p2) * 2^(32*half)
+    // + p2
+    final int h32 = half*32;
+    final int[] result =
+      add(
+        shiftUp(add(
+          shiftUp(p1,h32),
+          absDiff(absDiff(p3,p1),p2)),
+          h32),
+        p2);
+
+    return result; }
 
   @Override
   public final Natural multiplyKaratsuba (final Natural that) {
     final NaturalBEI u = (NaturalBEI) that;
     return unsafe(multiplyKaratsuba(words(),u.words())); }
 
+  //--------------------------------------------------------------
+
   @Override
   public final Natural multiplyToomCook3 (final Natural that) {
     final NaturalBEI u = (NaturalBEI) that;
     return unsafe(multiplyToomCook3(words(),u.words())); }
 
-//  @Override
-//  public final Natural multiply (final Natural that) {
-//    final NaturalBEI u = (NaturalBEI) that;
-//    if ((isZero()) || (u.isZero())) { return zero(); }
-//    final int n0 = endWord();
-//    if (equals(u) && (n0>MULTIPLY_SQUARE_THRESHOLD)) {
-//      return square(); }
-//    final int n1 = u.endWord();
-//    if ((n0<KARATSUBA_THRESHOLD) || (n1<KARATSUBA_THRESHOLD)) {
-//      if (n1 == 1) { return multiply(u.uword(0)); }
-//      if (n0 == 1) { return u.multiply(uword(0)); }
-//      return multiplyToLen(u); }
-//    if ((n0<TOOM_COOK_THRESHOLD) && (n1<TOOM_COOK_THRESHOLD)) {
-//      return multiplyKaratsuba(u); }
-//    return multiplyToomCook3(u); }
+  //  @Override
+  //  public final Natural multiply (final Natural that) {
+  //    final NaturalBEI u = (NaturalBEI) that;
+  //    if ((isZero()) || (u.isZero())) { return zero(); }
+  //    final int n0 = endWord();
+  //    if (equals(u) && (n0>MULTIPLY_SQUARE_THRESHOLD)) {
+  //      return square(); }
+  //    final int n1 = u.endWord();
+  //    if ((n0<KARATSUBA_THRESHOLD) || (n1<KARATSUBA_THRESHOLD)) {
+  //      if (n1 == 1) { return multiply(u.uword(0)); }
+  //      if (n0 == 1) { return u.multiply(uword(0)); }
+  //      return multiplyToLen(u); }
+  //    if ((n0<TOOM_COOK_THRESHOLD) && (n1<TOOM_COOK_THRESHOLD)) {
+  //      return multiplyKaratsuba(u); }
+  //    return multiplyToomCook3(u); }
   //return unsafe(multiply(words(),u.words())); }
 
   @Override
@@ -1561,11 +1563,11 @@ implements Natural {
     assert 1L<=that;
     return unsafe(multiply(words(),that)); }
 
-//  @Override
-//  public final Natural multiply (final long that,
-//                                 final int shift) {
-//    assert 1L<=that;
-//    return multiply(valueOf(that,shift)); }
+  //  @Override
+  //  public final Natural multiply (final long that,
+  //                                 final int shift) {
+  //    assert 1L<=that;
+  //    return multiply(valueOf(that,shift)); }
 
   public static final Natural multiply (final long t0,
                                         final long t1) {
@@ -1682,7 +1684,7 @@ implements Natural {
   public final Natural gcd (final Natural that) {
     // UNSAFE!!!
     final NaturalBEIMutable a = NaturalBEIMutable.valueOf(words());
-    final NaturalBEIMutable b = (NaturalBEIMutable) that.recyclable();
+    final NaturalBEIMutable b = (NaturalBEIMutable) that.recyclable(that);
     return a.hybridGCD(b).immutable(); }
 
   public static final Natural[] reduce (final NaturalBEI n0,
@@ -2171,7 +2173,10 @@ implements Natural {
   public final Natural immutable () { return this; }
 
   @Override
-  public final Natural recyclable () {
+  public final Natural recyclable (final Natural init) {
+    if (null==init) { 
+      return NaturalBEIMutable.make(words().length); }
+    assert this==init;
     return NaturalBEIMutable.valueOf(this); }
 
   @Override

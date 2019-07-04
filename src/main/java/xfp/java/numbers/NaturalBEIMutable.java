@@ -59,29 +59,37 @@ public final class NaturalBEIMutable implements Natural {
     assert length<=v.length;
     words = v; nWords = length; start = 0; }
 
-  // Synchronize?
-  private final void compact () {
-    start = 0;
-    System.arraycopy(words,start,words,0,nWords); }
+  private final int beIndex (final int i) {
+    return (start+nWords)-1-i; }
 
-  // Synchronize?
+  private final void clearUnused () {
+    final int n = words.length;
+    for (int i=0;i<start;i++) { words[i]=0; }
+    for (int i=start+nWords;i<n;i++) { words[i]=0; } }
+
+  private final void compact () {
+    if (0!=start) {
+      System.arraycopy(words,start,words,0,nWords);
+      start = 0; }
+    clearUnused(); }
+
   private final void expandTo (final int i) {
     final int i1 = i+1;
     if (nWords<i1) {
-      if (i1<words.length) { compact(); nWords = i1; }
+      if (i1<words.length) { 
+        compact(); 
+        nWords = i1; }
       else {
         // TODO: more eager growth?
         final int[] tmp = new int[i1];
         System.arraycopy(words,start,tmp,i1-nWords,nWords);
         words = tmp;
         start = 0;
-        nWords = i1; } } }
+        nWords = i1; } }
+    clearUnused(); }
 
   private final void setWords (final int[] v) {
     setWords(v,v.length); }
-
-  private final int beIndex (final int i) {
-    return (start+nWords)-1-i; }
 
   @Override
   public final int word (final int i) {
@@ -2028,10 +2036,13 @@ public final class NaturalBEIMutable implements Natural {
     if (isZero()) { return NaturalBEI.ZERO; }
     return
       NaturalBEI.unsafe(
-        Arrays.copyOfRange(words,start,start+nWords)); }
+        stripLeadingZeros(
+          Arrays.copyOfRange(words,start,start+nWords))); }
 
   @Override
-  public final Natural recyclable () { return this; }
+  public final Natural recyclable (final Natural init) { 
+    assert this==init;
+    return this; }
 
   @Override
   public final boolean isImmutable () { return false; }

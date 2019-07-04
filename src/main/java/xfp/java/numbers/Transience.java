@@ -56,18 +56,27 @@ public interface Transience<T extends Transience>  {
    * <p>
    * Example:
    * <pre>
-   * Uints u = x.recyclable();
+   * Uints u = x.recyclable(x);
    * for (int i=0;i<13;i++) { u = u.setWord(i,i); }
    * return u.immutable();
    * </pre>
    * <p>
    * Optional method.
+   * @param init If <code>null</code>, return an empty recyclable
+   * version of <code>this</code>. Otherwise return a recyclable
+   * whose value is equivalent to <code>init</code>. Most common 
+   * cases: 
+   * <code>recyclable(null)</code> (if the state will be 
+   * overwritten without use) and 
+   * <code>recyclable(this)</code> (if we a temp copy of 
+   * <code>this</code> that can be incrementally modified 
+   * without creating lots of temp copies.
    * @see <a href="https://clojure.org/reference/transients">
    * Clojure: Transient Data Structures</a>
    */
 
-  public default T recyclable () {
-    throw Exceptions.unsupportedOperation(this,"recyclable"); }
+  public default T recyclable (final T init) {
+    throw Exceptions.unsupportedOperation(this,"recyclable",init); }
 
   /** Like <code>(persistent! foo)</code> in Clojure.
    * <p>

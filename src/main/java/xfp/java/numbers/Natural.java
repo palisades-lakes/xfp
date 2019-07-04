@@ -135,7 +135,7 @@ extends Uints, Ringlike<Natural>, Transience<Natural> {
 
   @Override
   public default Natural add (final Natural u) {
-    Natural t = recyclable();
+    Natural t = recyclable(this);
     if (isZero()) { return u; }
     if (u.isZero()) { return this; }
     // TODO: optimize by summing over joint range
@@ -165,7 +165,7 @@ extends Uints, Ringlike<Natural>, Transience<Natural> {
     assert 0L<=u;
     if (0L==u) { return immutable(); }
     if (isZero()) { return ((Natural) from(u)).immutable(); }
-    Uints v = recyclable();
+    Uints v = recyclable(this);
     long sum = uword(0) + Numbers.loWord(u);
     v = v.setWord(0,(int) sum);
     long carry = (sum>>>32);
@@ -197,7 +197,7 @@ extends Uints, Ringlike<Natural>, Transience<Natural> {
     assert 0<=compareTo(u);
     if (u.isZero()) { return this; }
     assert ! isZero();
-    Uints v = recyclable();
+    Uints v = recyclable(this);
     long dif = 0L;
     long borrow = 0L;
     final int n = Math.max(endWord(),u.endWord());
@@ -222,7 +222,7 @@ extends Uints, Ringlike<Natural>, Transience<Natural> {
     final long hi = Numbers.hiWord(u);
     if (0L!=hi) { assert 2<=endWord(); }
     if (0L!=lo) { assert 1<=endWord(); }
-    Uints v = recyclable();
+    Uints v = recyclable(this);
     long dif = uword(0)-lo;
     v = v.setWord(0,(int) dif);
     long borrow = (dif>>32);
@@ -295,40 +295,22 @@ extends Uints, Ringlike<Natural>, Transience<Natural> {
 
   //--------------------------------------------------------------
 
-  //  private static Natural multiplyToLen (final Natural m0,
-  //                                        final int n0,
-  //                                        final Natural m1,
-  //                                        final int n1) {
-  //
-  //    final int xstart = n0-1;
-  //    final int ystart = n1-1;
-  //    if ((z == null) || (z.length < (n0 + n1))) {
-  //      z = new int[n0 + n1]; }
-  //    long carry = 0L;
-  //    for (int j = ystart, k = ystart + 1 + xstart;
-  //      j >= 0;
-  //      j--, k--) {
-  //      final long product = (m1.uword(j) * m0.uword(xstart)) + carry;
-  //      z[k] = (int) product;
-  //      carry = product >>> 32; }
-  //    z[xstart] = (int) carry;
-  //    for (int i = xstart - 1; i >= 0; i--) {
-  //      carry = 0;
-  //      for (int j = ystart, k = ystart + 1 + i; j >= 0; j--, k--) {
-  //        final long product = (m1.uword(j]) * m0.uword(i))
-  //          + unsigned(z[k]) + carry;
-  //        z[k] = (int) product;
-  //        carry = product >>> 32; }
-  //      z[i] = (int) carry; }
-  //    return z; }
-
-  //--------------------------------------------------------------
-
-  public default Natural multiplyLong (final long u) {
-    throw Exceptions.unsupportedOperation(this,"multiplyLong",u); }
-
-  public default Natural multiplyToLen (final Natural u) {
-    throw Exceptions.unsupportedOperation(this,"multiplyToLen",u); }
+  public default Natural multiplySimple (final Natural u) {
+    final int n0 = endWord();
+    final int n1 = u.endWord();
+    Uints v = recyclable(null); 
+    long carry = 0L;
+    for (int i0=0;i0<n0;i0++) {
+      carry = 0L;
+      for (int i1=0;i1<n1;i1++) {
+        final int i2 = i0+i1;
+        final long product =
+          (u.uword(i1)*uword(i0)) + v.uword(i2) + carry;
+        v = v.setWord(i2, (int) product);
+        carry = (product>>>32); }
+      final int i2 = i0+n1;
+      v = v.setWord(i2, (int) carry); }
+    return ((Natural) v).immutable(); }
 
   public default Natural multiplyKaratsuba (final Natural u) {
     throw Exceptions.unsupportedOperation(this,"multiplyKaratsuba",u); }
@@ -338,7 +320,6 @@ extends Uints, Ringlike<Natural>, Transience<Natural> {
 
   @Override
   public default Natural multiply (final Natural u) {
-    //throw Exceptions.unsupportedOperation(this,"multiply",u); }
     if ((isZero()) || (u.isZero())) { return zero(); }
     final int n0 = endWord();
     if (equals(u) && (n0>MULTIPLY_SQUARE_THRESHOLD)) { 
@@ -347,7 +328,7 @@ extends Uints, Ringlike<Natural>, Transience<Natural> {
     final int n1 = u.endWord();
     if (n1==1) { return multiply(u.uword(0)); }
     if ((n0<KARATSUBA_THRESHOLD) || (n1<KARATSUBA_THRESHOLD)) {
-      return multiplyToLen(u); }
+      return multiplySimple(u); }
     if ((n0<TOOM_COOK_THRESHOLD) && (n1<TOOM_COOK_THRESHOLD)) {
       return multiplyKaratsuba(u); }
     return multiplyToomCook3(u); }
