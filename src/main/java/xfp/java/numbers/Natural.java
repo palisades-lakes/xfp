@@ -338,35 +338,34 @@ extends Uints, Ringlike<Natural>, Transience<Natural> {
 
   @Override
   public default Natural multiply (final Natural u) {
-    throw Exceptions.unsupportedOperation(this,"multiply",u); }
-//    if ((isZero()) || (u.isZero())) { return zero(); }
-//    final int n0 = endWord();
-//    if (equals(u) && (n0>MULTIPLY_SQUARE_THRESHOLD)) {
-//      return square(); }
-//    final int n1 = u.endWord();
-//    if ((n0<KARATSUBA_THRESHOLD) || (n1<KARATSUBA_THRESHOLD)) {
-//      //if (n1 == 1) { return multiplyLong(u.uword(0)); }
-//      //if (n0 == 1) { return u.multiplyLong(uword(0)); }
-//      return multiplyToLen(u); }
-//
-//    if ((n0 < TOOM_COOK_THRESHOLD) && (n1 < TOOM_COOK_THRESHOLD)) {
-//      return multiplyKaratsuba(u); }
-//    return multiplyToomCook3(u); }
+    //throw Exceptions.unsupportedOperation(this,"multiply",u); }
+    if ((isZero()) || (u.isZero())) { return zero(); }
+    final int n0 = endWord();
+    if (equals(u) && (n0>MULTIPLY_SQUARE_THRESHOLD)) { 
+      return square(); }
+    if (n0==1) { return u.multiply(uword(0)); }
+    final int n1 = u.endWord();
+    if (n1==1) { return multiply(u.uword(0)); }
+    if ((n0<KARATSUBA_THRESHOLD) || (n1<KARATSUBA_THRESHOLD)) {
+      return multiplyToLen(u); }
+    if ((n0<TOOM_COOK_THRESHOLD) && (n1<TOOM_COOK_THRESHOLD)) {
+      return multiplyKaratsuba(u); }
+    return multiplyToomCook3(u); }
 
   //--------------------------------------------------------------
 
   public default Natural multiply (final long u) {
     throw Exceptions.unsupportedOperation(this,"multiply",u); }
-//    assert 0L<=u;
-//    return multiply((Natural) from(u)); }
+  //    assert 0L<=u;
+  //    return multiply((Natural) from(u)); }
 
   public default Natural multiply (final long u,
                                    final int upShift) {
-    throw Exceptions.unsupportedOperation(this,"multiply",u,upShift); }
-//    assert 0L<=u;
-//    assert 0<=upShift;
-//    //if (0==upShift) { return multiply(u); }
-//    return multiply((Natural) from(u,upShift)); }
+      assert 0L<=u;
+      if (0L==u) { return zero(); }
+      assert 0<=upShift;
+  if (0==upShift) { return multiply(u); }
+  return multiply((Natural) from(u,upShift)); }
 
   //--------------------------------------------------------------
 

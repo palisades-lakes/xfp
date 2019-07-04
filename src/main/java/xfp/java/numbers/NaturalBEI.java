@@ -491,7 +491,7 @@ implements Natural {
 
     return subtract(m1,m0); }
 
- //--------------------------------------------------------------
+  //--------------------------------------------------------------
   // Modular Arithmetic
   //--------------------------------------------------------------
 
@@ -827,6 +827,7 @@ implements Natural {
                                                 final int n0,
                                                 final int[] m1,
                                                 final int n1) {
+    //System.out.println("implMultiplyToLen");
     //assert (! leadingZero(m0));
     //assert (! leadingZero(m1));
 
@@ -853,18 +854,19 @@ implements Natural {
       z[i] = (int) carry; }
     return z; }
 
-  private static final int[] multiplyToLen (final int[] x,
-                                            final int[] y) {
-    final int n0 = x.length;
-    final int n1 = y.length;
-    multiplyToLenCheck(x,n0);
-    multiplyToLenCheck(y,n1);
-    return implMultiplyToLen(x,n0,y,n1); }
+  private static final int[] multiplyToLen (final int[] u0,
+                                            final int[] u1) {
+    final int n0 = u0.length;
+    final int n1 = u1.length;
+    multiplyToLenCheck(u0,n0);
+    multiplyToLenCheck(u1,n1);
+    return implMultiplyToLen(u0,n0,u1,n1); }
 
   //--------------------------------------------------------------
 
   private static final int[] multiplyKaratsuba (final int[] x,
                                                 final int[] y) {
+    //System.out.println("multiplyKaratsuba");
     //assert (! leadingZero(x));
     //assert (! leadingZero(y));
     final int xlen = x.length;
@@ -921,6 +923,7 @@ implements Natural {
 
   private static final int[] multiplyToomCook3 (final int[] m0,
                                                 final int[] m1) {
+    //System.out.println("multiplyToomCook3");
     //assert (! leadingZero(m0));
     //assert (! leadingZero(m1));
 
@@ -1008,31 +1011,27 @@ implements Natural {
 
   //--------------------------------------------------------------
 
-  static final int[] multiply (final int[] x,
-                               final int[] y) {
+  static final int[] multiply (final int[] u0,
+                               final int[] u1) {
     //assert (! leadingZero(x));
     //assert (! leadingZero(y));
 
-    if ((isZero(y)) || (isZero(x))) { return EMPTY; }
-    final int xlen = x.length;
-    if ((y == x)
-      &&
-      (xlen > MULTIPLY_SQUARE_THRESHOLD)) {
-      return square(x); }
+    if ((isZero(u1)) || (isZero(u0))) { return EMPTY; }
+    final int n0 = u0.length;
+    if ((u1==u0) && (n0 > MULTIPLY_SQUARE_THRESHOLD)) {
+      return square(u0); }
 
-    final int ylen = y.length;
+    final int n1 = u1.length;
 
-    if ((xlen < KARATSUBA_THRESHOLD)
-      || (ylen < KARATSUBA_THRESHOLD)) {
-      if (y.length == 1) { return multiply(x,unsigned(y[0])); }
-      if (x.length == 1) { return multiply(y,unsigned(x[0])); }
-      int[] result = multiplyToLen(x,y);
+    if ((n0<KARATSUBA_THRESHOLD) || (n1<KARATSUBA_THRESHOLD)) {
+      if (n0 == 1) { return multiply(u0,unsigned(u1[0])); }
+      if (n1 == 1) { return multiply(u1,unsigned(u0[0])); }
+      int[] result = multiplyToLen(u0,u1);
       result = stripLeadingZeros(result);
       return result; }
-    if ((xlen < TOOM_COOK_THRESHOLD)
-      && (ylen < TOOM_COOK_THRESHOLD)) {
-      return multiplyKaratsuba(x,y); }
-    return multiplyToomCook3(x,y); }
+    if ((n0<TOOM_COOK_THRESHOLD) && (n1<TOOM_COOK_THRESHOLD)) {
+      return multiplyKaratsuba(u0,u1); }
+    return multiplyToomCook3(u0,u1); }
 
   //--------------------------------------------------------------
 
@@ -1525,7 +1524,10 @@ implements Natural {
   @Override
   public final Natural multiplyToLen (final Natural that) {
     final NaturalBEI u = (NaturalBEI) that;
-    return unsafe(multiplyToLen(words(),u.words())); }
+    return 
+      unsafe(
+        stripLeadingZeros(
+          multiplyToLen(words(),u.words()))); }
 
   @Override
   public final Natural multiplyKaratsuba (final Natural that) {
@@ -1537,25 +1539,33 @@ implements Natural {
     final NaturalBEI u = (NaturalBEI) that;
     return unsafe(multiplyToomCook3(words(),u.words())); }
 
-  @Override
-  public final Natural multiply (final Natural that) {
-    final NaturalBEI u = (NaturalBEI) that;
-    if ((isZero()) || (u.isZero())) { return zero(); }
-    final int n0 = endWord();
-    if (equals(u) && (n0>MULTIPLY_SQUARE_THRESHOLD)) {
-      return square(); }
-    return unsafe(multiply(words(),u.words())); }
+//  @Override
+//  public final Natural multiply (final Natural that) {
+//    final NaturalBEI u = (NaturalBEI) that;
+//    if ((isZero()) || (u.isZero())) { return zero(); }
+//    final int n0 = endWord();
+//    if (equals(u) && (n0>MULTIPLY_SQUARE_THRESHOLD)) {
+//      return square(); }
+//    final int n1 = u.endWord();
+//    if ((n0<KARATSUBA_THRESHOLD) || (n1<KARATSUBA_THRESHOLD)) {
+//      if (n1 == 1) { return multiply(u.uword(0)); }
+//      if (n0 == 1) { return u.multiply(uword(0)); }
+//      return multiplyToLen(u); }
+//    if ((n0<TOOM_COOK_THRESHOLD) && (n1<TOOM_COOK_THRESHOLD)) {
+//      return multiplyKaratsuba(u); }
+//    return multiplyToomCook3(u); }
+  //return unsafe(multiply(words(),u.words())); }
 
   @Override
   public final Natural multiply (final long that) {
     assert 1L<=that;
     return unsafe(multiply(words(),that)); }
 
-  @Override
-  public final Natural multiply (final long that,
-                                 final int shift) {
-    assert 1L<=that;
-    return multiply(valueOf(that,shift)); }
+//  @Override
+//  public final Natural multiply (final long that,
+//                                 final int shift) {
+//    assert 1L<=that;
+//    return multiply(valueOf(that,shift)); }
 
   public static final Natural multiply (final long t0,
                                         final long t1) {
@@ -1964,18 +1974,18 @@ implements Natural {
     if (!(x instanceof NaturalBEI)) { return false; }
     return uintsEquals((NaturalBEI) x); }
 
-//  @Override
-//  public boolean equals (final Object x) {
-//    if (x==this) { return true; }
-//    if (!(x instanceof NaturalBEI)) { return false; }
-//    final NaturalBEI xInt = (NaturalBEI) x;
-//    final int[] m = _words;
-//    final int len = m.length;
-//    final int[] xm = xInt._words;
-//    if (len != xm.length) { return false; }
-//    for (int i = 0; i < len; i++) {
-//      if (xm[i] != m[i]) { return false; } }
-//    return true; }
+  //  @Override
+  //  public boolean equals (final Object x) {
+  //    if (x==this) { return true; }
+  //    if (!(x instanceof NaturalBEI)) { return false; }
+  //    final NaturalBEI xInt = (NaturalBEI) x;
+  //    final int[] m = _words;
+  //    final int len = m.length;
+  //    final int[] xm = xInt._words;
+  //    if (len != xm.length) { return false; }
+  //    for (int i = 0; i < len; i++) {
+  //      if (xm[i] != m[i]) { return false; } }
+  //    return true; }
 
   /** hex string. */
   @Override
