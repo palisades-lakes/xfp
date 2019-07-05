@@ -5,7 +5,7 @@ package xfp.java.numbers;
  * Don't implement Comparable, because of mutability!
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-01
+ * @version 2019-07-05
  */
 
 public final class NaturalLEMutable
@@ -30,6 +30,10 @@ implements Natural {
 
   private NaturalLEMutable () { super(new int[0],-1,0,-1); }
 
+  @Override
+  public final Natural empty () { 
+    return new NaturalLEMutable(); }
+   
   //--------------------------------------------------------------
 
   public static final NaturalLEMutable make () {

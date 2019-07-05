@@ -15,11 +15,11 @@ import xfp.java.exceptions.Exceptions;
  * in Clojure).
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-04
+ * @version 2019-07-05
  */
 
 @SuppressWarnings("unchecked")
-public interface Uints<T extends Uints> {
+public interface Uints<T extends Uints> extends Transience<T> {
 
   //--------------------------------------------------------------
   // word ops
@@ -75,6 +75,28 @@ public interface Uints<T extends Uints> {
 
   public default T clear () {
     throw Exceptions.unsupportedOperation(this,"clear"); }
+
+  //--------------------------------------------------------------
+
+  T empty ();
+  
+  //  public default T empty () {
+//    throw Exceptions.unsupportedOperation(this,"empty"); }
+
+  //--------------------------------------------------------------
+  /** Return the <code>[i0,i1)</code> words as a new 
+   * <code>Uints</code> with <code>[0,i1-i0)</code> words.
+   */
+  public default T words (final int i0,
+                          final int i1) {
+    assert 0<=i1;
+    assert i0<i1;
+    if ((0==i0) && (endWord()<=i1)) { return immutable(); }
+    final int n = Math.max(0,i1-i0);
+    if (0>=n) { return empty(); }
+    T u = recyclable(n);
+    for (int i=0;i<n;i++) { u = (T) u.setWord(i,word(i+i0)); }
+    return (T) u.immutable(); }
 
   //--------------------------------------------------------------
   /** Return a sequence whose value is the same as <code>u</code>.

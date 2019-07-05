@@ -9,7 +9,7 @@ import java.util.Arrays;
  * Don't implement Comparable, because of mutability!
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-01
+ * @version 2019-07-05
  */
 
 public final class NaturalBEIMutable implements Natural {
@@ -138,14 +138,14 @@ public final class NaturalBEIMutable implements Natural {
     nWords = n; }
 
   @Override
-  public final Natural zero () {
-    start = 0;
-    nWords = 0;
-    Arrays.fill(words,0);
-    return this; }
+  public final Natural empty () { return make(); }
 
   @Override
-  public final Natural clear () { return zero(); }
+  public final Natural clear () {
+  start = 0;
+  nWords = 0;
+  Arrays.fill(words,0);
+  return this; }
 
   public final int getLowestSetBit () {
     if (nWords == 0) { return -1; }
@@ -2040,6 +2040,7 @@ public final class NaturalBEIMutable implements Natural {
 
   @Override
   public final Natural recyclable (final int n) {
+    assert 0<=n;
     expandTo(n);
     return this; }
 
@@ -2105,6 +2106,7 @@ public final class NaturalBEIMutable implements Natural {
     return new NaturalBEIMutable(u); }
 
   public static final NaturalBEIMutable make (final int n) {
+    assert 0<=n;
     return new NaturalBEIMutable(new int[n]); }
 
   public static final NaturalBEIMutable

@@ -7,7 +7,7 @@ import java.util.Arrays;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-01
+ * @version 2019-07-05
  */
 
 public final class NaturalLE extends NaturalLEBase
@@ -136,11 +136,15 @@ implements Natural {
   //      powerCache[i] = new NaturalLE[] { NaturalLE.valueOf(i) };
   //      logCache[i] = Math.log(i); } }
 
-  //  public static final NaturalLE ZERO = new NaturalLE(EMPTY);
+  public static final NaturalLE ZERO = 
+    new NaturalLE(new int[0],-1,0,-1);
   //  public static final NaturalLE ONE = valueOf(1);
   //  public static final NaturalLE TWO = valueOf(2);
   //  public static final NaturalLE TEN = valueOf(10);
 
+  @Override
+  public final Natural empty () { return ZERO; }
+  
   //--------------------------------------------------------------
 
   //  public static final NaturalLE valueOf (final long x) {

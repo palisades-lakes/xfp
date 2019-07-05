@@ -14,7 +14,7 @@ import xfp.java.Debug;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-01
+ * @version 2019-07-05
  */
 
 public final class NaturalBEI0 extends Number
@@ -561,6 +561,9 @@ implements Natural {
   public static final NaturalBEI0 TWO = valueOf(2);
   public static final NaturalBEI0 TEN = valueOf(10);
 
+  @Override
+  public final Natural empty () { return ZERO; }
+  
   //--------------------------------------------------------------
 
   public static final NaturalBEI0 valueOf (final long x) {

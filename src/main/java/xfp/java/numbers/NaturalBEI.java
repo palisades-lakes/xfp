@@ -5,14 +5,13 @@ import static xfp.java.numbers.Numbers.unsigned;
 
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.List;
 
 /** immutable arbitrary-precision non-negative integers
  * (natural number) represented by big-endian
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-04
+ * @version 2019-07-05
  */
 
 public final class NaturalBEI //extends Number
@@ -1331,7 +1330,7 @@ implements Natural {
                                        final int n) {
     //assert (! leadingZero(m));
     final int len = m.length;
-    if (len <= n) { return m; }
+    if (len<=n) { return m; }
     final int lowerInts[] = new int[n];
     System.arraycopy(m,len-n,lowerInts,0,n);
     return stripLeadingZeros(lowerInts); }
@@ -1340,8 +1339,8 @@ implements Natural {
                                        final int n) {
     //assert (! leadingZero(m));
     final int len = m.length;
-    if (len <= n) { return EMPTY; }
-    final int upperLen = len - n;
+    if (len<=n) { return EMPTY; }
+    final int upperLen = len-n;
     final int upperInts[] = new int[upperLen];
     System.arraycopy(m,0,upperInts,0,upperLen);
     return stripLeadingZeros(upperInts); }
@@ -1363,13 +1362,10 @@ implements Natural {
     final int[] xh = getUpper(x,half);
     final int[] yl = getLower(y,half);
     final int[] yh = getUpper(y,half);
-
     final int[] p1 = multiply(xh,yh);  // p1 = xh*yh
     final int[] p2 = multiply(xl,yl);  // p2 = xl*yl
-
     // p3=(xh+xl)*(yh+yl)
     final int[] p3 = multiply(add(xh,xl),add(yh,yl));
-
     // result = p1 * 2^(32*2*half) + (p3 - p1 - p2) * 2^(32*half)
     // + p2
     final int h32 = half*32;
@@ -1380,15 +1376,39 @@ implements Natural {
           absDiff(absDiff(p3,p1),p2)),
           h32),
         p2);
-
     return result; }
 
-  @Override
-  public final List<Natural> split (final int n) {
-    final int[] w = words();
-    final Natural lower = unsafe(getLower(w,n));
-    final Natural upper = unsafe(getUpper(w,n));
-    return List.of(lower,upper); }
+//  @Override
+//  public final Natural multiplyKaratsuba (final Natural u) {
+//    //System.out.println("multiplyKaratsuba");
+//    final int n0 = endWord();
+//    final int n1 = u.endWord();
+//    final int half = (Math.max(n0,n1) + 1) / 2;
+//    final Natural xl = words(0,half);
+//    final Natural xh = words(half,endWord());
+//    final Natural yl = u.words(0,half);
+//    final Natural yh = u.words(half,u.endWord());
+//    final Natural p1 = xh.multiply(yh);
+//    final Natural p2 = xl.multiply(yl);
+//    final Natural p3 = xh.add(xl).multiply(yh.add(yl));
+//    final int h32 = half*32;
+//    final Natural p4 = p1.shiftUp(h32);
+//    final Natural p5 =
+//      p4.add(p3.subtract(p1).subtract(p2)).shiftUp(h32);
+//    return p5.add(p2); }
+//
+//  @Override
+//  public final List<Natural> split (final int n) {
+//    final Natural lower = words(0,n);
+//    final Natural upper = words(n,endWord());
+//    return List.of(lower,upper); }
+
+//  @Override
+//  public final List<Natural> split (final int n) {
+//    final int[] w = words();
+//    final Natural lower = unsafe(getLower(w,n));
+//    final Natural upper = unsafe(getUpper(w,n));
+//    return List.of(lower,upper); }
 
   //  @Override
   //  public final Natural multiplyKaratsuba (final Natural u) {
@@ -1709,7 +1729,7 @@ implements Natural {
   //      return multiplyToLen(u); }
   //    if ((n0<TOOM_COOK_THRESHOLD) && (n1<TOOM_COOK_THRESHOLD)) {
   //      return multiplyKaratsuba(u); }
-  //    return multiplyToomCook3(u); }
+  //    return  (u); }
   //return unsafe(multiply(words(),u.words())); }
 
   @Override
@@ -2335,6 +2355,7 @@ implements Natural {
 
   @Override
   public final Natural recyclable (final int n) {
+    assert 0<=n;
     return NaturalBEIMutable.make(n); }
 
   @Override
@@ -2411,7 +2432,7 @@ implements Natural {
   public static final NaturalBEI TEN = valueOf(10);
 
   @Override
-  public final Natural zero () { return ZERO; }
+  public final Natural empty () { return ZERO; }
 
   @Override
   public final Natural one () { return ONE; }

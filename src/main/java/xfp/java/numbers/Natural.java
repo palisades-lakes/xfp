@@ -14,12 +14,12 @@ import xfp.java.exceptions.Exceptions;
  * TODO: utilities class to hide private stuff?
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-04
+ * @version 2019-07-05
  */
 
 @SuppressWarnings("unchecked")
 public interface Natural
-extends Uints<Natural>, Ringlike<Natural>, Transience<Natural> {
+extends Uints<Natural>, Ringlike<Natural> {
 
   //--------------------------------------------------------------
   // ordering
@@ -117,8 +117,7 @@ extends Uints<Natural>, Ringlike<Natural>, Transience<Natural> {
   // implementations usually return a pre-allocated constant
 
   @Override
-  public default Natural zero () {
-    throw Exceptions.unsupportedOperation(this,"zero"); }
+  public default Natural zero () { return empty(); }
 
   @Override
   public default boolean isZero () {
@@ -314,25 +313,43 @@ extends Uints<Natural>, Ringlike<Natural>, Transience<Natural> {
     return ((Natural) v).immutable(); }
 
   //--------------------------------------------------------------
-  /** Return a list of 2 <code>Natural</code> such that
-   * <code>this = get(0) + get(1) * 2<sup>32*n</code>.
-   * For Karatsuba multiplication.
-   */
-
-  public default List<Natural> split (final int n) {
-    throw Exceptions.unsupportedOperation(this,"split",n); }
+//  /** Return a list of 2 <code>Natural</code> such that
+//   * <code>this = get(0) + get(1) * 2<sup>32*n</code>.
+//   * For Karatsuba multiplication.
+//   */
+//
+//  public default List<Natural> split (final int n) {
+//    throw Exceptions.unsupportedOperation(this,"split",n); }
+//
+//  public default Natural multiplyKaratsuba (final Natural u) {
+//    //System.out.println("multiplyKaratsuba");
+//    final int n0 = endWord();
+//    final int n1 = u.endWord();
+//    final int half = (Math.max(n0,n1) + 1) / 2;
+//    final List<Natural> s0 = split(half);
+//    final List<Natural> s1 = u.split(half);
+//    final Natural xl = s0.get(0);
+//    final Natural xh = s0.get(1);
+//    final Natural yl = s1.get(0);
+//    final Natural yh = s1.get(1);
+//    final Natural p1 = xh.multiply(yh);
+//    final Natural p2 = xl.multiply(yl);
+//    final Natural p3 = xh.add(xl).multiply(yh.add(yl));
+//    final int h32 = half*32;
+//    final Natural p4 = p1.shiftUp(h32);
+//    final Natural p5 =
+//      p4.add(p3.subtract(p1).subtract(p2)).shiftUp(h32);
+//    return p5.add(p2); }
 
   public default Natural multiplyKaratsuba (final Natural u) {
     //System.out.println("multiplyKaratsuba");
     final int n0 = endWord();
     final int n1 = u.endWord();
     final int half = (Math.max(n0,n1) + 1) / 2;
-    final List<Natural> s0 = split(half);
-    final List<Natural> s1 = u.split(half);
-    final Natural xl = s0.get(0);
-    final Natural xh = s0.get(1);
-    final Natural yl = s1.get(0);
-    final Natural yh = s1.get(1);
+    final Natural xl = words(0,half);
+    final Natural xh = words(half,endWord());
+    final Natural yl = u.words(0,half);
+    final Natural yh = u.words(half,u.endWord());
     final Natural p1 = xh.multiply(yh);
     final Natural p2 = xl.multiply(yl);
     final Natural p3 = xh.add(xl).multiply(yh.add(yl));
