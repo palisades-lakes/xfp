@@ -1577,31 +1577,52 @@ implements Natural {
         ss),v0);
     return stripLeadingZeros(result); }
 
-  @Override
-  public final Natural exactDivideBy3 () {
-    //assert (! leadingZero(m));
-    final int[] m = words();
-    final int len = m.length;
-    final int[] result = new int[len];
-    long x, w, q, borrow;
-    borrow = 0L;
-    for (int i = len - 1; i >= 0; i--) {
-      x = unsigned(m[i]);
-      w = x - borrow;
-      if (borrow > x) { // Did we make the number go negative?
-        borrow = 1L; }
-      else { borrow = 0L; }
-      // 0xAAAAAAAB is the modular inverse of 3 (mod 2^32). Thus,
-      // the effect of this is to divide by 3 (mod 2^32).
-      // This is much faster than division on most architectures.
-      q = loWord(w * 0xAAAAAAABL);
-      result[i] = (int) q;
-      // Now check the borrow. The second check can of course be
-      // eliminated if the first fails.
-      if (q >= 0x55555556L) {
-        borrow++;
-        if (q >= 0xAAAAAAABL) { borrow++; } } }
-    return unsafe(stripLeadingZeros(result)); }
+//  @Override
+//  public final Natural exactDivideBy3 () {
+//    //assert (! leadingZero(m));
+//    final int[] m = words();
+//    final int n = m.length;
+//    final int[] result = new int[n];
+//    long x, w, q, borrow;
+//    borrow = 0L;
+//    for (int i=n-1; i>=0; i--) {
+//      x = unsigned(m[i]);
+//      w = x - borrow;
+//      if (borrow > x) { // Did we make the number go negative?
+//        borrow = 1L; }
+//      else { borrow = 0L; }
+//      // 0xAAAAAAAB is the modular inverse of 3 (mod 2^32). Thus,
+//      // the effect of this is to divide by 3 (mod 2^32).
+//      // This is much faster than division on most architectures.
+//      q = loWord(w*0xAAAAAAABL);
+//      result[i] = (int) q;
+//      // Now check the borrow. The second check can of course be
+//      // eliminated if the first fails.
+//      if (q>=0x55555556L) {
+//        borrow++;
+//        if (q>=0xAAAAAAABL) { borrow++; } } }
+//    return unsafe(stripLeadingZeros(result)); }
+
+//  @Override
+//  public final Natural exactDivideBy3 () {
+//    final int n = endWord();
+//    Natural t = recyclable(n);
+//    long borrow = 0L;
+//    for (int i=0;i<n;i++) {
+//      final long x = uword(i);
+//      final long w = x-borrow;
+//      if (x<borrow) { borrow = 1L; }
+//      else { borrow = 0L; }
+//      // 0xAAAAAAAB is the modular inverse of 3 (mod 2^32). Thus,
+//      // the effect of this is to divide by 3 (mod 2^32).
+//      // This is much faster than division on most architectures.
+//      final long q = loWord(w*0xAAAAAAABL);
+//      t= t.setWord(i,(int) q);
+//      // Check the borrow. 
+//      if (q>=0x55555556L) {
+//        borrow++;
+//        if (q>=0xAAAAAAABL) { borrow++; } } }
+//    return t.immutable(); }
 
   @Override
   public final Natural getToomSlice (final int lowerSize,

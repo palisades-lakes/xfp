@@ -1,5 +1,7 @@
 package xfp.java.numbers;
 
+import static xfp.java.numbers.Numbers.loWord;
+
 import java.util.List;
 
 import xfp.java.exceptions.Exceptions;
@@ -361,8 +363,25 @@ extends Uints<Natural>, Ringlike<Natural> {
 
   //--------------------------------------------------------------
 
-  public default Natural exactDivideBy3 () { 
-    throw Exceptions.unsupportedOperation(this,"exactDivideBy3"); }
+  public default Natural exactDivideBy3 () {
+    final int n = endWord();
+    Natural t = recyclable(n);
+    long borrow = 0L;
+    for (int i=0;i<n;i++) {
+      final long x = uword(i);
+      final long w = x-borrow;
+      if (x<borrow) { borrow = 1L; }
+      else { borrow = 0L; }
+      // 0xAAAAAAAB is the modular inverse of 3 (mod 2^32). Thus,
+      // the effect of this is to divide by 3 (mod 2^32).
+      // This is much faster than division on most architectures.
+      final long q = loWord(w*0xAAAAAAABL);
+      t= t.setWord(i,(int) q);
+      // Check the borrow. 
+      if (q>=0x55555556L) {
+        borrow++;
+        if (q>=0xAAAAAAABL) { borrow++; } } }
+    return t.immutable(); }
 
   @SuppressWarnings("boxing")
   public default Natural getToomSlice (final int lowerSize,
