@@ -831,7 +831,7 @@ public final class Bei0 {
     //System.out.println("squareToomCook3");
     return squareToomCook3(m); }
 
-  private final static int[] squareToLen (final int[] x, 
+  private final static int[] squareToLen (final int[] x,
                                           final int len,
                                           int[] z) {
     final int zlen = len << 1;
@@ -1004,8 +1004,8 @@ public final class Bei0 {
     if (sliceSize <= 0) { return ZERO; }
     // While performing Toom-Cook, all slices are positive and
     // the sign is adjusted when the final number is composed.
-    if ((start == 0) && (sliceSize >= len)) { 
-      // original code: return this.abs(); 
+    if ((start == 0) && (sliceSize >= len)) {
+      // original code: return this.abs();
       return stripLeadingZeros(Arrays.copyOf(m,len)); }
     //return m; }
     final int intSlice[] = new int[sliceSize];
@@ -1030,7 +1030,7 @@ public final class Bei0 {
     final int[] da1 = add(da0,a1);
     final int[] v1 = square(da1,true);
     final int[] vinf = square(a2,true);
-    final int[] v2 = 
+    final int[] v2 =
       square(absDiff(shiftUp(add(da1,a2),1),a0),true);
 
     // The algorithm requires two divisions by 2 and one by 3.

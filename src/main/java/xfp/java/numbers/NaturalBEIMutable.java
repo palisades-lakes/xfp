@@ -76,8 +76,8 @@ public final class NaturalBEIMutable implements Natural {
   private final void expandTo (final int i) {
     final int i1 = i+1;
     if (nWords<i1) {
-      if (i1<words.length) { 
-        compact(); 
+      if (i1<words.length) {
+        compact();
         nWords = i1; }
       else {
         // TODO: more eager growth?
@@ -2034,8 +2034,13 @@ public final class NaturalBEIMutable implements Natural {
           Arrays.copyOfRange(words,start,start+nWords))); }
 
   @Override
-  public final Natural recyclable (final Natural init) { 
+  public final Natural recyclable (final Natural init) {
     assert this==init;
+    return this; }
+
+  @Override
+  public final Natural recyclable (final int n) {
+    expandTo(n);
     return this; }
 
   @Override

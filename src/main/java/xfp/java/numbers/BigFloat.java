@@ -67,10 +67,10 @@ implements Ringlike<BigFloat> {
       final int e2;
       if (e0<e1) {
         t02 = t0;
-        t12 = (Natural) t1.shiftUp(e1-e0);
+        t12 = t1.shiftUp(e1-e0);
         e2 = e0; }
       else if (e0>e1) {
-        t02 = (Natural) t0.shiftUp(e0-e1);
+        t02 = t0.shiftUp(e0-e1);
         t12 = t1;
         e2 = e1; }
       else {
@@ -170,7 +170,7 @@ implements Ringlike<BigFloat> {
     assert 0L<=m0;
     assert 0L<=m1;
     assert 0<=bitShift;
-    return 
+    return
       NaturalBEI.valueOf(m0)
       .add(NaturalBEI.valueOf(m1,bitShift)); }
 
@@ -180,7 +180,7 @@ implements Ringlike<BigFloat> {
     assert 0L<=m0;
     assert 0L<=m1;
     assert 0<=bitShift;
-    return 
+    return
       NaturalBEI.valueOf(m0,bitShift)
       .subtract(NaturalBEI.valueOf(m1)); }
 
@@ -232,7 +232,7 @@ implements Ringlike<BigFloat> {
     if (e0<=e1) {
       return addSameExponent(p0,t0,p1,t1,e1-e0,e0); }
     return
-      addSameExponent(p0,(Natural) t0.shiftUp(e0-e1),p1,t1,e1); }
+      addSameExponent(p0,t0.shiftUp(e0-e1),p1,t1,e1); }
 
   //--------------------------------------------------------------
 
@@ -330,7 +330,7 @@ implements Ringlike<BigFloat> {
     assert 0L<=x1;
     final int e0 = x0.loBit();
     final int e1 = Numbers.loBit(x1);
-    final Natural y0 = (Natural) ((0==e0) ? x0 : x0.shiftDown(e0));
+    final Natural y0 = (0==e0) ? x0 : x0.shiftDown(e0);
     final long y1 = (((0==e1)||(64==e1)) ? x1 : (x1 >>> e1));
     return valueOf(p1,y0.multiply(y1),e0+e1); }
 
@@ -653,9 +653,9 @@ implements Ringlike<BigFloat> {
     final int e1 = q.exponent();
     final int c;
     if (e0 <= e1) {
-      c = t0.compareTo((Natural) t1.shiftUp(e1-e0)); }
+      c = t0.compareTo(t1.shiftUp(e1-e0)); }
     else {
-      c = ((Natural) t0.shiftUp(e0-e1)).compareTo(t1); }
+      c = t0.shiftUp(e0-e1).compareTo(t1); }
     return (nonNegative() ? c : -c); }
 
   //--------------------------------------------------------------
@@ -712,7 +712,7 @@ implements Ringlike<BigFloat> {
       significand = t0;
       exponent = e0; }
     else {
-      significand = (Natural) t0.shiftDown(e1);
+      significand = t0.shiftDown(e1);
       exponent = Math.addExact(e0,e1); }
     assert significand.isImmutable();
     _significand = significand;

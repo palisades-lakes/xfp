@@ -15,11 +15,11 @@ import xfp.java.exceptions.Exceptions;
  * in Clojure).
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-03
+ * @version 2019-07-04
  */
 
 @SuppressWarnings("unchecked")
-public interface Uints {
+public interface Uints<T extends Uints> {
 
   //--------------------------------------------------------------
   // word ops
@@ -37,8 +37,8 @@ public interface Uints {
    * valid.
    */
 
-  public default Uints setWord (final int i,
-                                final int w) {
+  public default T setWord (final int i,
+                            final int w) {
     throw Exceptions.unsupportedOperation(this,"setWord",i,w); }
 
   /** The value of the unsigned <code>i</code>th word as a
@@ -73,7 +73,7 @@ public interface Uints {
 
   //--------------------------------------------------------------
 
-  public default Uints clear () {
+  public default T clear () {
     throw Exceptions.unsupportedOperation(this,"clear"); }
 
   //--------------------------------------------------------------
@@ -83,16 +83,16 @@ public interface Uints {
    * May be a copy of <code>u</code>.
    */
 
-  public default Uints set (final Uints u) {
+  public default T set (final Uints u) {
     Uints x = clear();
     for (int i=u.startWord();i<u.endWord();i++) {
       x = x.setWord(i,u.word(i)); }
-    return this; }
+    return (T) this; }
 
   /** Return a Uints whose value is the same as <code>u</code>.
    */
 
-  public default Uints set (final long u) {
+  public default T set (final long u) {
     assert 0<=u;
     // TODO: optimize zeroing internal array?
     clear();
@@ -100,7 +100,7 @@ public interface Uints {
     if (0!=lo) { setWord(0,(int) lo); }
     final long hi = Numbers.hiWord(u);
     if (0!=hi) { setWord(1,(int) hi); }
-    return this; }
+    return (T) this; }
 
   //--------------------------------------------------------------
   // wouldn't need these if startWord()/endWord()
@@ -204,21 +204,21 @@ public interface Uints {
 
   //--------------------------------------------------------------
 
-  public default Uints setBit (final int i) {
+  public default T setBit (final int i) {
     assert 0<=i;
     final int iw = (i>>>5);
     final int w = word(iw);
     final int ib = (i&0x1F);
     return setWord(iw,(w|(1<<ib))); }
 
-  public default Uints clearBit (final int n) {
+  public default T clearBit (final int n) {
     assert 0<=n;
     final int iw = (n>>>5);
     final int w = word(iw);
     final int ib = (n&0x1F);
     return setWord(iw,(w&(~(1<<ib)))); }
 
-  public default Uints flipBit (final int n) {
+  public default T flipBit (final int n) {
     assert 0<=n;
     final int iw = (n>>>5);
     final int w = word(iw);
@@ -227,11 +227,11 @@ public interface Uints {
 
   //--------------------------------------------------------------
 
-  public default Uints shiftDown (final int bitShift) {
+  public default T shiftDown (final int bitShift) {
     throw
     Exceptions.unsupportedOperation(this,"shiftDown",bitShift); }
 
-  public default Uints shiftUp (final int bitShift) {
+  public default T shiftUp (final int bitShift) {
     throw
     Exceptions.unsupportedOperation(this,"shiftUp",bitShift); }
 
@@ -242,10 +242,10 @@ public interface Uints {
    * <code>0&lt;=shift</code>
    */
 
-  public default Uints shiftUp (final Uints u,
-                                final int shift) {
+  public default T shiftUp (final T u,
+                            final int shift) {
     // TODO: optimize as single op
-    return set(u).shiftUp(shift); }
+    return (T) set(u).shiftUp(shift); }
 
   /** Return a Uints whose value is
    * <code>u * 2<sup>shift</sup></code>.
@@ -254,10 +254,10 @@ public interface Uints {
    * <code>0&lt;=shift</code>
    */
 
-  public default Uints shiftUp (final long u,
-                                final int shift) {
+  public default T shiftUp (final long u,
+                            final int shift) {
     // TODO: optimize as single op
-    return set(u).shiftUp(shift); }
+    return (T) set(u).shiftUp(shift); }
 
   //--------------------------------------------------------------
   // construction
@@ -266,7 +266,7 @@ public interface Uints {
    * Does not modify <code>this</code>.
    */
 
-  public default Uints from (final long u) {
+  public default T from (final long u) {
     throw Exceptions.unsupportedOperation(
       this,"from",u); }
 
@@ -277,8 +277,8 @@ public interface Uints {
    * <code>0&lt;=shift</code>
    */
 
-  public default Uints from (final long u,
-                             final int shift) {
+  public default T from (final long u,
+                         final int shift) {
     throw Exceptions.unsupportedOperation(
       this,"from",u,shift); }
 

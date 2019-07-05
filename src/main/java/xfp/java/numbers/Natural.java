@@ -12,14 +12,14 @@ import xfp.java.exceptions.Exceptions;
  *  uword(i) * 2<sup>32*i</sup></code>.
  *
  * TODO: utilities class to hide private stuff?
- * 
+ *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-03
+ * @version 2019-07-04
  */
 
 @SuppressWarnings("unchecked")
 public interface Natural
-extends Uints, Ringlike<Natural>, Transience<Natural> {
+extends Uints<Natural>, Ringlike<Natural>, Transience<Natural> {
 
   //--------------------------------------------------------------
   // ordering
@@ -43,7 +43,7 @@ extends Uints, Ringlike<Natural>, Transience<Natural> {
 
   public default int compareTo (final int upShift,
                                 final Natural u) {
-    return ((Natural) shiftUp(upShift)).compareTo(u); }
+    return shiftUp(upShift).compareTo(u); }
 
   public default int compareTo (final long u) {
     assert 0L<=u;
@@ -147,24 +147,24 @@ extends Uints, Ringlike<Natural>, Transience<Natural> {
     for (;i<end;i++) {
       sum = uword(i) + u.uword(i) + carry;
       carry = (sum>>>32);
-      t = (Natural) t.setWord(i,(int) sum); }
-    if (0L!=carry) { t = (Natural) t.setWord(i,(int) carry); }
+      t = t.setWord(i,(int) sum); }
+    if (0L!=carry) { t = t.setWord(i,(int) carry); }
     return t.immutable(); }
 
   public default Natural add (final Natural u,
                               final int shift) {
     assert 0<=shift;
-    if (isZero()) { return (Natural) u.shiftUp(shift); }
+    if (isZero()) { return u.shiftUp(shift); }
     if (u.isZero()) { return this; }
     if (0==shift) { return add(u); }
     // TODO: reduce to single builder op?
     // TODO: shiftUp mutable version and add this to that
-    return add((Natural) u.shiftUp(shift)); }
+    return add(u.shiftUp(shift)); }
 
   public default Natural add (final long u) {
     assert 0L<=u;
     if (0L==u) { return immutable(); }
-    if (isZero()) { return ((Natural) from(u)).immutable(); }
+    if (isZero()) { return from(u).immutable(); }
     Uints v = recyclable(this);
     long sum = uword(0) + Numbers.loWord(u);
     v = v.setWord(0,(int) sum);
@@ -187,7 +187,7 @@ extends Uints, Ringlike<Natural>, Transience<Natural> {
     if (0==upShift) { return add(u); }
     assert 0L<=u;
     if (0L==u) { return immutable(); }
-    return add((Natural) from(u,upShift)).immutable(); }
+    return add(from(u,upShift)).immutable(); }
 
   //--------------------------------------------------------------
 
@@ -243,21 +243,21 @@ extends Uints, Ringlike<Natural>, Transience<Natural> {
     assert 0L<=u;
     assert 0<=upShift;
     assert compareTo(u,upShift)>=0;
-    return subtract((Natural) from(u,upShift)); }
+    return subtract(from(u,upShift)); }
 
   //--------------------------------------------------------------
 
   public default Natural subtractFrom (final long u) {
     assert 0L<=u;
     assert compareTo(u)<=0;
-    return ((Natural) from(u)).subtract(this); }
+    return from(u).subtract(this); }
 
   public default Natural subtractFrom (final long u,
                                        final int upShift) {
     assert 0L<=u;
     assert 0<=upShift;
     assert compareTo(u,upShift)<=0;
-    return ((Natural) from(u,upShift)).subtract(this); }
+    return from(u,upShift).subtract(this); }
 
   //--------------------------------------------------------------
 
@@ -291,7 +291,7 @@ extends Uints, Ringlike<Natural>, Transience<Natural> {
 
   static final int MULTIPLY_SQUARE_THRESHOLD = 20;
   static final int KARATSUBA_THRESHOLD = 80;
-  static final int TOOM_COOK_THRESHOLD = 1024*240;
+  static final int TOOM_COOK_THRESHOLD = 240;
 
   //--------------------------------------------------------------
 
@@ -299,7 +299,7 @@ extends Uints, Ringlike<Natural>, Transience<Natural> {
     //System.out.println("multiplySimple");
     final int n0 = endWord();
     final int n1 = u.endWord();
-    Uints v = recyclable(null); 
+    Uints v = recyclable(n0+n1+1);
     long carry = 0L;
     for (int i0=0;i0<n0;i0++) {
       carry = 0L;
@@ -315,10 +315,10 @@ extends Uints, Ringlike<Natural>, Transience<Natural> {
 
   //--------------------------------------------------------------
   /** Return a list of 2 <code>Natural</code> such that
-   * <code>this = get(0) + get(1) * 2<sup>32*n</code>. 
+   * <code>this = get(0) + get(1) * 2<sup>32*n</code>.
    * For Karatsuba multiplication.
    */
-  
+
   public default List<Natural> split (final int n) {
     throw Exceptions.unsupportedOperation(this,"split",n); }
 
@@ -333,25 +333,114 @@ extends Uints, Ringlike<Natural>, Transience<Natural> {
     final Natural xh = s0.get(1);
     final Natural yl = s1.get(0);
     final Natural yh = s1.get(1);
-    final Natural p1 = xh.multiply(yh); 
+    final Natural p1 = xh.multiply(yh);
     final Natural p2 = xl.multiply(yl);
     final Natural p3 = xh.add(xl).multiply(yh.add(yl));
     final int h32 = half*32;
-    final Natural p4 = (Natural) p1.shiftUp(h32);
-    final Natural p5 = 
-      (Natural) p4.add(p3.subtract(p1).subtract(p2)).shiftUp(h32);
+    final Natural p4 = p1.shiftUp(h32);
+    final Natural p5 =
+      p4.add(p3.subtract(p1).subtract(p2)).shiftUp(h32);
     return p5.add(p2); }
 
   //--------------------------------------------------------------
 
+  public default Natural exactDivideBy3 () { 
+    throw Exceptions.unsupportedOperation(this,"exactDivideBy3"); }
+
+  @SuppressWarnings("boxing")
+  public default Natural getToomSlice (final int lowerSize,
+                                       final int upperSize,
+                                       final int slice,
+                                       final int fullsize) {
+    throw Exceptions.unsupportedOperation(this,"getToomSlice",
+      lowerSize,upperSize,slice,fullsize); }
+
   public default Natural multiplyToomCook3 (final Natural u) {
-    throw Exceptions.unsupportedOperation(this,"multiplyKaratsuba",u); }
+    //System.out.println("multiplyToomCook3");
+    final int n0 = endWord();
+    final int n1 = u.endWord();
+    final int largest = Math.max(n0,n1);
+    // k is the size (in ints) of the lower-order slices.
+    final int k = (largest + 2) / 3;   // Equal to ceil(largest/3)
+    // r is the size (in ints) of the highest-order slice.
+    final int r = largest - (2 * k);
+
+    // Obtain slices of the numbers. a2 and b2 are the most
+    // significant bits of the numbers a and b, and a0 and b0 the
+    // least significant.
+    final Natural a2 = getToomSlice(k,r,0,largest);
+    final Natural a1 = getToomSlice(k,r,1,largest);
+    final Natural a0 = getToomSlice(k,r,2,largest);
+    final Natural b2 = u.getToomSlice(k,r,0,largest);
+    final Natural b1 = u.getToomSlice(k,r,1,largest);
+    final Natural b0 = u.getToomSlice(k,r,2,largest);
+    final Natural v0 = a0.multiply(b0);
+    Natural da1 = a2.add(a0);
+    Natural db1 = b2.add(b0);
+
+    // might be negative
+    final Natural da1_a1;
+    final int ca = da1.compareTo(a1);
+    if (0 < ca) { da1_a1 = da1.subtract(a1); }
+    else { da1_a1 = a1.subtract(da1); }
+    // might be negative
+    final Natural db1_b1;
+    final int cb = db1.compareTo(b1);
+    if (0 < cb) { db1_b1 = db1.subtract(b1); }
+    else { db1_b1 = b1.subtract(db1); }
+    final int cv = ca * cb;
+    final Natural vm1 = da1_a1.multiply(db1_b1);
+
+    da1 = da1.add(a1);
+    db1 = db1.add(b1);
+    final Natural v1 = da1.multiply(db1);
+    final Natural v2 =
+        da1.add(a2).shiftUp(1).subtract(a0)
+        .multiply(
+        db1.add(b2).shiftUp(1).subtract(b0));
+
+    final Natural vinf = a2.multiply(b2);
+
+    // The algorithm requires two divisions by 2 and one by 3.
+    // All divisions are known to be exact, that is, they do not
+    // produce remainders, and all results are positive. The
+    // divisions by 2 are implemented as right shifts which are
+    // relatively efficient, leaving only an exact division by 3,
+    // which is done by a specialized linear-time algorithm.
+    Natural t2;
+    // handle missing sign of vm1
+    if (0 < cv) { t2 = v2.subtract(vm1).exactDivideBy3(); }
+    else { t2 = v2.add(vm1).exactDivideBy3();}
+
+    Natural tm1;
+    // handle missing sign of vm1
+    if (0 < cv) { tm1 = v1.subtract(vm1); }
+    else { tm1 = v1.add(vm1); }
+    tm1 = tm1.shiftDown(1);
+
+    Natural t1 = v1.subtract(v0);
+    t2 = t2.subtract(t1).shiftDown(1);
+    t1 = t1.subtract(tm1).subtract(vinf);
+    t2 = t2.subtract(vinf.shiftUp(1));
+    tm1 = tm1.subtract(t2);
+
+    // Number of bits to shift left.
+    final int ss = k * 32;
+
+    return
+      vinf.shiftUp(ss).add(t2).shiftUp(ss).add(t1)
+      .shiftUp(ss).add(tm1).shiftUp(ss).add(v0); }
+
+//  public default Natural multiplyToomCook3 (final Natural u) {
+//    throw Exceptions.unsupportedOperation(this,"multiplyToomCook3",u); }
+
+  //--------------------------------------------------------------
 
   @Override
   public default Natural multiply (final Natural u) {
     if ((isZero()) || (u.isZero())) { return zero(); }
     final int n0 = endWord();
-    if (equals(u) && (n0>MULTIPLY_SQUARE_THRESHOLD)) { 
+    if (equals(u) && (n0>MULTIPLY_SQUARE_THRESHOLD)) {
       return square(); }
     if (n0==1) { return u.multiply(uword(0)); }
     final int n1 = u.endWord();
@@ -371,11 +460,11 @@ extends Uints, Ringlike<Natural>, Transience<Natural> {
 
   public default Natural multiply (final long u,
                                    final int upShift) {
-      assert 0L<=u;
-      if (0L==u) { return zero(); }
-      assert 0<=upShift;
-  if (0==upShift) { return multiply(u); }
-  return multiply((Natural) from(u,upShift)); }
+    assert 0L<=u;
+    if (0L==u) { return zero(); }
+    assert 0<=upShift;
+    if (0==upShift) { return multiply(u); }
+    return multiply(from(u,upShift)); }
 
   //--------------------------------------------------------------
 

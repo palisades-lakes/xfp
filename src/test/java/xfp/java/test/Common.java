@@ -192,8 +192,8 @@ public final class Common {
 
   public static final <T extends Ringlike<T>> void
   square (final Function<BigInteger,T> fromBI,
-            final Function<T,BigInteger> toBI,
-            final BigInteger x0) {
+          final Function<T,BigInteger> toBI,
+          final BigInteger x0) {
     final BigInteger x2 = x0.multiply(x0);
     final T y0 = fromBI.apply(x0);
     final T y2 = y0.square();

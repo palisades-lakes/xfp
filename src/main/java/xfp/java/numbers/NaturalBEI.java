@@ -671,57 +671,6 @@ implements Natural {
     implSquareToLenChecks(m,len,z,zlen);
     return implSquareToLen(m,len,z,zlen); }
 
-  private static final int[] getToomSlice (final int[] m,
-                                           final int lowerSize,
-                                           final int upperSize,
-                                           final int slice,
-                                           final int fullsize) {
-    //assert (! leadingZero(m));
-    final int len = m.length;
-    final int offset = fullsize - len;
-    int start;
-    final int end;
-    if (slice == 0) {
-      start = 0 - offset;
-      end = upperSize - 1 - offset; }
-    else {
-      start = (upperSize + ((slice - 1) * lowerSize)) - offset;
-      end = (start + lowerSize) - 1; }
-    if (start < 0) { start = 0; }
-    if (end < 0) { return EMPTY; }
-    final int sliceSize = (end - start) + 1;
-    if (sliceSize <= 0) { return EMPTY; }
-    // While performing Toom-Cook, all slices are positive and
-    // the sign is adjusted when the final number is composed.
-    if ((start == 0) && (sliceSize >= len)) { return stripLeadingZeros(m); }
-    final int intSlice[] = new int[sliceSize];
-    System.arraycopy(m,start,intSlice,0,sliceSize);
-    return stripLeadingZeros(intSlice); }
-
-  private static final int[] exactDivideBy3 (final int[] m) {
-    //assert (! leadingZero(m));
-    final int len = m.length;
-    final int[] result = new int[len];
-    long x, w, q, borrow;
-    borrow = 0L;
-    for (int i = len - 1; i >= 0; i--) {
-      x = unsigned(m[i]);
-      w = x - borrow;
-      if (borrow > x) { // Did we make the number go negative?
-        borrow = 1L; }
-      else { borrow = 0L; }
-      // 0xAAAAAAAB is the modular inverse of 3 (mod 2^32). Thus,
-      // the effect of this is to divide by 3 (mod 2^32).
-      // This is much faster than division on most architectures.
-      q = loWord(w * 0xAAAAAAABL);
-      result[i] = (int) q;
-      // Now check the borrow. The second check can of course be
-      // eliminated if the first fails.
-      if (q >= 0x55555556L) {
-        borrow++;
-        if (q >= 0xAAAAAAABL) { borrow++; } } }
-    return stripLeadingZeros(result); }
-
   private static final int[] squareToomCook3 (final int[] m) {
     //assert (! leadingZero(m));
     final int len = m.length;
@@ -805,96 +754,6 @@ implements Natural {
       if (m0i<m1i) { return -1; }
       if (m0i>m1i) { return 1; } }
     return 0; }
-
-  //--------------------------------------------------------------
-
-  private static final int[] multiplyToomCook3 (final int[] m0,
-                                                final int[] m1) {
-    //System.out.println("multiplyToomCook3");
-    //assert (! leadingZero(m0));
-    //assert (! leadingZero(m1));
-
-    final int n0 = m0.length;
-    final int n1 = m1.length;
-
-    final int largest = Math.max(n0,n1);
-
-    // k is the size (in ints) of the lower-order slices.
-    final int k = (largest + 2) / 3;   // Equal to ceil(largest/3)
-
-    // r is the size (in ints) of the highest-order slice.
-    final int r = largest - (2 * k);
-
-    // Obtain slices of the numbers. a2 and b2 are the most
-    // significant bits of the numbers a and b, and a0 and b0 the
-    // least significant.
-    final int[] a2 = getToomSlice(m0,k,r,0,largest);
-    final int[] a1 = getToomSlice(m0,k,r,1,largest);
-    final int[] a0 = getToomSlice(m0,k,r,2,largest);
-    final int[] b2 = getToomSlice(m1,k,r,0,largest);
-    final int[] b1 = getToomSlice(m1,k,r,1,largest);
-    final int[] b0 = getToomSlice(m1,k,r,2,largest);
-    final int[] v0 = multiply(a0,b0);
-    int[] da1 = add(a2,a0);
-    int[] db1 = add(b2,b0);
-
-    // might be negative
-    final int[] da1_a1;
-    final int ca = compare(da1,a1);
-    if (0 < ca) { da1_a1 = subtract(da1,a1); }
-    else { da1_a1 = subtract(a1,da1); }
-    // might be negative
-    final int[] db1_b1;
-    final int cb = compare(db1,b1);
-    if (0 < cb) { db1_b1 = subtract(db1,b1); }
-    else { db1_b1 = subtract(b1,db1); }
-    final int cv = ca * cb;
-    final int[] vm1 = multiply(da1_a1,db1_b1);
-
-    da1 = add(da1,a1);
-    db1 = add(db1,b1);
-    final int[] v1 = multiply(da1,db1);
-    final int[] v2 =
-      multiply(
-        subtract(shiftUp(add(da1,a2),1),a0),
-        subtract(shiftUp(add(db1,b2),1),b0));
-
-    final int[] vinf = multiply(a2,b2);
-
-    // The algorithm requires two divisions by 2 and one by 3.
-    // All divisions are known to be exact, that is, they do not
-    // produce remainders, and all results are positive. The
-    // divisions by 2 are implemented as right shifts which are
-    // relatively efficient, leaving only an exact division by 3,
-    // which is done by a specialized linear-time algorithm.
-    int[] t2;
-    // handle missing sign of vm1
-    if (0 < cv) { t2 = exactDivideBy3(subtract(v2,vm1)); }
-    else { t2 = exactDivideBy3(add(v2,vm1));}
-
-    int[] tm1;
-    // handle missing sign of vm1
-    if (0 < cv) { tm1 = shiftDown(subtract(v1,vm1),1); }
-    else { tm1 = shiftDown(add(v1,vm1),1); }
-
-    int[] t1 = subtract(v1,v0);
-    t2 = shiftDown(subtract(t2,t1),1);
-    t1 = subtract(subtract(t1,tm1),vinf);
-    t2 = subtract(t2,shiftUp(vinf,1));
-    tm1 = subtract(tm1,t2);
-
-    // Number of bits to shift left.
-    final int ss = k * 32;
-
-    final int[] result =
-      add(shiftUp(
-        add(shiftUp(
-          add(shiftUp(
-            add(shiftUp(vinf,ss),t2),
-            ss),t1),
-          ss),tm1),
-        ss),v0);
-    return stripLeadingZeros(result); }
 
   //--------------------------------------------------------------
 
@@ -1423,7 +1282,7 @@ implements Natural {
     final int n1 = u1.length;
     multiplySimpleCheck(u0,n0);
     multiplySimpleCheck(u1,n1);
-    final int[] u2 = new int[n0+n1]; 
+    final int[] u2 = new int[n0+n1];
     long carry = 0L;
     for (int i0=n0-1;i0>=0;i0--) {
       carry = 0L;
@@ -1436,38 +1295,38 @@ implements Natural {
       u2[i0] = (int) carry; }
     return u2; }
 
-//  @Override
-//  public final Natural multiplySimple (final Natural that) {
-//    final NaturalBEI u = (NaturalBEI) that;
-//    return 
-//      unsafe(
-//        stripLeadingZeros(
-//          multiplySimple(words(),u.words()))); }
+  //  @Override
+  //  public final Natural multiplySimple (final Natural that) {
+  //    final NaturalBEI u = (NaturalBEI) that;
+  //    return
+  //      unsafe(
+  //        stripLeadingZeros(
+  //          multiplySimple(words(),u.words()))); }
 
-//    @Override
-//    public final Natural multiplySimple (final Natural that) {
-//      final Natural u0 = this;
-//      final Natural u1 = that;
-//      final int n0 = u0.endWord();
-//      final int n1 = u1.endWord();
-////      Uints u2 = NaturalBEI.valueOf(0L); 
-//     // Uints u2 = NaturalBEIMutable.make(); 
-//      Uints u2 = recyclable(null); 
-//      long carry = 0L;
-//      for (int i0=0;i0<n0;i0++) {
-//        carry = 0L;
-//        for (int i1=0;i1<n1;i1++) {
-//          final int i2 = i0+i1;
-//          final long product =
-//            (u1.uword(i1)*u0.uword(i0)) + u2.uword(i2) + carry;
-//          u2 = u2.setWord(i2, (int) product);
-//          carry = (product>>>32); }
-//        final int i2 = i0+n1;
-//        u2 = u2.setWord(i2, (int) carry); }
-//      return ((Natural) u2).immutable(); }
+  //    @Override
+  //    public final Natural multiplySimple (final Natural that) {
+  //      final Natural u0 = this;
+  //      final Natural u1 = that;
+  //      final int n0 = u0.endWord();
+  //      final int n1 = u1.endWord();
+  ////      Uints u2 = NaturalBEI.valueOf(0L);
+  //     // Uints u2 = NaturalBEIMutable.make();
+  //      Uints u2 = recyclable(null);
+  //      long carry = 0L;
+  //      for (int i0=0;i0<n0;i0++) {
+  //        carry = 0L;
+  //        for (int i1=0;i1<n1;i1++) {
+  //          final int i2 = i0+i1;
+  //          final long product =
+  //            (u1.uword(i1)*u0.uword(i0)) + u2.uword(i2) + carry;
+  //          u2 = u2.setWord(i2, (int) product);
+  //          carry = (product>>>32); }
+  //        final int i2 = i0+n1;
+  //        u2 = u2.setWord(i2, (int) carry); }
+  //      return ((Natural) u2).immutable(); }
 
   //--------------------------------------------------------------
-  
+
   private static final int[] getLower (final int[] m,
                                        final int n) {
     //assert (! leadingZero(m));
@@ -1531,39 +1390,310 @@ implements Natural {
     final Natural upper = unsafe(getUpper(w,n));
     return List.of(lower,upper); }
 
-//  @Override
-//  public final Natural multiplyKaratsuba (final Natural u) {
-//    System.out.println("multiplyKaratsuba");
-//    final int n0 = endWord();
-//    final int n1 = u.endWord();
-//    final int half = (Math.max(n0,n1) + 1) / 2;
-//    final List<Natural> s0 = split(half);
-//    final List<Natural> s1 = u.split(half);
-//    final Natural xl = s0.get(0);
-//    final Natural xh = s0.get(1);
-//    final Natural yl = s1.get(0);
-//    final Natural yh = s1.get(1);
-//    final Natural p1 = xh.multiply(yh); 
-//    final Natural p2 = xl.multiply(yl);
-//    final Natural p3 = xh.add(xl).multiply(yh.add(yl));
-//    final int h32 = half*32;
-//    final Natural p4 = (Natural) p1.shiftUp(h32);
-//    final Natural p5 = 
-//      (Natural) p4.add(p3.subtract(p1).subtract(p2)).shiftUp(h32);
-//    return p5.add(p2); }
+  //  @Override
+  //  public final Natural multiplyKaratsuba (final Natural u) {
+  //    System.out.println("multiplyKaratsuba");
+  //    final int n0 = endWord();
+  //    final int n1 = u.endWord();
+  //    final int half = (Math.max(n0,n1) + 1) / 2;
+  //    final List<Natural> s0 = split(half);
+  //    final List<Natural> s1 = u.split(half);
+  //    final Natural xl = s0.get(0);
+  //    final Natural xh = s0.get(1);
+  //    final Natural yl = s1.get(0);
+  //    final Natural yh = s1.get(1);
+  //    final Natural p1 = xh.multiply(yh);
+  //    final Natural p2 = xl.multiply(yl);
+  //    final Natural p3 = xh.add(xl).multiply(yh.add(yl));
+  //    final int h32 = half*32;
+  //    final Natural p4 = (Natural) p1.shiftUp(h32);
+  //    final Natural p5 =
+  //      (Natural) p4.add(p3.subtract(p1).subtract(p2)).shiftUp(h32);
+  //    return p5.add(p2); }
 
-//  @Override
-//  public final Natural multiplyKaratsuba (final Natural that) {
-//    final NaturalBEI u = (NaturalBEI) that;
-//    return unsafe(multiplyKaratsuba(words(),u.words())); }
+  //  @Override
+  //  public final Natural multiplyKaratsuba (final Natural that) {
+  //    final NaturalBEI u = (NaturalBEI) that;
+  //    return unsafe(multiplyKaratsuba(words(),u.words())); }
 
   //--------------------------------------------------------------
 
-  @Override
-  public final Natural multiplyToomCook3 (final Natural that) {
+  private static final int[] getToomSlice (final int[] m,
+                                           final int lowerSize,
+                                           final int upperSize,
+                                           final int slice,
+                                           final int fullsize) {
+    //assert (! leadingZero(m));
+    final int len = m.length;
+    final int offset = fullsize - len;
+    int start;
+    final int end;
+    if (slice == 0) {
+      start = 0 - offset;
+      end = upperSize - 1 - offset; }
+    else {
+      start = (upperSize + ((slice - 1) * lowerSize)) - offset;
+      end = (start + lowerSize) - 1; }
+    if (start < 0) { start = 0; }
+    if (end < 0) { return EMPTY; }
+    final int sliceSize = (end - start) + 1;
+    if (sliceSize <= 0) { return EMPTY; }
+    // While performing Toom-Cook, all slices are positive and
+    // the sign is adjusted when the final number is composed.
+    if ((start == 0) && (sliceSize >= len)) { return stripLeadingZeros(m); }
+    final int intSlice[] = new int[sliceSize];
+    System.arraycopy(m,start,intSlice,0,sliceSize);
+    return stripLeadingZeros(intSlice); }
+
+  private static final int[] exactDivideBy3 (final int[] m) {
+    //assert (! leadingZero(m));
+    final int len = m.length;
+    final int[] result = new int[len];
+    long x, w, q, borrow;
+    borrow = 0L;
+    for (int i = len - 1; i >= 0; i--) {
+      x = unsigned(m[i]);
+      w = x - borrow;
+      if (borrow > x) { // Did we make the number go negative?
+        borrow = 1L; }
+      else { borrow = 0L; }
+      // 0xAAAAAAAB is the modular inverse of 3 (mod 2^32). Thus,
+      // the effect of this is to divide by 3 (mod 2^32).
+      // This is much faster than division on most architectures.
+      q = loWord(w * 0xAAAAAAABL);
+      result[i] = (int) q;
+      // Now check the borrow. The second check can of course be
+      // eliminated if the first fails.
+      if (q >= 0x55555556L) {
+        borrow++;
+        if (q >= 0xAAAAAAABL) { borrow++; } } }
+    return stripLeadingZeros(result); }
+
+  private static final int[] multiplyToomCook3 (final int[] m0,
+                                                final int[] m1) {
     //System.out.println("multiplyToomCook3");
-    final NaturalBEI u = (NaturalBEI) that;
-    return unsafe(multiplyToomCook3(words(),u.words())); }
+    //assert (! leadingZero(m0));
+    //assert (! leadingZero(m1));
+
+    final int n0 = m0.length;
+    final int n1 = m1.length;
+
+    final int largest = Math.max(n0,n1);
+
+    // k is the size (in ints) of the lower-order slices.
+    final int k = (largest + 2) / 3;   // Equal to ceil(largest/3)
+
+    // r is the size (in ints) of the highest-order slice.
+    final int r = largest - (2 * k);
+
+    // Obtain slices of the numbers. a2 and b2 are the most
+    // significant bits of the numbers a and b, and a0 and b0 the
+    // least significant.
+    final int[] a2 = getToomSlice(m0,k,r,0,largest);
+    final int[] a1 = getToomSlice(m0,k,r,1,largest);
+    final int[] a0 = getToomSlice(m0,k,r,2,largest);
+    final int[] b2 = getToomSlice(m1,k,r,0,largest);
+    final int[] b1 = getToomSlice(m1,k,r,1,largest);
+    final int[] b0 = getToomSlice(m1,k,r,2,largest);
+    final int[] v0 = multiply(a0,b0);
+    int[] da1 = add(a2,a0);
+    int[] db1 = add(b2,b0);
+
+    // might be negative
+    final int[] da1_a1;
+    final int ca = compare(da1,a1);
+    if (0 < ca) { da1_a1 = subtract(da1,a1); }
+    else { da1_a1 = subtract(a1,da1); }
+    // might be negative
+    final int[] db1_b1;
+    final int cb = compare(db1,b1);
+    if (0 < cb) { db1_b1 = subtract(db1,b1); }
+    else { db1_b1 = subtract(b1,db1); }
+    final int cv = ca * cb;
+    final int[] vm1 = multiply(da1_a1,db1_b1);
+
+    da1 = add(da1,a1);
+    db1 = add(db1,b1);
+    final int[] v1 = multiply(da1,db1);
+    final int[] v2 =
+      multiply(
+        subtract(shiftUp(add(da1,a2),1),a0),
+        subtract(shiftUp(add(db1,b2),1),b0));
+
+    final int[] vinf = multiply(a2,b2);
+
+    // The algorithm requires two divisions by 2 and one by 3.
+    // All divisions are known to be exact, that is, they do not
+    // produce remainders, and all results are positive. The
+    // divisions by 2 are implemented as right shifts which are
+    // relatively efficient, leaving only an exact division by 3,
+    // which is done by a specialized linear-time algorithm.
+    int[] t2;
+    // handle missing sign of vm1
+    if (0 < cv) { t2 = exactDivideBy3(subtract(v2,vm1)); }
+    else { t2 = exactDivideBy3(add(v2,vm1));}
+
+    int[] tm1;
+    // handle missing sign of vm1
+    if (0 < cv) { tm1 = shiftDown(subtract(v1,vm1),1); }
+    else { tm1 = shiftDown(add(v1,vm1),1); }
+
+    int[] t1 = subtract(v1,v0);
+    t2 = shiftDown(subtract(t2,t1),1);
+    t1 = subtract(subtract(t1,tm1),vinf);
+    t2 = subtract(t2,shiftUp(vinf,1));
+    tm1 = subtract(tm1,t2);
+
+    // Number of bits to shift left.
+    final int ss = k * 32;
+
+    final int[] result =
+      add(shiftUp(
+        add(shiftUp(
+          add(shiftUp(
+            add(shiftUp(vinf,ss),t2),
+            ss),t1),
+          ss),tm1),
+        ss),v0);
+    return stripLeadingZeros(result); }
+
+  @Override
+  public final Natural exactDivideBy3 () {
+    //assert (! leadingZero(m));
+    final int[] m = words();
+    final int len = m.length;
+    final int[] result = new int[len];
+    long x, w, q, borrow;
+    borrow = 0L;
+    for (int i = len - 1; i >= 0; i--) {
+      x = unsigned(m[i]);
+      w = x - borrow;
+      if (borrow > x) { // Did we make the number go negative?
+        borrow = 1L; }
+      else { borrow = 0L; }
+      // 0xAAAAAAAB is the modular inverse of 3 (mod 2^32). Thus,
+      // the effect of this is to divide by 3 (mod 2^32).
+      // This is much faster than division on most architectures.
+      q = loWord(w * 0xAAAAAAABL);
+      result[i] = (int) q;
+      // Now check the borrow. The second check can of course be
+      // eliminated if the first fails.
+      if (q >= 0x55555556L) {
+        borrow++;
+        if (q >= 0xAAAAAAABL) { borrow++; } } }
+    return unsafe(stripLeadingZeros(result)); }
+
+  @Override
+  public final Natural getToomSlice (final int lowerSize,
+                                     final int upperSize,
+                                     final int slice,
+                                     final int fullsize) {
+    //assert (! leadingZero(m));
+    final int len = endWord();
+    final int offset = fullsize - len;
+    int start;
+    final int end;
+    if (slice == 0) {
+      start = 0 - offset;
+      end = upperSize - 1 - offset; }
+    else {
+      start = (upperSize + ((slice - 1) * lowerSize)) - offset;
+      end = (start + lowerSize) - 1; }
+    if (start < 0) { start = 0; }
+    if (end < 0) { return ZERO; }
+    final int sliceSize = (end - start) + 1;
+    if (sliceSize <= 0) { return ZERO; }
+    // While performing Toom-Cook, all slices are positive and
+    // the sign is adjusted when the final number is composed.
+    if ((start == 0) && (sliceSize >= len)) { return this; }
+    final int intSlice[] = new int[sliceSize];
+    System.arraycopy(words(),start,intSlice,0,sliceSize);
+    return unsafe(stripLeadingZeros(intSlice)); }
+
+  //    @Override
+  //    public final Natural multiplyToomCook3 (final Natural u) {
+  //      //System.out.println("multiplyToomCook3");
+  //      final int n0 = endWord();
+  //      final int n1 = u.endWord();
+  //      final int largest = Math.max(n0,n1);
+  //      // k is the size (in ints) of the lower-order slices.
+  //      final int k = (largest + 2) / 3;   // Equal to ceil(largest/3)
+  //      // r is the size (in ints) of the highest-order slice.
+  //      final int r = largest - (2 * k);
+  //  
+  //      // Obtain slices of the numbers. a2 and b2 are the most
+  //      // significant bits of the numbers a and b, and a0 and b0 the
+  //      // least significant.
+  //      final Natural a2 = getToomSlice(k,r,0,largest);
+  //      final Natural a1 = getToomSlice(k,r,1,largest);
+  //      final Natural a0 = getToomSlice(k,r,2,largest);
+  //      final Natural b2 = u.getToomSlice(k,r,0,largest);
+  //      final Natural b1 = u.getToomSlice(k,r,1,largest);
+  //      final Natural b0 = u.getToomSlice(k,r,2,largest);
+  //      final Natural v0 = a0.multiply(b0);
+  //      Natural da1 = a2.add(a0);
+  //      Natural db1 = b2.add(b0);
+  //  
+  //      // might be negative
+  //      final Natural da1_a1;
+  //      final int ca = da1.compareTo(a1);
+  //      if (0 < ca) { da1_a1 = da1.subtract(a1); }
+  //      else { da1_a1 = a1.subtract(da1); }
+  //      // might be negative
+  //      final Natural db1_b1;
+  //      final int cb = db1.compareTo(b1);
+  //      if (0 < cb) { db1_b1 = db1.subtract(b1); }
+  //      else { db1_b1 = b1.subtract(db1); }
+  //      final int cv = ca * cb;
+  //      final Natural vm1 = da1_a1.multiply(db1_b1);
+  //  
+  //      da1 = da1.add(a1);
+  //      db1 = db1.add(b1);
+  //      final Natural v1 = da1.multiply(db1);
+  //      final Natural v2 =
+  //          da1.add(a2).shiftUp(1).subtract(a0)
+  //          .multiply(
+  //          db1.add(b2).shiftUp(1).subtract(b0));
+  //  
+  //      final Natural vinf = a2.multiply(b2);
+  //  
+  //      // The algorithm requires two divisions by 2 and one by 3.
+  //      // All divisions are known to be exact, that is, they do not
+  //      // produce remainders, and all results are positive. The
+  //      // divisions by 2 are implemented as right shifts which are
+  //      // relatively efficient, leaving only an exact division by 3,
+  //      // which is done by a specialized linear-time algorithm.
+  //      Natural t2;
+  //      // handle missing sign of vm1
+  //      if (0 < cv) { t2 = v2.subtract(vm1).exactDivideBy3(); }
+  //      else { t2 = v2.add(vm1).exactDivideBy3();}
+  //  
+  //      Natural tm1;
+  //      // handle missing sign of vm1
+  //      if (0 < cv) { tm1 = v1.subtract(vm1); }
+  //      else { tm1 = v1.add(vm1); }
+  //      tm1 = tm1.shiftDown(1);
+  //  
+  //      Natural t1 = v1.subtract(v0);
+  //      t2 = t2.subtract(t1).shiftDown(1);
+  //      t1 = t1.subtract(tm1).subtract(vinf);
+  //      t2 = t2.subtract(vinf.shiftUp(1));
+  //      tm1 = tm1.subtract(t2);
+  //  
+  //      // Number of bits to shift left.
+  //      final int ss = k * 32;
+  //  
+  //      return
+  //        vinf.shiftUp(ss).add(t2).shiftUp(ss).add(t1)
+  //        .shiftUp(ss).add(tm1).shiftUp(ss).add(v0); }
+
+  //  @Override
+  //  public final Natural multiplyToomCook3 (final Natural that) {
+  //    //System.out.println("multiplyToomCook3");
+  //    final NaturalBEI u = (NaturalBEI) that;
+  //    return unsafe(multiplyToomCook3(words(),u.words())); }
+
+  //--------------------------------------------------------------
 
   //  @Override
   //  public final Natural multiply (final Natural that) {
@@ -2198,10 +2328,14 @@ implements Natural {
 
   @Override
   public final Natural recyclable (final Natural init) {
-    if (null==init) { 
+    if (null==init) {
       return NaturalBEIMutable.make(words().length); }
     assert this==init;
     return NaturalBEIMutable.valueOf(this); }
+
+  @Override
+  public final Natural recyclable (final int n) {
+    return NaturalBEIMutable.make(n); }
 
   @Override
   public final boolean isImmutable () { return true; }

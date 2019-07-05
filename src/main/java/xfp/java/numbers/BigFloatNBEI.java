@@ -184,7 +184,7 @@ implements Ringlike<BigFloatNBEI> {
     return Long.compare(m0,m11); }
 
   //--------------------------------------------------------------
-  
+
   private static final Natural add (final long m0,
                                     final long m1) {
     assert 0L<=m0;
@@ -202,8 +202,8 @@ implements Ringlike<BigFloatNBEI> {
     return NaturalBEI.unsafe(new int[] { hi, mid, lo, }); }
 
   private static final Natural add (final long m0,
-                                   final long m1,
-                                   final int bitShift) {
+                                    final long m1,
+                                    final int bitShift) {
     assert 0L<=m0;
     assert 0L<=m1;
     assert 0<=bitShift;
@@ -269,20 +269,20 @@ implements Ringlike<BigFloatNBEI> {
   private static final Natural subtract (final long m0,
                                          final long m1,
                                          final int bitShift) {
-     assert 0L<=m0;
-     assert 0L<=m1;
-     assert 0<=bitShift;
-     final long dm = m0 - (m1<<bitShift);
-     assert 0L<=dm;
-     return NaturalBEI.valueOf(dm); }
+    assert 0L<=m0;
+    assert 0L<=m1;
+    assert 0<=bitShift;
+    final long dm = m0 - (m1<<bitShift);
+    assert 0L<=dm;
+    return NaturalBEI.valueOf(dm); }
 
-   // only when (m1 << upShift) <= m0
+  // only when (m1 << upShift) <= m0
 
-   private static final Natural subtract (final long m0,
+  private static final Natural subtract (final long m0,
                                          final int bitShift,
                                          final long m1) {
-     return NaturalBEI.valueOf(m0,bitShift).subtract(m1); }
-   
+    return NaturalBEI.valueOf(m0,bitShift).subtract(m1); }
+
   private static final BigFloatNBEI
   addSameExponent (final boolean n0,
                    final long t0,
