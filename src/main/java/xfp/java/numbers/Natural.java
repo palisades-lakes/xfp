@@ -383,22 +383,41 @@ extends Uints<Natural>, Ringlike<Natural> {
         if (q>=0xAAAAAAABL) { borrow++; } } }
     return t.immutable(); }
 
-  @SuppressWarnings("boxing")
   public default Natural getToomSlice (final int lowerSize,
                                        final int upperSize,
                                        final int slice,
                                        final int fullsize) {
-    throw Exceptions.unsupportedOperation(this,"getToomSlice",
-      lowerSize,upperSize,slice,fullsize); }
+    final int n = endWord();
+    final int offset = fullsize-n;
+    int start;
+    final int end;
+    if (0==slice) {
+      start = 0-offset;
+      end = upperSize-1-offset; }
+    else {
+      start = upperSize+((slice-1)*lowerSize)-offset;
+      end = start+lowerSize-1; }
+    if (start < 0) { start = 0; }
+    if (end < 0) { return zero(); }
+    final int sliceSize = (end-start) + 1;
+    if (sliceSize<=0) { return zero(); }
+    // While performing Toom-Cook, all slices are positive and
+    // the sign is adjusted when the final number is composed.
+    if ((0==start) && (sliceSize>=n)) { return this; }
+    final int i1 = n-start;
+    final int i0 = i1-sliceSize;
+    return words(i0,i1); }
+//    throw Exceptions.unsupportedOperation(this,"getToomSlice",
+//      lowerSize,upperSize,slice,fullsize); }
 
   public default Natural multiplyToomCook3 (final Natural u) {
     //System.out.println("multiplyToomCook3");
     final int n0 = endWord();
     final int n1 = u.endWord();
     final int largest = Math.max(n0,n1);
-    // k is the size (in ints) of the lower-order slices.
-    final int k = (largest + 2) / 3;   // Equal to ceil(largest/3)
-    // r is the size (in ints) of the highest-order slice.
+    // words in the lower-order slices.
+    final int k = (largest+2)/3; // ceil(largest/3)
+    // words the highest-order slice.
     final int r = largest - (2 * k);
 
     // Obtain slices of the numbers. a2 and b2 are the most

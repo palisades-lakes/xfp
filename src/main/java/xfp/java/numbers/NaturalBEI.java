@@ -841,7 +841,7 @@ implements Natural {
 
   @Override
   public final int word (final int i) {
-    assert 0<=i;
+    assert 0<=i : "Negative index: " + i;
     final int n = words().length;
     final int ii = n-i-1;
     if ((0<=ii) && (ii<n)) { return words()[ii]; }
@@ -1624,32 +1624,61 @@ implements Natural {
 //        if (q>=0xAAAAAAABL) { borrow++; } } }
 //    return t.immutable(); }
 
-  @Override
-  public final Natural getToomSlice (final int lowerSize,
-                                     final int upperSize,
-                                     final int slice,
-                                     final int fullsize) {
-    //assert (! leadingZero(m));
-    final int len = endWord();
-    final int offset = fullsize - len;
-    int start;
-    final int end;
-    if (slice == 0) {
-      start = 0 - offset;
-      end = upperSize - 1 - offset; }
-    else {
-      start = (upperSize + ((slice - 1) * lowerSize)) - offset;
-      end = (start + lowerSize) - 1; }
-    if (start < 0) { start = 0; }
-    if (end < 0) { return ZERO; }
-    final int sliceSize = (end - start) + 1;
-    if (sliceSize <= 0) { return ZERO; }
-    // While performing Toom-Cook, all slices are positive and
-    // the sign is adjusted when the final number is composed.
-    if ((start == 0) && (sliceSize >= len)) { return this; }
-    final int intSlice[] = new int[sliceSize];
-    System.arraycopy(words(),start,intSlice,0,sliceSize);
-    return unsafe(stripLeadingZeros(intSlice)); }
+//  @Override
+//  public final Natural getToomSlice (final int lowerSize,
+//                                     final int upperSize,
+//                                     final int slice,
+//                                     final int fullsize) {
+//    //assert (! leadingZero(m));
+//    final int len = endWord();
+//    final int offset = fullsize - len;
+//    int start;
+//    final int end;
+//    if (slice == 0) {
+//      start = 0 - offset;
+//      end = upperSize - 1 - offset; }
+//    else {
+//      start = (upperSize + ((slice - 1) * lowerSize)) - offset;
+//      end = (start + lowerSize) - 1; }
+//    if (start < 0) { start = 0; }
+//    if (end < 0) { return ZERO; }
+//    final int sliceSize = (end - start) + 1;
+//    if (sliceSize <= 0) { return ZERO; }
+//    // While performing Toom-Cook, all slices are positive and
+//    // the sign is adjusted when the final number is composed.
+//    if ((start == 0) && (sliceSize >= len)) { return this; }
+//    final int intSlice[] = new int[sliceSize];
+//    System.arraycopy(words(),start,intSlice,0,sliceSize);
+//    return unsafe(stripLeadingZeros(intSlice)); }
+
+//  @Override
+//  public final Natural getToomSlice (final int lowerSize,
+//                                     final int upperSize,
+//                                     final int slice,
+//                                     final int fullsize) {
+//    final int n = endWord();
+//    final int offset = fullsize-n;
+//    int start;
+//    final int end;
+//    if (0==slice) {
+//      start = 0-offset;
+//      end = upperSize-1-offset; }
+//    else {
+//      start = upperSize+((slice-1)*lowerSize)-offset;
+//      end = start+lowerSize-1; }
+//    if (start < 0) { start = 0; }
+//    if (end < 0) { return ZERO; }
+//    final int sliceSize = (end-start) + 1;
+//    if (sliceSize<=0) { return ZERO; }
+//    // While performing Toom-Cook, all slices are positive and
+//    // the sign is adjusted when the final number is composed.
+//    if ((0==start) && (sliceSize>=n)) { return this; }
+//    final int i1 = n-start;
+//    final int i0 = i1-sliceSize;
+//    return words(i0,i1); }
+//    final int intSlice[] = new int[sliceSize];
+//    System.arraycopy(words(),start,intSlice,0,sliceSize);
+//    return unsafe(stripLeadingZeros(intSlice)); }
 
   //    @Override
   //    public final Natural multiplyToomCook3 (final Natural u) {
