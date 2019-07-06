@@ -1793,26 +1793,27 @@ implements Natural {
   //    assert 1L<=that;
   //    return multiply(valueOf(that,shift)); }
 
-  public static final Natural multiply (final long t0,
-                                        final long t1) {
-    assert 0L<=t0;
-    assert 0L<=t1;
-    final long hi0 = Numbers.hiWord(t0);
-    final long lo0 = loWord(t0);
-    final long hi1 = Numbers.hiWord(t1);
-    final long lo1 = loWord(t1);
-    final long lolo = lo0*lo1;
-    final long hilo2 = (hi0*lo1) + (hi1*lo0);
-    final long hihi = hi0*hi1;
-    final int[] m = new int[4];
-    long sum = lolo;
-    m[3] = (int) sum;
-    sum = (sum >>> 32) + hilo2;
-    m[2] = (int) sum;
-    sum = (sum >>> 32) + hihi ;
-    m[1] = (int) sum;
-    m[0] = (int) (sum >>> 32);
-    return unsafe(stripLeadingZeros(m)); }
+//  @Override
+//  public final Natural fromProduct (final long t0,
+//                                        final long t1) {
+//    assert 0L<=t0;
+//    assert 0L<=t1;
+//    final long hi0 = Numbers.hiWord(t0);
+//    final long lo0 = loWord(t0);
+//    final long hi1 = Numbers.hiWord(t1);
+//    final long lo1 = loWord(t1);
+//    final long lolo = lo0*lo1;
+//    final long hilo2 = (hi0*lo1) + (hi1*lo0);
+//    final long hihi = hi0*hi1;
+//    final int[] m = new int[4];
+//    long sum = lolo;
+//    m[3] = (int) sum;
+//    sum = (sum >>> 32) + hilo2;
+//    m[2] = (int) sum;
+//    sum = (sum >>> 32) + hihi ;
+//    m[1] = (int) sum;
+//    m[0] = (int) (sum >>> 32);
+//    return unsafe(stripLeadingZeros(m)); }
 
   //--------------------------------------------------------------
   // Division

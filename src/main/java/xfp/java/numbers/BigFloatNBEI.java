@@ -558,7 +558,7 @@ implements Ringlike<BigFloatNBEI> {
         significand(),
         exponent(),
         ! (p0 ^ p1),
-        (NaturalBEI) NaturalBEI.multiply(t00,t11),
+        (NaturalBEI) significand().fromProduct(t00,t11),
         e00+e11); }
 
   //  public final BigFloat

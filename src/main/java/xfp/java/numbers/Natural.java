@@ -315,33 +315,33 @@ extends Uints<Natural>, Ringlike<Natural> {
     return v.immutable(); }
 
   //--------------------------------------------------------------
-//  /** Return a list of 2 <code>Natural</code> such that
-//   * <code>this = get(0) + get(1) * 2<sup>32*n</code>.
-//   * For Karatsuba multiplication.
-//   */
-//
-//  public default List<Natural> split (final int n) {
-//    throw Exceptions.unsupportedOperation(this,"split",n); }
-//
-//  public default Natural multiplyKaratsuba (final Natural u) {
-//    //System.out.println("multiplyKaratsuba");
-//    final int n0 = endWord();
-//    final int n1 = u.endWord();
-//    final int half = (Math.max(n0,n1) + 1) / 2;
-//    final List<Natural> s0 = split(half);
-//    final List<Natural> s1 = u.split(half);
-//    final Natural xl = s0.get(0);
-//    final Natural xh = s0.get(1);
-//    final Natural yl = s1.get(0);
-//    final Natural yh = s1.get(1);
-//    final Natural p1 = xh.multiply(yh);
-//    final Natural p2 = xl.multiply(yl);
-//    final Natural p3 = xh.add(xl).multiply(yh.add(yl));
-//    final int h32 = half*32;
-//    final Natural p4 = p1.shiftUp(h32);
-//    final Natural p5 =
-//      p4.add(p3.subtract(p1).subtract(p2)).shiftUp(h32);
-//    return p5.add(p2); }
+  //  /** Return a list of 2 <code>Natural</code> such that
+  //   * <code>this = get(0) + get(1) * 2<sup>32*n</code>.
+  //   * For Karatsuba multiplication.
+  //   */
+  //
+  //  public default List<Natural> split (final int n) {
+  //    throw Exceptions.unsupportedOperation(this,"split",n); }
+  //
+  //  public default Natural multiplyKaratsuba (final Natural u) {
+  //    //System.out.println("multiplyKaratsuba");
+  //    final int n0 = endWord();
+  //    final int n1 = u.endWord();
+  //    final int half = (Math.max(n0,n1) + 1) / 2;
+  //    final List<Natural> s0 = split(half);
+  //    final List<Natural> s1 = u.split(half);
+  //    final Natural xl = s0.get(0);
+  //    final Natural xh = s0.get(1);
+  //    final Natural yl = s1.get(0);
+  //    final Natural yh = s1.get(1);
+  //    final Natural p1 = xh.multiply(yh);
+  //    final Natural p2 = xl.multiply(yl);
+  //    final Natural p3 = xh.add(xl).multiply(yh.add(yl));
+  //    final int h32 = half*32;
+  //    final Natural p4 = p1.shiftUp(h32);
+  //    final Natural p5 =
+  //      p4.add(p3.subtract(p1).subtract(p2)).shiftUp(h32);
+  //    return p5.add(p2); }
 
   public default Natural multiplyKaratsuba (final Natural u) {
     //System.out.println("multiplyKaratsuba");
@@ -407,8 +407,8 @@ extends Uints<Natural>, Ringlike<Natural> {
     final int i1 = n-start;
     final int i0 = i1-sliceSize;
     return words(i0,i1); }
-//    throw Exceptions.unsupportedOperation(this,"getToomSlice",
-//      lowerSize,upperSize,slice,fullsize); }
+  //    throw Exceptions.unsupportedOperation(this,"getToomSlice",
+  //      lowerSize,upperSize,slice,fullsize); }
 
   public default Natural multiplyToomCook3 (final Natural u) {
     //System.out.println("multiplyToomCook3");
@@ -450,8 +450,8 @@ extends Uints<Natural>, Ringlike<Natural> {
     db1 = db1.add(b1);
     final Natural v1 = da1.multiply(db1);
     final Natural v2 =
-        da1.add(a2).shiftUp(1).subtract(a0)
-        .multiply(
+      da1.add(a2).shiftUp(1).subtract(a0)
+      .multiply(
         db1.add(b2).shiftUp(1).subtract(b0));
 
     final Natural vinf = a2.multiply(b2);
@@ -486,8 +486,8 @@ extends Uints<Natural>, Ringlike<Natural> {
       vinf.shiftUp(ss).add(t2).shiftUp(ss).add(t1)
       .shiftUp(ss).add(tm1).shiftUp(ss).add(v0); }
 
-//  public default Natural multiplyToomCook3 (final Natural u) {
-//    throw Exceptions.unsupportedOperation(this,"multiplyToomCook3",u); }
+  //  public default Natural multiplyToomCook3 (final Natural u) {
+  //    throw Exceptions.unsupportedOperation(this,"multiplyToomCook3",u); }
 
   //--------------------------------------------------------------
 
@@ -532,9 +532,9 @@ extends Uints<Natural>, Ringlike<Natural> {
         carry = product >>> 32; }
       t = t.setWord(i+1,(int) carry); }
     return t.immutable(); }
-    //throw Exceptions.unsupportedOperation(this,"multiply",u); }
-  //    assert 0L<=u;
-  //    return multiply((Natural) from(u)); }
+  //throw Exceptions.unsupportedOperation(this,"multiply",u); }
+  //assert 0L<=u;
+  //return multiply((Natural) from(u)); }
 
   public default Natural multiply (final long u,
                                    final int upShift) {
@@ -543,6 +543,32 @@ extends Uints<Natural>, Ringlike<Natural> {
     assert 0<=upShift;
     if (0==upShift) { return multiply(u); }
     return multiply(from(u,upShift)); }
+
+  public default Natural fromProduct (final long t0,
+                                      final long t1) {
+    assert 0L<=t0;
+    assert 0L<=t1;
+    final long hi0 = Numbers.hiWord(t0);
+    final long lo0 = loWord(t0);
+    final long hi1 = Numbers.hiWord(t1);
+    final long lo1 = loWord(t1);
+    final long lolo = lo0*lo1;
+    final long hilo2 = (hi0*lo1) + (hi1*lo0);
+    final long hihi = hi0*hi1;
+    long sum = lolo;
+    final int m0 = (int) sum;
+    sum = (sum>>>32) + hilo2;
+    final int m1 = (int) sum;
+    sum = (sum>>>32) + hihi ;
+    final int m2 = (int) sum;
+    final int m3 = (int) (sum>>> 32);
+    final Natural u = recyclable(4);
+    if (0!=m0) { u.setWord(0,m0); }
+    if (0!=m1) { u.setWord(1,m1); }
+    if (0!=m2) { u.setWord(2,m2); }
+    if (0!=m3) { u.setWord(3,m3); }
+    return u.immutable(); }
+//throw Exceptions.unsupportedOperation(this,"fromProduct",t0,t1); }
 
   //--------------------------------------------------------------
 
