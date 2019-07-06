@@ -300,7 +300,7 @@ extends Uints<Natural>, Ringlike<Natural> {
     //System.out.println("multiplySimple");
     final int n0 = endWord();
     final int n1 = u.endWord();
-    Uints v = recyclable(n0+n1+1);
+    Natural v = recyclable(n0+n1+1);
     long carry = 0L;
     for (int i0=0;i0<n0;i0++) {
       carry = 0L;
@@ -312,7 +312,7 @@ extends Uints<Natural>, Ringlike<Natural> {
         carry = (product>>>32); }
       final int i2 = i0+n1;
       v = v.setWord(i2, (int) carry); }
-    return ((Natural) v).immutable(); }
+    return v.immutable(); }
 
   //--------------------------------------------------------------
 //  /** Return a list of 2 <code>Natural</code> such that
@@ -509,7 +509,30 @@ extends Uints<Natural>, Ringlike<Natural> {
   //--------------------------------------------------------------
 
   public default Natural multiply (final long u) {
-    throw Exceptions.unsupportedOperation(this,"multiply",u); }
+    if (0L==u) { return zero(); }
+    assert 0L < u;
+    final long hi = Numbers.hiWord(u);
+    final long lo = Numbers.loWord(u);
+    final int n0 = endWord();
+    Natural t = recyclable(n0+3);
+    long carry = 0;
+    int i=0;
+    for (;i<n0;i++) {
+      final long product = (uword(i)*lo) + carry;
+      t = t.setWord(i,(int) product);
+      carry = (product>>>32); }
+    t = t.setWord(i,(int) carry);
+    if (hi != 0L) {
+      carry = 0;
+      i=0;
+      for (;i<n0;i++) {
+        final int i1 = i+1;
+        final long product = (uword(i)*hi) + t.uword(i1) + carry;
+        t = t.setWord(i1,(int) product);
+        carry = product >>> 32; }
+      t = t.setWord(i+1,(int) carry); }
+    return t.immutable(); }
+    //throw Exceptions.unsupportedOperation(this,"multiply",u); }
   //    assert 0L<=u;
   //    return multiply((Natural) from(u)); }
 

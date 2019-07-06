@@ -1782,10 +1782,10 @@ implements Natural {
   //    return  (u); }
   //return unsafe(multiply(words(),u.words())); }
 
-  @Override
-  public final Natural multiply (final long that) {
-    assert 1L<=that;
-    return unsafe(multiply(words(),that)); }
+//  @Override
+//  public final Natural multiply (final long that) {
+//    assert 1L<=that;
+//    return unsafe(multiply(words(),that)); }
 
   //  @Override
   //  public final Natural multiply (final long that,
