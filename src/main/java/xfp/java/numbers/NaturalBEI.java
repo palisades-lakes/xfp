@@ -890,7 +890,7 @@ implements Natural {
   @Override
   public final Natural square () {
     if (isZero()) { return zero(); }
-    if (this.isOne()) { return this; }
+    if (isOne()) { return this; }
     return unsafe(square(words())); }
 
   //--------------------------------------------------------------
