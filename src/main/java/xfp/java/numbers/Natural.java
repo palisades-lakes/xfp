@@ -16,7 +16,7 @@ import xfp.java.exceptions.Exceptions;
  * TODO: utilities class to hide private stuff?
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-05
+ * @version 2019-07-06
  */
 
 @SuppressWarnings("unchecked")
@@ -274,6 +274,10 @@ extends Uints<Natural>, Ringlike<Natural> {
   //--------------------------------------------------------------
 
   @Override
+  public default Natural one () {
+    throw Exceptions.unsupportedOperation(this,"one"); }
+
+  @Override
   public default boolean isOne () {
     if (1!=word(0)) { return false; }
     for (int i=Math.max(1,startWord());i<endWord();i++) {
@@ -315,33 +319,6 @@ extends Uints<Natural>, Ringlike<Natural> {
     return v.immutable(); }
 
   //--------------------------------------------------------------
-  //  /** Return a list of 2 <code>Natural</code> such that
-  //   * <code>this = get(0) + get(1) * 2<sup>32*n</code>.
-  //   * For Karatsuba multiplication.
-  //   */
-  //
-  //  public default List<Natural> split (final int n) {
-  //    throw Exceptions.unsupportedOperation(this,"split",n); }
-  //
-  //  public default Natural multiplyKaratsuba (final Natural u) {
-  //    //System.out.println("multiplyKaratsuba");
-  //    final int n0 = endWord();
-  //    final int n1 = u.endWord();
-  //    final int half = (Math.max(n0,n1) + 1) / 2;
-  //    final List<Natural> s0 = split(half);
-  //    final List<Natural> s1 = u.split(half);
-  //    final Natural xl = s0.get(0);
-  //    final Natural xh = s0.get(1);
-  //    final Natural yl = s1.get(0);
-  //    final Natural yh = s1.get(1);
-  //    final Natural p1 = xh.multiply(yh);
-  //    final Natural p2 = xl.multiply(yl);
-  //    final Natural p3 = xh.add(xl).multiply(yh.add(yl));
-  //    final int h32 = half*32;
-  //    final Natural p4 = p1.shiftUp(h32);
-  //    final Natural p5 =
-  //      p4.add(p3.subtract(p1).subtract(p2)).shiftUp(h32);
-  //    return p5.add(p2); }
 
   public default Natural multiplyKaratsuba (final Natural u) {
     //System.out.println("multiplyKaratsuba");
@@ -486,9 +463,6 @@ extends Uints<Natural>, Ringlike<Natural> {
       vinf.shiftUp(ss).add(t2).shiftUp(ss).add(t1)
       .shiftUp(ss).add(tm1).shiftUp(ss).add(v0); }
 
-  //  public default Natural multiplyToomCook3 (final Natural u) {
-  //    throw Exceptions.unsupportedOperation(this,"multiplyToomCook3",u); }
-
   //--------------------------------------------------------------
 
   @Override
@@ -532,9 +506,6 @@ extends Uints<Natural>, Ringlike<Natural> {
         carry = product >>> 32; }
       t = t.setWord(i+1,(int) carry); }
     return t.immutable(); }
-  //throw Exceptions.unsupportedOperation(this,"multiply",u); }
-  //assert 0L<=u;
-  //return multiply((Natural) from(u)); }
 
   public default Natural multiply (final long u,
                                    final int upShift) {
@@ -568,51 +539,83 @@ extends Uints<Natural>, Ringlike<Natural> {
     if (0!=m2) { u.setWord(2,m2); }
     if (0!=m3) { u.setWord(3,m3); }
     return u.immutable(); }
-//throw Exceptions.unsupportedOperation(this,"fromProduct",t0,t1); }
+
+  //--------------------------------------------------------------
+  // division
+  //--------------------------------------------------------------
+
+  static final int BURNIKEL_ZIEGLER_THRESHOLD = 80;
+  static final int BURNIKEL_ZIEGLER_OFFSET = 40;
+
+  default boolean
+  useKnuthDivision (final Natural u) {
+    final int nn = endWord();
+    final int nd = u.endWord();
+    return
+      (nd < Natural.BURNIKEL_ZIEGLER_THRESHOLD)
+      ||
+      ((nn-nd) < Natural.BURNIKEL_ZIEGLER_OFFSET); }
+
+  //--------------------------------------------------------------
+
+  default List<Natural>
+  divideAndRemainderKnuth (final Natural u) {
+    return recyclable(this).divideAndRemainderKnuth(u); }
+
+  default List<Natural>
+  divideAndRemainderBurnikelZiegler (final Natural u) {
+    throw Exceptions.unsupportedOperation(
+      this,"divideAndRemainderBurnikelZiegler",u); }
+
+  @Override
+  public default List<Natural> divideAndRemainder (final Natural u) {
+    assert (! u.isZero());
+    if (useKnuthDivision(u)) {
+      return divideAndRemainderKnuth(u); }
+    return
+      divideAndRemainderBurnikelZiegler(u); }
+
+  public default List<Natural> divideAndRemainder (final int u) {
+    assert 0<u;
+    throw Exceptions.unsupportedOperation(
+      this,"divideAndRemainder",u); }
+ 
+  //--------------------------------------------------------------
+
+  default Natural divideKnuth (final Natural u) {
+    final Natural n = recyclable(this);
+    final Natural d = recyclable(u);
+    return n.divideKnuth(d).immutable(); }
+
+  @Override
+  public default Natural divide (final Natural u) {
+    assert (! u.isZero());
+    if (u.isOne()) { return this; }
+    if (useKnuthDivision(u)) { return divideKnuth(u); }
+    return divideAndRemainderBurnikelZiegler(u).get(0); }
 
   //--------------------------------------------------------------
 
   @Override
-  public default Natural divide (final Natural x) {
-    throw Exceptions.unsupportedOperation(this,"divide",x); }
+  public default Natural remainder (final Natural u) {
+    return divideAndRemainder(u).get(1); }
 
-  @Override
-  public default Natural invert () {
-    throw Exceptions.unsupportedOperation(this,"invert"); }
-
-  @Override
-  public default Natural one () {
-    throw Exceptions.unsupportedOperation(this,"one"); }
-
-  @Override
-  public default List<Natural> divideAndRemainder (final Natural x) {
-    final Natural d = divide(x);
-    final Natural r = subtract(x.multiply(d));
-    return List.of(d,r); }
-
-  @Override
-  public default Natural remainder (final Natural x) {
-    final Natural d = divide(x);
-    final Natural r = subtract(x.multiply(d));
-    return r; }
+  //--------------------------------------------------------------
 
   @Override
   public default Natural gcd (final Natural x) {
     throw Exceptions.unsupportedOperation(this,"gcd",x); }
 
   //--------------------------------------------------------------
+
+  @Override
+  public default Natural invert () { return one().divide(this); }
+
+  //--------------------------------------------------------------
   // 'Number' interface
   //--------------------------------------------------------------
-  // TODO: move to Ringlike?
-
-  //  @Override
-  //  public default byte[] toByteArray () {
-  //    throw Exceptions.unsupportedOperation(this,"toByteArray"); }
-
-  //  @Override
-  //  public default BigInteger bigIntegerValue () {
-  //    return new BigInteger(toByteArray()); }
-
+  // TODO: exceptions on truncation?
+  
   @Override
   public default int intValue () { return word(0); }
 

@@ -4,12 +4,15 @@ import static xfp.java.numbers.Numbers.loWord;
 import static xfp.java.numbers.Numbers.unsigned;
 
 import java.util.Arrays;
+import java.util.List;
+
+import xfp.java.exceptions.Exceptions;
 
 /**
  * Don't implement Comparable, because of mutability!
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-05
+ * @version 2019-07-06
  */
 
 public final class NaturalBEIMutable implements Natural {
@@ -142,10 +145,10 @@ public final class NaturalBEIMutable implements Natural {
 
   @Override
   public final Natural clear () {
-  start = 0;
-  nWords = 0;
-  Arrays.fill(words,0);
-  return this; }
+    start = 0;
+    nWords = 0;
+    Arrays.fill(words,0);
+    return this; }
 
   public final int getLowestSetBit () {
     if (nWords == 0) { return -1; }
@@ -1313,6 +1316,59 @@ public final class NaturalBEIMutable implements Natural {
     if (shift > 0) { return rem % divisor; }
     return rem; }
 
+  @Override
+  public final List<Natural> divideAndRemainder (final int divisor) {
+    final NaturalBEIMutable quotient = make();
+    final long divisorLong = unsigned(divisor);
+    // Special case of one word dividend
+    if (nWords == 1) {
+      final long dividendValue = unsigned(words[start]);
+      final int q = (int) (dividendValue / divisorLong);
+      final int r = (int) (dividendValue - (q * divisorLong));
+      quotient.words[0] = q;
+      quotient.nWords = (q == 0) ? 0 : 1;
+      quotient.start = 0;
+      return List.of(quotient.immutable(),NaturalBEI.valueOf(r)); }
+
+    if (quotient.words.length < nWords) {
+      quotient.words = new int[nWords]; }
+    quotient.start = 0;
+    quotient.nWords = nWords;
+
+    // Normalize the divisor
+    final int shift = Integer.numberOfLeadingZeros(divisor);
+    int rem = words[start];
+    long remLong = unsigned(rem);
+    if (remLong < divisorLong) { quotient.words[0] = 0; }
+    else {
+      quotient.words[0] = (int)(remLong / divisorLong);
+      rem = (int) (remLong - (quotient.words[0] * divisorLong));
+      remLong = unsigned(rem); }
+    int xlen = nWords;
+    while (--xlen > 0) {
+      final long dividendEstimate = (remLong << 32) |
+        unsigned(words[(start + nWords) - xlen]);
+      int q;
+      if (dividendEstimate >= 0) {
+        q = (int) (dividendEstimate / divisorLong);
+        rem = (int) (dividendEstimate - (q * divisorLong)); }
+      else {
+        final long tmp = divWord(dividendEstimate, divisor);
+        q = (int) Numbers.loWord(tmp);
+        rem = (int) (tmp >>> 32); }
+      quotient.words[nWords - xlen] = q;
+      remLong = unsigned(rem); }
+    quotient.normalize();
+    // denormalize
+    if (shift > 0) { 
+      return List.of(
+        quotient.immutable(),
+        NaturalBEI.valueOf(rem % divisor)); }
+
+    return List.of(
+      quotient.immutable(),
+      NaturalBEI.valueOf(rem)); }
+
   //--------------------------------------------------------------
   /** A primitive used for division. This method adds in one
    * multiple of the divisor a back to the dividend result at a
@@ -1525,11 +1581,49 @@ public final class NaturalBEIMutable implements Natural {
    * b is not changed.
    */
 
-  public final NaturalBEIMutable
-  divideKnuth (final NaturalBEIMutable b,
-               final NaturalBEIMutable quotient,
-               final boolean needRemainder) {
+  @Override
+  public final Natural
+  divideKnuth (final Natural u) {
+    final NaturalBEIMutable b = (NaturalBEIMutable) u;
     assert 0 != b.nWords;
+    // Dividend is zero
+    if (isZero()) { return zero(); }
+    final int cmp = compareTo(b);
+    // Dividend less than divisor
+    if (cmp < 0) { return zero(); }
+    // Dividend equal to divisor
+    if (cmp == 0) { return one(); }
+
+    final NaturalBEIMutable quotient = make();
+
+    // Special case one word divisor
+    if (b.nWords == 1) {
+      return divideAndRemainder(b.words[b.start]).get(0); }
+
+    // Cancel common powers of two if we're above the
+    // KNUTH_POW2_* thresholds
+    if (nWords >= KNUTH_POW2_THRESH_LEN) {
+      final int trailingZeroBits =
+        Math.min(getLowestSetBit(), b.getLowestSetBit());
+      if (trailingZeroBits >= (KNUTH_POW2_THRESH_ZEROS*32)) {
+        final NaturalBEIMutable aa = new NaturalBEIMutable(this);
+        final NaturalBEIMutable bb = new NaturalBEIMutable(b);
+        aa.downShift(trailingZeroBits);
+        bb.downShift(trailingZeroBits);
+        aa.divideAndRemainderKnuth(bb,quotient,true);
+        return quotient; } }
+
+    divideMagnitude(b, quotient, false); 
+    return quotient; }
+
+  //--------------------------------------------------------------
+
+  private final NaturalBEIMutable
+  divideAndRemainderKnuth (final NaturalBEIMutable b,
+                           final NaturalBEIMutable quotient,
+                           final boolean needRemainder) {
+    assert 0 != b.nWords;
+
     // Dividend is zero
     if (nWords == 0) {
       quotient.nWords = 0;
@@ -1568,11 +1662,50 @@ public final class NaturalBEIMutable implements Natural {
         final NaturalBEIMutable bb = new NaturalBEIMutable(b);
         aa.downShift(trailingZeroBits);
         bb.downShift(trailingZeroBits);
-        final NaturalBEIMutable r = aa.divideKnuth(bb,quotient,true);
+        final NaturalBEIMutable r = aa.divideAndRemainderKnuth(bb,quotient,true);
         r.upShift(trailingZeroBits);
         return r; } }
 
     return divideMagnitude(b, quotient, needRemainder); }
+
+  @Override
+  public final List<Natural>
+  divideAndRemainderKnuth (final Natural u) {
+    assert ! u.isZero();
+    // Special case shortcuts
+    if (isZero()) { 
+      return List.of(NaturalBEI.ZERO,NaturalBEI.ZERO); }
+
+    final int cmp = compareTo(u);
+    // Dividend less than divisor
+    if (cmp < 0) {
+      return List.of(NaturalBEI.ZERO,immutable()); }
+    // Dividend equal to divisor
+    if (cmp == 0) {
+      return List.of(NaturalBEI.ONE,NaturalBEI.ZERO); }
+
+    final NaturalBEIMutable b = (NaturalBEIMutable) recyclable(u);
+    // Special case one word divisor
+    if (b.nWords == 1) {
+      return divideAndRemainder(b.words[b.start]); } 
+
+    final NaturalBEIMutable q = (NaturalBEIMutable) recyclable(endWord());
+    // Cancel common powers of two if we're above the
+    // KNUTH_POW2_* thresholds
+    if (nWords >= KNUTH_POW2_THRESH_LEN) {
+      final int trailingZeroBits =
+        Math.min(getLowestSetBit(), b.getLowestSetBit());
+      if (trailingZeroBits >= (KNUTH_POW2_THRESH_ZEROS*32)) {
+        final NaturalBEIMutable aa = new NaturalBEIMutable(this);
+        final NaturalBEIMutable bb = new NaturalBEIMutable(b);
+        aa.downShift(trailingZeroBits);
+        bb.downShift(trailingZeroBits);
+        final NaturalBEIMutable r = 
+          aa.divideAndRemainderKnuth(bb,q,true);
+        r.upShift(trailingZeroBits);
+        return List.of(q.immutable(),r.immutable()); } }
+    final NaturalBEIMutable r = divideMagnitude(b, q, true); 
+    return List.of(q.immutable(),r.immutable()); }  
 
   //--------------------------------------------------------------
   // Burnikel-Ziegler
@@ -1596,7 +1729,7 @@ public final class NaturalBEIMutable implements Natural {
 
     // step 1: base case
     if (((n%2) != 0) || (n < NaturalBEI.BURNIKEL_ZIEGLER_THRESHOLD)) {
-      return divideKnuth(b,quotient,true); }
+      return divideAndRemainderKnuth(b,quotient,true); }
 
     // step 2: view this as [a1,a2,a3,a4] where each ai is n/2 ints or less
     final NaturalBEIMutable aUpper = new NaturalBEIMutable(this);
@@ -1670,7 +1803,7 @@ public final class NaturalBEIMutable implements Natural {
     // step 6: add b until r>=d
     while (r.compareTo(d) < 0) {
       r.add(b);
-      quotient.subtract(NaturalBEIMutable.ONE); }
+      quotient.subtract(one()); }
     r.subtract(d);
     return r; }
 
@@ -1819,7 +1952,7 @@ public final class NaturalBEIMutable implements Natural {
           final boolean needRemainder) {
     if ((b.nWords < NaturalBEI.BURNIKEL_ZIEGLER_THRESHOLD) ||
       ((nWords - b.nWords) < NaturalBEI.BURNIKEL_ZIEGLER_OFFSET)) {
-      return divideKnuth(b, quotient, needRemainder); }
+      return divideAndRemainderKnuth(b, quotient, needRemainder); }
     return divideAndRemainderBurnikelZiegler(b, quotient); }
 
   //-------------------------------------------------------------
@@ -1949,12 +2082,12 @@ public final class NaturalBEIMutable implements Natural {
       d.downShift(shift); }
     //    if (n.equals(d)) {
     //      return new NaturalBEIMutable[] { ONE, ONE, }; }
-    //    if (NaturalBEIMutable.d.isOne()) {
+    //    if (d.isOne()) {
     //      return new NaturalBEIMutable[] { n, ONE, }; }
-    //    if (NaturalBEI.n.isOne()) {
+    //    if (n.isOne()) {
     //      return new NaturalBEIMutable[] { ONE, d, }; }
     final NaturalBEIMutable gcd = n.hybridGCD(d);
-    if (gcd.compareTo(ONE) > 0) {
+    if (gcd.compareTo(n.one()) > 0) {
       final NaturalBEIMutable[] nd = { new NaturalBEIMutable(),
                                        new NaturalBEIMutable(), };
       n.divide(gcd,nd[0],false);
@@ -2035,8 +2168,8 @@ public final class NaturalBEIMutable implements Natural {
 
   @Override
   public final Natural recyclable (final Natural init) {
-    assert this==init;
-    return this; }
+    if (this==init) { return this; }
+    return valueOf(init); }
 
   @Override
   public final Natural recyclable (final int n) {
@@ -2117,6 +2250,18 @@ public final class NaturalBEIMutable implements Natural {
   valueOf (final NaturalBEI u) {
     return unsafe(u.copyWords()); }
 
+  public static final NaturalBEIMutable
+  valueOf (final NaturalBEIMutable u) {
+    return unsafe(u.copyWords()); }
+
+  public static final NaturalBEIMutable
+  valueOf (final Natural u) {
+    if (u instanceof NaturalBEI) { 
+      return valueOf((NaturalBEI) u); }
+    if (u instanceof NaturalBEIMutable) { 
+      return valueOf((NaturalBEIMutable) u); }
+    throw Exceptions.unsupportedOperation(null,"valueOf",u); }
+
   public static final NaturalBEIMutable valueOf (final long u) {
     if (0L==u) { return make(); }
     assert 0L<u;
@@ -2141,8 +2286,8 @@ public final class NaturalBEIMutable implements Natural {
 
   //--------------------------------------------------------------
 
-  private static final NaturalBEIMutable ONE =
-    new NaturalBEIMutable(1);
+  @Override
+  public final Natural one () { return new NaturalBEIMutable(1); }
 
   //--------------------------------------------------------------
 }
