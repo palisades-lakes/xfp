@@ -13,7 +13,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-03
+ * @version 2019-07-08
  */
 
 public final class BigFloatNBEI
@@ -470,7 +470,7 @@ implements Ringlike<BigFloatNBEI> {
     final int e;
     if ((0==s) || (64==s)) { t=tz; e=ez; }
     else { t=(tz>>>s); e=ez+s; }
-    final Natural t2 = NaturalBEI.square(t);
+    final Natural t2 = significand().square(t);
     final int e2 = (e<<1);
     return add(
       nonNegative(),

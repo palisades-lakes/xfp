@@ -16,7 +16,7 @@ import xfp.java.exceptions.Exceptions;
  * TODO: utilities class to hide private stuff?
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-06
+ * @version 2019-07-08
  */
 
 @SuppressWarnings("unchecked")
@@ -272,7 +272,8 @@ extends Uints<Natural>, Ringlike<Natural> {
   //--------------------------------------------------------------
   // multiplicative monoid
   //--------------------------------------------------------------
-
+  // TODO: singleton class for one() and zero()?
+  
   @Override
   public default Natural one () {
     throw Exceptions.unsupportedOperation(this,"one"); }
@@ -285,10 +286,132 @@ extends Uints<Natural>, Ringlike<Natural> {
     return true; }
 
   //--------------------------------------------------------------
+  // square
+  //--------------------------------------------------------------
 
-  @Override
+  static final int KARATSUBA_SQUARE_THRESHOLD = 128;
+  static final int TOOM_COOK_SQUARE_THRESHOLD = 216;
+
+  //--------------------------------------------------------------
+  // TODO: about twice the ops necessary, compared to using
+  // symmetry to optimize.
+  
+  public default Natural squareSimple () {
+//    throw Exceptions.unsupportedOperation(this,"square"); }
+    final int n = endWord();
+    Natural v = recyclable(2*n+1);
+    long carry = 0L;
+    for (int i0=0;i0<n;i0++) {
+      carry = 0L;
+      final long u0 = uword(i0);
+      for (int i1=0;i1<n;i1++) {
+        final int i2 = i0+i1;
+        // TODO: can this overflow? yes! 
+        // why does it seem to work anyway?
+        final long prod = (uword(i1)*u0) + v.uword(i2) + carry;
+        v = v.setWord(i2, (int) prod);
+        carry = (prod>>>32); }
+      final int i2 = i0+n;
+      v = v.setWord(i2, (int) carry); }
+    return v.immutable(); }
+
+//--------------------------------------------------------------
+
+  public default Natural squareKaratsuba () {
+    final int n = endWord();
+    final int half = (n+1)/2;
+    final Natural xl = words(0,half);
+    final Natural xh = words(half,n);
+    final Natural xhs = xh.square();
+    final Natural xls = xl.square();
+    // (xh^2<<64) + (((xl+xh)^2-(xh^2+xl^2))<<32) + xl^2
+    final int h32 = half*32;
+    return 
+      xhs.shiftUp(h32)
+      .add(
+        xl.add(xh).square().subtract(xhs.add(xls))).shiftUp(h32)
+      .add(xls); }
+
+  //--------------------------------------------------------------
+
+  public default Natural squareToomCook3 () {
+//    final int[] z = squareToomCook3(words());
+//    return unsafe(stripLeadingZeros(z)); }
+    final int n = endWord();
+    // k is the size (in ints) of the lower-order slices.
+    final int k = (n+2)/3;   // Equal to ceil(largest/3)
+    // r is the size (in ints) of the highest-order slice.
+    final int r = n-(2*k);
+    // Obtain slices of the numbers. a2 is the most significant
+    // bits of the number, and a0 the least significant.
+    final Natural a2 = getToomSlice(k,r,0,n);
+    final Natural a1 = getToomSlice(k,r,1,n);
+    final Natural a0 = getToomSlice(k,r,2,n);
+    final Natural v0 = a0.square();
+    final Natural da0 = a2.add(a0);
+    // subtract here causes errors due to negative answer
+    final Natural vm1 = da0.absDiff(a1).square();
+    final Natural da1 = da0.add(a1);
+    final Natural v1 = da1.square();
+    final Natural vinf = a2.square();
+    final Natural v2 = da1.add(a2).shiftUp(1).subtract(a0).square();
+
+    // The algorithm requires two divisions by 2 and one by 3.
+    // All divisions are known to be exact, that is, they do not
+    // produce remainders, and all results are positive. The 
+    // divisions by 2 are implemented as right shifts which are 
+    // relatively efficient, leaving only a division by 3.
+    // The division by 3 is done by an optimized algorithm for
+    // this case.
+    Natural t2 = v2.subtract(vm1).exactDivideBy3();
+    Natural tm1 = v1.subtract(vm1).shiftDown(1);
+    Natural t1 = v1.subtract(v0);
+    t2 = t2.subtract(t1).shiftDown(1);
+    t1 = t1.subtract(tm1).subtract(vinf);
+    t2 = t2.subtract(vinf.shiftUp(1));
+    tm1 = tm1.subtract(t2);
+    final int k32 = k*32;
+    return 
+      vinf.shiftUp(k32).add(t2).shiftUp(k32)
+      .add(t1).shiftUp(k32)
+      .add(tm1)
+      .shiftUp(k32)
+      .add(v0); }
+
+    @Override
   public default Natural square () {
-    throw Exceptions.unsupportedOperation(this,"square"); }
+    if (isZero()) { return zero(); }
+    if (isOne()) { return this; }
+    final int n = endWord();
+    if (n < KARATSUBA_SQUARE_THRESHOLD) { 
+      return squareSimple(); }
+    if (n < TOOM_COOK_SQUARE_THRESHOLD) {
+      return squareKaratsuba(); }
+    // For a discussion of overflow detection see multiply()
+    return squareToomCook3(); }
+ 
+
+  /** Return a {@link Natural} whose value is <code>t</code>.
+   * @see #multiply(long,long) 
+   */
+  
+  public default Natural square (final long t) {
+    assert 0L<=t;
+    final long hi = Numbers.hiWord(t);
+    final long lo = loWord(t);
+    long sum = lo*lo;
+    final int m0 = (int) sum;
+    sum = (sum>>>32) + ((hi*lo)<<1);
+    final int m1 = (int) sum;
+    sum = (sum>>>32) +  hi*hi ;
+    final int m2 = (int) sum;
+    final int m3 = (int) (sum>>>32);
+    final Natural u = recyclable(4);
+    if (0!=m0) { u.setWord(0,m0); }
+    if (0!=m1) { u.setWord(1,m1); }
+    if (0!=m2) { u.setWord(2,m2); }
+    if (0!=m3) { u.setWord(3,m3); }
+    return u.immutable(); }
 
   //--------------------------------------------------------------
   // multiply
@@ -532,7 +655,7 @@ extends Uints<Natural>, Ringlike<Natural> {
     final int m1 = (int) sum;
     sum = (sum>>>32) + hihi ;
     final int m2 = (int) sum;
-    final int m3 = (int) (sum>>> 32);
+    final int m3 = (int) (sum>>>32);
     final Natural u = recyclable(4);
     if (0!=m0) { u.setWord(0,m0); }
     if (0!=m1) { u.setWord(1,m1); }

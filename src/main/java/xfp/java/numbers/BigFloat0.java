@@ -10,7 +10,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-01
+ * @version 2019-07-08
  */
 
 public final class BigFloat0
@@ -328,7 +328,7 @@ implements Ringlike<BigFloat0> {
     final int e;
     if ((0==s) || (64==s)) { t=tz; e=ez; }
     else { t=(tz>>>s); e=ez+s; }
-    final NaturalBEI0 t2 = NaturalBEI0.square(t);
+    final NaturalBEI0 t2 = significand().square(t);
     final int e2 = (e<<1);
     return add(
       nonNegative(),

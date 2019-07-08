@@ -14,7 +14,7 @@ import xfp.java.Debug;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-05
+ * @version 2019-07-08
  */
 
 public final class NaturalBEI0 extends Number
@@ -179,7 +179,8 @@ implements Natural {
     if (0!=m3) { return unsafe(new int[] { m3, }); }
     return ZERO; }
 
-  public static final NaturalBEI0 square (final long t) {
+  @Override
+  public final NaturalBEI0 square (final long t) {
     assert 0L<=t;
     final long hi = Numbers.hiWord(t);
     final long lo = loWord(t);

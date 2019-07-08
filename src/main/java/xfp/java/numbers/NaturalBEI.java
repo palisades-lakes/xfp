@@ -1,6 +1,5 @@
 package xfp.java.numbers;
 
-import static xfp.java.numbers.Numbers.loWord;
 import static xfp.java.numbers.Numbers.unsigned;
 
 import java.math.BigInteger;
@@ -12,7 +11,7 @@ import java.util.List;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-06
+ * @version 2019-07-08
  */
 
 public final class NaturalBEI //extends Number
@@ -125,18 +124,12 @@ implements Natural {
       destructiveMulAdd(m,superRadix,groupVal); }
     return stripLeadingZeros(m); }
 
-  //  private static final int[] toInts (final String s) {
-  //    return toInts(s,0x10); }
-
   //--------------------------------------------------------------
 
   private static final boolean isZero (final int[] z) {
     for (final int element : z) {
       if (0!=element) { return false; } }
     return true; }
-
-  //  private static final boolean leadingZero (final int[] m) {
-  //    return (0<m.length) && (0==m[0]); }
 
   private static final int[] stripLeadingZeros (final int[] m) {
     final int n = m.length;
@@ -162,22 +155,6 @@ implements Natural {
     return result; }
 
   //--------------------------------------------------------------
-  /** hex string.
-   * TODO: move, useful as a general array op.
-   */
-
-  //  private static final String toHexString (final int[] m) {
-  //    //final StringBuilder b = new StringBuilder("0x");
-  //    final StringBuilder b = new StringBuilder("");
-  //    final int n = m.length;
-  //    if (0 == n) { b.append('0'); }
-  //    else {
-  //      b.append(String.format("%x",Long.valueOf(unsigned(m[0]))));
-  //      for (int i=1;i<n;i++) {
-  //        b.append(
-  //          String.format("%08x",Long.valueOf(unsigned(m[i])))); } }
-  //    return b.toString(); }
-
   /** TODO: move, useful as a general array op.
    */
   private static final byte[] toByteArray (final int[] m) {
@@ -198,9 +175,6 @@ implements Natural {
       byteArray[i] = (byte) nextInt; }
     return byteArray; }
 
-  //  private static final BigInteger bigIntegerValue (final int[] m) {
-  //    return new BigInteger(toByteArray(m)); }
-
   //--------------------------------------------------------------
   // Bit Operations
   //--------------------------------------------------------------
@@ -211,40 +185,6 @@ implements Natural {
     int bc = 0;
     for (final int mi : m) { bc += Integer.bitCount(mi); }
     return bc + 1; }
-
-  //  private static final int loBit (final int[] m) {
-  //    int lsb = 0;
-  //    if (isZero(m)) { lsb -= 1; }
-  //    else {
-  //      // Search for lowest order nonzero int
-  //      int i, b;
-  //      for (i = 0; (b = getInt(m,i)) == 0; i++) { }
-  //      lsb += (i << 5) + Integer.numberOfTrailingZeros(b); }
-  //    return lsb; }
-
-  //  private static final int intLength (final int[] m) {
-  //    return (hiBit(m) >>> 5) + 1; }
-
-
-  //  private static final int[] clearBit (final int[] m,
-  //                                       final int n) {
-  //    assert 0 < n;
-  //    final int nTrunc = (n >>> 5);
-  //    final int[] r = new int[Math.max(intLength(m),((n+1)>>>5)+1)];
-  //    final int nr = r.length;
-  //    for (int i=0;i<nr;i++) { r[nr-i-1] = getInt(m,i); }
-  //    r[nr-nTrunc-1] &= ~(1 << (n & 31));
-  //    return stripLeadingZeros(r); }
-  //
-  //  private static final int[] flipBit (final int[] m,
-  //                                      final int n) {
-  //    assert 0 < n;
-  //    final int intNum = (n >>> 5);
-  //    final int[] r = new int[Math.max(intLength(m),intNum+2)];
-  //    for (int i = 0; i < r.length; i++) {
-  //      r[r.length - i - 1] = getInt(m,i); }
-  //    r[r.length - intNum - 1] ^= (1 << (n & 31));
-  //    return stripLeadingZeros(r); }
 
   //--------------------------------------------------------------
   // shifts
@@ -275,41 +215,6 @@ implements Natural {
     return m1; }
 
   //--------------------------------------------------------------
-  //  /** Overwrite some elements of m0 with shifted bits from m1,
-  //   * if big enough. Otherwise throw an exception.
-  //   */
-  //  private static final int[] shiftUpInto (final int[] m0,
-  //                                         final int[] m1,
-  //                                         final int shift) {
-  //    assert 0<=shift;
-  //    assert !leadingZero(m1);
-  //    final int n0 = m0.length;
-  //    final int n1 = m1.length;
-  //    final int iShift = (shift >>> 5);
-  //    final int lShift = (shift & 0x1f);
-  //    final int rShift = 32-lShift;
-  //    final int hi0 = (m1[0] >>> rShift);
-  //    final int n1s = n1 + iShift +
-  //      (((0==lShift) || (0==hi0)) ? 0 : 1);
-  //    assert n1s<=n0;
-  //    if (lShift==0) {
-  //      System.arraycopy(m1,0,m0,n0-n1s,n1);
-  //      return m0; }
-  //    int i = n0-n1s;
-  //    if (0!=hi0) { m0[i++] = hi0; }
-  //    int j = 0;
-  //    int m1j = m1[j];
-  //    while (j < (n1-1)) {
-  //      final int hi = (m1j << lShift);
-  //      j++;
-  //      m1j = m1[j];
-  //      final int lo = (m1j >>> rShift);
-  //      m0[i] = (hi | lo);
-  //      i++; }
-  //    m0[i] = m1j << lShift;
-  //    return m0; }
-
-  //--------------------------------------------------------------
 
   static final int[] shiftUpLong (final long m,
                                   final int shift) {
@@ -322,22 +227,25 @@ implements Natural {
 
   //--------------------------------------------------------------
 
-  private static final int[] shiftDown0 (final int[] m0,
-                                         final int n) {
-    final int iShift = (n>>>5);
-    final int rShift = (n & 0x1f);
-    final int n0 = m0.length;
-    int m1[] = null;
-
+  private static final int[] shiftDown (final int[] m,
+                                        final int shift) {
+    assert 0<=shift;
+    if (isZero(m)) { return EMPTY; }
+    if (0==shift) { return stripLeadingZeros(m); }
+    final int iShift = (shift>>>5);
     // Special case: entire contents shifted off the end
+    final int n0 = m.length;
     if (iShift >= n0) { return EMPTY; }
+
+    final int rShift = (shift & 0x1f);
+    int m1[] = null;
 
     if (rShift == 0) {
       final int newMagLen = n0 - iShift;
-      m1 = Arrays.copyOf(m0,newMagLen); }
+      m1 = Arrays.copyOf(m,newMagLen); }
     else {
       int i = 0;
-      final int highBits = m0[0] >>> rShift;
+      final int highBits = m[0] >>> rShift;
       if (highBits != 0) {
         m1 = new int[n0 - iShift];
         m1[i++] = highBits; }
@@ -347,471 +255,8 @@ implements Natural {
       final int nBits2 = 32 - rShift;
       int j = 0;
       while (j < (n0 - iShift - 1)) {
-        m1[i++] = (m0[j++] << nBits2) | (m0[j] >>> rShift); } }
+        m1[i++] = (m[j++] << nBits2) | (m[j] >>> rShift); } }
     return m1; }
-
-  private static final int[] shiftDown (final int[] m,
-                                        final int n) {
-    assert 0<=n;
-    if (isZero(m)) { return EMPTY; }
-    if (0==n) { return stripLeadingZeros(m); }
-    return shiftDown0(m,n); }
-
-  //--------------------------------------------------------------
-  // addition
-  //--------------------------------------------------------------
-
-  private static final int[] add (final int[] m0,
-                                  final int[] m1) {
-    // TODO: assert necessary?
-    //assert (! leadingZero(m0));
-    //assert (! leadingZero(m1));
-    // If m0 is shorter, swap the two arrays
-    if (m0.length < m1.length) { return add(m1,m0); }
-    int i0 = m0.length;
-    int i1 = m1.length;
-    final int[] r0 = new int[i0];
-    long sum = 0;
-    if (i1 == 1) {
-      sum = unsigned(m0[--i0]) + unsigned(m1[0]);
-      r0[i0] = (int) sum; }
-    else {
-      while (i1 > 0) {
-        sum =
-          unsigned(m0[--i0])
-          + unsigned(m1[--i1])
-          + (sum >>> 32);
-        r0[i0] = (int) sum; } }
-    boolean carry = ((sum >>> 32) != 0);
-    while ((i0 > 0) && carry) {
-      carry = ((r0[--i0] = m0[i0] + 1) == 0); }
-    while (i0 > 0) { r0[--i0] = m0[i0]; }
-    if (carry) {
-      final int[] r1 = new int[r0.length + 1];
-      System.arraycopy(r0,0,r1,1,r0.length);
-      r1[0] = 0x01;
-      return r1; }
-    return r0; }
-
-  //--------------------------------------------------------------
-  /** If possible, overwrite m0 with m0+m1. */
-
-  //  private static final int[] increment (final int[] m0,
-  //                                        final int[] m1) {
-  //    int i0 = m0.length;
-  //    int i1 = m1.length;
-  //    assert (i1<=i0);
-  //    long sum = 0;
-  //    if (i1 == 1) {
-  //      i0--;
-  //      sum = unsigned(m0[i0]) + unsigned(m1[0]);
-  //      m0[i0] = (int) sum; }
-  //    else {
-  //      while ((0<i0) && (0<i1)) {
-  //        i0--; i1--;
-  //        sum = unsigned(m0[i0]) + unsigned(m1[i1]) + (sum >>> 32);
-  //        m0[i0] = (int) sum; } }
-  //    boolean carry = ((sum >>> 32) != 0);
-  //    while ((0<i0) && carry) {
-  //      i0--;
-  //      m0[i0]++;
-  //      carry = (m0[i0]==0); }
-  //    if (carry) {
-  //      final int[] r1 = new int[m0.length+1];
-  //      System.arraycopy(m0,0,r1,1,m0.length);
-  //      r1[0] = 0x01;
-  //      return r1; }
-  //    return m0; }
-
-  //--------------------------------------------------------------
-  // subtract
-  //--------------------------------------------------------------
-
-  private static final int[] subtract (final int[] m0,
-                                       final int[] m1) {
-
-    // TODO: assert necessary?
-    //assert (! leadingZero(m0));
-    //assert (! leadingZero(m1));
-    if (isZero(m1)) { return m0; }
-
-    final int c = compare(m0,m1);
-    assert 0L <= c;
-    if (c == 0) { return EMPTY; }
-
-    int i0 = m0.length;
-    final int result[] = new int[i0];
-    int i1 = m1.length;
-    long dif = 0;
-
-    while (i1 > 0) {
-      dif =
-        (unsigned(m0[--i0])
-          - unsigned(m1[--i1]))
-        + (dif >> 32);
-      result[i0] = (int) dif; }
-
-    boolean borrow = ((dif >> 32) != 0);
-    while ((i0 > 0) && borrow) {
-      borrow = ((result[--i0] = m0[i0] - 1) == -1); }
-
-    while (i0 > 0) { result[--i0] = m0[i0]; }
-
-    return stripLeadingZeros(result); }
-
-  //--------------------------------------------------------------
-
-  public static final int[] absDiff (final int[] m0,
-                                     final int[] m1) {
-
-    if (isZero(m0)) { return m1; }
-    if (isZero(m1)) { return m0; }
-
-    final int c = compare(m0,m1);
-    if (c == 0) { return EMPTY; }
-    if (0<=c) { return subtract(m0,m1); }
-
-    return subtract(m1,m0); }
-
-  //--------------------------------------------------------------
-  // Modular Arithmetic
-  //--------------------------------------------------------------
-
-  private static final void implMulAddCheck (final int[] out,
-                                             final int[] in,
-                                             final int offset,
-                                             final int len) {
-    //assert (! leadingZero(in));
-    if (len > in.length) {
-      throw new IllegalArgumentException(
-        "input length is out of bound: " + len + " > "
-          + in.length); }
-    if (offset < 0) {
-      throw new IllegalArgumentException(
-        "input offset is invalid: " + offset); }
-    if (offset > (out.length - 1)) {
-      throw new IllegalArgumentException(
-        "input offset is out of bound: " + offset + " > "
-          + (out.length - 1)); }
-    if (len > (out.length - offset)) {
-      throw new IllegalArgumentException(
-        "input len is out of bound: " + len + " > "
-          + (out.length - offset)); } }
-
-  private static final int implMulAdd (final int[] out,
-                                       final int[] in,
-                                       int offset,
-                                       final int len,
-                                       final int k) {
-    final long kLong = loWord(k);
-    long carry = 0;
-
-    offset = out.length - offset - 1;
-    for (int j = len - 1; j >= 0; j--) {
-      final long product =
-        (unsigned(in[j]) * kLong) + unsigned(out[offset])
-        + carry;
-      out[offset--] = (int) product;
-      carry = product >>> 32; }
-    return (int) carry; }
-
-  private static final int mulAdd (final int[] out,
-                                   final int[] in,
-                                   final int offset,
-                                   final int len,
-                                   final int k) {
-    //assert (! leadingZero(in));
-    implMulAddCheck(out,in,offset,len);
-    return implMulAdd(out,in,offset,len,k); }
-
-  //--------------------------------------------------------------
-  // square
-  //--------------------------------------------------------------
-
-  private static final int KARATSUBA_SQUARE_THRESHOLD = 128;
-  private static final int TOOM_COOK_SQUARE_THRESHOLD = 216;
-
-  private static void implSquareToLenChecks (final int[] x,
-                                             final int len,
-                                             final int[] z,
-                                             final int zlen) {
-    if (len < 1) {
-      throw new IllegalArgumentException(
-        "invalid input length: " + len); }
-    if (len > x.length) {
-      throw new IllegalArgumentException(
-        "input to long: " + len + " > " + x.length); }
-    if ((len * 2) > z.length) {
-      throw new IllegalArgumentException(
-        "input too long: " + (len * 2) + " > "
-          + z.length); }
-    if (zlen < 1) {
-      throw new IllegalArgumentException(
-        "invalid input length: " + zlen); }
-    if (zlen > z.length) {
-      throw new IllegalArgumentException(
-        "input to long: " + len + " > " + z.length); } }
-
-  // shifts a up to len left n bits assumes no leading zeros,
-  // 0<=n<32
-  private static void primitiveLeftShift (final int[] a,
-                                          final int len,
-                                          final int n) {
-    if ((len == 0) || (n == 0)) { return; }
-    final int n2 = 32 - n;
-    for (int i = 0, c = a[i], m = (i + len) - 1; i < m; i++) {
-      final int b = c;
-      c = a[i + 1];
-      a[i] = (b << n) | (c >>> n2); }
-    a[len - 1] <<= n; }
-
-  private static final int addOne (final int[] a,
-                                   int offset,
-                                   int mlen,
-                                   final int carry) {
-    offset = a.length - 1 - mlen - offset;
-    final long t = unsigned(a[offset]) + unsigned(carry);
-    a[offset] = (int) t;
-    if ((t >>> 32) == 0) { return 0; }
-    while (--mlen >= 0) {
-      if (--offset < 0) { // Carry out of number
-        return 1; }
-      a[offset]++;
-      if (a[offset] != 0) { return 0; } }
-    return 1; }
-
-  private static final int[] squareKaratsuba (final int[] m) {
-    //assert (! leadingZero(m));
-    final int half = (m.length + 1) / 2;
-    final int[] xl = getLower(m,half);
-    final int[] xh = getUpper(m,half);
-    final int[] xhs = square(xh);  // xhs = xh^2
-    final int[] xls = square(xl);  // xls = xl^2
-    // xh^2 << 64 + (((xl+xh)^2 - (xh^2 + xl^2)) << 32) + xl^2
-    final int h32 = half*32;
-    return
-      add(
-        shiftUp(
-          add(
-            shiftUp(xhs,h32),
-            subtract(square(add(xl,xh)),add(xhs,xls))),
-          h32),
-        xls); }
-
-  private static final int[] implSquareToLen (final int[] x,
-                                              final int len,
-                                              final int[] z,
-                                              final int zlen) {
-    //assert (! leadingZero(x));
-
-    // The algorithm used here is adapted from Colin Plumb's C
-    // library.
-    // Technique: Consider the partial products in the
-    // multiplication
-    // of "abcde" by itself:
-    // a b c d e
-    // * a b c d e
-    // ==================
-    // ae be ce de ee
-    // ad bd cd dd de
-    // ac bc cc cd ce
-    // ab bb bc bd be
-    // aa ab ac ad ae
-    // Note that everything above the main diagonal:
-    // ae be ce de = (abcd) * e
-    // ad bd cd = (abc) * d
-    // ac bc = (ab) * c
-    // ab = (a) * b
-    // is a copy of everything below the main diagonal:
-    // de
-    // cd ce
-    // bc bd be
-    // ab ac ad ae
-    // Thus, the sum is 2 * (off the diagonal) + diagonal.
-    // This is accumulated beginning with the diagonal (which
-    // consist of the squares of the digits of the input), which
-    // is then divided by two, the off-diagonal added, and
-    // multiplied by two again. The low bit is simply a copy of
-    // the low bit of the input, so it doesn't need special care.
-
-    // Store the squares, right shifted one bit (i.e., divided by
-    // 2)
-    int lastProductLowWord = 0;
-    for (int j = 0, i = 0; j < len; j++) {
-      final long piece = unsigned(x[j]);
-      final long product = piece * piece;
-      z[i++] =
-        (lastProductLowWord << 31) | (int) (product >>> 33);
-      z[i++] = (int) (product >>> 1);
-      lastProductLowWord = (int) product;
-    }
-
-    // Add in off-diagonal sums
-    for (int i = len, offset = 1; i > 0; i--, offset += 2) {
-      int t = x[i - 1];
-      t = mulAdd(z,x,offset,i - 1,t);
-      addOne(z,offset - 1,i,t); }
-
-    // Shift back up and set low bit
-    primitiveLeftShift(z,zlen,1);
-    z[zlen - 1] |= x[len - 1] & 1;
-
-    return z; }
-
-  private static final int[] squareToLen (final int[] m,
-                                          final int len,
-                                          int[] z) {
-    //assert (! leadingZero(m));
-    assert (0<=len);
-    final int zlen = len << 1;
-    if ((z == null) || (z.length < zlen)) {
-      z = new int[zlen]; }
-
-    // Execute checks before calling intrinsic method.
-    implSquareToLenChecks(m,len,z,zlen);
-    return implSquareToLen(m,len,z,zlen); }
-
-  private static final int[] squareToomCook3 (final int[] m) {
-    //assert (! leadingZero(m));
-    final int len = m.length;
-    // k is the size (in ints) of the lower-order slices.
-    final int k = (len + 2) / 3;   // Equal to ceil(largest/3)
-
-    // r is the size (in ints) of the highest-order slice.
-    final int r = len - (2 * k);
-
-    // Obtain slices of the numbers. a2 is the most significant
-    // bits of the number, and a0 the least significant.
-    final int[] a2 = getToomSlice(m,k,r,0,len);
-    final int[] a1 = getToomSlice(m,k,r,1,len);
-    final int[] a0 = getToomSlice(m,k,r,2,len);
-    final int[] v0 = square(a0);
-    int[] da1 = add(a2,a0);
-    final int[] vm1 = square(absDiff(da1,a1));
-    da1 = add(da1,a1);
-    final int[] v1 = square(da1);
-    final int[] vinf = square(a2);
-    final int[] v2 = square(absDiff(shiftUp(add(da1,a2),1),a0));
-
-    // The algorithm requires two divisions by 2 and one by 3.
-    // All divisions are known to be exact, that is, they do not
-    // produce remainders, and all results are positive. The
-    // divisions by 2 are implemented as right shifts which are
-    // relatively efficient, leaving only a division by 3.
-    // The division by 3 is done by an optimized algorithm for
-    // this case.
-    int[] t2 = exactDivideBy3(absDiff(v2,vm1));
-    int[] tm1 = shiftDown(absDiff(v1,vm1),1);
-    int[] t1 = absDiff(v1,v0);
-    t2 = shiftDown(absDiff(t2,t1),1);
-    t1 = absDiff(absDiff(t1,tm1),vinf);
-    t2 = absDiff(t2,shiftUp(vinf,1));
-    tm1 = absDiff(tm1,t2);
-
-    // Number of bits to shift left.
-    final int ss = k * 32;
-
-    return
-      stripLeadingZeros(
-        add(
-          shiftUp(add(
-            shiftUp(add(
-              shiftUp(add(
-                shiftUp(vinf,ss),
-                t2),ss),
-              t1),ss),
-            tm1),ss),
-          v0)); }
-
-  private static final int[] square (final int[] m) {
-    //assert (! leadingZero(m));
-    if (isZero(m)) { return EMPTY; }
-    final int len = m.length;
-    if (len < KARATSUBA_SQUARE_THRESHOLD) {
-      final int[] z = squareToLen(m,len,null);
-      return stripLeadingZeros(z); }
-    if (len < TOOM_COOK_SQUARE_THRESHOLD) {
-      return squareKaratsuba(m); }
-    // For a discussion of overflow detection see multiply()
-    return squareToomCook3(m); }
-
-  //--------------------------------------------------------------
-  // multiply
-  //--------------------------------------------------------------
-
-  private static final int compare (final int[] m0,
-                                    final int[] m1) {
-    // TODO: assert necessary?
-    //assert (! leadingZero(m0));
-    //assert (! leadingZero(m1));
-    final int n0 = m0.length;
-    final int n1 = m1.length;
-    if (n0<n1) { return -1; }
-    if (n0>n1) { return 1; }
-    for (int i=0;i<n0;i++) {
-      final long m0i = unsigned(m0[i]);
-      final long m1i = unsigned(m1[i]);
-      if (m0i<m1i) { return -1; }
-      if (m0i>m1i) { return 1; } }
-    return 0; }
-
-  //--------------------------------------------------------------
-
-  static final int[] multiply (final int[] u0,
-                               final int[] u1) {
-    //assert (! leadingZero(x));
-    //assert (! leadingZero(y));
-
-    if ((isZero(u1)) || (isZero(u0))) { return EMPTY; }
-    final int n0 = u0.length;
-    if ((u1==u0) && (n0 > MULTIPLY_SQUARE_THRESHOLD)) {
-      return square(u0); }
-
-    final int n1 = u1.length;
-
-    if ((n0<KARATSUBA_THRESHOLD) || (n1<KARATSUBA_THRESHOLD)) {
-      if (n0 == 1) { return multiply(u0,unsigned(u1[0])); }
-      if (n1 == 1) { return multiply(u1,unsigned(u0[0])); }
-      int[] result = multiplySimple(u0,u1);
-      result = stripLeadingZeros(result);
-      return result; }
-    if ((n0<TOOM_COOK_THRESHOLD) && (n1<TOOM_COOK_THRESHOLD)) {
-      return multiplyKaratsuba(u0,u1); }
-    return multiplyToomCook3(u0,u1); }
-
-  //--------------------------------------------------------------
-
-  private static final int[] multiply (final int[] u,
-                                       final long m1) {
-    //assert (! leadingZero(m0));
-    if (0L==m1) { return EMPTY; }
-    assert 0L < m1;
-
-    final long dh = Numbers.hiWord(m1);
-    final long dl = Numbers.loWord(m1);
-    final int xlen = u.length;
-    int[] rm =
-      ((dh == 0L) ? (new int[xlen + 1]) : (new int[xlen + 2]));
-    long carry = 0;
-    int rstart = rm.length - 1;
-    for (int i = xlen - 1; i >= 0; i--) {
-      final long product = (unsigned(u[i]) * dl) + carry;
-      rm[rstart--] = (int) product;
-      carry = product >>> 32; }
-    rm[rstart] = (int) carry;
-    if (dh != 0L) {
-      carry = 0;
-      rstart = rm.length - 2;
-      for (int i = xlen - 1; i >= 0; i--) {
-        final long product =
-          (unsigned(u[i]) * dh)
-          + unsigned(rm[rstart]) + carry;
-        rm[rstart--] = (int) product;
-        carry = product >>> 32; }
-      rm[0] = (int) carry; }
-    if (carry == 0L) {
-      rm = Arrays.copyOfRange(rm,1,rm.length); }
-    return stripLeadingZeros(rm); }
 
   //--------------------------------------------------------------
   // fields
@@ -840,20 +285,6 @@ implements Natural {
     ws[n1-1-i] = w;
     return unsafe(stripLeadingZeros(ws)); }
 
-  //  private static final int[] setBit (final int[] m,
-  //                                     final int n) {
-  //    assert 0<n;
-  //    final int nTrunc = (n>>>5);
-  //    final int[] r = new int[Math.max(intLength(m),nTrunc+2)];
-  //    final int nr = r.length;
-  //    for (int i=0;i<nr;i++) { r[nr-i-1] = getInt(m,i); }
-  //    r[nr-nTrunc-1] |= (1 << (n & 31));
-  //    return stripLeadingZeros(r); }
-
-  //  @Override
-  //  public final long uword (final int i) {
-  //    return unsigned(word(i)); }
-
   @Override
   public final int startWord () { return 0; }
   @Override
@@ -863,262 +294,98 @@ implements Natural {
     return Arrays.copyOfRange(words(),0,endWord()); }
 
   //--------------------------------------------------------------
-  // arithmetic
+  // Modular Arithmetic
   //--------------------------------------------------------------
+
+//  private static final int mulAdd (final int[] out,
+//                                   final int[] in,
+//                                   int offset,
+//                                   final int n,
+//                                   final long k) {
+//    long carry = 0;
+//    offset = out.length-offset-1;
+//    for (int j=n-1; j>=0; j--) {
+//      final long product =
+//        (unsigned(in[j])*k) + unsigned(out[offset]) + carry;
+//      out[offset--] = (int) product;
+//      carry = (product >>> 32); }
+//    return (int) carry; }
+//
+//  private static final void addOne (final int[] a,
+//                                    final int offset,
+//                                    final int mlen,
+//                                    final int carry) {
+//    int i = a.length-1-mlen-offset;
+//    final long t = unsigned(a[i]) + unsigned(carry);
+//    a[i] = (int) t;
+//    if ((t >>> 32) == 0) { return; }
+//    int j = mlen;
+//    while ((--j>=0)&&(--i>=0)) { // Carry out of number
+//      a[i]++; if (a[i]!=0) { break; } }
+//    return; }
+//
+//  // shifts a up to n elements up shift bits assumes,
+//  // 0<=shift<32
+//
+//  private static void shiftUp1Bit (final int[] a) {
+//    final int n = a.length;
+//    for (int i=1;i<n;i++) { a[i-1] = (a[i-1]<<1) | (a[i]>>>31); }
+//    a[n-1] = (a[n-1]<<1); }
 
   //--------------------------------------------------------------
   // square
   //--------------------------------------------------------------
+  // The algorithm used here is adapted from Colin Plumb's C
+  // library.
+  // Technique: Consider the partial products in the
+  // multiplication of "abcde" by itself:
+  // a b c d e  * a b c d e
+  // ==================
+  // ae be ce de ee
+  // ad bd cd dd de
+  // ac bc cc cd ce
+  // ab bb bc bd be
+  // aa ab ac ad ae
+  // Note that everything above the main diagonal:
+  // ae be ce de = (abcd) * e
+  // ad bd cd = (abc) * d
+  // ac bc = (ab) * c
+  // ab = (a) * b
+  // is a copy of everything below the main diagonal:
+  // de
+  // cd ce
+  // bc bd be
+  // ab ac ad ae
+  // Thus, the sum is 2 * (off the diagonal) + diagonal.
+  // This is accumulated beginning with the diagonal (which
+  // consist of the squares of the digits of the input), which
+  // is then divided by two, the off-diagonal added, and
+  // multiplied by two again. The low bit is simply a copy of
+  // the low bit of the input, so it doesn't need special care.
 
-  public static final Natural square (final long t) {
-    assert 0L<=t;
-    final long hi = Numbers.hiWord(t);
-    final long lo = loWord(t);
-    final long lolo = lo*lo;
-    final long hilo2 = (hi*lo) << 1;
-    final long hihi = hi*hi;
-    final int[] m = new int[4];
-    long sum = lolo;
-    m[3] = (int) sum;
-    sum = (sum >>> 32) + hilo2;
-    m[2] = (int) sum;
-    sum = (sum >>> 32) + hihi ;
-    m[1] = (int) sum;
-    m[0] = (int) (sum >>> 32);
-    return unsafe(stripLeadingZeros(m)); }
-
-  @Override
-  public final Natural square () {
-    if (isZero()) { return zero(); }
-    if (isOne()) { return this; }
-    return unsafe(square(words())); }
-
-  //--------------------------------------------------------------
-  // multiplication monoid
-  //--------------------------------------------------------------
-
-  private static final void multiplySimpleCheck (final int[] array,
-                                                 final int length) {
-    //assert (! leadingZero(array));
-    // not an error because multiplyToLen won't execute if len<=0
-    if (length <= 0) { return; }
-    //Objects.requireNonNull(array);
-    if (length > array.length) {
-      throw new ArrayIndexOutOfBoundsException(length-1); } }
-
-  private static final int[] multiplySimple (final int[] u0,
-                                             final int[] u1) {
-    final int n0 = u0.length;
-    final int n1 = u1.length;
-    multiplySimpleCheck(u0,n0);
-    multiplySimpleCheck(u1,n1);
-    final int[] u2 = new int[n0+n1];
-    long carry = 0L;
-    for (int i0=n0-1;i0>=0;i0--) {
-      carry = 0L;
-      for (int i1=n1-1, i2=n1+i0; i1>=0; i1--,i2--) {
-        final long product =
-          (unsigned(u1[i1])*unsigned(u0[i0]))
-          + unsigned(u2[i2]) + carry;
-        u2[i2] = (int) product;
-        carry = product>>>32; }
-      u2[i0] = (int) carry; }
-    return u2; }
-
-  //--------------------------------------------------------------
-
-  private static final int[] getLower (final int[] m,
-                                       final int n) {
-    //assert (! leadingZero(m));
-    final int len = m.length;
-    if (len<=n) { return m; }
-    final int lowerInts[] = new int[n];
-    System.arraycopy(m,len-n,lowerInts,0,n);
-    return stripLeadingZeros(lowerInts); }
-
-  private static final int[] getUpper (final int[] m,
-                                       final int n) {
-    //assert (! leadingZero(m));
-    final int len = m.length;
-    if (len<=n) { return EMPTY; }
-    final int upperLen = len-n;
-    final int upperInts[] = new int[upperLen];
-    System.arraycopy(m,0,upperInts,0,upperLen);
-    return stripLeadingZeros(upperInts); }
-
-  private static final int[] multiplyKaratsuba (final int[] x,
-                                                final int[] y) {
-    //System.out.println("multiplyKaratsuba");
-    //assert (! leadingZero(x));
-    //assert (! leadingZero(y));
-    final int xlen = x.length;
-    final int ylen = y.length;
-
-    // The number of ints in each half of the number.
-    final int half = (Math.max(xlen,ylen) + 1) / 2;
-
-    // xl and yl are the lower halves of x and y respectively,
-    // xh and yh are the upper halves.
-    final int[] xl = getLower(x,half);
-    final int[] xh = getUpper(x,half);
-    final int[] yl = getLower(y,half);
-    final int[] yh = getUpper(y,half);
-    final int[] p1 = multiply(xh,yh);  // p1 = xh*yh
-    final int[] p2 = multiply(xl,yl);  // p2 = xl*yl
-    // p3=(xh+xl)*(yh+yl)
-    final int[] p3 = multiply(add(xh,xl),add(yh,yl));
-    // result = p1 * 2^(32*2*half) + (p3 - p1 - p2) * 2^(32*half)
-    // + p2
-    final int h32 = half*32;
-    final int[] result =
-      add(
-        shiftUp(add(
-          shiftUp(p1,h32),
-          absDiff(absDiff(p3,p1),p2)),
-          h32),
-        p2);
-    return result; }
-
-  //--------------------------------------------------------------
-
-  private static final int[] getToomSlice (final int[] m,
-                                           final int lowerSize,
-                                           final int upperSize,
-                                           final int slice,
-                                           final int fullsize) {
-    //assert (! leadingZero(m));
-    final int len = m.length;
-    final int offset = fullsize - len;
-    int start;
-    final int end;
-    if (slice == 0) {
-      start = 0 - offset;
-      end = upperSize - 1 - offset; }
-    else {
-      start = (upperSize + ((slice - 1) * lowerSize)) - offset;
-      end = (start + lowerSize) - 1; }
-    if (start < 0) { start = 0; }
-    if (end < 0) { return EMPTY; }
-    final int sliceSize = (end - start) + 1;
-    if (sliceSize <= 0) { return EMPTY; }
-    // While performing Toom-Cook, all slices are positive and
-    // the sign is adjusted when the final number is composed.
-    if ((start == 0) && (sliceSize >= len)) { return stripLeadingZeros(m); }
-    final int intSlice[] = new int[sliceSize];
-    System.arraycopy(m,start,intSlice,0,sliceSize);
-    return stripLeadingZeros(intSlice); }
-
-  private static final int[] exactDivideBy3 (final int[] m) {
-    //assert (! leadingZero(m));
-    final int len = m.length;
-    final int[] result = new int[len];
-    long x, w, q, borrow;
-    borrow = 0L;
-    for (int i = len - 1; i >= 0; i--) {
-      x = unsigned(m[i]);
-      w = x - borrow;
-      if (borrow > x) { // Did we make the number go negative?
-        borrow = 1L; }
-      else { borrow = 0L; }
-      // 0xAAAAAAAB is the modular inverse of 3 (mod 2^32). Thus,
-      // the effect of this is to divide by 3 (mod 2^32).
-      // This is much faster than division on most architectures.
-      q = loWord(w * 0xAAAAAAABL);
-      result[i] = (int) q;
-      // Now check the borrow. The second check can of course be
-      // eliminated if the first fails.
-      if (q >= 0x55555556L) {
-        borrow++;
-        if (q >= 0xAAAAAAABL) { borrow++; } } }
-    return stripLeadingZeros(result); }
-
-  private static final int[] multiplyToomCook3 (final int[] m0,
-                                                final int[] m1) {
-    //System.out.println("multiplyToomCook3");
-    //assert (! leadingZero(m0));
-    //assert (! leadingZero(m1));
-
-    final int n0 = m0.length;
-    final int n1 = m1.length;
-
-    final int largest = Math.max(n0,n1);
-
-    // k is the size (in ints) of the lower-order slices.
-    final int k = (largest + 2) / 3;   // Equal to ceil(largest/3)
-
-    // r is the size (in ints) of the highest-order slice.
-    final int r = largest - (2 * k);
-
-    // Obtain slices of the numbers. a2 and b2 are the most
-    // significant bits of the numbers a and b, and a0 and b0 the
-    // least significant.
-    final int[] a2 = getToomSlice(m0,k,r,0,largest);
-    final int[] a1 = getToomSlice(m0,k,r,1,largest);
-    final int[] a0 = getToomSlice(m0,k,r,2,largest);
-    final int[] b2 = getToomSlice(m1,k,r,0,largest);
-    final int[] b1 = getToomSlice(m1,k,r,1,largest);
-    final int[] b0 = getToomSlice(m1,k,r,2,largest);
-    final int[] v0 = multiply(a0,b0);
-    int[] da1 = add(a2,a0);
-    int[] db1 = add(b2,b0);
-
-    // might be negative
-    final int[] da1_a1;
-    final int ca = compare(da1,a1);
-    if (0 < ca) { da1_a1 = subtract(da1,a1); }
-    else { da1_a1 = subtract(a1,da1); }
-    // might be negative
-    final int[] db1_b1;
-    final int cb = compare(db1,b1);
-    if (0 < cb) { db1_b1 = subtract(db1,b1); }
-    else { db1_b1 = subtract(b1,db1); }
-    final int cv = ca * cb;
-    final int[] vm1 = multiply(da1_a1,db1_b1);
-
-    da1 = add(da1,a1);
-    db1 = add(db1,b1);
-    final int[] v1 = multiply(da1,db1);
-    final int[] v2 =
-      multiply(
-        subtract(shiftUp(add(da1,a2),1),a0),
-        subtract(shiftUp(add(db1,b2),1),b0));
-
-    final int[] vinf = multiply(a2,b2);
-
-    // The algorithm requires two divisions by 2 and one by 3.
-    // All divisions are known to be exact, that is, they do not
-    // produce remainders, and all results are positive. The
-    // divisions by 2 are implemented as right shifts which are
-    // relatively efficient, leaving only an exact division by 3,
-    // which is done by a specialized linear-time algorithm.
-    int[] t2;
-    // handle missing sign of vm1
-    if (0 < cv) { t2 = exactDivideBy3(subtract(v2,vm1)); }
-    else { t2 = exactDivideBy3(add(v2,vm1));}
-
-    int[] tm1;
-    // handle missing sign of vm1
-    if (0 < cv) { tm1 = shiftDown(subtract(v1,vm1),1); }
-    else { tm1 = shiftDown(add(v1,vm1),1); }
-
-    int[] t1 = subtract(v1,v0);
-    t2 = shiftDown(subtract(t2,t1),1);
-    t1 = subtract(subtract(t1,tm1),vinf);
-    t2 = subtract(t2,shiftUp(vinf,1));
-    tm1 = subtract(tm1,t2);
-
-    // Number of bits to shift left.
-    final int ss = k * 32;
-
-    final int[] result =
-      add(shiftUp(
-        add(shiftUp(
-          add(shiftUp(
-            add(shiftUp(vinf,ss),t2),
-            ss),t1),
-          ss),tm1),
-        ss),v0);
-    return stripLeadingZeros(result); }
+//  @Override
+//  public final Natural squareSimple () {
+//    final int[] x = words();
+//    final int n = endWord();
+//    final int n2 = (n<<1);
+//    int[] z = new int[n2]; 
+//    // Store the squares, right shifted one bit (divided by 2)
+//    int lo = 0;
+//    for (int j=0,i=0;j<n;j++) {
+//      final long xj = unsigned(x[j]);
+//      final long xj2 = xj*xj;
+//      z[i++] = ((lo<<31) | (int) (xj2>>>33));
+//      z[i++] = (int) (xj2>>>1);
+//      lo = (int) xj2; }
+//    // Add in off-diagonal sums
+//    for (int i=n-1,offset=1;i>=0;i--,offset+=2) {
+//      final long xi = unsigned(x[i]);
+//      final int carry = mulAdd(z,x,offset,i,xi);
+//      addOne(z,offset-1,i+1,carry); }
+//    // Shift back up and set low bit
+//    shiftUp1Bit(z);
+//    z[n2-1] |= (x[n-1]&1);
+//    return unsafe(stripLeadingZeros(z)); }
 
   //--------------------------------------------------------------
   // Division
@@ -1135,7 +402,7 @@ implements Natural {
       n.divideAndRemainderBurnikelZiegler(d,q);
     return List.of(q.immutable(), r.immutable()); }
 
- //--------------------------------------------------------------
+  //--------------------------------------------------------------
   // gcd
   //--------------------------------------------------------------
 
@@ -1196,68 +463,6 @@ implements Natural {
     return unsafe(shiftDown(words(),shift)); }
 
   //--------------------------------------------------------------
-  // get the least significant int word of (m >>> shift)
-
-  //  private static final int getShiftedInt (final int[] m,
-  //                                          final int shift) {
-  //    // leading zeros don't matter
-  //    final int intShift = shift >>> 5;
-  //    final int remShift = shift & 0x1f;
-  //    final int n = m.length;
-  //    if (intShift >= n) { return 0; }
-  //    final int i = n-intShift-1;
-  //    if (0==remShift) { return m[i]; }
-  //    final int r2 = 32-remShift;
-  //    final long lo = (unsigned(m[i]) >>> remShift);
-  //    final long hi = (0<i) ? (unsigned(m[i-1]) << r2) : 0;
-  //    return (int) (hi | lo); }
-  //
-  //  @Override
-  //  public final int getShiftedInt (final int n) {
-  //    assert 0<=n;
-  //    final int i0 = Natural.super.getShiftedInt(n);
-  //    final int i1 = getShiftedInt(words(),n);
-  //    assert i0==i1;
-  //    return i0; }
-
-  //--------------------------------------------------------------
-  // get the least significant two int words of (m >>> shift) as a
-  // long
-
-  //  private static final long getShiftedLong (final int[] m,
-  //                                            final int shift) {
-  //    // leading zeros don't matter
-  //    final int intShift = shift >>> 5;
-  //    final int remShift = shift & 0x1f;
-  //    final int n = m.length;
-  //    if (intShift >= n) { return 0L; }
-  //
-  //    final int i = n-intShift-1;
-  //
-  //    if (0==remShift) {
-  //      if (0==i) { return unsigned(m[0]); }
-  //      return (unsigned(m[i-1]) << 32) | unsigned(m[i]); }
-  //
-  //    final int r2 = 32-remShift;
-  //    final long lo0 = (unsigned(m[i]) >>> remShift);
-  //    final long lo1 = (0<i) ? (unsigned(m[i-1]) << r2) : 0L;
-  //    final long lo = lo1 | lo0;
-  //    final long hi0 = (0<i) ? (unsigned(m[i-1]) >>> remShift) : 0;
-  //    final long hi1 = (1<i) ? (unsigned(m[i-2]) << r2) : 0;
-  //    final long hi = hi1 | hi0;
-  //    return (hi << 32) | lo; }
-  //
-  //  @Override
-  //  public final long getShiftedLong (final int n) {
-  //    assert 0<=n;
-  //    final long i0 = Natural.super.getShiftedLong(n);
-  //    final long i1 = getShiftedLong(words(),n);
-  //    assert i0==i1 :
-  //      "\ni0=" + Long.toHexString(i0)
-  //      + "\ni1=" + Long.toHexString(i1)
-  //      + "\nwords=" + //Debug.toHexString(_words)
-  //      + "\nn=" + n;
-  //    return i0; }
 
   private static final int getInt (final int[] m,
                                    final int n) {
@@ -1265,37 +470,6 @@ implements Natural {
     if (n >= m.length) { return 0; }
     final int mInt = m[m.length - n - 1];
     return mInt; }
-
-  //  private static final boolean testBit (final int[] m,
-  //                                        final int n) {
-  //    assert 0<=n;
-  //    return (getInt(m,n >>> 5) & (1 << (n & 31))) != 0; }
-
-  //  @Override
-  //  public final boolean testBit (final int n) {
-  //    final boolean tf0 = testBit(words(),n);
-  //    final boolean tf1 = Natural.super.testBit( n);
-  //    assert tf0==tf1 : "tf0=" + tf0 + "; " + "tf1=" + tf1;
-  //    return tf1; }
-
-  //  @Override
-  //  public final NaturalBEI setBit (final int i) {
-  //    return unsafe(setBit(words(),i)); }
-
-  //  @Override
-  //  public final NaturalBEI clearBit (final int n) {
-  //    return unsafe(clearBit(words(),n)); }
-
-  //  @Override
-  //  public final NaturalBEI flipBit (final int n) {
-  //    return unsafe(flipBit(words(),n)); }
-
-  //  @Override
-  //  public final int loBit () {
-  //    final int i = Natural.super.loBit();
-  //    assert i==loBit(words()) :
-  //      i + "!=" + loBit(words());
-  //    return i; }
 
   private static final int hiBit (final int[] m) {
     final int len = m.length;
@@ -1305,40 +479,11 @@ implements Natural {
     final int n = ((len-1)<<5) + Numbers.bitLength(m[0]);
     return n; }
 
-  //  @Override
-  //  public final int hiBit () {
-  //    final int i = Natural.super.hiBit();
-  //    //Debug.println("words=" + Arrays.toString(words()));
-  //    assert i==hiBit(words()) :
-  //      i + "!=" + hiBit(words());
-  //    return i; }
-
   public final int bitCount () { return bitCount(words()); }
 
   //--------------------------------------------------------------
   // Comparable interface+
   //--------------------------------------------------------------
-
-  //  @Override
-  //  public final int compareTo (final Natural that) {
-  //    final NaturalBEI u = (NaturalBEI) that;
-  //    // TODO: should really compare hiBits
-  //    final int n0 = endWord();
-  //    final int n1 = u.endWord();
-  //    if (n0<n1) { return -1; }
-  //    if (n0>n1) { return 1; }
-  //    for (int i=0;i<n0;i++) {
-  //      final long m0i = unsigned(_words[i]);
-  //      final long m1i = unsigned(u._words[i]);
-  //      if (m0i<m1i) { return -1; }
-  //      if (m0i>m1i) { return 1; } }
-  //    return 0; }
-
-  //  @Override
-  //  public final int compareTo (final int upShift,
-  //                              final Natural that) {
-  //    final NaturalBEI u = (NaturalBEI) that;
-  //    return shiftUp(upShift).compareTo(u); }
 
   public static final int compareTo (final NaturalBEI u0,
                                      final long u1) {
@@ -1357,71 +502,6 @@ implements Natural {
     if (m01>m11) { return 1; }
     return 0; }
 
-  //  @Override
-  //  public final int compareTo (final long u) {
-  //    assert 0L<=u;
-  //    final int c0 = Natural.super.compareTo(u);
-  //    final int c1 = compareTo(this,u);
-  //    assert c0 == c1 :
-  //      "\n" + c0 + "!=" + c1
-  //      + "\nwords=" + Debug.toHexString(_words)
-  //      + "\nthis=" + Long.toHexString(getLong())
-  //      + "\nthis=" + getLong()
-  //      + "\nu=" + Long.toHexString(u);
-  //    return c0; }
-
-  //  @Override
-  //  public final int compareTo (final long u,
-  //                              final int upShift) {
-  //    assert 0L<=u;
-  //    assert 0<=upShift : "upShift=" + upShift;
-  //    if (0==upShift) { return compareTo(u); }
-  //    if (0L==u) {
-  //      if (isZero()) { return 0; }
-  //      return 1; }
-  //
-  //    final int n0 = endWord()-startWord();
-  //
-  //    final int intShift = upShift >>> 5;
-  //    final int remShift = upShift & 0x1f;
-  //    final int nwords;
-  //    final int hi = Numbers.hiBit(u) + remShift;
-  //    if (64 < hi) { nwords = 3; }
-  //    else if (32 < hi) { nwords = 2; }
-  //    else { nwords = 1; }
-  //
-  //    final int n1 = intShift + nwords;
-  //    if (n0<n1) { return -1; }
-  //    if (n0>n1) { return 1; }
-  //
-  //    final int[] m0 = words();
-  //    // most significant word in m0
-  //    int i = 0;
-  //    if (3==nwords) {
-  //      final long m00 = unsigned(_words[i++]);
-  //      //final long m10 = hiPart(m1,remShift);
-  //      final long m10 = u >>> (64-remShift);
-  //    if (m00<m10) { return -1; }
-  //    if (m00>m10) { return 1; }  }
-  //
-  //    final long m1s = (u << remShift);
-  //    if (2<=nwords) {
-  //      final long m01 = unsigned(_words[i++]);
-  //      //final long m11 = midPart(m1,remShift);
-  //      final long m11 = Numbers.hiWord(m1s);
-  //      if (m01<m11) { return -1; }
-  //      if (m01>m11) { return 1; } }
-  //
-  //    // 1 nonzero word after shifting
-  //    final long m02 = unsigned(_words[i++]);
-  //    //final long m12 = loPart(m1,remShift);
-  //    final long m12 = loWord(m1s);
-  //    if (m02<m12) { return -1; }
-  //    if (m02>m12) { return 1; }
-  //
-  //    while (i<n0) { if (0!=m0[i++]) { return 1; } }
-  //    return 0; }
-
   //--------------------------------------------------------------
   // Object methods
   //--------------------------------------------------------------
@@ -1435,19 +515,6 @@ implements Natural {
     if (!(x instanceof NaturalBEI)) { return false; }
     return uintsEquals((NaturalBEI) x); }
 
-  //  @Override
-  //  public boolean equals (final Object x) {
-  //    if (x==this) { return true; }
-  //    if (!(x instanceof NaturalBEI)) { return false; }
-  //    final NaturalBEI xInt = (NaturalBEI) x;
-  //    final int[] m = _words;
-  //    final int len = m.length;
-  //    final int[] xm = xInt._words;
-  //    if (len != xm.length) { return false; }
-  //    for (int i = 0; i < len; i++) {
-  //      if (xm[i] != m[i]) { return false; } }
-  //    return true; }
-
   /** hex string. */
   @Override
   public final String toString () { return toHexString(); }
@@ -1459,23 +526,6 @@ implements Natural {
   @Override
   public final byte[] toByteArray () {
     return toByteArray(words()); }
-
-  //  @Override
-  //  public final BigInteger bigIntegerValue () {
-  //    return bigIntegerValue(words()); }
-
-  //private static final int intValue (final int[] m) {
-  //return getInt(m,0); }
-  //
-  //private static final long longValue (final int[] m) {
-  //return
-  //  (unsigned(getInt(m,1)) << 32)  + unsigned(getInt(m,0)); }
-
-  //  @Override
-  //  public final int intValue () { return intValue(words()); }
-  //
-  //  @Override
-  //  public final long longValue () { return longValue(words()); }
 
   //--------------------------------------------------------------
 

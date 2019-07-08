@@ -12,7 +12,7 @@ import xfp.java.exceptions.Exceptions;
  * Don't implement Comparable, because of mutability!
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-06
+ * @version 2019-07-08
  */
 
 public final class NaturalBEIMutable implements Natural {
@@ -107,25 +107,6 @@ public final class NaturalBEIMutable implements Natural {
     expandTo(i);
     words[beIndex(i)] = w;
     return this; }
-
-  //--------------------------------------------------------------
-  /** Returns an <code>int[]</code>containing the {@code n}
-   * low ints of this number.
-   * TODO: wrap with a view object, no copying?
-   */
-
-  private final int[] getLower (final int n) {
-    if (isZero()) { return NaturalBEI.EMPTY; }
-    // TODO: copy here? DANGER!!!
-    else if (nWords < n) { return getWords(); }
-    else {
-      // strip zeros
-      int len = n;
-      while ((len > 0) && (words[(start+nWords)-len] == 0)) {
-        len--; }
-      return
-        Arrays.copyOfRange(
-          words, (start+nWords)-len, start+nWords); } }
 
   //--------------------------------------------------------------
   /** Makes this number an {@code n}-int number all of whose bits
@@ -1774,15 +1755,15 @@ public final class NaturalBEIMutable implements Natural {
     // step 2: view b as [b1,b2] where each bi is n ints or less
     final NaturalBEIMutable b1 = new NaturalBEIMutable(b);
     b1.safeDownShift(n * 32);
-    final int[] b2 = b.getLower(n);
+    final Natural b2 = b.words(0,n);
     NaturalBEIMutable r;
     NaturalBEIMutable d;
     if (compareShifted(b, n) < 0) {
       // step 3a: if a1<b1, let quotient=a12/b1 and r=a12%b1
       r = a12.divide2n1n(b1, quotient);
       // step 4: d=quotient*b2
-      final int[] qu = NaturalBEI.multiply(quotient.getWords(),b2);
-      d = NaturalBEIMutable.valueOf(qu); }
+      final Natural qu = quotient.multiply(b2);
+      d = (NaturalBEIMutable) qu.recyclable(qu); }
     else {
       // step 3b: if a1>=b1, let quotient=beta^n-1
       //and r=a12-b1*2^n+b1
