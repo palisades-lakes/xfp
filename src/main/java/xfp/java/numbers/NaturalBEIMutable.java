@@ -1801,15 +1801,17 @@ public final class NaturalBEIMutable implements Natural {
    * @return the remainder
    */
 
-  public final NaturalBEIMutable
-  divideAndRemainderBurnikelZiegler (final NaturalBEIMutable b,
-                                     final NaturalBEIMutable quotient) {
+  @Override
+  public final List<Natural>
+  divideAndRemainderBurnikelZiegler (final Natural u) {
+    final NaturalBEIMutable quotient = make();
+    final NaturalBEIMutable b = (NaturalBEIMutable) u;
     final int r = nWords;
     final int s = b.nWords;
 
     // Clear the quotient
     quotient.start = quotient.nWords = 0;
-    if (r < s) { return this; }
+    if (r < s) { return List.of(NaturalBEI.ZERO,this); }
     // step 1: let m = min{2^k | (2^k)*BURNIKEL_ZIEGLER_THRESHOLD > s}
     final int s0 = s/NaturalBEI.BURNIKEL_ZIEGLER_THRESHOLD;
     final int m = 1 << (32-Integer.numberOfLeadingZeros(s0));
@@ -1859,7 +1861,7 @@ public final class NaturalBEIMutable implements Natural {
     quotient.add(qi);
     // step 9: a and b were shifted, so shift back
     ri.downShift(sigma);
-    return ri; }
+    return List.of(quotient,ri); }
 
   /** This method is used for division. It multiplies an n word
    * input a by one word input x, and subtracts the n word product
@@ -1927,14 +1929,14 @@ public final class NaturalBEIMutable implements Natural {
 
   //-------------------------------------------------------------
 
-  private final NaturalBEIMutable
-  divide (final NaturalBEIMutable b,
-          final NaturalBEIMutable quotient,
-          final boolean needRemainder) {
-    if ((b.nWords < NaturalBEI.BURNIKEL_ZIEGLER_THRESHOLD) ||
-      ((nWords - b.nWords) < NaturalBEI.BURNIKEL_ZIEGLER_OFFSET)) {
-      return divideAndRemainderKnuth(b, quotient, needRemainder); }
-    return divideAndRemainderBurnikelZiegler(b, quotient); }
+//  private final NaturalBEIMutable
+//  divide (final NaturalBEIMutable b,
+//          final NaturalBEIMutable quotient,
+//          final boolean needRemainder) {
+//    if ((b.nWords < NaturalBEI.BURNIKEL_ZIEGLER_THRESHOLD) ||
+//      ((nWords - b.nWords) < NaturalBEI.BURNIKEL_ZIEGLER_OFFSET)) {
+//      return divideAndRemainderKnuth(b, quotient, needRemainder); }
+//    return divideAndRemainderBurnikelZiegler(b, quotient); }
 
   //-------------------------------------------------------------
   // gcd
@@ -2045,37 +2047,13 @@ public final class NaturalBEIMutable implements Natural {
   public final Natural gcd (final Natural d) {
     NaturalBEIMutable b = (NaturalBEIMutable) d;
     NaturalBEIMutable a = this;
-    final NaturalBEIMutable q = new NaturalBEIMutable();
     while (b.nWords != 0) {
       if (Math.abs(a.nWords-b.nWords) < 2) { 
         return a.binaryGCD(b); }
-      final NaturalBEIMutable r = a.divide(b, q, true);
+      final List<Natural> qr = a.divideAndRemainder(b);
       a = b;
-      b = r; }
+      b = (NaturalBEIMutable) recyclable(qr.get(1)); }
     return a; }
-
-//  // remove common factors as if numerator and denominator
-//  public static final NaturalBEIMutable[]
-//    reduce (final NaturalBEIMutable n,
-//            final NaturalBEIMutable d) {
-//    final int shift = Math.min(loBit(n),loBit(d));
-//    if (0 != shift) {
-//      n.downShift(shift);
-//      d.downShift(shift); }
-//    //    if (n.equals(d)) {
-//    //      return new NaturalBEIMutable[] { ONE, ONE, }; }
-//    //    if (d.isOne()) {
-//    //      return new NaturalBEIMutable[] { n, ONE, }; }
-//    //    if (n.isOne()) {
-//    //      return new NaturalBEIMutable[] { ONE, d, }; }
-//    final NaturalBEIMutable gcd = (NaturalBEIMutable) n.gcd(d);
-//    if (gcd.compareTo(n.one()) > 0) {
-//      final NaturalBEIMutable[] nd = { new NaturalBEIMutable(),
-//                                       new NaturalBEIMutable(), };
-//      n.divide(gcd,nd[0],false);
-//      d.divide(gcd,nd[1],false);
-//      return nd; }
-//    return new NaturalBEIMutable[] { n, d, }; }
 
   //-------------------------------------------------------------
   // pseudo-Comparable, not Comparable due to mutability
@@ -2255,7 +2233,7 @@ public final class NaturalBEIMutable implements Natural {
     assert 0<=upShift;
     if (0==upShift) { return valueOf(u); }
     if (0L==u) { return make(); }
-    return unsafe(NaturalBEI.shiftUpLong(u,upShift)); }
+    return valueOf(NaturalBEI.valueOf(u,upShift)); }
 
   @Override
   public final Natural from (final long u) {

@@ -4,7 +4,6 @@ import static xfp.java.numbers.Numbers.unsigned;
 
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.List;
 
 /** immutable arbitrary-precision non-negative integers
  * (natural number) represented by big-endian
@@ -205,17 +204,6 @@ implements Natural {
 
   //--------------------------------------------------------------
 
-  static final int[] shiftUpLong (final long m,
-                                  final int shift) {
-    final int hi = (int) Numbers.hiWord(m);
-    final int lo = (int) Numbers.loWord(m);
-    if (0==hi) {
-      if (0==lo) { return new int[0]; }
-      return shiftUp(new int[] { lo },shift); }
-    return shiftUp(new int[] { hi, lo, },shift); }
-
-  //--------------------------------------------------------------
-
   private static final int[] shiftDown (final int[] m,
                                         final int shift) {
     assert 0<=shift;
@@ -281,41 +269,6 @@ implements Natural {
 
   public final int[] copyWords () {
     return Arrays.copyOfRange(words(),0,endWord()); }
-
-  //--------------------------------------------------------------
-  //--------------------------------------------------------------
-  // Division
-  //--------------------------------------------------------------
-
-  @Override
-  public final List<Natural>
-  divideAndRemainderBurnikelZiegler (final Natural that) {
-    final NaturalBEI u = (NaturalBEI) that;
-    final NaturalBEIMutable q = NaturalBEIMutable.make();
-    final NaturalBEIMutable n = NaturalBEIMutable.valueOf(words());
-    final NaturalBEIMutable d = NaturalBEIMutable.valueOf(u.words());
-    final NaturalBEIMutable r =
-      n.divideAndRemainderBurnikelZiegler(d,q);
-    return List.of(q.immutable(), r.immutable()); }
-
-  //--------------------------------------------------------------
-  // gcd
-  //--------------------------------------------------------------
-
-//  public static final Natural[] reduce (final NaturalBEI n0,
-//                                        final NaturalBEI d0) {
-//    final int shift = Math.min(n0.loBit(),d0.loBit());
-//    final NaturalBEI n =
-//      (NaturalBEI) ((shift != 0) ? n0.shiftDown(shift) : n0);
-//    final NaturalBEI d =
-//      (NaturalBEI) ((shift != 0) ? d0.shiftDown(shift) : d0);
-//    if (n.equals(d)) { return new NaturalBEI[] { ONE, ONE, }; }
-//    if (d.isOne()) { return new NaturalBEI[] { n, ONE, }; }
-//    if (n.isOne()) { return new NaturalBEI[] { ONE, d, }; }
-//    final Natural gcd = n.gcd(d);
-//    if (gcd.compareTo(ONE) > 0) {
-//      return new Natural[] { n.divide(gcd), d.divide(gcd), }; }
-//    return new Natural[] { n, d, }; }
 
   //--------------------------------------------------------------
   // Bit Operations
@@ -647,9 +600,15 @@ implements Natural {
 
   public static final NaturalBEI valueOf (final long x,
                                           final int upShift) {
+    assert 0L<=x;
+    assert 0<=upShift;
     if (0L==x) { return ZERO; }
-    assert 0L < x;
-    return unsafe(shiftUpLong(x,upShift)); }
+    if (0==upShift) { return valueOf(x); }
+    final int hi = (int) Numbers.hiWord(x);
+    final int lo = (int) Numbers.loWord(x);
+    if (0==hi) {
+      return unsafe(shiftUp(new int[] { lo },upShift)); }
+    return unsafe(shiftUp(new int[] { hi, lo, },upShift)); }
 
   //--------------------------------------------------------------
 

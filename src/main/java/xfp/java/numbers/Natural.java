@@ -687,8 +687,12 @@ extends Uints<Natural>, Ringlike<Natural> {
 
   default List<Natural>
   divideAndRemainderBurnikelZiegler (final Natural u) {
-    throw Exceptions.unsupportedOperation(
-      this,"divideAndRemainderBurnikelZiegler",u); }
+    //throw Exceptions.unsupportedOperation(
+    //  this,"divideAndRemainderBurnikelZiegler",u); }
+  final Natural n = recyclable(this);
+  final Natural d = u.recyclable(u);
+  final List<Natural> qr = n.divideAndRemainderBurnikelZiegler(d);
+  return List.of(qr.get(0).immutable(), qr.get(1).immutable()); }
 
   @Override
   public default List<Natural> divideAndRemainder (final Natural u) {
