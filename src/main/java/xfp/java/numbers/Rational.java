@@ -4,6 +4,7 @@ import static xfp.java.numbers.Numbers.hiBit;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Objects;
 
 import xfp.java.exceptions.Exceptions;
@@ -509,9 +510,8 @@ implements Ringlike<Rational> {
     if (n0.isZero()) { return ZERO; }
     if (d0.isOne()) {
       return new Rational(nonNegative,n0,NaturalBEI.ONE); }
-    final Natural[] nd = NaturalBEI.reduce((NaturalBEI) n0,
-      (NaturalBEI)d0);
-    return new Rational(nonNegative,nd[0],nd[1]); }
+    final List<Natural> nd = n0.reduce(d0);
+    return new Rational(nonNegative,nd.get(0),nd.get(1)); }
 
   public final Rational reduce () {
     return reduce(nonNegative(),numerator(),denominator()); }

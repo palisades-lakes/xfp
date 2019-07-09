@@ -11,7 +11,7 @@ import xfp.java.exceptions.Exceptions;
  * (eq associativity).
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-01
+ * @version 2019-07-08
  */
 
 @SuppressWarnings("unchecked")
@@ -75,6 +75,13 @@ extends Comparable<T> {
 
   public default T gcd (final T x) {
     throw Exceptions.unsupportedOperation(this,"gcd",x); }
+
+  /** Return a list of <code>this/f,u/f</code>
+   * where <code>f</code> is the {@link #gcd} of this and 
+   * <code>u</code>>
+   */
+  public default List<T> reduce (final T u) {
+    throw Exceptions.unsupportedOperation(this,"reduce",u); }
 
   //--------------------------------------------------------------
   // 'Number' interface

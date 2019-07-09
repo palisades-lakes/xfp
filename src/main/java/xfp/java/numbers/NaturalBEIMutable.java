@@ -139,8 +139,8 @@ public final class NaturalBEIMutable implements Natural {
     if (b == 0) { return -1; }
     return ((nWords-1-j)<<5) + Integer.numberOfTrailingZeros(b); }
 
-  private static final int loBit (final NaturalBEIMutable m) {
-    return m.getLowestSetBit(); }
+//  private static final int loBit (final NaturalBEIMutable m) {
+//    return m.getLowestSetBit(); }
 
   private final void normalize () {
     if (nWords == 0) { start = 0; return; }
@@ -2041,40 +2041,41 @@ public final class NaturalBEIMutable implements Natural {
   // Use Euclid's algorithm until the numbers are approximately the
   // same length, then use the binary GCD algorithm to find the GCD.
 
-  public final NaturalBEIMutable hybridGCD (final NaturalBEIMutable d) {
-    NaturalBEIMutable b = d;
+  @Override
+  public final Natural gcd (final Natural d) {
+    NaturalBEIMutable b = (NaturalBEIMutable) d;
     NaturalBEIMutable a = this;
     final NaturalBEIMutable q = new NaturalBEIMutable();
     while (b.nWords != 0) {
-      if (Math.abs(a.nWords - b.nWords) < 2) {
+      if (Math.abs(a.nWords-b.nWords) < 2) { 
         return a.binaryGCD(b); }
       final NaturalBEIMutable r = a.divide(b, q, true);
       a = b;
       b = r; }
     return a; }
 
-  // remove common factors as if numerator and denominator
-  public static final NaturalBEIMutable[]
-    reduce (final NaturalBEIMutable n,
-            final NaturalBEIMutable d) {
-    final int shift = Math.min(loBit(n),loBit(d));
-    if (0 != shift) {
-      n.downShift(shift);
-      d.downShift(shift); }
-    //    if (n.equals(d)) {
-    //      return new NaturalBEIMutable[] { ONE, ONE, }; }
-    //    if (d.isOne()) {
-    //      return new NaturalBEIMutable[] { n, ONE, }; }
-    //    if (n.isOne()) {
-    //      return new NaturalBEIMutable[] { ONE, d, }; }
-    final NaturalBEIMutable gcd = n.hybridGCD(d);
-    if (gcd.compareTo(n.one()) > 0) {
-      final NaturalBEIMutable[] nd = { new NaturalBEIMutable(),
-                                       new NaturalBEIMutable(), };
-      n.divide(gcd,nd[0],false);
-      d.divide(gcd,nd[1],false);
-      return nd; }
-    return new NaturalBEIMutable[] { n, d, }; }
+//  // remove common factors as if numerator and denominator
+//  public static final NaturalBEIMutable[]
+//    reduce (final NaturalBEIMutable n,
+//            final NaturalBEIMutable d) {
+//    final int shift = Math.min(loBit(n),loBit(d));
+//    if (0 != shift) {
+//      n.downShift(shift);
+//      d.downShift(shift); }
+//    //    if (n.equals(d)) {
+//    //      return new NaturalBEIMutable[] { ONE, ONE, }; }
+//    //    if (d.isOne()) {
+//    //      return new NaturalBEIMutable[] { n, ONE, }; }
+//    //    if (n.isOne()) {
+//    //      return new NaturalBEIMutable[] { ONE, d, }; }
+//    final NaturalBEIMutable gcd = (NaturalBEIMutable) n.gcd(d);
+//    if (gcd.compareTo(n.one()) > 0) {
+//      final NaturalBEIMutable[] nd = { new NaturalBEIMutable(),
+//                                       new NaturalBEIMutable(), };
+//      n.divide(gcd,nd[0],false);
+//      d.divide(gcd,nd[1],false);
+//      return nd; }
+//    return new NaturalBEIMutable[] { n, d, }; }
 
   //-------------------------------------------------------------
   // pseudo-Comparable, not Comparable due to mutability

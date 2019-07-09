@@ -178,17 +178,6 @@ implements Natural {
   //--------------------------------------------------------------
   // Bit Operations
   //--------------------------------------------------------------
-  // TODO: BigInteger caches this with the instance. Is it worth
-  // having a cache map for these?
-
-  private static final int bitCount (final int[] m) {
-    int bc = 0;
-    for (final int mi : m) { bc += Integer.bitCount(mi); }
-    return bc + 1; }
-
-  //--------------------------------------------------------------
-  // shifts
-  //--------------------------------------------------------------
 
   private static final int[] shiftUp (final int[] m,
                                       final int bitShift) {
@@ -294,99 +283,6 @@ implements Natural {
     return Arrays.copyOfRange(words(),0,endWord()); }
 
   //--------------------------------------------------------------
-  // Modular Arithmetic
-  //--------------------------------------------------------------
-
-//  private static final int mulAdd (final int[] out,
-//                                   final int[] in,
-//                                   int offset,
-//                                   final int n,
-//                                   final long k) {
-//    long carry = 0;
-//    offset = out.length-offset-1;
-//    for (int j=n-1; j>=0; j--) {
-//      final long product =
-//        (unsigned(in[j])*k) + unsigned(out[offset]) + carry;
-//      out[offset--] = (int) product;
-//      carry = (product >>> 32); }
-//    return (int) carry; }
-//
-//  private static final void addOne (final int[] a,
-//                                    final int offset,
-//                                    final int mlen,
-//                                    final int carry) {
-//    int i = a.length-1-mlen-offset;
-//    final long t = unsigned(a[i]) + unsigned(carry);
-//    a[i] = (int) t;
-//    if ((t >>> 32) == 0) { return; }
-//    int j = mlen;
-//    while ((--j>=0)&&(--i>=0)) { // Carry out of number
-//      a[i]++; if (a[i]!=0) { break; } }
-//    return; }
-//
-//  // shifts a up to n elements up shift bits assumes,
-//  // 0<=shift<32
-//
-//  private static void shiftUp1Bit (final int[] a) {
-//    final int n = a.length;
-//    for (int i=1;i<n;i++) { a[i-1] = (a[i-1]<<1) | (a[i]>>>31); }
-//    a[n-1] = (a[n-1]<<1); }
-
-  //--------------------------------------------------------------
-  // square
-  //--------------------------------------------------------------
-  // The algorithm used here is adapted from Colin Plumb's C
-  // library.
-  // Technique: Consider the partial products in the
-  // multiplication of "abcde" by itself:
-  // a b c d e  * a b c d e
-  // ==================
-  // ae be ce de ee
-  // ad bd cd dd de
-  // ac bc cc cd ce
-  // ab bb bc bd be
-  // aa ab ac ad ae
-  // Note that everything above the main diagonal:
-  // ae be ce de = (abcd) * e
-  // ad bd cd = (abc) * d
-  // ac bc = (ab) * c
-  // ab = (a) * b
-  // is a copy of everything below the main diagonal:
-  // de
-  // cd ce
-  // bc bd be
-  // ab ac ad ae
-  // Thus, the sum is 2 * (off the diagonal) + diagonal.
-  // This is accumulated beginning with the diagonal (which
-  // consist of the squares of the digits of the input), which
-  // is then divided by two, the off-diagonal added, and
-  // multiplied by two again. The low bit is simply a copy of
-  // the low bit of the input, so it doesn't need special care.
-
-//  @Override
-//  public final Natural squareSimple () {
-//    final int[] x = words();
-//    final int n = endWord();
-//    final int n2 = (n<<1);
-//    int[] z = new int[n2]; 
-//    // Store the squares, right shifted one bit (divided by 2)
-//    int lo = 0;
-//    for (int j=0,i=0;j<n;j++) {
-//      final long xj = unsigned(x[j]);
-//      final long xj2 = xj*xj;
-//      z[i++] = ((lo<<31) | (int) (xj2>>>33));
-//      z[i++] = (int) (xj2>>>1);
-//      lo = (int) xj2; }
-//    // Add in off-diagonal sums
-//    for (int i=n-1,offset=1;i>=0;i--,offset+=2) {
-//      final long xi = unsigned(x[i]);
-//      final int carry = mulAdd(z,x,offset,i,xi);
-//      addOne(z,offset-1,i+1,carry); }
-//    // Shift back up and set low bit
-//    shiftUp1Bit(z);
-//    z[n2-1] |= (x[n-1]&1);
-//    return unsafe(stripLeadingZeros(z)); }
-
   //--------------------------------------------------------------
   // Division
   //--------------------------------------------------------------
@@ -406,27 +302,20 @@ implements Natural {
   // gcd
   //--------------------------------------------------------------
 
-  @Override
-  public final Natural gcd (final Natural that) {
-    // UNSAFE!!!
-    final NaturalBEIMutable a = NaturalBEIMutable.valueOf(words());
-    final NaturalBEIMutable b = (NaturalBEIMutable) that.recyclable(that);
-    return a.hybridGCD(b).immutable(); }
-
-  public static final Natural[] reduce (final NaturalBEI n0,
-                                        final NaturalBEI d0) {
-    final int shift = Math.min(n0.loBit(),d0.loBit());
-    final NaturalBEI n =
-      (NaturalBEI) ((shift != 0) ? n0.shiftDown(shift) : n0);
-    final NaturalBEI d =
-      (NaturalBEI) ((shift != 0) ? d0.shiftDown(shift) : d0);
-    if (n.equals(d)) { return new NaturalBEI[] { ONE, ONE, }; }
-    if (d.isOne()) { return new NaturalBEI[] { n, ONE, }; }
-    if (n.isOne()) { return new NaturalBEI[] { ONE, d, }; }
-    final Natural gcd = n.gcd(d);
-    if (gcd.compareTo(ONE) > 0) {
-      return new Natural[] { n.divide(gcd), d.divide(gcd), }; }
-    return new Natural[] { n, d, }; }
+//  public static final Natural[] reduce (final NaturalBEI n0,
+//                                        final NaturalBEI d0) {
+//    final int shift = Math.min(n0.loBit(),d0.loBit());
+//    final NaturalBEI n =
+//      (NaturalBEI) ((shift != 0) ? n0.shiftDown(shift) : n0);
+//    final NaturalBEI d =
+//      (NaturalBEI) ((shift != 0) ? d0.shiftDown(shift) : d0);
+//    if (n.equals(d)) { return new NaturalBEI[] { ONE, ONE, }; }
+//    if (d.isOne()) { return new NaturalBEI[] { n, ONE, }; }
+//    if (n.isOne()) { return new NaturalBEI[] { ONE, d, }; }
+//    final Natural gcd = n.gcd(d);
+//    if (gcd.compareTo(ONE) > 0) {
+//      return new Natural[] { n.divide(gcd), d.divide(gcd), }; }
+//    return new Natural[] { n, d, }; }
 
   //--------------------------------------------------------------
   // Bit Operations
@@ -468,39 +357,14 @@ implements Natural {
                                    final int n) {
     if (n < 0) { return 0; }
     if (n >= m.length) { return 0; }
-    final int mInt = m[m.length - n - 1];
+    final int mInt = m[m.length-n-1];
     return mInt; }
 
   private static final int hiBit (final int[] m) {
     final int len = m.length;
     if (len == 0) { return(0); }
-    // Calculate the bit length of the magnitude
-    //Debug.println("m[0]=" + Integer.toHexString(m[0]));
     final int n = ((len-1)<<5) + Numbers.bitLength(m[0]);
     return n; }
-
-  public final int bitCount () { return bitCount(words()); }
-
-  //--------------------------------------------------------------
-  // Comparable interface+
-  //--------------------------------------------------------------
-
-  public static final int compareTo (final NaturalBEI u0,
-                                     final long u1) {
-    assert 0L<=u1;
-    final int n0 = u0.endWord();
-    final long m10 = Numbers.hiWord(u1);
-    final long m11 = Numbers.loWord(u1);
-    final int n1 = (0L!=m10) ? 2 : ((0L!=m11) ? 1 : 0);
-    if (n0<n1) { return -1; }
-    if (n0>n1) { return 1; }
-    final long m00 = unsigned(u0._words[0]);
-    if (m00<m10) { return -1; }
-    if (m00>m10) { return 1; }
-    final long m01 = unsigned(u0._words[1]);
-    if (m01<m11) { return -1; }
-    if (m01>m11) { return 1; }
-    return 0; }
 
   //--------------------------------------------------------------
   // Object methods

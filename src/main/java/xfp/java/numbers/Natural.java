@@ -726,8 +726,25 @@ extends Uints<Natural>, Ringlike<Natural> {
   //--------------------------------------------------------------
 
   @Override
-  public default Natural gcd (final Natural x) {
-    throw Exceptions.unsupportedOperation(this,"gcd",x); }
+  public default Natural gcd (final Natural u) {
+    final Natural a = recyclable(this);
+    final Natural b = u.recyclable(u);
+    return a.gcd(b).immutable(); }
+    //throw Exceptions.unsupportedOperation(this,"gcd",x); }
+
+  @Override
+  public default List<Natural> reduce (final Natural d0) {
+    final Natural n0 = this;
+    final int shift = Math.min(n0.loBit(),d0.loBit());
+    final Natural n = ((shift != 0) ? n0.shiftDown(shift) : n0);
+    final Natural d = ((shift != 0) ? d0.shiftDown(shift) : d0);
+    if (n.equals(d)) { return List.of(one(),one()); }
+    if (d.isOne()) { return List.of(n,one()); }
+    if (n.isOne()) { return List.of(one(),d); }
+    final Natural g = n.gcd(d);
+    if (g.compareTo(one()) > 0) {
+      return List.of(n.divide(g),d.divide(g)); }
+    return List.of(n,d); }
 
   //--------------------------------------------------------------
 
