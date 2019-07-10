@@ -53,11 +53,11 @@ public abstract class NaturalLEBase extends Number {
   // Number methods
   //--------------------------------------------------------------
 
-  public final byte[] toByteArray () {
+  public final byte[] bigEndianBytes () {
     throw Exceptions.unsupportedOperation(this,"toByteArray"); }
 
   public final BigInteger bigIntegerValue () {
-    return new BigInteger(toByteArray()); }
+    return new BigInteger(bigEndianBytes()); }
 
   @Override
   public final int intValue () {

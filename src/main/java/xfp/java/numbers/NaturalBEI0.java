@@ -469,7 +469,7 @@ implements Natural {
   //--------------------------------------------------------------
 
   @Override
-  public final byte[] toByteArray () {
+  public final byte[] bigEndianBytes () {
     return Bei0.toByteArray(_words); }
 
   @Override

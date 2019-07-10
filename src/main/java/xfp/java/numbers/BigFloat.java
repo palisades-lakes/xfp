@@ -11,7 +11,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-08
+ * @version 2019-07-09
  */
 
 @SuppressWarnings("unchecked")
@@ -172,7 +172,7 @@ implements Ringlike<BigFloat> {
     assert 0<=bitShift;
     return
       NaturalBEI.valueOf(m0)
-      .add(NaturalBEI.valueOf(m1,bitShift)); }
+      .add(NaturalBEI.valueOf(m1).shiftUp(bitShift)); }
 
   private static final Natural subtract (final long m0,
                                          final int bitShift,
@@ -181,7 +181,7 @@ implements Ringlike<BigFloat> {
     assert 0L<=m1;
     assert 0<=bitShift;
     return
-      NaturalBEI.valueOf(m0,bitShift)
+      NaturalBEI.valueOf(m0).shiftUp(bitShift)
       .subtract(NaturalBEI.valueOf(m1)); }
 
   private static final Natural subtract (final long m0,

@@ -12,7 +12,7 @@ import xfp.java.exceptions.Exceptions;
  * Don't implement Comparable, because of mutability!
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-08
+ * @version 2019-07-09
  */
 
 public final class NaturalBEIMutable implements Natural {
@@ -2222,10 +2222,19 @@ public final class NaturalBEIMutable implements Natural {
       return valueOf((NaturalBEIMutable) u); }
     throw Exceptions.unsupportedOperation(null,"valueOf",u); }
 
+  private static final int[] toInts (final long u) {
+    assert 0<=u;
+    final int hi = (int) (u>>>32);
+    final int lo = (int) u;
+    if (0==hi) {
+      if (0==lo) { return EMPTY; }
+      return new int[] { lo, }; }
+    return new int[] { hi, lo, }; }
+  
   public static final NaturalBEIMutable valueOf (final long u) {
     if (0L==u) { return make(); }
     assert 0L<u;
-    return unsafe(NaturalBEI.toInts(u)); }
+    return unsafe(toInts(u)); }
 
   public static final NaturalBEIMutable valueOf (final long u,
                                                  final int upShift) {
@@ -2233,16 +2242,7 @@ public final class NaturalBEIMutable implements Natural {
     assert 0<=upShift;
     if (0==upShift) { return valueOf(u); }
     if (0L==u) { return make(); }
-    return valueOf(NaturalBEI.valueOf(u,upShift)); }
-
-  @Override
-  public final Natural from (final long u) {
-    return NaturalBEI.valueOf(u); }
-
-  @Override
-  public final Natural from (final long u,
-                             final int shift) {
-    return valueOf(u,shift); }
+    return valueOf(u).shiftUp(upShift); }
 
   //--------------------------------------------------------------
 

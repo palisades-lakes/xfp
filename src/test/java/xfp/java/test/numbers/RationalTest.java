@@ -4,6 +4,7 @@ import java.util.function.BinaryOperator;
 
 import org.junit.jupiter.api.Test;
 
+import xfp.java.numbers.Natural;
 import xfp.java.numbers.NaturalBEI;
 import xfp.java.numbers.Numbers;
 import xfp.java.numbers.Rational;
@@ -17,7 +18,7 @@ import xfp.java.test.Common;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-24
+ * @version 2019-07-09
  */
 
 public final class RationalTest {

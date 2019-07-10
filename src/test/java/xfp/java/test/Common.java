@@ -23,6 +23,7 @@ import xfp.java.function.ToFloatFunction;
 import xfp.java.numbers.Doubles;
 import xfp.java.numbers.Floats;
 import xfp.java.numbers.Ringlike;
+import xfp.java.numbers.Uints;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
 import xfp.java.prng.PRNG;
@@ -30,7 +31,7 @@ import xfp.java.prng.PRNG;
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-03
+ * @version 2019-07-09
  */
 @SuppressWarnings("unchecked")
 public final class Common {
@@ -87,6 +88,15 @@ public final class Common {
   // natural number/ integer tests
 
   public static final <T extends Ringlike<T>> void
+  hiBit (final Function<BigInteger,T> fromBI,
+         final BigInteger z0) {
+    final int bl = z0.bitLength();
+    final Uints r0 = (Uints) fromBI.apply(z0);
+    final int hi = r0.hiBit();
+    Assertions.assertEquals(bl,hi,() ->
+    "\nbitLength=" + bl + "\nhiBit=" + hi); }
+
+  public static final <T extends Ringlike<T>> void
   hexRoundTrip (final Function<BigInteger,T> fromBI,
                 final Function<String,T> valueOf,
                 final BigInteger z0) {
@@ -115,9 +125,11 @@ public final class Common {
     final T y = fromBI.apply(x0);
     final BigInteger x1 = toBI.apply(y);
     Assertions.assertEquals(x0,x1,() ->
-    "0x" + x0.toString(0x10)
+    "\n" + y.getClass()
+    + "\n" + x0.toString(0x10)
     + "\n" + y.toString()
-    + "\n0x" + x1.toString(0x10)); }
+    + "\n" + x1.toString(0x10)
+    + "\n"); }
 
   public static final <T extends Ringlike<T>> void
   add (final Function<BigInteger,T> fromBI,
@@ -130,17 +142,18 @@ public final class Common {
     final T y2 = y0.add(y1);
     final BigInteger x3 = toBI.apply( y2);
     Assertions.assertEquals(x2,x3,() ->
-    x0.toString(0x10)
+    "\n" + x0.toString(0x10) + "(" + x0.toString() + ")"
     + "\n + "
-    + "\n" +  x1.toString(0x10)
+    + "\n" +  x1.toString(0x10) + "(" + x1.toString() + ")"
     + "\n -> "
-    + "\n" + x2.toString(0x10)
-    + "\n" + y0.toString()
+    + "\n" + x2.toString(0x10) + "(" + x2.toString() + ")"
+    + "\n\n" + y0.toString()
     + "\n + "
     + "\n" +  y1.toString()
     + "\n -> "
     + "\n" + y2.toString()
-    + "\n" + x3.toString(0x10)); }
+    + "\n\n" + x3.toString(0x10) + "(" + x3.toString() + ")"
+    + "\n\n"); }
 
   public static final <T extends Ringlike<T>> void
   absDiff (final Function<BigInteger,T> fromBI,
@@ -362,6 +375,9 @@ public final class Common {
     assert 0<=z1.signum();
     //Debug.println("z0=" + z0.toString(0x10));
     //Debug.println("z1=" + z1.toString(0x10));
+    // TODO: test shifting and other bit ops. uintsTest?
+    hiBit(fromBI,z0);
+    hiBit(fromBI,z1);
     hexRoundTrip(fromBI,valueOf,z0);
     hexRoundTrip(fromBI,valueOf,z1);
     biRoundTrip(fromBI,toBI,z0);

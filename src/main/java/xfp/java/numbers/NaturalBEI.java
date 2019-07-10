@@ -10,28 +10,130 @@ import java.util.Arrays;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-08
+ * @version 2019-07-09
  */
 
 public final class NaturalBEI //extends Number
 implements Natural {
 
   //--------------------------------------------------------------
-  // int[] ops
+  // fields
   //--------------------------------------------------------------
 
-  static final int[] EMPTY = new int[0];
+  private static final int[] stripLeadingZeros (final int[] m) {
+    final int n = m.length;
+    int start = 0;
+    while ((start < n) && (m[start] == 0)) { start++; }
+    return (0==start) ? m : Arrays.copyOfRange(m,start,n); }
 
-  static final int[] toInts (final long u) {
-    assert 0<=u;
-    final int hi = (int) (u>>>32);
-    final int lo = (int) u;
-    if (0==hi) {
-      if (0==lo) { return EMPTY; }
-      return new int[] { lo, }; }
-    return new int[] { hi, lo, }; }
+  private final int[] _words;
+  private final int[] words () { return _words; }
+
+  @Override
+  public final int word (final int i) {
+    assert 0<=i : "Negative index: " + i;
+    final int n = words().length;
+    final int ii = n-i-1;
+    if ((0<=ii) && (ii<n)) { return words()[ii]; }
+    return 0; }
+
+  @Override
+  public final Natural setWord (final int i,
+                                final int w) {
+    assert 0<=i;
+    final int n0 = words().length;
+    final int n1 = Math.max(i+1,n0);
+    assert i<n1;
+    final int[] ws = new int[n1];
+    System.arraycopy(words(),0,ws,n1-n0,n0);
+    ws[n1-1-i] = w;
+    return unsafe(stripLeadingZeros(ws)); }
+
+  @Override
+  public final int startWord () { return 0; }
+  @Override
+  public final int endWord () { return words().length; }
+
+  public final int[] copyWords () {
+    return Arrays.copyOfRange(words(),0,endWord()); }
+
+  //--------------------------------------------------------------
+  // Mutability
+  //-------------------------------------------------------------
+
+  @Override
+  public final Natural immutable () { return this; }
+
+  @Override
+  public final Natural recyclable (final Natural init) {
+    if (null==init) {
+      return NaturalBEIMutable.make(words().length); }
+    return NaturalBEIMutable.valueOf(init); }
+
+  @Override
+  public final Natural recyclable (final int n) {
+    assert 0<=n;
+    return NaturalBEIMutable.make(n); }
+
+  @Override
+  public final boolean isImmutable () { return true; }
+
+  //--------------------------------------------------------------
+ // Object methods
+ //--------------------------------------------------------------
+
+ @Override
+ public final int hashCode () { return uintsHashCode(); }
+
+ @Override
+ public final boolean equals (final Object x) {
+   if (x==this) { return true; }
+   if (!(x instanceof NaturalBEI)) { return false; }
+   return uintsEquals((NaturalBEI) x); }
+
+ /** hex string. */
+ @Override
+ public final String toString () { return toHexString(); }
+
+  //--------------------------------------------------------------
+  // construction
+  //-------------------------------------------------------------
+
+  private NaturalBEI (final int[] m) { _words = m; }
+
+  // assume no leading zeros
+  // TODO: change to implementation where leading zeros are ok
+  public static final NaturalBEI unsafe (final int[] m) {
+    return new NaturalBEI(m); }
+
+  // assume no leading zeros
+  public static final NaturalBEI valueOf (final int[] m) {
+    return unsafe(Arrays.copyOf(m,m.length)); }
+
+  public static final NaturalBEI valueOf (final byte[] a) {
+    //return valueOf(b,0,b.length); }
+    final int nBytes = a.length;
+    int keep = 0;
+    while ((keep<nBytes) && (a[keep]==0)) { keep++; }
+    final int nInts = ((nBytes-keep) + 3) >>> 2;
+    final int[] result = new int[nInts];
+    int b = nBytes-1;
+    for (int i = nInts - 1; i >= 0; i--) {
+      result[i] = a[b--] & 0xff;
+      final int bytesRemaining = (b - keep) + 1;
+      final int bytesToTransfer = Math.min(3,bytesRemaining);
+      for (int j = 8; j <= (bytesToTransfer << 3); j += 8) {
+        result[i] |= ((a[b--] & 0xff) << j); } }
+    return unsafe(result); }
+
+  public static final NaturalBEI valueOf (final BigInteger bi) {
+    return valueOf(bi.toByteArray()); }
 
   //-------------------------------------------------------------
+
+  private static final int[] EMPTY = new int[0];
+
+
   // string parsing
 
   // bitsPerDigit in the given radix times 1024
@@ -123,423 +225,6 @@ implements Natural {
       destructiveMulAdd(m,superRadix,groupVal); }
     return stripLeadingZeros(m); }
 
-  //--------------------------------------------------------------
-
-  private static final boolean isZero (final int[] z) {
-    for (final int element : z) {
-      if (0!=element) { return false; } }
-    return true; }
-
-  private static final int[] stripLeadingZeros (final int[] m) {
-    final int n = m.length;
-    int start = 0;
-    while ((start < n) && (m[start] == 0)) { start++; }
-    return (0==start) ? m : Arrays.copyOfRange(m,start,n); }
-
-  private static final int[] stripLeadingZeros (final byte a[],
-                                                final int off,
-                                                final int len) {
-    final int indexBound = off + len;
-    int keep = off;
-    while ((keep < indexBound) && (a[keep] == 0)) { keep++; }
-    final int intLength = ((indexBound - keep) + 3) >>> 2;
-    final int[] result = new int[intLength];
-    int b = indexBound - 1;
-    for (int i = intLength - 1; i >= 0; i--) {
-      result[i] = a[b--] & 0xff;
-      final int bytesRemaining = (b - keep) + 1;
-      final int bytesToTransfer = Math.min(3,bytesRemaining);
-      for (int j = 8; j <= (bytesToTransfer << 3); j += 8) {
-        result[i] |= ((a[b--] & 0xff) << j); } }
-    return result; }
-
-  //--------------------------------------------------------------
-  /** TODO: move, useful as a general array op.
-   */
-  private static final byte[] toByteArray (final int[] m) {
-    final int byteLen = (hiBit(m) / 8) + 1;
-    final byte[] byteArray = new byte[byteLen];
-    for (
-      int i = byteLen-1,
-      bytesCopied = 4,
-      nextInt = 0,
-      intIndex = 0;
-      i >= 0;
-      i--) {
-      if (bytesCopied == 4) {
-        nextInt = getInt(m,intIndex++);
-        bytesCopied = 1; }
-      else {
-        nextInt >>>= 8; bytesCopied++; }
-      byteArray[i] = (byte) nextInt; }
-    return byteArray; }
-
-  //--------------------------------------------------------------
-  // Bit Operations
-  //--------------------------------------------------------------
-
-  private static final int[] shiftUp (final int[] m,
-                                      final int bitShift) {
-    assert 0<=bitShift;
-    if (bitShift==0) { return m; }
-    if (isZero(m)) { return EMPTY; }
-    final int intShift = (bitShift >>> 5);
-    final int remShift = (bitShift & 0x1f);
-    final int n = m.length;
-    if (remShift==0) {
-      return Arrays.copyOfRange(m,0,n+intShift); }
-    int m1[] = null;
-    int i = 0;
-    final int downShift = 32 - remShift;
-    final int highBits = (m[0] >>> downShift);
-    if (highBits != 0) {
-      m1 = new int[n + intShift + 1];
-      m1[i++] = highBits; }
-    else { m1 = new int[n + intShift]; }
-    int j = 0;
-    while (j < (n - 1)) {
-      m1[i++] = (m[j++] << remShift) | (m[j] >>> downShift); }
-    m1[i] = m[j] << remShift;
-    return m1; }
-
-  //--------------------------------------------------------------
-
-  private static final int[] shiftDown (final int[] m,
-                                        final int shift) {
-    assert 0<=shift;
-    if (isZero(m)) { return EMPTY; }
-    if (0==shift) { return stripLeadingZeros(m); }
-    final int iShift = (shift>>>5);
-    // Special case: entire contents shifted off the end
-    final int n0 = m.length;
-    if (iShift >= n0) { return EMPTY; }
-
-    final int rShift = (shift & 0x1f);
-    int m1[] = null;
-
-    if (rShift == 0) {
-      final int newMagLen = n0 - iShift;
-      m1 = Arrays.copyOf(m,newMagLen); }
-    else {
-      int i = 0;
-      final int highBits = m[0] >>> rShift;
-      if (highBits != 0) {
-        m1 = new int[n0 - iShift];
-        m1[i++] = highBits; }
-      else {
-        m1 = new int[n0 - iShift - 1]; }
-
-      final int nBits2 = 32 - rShift;
-      int j = 0;
-      while (j < (n0 - iShift - 1)) {
-        m1[i++] = (m[j++] << nBits2) | (m[j] >>> rShift); } }
-    return m1; }
-
-  //--------------------------------------------------------------
-  // fields
-  //--------------------------------------------------------------
-
-  private final int[] _words;
-  private final int[] words () { return _words; }
-
-  @Override
-  public final int word (final int i) {
-    assert 0<=i : "Negative index: " + i;
-    final int n = words().length;
-    final int ii = n-i-1;
-    if ((0<=ii) && (ii<n)) { return words()[ii]; }
-    return 0; }
-
-  @Override
-  public final Natural setWord (final int i,
-                                final int w) {
-    assert 0<=i;
-    final int n0 = words().length;
-    final int n1 = Math.max(i+1,n0);
-    assert i<n1;
-    final int[] ws = new int[n1];
-    System.arraycopy(words(),0,ws,n1-n0,n0);
-    ws[n1-1-i] = w;
-    return unsafe(stripLeadingZeros(ws)); }
-
-  @Override
-  public final int startWord () { return 0; }
-  @Override
-  public final int endWord () { return words().length; }
-
-  public final int[] copyWords () {
-    return Arrays.copyOfRange(words(),0,endWord()); }
-
-  //--------------------------------------------------------------
-  // Bit Operations
-  //--------------------------------------------------------------
-
-  @Override
-  public final Natural shiftUp (final int bitShift) {
-    assert 0<=bitShift;
-    if (bitShift==0) { return this; }
-    if (isZero()) { return ZERO; }
-    final int iShift = (bitShift >>> 5);
-    final int lShift = (bitShift & 0x1f);
-    final int[] m0 = words();
-    final int n0 = m0.length;
-    final int n1 = n0+iShift;
-    if (lShift==0) { return unsafe(Arrays.copyOfRange(m0,0,n1)); }
-    final int m1[];
-    int i = 0;
-    final int rShift = 32 - lShift;
-    final int hi = (m0[0] >>> rShift);
-    if (hi != 0) {
-      m1 = new int[n1+1];
-      m1[i++] = hi; }
-    else { m1 = new int[n1]; }
-    int j = 0;
-    while (j < (n0-1)) {
-      m1[i++] = (m0[j++] << lShift) | (m0[j] >>> rShift); }
-    m1[i] = m0[j] << lShift;
-    return unsafe(m1); }
-
-  @Override
-  public final Natural shiftDown (final int shift) {
-    assert 0<=shift;
-    return unsafe(shiftDown(words(),shift)); }
-
-  //--------------------------------------------------------------
-
-  private static final int getInt (final int[] m,
-                                   final int n) {
-    if (n < 0) { return 0; }
-    if (n >= m.length) { return 0; }
-    final int mInt = m[m.length-n-1];
-    return mInt; }
-
-  private static final int hiBit (final int[] m) {
-    final int len = m.length;
-    if (len == 0) { return(0); }
-    final int n = ((len-1)<<5) + Numbers.bitLength(m[0]);
-    return n; }
-
-  //--------------------------------------------------------------
-  // Object methods
-  //--------------------------------------------------------------
-
-  @Override
-  public final int hashCode () { return uintsHashCode(); }
-
-  @Override
-  public final boolean equals (final Object x) {
-    if (x==this) { return true; }
-    if (!(x instanceof NaturalBEI)) { return false; }
-    return uintsEquals((NaturalBEI) x); }
-
-  /** hex string. */
-  @Override
-  public final String toString () { return toHexString(); }
-
-  //--------------------------------------------------------------
-  // 'Number' interface+
-  //--------------------------------------------------------------
-
-  @Override
-  public final byte[] toByteArray () {
-    return toByteArray(words()); }
-
-  //--------------------------------------------------------------
-
-  @Override
-  public final float floatValue () {
-    if (isZero()) { return 0.0F; }
-
-    final int exponent =
-      (((endWord() - 1) << 5) + Numbers.bitLength(_words[0])) - 1;
-
-    // exponent == floor(log2(abs(this)))
-    if (exponent < (Long.SIZE - 1)) { return longValue(); }
-    else if (exponent > Float.MAX_EXPONENT) {
-      return Float.POSITIVE_INFINITY; }
-
-    // We need the top SIGNIFICAND_WIDTH bits, including the
-    // "implicit" one bit. To make rounding easier, we pick out
-    // the top SIGNIFICAND_WIDTH + 1 bits, so we have one to help
-    //us round up or down. twiceSignifFloor will contain the top
-    // SIGNIFICAND_WIDTH + 1 bits, and signifFloor the top
-    // SIGNIFICAND_WIDTH.
-    // It helps to consider the real number signif = abs(this) *
-    // 2^(SIGNIFICAND_WIDTH - 1 - exponent).
-    final int shift = exponent - Floats.SIGNIFICAND_BITS;
-
-    int twiceSignifFloor;
-    // twiceSignifFloor will be ==
-    // abs().shiftDown(shift).intValue()
-    // We do the shift into an int directly to improve
-    // performance.
-
-    final int nBits = shift & 0x1f;
-    final int nBits2 = 32 - nBits;
-
-    if (nBits == 0) { twiceSignifFloor = _words[0]; }
-    else {
-      twiceSignifFloor = _words[0] >>> nBits;
-      if (twiceSignifFloor == 0) {
-        twiceSignifFloor =
-          (_words[0] << nBits2) | (_words[1] >>> nBits); } }
-
-    int signifFloor = (twiceSignifFloor >> 1);
-    signifFloor &= Floats.STORED_SIGNIFICAND_MASK;
-    // We round up if either the fractional part of signif is
-    // strictly greater than 0.5 (which is true if the 0.5 bit is
-    // set and any lower bit is set), or if the fractional part of
-    // signif is >= 0.5 and signifFloor is odd (which is true if
-    // both the 0.5 bit and the 1 bit are set). This is equivalent
-    // to the desired HALF_EVEN rounding.
-    final boolean increment =
-      ((twiceSignifFloor
-        & 1) != 0) && (((signifFloor & 1) != 0)
-          || (loBit() < shift));
-    final int signifRounded =
-      increment ? signifFloor + 1 : signifFloor;
-    int bits =
-      ((exponent
-        + Floats.EXPONENT_BIAS)) << (Floats.SIGNIFICAND_BITS - 1);
-    bits += signifRounded;
-    /*
-     * If signifRounded == 2^24, we'd need to set all of the
-     * significand
-     * bits to zero and add 1 to the exponent. This is exactly the
-     * behavior
-     * we get from just adding signifRounded to bits directly. If
-     * the
-     * exponent is Float.MAX_EXPONENT, we round up (correctly) to
-     * Float.POSITIVE_INFINITY.
-     */
-    bits |= 1 & Floats.SIGN_MASK;
-    return Float.intBitsToFloat(bits); }
-
-  //--------------------------------------------------------------
-
-  @Override
-  public final double doubleValue () {
-    if (isZero()) { return 0.0; }
-
-    final int exponent =
-      (((endWord() - 1) << 5) + Numbers.bitLength(_words[0])) - 1;
-
-    // exponent == floor(log2(abs(this))Double)
-    if (exponent < (Long.SIZE - 1)) { return longValue(); }
-    else if (exponent > Double.MAX_EXPONENT) {
-      return Double.POSITIVE_INFINITY; }
-
-    // We need the top SIGNIFICAND_WIDTH bits, including the
-    // "implicit" one bit. To make rounding easier, we pick out
-    // the top SIGNIFICAND_WIDTH + 1 bits, so we have one to help
-    // us round up or down. twiceSignifFloor will contain the top
-    // SIGNIFICAND_WIDTH + 1 bits, and signifFloor the top
-    // SIGNIFICAND_WIDTH.
-    // It helps to consider the real number signif = abs(this) *
-    // 2^(SIGNIFICAND_WIDTH - 1 - exponent).
-    final int shift = exponent - Doubles.SIGNIFICAND_BITS;
-
-    long twiceSignifFloor;
-    // twiceSignifFloor will be ==
-    // abs().shiftDown(shift).longValue()
-    // We do the shift into a long directly to improve
-    // performance.
-
-    final int nBits = shift & 0x1f;
-    final int nBits2 = 32 - nBits;
-
-    int highBits;
-    int lowBits;
-    if (nBits == 0) {
-      highBits = _words[0];
-      lowBits = _words[1]; }
-    else {
-      highBits = _words[0] >>> nBits;
-      lowBits = (_words[0] << nBits2) | (_words[1] >>> nBits);
-      if (highBits == 0) {
-        highBits = lowBits;
-        lowBits = (_words[1] << nBits2) | (_words[2] >>> nBits); } }
-
-    twiceSignifFloor =
-      (unsigned(highBits) << 32) | unsigned(lowBits);
-
-    // remove the implied bit
-    final long signifFloor =
-      (twiceSignifFloor >> 1) & Doubles.STORED_SIGNIFICAND_MASK;
-    // We round up if either the fractional part of signif is
-    // strictly greater than 0.5 (which is true if the 0.5 bit
-    // is set and any lower bit is set), or if the fractional
-    // part of signif is >= 0.5 and signifFloor is odd (which is
-    // true if both the 0.5 bit and the 1 bit are set). This is
-    // equivalent to the desired HALF_EVEN rounding.
-
-    final boolean increment =
-      ((twiceSignifFloor
-        & 1) != 0) && (((signifFloor & 1) != 0)
-          || (loBit() < shift));
-    final long signifRounded =
-      increment ? signifFloor + 1 : signifFloor;
-    long bits =
-      (long) ((exponent
-        + Doubles.EXPONENT_BIAS)) << Doubles.STORED_SIGNIFICAND_BITS;
-    bits += signifRounded;
-    // If signifRounded == 2^53, we'd need to set all of the
-    // significand bits to zero and add 1 to the exponent. This is
-    // exactly the behavior we get from just adding signifRounded
-    // to bits directly. If the exponent is Double.MAX_EXPONENT,
-    // we round up (correctly) to Double.POSITIVE_INFINITY.
-    bits |= 1 & Doubles.SIGN_MASK;
-    return Double.longBitsToDouble(bits); }
-
-  //--------------------------------------------------------------
-  // Mutability
-  //-------------------------------------------------------------
-
-  @Override
-  public final Natural immutable () { return this; }
-
-  @Override
-  public final Natural recyclable (final Natural init) {
-    if (null==init) {
-      return NaturalBEIMutable.make(words().length); }
-    return NaturalBEIMutable.valueOf(init); }
-
-  @Override
-  public final Natural recyclable (final int n) {
-    assert 0<=n;
-    return NaturalBEIMutable.make(n); }
-
-  @Override
-  public final boolean isImmutable () { return true; }
-
-  //--------------------------------------------------------------
-  // construction
-  //-------------------------------------------------------------
-
-  private NaturalBEI (final int[] m) { _words = m; }
-
-  // assume no leading zeros
-  // TODO: change to implementation where leading zeros are ok
-  public static final NaturalBEI unsafe (final int[] m) {
-    return new NaturalBEI(m); }
-
-  // assume no leading zeros
-  public static final NaturalBEI valueOf (final int[] m) {
-    return unsafe(Arrays.copyOf(m,m.length)); }
-
-  public static final NaturalBEI valueOf (final byte[] b,
-                                          final int off,
-                                          final int len) {
-    return unsafe(stripLeadingZeros(b,off,len)); }
-
-  public static final NaturalBEI valueOf (final byte[] b) {
-    return valueOf(b,0,b.length); }
-
-  public static final NaturalBEI valueOf (final BigInteger bi) {
-    return valueOf(bi.toByteArray()); }
-
-  //-------------------------------------------------------------
-
   public static final NaturalBEI valueOf (final String s,
                                           final int radix) {
     return unsafe(toInts(s,radix)); }
@@ -590,6 +275,15 @@ implements Natural {
 
   //--------------------------------------------------------------
 
+  private static final int[] toInts (final long u) {
+    assert 0<=u;
+    final int hi = (int) (u>>>32);
+    final int lo = (int) u;
+    if (0==hi) {
+      if (0==lo) { return EMPTY; }
+      return new int[] { lo, }; }
+    return new int[] { hi, lo, }; }
+  
   public static final NaturalBEI valueOf (final long x) {
     if (x==0) { return ZERO; }
     assert 0L < x;
@@ -598,27 +292,8 @@ implements Natural {
 
   //--------------------------------------------------------------
 
-  public static final NaturalBEI valueOf (final long x,
-                                          final int upShift) {
-    assert 0L<=x;
-    assert 0<=upShift;
-    if (0L==x) { return ZERO; }
-    if (0==upShift) { return valueOf(x); }
-    final int hi = (int) Numbers.hiWord(x);
-    final int lo = (int) Numbers.loWord(x);
-    if (0==hi) {
-      return unsafe(shiftUp(new int[] { lo },upShift)); }
-    return unsafe(shiftUp(new int[] { hi, lo, },upShift)); }
-
-  //--------------------------------------------------------------
-
   @Override
   public final Natural from (final long u) { return valueOf(u); }
-
-  @Override
-  public final Natural from (final long u,
-                             final int shift) {
-    return valueOf(u,shift); }
 
   //--------------------------------------------------------------
 }
