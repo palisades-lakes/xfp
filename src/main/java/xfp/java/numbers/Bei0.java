@@ -1,7 +1,6 @@
 package xfp.java.numbers;
 
 import static xfp.java.numbers.Numbers.UNSIGNED_MASK;
-import static xfp.java.numbers.Numbers.hiBit;
 import static xfp.java.numbers.Numbers.hiWord;
 import static xfp.java.numbers.Numbers.loWord;
 import static xfp.java.numbers.Numbers.unsigned;
@@ -17,7 +16,7 @@ import java.util.Arrays;
  * compression/optimization step?
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-03
+ * @version 2019-07-10
  */
 
 public final class Bei0 {
@@ -231,7 +230,7 @@ public final class Bei0 {
     final int intShift = bitShift >>> 5;
     final int remShift = bitShift & 0x1f;
     final int nwords;
-    final int hi = hiBit(m1) + remShift;
+    final int hi = Numbers.hiBit(m1) + remShift;
     if (64 < hi) { nwords = 3; }
     else if (32 < hi) { nwords = 2; }
     else { nwords = 1; }
@@ -280,8 +279,8 @@ public final class Bei0 {
       if (0L==m0) { return 0; }
       return 1; }
     if (0L==m0) { return -1; }
-    final int hiBit0 = hiBit(m0);
-    final int hiBit1 = hiBit(m1) + bitShift;
+    final int hiBit0 = Numbers.hiBit(m0);
+    final int hiBit1 = Numbers.hiBit(m1) + bitShift;
     if (hiBit0<hiBit1) { return -1; }
     if (hiBit0>hiBit1) { return 1; }
     // shifted m1 must fit in one long, since hiBit0 < 64
@@ -407,7 +406,7 @@ public final class Bei0 {
     final int intShift = bitShift >>> 5;
     final int remShift = bitShift & 0x1f;
     final int nwords;
-    final int hi = hiBit(m1) + remShift;
+    final int hi = Numbers.hiBit(m1) + remShift;
     if (64 < hi) { nwords = 3; }
     else if (32 < hi) { nwords = 2; }
     else { nwords = 1; }
@@ -481,7 +480,7 @@ public final class Bei0 {
     final int intShift = bitShift >>> 5;
     final int remShift = bitShift & 0x1f;
     final int nwords1;
-    final int hi1 = hiBit(m1) + remShift;
+    final int hi1 = Numbers.hiBit(m1) + remShift;
     if (64 < hi1) { nwords1 = 3; }
     else if (32 < hi1) { nwords1 = 2; }
     else { nwords1 = 1; }
@@ -723,7 +722,7 @@ public final class Bei0 {
     final int intShift = bitShift >>> 5;
     final int remShift = bitShift & 0x1f;
     final int nwords;
-    final int hi = hiBit(m1) + remShift;
+    final int hi = Numbers.hiBit(m1) + remShift;
     if (64 < hi) { nwords = 3; }
     else if (32 < hi) { nwords = 2; }
     else { nwords = 1; }
@@ -806,11 +805,11 @@ public final class Bei0 {
 
   private static final int TOOM_COOK_SQUARE_THRESHOLD = 216;
 
-  private static int bitLength (final int[] m,
+  private static int hiBit (final int[] m,
                                 final int len) {
     assert (! leadingZero(m));
     if (len == 0) { return 0; }
-    return ((len-1) << 5) + Numbers.bitLength(m[0]); }
+    return ((len-1) << 5) + Numbers.hiBit(m[0]); }
 
   public static final int[] square (final int[] m,
                                     final boolean isRecursion) {
@@ -826,7 +825,7 @@ public final class Bei0 {
       return squareKaratsuba(m); }
     // For a discussion of overflow detection see multiply()
     if (!isRecursion) {
-      if (bitLength(m,m.length) > (16L * MAX_MAG_LENGTH)) {
+      if (hiBit(m,m.length) > (16L * MAX_MAG_LENGTH)) {
         reportOverflow(); } }
     //System.out.println("squareToomCook3");
     return squareToomCook3(m); }
@@ -1421,11 +1420,11 @@ public final class Bei0 {
     // zero elements.
     //
     if (!isRecursion) {
-      // The bitLength() instance method is not used here as we
+      // The hiBit() instance method is not used here as we
       // are only considering the magnitudes as non-negative. The
       // Toom-Cook multiplication algorithm determines the sign
       // at its end from the two signum values.
-      if ((bitLength(x,x.length) + bitLength(y,
+      if ((hiBit(x,x.length) + hiBit(y,
         y.length)) > (32L * MAX_MAG_LENGTH)) {
         reportOverflow(); } }
 
@@ -1650,7 +1649,7 @@ public final class Bei0 {
     r[r.length-intNum-1] ^= (1 << (n & 31));
     return stripLeadingZeros(r); }
 
-  public static final int getLowestSetBit (final int[] m) {
+  public static final int loBit (final int[] m) {
     int lsb = 0;
     if (isZero(m)) { lsb -= 1; }
     else {
@@ -1666,11 +1665,11 @@ public final class Bei0 {
   // TODO: BigInteger caches this with the instance. Is it worth
   // having a cache map for these?
 
-  public static final int bitLength (final int[] m) {
+  public static final int hiBit (final int[] m) {
     final int len = m.length;
     if (len == 0) { return(0); }
     // Calculate the bit length of the magnitude
-    final int n = ((len-1) << 5) + Numbers.bitLength(m[0]);
+    final int n = ((len-1) << 5) + Numbers.hiBit(m[0]);
     return n; }
 
   // TODO: BigInteger caches this with the instance. Is it worth
@@ -1686,7 +1685,7 @@ public final class Bei0 {
   //--------------------------------------------------------------
 
   public static final byte[] toByteArray (final int[] m) {
-    final int byteLen = (bitLength(m) / 8) + 1;
+    final int byteLen = (hiBit(m) / 8) + 1;
     final byte[] byteArray = new byte[byteLen];
     for (
       int i = byteLen-1,
@@ -1721,7 +1720,7 @@ public final class Bei0 {
     if (isZero(m)) { return 0.0F; }
 
     final int exponent =
-      (((m.length-1) << 5) + Numbers.bitLength(m[0]))-1;
+      (((m.length-1) << 5) + Numbers.hiBit(m[0]))-1;
 
     // exponent == floor(log2(abs(this)))
     if (exponent < (Long.SIZE-1)) { return longValue(m); }
@@ -1765,7 +1764,7 @@ public final class Bei0 {
     final boolean increment =
       ((twiceSignifFloor
         & 1) != 0) && (((signifFloor & 1) != 0)
-          || (getLowestSetBit(m) < shift));
+          || (loBit(m) < shift));
     final int signifRounded =
       increment ? signifFloor + 1 : signifFloor;
     int bits =
@@ -1790,7 +1789,7 @@ public final class Bei0 {
     if (isZero(m)) { return 0.0; }
 
     final int exponent =
-      (((m.length-1) << 5) + Numbers.bitLength(m[0]))-1;
+      (((m.length-1) << 5) + Numbers.hiBit(m[0]))-1;
 
     // exponent == floor(log2(abs(this))Double)
     if (exponent < (Long.SIZE-1)) { return longValue(m); }
@@ -1847,7 +1846,7 @@ public final class Bei0 {
     final boolean increment =
       ((twiceSignifFloor
         & 1) != 0) && (((signifFloor & 1) != 0)
-          || (getLowestSetBit(m) < shift));
+          || (loBit(m) < shift));
     final long signifRounded =
       increment ? signifFloor + 1 : signifFloor;
     long bits =
@@ -1880,7 +1879,7 @@ public final class Bei0 {
     0x39aa400 };
 
   private static final int intLength (final int[] m) {
-    return (bitLength(m) >>> 5) + 1; }
+    return (hiBit(m) >>> 5) + 1; }
 
   private static final int getInt (final int[] m,
                                    final int n) {

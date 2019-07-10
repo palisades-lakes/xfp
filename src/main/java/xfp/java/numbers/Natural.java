@@ -17,7 +17,7 @@ import xfp.java.exceptions.Exceptions;
  * TODO: utilities class to hide private stuff?
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-08
+ * @version 2019-07-10
  */
 
 @SuppressWarnings("unchecked")
@@ -274,7 +274,7 @@ extends Uints<Natural>, Ringlike<Natural> {
   // multiplicative monoid
   //--------------------------------------------------------------
   // TODO: singleton class for one() and zero()?
-  
+
   @Override
   public default Natural one () {
     throw Exceptions.unsupportedOperation(this,"one"); }
@@ -296,9 +296,9 @@ extends Uints<Natural>, Ringlike<Natural> {
   //--------------------------------------------------------------
   // TODO: about twice the ops necessary, compared to using
   // symmetry to optimize.
-  
+
   public default Natural squareSimple () {
-//    throw Exceptions.unsupportedOperation(this,"square"); }
+    //    throw Exceptions.unsupportedOperation(this,"square"); }
     final int n = endWord();
     Natural v = recyclable(2*n+1);
     long carry = 0L;
@@ -316,7 +316,7 @@ extends Uints<Natural>, Ringlike<Natural> {
       v = v.setWord(i2, (int) carry); }
     return v.immutable(); }
 
-//--------------------------------------------------------------
+  //--------------------------------------------------------------
 
   public default Natural squareKaratsuba () {
     final int n = endWord();
@@ -336,8 +336,8 @@ extends Uints<Natural>, Ringlike<Natural> {
   //--------------------------------------------------------------
 
   public default Natural squareToomCook3 () {
-//    final int[] z = squareToomCook3(words());
-//    return unsafe(stripLeadingZeros(z)); }
+    //    final int[] z = squareToomCook3(words());
+    //    return unsafe(stripLeadingZeros(z)); }
     final int n = endWord();
     // k is the size (in ints) of the lower-order slices.
     final int k = (n+2)/3;   // Equal to ceil(largest/3)
@@ -379,7 +379,7 @@ extends Uints<Natural>, Ringlike<Natural> {
       .shiftUp(k32)
       .add(v0); }
 
-    @Override
+  @Override
   public default Natural square () {
     if (isZero()) { return zero(); }
     if (isOne()) { return this; }
@@ -390,12 +390,12 @@ extends Uints<Natural>, Ringlike<Natural> {
       return squareKaratsuba(); }
     // For a discussion of overflow detection see multiply()
     return squareToomCook3(); }
- 
+
 
   /** Return a {@link Natural} whose value is <code>t</code>.
    * @see #multiply(long,long) 
    */
-  
+
   public default Natural square (final long t) {
     assert 0L<=t;
     final long hi = Numbers.hiWord(t);
@@ -690,10 +690,10 @@ extends Uints<Natural>, Ringlike<Natural> {
   divideAndRemainderBurnikelZiegler (final Natural u) {
     //throw Exceptions.unsupportedOperation(
     //  this,"divideAndRemainderBurnikelZiegler",u); }
-  final Natural n = recyclable(this);
-  final Natural d = u.recyclable(u);
-  final List<Natural> qr = n.divideAndRemainderBurnikelZiegler(d);
-  return List.of(qr.get(0).immutable(), qr.get(1).immutable()); }
+    final Natural n = recyclable(this);
+    final Natural d = u.recyclable(u);
+    final List<Natural> qr = n.divideAndRemainderBurnikelZiegler(d);
+    return List.of(qr.get(0).immutable(), qr.get(1).immutable()); }
 
   @Override
   public default List<Natural> divideAndRemainder (final Natural u) {
@@ -707,7 +707,7 @@ extends Uints<Natural>, Ringlike<Natural> {
     assert 0<u;
     throw Exceptions.unsupportedOperation(
       this,"divideAndRemainder",u); }
- 
+
   //--------------------------------------------------------------
 
   default Natural divideKnuth (final Natural u) {
@@ -729,13 +729,59 @@ extends Uints<Natural>, Ringlike<Natural> {
     return divideAndRemainder(u).get(1); }
 
   //--------------------------------------------------------------
+  /** Algorithm B from Knuth section 4.5.2 */
+
+  public default Natural gcdKnuth (final Natural u) {
+    Natural a = recyclable(this);
+    Natural b = u.recyclable(u);
+    // B1
+    final int sa = a.loBit();
+    final int s = Math.min(sa,b.loBit());
+    if (s!=0) { a = a.shiftDown(s); b = b.shiftDown(s); }
+    // B2
+    int tsign = (s==sa) ? -1 : 1;
+    Natural t = (0<tsign) ? a : b;
+    for (int lb=t.loBit();lb>=0;lb=t.loBit()) {
+      // B3 and B4
+      t = t.shiftDown(lb);
+      // step B5
+      if (0<tsign) { a = t; }
+      else { b = t; }
+      final int an = a.endWord();
+      final int bn = b.endWord();
+      if ((an<2) && (bn<2)) {
+        final int x = a.word(an-1);
+        final int y = b.word(bn-1);
+        Natural r = from(Ints.unsignedGcd(x,y));
+        if (s > 0) { r = r.shiftUp(s); }
+        return r; }
+      // B6
+      tsign = a.compareTo(b);
+      if (0==tsign) { break; }
+      else if (0<tsign) { a = a.subtract(b); t = a;  }
+      else { b = b.subtract(a); t = b; } }
+    if (s > 0) { a = a.shiftUp(s); }
+    return a; }
+
+  //--------------------------------------------------------------
+  /** Use Euclid until the numbers are approximately the
+   * same length, then use the Knuth algorithm.
+   */
 
   @Override
   public default Natural gcd (final Natural u) {
-    final Natural a = recyclable(this);
-    final Natural b = u.recyclable(u);
-    return a.gcd(b).immutable(); }
-    //throw Exceptions.unsupportedOperation(this,"gcd",x); }
+    Natural a = recyclable(this);
+    Natural b = u.recyclable(u);
+    while (b.endWord() != 0) {
+      if (Math.abs(a.endWord()-b.endWord()) < 2) { 
+        return a.gcdKnuth(b).immutable(); }
+      final List<Natural> qr = a.divideAndRemainder(b);
+      a = b;
+      final Natural r = qr.get(1);
+      b = r.recyclable(r); }
+    return a.immutable(); }
+
+  //--------------------------------------------------------------
 
   @Override
   public default List<Natural> reduce (final Natural d0) {
@@ -760,7 +806,7 @@ extends Uints<Natural>, Ringlike<Natural> {
   // 'Number' interface
   //--------------------------------------------------------------
   // TODO: exceptions on truncation?
-  
+
   @Override
   public default int intValue () { return word(0); }
 
@@ -769,7 +815,7 @@ extends Uints<Natural>, Ringlike<Natural> {
     return (uword(1)<<32) | uword(0); }
 
   //--------------------------------------------------------------
-  
+
   @Override
   public default float floatValue () {
     if (isZero()) { return 0.0F; }
@@ -856,7 +902,7 @@ extends Uints<Natural>, Ringlike<Natural> {
     // twiceSignifFloor == abs().shiftDown(shift).intValue()
     // shift into an int directly 
     long twiceSignifFloor;
-     if (nBits == 0) {
+    if (nBits == 0) {
       highBits = w0;
       lowBits = w1; }
     else {
@@ -901,4 +947,3 @@ extends Uints<Natural>, Ringlike<Natural> {
   //--------------------------------------------------------------
 }
 //--------------------------------------------------------------
-

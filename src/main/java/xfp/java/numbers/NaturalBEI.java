@@ -1,7 +1,5 @@
 package xfp.java.numbers;
 
-import static xfp.java.numbers.Numbers.unsigned;
-
 import java.math.BigInteger;
 import java.util.Arrays;
 
@@ -10,7 +8,7 @@ import java.util.Arrays;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-09
+ * @version 2019-07-10
  */
 
 public final class NaturalBEI //extends Number
@@ -19,12 +17,6 @@ implements Natural {
   //--------------------------------------------------------------
   // fields
   //--------------------------------------------------------------
-
-  private static final int[] stripLeadingZeros (final int[] m) {
-    final int n = m.length;
-    int start = 0;
-    while ((start < n) && (m[start] == 0)) { start++; }
-    return (0==start) ? m : Arrays.copyOfRange(m,start,n); }
 
   private final int[] _words;
   private final int[] words () { return _words; }
@@ -47,7 +39,7 @@ implements Natural {
     final int[] ws = new int[n1];
     System.arraycopy(words(),0,ws,n1-n0,n0);
     ws[n1-1-i] = w;
-    return unsafe(stripLeadingZeros(ws)); }
+    return unsafe(Ints.stripLeadingZeros(ws)); }
 
   @Override
   public final int startWord () { return 0; }
@@ -129,105 +121,9 @@ implements Natural {
   public static final NaturalBEI valueOf (final BigInteger bi) {
     return valueOf(bi.toByteArray()); }
 
-  //-------------------------------------------------------------
-
-  private static final int[] EMPTY = new int[0];
-
-
-  // string parsing
-
-  // bitsPerDigit in the given radix times 1024
-  // Rounded up to avoid under-allocation.
-
-  private static final long[] bitsPerDigit =
-  { 0, 0, 1024, 1624, 2048, 2378, 2648, 2875, 3072, 3247, 3402,
-    3543, 3672, 3790, 3899, 4001, 4096, 4186, 4271, 4350, 4426,
-    4498, 4567, 4633, 4696, 4756, 4814, 4870, 4923, 4975, 5025,
-    5074, 5120, 5166, 5210, 5253, 5295 };
-
-  private static final int[] digitsPerInt =
-  { 0, 0, 30, 19, 15, 13, 11, 11, 10, 9, 9, 8, 8, 8, 8, 7, 7, 7,
-    7, 7, 7, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5 };
-
-  private static final int[] intRadix =
-  { 0, 0, 0x40000000, 0x4546b3db, 0x40000000, 0x48c27395,
-    0x159fd800, 0x75db9c97, 0x40000000, 0x17179149, 0x3b9aca00,
-    0xcc6db61, 0x19a10000, 0x309f1021, 0x57f6c100, 0xa2f1b6f,
-    0x10000000, 0x18754571, 0x247dbc80, 0x3547667b, 0x4c4b4000,
-    0x6b5a6e1d, 0x6c20a40, 0x8d2d931, 0xb640000, 0xe8d4a51,
-    0x1269ae40, 0x17179149, 0x1cb91000, 0x23744899, 0x2b73a840,
-    0x34e63b41, 0x40000000, 0x4cfa3cc1, 0x5c13d840, 0x6d91b519,
-    0x39aa400 };
-
-  // Multiply x array times word y in place, and add word z
-
-  private static final void destructiveMulAdd (final int[] x,
-                                               final int y,
-                                               final int z) {
-    final long ylong = unsigned(y);
-    final long zlong = unsigned(z);
-    final int lm1 = x.length-1;
-    long product = 0;
-    long carry = 0;
-    for (int i = lm1; i >= 0; i--) {
-      product = (ylong * unsigned(x[i])) + carry;
-      x[i] = (int) product;
-      carry = product >>> 32; }
-    long sum = unsigned(x[lm1]) + zlong;
-    x[lm1] = (int) sum;
-    carry = sum >>> 32;
-    for (int i = lm1-1; i >= 0; i--) {
-      sum = unsigned(x[i]) + carry;
-      x[i] = (int) sum;
-      carry = sum >>> 32; } }
-
-  private static final int[] toInts (final String s,
-                                     final int radix) {
-    final int len = s.length();
-    assert 0 < len;
-    assert Character.MIN_RADIX <= radix;
-    assert radix <= Character.MAX_RADIX;
-    assert 0 > s.indexOf('-');
-    assert 0 > s.indexOf('+');
-
-    int cursor = 0;
-    // skip leading '0' --- not strictly necessary?
-    while ((cursor < len)
-      && (Character.digit(s.charAt(cursor),radix) == 0)) {
-      cursor++; }
-    if (cursor == len) { return EMPTY; }
-
-    final int nDigits = len - cursor;
-
-    // might be bigger than needed,
-    // but stripLeadingZeros(int[]) handles that
-    final long nBits =
-      ((nDigits * bitsPerDigit[radix]) >>> 10) + 1;
-    final int nWords = (int) (nBits + 31) >>> 5;
-    final int[] m = new int[nWords];
-
-    // Process first (potentially short) digit group
-    int firstGroupLen = nDigits % digitsPerInt[radix];
-    if (firstGroupLen == 0) { firstGroupLen = digitsPerInt[radix]; }
-    String group = s.substring(cursor,cursor += firstGroupLen);
-    m[nWords-1] = Integer.parseInt(group,radix);
-    if (m[nWords-1] < 0) {
-      throw new NumberFormatException("Illegal digit"); }
-
-    // Process remaining digit groups
-    final int superRadix = intRadix[radix];
-    int groupVal = 0;
-    while (cursor < len) {
-      group = s.substring(cursor,cursor += digitsPerInt[radix]);
-      groupVal = Integer.parseInt(group,radix);
-      if (groupVal < 0) {
-        throw new NumberFormatException("Illegal digit"); }
-      destructiveMulAdd(m,superRadix,groupVal); }
-    return stripLeadingZeros(m); }
-
   public static final NaturalBEI valueOf (final String s,
                                           final int radix) {
-    return unsafe(toInts(s,radix)); }
+    return unsafe(Ints.bigEndian(s,radix)); }
 
   public static final NaturalBEI valueOf (final String s) {
     return valueOf(s,0x10); }
@@ -262,7 +158,7 @@ implements Natural {
       powerCache[i] = new NaturalBEI[] { NaturalBEI.valueOf(i) };
       logCache[i] = Math.log(i); } }
 
-  public static final NaturalBEI ZERO = new NaturalBEI(EMPTY);
+  public static final NaturalBEI ZERO = new NaturalBEI(Ints.EMPTY);
   public static final NaturalBEI ONE = valueOf(1);
   public static final NaturalBEI TWO = valueOf(2);
   public static final NaturalBEI TEN = valueOf(10);
@@ -275,20 +171,11 @@ implements Natural {
 
   //--------------------------------------------------------------
 
-  private static final int[] toInts (final long u) {
-    assert 0<=u;
-    final int hi = (int) (u>>>32);
-    final int lo = (int) u;
-    if (0==hi) {
-      if (0==lo) { return EMPTY; }
-      return new int[] { lo, }; }
-    return new int[] { hi, lo, }; }
-  
   public static final NaturalBEI valueOf (final long x) {
     if (x==0) { return ZERO; }
     assert 0L < x;
     if (x <= MAX_CONSTANT) { return posConst[(int) x]; }
-    return unsafe(toInts(x)); }
+    return unsafe(Ints.bigEndian(x)); }
 
   //--------------------------------------------------------------
 

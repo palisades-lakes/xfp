@@ -14,7 +14,7 @@ import xfp.java.Debug;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-08
+ * @version 2019-07-10
  */
 
 public final class NaturalBEI0 extends Number
@@ -339,8 +339,8 @@ implements Natural {
                                         final NaturalBEI0 d0) {
     final int shift =
       Math.min(
-        Bei0.getLowestSetBit(n0._words),
-        Bei0.getLowestSetBit(d0._words));
+        Bei0.loBit(n0._words),
+        Bei0.loBit(d0._words));
     final NaturalBEI0 n = (shift != 0) ? n0.shiftDown(shift) : n0;
     final NaturalBEI0 d = (shift != 0) ? d0.shiftDown(shift) : d0;
     if (n.equals(d)) { return new NaturalBEI0[] { ONE, ONE, }; }
@@ -397,11 +397,10 @@ implements Natural {
     return unsafe(Bei0.flipBit(_words,n)); }
 
   @Override
-  public final int loBit () {
-    return Bei0.getLowestSetBit(_words); }
+  public final int loBit () { return Bei0.loBit(_words); }
 
   @Override
-  public final int hiBit () { return Bei0.bitLength(_words); }
+  public final int hiBit () { return Bei0.hiBit(_words); }
 
   public final int bitCount () { return Bei0.bitCount(_words); }
 

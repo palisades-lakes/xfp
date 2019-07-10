@@ -114,7 +114,7 @@ public final class MutableNaturalBEI0 {
   // bit operations
   //--------------------------------------------------------------
 
-  public final long bitLength () {
+  public final long hiBit () {
     if (intLen == 0) { return 0; }
     return
       (intLen*32L)
@@ -143,7 +143,7 @@ public final class MutableNaturalBEI0 {
     final int nBits = n & 0x1F;
     this.intLen -= nInts;
     if (nBits == 0) { return; }
-    final int bitsInHighWord = Numbers.bitLength(value[offset]);
+    final int bitsInHighWord = Numbers.hiBit(value[offset]);
     if (nBits >= bitsInHighWord) {
       this.primitiveLeftShift(32 - nBits);
       this.intLen--; }
@@ -179,7 +179,7 @@ public final class MutableNaturalBEI0 {
     if (intLen == 0) { return; }
     final int nInts = n >>> 5;
     final int nBits = n&0x1F;
-    final int bitsInHighWord = Numbers.bitLength(value[offset]);
+    final int bitsInHighWord = Numbers.hiBit(value[offset]);
 
     // If shift can be done without moving words, do so
     if (n <= (32-bitsInHighWord)) {
@@ -763,8 +763,8 @@ public final class MutableNaturalBEI0 {
    * The parameter beta is 2<sup>32</sup> so all shifts are
    * multiples of 32 bits. <br/>
    * {@code this} must be a nonnegative number such that
-   * {@code this.bitLength() <= 2*b.bitLength()}
-   * @param b a positive number such that {@code b.bitLength()} is even
+   * {@code this.hiBit() <= 2*b.hiBit()}
+   * @param b a positive number such that {@code b.hiBit()} is even
    * @param quotient output parameter for {@code this/b}
    * @return {@code this%b}
    */
@@ -803,7 +803,7 @@ public final class MutableNaturalBEI0 {
    * multiples of 32 bits.<br/>
    * <br/>
    * {@code this} must be a nonnegative number such that
-   * {@code 2*this.bitLength() <= 3*b.bitLength()}
+   * {@code 2*this.hiBit() <= 3*b.hiBit()}
    * @param quotient output parameter for {@code this/b}
    * @return {@code this%b}
    */
@@ -884,7 +884,7 @@ public final class MutableNaturalBEI0 {
     final int n = j * m; // step 2b: block length in 32-bit units
     final long n32 = 32L * n; // block length in bits
     // step 3: sigma = max{T | (2^T)*B < beta^n}
-    final int sigma = (int) Math.max(0, n32 - b.bitLength());
+    final int sigma = (int) Math.max(0, n32 - b.hiBit());
     final MutableNaturalBEI0 bShifted = new MutableNaturalBEI0(b);
     // step 4a: shift b so its length is a multiple of n
     bShifted.safeLeftShift(sigma);
@@ -894,7 +894,7 @@ public final class MutableNaturalBEI0 {
 
     // step 5: t is the number of blocks needed to accommodate a
     // plus one additional bit
-    int t = (int) ((aShifted.bitLength()+n32) / n32);
+    int t = (int) ((aShifted.hiBit()+n32) / n32);
     if (t < 2) { t = 2; }
 
     // step 6: conceptually split a into blocks a[t-1], ..., a[0]

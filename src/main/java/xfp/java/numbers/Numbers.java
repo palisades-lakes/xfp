@@ -110,38 +110,12 @@ public final class Numbers implements Set {
     return i.bitLength(); }
 
   /** inclusive */
-  public static final int loBit (final NaturalBEIMutable i) {
-    return i.getLowestSetBit(); }
-
-  /** exclusive */
-  public static final int hiBit (final NaturalBEIMutable i) {
-    final long n = i.bitLength();
-    assert n <= Integer.MAX_VALUE;
-    return (int) n; }
-
-  //  /** inclusive, big-endian */
-  //  public static final int loBit (final int[] i) {
-  //    return Bei.getLowestSetBit(i); }
-
-  /** inclusive */
-  public static final int loBit (final NaturalBEI i) {
+  public static final int loBit (final Uints i) {
     return i.loBit(); }
 
-  /** inclusive */
-  public static final int loBit (final NaturalBEI0 i) {
-    return i.loBit(); }
-
-  //  /** exclusive, big-endian */
-  //  public static final int hiBit (final int[] i) {
-  //    return Bei.bitLength(i); }
-
   /** exclusive */
-  public static final int hiBit (final NaturalBEI i) {
-    return i.hiBit(); }
-
-  /** exclusive */
-  public static final int hiBit (final NaturalBEI0 i) {
-    return i.hiBit(); }
+  public static final int hiBit (final Uints i) {
+     return i.hiBit(); }
 
   /** inclusive */
   public static final int loBit (final int i) {
@@ -159,12 +133,7 @@ public final class Numbers implements Set {
   public static final int hiBit (final long i) {
     return Long.SIZE -  Long.numberOfLeadingZeros(i); }
 
-  //--------------------------------------------------------------
-
-  public static final int bitLength (final int n) {
-    return 32 - Integer.numberOfLeadingZeros(n); }
-
-  //--------------------------------------------------------------
+   //--------------------------------------------------------------
 
   public static final boolean isZero (final double x) {
     return 0.0 == x; }

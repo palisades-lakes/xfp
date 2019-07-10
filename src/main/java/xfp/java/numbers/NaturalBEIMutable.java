@@ -12,7 +12,7 @@ import xfp.java.exceptions.Exceptions;
  * Don't implement Comparable, because of mutability!
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-09
+ * @version 2019-07-10
  */
 
 public final class NaturalBEIMutable implements Natural {
@@ -71,10 +71,15 @@ public final class NaturalBEIMutable implements Natural {
     for (int i=start+nWords;i<n;i++) { words[i]=0; } }
 
   private final void compact () {
-    if (0!=start) {
-      System.arraycopy(words,start,words,0,nWords);
-      start = 0; }
-    clearUnused(); }
+    if (nWords == 0) { start = 0; return; }
+    int index = start;
+    if (words[index] != 0) { return; }
+    final int indexBound = index+nWords;
+    do { index++; }
+    while((index < indexBound) && (words[index] == 0));
+    final int numZeros = index - start;
+    nWords -= numZeros;
+    start = (nWords == 0 ?  0 : start+numZeros); }
 
   private final void expandTo (final int i) {
     final int i1 = i+1;
@@ -109,17 +114,8 @@ public final class NaturalBEIMutable implements Natural {
     return this; }
 
   //--------------------------------------------------------------
-  /** Makes this number an {@code n}-int number all of whose bits
-   * are ones. Used by Burnikel-Ziegler division.
-   * @param n number of ints in the {@code words} array
-   * @return a number equal to {@code ((1<<(32*n)))-1}
-   */
-
-  private final void ones (final int n) {
-    if (n > words.length) { words = new int[n]; }
-    Arrays.fill(words, -1);
-    start = 0;
-    nWords = n; }
+  // Uints<Natural> api
+  //--------------------------------------------------------------
 
   @Override
   public final Natural empty () { return make(); }
@@ -131,28 +127,6 @@ public final class NaturalBEIMutable implements Natural {
     Arrays.fill(words,0);
     return this; }
 
-  public final int getLowestSetBit () {
-    if (nWords == 0) { return -1; }
-    int j, b;
-    for (j=nWords-1; (j > 0) && (words[j+start] == 0); j--) { }
-    b = words[j+start];
-    if (b == 0) { return -1; }
-    return ((nWords-1-j)<<5) + Integer.numberOfTrailingZeros(b); }
-
-//  private static final int loBit (final NaturalBEIMutable m) {
-//    return m.getLowestSetBit(); }
-
-  private final void normalize () {
-    if (nWords == 0) { start = 0; return; }
-    int index = start;
-    if (words[index] != 0) { return; }
-    final int indexBound = index+nWords;
-    do { index++; }
-    while((index < indexBound) && (words[index] == 0));
-    final int numZeros = index - start;
-    nWords -= numZeros;
-    start = (nWords == 0 ?  0 : start+numZeros); }
-
   /** Discards all ints whose index is greater than {@code n}.
    */
   private final void keepLower (final int n) {
@@ -160,14 +134,6 @@ public final class NaturalBEIMutable implements Natural {
 
   //--------------------------------------------------------------
   // bit operations
-  //--------------------------------------------------------------
-
-  public final long bitLength () {
-    if (nWords == 0) { return 0; }
-    return
-      (nWords*32L)
-      - Integer.numberOfLeadingZeros(words[start]); }
-
   //--------------------------------------------------------------
   /** Down shift this NaturalBEIMutable n bits, where n is
    * less than 32. Assumes that nWords > 0, n > 0 for speed
@@ -186,14 +152,14 @@ public final class NaturalBEIMutable implements Natural {
    */
 
   private final void downShift (final int n) {
-    if (nWords == 0) { return; }
+    if (nWords==0) { return; }
     final int nInts = n >>> 5;
     final int nBits = n & 0x1F;
     this.nWords -= nInts;
     if (nBits == 0) { return; }
-    final int bitsInHighWord = Numbers.bitLength(words[start]);
+    final int bitsInHighWord = Numbers.hiBit(words[start]);
     if (nBits >= bitsInHighWord) {
-      this.primitiveUpShift(32 - nBits);
+      this.primitiveUpShift(32-nBits);
       this.nWords--; }
     else { primitiveDownShift(nBits); } }
 
@@ -232,7 +198,7 @@ public final class NaturalBEIMutable implements Natural {
     if (nWords == 0) { return; }
     final int iShift = (shift>>>5);
     final int rShift = (shift&0x1F);
-    final int bitsInHighWord = Numbers.bitLength(words[start]);
+    final int bitsInHighWord = Numbers.hiBit(words[start]);
 
     // If shift can be done without moving words, do so
     if (shift <= (32-bitsInHighWord)) {
@@ -240,12 +206,11 @@ public final class NaturalBEIMutable implements Natural {
 
     int newLen = nWords + iShift +1;
     if (rShift <= (32-bitsInHighWord)) { newLen--; }
-    if (words.length < newLen) {
+    if (words.length<newLen) {
       // The array must grow
-      final int[] result = new int[newLen];
-      for (int i=0; i < nWords; i++) {
-        result[i] = words[start+i]; }
-      setWords(result, newLen); }
+      final int[] r = new int[newLen];
+      for (int i=0; i<nWords; i++) { r[i] = words[start+i]; }
+      setWords(r, newLen); }
     else if ((words.length - start) >= newLen) {
       // Use space on right
       for(int i=0; i < (newLen - nWords); i++) {
@@ -454,23 +419,58 @@ public final class NaturalBEIMutable implements Natural {
     if ((a.start + a.nWords) >= n) {
       a.start = (a.start + a.nWords) - n;
       a.nWords = n; }
-    a.normalize();
+    a.compact();
     add(a); }
 
   //--------------------------------------------------------------
   // subtraction
   //--------------------------------------------------------------
-  /** Subtracts the smaller of this and b from the larger and
-   * places the result into this NaturalBEIMutable.
-   */
 
-  private final int subtract (NaturalBEIMutable b) {
+//  private final int decrement (NaturalBEIMutable b) {
+//    NaturalBEIMutable a = this;
+//    int[] result = words;
+//    final int sign = a.compareTo(b);
+//    if (sign == 0) { clear(); return 0; }
+//    if (sign < 0) {
+//      final NaturalBEIMutable tmp = a; a = b; b = tmp; }
+//    final int resultLen = a.nWords;
+//    if (result.length < resultLen) { result = new int[resultLen]; }
+//    long diff = 0;
+//    int x = a.nWords;
+//    int y = b.nWords;
+//    int rstart = result.length - 1;
+//    // Subtract common parts of both numbers
+//    while (y > 0) {
+//      x--; y--;
+//      diff = unsigned(a.words[x+a.start])
+//        - unsigned(b.words[y+b.start])
+//        - ((int)-(diff>>32));
+//      result[rstart--] = (int)diff; }
+//    // Subtract remainder of longer number
+//    while (x > 0) {
+//      x--;
+//      diff = unsigned(a.words[x+a.start])
+//        - ((int)-(diff>>32));
+//      result[rstart--] = (int) diff; }
+//
+//    words = result;
+//    nWords = resultLen;
+//    start = words.length - resultLen;
+//    compact();
+//    return sign; }
+
+  // DANGER: overwrites this with result!
+  @Override
+  public final Natural subtract (final Natural u) {
+    if (! (u instanceof NaturalBEIMutable)) {
+      return Natural.super.subtract(u); }
+
     NaturalBEIMutable a = this;
+    NaturalBEIMutable b = (NaturalBEIMutable) u;
     int[] result = words;
     final int sign = a.compareTo(b);
-    if (sign == 0) { clear(); return 0; }
-    if (sign < 0) {
-      final NaturalBEIMutable tmp = a; a = b; b = tmp; }
+    assert 0<=sign;
+    if (sign == 0) { clear(); return this; }
     final int resultLen = a.nWords;
     if (result.length < resultLen) { result = new int[resultLen]; }
     long diff = 0;
@@ -487,15 +487,14 @@ public final class NaturalBEIMutable implements Natural {
     // Subtract remainder of longer number
     while (x > 0) {
       x--;
-      diff = unsigned(a.words[x+a.start])
-        - ((int)-(diff>>32));
+      diff = unsigned(a.words[x+a.start]) - ((int)-(diff>>32));
       result[rstart--] = (int) diff; }
 
     words = result;
     nWords = resultLen;
     start = words.length - resultLen;
-    normalize();
-    return sign; }
+    compact();
+    return this; }
 
   //--------------------------------------------------------------
   // square
@@ -1292,8 +1291,8 @@ public final class NaturalBEIMutable implements Natural {
         rem = (int) (tmp >>> 32); }
       quotient.words[nWords - xlen] = q;
       remLong = unsigned(rem); }
-    quotient.normalize();
-    // denormalize
+    quotient.compact();
+    // decompact
     if (shift > 0) { return rem % divisor; }
     return rem; }
 
@@ -1339,8 +1338,8 @@ public final class NaturalBEIMutable implements Natural {
         rem = (int) (tmp >>> 32); }
       quotient.words[nWords - xlen] = q;
       remLong = unsigned(rem); }
-    quotient.normalize();
-    // denormalize
+    quotient.compact();
+    // decompact
     if (shift > 0) { 
       return List.of(
         quotient.immutable(),
@@ -1378,7 +1377,7 @@ public final class NaturalBEIMutable implements Natural {
                    final NaturalBEIMutable quotient,
                    final boolean needRemainder ) {
     assert div.nWords > 1;
-    // D1 normalize the divisor
+    // D1 compact the divisor
     final int shift =
       Integer.numberOfLeadingZeros(div.words[div.start]);
     // Copy divisor words to protect divisor
@@ -1464,13 +1463,13 @@ public final class NaturalBEIMutable implements Natural {
         final long nl = unsigned(rem.words[j+2+rem.start]);
         long rs = (unsigned(qrem) << 32) | nl;
         long estProduct = unsigned(dl) * (unsigned(qhat));
-        if (unsignedLongCompare(estProduct, rs)) {
+        if (unsignedGreaterThan(estProduct, rs)) {
           qhat--;
           qrem = (int)((unsigned(qrem)) + dhLong);
           if ((unsigned(qrem)) >=  dhLong) {
             estProduct -= (unsigned(dl));
             rs = ((unsigned(qrem)) << 32) | nl;
-            if (unsignedLongCompare(estProduct, rs)) {
+            if (unsignedGreaterThan(estProduct, rs)) {
               qhat--; } } } }
       // D4 Multiply and subtract
       rem.words[j+rem.start] = 0;
@@ -1512,13 +1511,13 @@ public final class NaturalBEIMutable implements Natural {
           unsigned(rem.words[limit + 1 + rem.start]);
         long rs = ((unsigned(qrem)) << 32) | nl;
         long estProduct = (unsigned(dl)) * (unsigned(qhat));
-        if (unsignedLongCompare(estProduct, rs)) {
+        if (unsignedGreaterThan(estProduct, rs)) {
           qhat--;
           qrem = (int) ((unsigned(qrem)) + dhLong);
           if ((unsigned(qrem)) >= dhLong) {
             estProduct -= (unsigned(dl));
             rs = ((unsigned(qrem)) << 32) | nl;
-            if (unsignedLongCompare(estProduct, rs)) { qhat--; } } } }
+            if (unsignedGreaterThan(estProduct, rs)) { qhat--; } } } }
       // D4 Multiply and subtract
       int borrow;
       rem.words[(limit - 1) + rem.start] = 0;
@@ -1540,10 +1539,10 @@ public final class NaturalBEIMutable implements Natural {
       q[(limit - 1)] = qhat; }
 
     if (needRemainder) {
-      // D8 denormalize
+      // D8 decompact
       if (shift > 0) { rem.downShift(shift); }
-      rem.normalize(); }
-    quotient.normalize();
+      rem.compact(); }
+    quotient.compact();
     return needRemainder ? rem : null; }
 
   //--------------------------------------------------------------
@@ -1585,7 +1584,7 @@ public final class NaturalBEIMutable implements Natural {
     // KNUTH_POW2_* thresholds
     if (nWords >= KNUTH_POW2_THRESH_LEN) {
       final int trailingZeroBits =
-        Math.min(getLowestSetBit(), b.getLowestSetBit());
+        Math.min(loBit(), b.loBit());
       if (trailingZeroBits >= (KNUTH_POW2_THRESH_ZEROS*32)) {
         final NaturalBEIMutable aa = new NaturalBEIMutable(this);
         final NaturalBEIMutable bb = new NaturalBEIMutable(b);
@@ -1637,7 +1636,7 @@ public final class NaturalBEIMutable implements Natural {
     // KNUTH_POW2_* thresholds
     if (nWords >= KNUTH_POW2_THRESH_LEN) {
       final int trailingZeroBits =
-        Math.min(getLowestSetBit(), b.getLowestSetBit());
+        Math.min(loBit(), b.loBit());
       if (trailingZeroBits >= (KNUTH_POW2_THRESH_ZEROS*32)) {
         final NaturalBEIMutable aa = new NaturalBEIMutable(this);
         final NaturalBEIMutable bb = new NaturalBEIMutable(b);
@@ -1675,7 +1674,7 @@ public final class NaturalBEIMutable implements Natural {
     // KNUTH_POW2_* thresholds
     if (nWords >= KNUTH_POW2_THRESH_LEN) {
       final int trailingZeroBits =
-        Math.min(getLowestSetBit(), b.getLowestSetBit());
+        Math.min(loBit(), b.loBit());
       if (trailingZeroBits >= (KNUTH_POW2_THRESH_ZEROS*32)) {
         final NaturalBEIMutable aa = new NaturalBEIMutable(this);
         final NaturalBEIMutable bb = new NaturalBEIMutable(b);
@@ -1697,8 +1696,8 @@ public final class NaturalBEIMutable implements Natural {
    * The parameter beta is 2<sup>32</sup> so all shifts are
    * multiples of 32 bits. <br/>
    * {@code this} must be a nonnegative number such that
-   * {@code this.bitLength() <= 2*b.bitLength()}
-   * @param b a positive number such that {@code b.bitLength()} is even
+   * {@code this.hiBit() <= 2*b.hiBit()}
+   * @param b a positive number such that {@code b.hiBit()} is even
    * @param quotient output parameter for {@code this/b}
    * @return {@code this%b}
    */
@@ -1730,6 +1729,18 @@ public final class NaturalBEIMutable implements Natural {
     return r2; }
 
   //--------------------------------------------------------------
+  /** Makes this number an {@code n}-int number all of whose bits
+   * are ones. Used by Burnikel-Ziegler division.
+   * @param n number of ints in the {@code words} array
+   * @return a number equal to {@code ((1<<(32*n)))-1}
+   */
+
+  private final void ones (final int n) {
+    if (n > words.length) { words = new int[n]; }
+    Arrays.fill(words, 0xFFFFFFFF);
+    start = 0;
+    nWords = n; }
+
   /** This method implements algorithm 2 from pg. 5 of the
    * Burnikel-Ziegler paper. It divides a 3n-digit number by a
    * 2n-digit number.<br/>
@@ -1737,7 +1748,7 @@ public final class NaturalBEIMutable implements Natural {
    * multiples of 32 bits.<br/>
    * <br/>
    * {@code this} must be a nonnegative number such that
-   * {@code 2*this.bitLength() <= 3*b.bitLength()}
+   * {@code 2*this.hiBit() <= 3*b.hiBit()}
    * @param quotient output parameter for {@code this/b}
    * @return {@code this%b}
    */
@@ -1749,7 +1760,7 @@ public final class NaturalBEIMutable implements Natural {
 
     // step 1: view this as [a1,a2,a3] where each ai is n ints
     // or less; let a12=[a1,a2]
-    final NaturalBEIMutable a12 = new NaturalBEIMutable(this);
+    NaturalBEIMutable a12 = new NaturalBEIMutable(this);
     a12.safeDownShift(32*n);
 
     // step 2: view b as [b1,b2] where each bi is n ints or less
@@ -1770,12 +1781,12 @@ public final class NaturalBEIMutable implements Natural {
       quotient.ones(n);
       a12.add(b1);
       b1.upShift(32*n);
-      a12.subtract(b1);
+      a12 = (NaturalBEIMutable) a12.subtract(b1);
       r = a12;
       // step 4: d=quotient*b2=(b2 << 32*n) - b2
       d = NaturalBEIMutable.valueOf(b2);
       d.upShift(32 * n);
-      d.subtract(NaturalBEIMutable.valueOf(b2)); }
+      d = (NaturalBEIMutable) d.subtract(NaturalBEIMutable.valueOf(b2)); }
     // step 5: r = r*beta^n + a3 - d (paper says a4)
     // However, don't subtract d until after the while loop
     // so r doesn't become negative
@@ -1785,7 +1796,7 @@ public final class NaturalBEIMutable implements Natural {
     while (r.compareTo(d) < 0) {
       r.add(b);
       quotient.subtract(one()); }
-    r.subtract(d);
+    r = (NaturalBEIMutable) r.subtract(d);
     return r; }
 
   //--------------------------------------------------------------
@@ -1820,7 +1831,7 @@ public final class NaturalBEIMutable implements Natural {
     final int n = j * m; // step 2b: block length in 32-bit units
     final long n32 = 32L * n; // block length in bits
     // step 3: sigma = max{T | (2^T)*B < beta^n}
-    final int sigma = (int) Math.max(0, n32 - b.bitLength());
+    final int sigma = (int) Math.max(0, n32 - b.hiBit());
     final NaturalBEIMutable bShifted = new NaturalBEIMutable(b);
     // step 4a: shift b so its length is a multiple of n
     bShifted.safeUpShift(sigma);
@@ -1830,7 +1841,7 @@ public final class NaturalBEIMutable implements Natural {
 
     // step 5: t is the number of blocks needed to accommodate a
     // plus one additional bit
-    int t = (int) ((aShifted.bitLength()+n32) / n32);
+    int t = (int) ((aShifted.hiBit()+n32) / n32);
     if (t < 2) { t = 2; }
 
     // step 6: conceptually split a into blocks a[t-1], ..., a[0]
@@ -1928,144 +1939,16 @@ public final class NaturalBEIMutable implements Natural {
     return (r << 32) | (loWord(q)); }
 
   //-------------------------------------------------------------
-
-//  private final NaturalBEIMutable
-//  divide (final NaturalBEIMutable b,
-//          final NaturalBEIMutable quotient,
-//          final boolean needRemainder) {
-//    if ((b.nWords < NaturalBEI.BURNIKEL_ZIEGLER_THRESHOLD) ||
-//      ((nWords - b.nWords) < NaturalBEI.BURNIKEL_ZIEGLER_OFFSET)) {
-//      return divideAndRemainderKnuth(b, quotient, needRemainder); }
-//    return divideAndRemainderBurnikelZiegler(b, quotient); }
-
-  //-------------------------------------------------------------
-  // gcd
-  //-------------------------------------------------------------
-  /** a and b interpreted as unsigned integers.
-   */
-
-  private static final int binaryGcd (int a, int b) {
-    if (b == 0) { return a; }
-    if (a == 0) { return b; }
-
-    // Down shift a & b till their last bits equal to 1.
-    final int aZeros = Integer.numberOfTrailingZeros(a);
-    final int bZeros = Integer.numberOfTrailingZeros(b);
-    a >>>= aZeros;
-    b >>>= bZeros;
-
-    final int t = (aZeros < bZeros ? aZeros : bZeros);
-
-    while (a != b) {
-      if ((a+0x80000000) > (b+0x80000000)) {  // a > b as unsigned
-        a -= b;
-        a >>>= Integer.numberOfTrailingZeros(a); }
-      else {
-        b -= a;
-        b >>>= Integer.numberOfTrailingZeros(b); } }
-    return a<<t; }
-
-  /** Subtracts the smaller of a and b from the larger and places
-   * the result into the larger. Returns 1 if the answer is in a,
-   * -1 if in b, 0 if no operation was performed.
-   */
-  private final int difference (NaturalBEIMutable b) {
-    NaturalBEIMutable a = this;
-    final int sign = a.compareTo(b);
-    if (sign == 0) { return 0; }
-    if (sign < 0) {
-      final NaturalBEIMutable tmp = a; a = b; b = tmp; }
-
-    long diff = 0;
-    int x = a.nWords;
-    int y = b.nWords;
-
-    // Subtract common parts of both numbers
-    while (y > 0) {
-      x--; y--;
-      diff =
-        unsigned(a.words[a.start+ x])
-        - unsigned(b.words[b.start+ y])
-        - ((int)-(diff>>32));
-      a.words[a.start+x] = (int) diff; }
-    // Subtract remainder of longer number
-    while (x > 0) {
-      x--;
-      diff = unsigned(a.words[a.start+ x]) - ((int)-(diff>>32));
-      a.words[a.start+x] = (int)diff; }
-    a.normalize();
-    return sign; }
-
-  private final NaturalBEIMutable
-  binaryGCD (NaturalBEIMutable v) {
-    // Algorithm B from Knuth section 4.5.2
-    NaturalBEIMutable u = this;
-    final NaturalBEIMutable r = new NaturalBEIMutable();
-
-    // step B1
-    final int s1 = u.getLowestSetBit();
-    final int s2 = v.getLowestSetBit();
-    final int k = (s1 < s2) ? s1 : s2;
-    if (k != 0) { u.downShift(k); v.downShift(k); }
-
-    // step B2
-    final boolean uOdd = (k == s1);
-    NaturalBEIMutable t = uOdd ? v: u;
-    int tsign = uOdd ? -1 : 1;
-
-    int lb;
-    while ((lb = t.getLowestSetBit()) >= 0) {
-      // steps B3 and B4
-      t.downShift(lb);
-      // step B5
-      if (tsign > 0) { u = t; }
-      else { v = t; }
-
-      // Special case one word numbers
-      if ((u.nWords < 2) && (v.nWords < 2)) {
-        int x = u.words[u.start];
-        final int y = v.words[v.start];
-        x  = binaryGcd(x, y);
-        r.words[0] = x;
-        r.nWords = 1;
-        r.start = 0;
-        if (k > 0) { r.upShift(k); }
-        return r; }
-
-      // step B6
-      if ((tsign = u.difference(v)) == 0) { break; }
-      t = ((tsign >= 0) ? u : v); }
-
-    if (k > 0) { u.upShift(k); }
-    return u; }
-
-  //-------------------------------------------------------------
-  // Use Euclid's algorithm until the numbers are approximately the
-  // same length, then use the binary GCD algorithm to find the GCD.
-
-  @Override
-  public final Natural gcd (final Natural d) {
-    NaturalBEIMutable b = (NaturalBEIMutable) d;
-    NaturalBEIMutable a = this;
-    while (b.nWords != 0) {
-      if (Math.abs(a.nWords-b.nWords) < 2) { 
-        return a.binaryGCD(b); }
-      final List<Natural> qr = a.divideAndRemainder(b);
-      a = b;
-      b = (NaturalBEIMutable) recyclable(qr.get(1)); }
-    return a; }
-
-  //-------------------------------------------------------------
-  // pseudo-Comparable, not Comparable due to mutability
+  // Comparable, DANGER to mutability
   //-------------------------------------------------------------
   /** Compare two longs as if they were unsigned.
-   * Returns true iff one is bigger than two.
+   * Returns true iff a is bigger than a.
    */
 
   private static final boolean
-  unsignedLongCompare (final long one,
-                       final long two) {
-    return (one+Long.MIN_VALUE) > (two+Long.MIN_VALUE); }
+  unsignedGreaterThan (final long a,
+                       final long b) {
+    return (a+Long.MIN_VALUE) > (b+Long.MIN_VALUE); }
 
   private final int compareTo (final NaturalBEIMutable b) {
     final int blen = b.nWords;
@@ -2079,6 +1962,12 @@ public final class NaturalBEIMutable implements Natural {
       if (b1 < b2) { return -1; }
       if (b1 > b2) { return 1; } }
     return 0; }
+
+  @Override
+  public final int compareTo (final Natural that) {
+    if (that instanceof NaturalBEIMutable) {
+      return compareTo((NaturalBEIMutable) that); }
+    return Natural.super.compareTo(that); }
 
   private final int compareShifted (final NaturalBEIMutable b,
                                     final int ints) {
@@ -2162,6 +2051,10 @@ public final class NaturalBEIMutable implements Natural {
     nWords = 1;
     words[0] = val; }
 
+  @Override
+  public final Natural from (final int x) {
+    return new NaturalBEIMutable(x); }
+
   //--------------------------------------------------------------
   /** Returns a {@code NaturalBEIMutable} containing
    * {@code blockLength} ints from {@code this} number, starting
@@ -2222,19 +2115,10 @@ public final class NaturalBEIMutable implements Natural {
       return valueOf((NaturalBEIMutable) u); }
     throw Exceptions.unsupportedOperation(null,"valueOf",u); }
 
-  private static final int[] toInts (final long u) {
-    assert 0<=u;
-    final int hi = (int) (u>>>32);
-    final int lo = (int) u;
-    if (0==hi) {
-      if (0==lo) { return EMPTY; }
-      return new int[] { lo, }; }
-    return new int[] { hi, lo, }; }
-  
   public static final NaturalBEIMutable valueOf (final long u) {
     if (0L==u) { return make(); }
     assert 0L<u;
-    return unsafe(toInts(u)); }
+    return unsafe(Ints.bigEndian(u)); }
 
   public static final NaturalBEIMutable valueOf (final long u,
                                                  final int upShift) {

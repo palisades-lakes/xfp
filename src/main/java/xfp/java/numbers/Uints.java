@@ -1,7 +1,6 @@
 package xfp.java.numbers;
 
 import java.math.BigInteger;
-import java.util.Arrays;
 
 import xfp.java.exceptions.Exceptions;
 
@@ -15,8 +14,10 @@ import xfp.java.exceptions.Exceptions;
  * method (similar to the behavior of transient data structures
  * in Clojure).
  *
+ * TODO: max valid range limited by int hiBit!
+ * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-09
+ * @version 2019-07-10
  */
 
 @SuppressWarnings("unchecked")
@@ -169,7 +170,7 @@ public interface Uints<T extends Uints> extends Transience<T> {
     //Debug.println("hiBit this=" + this);
     final int n = hiInt()-1;
     if (0>n) { return 0; }
-    return (n<<5) + Numbers.bitLength(word(n)); }
+    return (n<<5) + Numbers.hiBit(word(n)); }
 
   //--------------------------------------------------------------
 
@@ -349,6 +350,14 @@ public interface Uints<T extends Uints> extends Transience<T> {
    */
 
   public default T from (final long u) {
+    throw Exceptions.unsupportedOperation(
+      this,"from",u); }
+
+  /** Return a new Uints whose value is <code>u</code>.
+   * Does not modify <code>this</code>.
+   */
+
+  public default T from (final int u) {
     throw Exceptions.unsupportedOperation(
       this,"from",u); }
 

@@ -11,7 +11,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-09
+ * @version 2019-07-10
  */
 
 @SuppressWarnings("unchecked")
@@ -541,11 +541,12 @@ implements Ringlike<BigFloat> {
     final int e0 = exponent();
     if (s0.isZero()) { return (nn ? 0.0F : -0.0F); }
 
+    // DANGER: what if hiBit isn't in the int range?
     final int eh = s0.hiBit();
     final int es =
       Math.max(Floats.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND-e0,
         Math.min(
-          Floats.MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND-e0 -1,
+          Floats.MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND-e0-1,
           eh-Floats.SIGNIFICAND_BITS));
     if (0==es) {
       return floatMergeBits(nn,s0.intValue(),e0); }
