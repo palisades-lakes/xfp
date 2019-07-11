@@ -17,7 +17,7 @@ import xfp.java.exceptions.Exceptions;
  * TODO: utilities class to hide private stuff?
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-10
+ * @version 2019-07-11
  */
 
 @SuppressWarnings("unchecked")
@@ -681,11 +681,53 @@ extends Uints<Natural>, Ringlike<Natural> {
       ((nn-nd) < Natural.BURNIKEL_ZIEGLER_OFFSET); }
 
   //--------------------------------------------------------------
+  /** Interpret {@code d} as unsigned. */
+  
+  default List<Natural> divideAndRemainder (final int d) {
+//    assert 0<d;
+//    throw Exceptions.unsupportedOperation(
+//      this,"divideAndRemainder",u); }
+    final long dd = unsigned(d);
+    if (1==endWord()) {
+      final long nn = uword(0);
+      final int q = (int) (nn / dd);
+      final int r = (int) (nn - (q*dd));
+    return List.of(from(q),from(r)); }
 
-  default List<Natural> divideAndRemainder (final int u) {
-    assert 0<u;
-    throw Exceptions.unsupportedOperation(
-      this,"divideAndRemainder",u); }
+    Natural qq = recyclable(endWord());
+
+    final int shift = Integer.numberOfLeadingZeros(d);
+    int r = word(endWord()-1);
+    long rr = unsigned(r);
+    if (rr < dd) { 
+      qq = qq.setWord(qq.endWord()-1,0); }
+    else {
+      final int rrdd = (int) (rr / dd);
+      qq = qq.setWord(endWord()-1,rrdd);
+      r = (int) (rr - (rrdd * dd));
+      rr = unsigned(r); }
+    int xlen = endWord();
+    while (--xlen > 0) {
+      final long nEst = (rr << 32) | uword(xlen-1);
+      final int q;
+      if (nEst >= 0) {
+        q = (int) (nEst / dd);
+        r = (int) (nEst - (q * dd)); }
+      else {
+        final long tmp = Ints.divWord(nEst,d);
+        q = (int) Numbers.loWord(tmp);
+        r = (int) Numbers.hiWord(tmp); }
+      qq = qq.setWord(xlen-1,q);
+      rr = unsigned(r); }
+    
+    //qq.compact();
+    
+    // decompact
+    if (shift > 0) { 
+      return List.of(qq,from(r % d)); }
+
+    return List.of(qq,from(r)); }
+
 
   //--------------------------------------------------------------
 

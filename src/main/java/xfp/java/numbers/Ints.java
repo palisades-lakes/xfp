@@ -1,5 +1,6 @@
 package xfp.java.numbers;
 
+import static xfp.java.numbers.Numbers.loWord;
 import static xfp.java.numbers.Numbers.unsigned;
 
 import java.util.Arrays;
@@ -19,13 +20,35 @@ import xfp.java.prng.Generators;
 /** Utilities for <code>int</code>, <code>int[]</code>.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-10
+ * @version 2019-07-11
  */
 public final class Ints implements Set {
 
   //--------------------------------------------------------------
   // int ops
-  //-------------------------------------------------------------
+  //--------------------------------------------------------------
+  /** Divides a long by an (unsigned) int.
+   * Returns a long where high unsigned int is the remainder
+   * and low unsigned int is the quotient.
+   */
+  
+  public static final long divWord (final long n, 
+                                    final int d) {
+    final long dLong = unsigned(d);
+    if (dLong == 1) {
+      final long q = (int) n;
+      final long r = 0;
+      return (r << 32) | (loWord(q)); }
+    // Approximate the quotient and remainder
+    long q = (n >>> 1) / (dLong >>> 1);
+    long r = n - (q*dLong);
+    // Correct the approximation
+    while (r < 0) { r += dLong; q--; }
+    while (r >= dLong) { r -= dLong; q++; }
+    // n - q*dlong == r && 0 <= r <dLong, hence we're done.
+    return (r << 32) | (loWord(q)); }
+
+ //-------------------------------------------------------------
   // gcd
   //-------------------------------------------------------------
   /** a and b interpreted as unsigned integers.

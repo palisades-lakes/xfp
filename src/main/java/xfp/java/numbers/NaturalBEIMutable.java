@@ -13,7 +13,7 @@ import xfp.java.exceptions.Exceptions;
  * Don't implement Comparable, because of mutability!
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-10
+ * @version 2019-07-11
  */
 
 public final class NaturalBEIMutable implements Natural {
@@ -299,7 +299,7 @@ public final class NaturalBEIMutable implements Natural {
         q = (int) (dividendEstimate / divisorLong);
         rem = (int) (dividendEstimate - (q * divisorLong)); }
       else {
-        final long tmp = divWord(dividendEstimate, divisor);
+        final long tmp = Ints.divWord(dividendEstimate, divisor);
         q = (int) Numbers.loWord(tmp);
         rem = (int) (tmp >>> 32); }
       quotient.words[nWords - xlen] = q;
@@ -309,59 +309,49 @@ public final class NaturalBEIMutable implements Natural {
     if (shift > 0) { return rem % divisor; }
     return rem; }
 
-  @Override
-  public final List<Natural> divideAndRemainder (final int divisor) {
-    final NaturalBEIMutable quotient = make();
-    final long divisorLong = unsigned(divisor);
-    // Special case of one word dividend
-    if (nWords == 1) {
-      final long dividendValue = unsigned(words[start]);
-      final int q = (int) (dividendValue / divisorLong);
-      final int r = (int) (dividendValue - (q * divisorLong));
-      quotient.words[0] = q;
-      quotient.nWords = (q == 0) ? 0 : 1;
-      quotient.start = 0;
-      return List.of(quotient.immutable(),NaturalBEI.valueOf(r)); }
-
-    if (quotient.words.length < nWords) {
-      quotient.words = new int[nWords]; }
-    quotient.start = 0;
-    quotient.nWords = nWords;
-
-    // Normalize the divisor
-    final int shift = Integer.numberOfLeadingZeros(divisor);
-    int rem = words[start];
-    long remLong = unsigned(rem);
-    if (remLong < divisorLong) { quotient.words[0] = 0; }
-    else {
-      quotient.words[0] = (int)(remLong / divisorLong);
-      rem = (int) (remLong - (quotient.words[0] * divisorLong));
-      remLong = unsigned(rem); }
-    int xlen = nWords;
-    while (--xlen > 0) {
-      final long dividendEstimate = (remLong << 32) |
-        unsigned(words[(start + nWords) - xlen]);
-      int q;
-      if (dividendEstimate >= 0) {
-        q = (int) (dividendEstimate / divisorLong);
-        rem = (int) (dividendEstimate - (q * divisorLong)); }
-      else {
-        final long tmp = divWord(dividendEstimate, divisor);
-        q = (int) Numbers.loWord(tmp);
-        rem = (int) (tmp >>> 32); }
-      quotient.words[nWords - xlen] = q;
-      remLong = unsigned(rem); }
-    quotient.compact();
-    // decompact
-    if (shift > 0) { 
-      return List.of(
-        quotient.immutable(),
-        NaturalBEI.valueOf(rem % divisor)); }
-
-    return List.of(
-      quotient.immutable(),
-      NaturalBEI.valueOf(rem)); }
-
+//  @Override
+//  public final List<Natural> divideAndRemainder (final int d) {
+//    final long dd = unsigned(d);
+//    if (1==endWord()) {
+//      final long nn = uword(0);
+//      final int q = (int) (nn / dd);
+//      final int r = (int) (nn - (q*dd));
+//    return List.of(from(q),from(r)); }
+//
+//    Natural qq = recyclable(endWord());
+//
+//    final int shift = Integer.numberOfLeadingZeros(d);
+//    int r = word(endWord()-1);
+//    long rr = unsigned(r);
+//    if (rr < dd) { 
+//      qq = qq.setWord(qq.endWord()-1,0); }
+//    else {
+//      final int rrdd = (int) (rr / dd);
+//      qq = qq.setWord(endWord()-1,rrdd);
+//      r = (int) (rr - (rrdd * dd));
+//      rr = unsigned(r); }
+//    int xlen = endWord();
+//    while (--xlen > 0) {
+//      final long nEst = (rr << 32) | uword(xlen-1);
+//      final int q;
+//      if (nEst >= 0) {
+//        q = (int) (nEst / dd);
+//        r = (int) (nEst - (q * dd)); }
+//      else {
+//        final long tmp = divWord(nEst, d);
+//        q = (int) Numbers.loWord(tmp);
+//        r = (int) Numbers.hiWord(tmp); }
+//      qq = qq.setWord(xlen-1,q);
+//      rr = unsigned(r); }
+//    
+//    //qq.compact();
+//    
+//    // decompact
+//    if (shift > 0) { 
+//      return List.of(qq,from(r % d)); }
+//
+//    return List.of(qq,from(r)); }
+//
   //--------------------------------------------------------------
   /** A primitive used for division. This method adds in one
    * multiple of the divisor a back to the dividend result at a
@@ -484,7 +474,7 @@ public final class NaturalBEIMutable implements Natural {
           qhat = (int) (nChunk / dhLong);
           qrem = (int) (nChunk - (qhat * dhLong)); }
         else {
-          final long tmp = divWord(nChunk, dh);
+          final long tmp = Ints.divWord(nChunk, dh);
           qhat = (int) (loWord(tmp));
           qrem = (int) (tmp >>> 32); } }
       if (qhat == 0) { continue; }
@@ -530,7 +520,7 @@ public final class NaturalBEIMutable implements Natural {
         qhat = (int) (nChunk / dhLong);
         qrem = (int) (nChunk - (qhat * dhLong)); }
       else {
-        final long tmp = divWord(nChunk, dh);
+        final long tmp = Ints.divWord(nChunk, dh);
         qhat = (int) (loWord(tmp));
         qrem = (int) (tmp >>> 32); } }
     // 2nd correction
@@ -578,7 +568,6 @@ public final class NaturalBEIMutable implements Natural {
                            final NaturalBEIMutable quotient) {
     //assert 0 != b.nWords;
     assert ! b.isZero();
-    //if (nWords == 0) { quotient.clear(); return make(); }
     if (isZero()) {  
       return List.of(quotient.clear(),new NaturalBEIMutable(this)); }
     final int cmp = compareTo(b);
@@ -950,27 +939,6 @@ public final class NaturalBEIMutable implements Natural {
         +
         (((loWord(difference))>(unsigned(~(int)product)))?1:0); }
     return (int) carry; }
-
-  /** This method divides a long quantity by an int to estimate
-   * qhat for two multi precision numbers. It is used when
-   * the signed words of n is less than zero.
-   * Returns long words where high 32 bits contain remainder words
-   * and low 32 bits contain quotient words.
-   */
-  private static final long divWord(final long n, final int d) {
-    final long dLong = unsigned(d);
-    if (dLong == 1) {
-      final long q = (int) n;
-      final long r = 0;
-      return (r << 32) | (loWord(q)); }
-    // Approximate the quotient and remainder
-    long q = (n >>> 1) / (dLong >>> 1);
-    long r = n - (q*dLong);
-    // Correct the approximation
-    while (r < 0) { r += dLong; q--; }
-    while (r >= dLong) { r -= dLong; q++; }
-    // n - q*dlong == r && 0 <= r <dLong, hence we're done.
-    return (r << 32) | (loWord(q)); }
 
   //-------------------------------------------------------------
   // Comparable, DANGER to mutability
