@@ -59,6 +59,11 @@ public final class Ints implements Set {
   // TODO: is this worth anything vs new int[] everywhere?
   public static final int[] EMPTY = new int[0];
 
+  public static final boolean isZero (final int[] z) {
+    for (final int element : z) {
+      if (0!=element) { return false; } }
+    return true; }
+
   public static final int hiInt (final int[] x) {
     final int n = x.length;
     int k = -1;

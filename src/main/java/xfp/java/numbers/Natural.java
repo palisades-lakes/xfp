@@ -391,7 +391,7 @@ extends Uints<Natural>, Ringlike<Natural> {
     // For a discussion of overflow detection see multiply()
     return squareToomCook3(); }
 
-
+  //--------------------------------------------------------------
   /** Return a {@link Natural} whose value is <code>t</code>.
    * @see #multiply(long,long) 
    */

@@ -92,8 +92,9 @@ public interface Uints<T extends Uints> extends Transience<T> {
    */
   public default T words (final int i0,
                           final int i1) {
-    assert 0<=i1;
+    assert 0<=i0;
     assert i0<i1;
+    //if ((0==i0) && (endWord()<=i1)) { return (T) this; }
     if ((0==i0) && (endWord()<=i1)) { return immutable(); }
     final int n = Math.max(0,i1-i0);
     if (0>=n) { return empty(); }
@@ -370,7 +371,7 @@ public interface Uints<T extends Uints> extends Transience<T> {
 
   public default T from (final long u,
                          final int shift) {
-      return (T) from(u).shiftUp(shift); }
+    return (T) from(u).shiftUp(shift); }
 
   //--------------------------------------------------------------
   // 'Number' interface
