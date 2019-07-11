@@ -14,34 +14,34 @@ public interface Generator {
 
   // default methods throw UnsupportetOperationException.
 
-  public default String name () {
+  default String name () {
     throw Exceptions.unsupportedOperation(this,"name"); }
 
-  public default Object next () {
+  default Object next () {
     throw Exceptions.unsupportedOperation(this,"next"); }
 
-  public default boolean nextBoolean () {
+  default boolean nextBoolean () {
     throw Exceptions.unsupportedOperation(this,"nextBoolean"); }
 
-  public default byte nextByte () {
+  default byte nextByte () {
     throw Exceptions.unsupportedOperation(this,"nextByte"); }
 
-  public default char nextChar () {
+  default char nextChar () {
     throw Exceptions.unsupportedOperation(this,"nextChar"); }
 
-  public default short nextShort () {
+  default short nextShort () {
     throw Exceptions.unsupportedOperation(this,"nextShort"); }
 
-  public default int nextInt () {
+  default int nextInt () {
     throw Exceptions.unsupportedOperation(this,"nextInt"); }
 
-  public default long nextLong () {
+  default long nextLong () {
     throw Exceptions.unsupportedOperation(this,"nextLong"); }
 
-  public default float nextFloat () {
+  default float nextFloat () {
     throw Exceptions.unsupportedOperation(this,"nextFloat"); }
 
-  public default double nextDouble () {
+  default double nextDouble () {
     throw Exceptions.unsupportedOperation(this,"nextDouble"); }
 
   //--------------------------------------------------------------

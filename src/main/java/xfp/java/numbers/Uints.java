@@ -40,15 +40,15 @@ public interface Uints<T extends Uints> extends Transience<T> {
    * valid.
    */
 
-  public default T setWord (final int i,
-                            final int w) {
+  default T setWord (final int i,
+                     final int w) {
     throw Exceptions.unsupportedOperation(this,"setWord",i,w); }
 
   /** The value of the unsigned <code>i</code>th (little endian) 
    * word as a <code>long</code>.
    */
 
-  public default long uword (final int i) {
+  default long uword (final int i) {
     return Numbers.unsigned(word(i)); }
 
   /** Inclusive lower bound on non-zero words:
@@ -76,22 +76,22 @@ public interface Uints<T extends Uints> extends Transience<T> {
 
   //--------------------------------------------------------------
 
-  public default T clear () {
+  default T clear () {
     throw Exceptions.unsupportedOperation(this,"clear"); }
 
   //--------------------------------------------------------------
 
-  T empty ();
+  //T empty ();
 
-  //  public default T empty () {
-  //    throw Exceptions.unsupportedOperation(this,"empty"); }
+  default T empty () {
+    throw Exceptions.unsupportedOperation(this,"empty"); }
 
   //--------------------------------------------------------------
   /** Return the <code>[i0,i1)</code> words as a new 
    * <code>Uints</code> with <code>[0,i1-i0)</code> words.
    */
-  public default T words (final int i0,
-                          final int i1) {
+  default T words (final int i0,
+                   final int i1) {
     assert 0<=i0;
     assert i0<i1;
     //if ((0==i0) && (endWord()<=i1)) { return (T) this; }
@@ -109,7 +109,7 @@ public interface Uints<T extends Uints> extends Transience<T> {
    * May be a copy of <code>u</code>.
    */
 
-  public default T set (final Uints u) {
+  default T set (final Uints u) {
     Uints x = clear();
     for (int i=u.startWord();i<u.endWord();i++) {
       x = x.setWord(i,u.word(i)); }
@@ -118,7 +118,7 @@ public interface Uints<T extends Uints> extends Transience<T> {
   /** Return a Uints whose value is the same as <code>u</code>.
    */
 
-  public default T set (final long u) {
+  default T set (final long u) {
     assert 0<=u;
     // TODO: optimize zeroing internal array?
     clear();
@@ -132,7 +132,7 @@ public interface Uints<T extends Uints> extends Transience<T> {
   // wouldn't need these if startWord()/endWord()
   // promised maximal/minimal bounds
 
-  public default int loInt () {
+  default int loInt () {
     // Search for lowest order nonzero int
     // TODO: not necessary if startWord promises
     // maximal lower bound
@@ -146,7 +146,7 @@ public interface Uints<T extends Uints> extends Transience<T> {
     // all words are zero
     return -1; }
 
-  public default int hiInt () {
+  default int hiInt () {
     final int end = endWord();
     //Debug.println("hiInt end=" + end);
     if (0==end) { return 0; }
@@ -161,13 +161,13 @@ public interface Uints<T extends Uints> extends Transience<T> {
   // bit ops
   //--------------------------------------------------------------
 
-  public default int loBit () {
+  default int loBit () {
     // Search for lowest order nonzero int
     final int i=loInt(); // might be -1
     if (i<0) { return -1; } // no set bits
     return (i << 5) + Integer.numberOfTrailingZeros(word(i)); }
 
-  public default int hiBit () {
+  default int hiBit () {
     //Debug.println("hiBit this=" + this);
     final int n = hiInt()-1;
     if (0>n) { return 0; }
@@ -175,7 +175,7 @@ public interface Uints<T extends Uints> extends Transience<T> {
 
   //--------------------------------------------------------------
 
-  public default boolean testBit (final int n) {
+  default boolean testBit (final int n) {
     assert 0<=n;
     final int w = word(n>>>5);
     final int b = (1 << (n&0x1F));
@@ -184,7 +184,7 @@ public interface Uints<T extends Uints> extends Transience<T> {
   //--------------------------------------------------------------
   /** get the least significant int word of (this >>> shift) */
 
-  public default int getShiftedInt (final int downShift) {
+  default int getShiftedInt (final int downShift) {
     assert 0<=downShift;
     final int iShift = (downShift>>>5);
     if (endWord()<=iShift) { return 0; }
@@ -200,7 +200,7 @@ public interface Uints<T extends Uints> extends Transience<T> {
    * as a long.
    */
 
-  public default long getShiftedLong (final int downShift) {
+  default long getShiftedLong (final int downShift) {
     assert 0<=downShift;
     final int iShift = (downShift>>>5);
     if (endWord()<=iShift) { return 0L; }
@@ -222,26 +222,26 @@ public interface Uints<T extends Uints> extends Transience<T> {
    * a long.
    */
 
-  public default long getLong () {
+  default long getLong () {
     return (uword(1)<<32) | uword(0); }
 
   //--------------------------------------------------------------
 
-  public default T setBit (final int i) {
+  default T setBit (final int i) {
     assert 0<=i;
     final int iw = (i>>>5);
     final int w = word(iw);
     final int ib = (i&0x1F);
     return setWord(iw,(w|(1<<ib))); }
 
-  public default T clearBit (final int n) {
+  default T clearBit (final int n) {
     assert 0<=n;
     final int iw = (n>>>5);
     final int w = word(iw);
     final int ib = (n&0x1F);
     return setWord(iw,(w&(~(1<<ib)))); }
 
-  public default T flipBit (final int n) {
+  default T flipBit (final int n) {
     assert 0<=n;
     final int iw = (n>>>5);
     final int w = word(iw);
@@ -262,7 +262,7 @@ public interface Uints<T extends Uints> extends Transience<T> {
       u = (T) u.setWord(i,word(i+iShift)); }
     return (T) u.immutable(); }
 
-  public default T shiftDown (final int shift) {
+  default T shiftDown (final int shift) {
     //throw
     //Exceptions.unsupportedOperation(this,"shiftDown",shift); }
     assert 0<=shift;
@@ -295,7 +295,7 @@ public interface Uints<T extends Uints> extends Transience<T> {
     for (int i=0;i<n;i++) { u = (T) u.setWord(i+iShift,word(i)); }
     return (T) u.immutable(); }
 
-  public default T shiftUp (final int shift) {
+  default T shiftUp (final int shift) {
     //    throw
     //    Exceptions.unsupportedOperation(this,"shiftUp",shift); }
     assert 0<=shift;
@@ -326,8 +326,8 @@ public interface Uints<T extends Uints> extends Transience<T> {
    * <code>0&lt;=shift</code>
    */
 
-  public default T shiftUp (final T u,
-                            final int shift) {
+  default T shiftUp (final T u,
+                     final int shift) {
     // TODO: optimize as single op
     return (T) set(u).shiftUp(shift); }
 
@@ -338,8 +338,8 @@ public interface Uints<T extends Uints> extends Transience<T> {
    * <code>0&lt;=shift</code>
    */
 
-  public default T shiftUp (final long u,
-                            final int shift) {
+  default T shiftUp (final long u,
+                     final int shift) {
     // TODO: optimize as single op
     return (T) set(u).shiftUp(shift); }
 
@@ -350,7 +350,7 @@ public interface Uints<T extends Uints> extends Transience<T> {
    * Does not modify <code>this</code>.
    */
 
-  public default T from (final long u) {
+  default T from (final long u) {
     throw Exceptions.unsupportedOperation(
       this,"from",u); }
 
@@ -358,7 +358,7 @@ public interface Uints<T extends Uints> extends Transience<T> {
    * Does not modify <code>this</code>.
    */
 
-  public default T from (final int u) {
+  default T from (final int u) {
     throw Exceptions.unsupportedOperation(
       this,"from",u); }
 
@@ -369,15 +369,15 @@ public interface Uints<T extends Uints> extends Transience<T> {
    * <code>0&lt;=shift</code>
    */
 
-  public default T from (final long u,
-                         final int shift) {
+  default T from (final long u,
+                  final int shift) {
     return (T) from(u).shiftUp(shift); }
 
   //--------------------------------------------------------------
   // 'Number' interface
   //--------------------------------------------------------------
 
-  public default byte[] littleEndianBytes () {
+  default byte[] littleEndianBytes () {
     final int hi = hiBit();
     // an extra zero byte to avoid getting a negative
     // two's complement input to new BigInteger(b).
@@ -391,7 +391,7 @@ public interface Uints<T extends Uints> extends Transience<T> {
       b[i] = (byte) w; }
     return b; }
 
-  public default byte[] bigEndianBytes () {
+  default byte[] bigEndianBytes () {
     final int hi = hiBit();
     // an extra zero byte to avoid getting a negative
     // two's complement input to new BigInteger(b).
@@ -405,10 +405,10 @@ public interface Uints<T extends Uints> extends Transience<T> {
       b[n-1-i] = (byte) w; }
     return b; }
 
-  public default BigInteger bigIntegerValue () {
+  default BigInteger bigIntegerValue () {
     return new BigInteger(bigEndianBytes()); }
 
-  public default String toHexString () {
+  default String toHexString () {
     final StringBuilder b = new StringBuilder("");
     final int n = endWord()-1;
     if (0>n) { b.append('0'); }
@@ -423,14 +423,14 @@ public interface Uints<T extends Uints> extends Transience<T> {
   // 'Object' interface
   //--------------------------------------------------------------
 
-  public default int uintsHashCode () {
+  default int uintsHashCode () {
     int hashCode = 0;
     for (int i=0; i<endWord(); i++) {
       hashCode = (int) ((31 * hashCode) + uword(i)); }
     return hashCode; }
 
   // DANGER: equality across classes
-  public default boolean uintsEquals (final Uints x) {
+  default boolean uintsEquals (final Uints x) {
     if (x==this) { return true; }
     final Uints u = x;
     final int n = Math.max(endWord(),u.endWord());

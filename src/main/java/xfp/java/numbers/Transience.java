@@ -31,7 +31,7 @@ public interface Transience<T extends Transience>  {
    * set all fields to <code>null</code>, <code>NaN</code>, etc.?
    */
 
-  public default T recycle () {
+  default T recycle () {
     throw Exceptions.unsupportedOperation(this,"recycle"); }
 
   /** If <code>this</code> has been invalidated in recycling,
@@ -42,7 +42,7 @@ public interface Transience<T extends Transience>  {
    * set all fields to <code>null</code>, <code>NaN</code>, etc.?
    */
 
-  public default boolean isValid () {
+  default boolean isValid () {
     throw Exceptions.unsupportedOperation(this,"isValid"); }
 
   /** Like <code>(transient foo)</code> in Clojure.
@@ -75,10 +75,10 @@ public interface Transience<T extends Transience>  {
    * Clojure: Transient Data Structures</a>
    */
 
-  public default T recyclable (final T init) {
+  default T recyclable (final T init) {
     throw Exceptions.unsupportedOperation(this,"recyclable",init); }
 
-  public default T recyclable (final int n) {
+  default T recyclable (final int n) {
     throw Exceptions.unsupportedOperation(this,"recyclable",n); }
 
   /** Like <code>(persistent! foo)</code> in Clojure.
@@ -98,10 +98,10 @@ public interface Transience<T extends Transience>  {
    * Clojure: Transient Data Structures</a>
    */
 
-  public default T immutable () {
+  default T immutable () {
     throw Exceptions.unsupportedOperation(this,"immutable"); }
 
-  public default boolean isImmutable () {
+  default boolean isImmutable () {
     throw Exceptions.unsupportedOperation(this,"isImmutable"); }
 
   //--------------------------------------------------------------

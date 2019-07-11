@@ -75,50 +75,50 @@ public interface Set {
    * equivalence classes of objects.
    */
 
-  public default BiPredicate equivalence () {
+  default BiPredicate equivalence () {
     return Sets.OBJECT_EQUALS; }
 
   //--------------------------------------------------------------
   // TODO: should the default be an exception?
   @SuppressWarnings("unused")
-  public default boolean contains (final Object element) {
+  default boolean contains (final Object element) {
     return false; }
 
   @SuppressWarnings("unused")
-  public default boolean contains (final boolean element) {
+  default boolean contains (final boolean element) {
     return false; }
 
   @SuppressWarnings("unused")
-  public default boolean contains (final byte element) {
+  default boolean contains (final byte element) {
     return false; }
 
   @SuppressWarnings("unused")
-  public default boolean contains (final short element) {
+  default boolean contains (final short element) {
     return false; }
 
   @SuppressWarnings("unused")
-  public default boolean contains (final int element) {
+  default boolean contains (final int element) {
     return false; }
 
   @SuppressWarnings("unused")
-  public default boolean contains (final long element) {
+  default boolean contains (final long element) {
     return false; }
 
   @SuppressWarnings("unused")
-  public default boolean contains (final float element) {
+  default boolean contains (final float element) {
     return false; }
 
   @SuppressWarnings("unused")
-  public default boolean contains (final double element) {
+  default boolean contains (final double element) {
     return false; }
 
   @SuppressWarnings("unused")
-  public default boolean contains (final char element) {
+  default boolean contains (final char element) {
     return false; }
 
   //--------------------------------------------------------------
 
-  public default String toString (final Object e) {
+  default String toString (final Object e) {
     assert contains(e);
     if (e instanceof byte[]) {
       return Arrays.toString((byte[]) e); }
@@ -143,39 +143,39 @@ public interface Set {
   // That is, Is a set a function from all java objects to its
   // elements?
 
-  //  public default boolean getBoolean (final Map options) {
+  //  default boolean getBoolean (final Map options) {
   //    throw Exceptions.unsupportedOperation(
   //      this,"getBoolean",options); }
   //
-  //  public default byte getByte (final Map options) {
+  //  default byte getByte (final Map options) {
   //    throw Exceptions.unsupportedOperation(
   //      this,"getByte",options); }
   //
-  //  public default short getShort (final Map options) {
+  //  default short getShort (final Map options) {
   //    throw Exceptions.unsupportedOperation(
   //      this,"getShort",options); }
   //
-  //  public default int getInt (final Map options) {
+  //  default int getInt (final Map options) {
   //    throw Exceptions.unsupportedOperation(
   //      this,"getInt",options); }
   //
-  //  public default long getLong (final Map options) {
+  //  default long getLong (final Map options) {
   //    throw Exceptions.unsupportedOperation(
   //      this,"getLong",options); }
   //
-  //  public default float getFloat (final Map options) {
+  //  default float getFloat (final Map options) {
   //    throw Exceptions.unsupportedOperation(
   //      this,"getFloat",options); }
   //
-  //  public default double getDouble (final Map options) {
+  //  default double getDouble (final Map options) {
   //    throw Exceptions.unsupportedOperation (
   //      this,"getDouble",options); }
   //
-  //  public default char getChar (final Map options) {
+  //  default char getChar (final Map options) {
   //    throw Exceptions.unsupportedOperation(
   //      this,"getChar",options); }
 
-  //  public default Object get (final Map options) {
+  //  default Object get (final Map options) {
   //    throw Exceptions.unsupportedOperation(
   //      this,"get",options); }
 
@@ -218,7 +218,7 @@ public interface Set {
     final Object seed = SEED.invoke(options);
     return PRNG.well44497b(seed);  }
 
-  public default Supplier generator (final Map options) {
+  default Supplier generator (final Map options) {
     throw Exceptions.unsupportedOperation(
       this,"generator",options); }
 
@@ -226,7 +226,7 @@ public interface Set {
    * results for more complicated structures of which this set
    * might be a component.
    */
-  public default ImmutableMap<Set,Supplier>
+  default ImmutableMap<Set,Supplier>
   generators (final Map options) {
     return ImmutableMap.of(this, generator(options)); }
 
@@ -238,11 +238,11 @@ public interface Set {
    * TODO: unify with {@link #generator(UniformRandomProvider, Map)}
    * via options?
    */
-  public default Supplier iterator (final Map options) {
+  default Supplier iterator (final Map options) {
     throw Exceptions.unsupportedOperation(
       this,"iterator",options); }
 
-  public default Supplier iterator () {
+  default Supplier iterator () {
     return iterator(Collections.emptyMap()); }
 
   public static Set EMPTY_SET = new Set() {};

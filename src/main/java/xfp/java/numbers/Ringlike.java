@@ -22,89 +22,89 @@ extends Comparable<T> {
   // TODO: fma?
   //--------------------------------------------------------------
 
-  public default T add (final T x) {
+  default T add (final T x) {
     throw Exceptions.unsupportedOperation(this,"add",x); }
 
-  public default T subtract (final T x) {
+  default T subtract (final T x) {
     throw Exceptions.unsupportedOperation(this,"subtract",x); }
 
-  public default T negate () {
+  default T negate () {
     throw Exceptions.unsupportedOperation(this,"negate"); }
 
-  public default T zero () {
+  default T zero () {
     throw Exceptions.unsupportedOperation(this,"zero"); }
 
-  public default boolean isZero () {
+  default boolean isZero () {
     throw Exceptions.unsupportedOperation(this,"isZero"); }
 
-  public default T abs () {
+  default T abs () {
     throw Exceptions.unsupportedOperation(this,"abs"); }
 
-  public default T absDiff (final T x) {
+  default T absDiff (final T x) {
     return (T) subtract(x).abs(); }
 
   //--------------------------------------------------------------
 
-  public default T square () {
+  default T square () {
     throw Exceptions.unsupportedOperation(this,"square"); }
 
-  public default T multiply (final T x) {
+  default T multiply (final T x) {
     throw Exceptions.unsupportedOperation(this,"multiply",x); }
 
-  public default T divide (final T x) {
+  default T divide (final T x) {
     throw Exceptions.unsupportedOperation(this,"divide",x); }
 
-  public default T invert () {
+  default T invert () {
     throw Exceptions.unsupportedOperation(this,"invert"); }
 
-  public default T one () {
+  default T one () {
     throw Exceptions.unsupportedOperation(this,"one"); }
 
-  public default boolean isOne() {
+  default boolean isOne() {
     throw Exceptions.unsupportedOperation(this,"isOne"); }
 
-  public default List<T> divideAndRemainder (final T x) {
+  default List<T> divideAndRemainder (final T x) {
     final T d = divide(x);
     final T r = subtract((T) x.multiply(d));
     return List.of(d,r); }
 
-  public default T remainder (final T x) {
+  default T remainder (final T x) {
     final T d = divide(x);
     final T r = subtract((T) x.multiply(d));
     return r; }
 
-  public default T gcd (final T x) {
+  default T gcd (final T x) {
     throw Exceptions.unsupportedOperation(this,"gcd",x); }
 
   /** Return a list of <code>this/f,u/f</code>
    * where <code>f</code> is the {@link #gcd} of this and 
    * <code>u</code>>
    */
-  public default List<T> reduce (final T u) {
+  default List<T> reduce (final T u) {
     throw Exceptions.unsupportedOperation(this,"reduce",u); }
 
   //--------------------------------------------------------------
   // 'Number' interface
   //--------------------------------------------------------------
 
-  public default int intValue () {
+  default int intValue () {
     throw Exceptions.unsupportedOperation(this,"intValue"); }
 
-  public default long longValue () {
+  default long longValue () {
     throw Exceptions.unsupportedOperation(this,"longValue"); }
 
-  public default float floatValue () {
+  default float floatValue () {
     throw Exceptions.unsupportedOperation(this,"floatValue"); }
 
-  public default double doubleValue () {
+  default double doubleValue () {
     throw Exceptions.unsupportedOperation(this,"doubleValue"); }
 
   //--------------------------------------------------------------
 
-  public default T min (final T that) {
+  default T min (final T that) {
     return (compareTo(that) < 0 ? (T) this : that); }
 
-  public default T max (final T that) {
+  default T max (final T that) {
     return (compareTo(that) > 0 ? (T) this : that); }
 
   //--------------------------------------------------------------
