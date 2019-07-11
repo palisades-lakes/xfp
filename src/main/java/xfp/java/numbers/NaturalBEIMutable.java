@@ -10,8 +10,6 @@ import java.util.List;
 import xfp.java.exceptions.Exceptions;
 
 /**
- * Don't implement Comparable, because of mutability!
- *
  * @author palisades dot lakes at gmail dot com
  * @version 2019-07-11
  */
@@ -257,102 +255,6 @@ public final class NaturalBEIMutable implements Natural {
   //--------------------------------------------------------------
   // division
   //--------------------------------------------------------------
-  /** This method is used for division of an n word dividend by a
-   * one word divisor. The quotient is placed into quotient. The
-   * one word divisor is specified by divisor.
-   * @return the remainder of the division.
-   */
-
-  private final int divideOneWord (final int divisor,
-                                   final NaturalBEIMutable quotient) {
-    final long divisorLong = unsigned(divisor);
-    // Special case of one word dividend
-    if (nWords == 1) {
-      final long dividendValue = unsigned(words[start]);
-      final int q = (int) (dividendValue / divisorLong);
-      final int r = (int) (dividendValue - (q * divisorLong));
-      quotient.words[0] = q;
-      quotient.nWords = (q == 0) ? 0 : 1;
-      quotient.start = 0;
-      return r; }
-
-    if (quotient.words.length < nWords) {
-      quotient.words = new int[nWords]; }
-    quotient.start = 0;
-    quotient.nWords = nWords;
-
-    // Normalize the divisor
-    final int shift = Integer.numberOfLeadingZeros(divisor);
-    int rem = words[start];
-    long remLong = unsigned(rem);
-    if (remLong < divisorLong) { quotient.words[0] = 0; }
-    else {
-      quotient.words[0] = (int)(remLong / divisorLong);
-      rem = (int) (remLong - (quotient.words[0] * divisorLong));
-      remLong = unsigned(rem); }
-    int xlen = nWords;
-    while (--xlen > 0) {
-      final long dividendEstimate = (remLong << 32) |
-        unsigned(words[(start + nWords) - xlen]);
-      int q;
-      if (dividendEstimate >= 0) {
-        q = (int) (dividendEstimate / divisorLong);
-        rem = (int) (dividendEstimate - (q * divisorLong)); }
-      else {
-        final long tmp = Ints.divWord(dividendEstimate, divisor);
-        q = (int) Numbers.loWord(tmp);
-        rem = (int) (tmp >>> 32); }
-      quotient.words[nWords - xlen] = q;
-      remLong = unsigned(rem); }
-    quotient.compact();
-    // decompact
-    if (shift > 0) { return rem % divisor; }
-    return rem; }
-
-//  @Override
-//  public final List<Natural> divideAndRemainder (final int d) {
-//    final long dd = unsigned(d);
-//    if (1==endWord()) {
-//      final long nn = uword(0);
-//      final int q = (int) (nn / dd);
-//      final int r = (int) (nn - (q*dd));
-//    return List.of(from(q),from(r)); }
-//
-//    Natural qq = recyclable(endWord());
-//
-//    final int shift = Integer.numberOfLeadingZeros(d);
-//    int r = word(endWord()-1);
-//    long rr = unsigned(r);
-//    if (rr < dd) { 
-//      qq = qq.setWord(qq.endWord()-1,0); }
-//    else {
-//      final int rrdd = (int) (rr / dd);
-//      qq = qq.setWord(endWord()-1,rrdd);
-//      r = (int) (rr - (rrdd * dd));
-//      rr = unsigned(r); }
-//    int xlen = endWord();
-//    while (--xlen > 0) {
-//      final long nEst = (rr << 32) | uword(xlen-1);
-//      final int q;
-//      if (nEst >= 0) {
-//        q = (int) (nEst / dd);
-//        r = (int) (nEst - (q * dd)); }
-//      else {
-//        final long tmp = divWord(nEst, d);
-//        q = (int) Numbers.loWord(tmp);
-//        r = (int) Numbers.hiWord(tmp); }
-//      qq = qq.setWord(xlen-1,q);
-//      rr = unsigned(r); }
-//    
-//    //qq.compact();
-//    
-//    // decompact
-//    if (shift > 0) { 
-//      return List.of(qq,from(r % d)); }
-//
-//    return List.of(qq,from(r)); }
-//
-  //--------------------------------------------------------------
   /** A primitive used for division. This method adds in one
    * multiple of the divisor a back to the dividend result at a
    * specified start. It is used when qhat was estimated too
@@ -392,7 +294,7 @@ public final class NaturalBEIMutable implements Natural {
    * and the remainder object is returned.
    */
 
-  protected final NaturalBEIMutable
+  private final NaturalBEIMutable
   divideMagnitude (final NaturalBEIMutable div,
                    final NaturalBEIMutable quotient ) {
     assert div.nWords > 1;
@@ -565,22 +467,25 @@ public final class NaturalBEIMutable implements Natural {
 
   private final List<Natural>
   knuthRecursive (final NaturalBEIMutable b,
-                           final NaturalBEIMutable quotient) {
+                  final NaturalBEIMutable quotient) {
     //assert 0 != b.nWords;
     assert ! b.isZero();
+    quotient.clear();
     if (isZero()) {  
-      return List.of(quotient.clear(),new NaturalBEIMutable(this)); }
+      //System.out.println("isZero");
+      return List.of(make(),valueOf(this)); }
     final int cmp = compareTo(b);
     if (cmp < 0) { 
-      return List.of(quotient.clear(),new NaturalBEIMutable(this)); }
-    if (cmp == 0) { List.of(quotient.set(1),zero()); }
+      //System.out.println("d>n");
+      return List.of(make(),valueOf(this)); }
+    if (cmp == 0) { 
+      //System.out.println("d==n");
+      List.of(from(1),make()); }
     if (b.nWords == 1) {
-      quotient.clear();
-      final int r = divideOneWord(b.words[b.start], quotient);
-      if (r == 0) { return List.of(quotient,zero()); }
-      return List.of(quotient,new NaturalBEIMutable(r)); }
+    return divideAndRemainder(b.words[b.start]); }
     // Cancel common powers of two if we're above the
     // KNUTH_POW2_* thresholds
+
     if (nWords >= KNUTH_POW2_THRESH_LEN) {
       final int trailingZeroBits = Math.min(loBit(),b.loBit());
       if (trailingZeroBits >= (KNUTH_POW2_THRESH_ZEROS*32)) {
@@ -588,24 +493,49 @@ public final class NaturalBEIMutable implements Natural {
         NaturalBEIMutable bb = new NaturalBEIMutable(b);
         aa = (NaturalBEIMutable) aa.shiftDown(trailingZeroBits);
         bb = (NaturalBEIMutable) bb.shiftDown(trailingZeroBits);
-        quotient.zero();
+        //System.out.println("recursive");
         List<Natural> qr = aa.knuthRecursive(bb,quotient);
         Natural r = qr.get(1).shiftUp(trailingZeroBits);
-        return List.of(quotient,r); } }
+        return List.of(qr.get(0),r); } }
 
-    quotient.clear();
+    //System.out.println("magnitude");
     Natural r = divideMagnitude(b, quotient); 
     return List.of(quotient,r); }
 
   @Override
   public final List<Natural>
   divideAndRemainderKnuth (final Natural u) {
+//    System.out.println("divideAndRemainderKnuth");
+//    System.out.println(this);
+//    System.out.println();
+//    System.out.println(u);
+//    System.out.println();
     assert ! u.isZero();
-    if (isZero()) { return List.of(zero(),zero()); }
+    if (u.isOne()) {
+      return List.of(valueOf(this),make()); }
+    if (isZero()) { 
+//      System.out.println("isZero");
+      return List.of(make(),make()); }
     final int cmp = compareTo(u);
-    if (0==cmp) { return List.of(one(),zero()); }
-    if (0>cmp) { return List.of(zero(),new NaturalBEIMutable(this)); }
-    if (1==u.hiInt()) { return divideAndRemainder(u.word(0)); } 
+    if (0==cmp) { 
+//      System.out.println("d==n");
+      return List.of(from(1),make()); }
+    if (0>cmp) { 
+//      System.out.println("d>n");
+      return List.of(make(),valueOf(this)); }
+    if (1==u.endWord()) { 
+      return divideAndRemainder(u.word(0)); } 
+//      final NaturalBEIMutable q = (NaturalBEIMutable) recyclable(endWord());
+//      final int r = divideOneWord(u.word(0),q);
+//      if (r==0) { 
+//        System.out.println("1 word zero remainder d!=n");
+//        System.out.println(this);
+//        System.out.println(u.word(0));
+//        System.out.println(q);
+//        System.out.println(r);
+//        return List.of(q,from(r)); }
+//      System.out.println("1 word d!=n");
+//      return List.of(q,from(r)); }
     // Cancel common powers of two if we're above the
     // KNUTH_POW2_* thresholds
     if (nWords >= KNUTH_POW2_THRESH_LEN) {
@@ -615,14 +545,17 @@ public final class NaturalBEIMutable implements Natural {
         NaturalBEIMutable bb = valueOf(u);
         aa = (NaturalBEIMutable) aa.shiftDown(trailingZeroBits);
         bb = (NaturalBEIMutable) bb.shiftDown(trailingZeroBits);
+//        System.out.println("recursive");
         final NaturalBEIMutable q = (NaturalBEIMutable) recyclable(endWord());
         List<Natural> qr = aa.knuthRecursive(bb,q);
-//        List<Natural> qr = aa.divideAndRemainderKnuth(bb);
-        //final Natural q = qr.get(0);
+        //List<Natural> qr = aa.divideAndRemainderKnuth(bb);
         Natural r = qr.get(1);
         r = r.shiftUp(trailingZeroBits);
-        return List.of(q,r); } }
+        return List.of(qr.get(0),r); } }
 
+//    System.out.println("magnitude");
+//    System.out.println(this);
+//    System.out.println(u);
     final NaturalBEIMutable q = (NaturalBEIMutable) recyclable(endWord());
     final NaturalBEIMutable r = divideMagnitude(valueOf(u),q); 
     return List.of(q,r); }  

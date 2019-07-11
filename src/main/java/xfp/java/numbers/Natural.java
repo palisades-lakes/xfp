@@ -684,14 +684,16 @@ extends Uints<Natural>, Ringlike<Natural> {
   /** Interpret {@code d} as unsigned. */
   
   default List<Natural> divideAndRemainder (final int d) {
-//    assert 0<d;
 //    throw Exceptions.unsupportedOperation(
 //      this,"divideAndRemainder",u); }
+    if (1==d) {
+      return List.of(this.immutable(),from(0)); }
+
     final long dd = unsigned(d);
     if (1==endWord()) {
       final long nn = uword(0);
-      final int q = (int) (nn / dd);
-      final int r = (int) (nn - (q*dd));
+      final int q = (int) (nn/dd);
+      final int r = (int) (nn-(q*dd));
     return List.of(from(q),from(r)); }
 
     Natural qq = recyclable(endWord());
@@ -704,8 +706,9 @@ extends Uints<Natural>, Ringlike<Natural> {
     else {
       final int rrdd = (int) (rr / dd);
       qq = qq.setWord(endWord()-1,rrdd);
-      r = (int) (rr - (rrdd * dd));
+      r = (int) (rr-(rrdd*dd));
       rr = unsigned(r); }
+    
     int xlen = endWord();
     while (--xlen > 0) {
       final long nEst = (rr << 32) | uword(xlen-1);

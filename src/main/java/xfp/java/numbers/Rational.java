@@ -418,12 +418,12 @@ implements Ringlike<Rational> {
     final Natural d3 = sub ? d2.shiftUp(e3-e2) : d2;
     final Natural n3 = (n1.shiftUp(Doubles.STORED_SIGNIFICAND_BITS));
     final int e4 = e3 - Doubles.STORED_SIGNIFICAND_BITS;
-    final Natural[] qr =
-      n3.divideAndRemainder(d3).toArray(new Natural[0]);
+    
+    final List<Natural> qr = n3.divideAndRemainder(d3);
 
     // round down or up? <= implies half-even (?)
-    final int c = qr[1].shiftUp(1).compareTo(d3);
-    final long q4 = qr[0].longValue();
+    final int c = qr.get(1).shiftUp(1).compareTo(d3);
+    final long q4 = qr.get(0).longValue();
     final boolean even = (0x0L == (q4 & 0x1L));
     final boolean down = (c < 0) || ((c == 0) && even);
 
