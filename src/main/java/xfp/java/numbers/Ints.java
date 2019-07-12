@@ -20,7 +20,7 @@ import xfp.java.prng.Generators;
 /** Utilities for <code>int</code>, <code>int[]</code>.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-11
+ * @version 2019-07-12
  */
 public final class Ints implements Set {
 
@@ -31,7 +31,7 @@ public final class Ints implements Set {
    * Returns a long where high unsigned int is the remainder
    * and low unsigned int is the quotient.
    */
-  
+
   public static final long divWord (final long n, 
                                     final int d) {
     final long dLong = unsigned(d);
@@ -48,24 +48,24 @@ public final class Ints implements Set {
     // n - q*dlong == r && 0 <= r <dLong, hence we're done.
     return (r << 32) | (loWord(q)); }
 
- //-------------------------------------------------------------
+  //-------------------------------------------------------------
   // gcd
   //-------------------------------------------------------------
   /** a and b interpreted as unsigned integers.
    */
-  
+
   public static final int unsignedGcd (int a, int b) {
     if (b == 0) { return a; }
     if (a == 0) { return b; }
-  
+
     // Down shift a & b till their last bits equal to 1.
     final int aZeros = Integer.numberOfTrailingZeros(a);
     final int bZeros = Integer.numberOfTrailingZeros(b);
     a >>>= aZeros;
     b >>>= bZeros;
-  
+
     final int t = (aZeros < bZeros ? aZeros : bZeros);
-  
+
     while (a != b) {
       if ((a+0x80000000) > (b+0x80000000)) {  // a > b as unsigned
         a -= b;
@@ -77,9 +77,10 @@ public final class Ints implements Set {
 
   //--------------------------------------------------------------
   // int[] ops
+  // TODO: non-instantiable IntUtils?
   //--------------------------------------------------------------
-
   // TODO: is this worth anything vs new int[] everywhere?
+
   public static final int[] EMPTY = new int[0];
 
   public static final boolean isZero (final int[] z) {
@@ -116,6 +117,27 @@ public final class Ints implements Set {
       final int t = x[n1i];
       x[n1i] = x[i];
       x[i] = t; } }
+
+  //--------------------------------------------------------------
+
+  public static final void copyAndShift (final int[] src,
+                                         final int isrc,
+                                         final int n,
+                                         final int[] dst,
+                                         final int idst,
+                                         final int lShift) {
+    assert 0<=lShift;
+    assert lShift<32;
+    if (0==lShift) {
+      System.arraycopy(src,isrc,dst,idst,n); }
+    else {
+      final int rShift = 32-lShift;
+      int c=src[isrc];
+      for (int i0=idst,i1=isrc;i0<idst+n-1; i0++) {
+        final int b = c;
+        c = src[++i1];
+        dst[i0] = (b << lShift) | (c >>> rShift); }
+      dst[(idst+n)-1] = c << lShift; } }
 
   //-------------------------------------------------------------
   // string parsing
@@ -217,7 +239,7 @@ public final class Ints implements Set {
     return x; }
 
   //--------------------------------------------------------------
-  
+
   public static final int[] bigEndian (final long u) {
     assert 0<=u;
     final int hi = (int) (u>>>32);
@@ -226,7 +248,7 @@ public final class Ints implements Set {
       if (0==lo) { return Ints.EMPTY; }
       return new int[] { lo, }; }
     return new int[] { hi, lo, }; }
-  
+
   public static final int[] littleEndian (final long u) {
     assert 0<=u;
     final int hi = (int) (u>>>32);
@@ -235,8 +257,8 @@ public final class Ints implements Set {
       if (0==lo) { return Ints.EMPTY; }
       return new int[] { lo, }; }
     return new int[] { lo, hi, }; }
-  
-   //--------------------------------------------------------------
+
+  //--------------------------------------------------------------
   // operations for algebraic structures over
   //--------------------------------------------------------------
 

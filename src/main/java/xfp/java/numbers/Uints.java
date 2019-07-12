@@ -17,7 +17,7 @@ import xfp.java.exceptions.Exceptions;
  * TODO: max valid range limited by int hiBit!
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-10
+ * @version 2019-07-12
  */
 
 @SuppressWarnings("unchecked")

@@ -150,7 +150,7 @@ public final class NaturalBEIMutable implements Natural {
     final int nBits = shift & 0x1F;
     nWords -= nInts;
     if (nBits == 0) { return this; }
-    final int bitsInHighWord = Numbers.hiBit(words[start]);
+    final int bitsInHighWord = Numbers.hiBit(word(endWord()-1));
     if (nBits >= bitsInHighWord) {
       primitiveUpShift(32-nBits);
       nWords--; }
@@ -182,7 +182,7 @@ public final class NaturalBEIMutable implements Natural {
     if (nWords == 0) { return this; }
     final int iShift = (shift>>>5);
     final int rShift = (shift&0x1F);
-    final int bitsInHighWord = Numbers.hiBit(words[start]);
+    final int bitsInHighWord = Numbers.hiBit(word(endWord()-1));
 
     // If shift can be done without moving words, do so
     if (shift <= (32-bitsInHighWord)) {
@@ -272,71 +272,51 @@ public final class NaturalBEIMutable implements Natural {
       carry = sum >>> 32; }
     return (int) carry; }
 
-  //--------------------------------------------------------------
-
-  private static final void copyAndShift (final int[] src,
-                                          int srcFrom,
-                                          final int srcLen,
-                                          final int[] dst,
-                                          final int dstFrom,
-                                          final int shift) {
-    final int n2 = 32 - shift;
-    int c=src[srcFrom];
-    for (int i=0; i < (srcLen-1); i++) {
-      final int b = c;
-      c = src[++srcFrom];
-      dst[dstFrom+i] = (b << shift) | (c >>> n2); }
-    dst[(dstFrom+srcLen)-1] = c << shift; }
-
    //--------------------------------------------------------------
 
   @Override
   public final List<Natural> knuthDivision (final Natural u) {
+    assert !u.isZero();
     final NaturalBEIMutable div = (NaturalBEIMutable) u;
-    final NaturalBEIMutable quotient = make(endWord());
-    assert div.nWords > 1;
+    final NaturalBEIMutable quotient = 
+      (NaturalBEIMutable) recyclable(endWord());
     // D1 compact the divisor
     final int shift =
-      Integer.numberOfLeadingZeros(div.words[div.start]);
+      Integer.numberOfLeadingZeros(div.word(div.endWord()-1));
     // Copy divisor words to protect divisor
-    final int dlen = div.nWords;
+    final int dlen = div.endWord();
     int[] divisor;
     // Remainder starts as dividend with space for a leading zero
     NaturalBEIMutable rem;
-    if (shift > 0) {
+    if (0<shift) {
       divisor = new int[dlen];
-      copyAndShift(div.words,div.start,dlen,divisor,0,shift);
-      if (shift<=Integer.numberOfLeadingZeros(words[start])) {
-        final int[] remarr = new int[nWords + 1];
-        rem = new NaturalBEIMutable(remarr);
-        rem.nWords = nWords;
-        rem.start = 1;
-        copyAndShift(words,start,nWords,remarr,1,shift); }
+      Ints.copyAndShift(div.words,div.start,dlen,divisor,0,shift);
+      //rem = (NaturalBEIMutable) shiftUp(shift);
+      //rem.expandTo(nWords+2);
+      if (shift<=Integer.numberOfLeadingZeros(word(endWord()-1))) {
+        rem = make(nWords+1); rem.nWords = nWords; rem.start = 1;
+        Ints.copyAndShift(words,start,nWords,rem.words,1,shift); }
       else {
-        final int[] remarr = new int[nWords + 2];
-        rem = new NaturalBEIMutable(remarr);
-        rem.nWords = nWords+1;
-        rem.start = 1;
+        rem = make(nWords+2); rem.nWords = nWords+1; rem.start = 1;
         int rFrom = start;
         int c=0;
         final int n2 = 32 - shift;
         for (int i=1; i < (nWords+1); i++,rFrom++) {
           final int b = c;
           c = words[rFrom];
-          remarr[i] = (b << shift) | (c >>> n2); }
-        remarr[nWords+1] = c << shift; } }
+          rem.words[i] = (b << shift) | (c >>> n2); }
+        rem.words[nWords+1] = c << shift; }
+      }
     else {
       divisor = Arrays.copyOfRange(
         div.words, div.start, div.start + div.nWords);
-      rem = new NaturalBEIMutable(new int[nWords + 1]);
-      System.arraycopy(words, start, rem.words, 1, nWords);
-      rem.nWords = nWords;
-      rem.start = 1; }
+      rem = make(nWords+1); rem.nWords = nWords; rem.start = 1;
+      System.arraycopy(words, start, rem.words, 1, nWords); }
 
-    final int nlen = rem.nWords;
+    final int nlen = rem.endWord();
 
     // Set the quotient size
-    final int limit = (nlen - dlen) + 1;
+    final int limit = (nlen-dlen) + 1;
     if (quotient.words.length < limit) {
       quotient.words = new int[limit];
       quotient.start = 0; }
@@ -440,8 +420,7 @@ public final class NaturalBEIMutable implements Natural {
       int borrow;
       rem.words[(limit - 1) + rem.start] = 0;
       borrow =
-        mulsub(
-          rem.words,divisor,qhat,dlen,(limit-1)+rem.start);
+        mulsub(rem.words,divisor,qhat,dlen,(limit-1)+rem.start);
       // D5 Test remainder
       if ((borrow + 0x80000000) > nh2) {
         // D6 Add back
@@ -858,8 +837,8 @@ public final class NaturalBEIMutable implements Natural {
   @Override
   public final Natural recyclable (final int n) {
     assert 0<=n;
-    expandTo(n);
-    return this; }
+    return make(n); }
+//    expandTo(n); return this; }
 
   @Override
   public final boolean isImmutable () { return false; }
