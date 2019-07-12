@@ -34,6 +34,18 @@ public interface Transience<T extends Transience>  {
   default T recycle () {
     throw Exceptions.unsupportedOperation(this,"recycle"); }
 
+  /** If {@link #isImmutable()}, return this. <br>
+   * If not, return a new instance, without modifying 
+   * {@code this}.
+   *
+   * TODO: options argument?
+   * TODO: a more foolproof way to handle this? Use reflection to
+   * set all fields to <code>null</code>, <code>NaN</code>, etc.?
+   */
+
+  default T copy () {
+    throw Exceptions.unsupportedOperation(this,"copy"); }
+
   /** If <code>this</code> has been invalidated in recycling,
    * and its possibly mutable components used elsewhere,
    * return false.

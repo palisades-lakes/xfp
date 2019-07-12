@@ -288,15 +288,12 @@ public final class NaturalBEIMutable implements Natural {
       dst[dstFrom+i] = (b << shift) | (c >>> n2); }
     dst[(dstFrom+srcLen)-1] = c << shift; }
 
-  //--------------------------------------------------------------
-  /** Divide this NaturalBEIMutable by the divisor.
-   * The quotient will be placed into the provided quotient object
-   * and the remainder object is returned.
-   */
+   //--------------------------------------------------------------
 
-  private final NaturalBEIMutable
-  divideMagnitude (final NaturalBEIMutable div,
-                   final NaturalBEIMutable quotient ) {
+  @Override
+  public final List<Natural> knuthDivision (final Natural u) {
+    final NaturalBEIMutable div = (NaturalBEIMutable) u;
+    final NaturalBEIMutable quotient = make(endWord());
     assert div.nWords > 1;
     // D1 compact the divisor
     final int shift =
@@ -458,107 +455,7 @@ public final class NaturalBEIMutable implements Natural {
       rem = (NaturalBEIMutable) rem.shiftDown(shift); }
     rem.compact(); 
     quotient.compact();
-    return rem; }
-
-  //--------------------------------------------------------------
-
-  private static final int KNUTH_POW2_THRESH_LEN = 6;
-  private static final int KNUTH_POW2_THRESH_ZEROS = 3;
-
-  private final List<Natural>
-  knuthRecursive (final NaturalBEIMutable b,
-                  final NaturalBEIMutable quotient) {
-    //assert 0 != b.nWords;
-    assert ! b.isZero();
-    quotient.clear();
-    if (isZero()) {  
-      //System.out.println("isZero");
-      return List.of(make(),valueOf(this)); }
-    final int cmp = compareTo(b);
-    if (cmp < 0) { 
-      //System.out.println("d>n");
-      return List.of(make(),valueOf(this)); }
-    if (cmp == 0) { 
-      //System.out.println("d==n");
-      List.of(from(1),make()); }
-    if (b.nWords == 1) {
-    return divideAndRemainder(b.words[b.start]); }
-    // Cancel common powers of two if we're above the
-    // KNUTH_POW2_* thresholds
-
-    if (nWords >= KNUTH_POW2_THRESH_LEN) {
-      final int trailingZeroBits = Math.min(loBit(),b.loBit());
-      if (trailingZeroBits >= (KNUTH_POW2_THRESH_ZEROS*32)) {
-        NaturalBEIMutable aa = new NaturalBEIMutable(this);
-        NaturalBEIMutable bb = new NaturalBEIMutable(b);
-        aa = (NaturalBEIMutable) aa.shiftDown(trailingZeroBits);
-        bb = (NaturalBEIMutable) bb.shiftDown(trailingZeroBits);
-        //System.out.println("recursive");
-        List<Natural> qr = aa.knuthRecursive(bb,quotient);
-        Natural r = qr.get(1).shiftUp(trailingZeroBits);
-        return List.of(qr.get(0),r); } }
-
-    //System.out.println("magnitude");
-    Natural r = divideMagnitude(b, quotient); 
-    return List.of(quotient,r); }
-
-  @Override
-  public final List<Natural>
-  divideAndRemainderKnuth (final Natural u) {
-//    System.out.println("divideAndRemainderKnuth");
-//    System.out.println(this);
-//    System.out.println();
-//    System.out.println(u);
-//    System.out.println();
-    assert ! u.isZero();
-    if (u.isOne()) {
-      return List.of(valueOf(this),make()); }
-    if (isZero()) { 
-//      System.out.println("isZero");
-      return List.of(make(),make()); }
-    final int cmp = compareTo(u);
-    if (0==cmp) { 
-//      System.out.println("d==n");
-      return List.of(from(1),make()); }
-    if (0>cmp) { 
-//      System.out.println("d>n");
-      return List.of(make(),valueOf(this)); }
-    if (1==u.endWord()) { 
-      return divideAndRemainder(u.word(0)); } 
-//      final NaturalBEIMutable q = (NaturalBEIMutable) recyclable(endWord());
-//      final int r = divideOneWord(u.word(0),q);
-//      if (r==0) { 
-//        System.out.println("1 word zero remainder d!=n");
-//        System.out.println(this);
-//        System.out.println(u.word(0));
-//        System.out.println(q);
-//        System.out.println(r);
-//        return List.of(q,from(r)); }
-//      System.out.println("1 word d!=n");
-//      return List.of(q,from(r)); }
-    // Cancel common powers of two if we're above the
-    // KNUTH_POW2_* thresholds
-    if (nWords >= KNUTH_POW2_THRESH_LEN) {
-      final int trailingZeroBits = Math.min(loBit(), u.loBit());
-      if (trailingZeroBits >= (KNUTH_POW2_THRESH_ZEROS*32)) {
-        NaturalBEIMutable aa = new NaturalBEIMutable(this);
-        NaturalBEIMutable bb = valueOf(u);
-        aa = (NaturalBEIMutable) aa.shiftDown(trailingZeroBits);
-        bb = (NaturalBEIMutable) bb.shiftDown(trailingZeroBits);
-//        System.out.println("recursive");
-        final NaturalBEIMutable q = (NaturalBEIMutable) recyclable(endWord());
-        List<Natural> qr = aa.knuthRecursive(bb,q);
-        //List<Natural> qr = aa.divideAndRemainderKnuth(bb);
-        Natural r = qr.get(1);
-        r = r.shiftUp(trailingZeroBits);
-        return List.of(qr.get(0),r); } }
-
-//    System.out.println("magnitude");
-//    System.out.println(this);
-//    System.out.println(u);
-    final NaturalBEIMutable q = (NaturalBEIMutable) recyclable(endWord());
-    final NaturalBEIMutable r = divideMagnitude(valueOf(u),q); 
-    return List.of(q,r); }  
+    return List.of(quotient,rem); }
 
   //--------------------------------------------------------------
   // Burnikel-Ziegler
@@ -619,7 +516,7 @@ public final class NaturalBEIMutable implements Natural {
     // step 1: base case
     if (((n%2) != 0) 
       || (n < NaturalBEI.BURNIKEL_ZIEGLER_THRESHOLD)) {
-      final List<Natural> qr = knuthRecursive(b,quotient);
+      final List<Natural> qr = divideAndRemainder(b);
       return (NaturalBEIMutable) qr.get(1); }
 
     // step 2: view this as [a1,a2,a3,a4] 
@@ -951,6 +848,9 @@ public final class NaturalBEIMutable implements Natural {
           Arrays.copyOfRange(words,start,start+nWords))); }
 
   @Override
+  public final Natural copy () { return valueOf(this); }
+
+  @Override
   public final Natural recyclable (final Natural init) {
     if (this==init) { return this; }
     return valueOf(init); }
@@ -973,14 +873,14 @@ public final class NaturalBEIMutable implements Natural {
     words = val;
     nWords = val.length; }
 
-  private NaturalBEIMutable () { words = new int[1]; nWords = 0; }
+  private NaturalBEIMutable () { 
+    words = new int[1]; nWords = 0; }
 
   private NaturalBEIMutable (final NaturalBEIMutable val) {
     nWords = val.nWords;
     words =
       Arrays.copyOfRange(
         val.words,val.start,val.start+nWords); }
-
 
   private NaturalBEIMutable (final int val) {
     words = new int[1];

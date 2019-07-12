@@ -8,7 +8,7 @@ import java.util.Arrays;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-10
+ * @version 2019-07-11
  */
 
 public final class NaturalBEI //extends Number
@@ -55,6 +55,9 @@ implements Natural {
 
   @Override
   public final Natural immutable () { return this; }
+
+  @Override
+  public final Natural copy () { return this; }
 
   @Override
   public final Natural recyclable (final Natural init) {
@@ -172,15 +175,24 @@ implements Natural {
   //--------------------------------------------------------------
 
   public static final NaturalBEI valueOf (final long x) {
-    if (x==0) { return ZERO; }
+    if (x==0L) { return ZERO; }
     assert 0L < x;
     if (x <= MAX_CONSTANT) { return posConst[(int) x]; }
     return unsafe(Ints.bigEndian(x)); }
+
+  public static final NaturalBEI valueOf (final int x) {
+    if (x==0) { return ZERO; }
+    assert 0L < x;
+    if (x <= MAX_CONSTANT) { return posConst[x]; }
+    return unsafe(new int[] {x}); }
 
   //--------------------------------------------------------------
 
   @Override
   public final Natural from (final long u) { return valueOf(u); }
+
+  @Override
+  public final Natural from (final int u) { return valueOf(u); }
 
   //--------------------------------------------------------------
 }

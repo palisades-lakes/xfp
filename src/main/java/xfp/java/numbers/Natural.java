@@ -45,7 +45,7 @@ extends Uints<Natural>, Ringlike<Natural> {
     return 0; }
 
   default int compareTo (final int upShift,
-                                final Natural u) {
+                         final Natural u) {
     return shiftUp(upShift).compareTo(u); }
 
   default int compareTo (final long u) {
@@ -62,7 +62,7 @@ extends Uints<Natural>, Ringlike<Natural> {
     return 0; }
 
   default int compareTo (final long u,
-                                final int upShift) {
+                         final int upShift) {
     assert 0L<=u;
     assert 0<=upShift : "upShift=" + upShift;
     if (0==upShift) { return compareTo(u); }
@@ -154,7 +154,7 @@ extends Uints<Natural>, Ringlike<Natural> {
     return t.immutable(); }
 
   default Natural add (final Natural u,
-                              final int shift) {
+                       final int shift) {
     assert 0<=shift;
     if (isZero()) { return u.shiftUp(shift); }
     if (u.isZero()) { return this; }
@@ -182,10 +182,10 @@ extends Uints<Natural>, Ringlike<Natural> {
       carry = (sum>>>32); }
     if (0L!=carry) { v = v.setWord(i,(int) carry); }
     //return v; }
-  return v.immutable(); }
+    return v.immutable(); }
 
   default Natural add (final long u,
-                              final int upShift) {
+                       final int upShift) {
     assert 0<=upShift;
     if (0==upShift) { return add(u); }
     assert 0L<=u;
@@ -242,7 +242,7 @@ extends Uints<Natural>, Ringlike<Natural> {
     return ((Natural) v).immutable(); }
 
   default Natural subtract (final long u,
-                                   final int upShift) {
+                            final int upShift) {
     assert 0L<=u;
     assert 0<=upShift;
     assert compareTo(u,upShift)>=0;
@@ -256,7 +256,7 @@ extends Uints<Natural>, Ringlike<Natural> {
     return from(u).subtract(this); }
 
   default Natural subtractFrom (final long u,
-                                       final int upShift) {
+                                final int upShift) {
     assert 0L<=u;
     assert 0<=upShift;
     assert compareTo(u,upShift)<=0;
@@ -486,9 +486,9 @@ extends Uints<Natural>, Ringlike<Natural> {
     return t.immutable(); }
 
   default Natural getToomSlice (final int lowerSize,
-                                       final int upperSize,
-                                       final int slice,
-                                       final int fullsize) {
+                                final int upperSize,
+                                final int slice,
+                                final int fullsize) {
     final int n = endWord();
     final int offset = fullsize-n;
     int start;
@@ -633,7 +633,7 @@ extends Uints<Natural>, Ringlike<Natural> {
     return t.immutable(); }
 
   default Natural multiply (final long u,
-                                   final int upShift) {
+                            final int upShift) {
     assert 0L<=u;
     if (0L==u) { return zero(); }
     assert 0<=upShift;
@@ -641,7 +641,7 @@ extends Uints<Natural>, Ringlike<Natural> {
     return multiply(from(u,upShift)); }
 
   default Natural fromProduct (final long t0,
-                                      final long t1) {
+                               final long t1) {
     assert 0L<=t0;
     assert 0L<=t1;
     final long hi0 = Numbers.hiWord(t0);
@@ -682,10 +682,10 @@ extends Uints<Natural>, Ringlike<Natural> {
 
   //--------------------------------------------------------------
   /** Interpret {@code d} as unsigned. */
-  
+
   default List<Natural> divideAndRemainder (final int d) {
-//    throw Exceptions.unsupportedOperation(
-//      this,"divideAndRemainder",u); }
+    //    throw Exceptions.unsupportedOperation(
+    //      this,"divideAndRemainder",u); }
     if (1==d) {
       return List.of(this.immutable(),from(0)); }
 
@@ -694,7 +694,7 @@ extends Uints<Natural>, Ringlike<Natural> {
       final long nn = uword(0);
       final int q = (int) (nn/dd);
       final int r = (int) (nn-(q*dd));
-    return List.of(from(q),from(r)); }
+      return List.of(from(q),from(r)); }
 
     Natural qq = recyclable(endWord());
 
@@ -708,7 +708,7 @@ extends Uints<Natural>, Ringlike<Natural> {
       qq = qq.setWord(endWord()-1,rrdd);
       r = (int) (rr-(rrdd*dd));
       rr = unsigned(r); }
-    
+
     int xlen = endWord();
     while (--xlen > 0) {
       final long nEst = (rr << 32) | uword(xlen-1);
@@ -722,21 +722,51 @@ extends Uints<Natural>, Ringlike<Natural> {
         r = (int) Numbers.hiWord(tmp); }
       qq = qq.setWord(xlen-1,q);
       rr = unsigned(r); }
-    
+
     //qq.compact();
-    
+
     // decompact
     if (shift > 0) { 
       return List.of(qq,from(r % d)); }
 
     return List.of(qq,from(r)); }
 
-
   //--------------------------------------------------------------
 
   default List<Natural> 
+  knuthDivision (final Natural u) {
+    throw 
+    Exceptions.unsupportedOperation(this,"knuthDivision",u); }
+
+  static final int KNUTH_POW2_THRESH_LEN = 6;
+  static final int KNUTH_POW2_THRESH_ZEROS = 3;
+
+  default List<Natural> 
   divideAndRemainderKnuth (final Natural u) {
-    return recyclable(this).divideAndRemainderKnuth(u); }
+    //return recyclable(this).divideAndRemainderKnuth(u); }
+    assert ! u.isZero();
+    if (u.isOne()) { return List.of(this.immutable(),zero()); }
+    if (isZero()) { return List.of(zero(),zero()); }
+    final int cmp = compareTo(u);
+    if (0==cmp) { return List.of(one(),zero()); }
+    if (0>cmp) { return List.of(zero(),this.immutable()); }
+    if (1==u.endWord()) { return divideAndRemainder(u.word(0)); } 
+
+    final Natural a = recyclable(this);
+    final Natural b = u.recyclable(u);
+
+    // Cancel common powers of two if we're above the
+    // KNUTH_POW2_* thresholds
+    if (endWord() >= KNUTH_POW2_THRESH_LEN) {
+      final int shift = Math.min(loBit(),b.loBit());
+      if (shift >= (KNUTH_POW2_THRESH_ZEROS*32)) {
+        final Natural aa = a.copy().shiftDown(shift);
+        final Natural bb = b.copy().shiftDown(shift);
+        final List<Natural> qr = aa.divideAndRemainderKnuth(bb);
+        final Natural r = qr.get(1).shiftUp(shift);
+        return List.of(qr.get(0),r); } }
+    
+    return a.knuthDivision(b); }
 
   default List<Natural>
   divideAndRemainderBurnikelZiegler (final Natural u) {
@@ -746,13 +776,9 @@ extends Uints<Natural>, Ringlike<Natural> {
   default List<Natural> divideAndRemainder (final Natural u) {
     assert (! u.isZero());
     final List<Natural> qr;
-    if (useKnuthDivision(u)) {
-      qr = divideAndRemainderKnuth(u); }
-    else {
-      qr =divideAndRemainderBurnikelZiegler(u); }
-    return List.of(
-      qr.get(0).immutable(),
-      qr.get(1).immutable()); }
+    if (useKnuthDivision(u)) { qr = divideAndRemainderKnuth(u); }
+    else { qr = divideAndRemainderBurnikelZiegler(u); }
+    return List.of(qr.get(0).immutable(),qr.get(1).immutable()); }
 
   @Override
   default Natural divide (final Natural u) {
