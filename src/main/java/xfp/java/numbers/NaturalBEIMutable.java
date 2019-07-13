@@ -272,83 +272,72 @@ public final class NaturalBEIMutable implements Natural {
       carry = sum >>> 32; }
     return (int) carry; }
 
-   //--------------------------------------------------------------
+  //--------------------------------------------------------------
 
   @Override
   public final List<Natural> knuthDivision (final Natural u) {
     assert !u.isZero();
-    final NaturalBEIMutable div = (NaturalBEIMutable) u;
-    final NaturalBEIMutable quotient = 
-      (NaturalBEIMutable) recyclable(endWord());
+    final NaturalBEIMutable d = (NaturalBEIMutable) u;
     // D1 compact the divisor
-    final int shift =
-      Integer.numberOfLeadingZeros(div.word(div.endWord()-1));
+    final int lShift =
+      Integer.numberOfLeadingZeros(d.word(d.endWord()-1));
     // Copy divisor words to protect divisor
-    final int dlen = div.endWord();
-    int[] divisor;
+    final int dlen = d.endWord();
     // Remainder starts as dividend with space for a leading zero
-    NaturalBEIMutable rem;
-    if (0<shift) {
-      divisor = new int[dlen];
-      Ints.copyAndShift(div.words,div.start,dlen,divisor,0,shift);
-      //rem = (NaturalBEIMutable) shiftUp(shift);
-      //rem.expandTo(nWords+2);
-      if (shift<=Integer.numberOfLeadingZeros(word(endWord()-1))) {
-        rem = make(nWords+1); rem.nWords = nWords; rem.start = 1;
-        Ints.copyAndShift(words,start,nWords,rem.words,1,shift); }
+    int[] div;
+    NaturalBEIMutable r;
+    if (0<lShift) {
+      div = new int[dlen];
+      Ints.copyAndShift(d.words,d.start,dlen,div,0,lShift);
+      //rem = (NaturalBEIMutable) shiftUp(lShift);
+      //rem.expandTo(rem.endWord()+2);
+      if (lShift<=Integer.numberOfLeadingZeros(word(endWord()-1))) {
+        r =(NaturalBEIMutable) recyclable(nWords+1); 
+        r.nWords = endWord(); r.start = 1;
+        Ints.copyAndShift(words,start,endWord(),r.words,1,lShift); }
       else {
-        rem = make(nWords+2); rem.nWords = nWords+1; rem.start = 1;
-        int rFrom = start;
+        r = (NaturalBEIMutable) recyclable(nWords+2); 
+        r.nWords = endWord()+1; r.start = 1;
         int c=0;
-        final int n2 = 32 - shift;
-        for (int i=1; i < (nWords+1); i++,rFrom++) {
+        final int rShift = 32-lShift;
+        for (int i=1,j=start; i<=endWord(); i++,j++) {
           final int b = c;
-          c = words[rFrom];
-          rem.words[i] = (b << shift) | (c >>> n2); }
-        rem.words[nWords+1] = c << shift; }
-      }
+          c = word(beIndex(j));
+          r = (NaturalBEIMutable) 
+            r.setWord(r.beIndex(i),((b<<lShift)|(c>>>rShift))); }
+        r = (NaturalBEIMutable) 
+          r.setWord(r.beIndex(endWord()+1),(c<<lShift)); }
+    }
     else {
-      divisor = Arrays.copyOfRange(
-        div.words, div.start, div.start + div.nWords);
-      rem = make(nWords+1); rem.nWords = nWords; rem.start = 1;
-      System.arraycopy(words, start, rem.words, 1, nWords); }
+      div = Arrays.copyOfRange(d.words,d.start,d.start+d.endWord());
+      r = make(nWords+1); r.nWords = nWords; r.start = 1;
+      System.arraycopy(words, start, r.words, 1, nWords); }
 
-    final int nlen = rem.endWord();
+    final int nlen = r.endWord();
+    r.start = 0;
+    r.words[0] = 0;
+    r.nWords++; 
 
-    // Set the quotient size
     final int limit = (nlen-dlen) + 1;
-    if (quotient.words.length < limit) {
-      quotient.words = new int[limit];
-      quotient.start = 0; }
-    quotient.nWords = limit;
-    final int[] q = quotient.words;
-
-    // Must insert leading 0 in rem if its length did not change
-    if (rem.nWords == nlen) {
-      rem.start = 0;
-      rem.words[0] = 0;
-      rem.nWords++; }
-
-    final int dh = divisor[0];
+    final NaturalBEIMutable q = (NaturalBEIMutable) recyclable(limit);
+    final int dh = div[0];
     final long dhLong = unsigned(dh);
-    final int dl = divisor[1];
+    final int dl = div[1];
     // D2 Initialize j
     for (int j=0; j < (limit-1); j++) {
       // D3 Calculate qhat
-      // estimate qhat
-      int qhat = 0;
-      int qrem = 0;
       boolean skipCorrection = false;
-      final int nh = rem.words[j+rem.start];
+      final int nh = r.words[j+r.start];
       final int nh2 = nh + 0x80000000;
-      final int nm = rem.words[j+1+rem.start];
+      final int nm = r.words[j+1+r.start];
+      int qhat;
+      int qrem;
       if (nh == dh) {
         qhat = ~0;
         qrem = nh + nm;
         skipCorrection = (qrem + 0x80000000) < nh2; }
       else {
-        final long nChunk =
-          (((long)nh) << 32) | (unsigned(nm));
+        final long nChunk = (((long)nh)<<32) | (unsigned(nm));
         if (nChunk >= 0) {
           qhat = (int) (nChunk / dhLong);
           qrem = (int) (nChunk - (qhat * dhLong)); }
@@ -358,7 +347,7 @@ public final class NaturalBEIMutable implements Natural {
           qrem = (int) (tmp >>> 32); } }
       if (qhat == 0) { continue; }
       if (!skipCorrection) { // Correct qhat
-        final long nl = unsigned(rem.words[j+2+rem.start]);
+        final long nl = unsigned(r.words[j+2+r.start]);
         long rs = (unsigned(qrem) << 32) | nl;
         long estProduct = unsigned(dl) * (unsigned(qhat));
         if (unsignedGreaterThan(estProduct, rs)) {
@@ -370,25 +359,25 @@ public final class NaturalBEIMutable implements Natural {
             if (unsignedGreaterThan(estProduct, rs)) {
               qhat--; } } } }
       // D4 Multiply and subtract
-      rem.words[j+rem.start] = 0;
+      r.words[j+r.start] = 0;
       final int borrow =
-        mulsub(rem.words, divisor, qhat, dlen, j+rem.start);
+        mulsub(r.words, div, qhat, dlen, j+r.start);
       // D5 Test remainder
       if ((borrow + 0x80000000) > nh2) {
         // D6 Add back
-        divadd(divisor, rem.words, j+1+rem.start);
+        divadd(div, r.words, j+1+r.start);
         qhat--; }
       // Store the quotient digit
-      q[j] = qhat; } // D7 loop on j
+      q.words[j] = qhat; } // D7 loop on j
 
     // D3 Calculate qhat
     // 1st estimate
     int qhat = 0;
     int qrem = 0;
     boolean skipCorrection = false;
-    final int nh = rem.words[(limit - 1) + rem.start];
+    final int nh = r.words[(limit - 1) + r.start];
     final int nh2 = nh + 0x80000000;
-    final int nm = rem.words[limit + rem.start];
+    final int nm = r.words[limit + r.start];
     if (nh == dh) {
       qhat = ~0;
       qrem = nh + nm;
@@ -406,7 +395,7 @@ public final class NaturalBEIMutable implements Natural {
     if (qhat != 0) {
       if (!skipCorrection) {
         final long nl =
-          unsigned(rem.words[limit + 1 + rem.start]);
+          unsigned(r.words[limit + 1 + r.start]);
         long rs = ((unsigned(qrem)) << 32) | nl;
         long estProduct = (unsigned(dl)) * (unsigned(qhat));
         if (unsignedGreaterThan(estProduct, rs)) {
@@ -418,23 +407,23 @@ public final class NaturalBEIMutable implements Natural {
             if (unsignedGreaterThan(estProduct, rs)) { qhat--; } } } }
       // D4 Multiply and subtract
       int borrow;
-      rem.words[(limit - 1) + rem.start] = 0;
+      r.words[(limit - 1) + r.start] = 0;
       borrow =
-        mulsub(rem.words,divisor,qhat,dlen,(limit-1)+rem.start);
+        mulsub(r.words,div,qhat,dlen,(limit-1)+r.start);
       // D5 Test remainder
       if ((borrow + 0x80000000) > nh2) {
         // D6 Add back
-        divadd(divisor,rem.words,(limit-1)+1+rem.start);
+        divadd(div,r.words,(limit-1)+1+r.start);
         qhat--; }
       // Store the quotient digit
-      q[(limit - 1)] = qhat; }
+      q.words[(limit - 1)] = qhat; }
 
     // D8 decompact
-    if (shift > 0) { 
-      rem = (NaturalBEIMutable) rem.shiftDown(shift); }
-    rem.compact(); 
-    quotient.compact();
-    return List.of(quotient,rem); }
+    if (lShift > 0) { 
+      r = (NaturalBEIMutable) r.shiftDown(lShift); }
+    r.compact(); 
+    q.compact();
+    return List.of(q,r); }
 
   //--------------------------------------------------------------
   // Burnikel-Ziegler
@@ -838,7 +827,7 @@ public final class NaturalBEIMutable implements Natural {
   public final Natural recyclable (final int n) {
     assert 0<=n;
     return make(n); }
-//    expandTo(n); return this; }
+  //    expandTo(n); return this; }
 
   @Override
   public final boolean isImmutable () { return false; }
