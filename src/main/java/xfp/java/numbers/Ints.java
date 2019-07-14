@@ -126,18 +126,15 @@ public final class Ints implements Set {
                                          final int[] dst,
                                          final int idst,
                                          final int lShift) {
-    assert 0<=lShift;
+    assert 0<lShift;
     assert lShift<32;
-    if (0==lShift) {
-      System.arraycopy(src,isrc,dst,idst,n); }
-    else {
       final int rShift = 32-lShift;
       int c=src[isrc];
       for (int i0=idst,i1=isrc;i0<idst+n-1; i0++) {
         final int b = c;
         c = src[++i1];
         dst[i0] = (b << lShift) | (c >>> rShift); }
-      dst[(idst+n)-1] = c << lShift; } }
+      dst[idst+n-1] = (c<<lShift); } 
 
   //-------------------------------------------------------------
   // string parsing

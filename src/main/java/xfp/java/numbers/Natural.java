@@ -17,7 +17,7 @@ import xfp.java.exceptions.Exceptions;
  * TODO: utilities class to hide private stuff?
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-11
+ * @version 2019-07-13
  */
 
 @SuppressWarnings("unchecked")
@@ -743,7 +743,6 @@ extends Uints<Natural>, Ringlike<Natural> {
 
   default List<Natural> 
   divideAndRemainderKnuth (final Natural u) {
-    //return recyclable(this).divideAndRemainderKnuth(u); }
     assert ! u.isZero();
     if (u.isOne()) { return List.of(this.immutable(),zero()); }
     if (isZero()) { return List.of(zero(),zero()); }
@@ -752,20 +751,18 @@ extends Uints<Natural>, Ringlike<Natural> {
     if (0>cmp) { return List.of(zero(),this.immutable()); }
     if (1==u.endWord()) { return divideAndRemainder(u.word(0)); } 
 
-    final Natural a = recyclable(this);
-    final Natural b = u.recyclable(u);
-
-    // Cancel common powers of two if we're above the
-    // KNUTH_POW2_* thresholds
+    // Cancel common powers of 2 if above KNUTH_POW2_* thresholds
     if (endWord() >= KNUTH_POW2_THRESH_LEN) {
-      final int shift = Math.min(loBit(),b.loBit());
+      final int shift = Math.min(loBit(),u.loBit());
       if (shift >= (KNUTH_POW2_THRESH_ZEROS*32)) {
-        final Natural aa = a.copy().shiftDown(shift);
-        final Natural bb = b.copy().shiftDown(shift);
-        final List<Natural> qr = aa.divideAndRemainderKnuth(bb);
+        final Natural a = recyclable(this).shiftDown(shift);
+        final Natural b = u.recyclable(u).shiftDown(shift);
+        final List<Natural> qr = a.divideAndRemainderKnuth(b);
         final Natural r = qr.get(1).shiftUp(shift);
         return List.of(qr.get(0),r); } }
     
+    final Natural a = recyclable(this);
+    final Natural b = u.recyclable(u);
     return a.knuthDivision(b); }
 
   default List<Natural>

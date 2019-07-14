@@ -11,7 +11,7 @@ import xfp.java.exceptions.Exceptions;
 
 /**
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-11
+ * @version 2019-07-13
  */
 
 public final class NaturalBEIMutable implements Natural {
@@ -46,14 +46,8 @@ public final class NaturalBEIMutable implements Natural {
 
   private int[] words;
 
-  private final int[] getWords () {
-    if ((start > 0) || (words.length != nWords)) {
-      return Arrays.copyOfRange(words, start, start + nWords); }
-    // UNSAFE!!!
-    return words; }
-
   private final int[] copyWords () {
-    return Arrays.copyOfRange(words, start, start + nWords); }
+    return Arrays.copyOfRange(words,start,start+nWords); }
 
   // TODO: useful to oversize array? or as an option?
   private final void setWords (final int[] v,
@@ -61,7 +55,7 @@ public final class NaturalBEIMutable implements Natural {
     assert length<=v.length;
     words = v; nWords = length; start = 0; }
 
-  private final int beIndex (final int i) {
+  private final int bei (final int i) {
     return (start+nWords)-1-i; }
 
   private final void clearUnused () {
@@ -80,7 +74,7 @@ public final class NaturalBEIMutable implements Natural {
     nWords -= numZeros;
     start = (nWords == 0 ?  0 : start+numZeros); }
 
-  private final void expandTo (final int i) {
+  private final NaturalBEIMutable expandTo (final int i) {
     final int i1 = i+1;
     if (nWords<i1) {
       if (i1<words.length) {
@@ -93,20 +87,21 @@ public final class NaturalBEIMutable implements Natural {
         words = tmp;
         start = 0;
         nWords = i1; } }
-    clearUnused(); }
+    clearUnused(); 
+    return this; }
 
   @Override
   public final int word (final int i) {
     assert 0<=i;
     if (i>=nWords) { return 0; }
-    return words[beIndex(i)]; }
+    return words[bei(i)]; }
 
   @Override
   public final Natural setWord (final int i,
                                 final int w) {
     assert 0<=i;
     expandTo(i);
-    words[beIndex(i)] = w;
+    words[bei(i)] = w;
     return this; }
 
   //--------------------------------------------------------------
@@ -130,15 +125,15 @@ public final class NaturalBEIMutable implements Natural {
    * less than 32. Assumes that nWords > 0, n > 0 for speed
    */
 
-  private final void primitiveDownShift (final int shift) {
+  private final void smallDownShift (final int shift) {
     assert 0<=shift;
     assert shift<32;
     final int[] val = words;
-    final int n2 = 32-shift;
+    final int lShift = 32-shift;
     for (int i=(start+nWords)-1, c=val[i]; i > start; i--) {
       final int b = c;
       c = val[i-1];
-      val[i] = (c << n2) | (b >>> shift); }
+      val[i] = (c << lShift) | (b >>> shift); }
     val[start] >>>= shift; }
 
   @Override
@@ -146,28 +141,28 @@ public final class NaturalBEIMutable implements Natural {
     assert 0<=shift;
     if ((shift>>>5) >= nWords) { return clear(); }
     if (nWords==0) { return this; }
-    final int nInts = shift >>> 5;
-    final int nBits = shift & 0x1F;
-    nWords -= nInts;
-    if (nBits == 0) { return this; }
+    final int iShift = (shift>>>5);
+    final int bShift = (shift&0x1F);
+    nWords -= iShift;
+    if (bShift == 0) { return this; }
     final int bitsInHighWord = Numbers.hiBit(word(endWord()-1));
-    if (nBits >= bitsInHighWord) {
-      primitiveUpShift(32-nBits);
+    if (bShift >= bitsInHighWord) {
+      smallUpShift(32-bShift);
       nWords--; }
-    else { primitiveDownShift(nBits); } 
+    else { smallDownShift(bShift); } 
     return this; }
 
   //--------------------------------------------------------------
 
-  private final void primitiveUpShift (final int shift) {
+  private final void smallUpShift (final int shift) {
     assert 0<=shift;
     assert shift<32;
     final int[] val = words;
-    final int n2 = 32 - shift;
+    final int rShift = 32-shift;
     for (int i=start, c=val[i], m=(i+nWords)-1; i < m; i++) {
       final int b = c;
       c = val[i+1];
-      val[i] = (b << shift) | (c >>> n2); }
+      val[i] = (b << shift) | (c >>> rShift); }
     val[(start+nWords)-1] <<= shift; }
 
   @Override
@@ -177,19 +172,19 @@ public final class NaturalBEIMutable implements Natural {
     // If there is enough storage space in this NaturalBEIMutable
     // already the available space will be used. Space to the
     // right of the used ints in the words array is faster to
-    // utilize, so the extra space will be taken from the right if
+    // use, so the extra space will be taken from the right if
     // possible.
     if (nWords == 0) { return this; }
     final int iShift = (shift>>>5);
-    final int rShift = (shift&0x1F);
+    final int bShift = (shift&0x1F);
     final int bitsInHighWord = Numbers.hiBit(word(endWord()-1));
 
     // If shift can be done without moving words, do so
-    if (shift <= (32-bitsInHighWord)) {
-      primitiveUpShift(rShift); return this; }
+    if (shift<=(32-bitsInHighWord)) {
+      smallUpShift(bShift); return this; }
 
     int newLen = nWords + iShift +1;
-    if (rShift <= (32-bitsInHighWord)) { newLen--; }
+    if (bShift <= (32-bitsInHighWord)) { newLen--; }
     if (words.length<newLen) {
       // The array must grow
       final int[] r = new int[newLen];
@@ -205,10 +200,10 @@ public final class NaturalBEIMutable implements Natural {
       for (int i=nWords; i<newLen; i++) { words[i] = 0; }
       start = 0; }
     nWords = newLen;
-    if (rShift == 0) { return this; }
-    if (rShift <= (32-bitsInHighWord)) {
-      primitiveUpShift(rShift); }
-    else { primitiveDownShift(32 -rShift); }
+    if (bShift == 0) { return this; }
+    if (bShift <= (32-bitsInHighWord)) {
+      smallUpShift(bShift); }
+    else { smallDownShift(32-bShift); }
     return this; }
 
   //--------------------------------------------------------------
@@ -277,59 +272,57 @@ public final class NaturalBEIMutable implements Natural {
   @Override
   public final List<Natural> knuthDivision (final Natural u) {
     assert !u.isZero();
-    final NaturalBEIMutable d = (NaturalBEIMutable) u;
     // D1 compact the divisor
     final int lShift =
-      Integer.numberOfLeadingZeros(d.word(d.endWord()-1));
+      Integer.numberOfLeadingZeros(u.word(u.endWord()-1));
     // Copy divisor words to protect divisor
-    final int dlen = d.endWord();
+    final int dlen = u.endWord();
     // Remainder starts as dividend with space for a leading zero
-    int[] div;
+    NaturalBEIMutable div;
     NaturalBEIMutable r;
+    final NaturalBEIMutable d = (NaturalBEIMutable) u;
     if (0<lShift) {
-      div = new int[dlen];
-      Ints.copyAndShift(d.words,d.start,dlen,div,0,lShift);
-      //rem = (NaturalBEIMutable) shiftUp(lShift);
-      //rem.expandTo(rem.endWord()+2);
+      div = (NaturalBEIMutable) u.recyclable(dlen);
+      Ints.copyAndShift(d.words,d.start,d.nWords,div.words,0,lShift);
+      //div = (NaturalBEIMutable) u.recyclable(u).shiftUp(lShift);
+//      r = (NaturalBEIMutable) recyclable(this).shiftUp(lShift);
+//      r.expandTo(r.endWord()+2);
       if (lShift<=Integer.numberOfLeadingZeros(word(endWord()-1))) {
         r =(NaturalBEIMutable) recyclable(nWords+1); 
-        r.nWords = endWord(); r.start = 1;
-        Ints.copyAndShift(words,start,endWord(),r.words,1,lShift); }
+        r.nWords = endWord(); r.start=1;
+        Ints.copyAndShift(words,start,nWords,r.words,1,lShift); }
       else {
         r = (NaturalBEIMutable) recyclable(nWords+2); 
-        r.nWords = endWord()+1; r.start = 1;
+        r.nWords = endWord()+1; r.start=1;
         int c=0;
         final int rShift = 32-lShift;
         for (int i=1,j=start; i<=endWord(); i++,j++) {
           final int b = c;
-          c = word(beIndex(j));
+          c = word(bei(j));
           r = (NaturalBEIMutable) 
-            r.setWord(r.beIndex(i),((b<<lShift)|(c>>>rShift))); }
+            r.setWord(r.bei(i),((b<<lShift)|(c>>>rShift))); }
         r = (NaturalBEIMutable) 
-          r.setWord(r.beIndex(endWord()+1),(c<<lShift)); }
+          r.setWord(r.bei(endWord()+1),(c<<lShift)); }
     }
     else {
-      div = Arrays.copyOfRange(d.words,d.start,d.start+d.endWord());
+      div = (NaturalBEIMutable) u.recyclable(u);
       r = make(nWords+1); r.nWords = nWords; r.start = 1;
-      System.arraycopy(words, start, r.words, 1, nWords); }
+      System.arraycopy(words,start,r.words,1, nWords); }
 
-    final int nlen = r.endWord();
-    r.start = 0;
-    r.words[0] = 0;
-    r.nWords++; 
-
-    final int limit = (nlen-dlen) + 1;
-    final NaturalBEIMutable q = (NaturalBEIMutable) recyclable(limit);
-    final int dh = div[0];
+    r.setWord(r.endWord(),0);
+    final int limit = r.endWord()-dlen;
+    NaturalBEIMutable q = (NaturalBEIMutable) recyclable(limit);
+    final int dh = div.word(div.endWord()-1);
     final long dhLong = unsigned(dh);
-    final int dl = div[1];
+    final int dl = div.word(div.endWord()-2);
     // D2 Initialize j
     for (int j=0; j < (limit-1); j++) {
       // D3 Calculate qhat
       boolean skipCorrection = false;
-      final int nh = r.words[j+r.start];
+      final int i = r.endWord()-j-1;
+      final int nh = r.word(i);
       final int nh2 = nh + 0x80000000;
-      final int nm = r.words[j+1+r.start];
+      final int nm = r.word(i-1);
       int qhat;
       int qrem;
       if (nh == dh) {
@@ -343,11 +336,11 @@ public final class NaturalBEIMutable implements Natural {
           qrem = (int) (nChunk - (qhat * dhLong)); }
         else {
           final long tmp = Ints.divWord(nChunk, dh);
-          qhat = (int) (loWord(tmp));
+          qhat = (int) loWord(tmp);
           qrem = (int) (tmp >>> 32); } }
       if (qhat == 0) { continue; }
       if (!skipCorrection) { // Correct qhat
-        final long nl = unsigned(r.words[j+2+r.start]);
+        final long nl = r.uword(i-2);
         long rs = (unsigned(qrem) << 32) | nl;
         long estProduct = unsigned(dl) * (unsigned(qhat));
         if (unsignedGreaterThan(estProduct, rs)) {
@@ -359,25 +352,26 @@ public final class NaturalBEIMutable implements Natural {
             if (unsignedGreaterThan(estProduct, rs)) {
               qhat--; } } } }
       // D4 Multiply and subtract
-      r.words[j+r.start] = 0;
+      r.setWord(i,0);
       final int borrow =
-        mulsub(r.words, div, qhat, dlen, j+r.start);
+        mulsub(r.words, div.words, qhat, dlen, j+r.start);
       // D5 Test remainder
       if ((borrow + 0x80000000) > nh2) {
         // D6 Add back
-        divadd(div, r.words, j+1+r.start);
+        divadd(div.words, r.words, j+1+r.start);
         qhat--; }
       // Store the quotient digit
-      q.words[j] = qhat; } // D7 loop on j
+      q = (NaturalBEIMutable) q.setWord(q.bei(j), qhat); } // D7 loop on j
 
     // D3 Calculate qhat
     // 1st estimate
     int qhat = 0;
     int qrem = 0;
     boolean skipCorrection = false;
-    final int nh = r.words[(limit - 1) + r.start];
+    final int i = r.bei((limit - 1) + r.start);
+    final int nh = r.word(i);
     final int nh2 = nh + 0x80000000;
-    final int nm = r.words[limit + r.start];
+    final int nm = r.word(i-1);
     if (nh == dh) {
       qhat = ~0;
       qrem = nh + nm;
@@ -394,8 +388,7 @@ public final class NaturalBEIMutable implements Natural {
     // 2nd correction
     if (qhat != 0) {
       if (!skipCorrection) {
-        final long nl =
-          unsigned(r.words[limit + 1 + r.start]);
+        final long nl = r.uword(i-2);
         long rs = ((unsigned(qrem)) << 32) | nl;
         long estProduct = (unsigned(dl)) * (unsigned(qhat));
         if (unsignedGreaterThan(estProduct, rs)) {
@@ -407,16 +400,16 @@ public final class NaturalBEIMutable implements Natural {
             if (unsignedGreaterThan(estProduct, rs)) { qhat--; } } } }
       // D4 Multiply and subtract
       int borrow;
-      r.words[(limit - 1) + r.start] = 0;
+      r = (NaturalBEIMutable) r.setWord(i,0);
       borrow =
-        mulsub(r.words,div,qhat,dlen,(limit-1)+r.start);
+        mulsub(r.words,div.words,qhat,dlen,(limit-1)+r.start);
       // D5 Test remainder
       if ((borrow + 0x80000000) > nh2) {
         // D6 Add back
-        divadd(div,r.words,(limit-1)+1+r.start);
+        divadd(div.words,r.words,(limit-1)+1+r.start);
         qhat--; }
       // Store the quotient digit
-      q.words[(limit - 1)] = qhat; }
+      q = (NaturalBEIMutable) q.setWord(q.bei(limit - 1),qhat); }
 
     // D8 decompact
     if (lShift > 0) { 
@@ -790,7 +783,7 @@ public final class NaturalBEIMutable implements Natural {
 
   @Override
   public final String toString () {
-    return NaturalBEI.valueOf(getWords()).toString(); }
+    return NaturalBEI.valueOf(words).toString(); }
 
   //--------------------------------------------------------------
   // Mutability

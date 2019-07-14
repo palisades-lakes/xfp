@@ -296,8 +296,6 @@ public interface Uints<T extends Uints> extends Transience<T> {
     return (T) u.immutable(); }
 
   default T shiftUp (final int shift) {
-    //    throw
-    //    Exceptions.unsupportedOperation(this,"shiftUp",shift); }
     assert 0<=shift;
     if (shift==0) { return (T) this; }
     final int n0 = endWord();
