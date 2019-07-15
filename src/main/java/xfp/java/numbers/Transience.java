@@ -93,6 +93,11 @@ public interface Transience<T extends Transience>  {
   default T recyclable (final int n) {
     throw Exceptions.unsupportedOperation(this,"recyclable",n); }
 
+  default T recyclable (final T init,
+                        final int n) {
+    throw Exceptions.unsupportedOperation(
+      this,"recyclable",init,Integer.valueOf(n)); }
+
   /** Like <code>(persistent! foo)</code> in Clojure.
    * <p>
    * Return an equivalent sequence that is guaranteed to be

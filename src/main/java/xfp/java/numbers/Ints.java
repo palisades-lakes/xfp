@@ -20,7 +20,7 @@ import xfp.java.prng.Generators;
 /** Utilities for <code>int</code>, <code>int[]</code>.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-12
+ * @version 2019-07-14
  */
 public final class Ints implements Set {
 
@@ -33,20 +33,15 @@ public final class Ints implements Set {
    */
 
   public static final long divWord (final long n, 
-                                    final int d) {
-    final long dLong = unsigned(d);
-    if (dLong == 1) {
-      final long q = (int) n;
-      final long r = 0;
-      return (r << 32) | (loWord(q)); }
-    // Approximate the quotient and remainder
-    long q = (n >>> 1) / (dLong >>> 1);
-    long r = n - (q*dLong);
-    // Correct the approximation
-    while (r < 0) { r += dLong; q--; }
-    while (r >= dLong) { r -= dLong; q++; }
-    // n - q*dlong == r && 0 <= r <dLong, hence we're done.
-    return (r << 32) | (loWord(q)); }
+                                    final long d) {
+    //assert 0L<=n;
+    assert 0L<d;
+    if (d == 1L) { return loWord(n); }
+    long q = (n>>>1) / (d>>>1);
+    long r = n-(q*d);
+    while (r<0L) { r+=d; q--; }
+    while (r>=d) { r-=d; q++; }
+    return (r<<32) | loWord(q); }
 
   //-------------------------------------------------------------
   // gcd

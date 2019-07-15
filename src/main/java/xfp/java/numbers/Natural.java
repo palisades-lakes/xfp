@@ -717,7 +717,7 @@ extends Uints<Natural>, Ringlike<Natural> {
         q = (int) (nEst / dd);
         r = (int) (nEst - (q * dd)); }
       else {
-        final long tmp = Ints.divWord(nEst,d);
+        final long tmp = Ints.divWord(nEst,dd);
         q = (int) Numbers.loWord(tmp);
         r = (int) Numbers.hiWord(tmp); }
       qq = qq.setWord(xlen-1,q);

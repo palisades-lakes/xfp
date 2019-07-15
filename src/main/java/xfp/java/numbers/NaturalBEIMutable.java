@@ -1,6 +1,7 @@
 package xfp.java.numbers;
 
 import static xfp.java.numbers.Ints.stripLeadingZeros;
+import static xfp.java.numbers.Numbers.hiWord;
 import static xfp.java.numbers.Numbers.loWord;
 import static xfp.java.numbers.Numbers.unsigned;
 
@@ -11,7 +12,7 @@ import xfp.java.exceptions.Exceptions;
 
 /**
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-13
+ * @version 2019-07-14
  */
 
 public final class NaturalBEIMutable implements Natural {
@@ -48,6 +49,12 @@ public final class NaturalBEIMutable implements Natural {
 
   private final int[] copyWords () {
     return Arrays.copyOfRange(words,start,start+nWords); }
+
+  public final void copyWords (final int[] dst,
+                               final int dstStart) {
+    final int n = Math.min(words.length,dst.length-dstStart);
+    Arrays.fill(dst,0);
+    System.arraycopy(words,0,dst,dstStart,n); }
 
   // TODO: useful to oversize array? or as an option?
   private final void setWords (final int[] v,
@@ -249,6 +256,47 @@ public final class NaturalBEIMutable implements Natural {
 
   //--------------------------------------------------------------
   // division
+  //-------------------------------------------------------------
+  /** This method is used for division. It multiplies an n word
+   * input a by one word input x, and subtracts the n word product
+   * from q. This is needed when subtracting qhat*divisor from
+   * the dividend.
+   */
+
+  private final int mulsub (final NaturalBEIMutable u,
+                            final long x,
+                            final int len,
+                            final int i0) {
+    final int[] q = words;
+    final int[] a = u.words;
+    long carry = 0;
+    int i = i0+len;
+    for (int j=len-1;j>=0;j--) {
+      final long prod = (unsigned(a[j])*x) + carry;
+      final long diff = q[i]-prod;
+      q[i--] = (int) diff;
+      carry = hiWord(prod) +
+        ((loWord(diff)>unsigned(~(int)prod))?1:0); }
+    return (int) carry; }
+
+//  private final int mulsub (final NaturalBEIMutable u,
+//                            final int x,
+//                            final int len,
+//                            final int i0) {
+//    final int[] q = words;
+//    final int[] a = u.words;
+//    final long xx = unsigned(x);
+//    long carry = 0;
+//    int i = i0 + len;
+//    for (int j=len-1;j>=0;j--) {
+//      final long product = (unsigned(a[j])*xx) + carry;
+//      final long difference = q[i] - product;
+//      q[i--] = (int)difference;
+//      carry = (product >>> 32)
+//        +
+//        (((loWord(difference))>(unsigned(~(int)product)))?1:0); }
+//    return (int) carry; }
+
   //--------------------------------------------------------------
   /** A primitive used for division. This method adds in one
    * multiple of the divisor a back to the dividend result at a
@@ -256,14 +304,15 @@ public final class NaturalBEIMutable implements Natural {
    * large, and must be adjusted.
    */
 
-  private static final int divadd (final int[] a,
-                                   final int[] result,
-                                   final int start) {
+  private final int divadd (final NaturalBEIMutable u,
+                            final int i) {
+    final int[] a = words;
+    final int[] result = u.words;
     long carry = 0;
-    for (int j=a.length-1; j >= 0; j--) {
+    for (int j=a.length-1; j>=0; j--) {
       final long sum =
-        (unsigned(a[j])) + unsigned(result[j+start]) + carry;
-      result[j+start] = (int)sum;
+        (unsigned(a[j])) + unsigned(result[j+i]) + carry;
+      result[j+i] = (int)sum;
       carry = sum >>> 32; }
     return (int) carry; }
 
@@ -273,149 +322,123 @@ public final class NaturalBEIMutable implements Natural {
   public final List<Natural> knuthDivision (final Natural u) {
     assert !u.isZero();
     // D1 compact the divisor
-    final int lShift =
-      Integer.numberOfLeadingZeros(u.word(u.endWord()-1));
-    // Copy divisor words to protect divisor
-    final int dlen = u.endWord();
-    // Remainder starts as dividend with space for a leading zero
-    NaturalBEIMutable div;
-    NaturalBEIMutable r;
-    final NaturalBEIMutable d = (NaturalBEIMutable) u;
-    if (0<lShift) {
-      div = (NaturalBEIMutable) u.recyclable(dlen);
-      Ints.copyAndShift(d.words,d.start,d.nWords,div.words,0,lShift);
-      //div = (NaturalBEIMutable) u.recyclable(u).shiftUp(lShift);
-//      r = (NaturalBEIMutable) recyclable(this).shiftUp(lShift);
-//      r.expandTo(r.endWord()+2);
-      if (lShift<=Integer.numberOfLeadingZeros(word(endWord()-1))) {
-        r =(NaturalBEIMutable) recyclable(nWords+1); 
-        r.nWords = endWord(); r.start=1;
-        Ints.copyAndShift(words,start,nWords,r.words,1,lShift); }
-      else {
-        r = (NaturalBEIMutable) recyclable(nWords+2); 
-        r.nWords = endWord()+1; r.start=1;
-        int c=0;
-        final int rShift = 32-lShift;
-        for (int i=1,j=start; i<=endWord(); i++,j++) {
-          final int b = c;
-          c = word(bei(j));
-          r = (NaturalBEIMutable) 
-            r.setWord(r.bei(i),((b<<lShift)|(c>>>rShift))); }
-        r = (NaturalBEIMutable) 
-          r.setWord(r.bei(endWord()+1),(c<<lShift)); }
-    }
-    else {
-      div = (NaturalBEIMutable) u.recyclable(u);
-      r = make(nWords+1); r.nWords = nWords; r.start = 1;
-      System.arraycopy(words,start,r.words,1, nWords); }
-
-    r.setWord(r.endWord(),0);
-    final int limit = r.endWord()-dlen;
+    final int nu = u.endWord();
+    final int lShift = Integer.numberOfLeadingZeros(u.word(nu-1));
+    NaturalBEIMutable d =
+      (NaturalBEIMutable) recyclable(u,nu).shiftUp(lShift);
+    final int nd = d.endWord();
+    NaturalBEIMutable r = 
+      (NaturalBEIMutable) copy().shiftUp(lShift);
+    final int nr = r.endWord();
+    r = (NaturalBEIMutable) r.setWord(nr,0);
+    final int limit = nr-nu+1;
     NaturalBEIMutable q = (NaturalBEIMutable) recyclable(limit);
-    final int dh = div.word(div.endWord()-1);
-    final long dhLong = unsigned(dh);
-    final int dl = div.word(div.endWord()-2);
+    final int dh = d.word(nd-1);
+    final long dhl = unsigned(dh);
+    final int dl = d.word(nd-2);
+    final long dll = unsigned(dl);
     // D2 Initialize j
-    for (int j=0; j < (limit-1); j++) {
+    for (int j=0;j<(limit-1);j++) {
       // D3 Calculate qhat
       boolean skipCorrection = false;
-      final int i = r.endWord()-j-1;
+      final int i = nr-j;
       final int nh = r.word(i);
-      final int nh2 = nh + 0x80000000;
+      final long nhl = unsigned(nh);
+      final int nh2 = nh+0x80000000;
       final int nm = r.word(i-1);
-      int qhat;
-      int qrem;
-      if (nh == dh) {
-        qhat = ~0;
-        qrem = nh + nm;
-        skipCorrection = (qrem + 0x80000000) < nh2; }
+      final long nml = unsigned(nm);
+      long qhat;
+      long qrem;
+      if (nh==dh) {
+        qhat = 0xFFFFFFFFL;
+        qrem = unsigned(nh+nm);
+        skipCorrection = (((int)qrem)+0x80000000) < nh2; }
       else {
-        final long nChunk = (((long)nh)<<32) | (unsigned(nm));
+        final long nChunk = (nhl<<32) | nml;
         if (nChunk >= 0) {
-          qhat = (int) (nChunk / dhLong);
-          qrem = (int) (nChunk - (qhat * dhLong)); }
+          qhat = loWord(nChunk/dhl);
+          qrem = loWord(nChunk-(qhat*dhl)); }
         else {
-          final long tmp = Ints.divWord(nChunk, dh);
-          qhat = (int) loWord(tmp);
-          qrem = (int) (tmp >>> 32); } }
-      if (qhat == 0) { continue; }
+          final long tmp = Ints.divWord(nChunk,dhl);
+          qhat = loWord(tmp);
+          qrem = hiWord(tmp); } }
+      if (qhat == 0L) { continue; }
       if (!skipCorrection) { // Correct qhat
         final long nl = r.uword(i-2);
-        long rs = (unsigned(qrem) << 32) | nl;
-        long estProduct = unsigned(dl) * (unsigned(qhat));
+        long rs = (qrem << 32) | nl;
+        long estProduct = dll*qhat;
         if (unsignedGreaterThan(estProduct, rs)) {
           qhat--;
-          qrem = (int)((unsigned(qrem)) + dhLong);
-          if ((unsigned(qrem)) >=  dhLong) {
-            estProduct -= (unsigned(dl));
-            rs = ((unsigned(qrem)) << 32) | nl;
-            if (unsignedGreaterThan(estProduct, rs)) {
-              qhat--; } } } }
+          qrem = loWord(qrem+dhl); 
+          if (qrem>=dhl) {
+            estProduct -= (dll);
+            rs = (qrem << 32) | nl;
+            if (unsignedGreaterThan(estProduct, rs)) { qhat--; } } } }
       // D4 Multiply and subtract
       r.setWord(i,0);
-      final int borrow =
-        mulsub(r.words, div.words, qhat, dlen, j+r.start);
+      final int borrow = r.mulsub(d,qhat,nu,j+r.start);
       // D5 Test remainder
       if ((borrow + 0x80000000) > nh2) {
         // D6 Add back
-        divadd(div.words, r.words, j+1+r.start);
+        d.divadd(r,j+1+r.start);
         qhat--; }
       // Store the quotient digit
-      q = (NaturalBEIMutable) q.setWord(q.bei(j), qhat); } // D7 loop on j
+      q = (NaturalBEIMutable) q.setWord(q.bei(j),(int)qhat); } // D7 loop on j
 
     // D3 Calculate qhat
     // 1st estimate
-    int qhat = 0;
-    int qrem = 0;
+    long qhat;
+    long qrem;
     boolean skipCorrection = false;
     final int i = r.bei((limit - 1) + r.start);
     final int nh = r.word(i);
+    final long nhl = unsigned(nh);
     final int nh2 = nh + 0x80000000;
     final int nm = r.word(i-1);
+    final long nml = unsigned(nm);
     if (nh == dh) {
-      qhat = ~0;
-      qrem = nh + nm;
-      skipCorrection = (qrem + 0x80000000) < nh2; }
+      qhat = 0xFFFFFFFFL;
+      qrem = unsigned(nh+nm);
+      skipCorrection = (((int)qrem)+0x80000000) < nh2; }
     else {
-      final long nChunk = (((long) nh) << 32) | (unsigned(nm));
+      final long nChunk = (nhl << 32) | nml;
       if (nChunk >= 0) {
-        qhat = (int) (nChunk / dhLong);
-        qrem = (int) (nChunk - (qhat * dhLong)); }
+        qhat = loWord(nChunk/dhl);
+        qrem = loWord(nChunk-(qhat*dhl)); }
       else {
-        final long tmp = Ints.divWord(nChunk, dh);
-        qhat = (int) (loWord(tmp));
-        qrem = (int) (tmp >>> 32); } }
+        final long tmp = Ints.divWord(nChunk,dhl);
+        qhat = loWord(tmp);
+        qrem = hiWord(tmp); } }
     // 2nd correction
-    if (qhat != 0) {
+    if (qhat != 0L) {
       if (!skipCorrection) {
         final long nl = r.uword(i-2);
-        long rs = ((unsigned(qrem)) << 32) | nl;
-        long estProduct = (unsigned(dl)) * (unsigned(qhat));
+        long rs = (qrem << 32) | nl;
+        long estProduct = dll*qhat;
         if (unsignedGreaterThan(estProduct, rs)) {
           qhat--;
-          qrem = (int) ((unsigned(qrem)) + dhLong);
-          if ((unsigned(qrem)) >= dhLong) {
-            estProduct -= (unsigned(dl));
-            rs = ((unsigned(qrem)) << 32) | nl;
+          qrem = loWord(qrem + dhl);
+          if (qrem >= dhl) {
+            estProduct -= (dll);
+            rs = (qrem << 32) | nl;
             if (unsignedGreaterThan(estProduct, rs)) { qhat--; } } } }
       // D4 Multiply and subtract
       int borrow;
       r = (NaturalBEIMutable) r.setWord(i,0);
-      borrow =
-        mulsub(r.words,div.words,qhat,dlen,(limit-1)+r.start);
+      borrow = r.mulsub(d,qhat,nu,(limit-1)+r.start);
       // D5 Test remainder
       if ((borrow + 0x80000000) > nh2) {
         // D6 Add back
-        divadd(div.words,r.words,(limit-1)+1+r.start);
+        d.divadd(r,(limit-1)+1+r.start);
         qhat--; }
       // Store the quotient digit
-      q = (NaturalBEIMutable) q.setWord(q.bei(limit - 1),qhat); }
+      q = (NaturalBEIMutable) q.setWord(q.bei(limit-1),(int)qhat); }
 
     // D8 decompact
     if (lShift > 0) { 
       r = (NaturalBEIMutable) r.shiftDown(lShift); }
-    r.compact(); 
-    q.compact();
+    //r.compact(); 
+    //q.compact();
     return List.of(q,r); }
 
   //--------------------------------------------------------------
@@ -709,28 +732,6 @@ public final class NaturalBEIMutable implements Natural {
     ri = (NaturalBEIMutable) ri.shiftDown(sigma);
     return List.of(q,ri); }
 
-  /** This method is used for division. It multiplies an n word
-   * input a by one word input x, and subtracts the n word product
-   * from q. This is needed when subtracting qhat*divisor from
-   * the dividend.
-   */
-  private static final int mulsub (final int[] q,
-                                   final int[] a,
-                                   final int x,
-                                   final int len,
-                                   int start) {
-    final long xLong = unsigned(x);
-    long carry = 0;
-    start += len;
-    for (int j=len-1;j>=0;j--) {
-      final long product = (unsigned(a[j])*xLong) + carry;
-      final long difference = q[start] - product;
-      q[start--] = (int)difference;
-      carry = (product >>> 32)
-        +
-        (((loWord(difference))>(unsigned(~(int)product)))?1:0); }
-    return (int) carry; }
-
   //-------------------------------------------------------------
   // Comparable, DANGER to mutability
   //-------------------------------------------------------------
@@ -817,6 +818,11 @@ public final class NaturalBEIMutable implements Natural {
     return valueOf(init); }
 
   @Override
+  public final Natural recyclable (final Natural init,
+                                   final int n) {
+    return make(init,n); }
+
+  @Override
   public final Natural recyclable (final int n) {
     assert 0<=n;
     return make(n); }
@@ -841,7 +847,9 @@ public final class NaturalBEIMutable implements Natural {
     nWords = val.nWords;
     words =
       Arrays.copyOfRange(
-        val.words,val.start,val.start+nWords); }
+        val.words,
+        val.start,
+        val.start+nWords); }
 
   private NaturalBEIMutable (final int val) {
     words = new int[1];
@@ -891,6 +899,31 @@ public final class NaturalBEIMutable implements Natural {
   public static final NaturalBEIMutable make (final int n) {
     assert 0<=n;
     return new NaturalBEIMutable(new int[n]); }
+
+  public static final NaturalBEIMutable make (final NaturalBEI init,
+                                              final int n) {
+    assert 0<=n;
+    final int[] words = new int[n];
+    final int start = Math.max(0,n-init.endWord());
+    init.copyWords(words,start);
+    return new NaturalBEIMutable(words); }
+
+  public static final NaturalBEIMutable make (final NaturalBEIMutable init,
+                                              final int n) {
+    assert 0<=n;
+    final int[] wrods = new int[n];
+    final int start = Math.max(0,n-init.endWord());
+    init.copyWords(wrods,start);
+    return new NaturalBEIMutable(wrods); }
+
+  public static final NaturalBEIMutable make (final Natural u,
+                                              final int n) {
+    if (u instanceof NaturalBEI) { 
+      return make((NaturalBEI) u,n); }
+    if (u instanceof NaturalBEIMutable) { 
+      return make((NaturalBEIMutable) u,n); }
+    throw Exceptions.unsupportedOperation(
+      null,"make",u,Integer.valueOf(n)); }
 
   public static final NaturalBEIMutable
   valueOf (final int[] val) {

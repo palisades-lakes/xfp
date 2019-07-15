@@ -8,7 +8,7 @@ import java.util.Arrays;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-11
+ * @version 2019-07-14
  */
 
 public final class NaturalBEI //extends Number
@@ -49,6 +49,12 @@ implements Natural {
   public final int[] copyWords () {
     return Arrays.copyOfRange(words(),0,endWord()); }
 
+  public final void copyWords (final int[] dst,
+                               final int start) {
+    final int n = Math.min(words().length,dst.length-start);
+    Arrays.fill(dst,0);
+    System.arraycopy(words(),0,dst,start,n); }
+
   //--------------------------------------------------------------
   // Mutability
   //-------------------------------------------------------------
@@ -64,6 +70,13 @@ implements Natural {
     if (null==init) {
       return NaturalBEIMutable.make(words().length); }
     return NaturalBEIMutable.valueOf(init); }
+
+  @Override
+  public final Natural recyclable (final Natural init,
+                                   final int nWords) {
+    if (null==init) {
+      return NaturalBEIMutable.make(nWords); }
+    return NaturalBEIMutable.make(init,nWords); }
 
   @Override
   public final Natural recyclable (final int n) {
