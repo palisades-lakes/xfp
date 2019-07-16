@@ -92,7 +92,7 @@ public final class NaturalBEIMutable implements Natural {
         words = tmp;
         start = 0;
         nWords = i1; } }
-    clearUnused(); 
+    clearUnused();
     return this; }
 
   @Override
@@ -154,7 +154,7 @@ public final class NaturalBEIMutable implements Natural {
     if (bShift >= bitsInHighWord) {
       smallUpShift(32-bShift);
       nWords--; }
-    else { smallDownShift(bShift); } 
+    else { smallDownShift(bShift); }
     return this; }
 
   //--------------------------------------------------------------
@@ -220,8 +220,8 @@ public final class NaturalBEIMutable implements Natural {
     if (! (u instanceof NaturalBEIMutable)) {
       return Natural.super.subtract(u); }
 
-    NaturalBEIMutable a = this;
-    NaturalBEIMutable b = (NaturalBEIMutable) u;
+    final NaturalBEIMutable a = this;
+    final NaturalBEIMutable b = (NaturalBEIMutable) u;
     int[] result = words;
     final int sign = a.compareTo(b);
     assert 0<=sign;
@@ -292,7 +292,7 @@ public final class NaturalBEIMutable implements Natural {
       result[i] = 0; }
     words = result;
     nWords = resultLen;
-    start = result.length - resultLen; 
+    start = result.length - resultLen;
     return this; }
 
   //--------------------------------------------------------------
@@ -320,31 +320,25 @@ public final class NaturalBEIMutable implements Natural {
     // step 1: base case
     if (((n%2) != 0) || (n < BURNIKEL_ZIEGLER_THRESHOLD)) {
       final List<Natural> qr = divideAndRemainderKnuth(b);
-      return List.of(valueOf(qr.get(0)),valueOf(qr.get(1))); }
+      return List.of(qr.get(0),qr.get(1)); }
 
-    // step 2: view this as [a1,a2,a3,a4] 
+    // step 2: view this as [a1,a2,a3,a4]
     // where each ai is n/2 ints or less
-    NaturalBEIMutable aUpper = new NaturalBEIMutable(this);
     // aUpper = [a1,a2,a3]
-    aUpper = (NaturalBEIMutable) aUpper.shiftDown(32*(n/2));   
-    keepLower(n/2);   // this = a4
+    final NaturalBEIMutable aUpper =
+      (NaturalBEIMutable) this.copy().shiftDown(32*(n/2));
+    keepLower(n/2); // this = a4
 
     // step 3: q1=aUpper/b, r1=aUpper%b
-    NaturalBEIMutable q1 = new NaturalBEIMutable();
     final List<Natural> qr1 = aUpper.divide3n2n(b);
-    q1 = (NaturalBEIMutable) qr1.get(0);
-    final NaturalBEIMutable r1 = (NaturalBEIMutable) qr1.get(1);
 
     // step 4: quotient=[r1,this]/b, r2=[r1,this]%b
-    addDisjoint(r1, n/2);   // this = [r1,this]
-    NaturalBEIMutable quotient = make();
+    addDisjoint(qr1.get(1), n/2);   // this = [r1,this]
     final List<Natural> qr2 = divide3n2n(b);
-    quotient = (NaturalBEIMutable) qr2.get(0);
-    final NaturalBEIMutable r2 = (NaturalBEIMutable) qr2.get(1);
-
     // step 5: let quotient=[q1,quotient] and return r2
-    quotient.addDisjoint(q1, n/2);
-    return List.of(quotient,r2); }
+    final Natural q2 = 
+      ((NaturalBEIMutable) qr2.get(0)).addDisjoint(qr1.get(0), n/2);
+    return List.of(q2,qr2.get(1)); }
 
   //--------------------------------------------------------------
   /** Makes this number an {@code n}-int number all of whose bits
@@ -353,11 +347,16 @@ public final class NaturalBEIMutable implements Natural {
    * @return a number equal to {@code ((1<<(32*n)))-1}
    */
 
-  private final void ones (final int n) {
-    if (n>words.length) { words = new int[n]; }
-    Arrays.fill(words, 0xFFFFFFFF);
-    start = 0;
-    nWords = n; }
+  //  private final void ones (final int n) {
+  //    if (n>words.length) { words = new int[n]; }
+  //    Arrays.fill(words, 0xFFFFFFFF);
+  //    start = 0;
+  //    nWords = n; }
+
+  private static final NaturalBEIMutable ones (final int n) {
+    final int[] w = new int[n];
+    Arrays.fill(w, 0xFFFFFFFF);
+    return unsafe(w); }
 
   /** This method implements algorithm 2 from pg. 5 of the
    * Burnikel-Ziegler paper. It divides a 3n-digit number by a
@@ -371,42 +370,37 @@ public final class NaturalBEIMutable implements Natural {
    * @return {@code this%b}
    */
 
-  private final List<Natural> 
+  private final List<Natural>
   divide3n2n (final Natural b) {
     final int n = b.endWord() / 2;   // half the length of b in ints
-    NaturalBEIMutable quotient = make();
 
     // step 1: view this as [a1,a2,a3] where each ai is n ints
     // or less; let a12=[a1,a2]
-    NaturalBEIMutable a12 = new NaturalBEIMutable(this);
-    a12 = (NaturalBEIMutable) a12.shiftDown(32*n);
+    NaturalBEIMutable a12 =
+      (NaturalBEIMutable) copy().shiftDown(32*n);
 
     // step 2: view b as [b1,b2] where each bi is n ints or less
-    NaturalBEIMutable b1 = valueOf(b);
-    b1 = (NaturalBEIMutable) b1.shiftDown(n*32);
+    Natural b1 = b.copy().shiftDown(n*32);
     final Natural b2 = b.words(0,n);
     Natural r;
-    NaturalBEIMutable d;
+    Natural d;
+    Natural q;
     if (compareTo(b, 32*n) < 0) {
       // step 3a: if a1<b1, let quotient=a12/b1 and r=a12%b1
       final List<Natural> qr = a12.divide2n1n(b1);
-      quotient = (NaturalBEIMutable) qr.get(0);
+      q = qr.get(0);
       r = qr.get(1);
       // step 4: d=quotient*b2
-      final Natural qu = quotient.multiply(b2);
-      d = valueOf(qu); }
+      d = valueOf(q.multiply(b2)); }
     else {
       // step 3b: if a1>=b1, let quotient=beta^n-1
       //and r=a12-b1*2^n+b1
-      quotient.ones(n);
+      q = ones(n);
       a12 = (NaturalBEIMutable) a12.add(b1);
-      b1 = (NaturalBEIMutable) b1.shiftUp(32*n);
-      a12 = (NaturalBEIMutable) a12.subtract(b1);
-      r = a12;
+      b1 = b1.shiftUp(32*n);
+      r = a12.subtract(b1);
       // step 4: d=quotient*b2=(b2 << 32*n) - b2
-      d = valueOf(b2);
-      d = (NaturalBEIMutable) d.shiftUp(32*n);
-      d = (NaturalBEIMutable) d.subtract(valueOf(b2)); }
+      d = valueOf(b2).shiftUp(32*n).subtract(b2); }
     // step 5: r = r*beta^n + a3 - d (paper says a4)
     // However, don't subtract d until after the while loop
     // so r doesn't become negative
@@ -414,8 +408,8 @@ public final class NaturalBEIMutable implements Natural {
     // step 6: add b until r>=d
     while (r.compareTo(d) < 0) {
       r = r.add(b);
-      quotient = (NaturalBEIMutable) quotient.subtract(one()); }
-    return List.of(quotient,valueOf(r.subtract(d))); }
+      q = q.subtract(one()); }
+    return List.of(q,r.subtract(d)); }
 
   //--------------------------------------------------------------
   /** Computes {@code this/b} and {@code this%b} using the
@@ -447,9 +441,9 @@ public final class NaturalBEIMutable implements Natural {
     final int sigma = (int) Math.max(0, n32 - u.hiBit());
 
     // step 4a: shift b so its length is a multiple of n
-    Natural bShifted = u.shiftUp(sigma);
+    final Natural bShifted = u.shiftUp(sigma);
     // step 4b: shift a by the same amount
-    NaturalBEIMutable aShifted = (NaturalBEIMutable) shiftUp(sigma);
+    final NaturalBEIMutable aShifted = (NaturalBEIMutable) shiftUp(sigma);
 
     // step 5: t is the number of blocks needed to accommodate a
     // plus one additional bit
@@ -467,25 +461,21 @@ public final class NaturalBEIMutable implements Natural {
 
     // schoolbook division on blocks, dividing 2-block by 1-block
     Natural q = zero();
-    NaturalBEIMutable qi = (NaturalBEIMutable) zero();
-    Natural ri;
     for (int i=t-2; i > 0; i--) {
       // step 8a: compute (qi,ri) such that z=b*qi+ri
       final List<Natural> qri = z.divide2n1n(bShifted);
-      qi = (NaturalBEIMutable) qri.get(0);
-      ri = qri.get(1);
       // step 8b: z = [ri, a[i-1]]
       z = aShifted.getBlock(i-1, t, n);   // a[i-1]
-      z = z.addDisjoint(ri, n);
+      z = z.addDisjoint(qri.get(1), n);
       // update q (part of step 9)
-      q = q.add(qi.immutable().shiftUp((i*n)<<5)); }
+      q = q.add(qri.get(0).immutable(),(i*n)<<5); }
     // final iteration of step 8: do the loop one more time
     // for i=0 but leave z unchanged
     final List<Natural> qri = z.divide2n1n(bShifted);
-    qi = (NaturalBEIMutable) qri.get(0);
-    ri = qri.get(1);
     // step 9: a and b were shifted, so shift back
-    return List.of(q.add(qi), ri.shiftDown(sigma)); }
+    return List.of(
+      q.add(qri.get(0)),
+      qri.get(1).shiftDown(sigma)); }
 
   //--------------------------------------------------------------
   // Object methods
@@ -560,7 +550,7 @@ public final class NaturalBEIMutable implements Natural {
     words = val;
     nWords = val.length; }
 
-  private NaturalBEIMutable () { 
+  private NaturalBEIMutable () {
     words = new int[1]; nWords = 0; }
 
   private NaturalBEIMutable (final NaturalBEIMutable val) {
@@ -638,9 +628,9 @@ public final class NaturalBEIMutable implements Natural {
 
   public static final NaturalBEIMutable make (final Natural u,
                                               final int n) {
-    if (u instanceof NaturalBEI) { 
+    if (u instanceof NaturalBEI) {
       return make((NaturalBEI) u,n); }
-    if (u instanceof NaturalBEIMutable) { 
+    if (u instanceof NaturalBEIMutable) {
       return make((NaturalBEIMutable) u,n); }
     throw Exceptions.unsupportedOperation(
       null,"make",u,Integer.valueOf(n)); }
@@ -659,9 +649,9 @@ public final class NaturalBEIMutable implements Natural {
 
   public static final NaturalBEIMutable
   valueOf (final Natural u) {
-    if (u instanceof NaturalBEI) { 
+    if (u instanceof NaturalBEI) {
       return valueOf((NaturalBEI) u); }
-    if (u instanceof NaturalBEIMutable) { 
+    if (u instanceof NaturalBEIMutable) {
       return valueOf((NaturalBEIMutable) u); }
     throw Exceptions.unsupportedOperation(null,"valueOf",u); }
 
