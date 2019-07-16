@@ -14,7 +14,7 @@ import xfp.java.Debug;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-10
+ * @version 2019-07-15
  */
 
 public final class NaturalBEI0 extends Number
@@ -241,15 +241,17 @@ implements Natural {
     num.divideKnuth(den,q,false);
     return valueOf(q.getValue()); }
 
-  private final NaturalBEI0[]
-    divideAndRemainderKnuth (final NaturalBEI0 that) {
+  @Override
+  public final List<Natural>
+    divideAndRemainderKnuth (final Natural u) {
+    final NaturalBEI0 that = (NaturalBEI0) u;
     final MutableNaturalBEI0 q = MutableNaturalBEI0.make();
     final MutableNaturalBEI0 num = MutableNaturalBEI0.valueOf(this._words);
     final MutableNaturalBEI0 den = MutableNaturalBEI0.valueOf(that._words);
     final MutableNaturalBEI0 r = num.divideKnuth(den,q,true);
-    return new NaturalBEI0[]
-      { valueOf(q.getValue()),
-        valueOf(r.getValue()), }; }
+    return List.of(
+      valueOf(q.getValue()), 
+      valueOf(r.getValue())); }
 
   private final NaturalBEI0 remainderKnuth (final NaturalBEI0 that) {
     final MutableNaturalBEI0 q = MutableNaturalBEI0.make();
@@ -260,8 +262,10 @@ implements Natural {
 
   //--------------------------------------------------------------
 
-  private final NaturalBEI0[]
-    divideAndRemainderBurnikelZiegler (final NaturalBEI0 that) {
+  @Override
+  public final List<Natural>
+    divideAndRemainderBurnikelZiegler (final Natural u) {
+    final NaturalBEI0 that = (NaturalBEI0) u;
     final MutableNaturalBEI0 q = MutableNaturalBEI0.make();
     final MutableNaturalBEI0 num = MutableNaturalBEI0.valueOf(this._words);
     final MutableNaturalBEI0 den = MutableNaturalBEI0.valueOf(that._words);
@@ -271,15 +275,19 @@ implements Natural {
       q.isZero() ? ZERO : valueOf(q.getValue());
     final NaturalBEI0 rr =
       r.isZero() ? ZERO : valueOf(r.getValue());
-    return new NaturalBEI0[] { qq, rr }; }
+    return List.of(qq,rr); }
 
   private final NaturalBEI0
   divideBurnikelZiegler (final NaturalBEI0 that) {
-    return divideAndRemainderBurnikelZiegler(that)[0]; }
+    return 
+      (NaturalBEI0) 
+      divideAndRemainderBurnikelZiegler(that).get(0); }
 
   private final NaturalBEI0
   remainderBurnikelZiegler (final NaturalBEI0 that) {
-    return divideAndRemainderBurnikelZiegler(that)[1]; }
+    return  
+      (NaturalBEI0) 
+      divideAndRemainderBurnikelZiegler(that).get(1); }
 
   //--------------------------------------------------------------
   // division Ringlike api
@@ -300,9 +308,8 @@ implements Natural {
     assert (! that.isZero());
     final NaturalBEI0 u = (NaturalBEI0) that;
     if (useKnuthDivision(this,u)) {
-      return Arrays.asList(divideAndRemainderKnuth(u)); }
-    return
-      Arrays.asList(divideAndRemainderBurnikelZiegler(u)); }
+      return divideAndRemainderKnuth(u); }
+    return divideAndRemainderBurnikelZiegler(u); }
 
   @Override
   public final Natural remainder (final Natural that) {

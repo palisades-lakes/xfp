@@ -22,6 +22,7 @@ import xfp.java.function.FloatFunction;
 import xfp.java.function.ToFloatFunction;
 import xfp.java.numbers.Doubles;
 import xfp.java.numbers.Floats;
+import xfp.java.numbers.Natural;
 import xfp.java.numbers.Ringlike;
 import xfp.java.numbers.Uints;
 import xfp.java.prng.Generator;
@@ -31,7 +32,7 @@ import xfp.java.prng.PRNG;
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-09
+ * @version 2019-07-15
  */
 @SuppressWarnings("unchecked")
 public final class Common {
@@ -274,18 +275,18 @@ public final class Common {
       + "\n" + y2.toString()
       + "\n" + x3.toString(0x10)); } }
 
-  public static final void
-  divideAndRemainder (final Function<BigInteger,Ringlike> fromBI,
-                      final Function<Ringlike,BigInteger> toBI,
+  public static final <T extends Ringlike<T>> void
+  divideAndRemainder (final Function<BigInteger,T> fromBI,
+                      final Function<T,BigInteger> toBI,
                       final BigInteger x0,
                       final BigInteger x1) {
     if (0 != x1.signum()) {
       final Ringlike y0 = fromBI.apply(x0);
       final Ringlike y1 = fromBI.apply(x1);
       final BigInteger[] x2 = x0.divideAndRemainder(x1);
-      final Ringlike[] y2 =
-        (Ringlike[]) y0.divideAndRemainder(y1).toArray(new Ringlike[2]);
-      final BigInteger[] x3 = { toBI.apply(y2[0]), toBI.apply(y2[1]),};
+      final List<T> y2 = y0.divideAndRemainder(y1);
+      final BigInteger[] x3 = { toBI.apply(y2.get(0)), 
+                                toBI.apply(y2.get(1)),};
 
       Assertions.assertEquals(x2[0],x3[0],() ->
       x0.toString(0x10)
@@ -297,7 +298,7 @@ public final class Common {
       + "\n / "
       + "\n" +  y1.toString()
       + "\n -> "
-      + "\n" + y2[0].toString()
+      + "\n" + y2.get(0).toString()
       + "\n" + x3[0].toString(0x10));
 
       Assertions.assertEquals(x2[1],x3[1],() ->
@@ -310,19 +311,97 @@ public final class Common {
       + "\n rem "
       + "\n" +  y1.toString()
       + "\n -> "
-      + "\n" + y2[1].toString()
+      + "\n" + y2.get(1).toString()
+      + "\n" + x3[1].toString(0x10)); } }
+
+  public static final void 
+  divideAndRemainderKnuth (final Function<BigInteger,Natural> fromBI,
+                           final Function<Natural,BigInteger> toBI,
+                           final BigInteger x0,
+                           final BigInteger x1) {
+    if (0 != x1.signum()) {
+      final Natural y0 = fromBI.apply(x0);
+      final Natural y1 = fromBI.apply(x1);
+      final BigInteger[] x2 = x0.divideAndRemainder(x1);
+      final List<Natural> y2 = y0.divideAndRemainderKnuth(y1);
+      final BigInteger[] x3 = { toBI.apply(y2.get(0)), 
+                                toBI.apply(y2.get(1)),};
+
+      Assertions.assertEquals(x2[0],x3[0],() ->
+      x0.toString(0x10)
+      + "\n / "
+      + "\n" +  x1.toString(0x10)
+      + "\n -> "
+      + "\n" + x2[0].toString(0x10)
+      + "\n" + y0.toString()
+      + "\n / "
+      + "\n" +  y1.toString()
+      + "\n -> "
+      + "\n" + y2.get(0).toString()
+      + "\n" + x3[0].toString(0x10));
+
+      Assertions.assertEquals(x2[1],x3[1],() ->
+      x0.toString(0x10)
+      + "\n rem "
+      + "\n" +  x1.toString(0x10)
+      + "\n -> "
+      + "\n" + x2[1].toString(0x10)
+      + "\n" + y0.toString()
+      + "\n rem "
+      + "\n" +  y1.toString()
+      + "\n -> "
+      + "\n" + y2.get(1).toString()
       + "\n" + x3[1].toString(0x10)); } }
 
   public static final void
-  remainder (final Function<BigInteger,Ringlike> fromBI,
-             final Function<Ringlike,BigInteger> toBI,
+  divideAndRemainderBurnikelZiegler (final Function<BigInteger,Natural> fromBI,
+                                     final Function<Natural,BigInteger> toBI,
+                                     final BigInteger x0,
+                                     final BigInteger x1) {
+    if (0 != x1.signum()) {
+      final Natural y0 = fromBI.apply(x0);
+      final Natural y1 = fromBI.apply(x1);
+      final BigInteger[] x2 = x0.divideAndRemainder(x1);
+      final List<Natural> y2 = y0.divideAndRemainderBurnikelZiegler(y1);
+      final BigInteger[] x3 = { toBI.apply(y2.get(0)), 
+                                toBI.apply(y2.get(1)),};
+
+      Assertions.assertEquals(x2[0],x3[0],() ->
+      "\n" + x0.toString(0x10)
+      + "\n / "
+      + "\n" +  x1.toString(0x10)
+      + "\n -> "
+      + "\n" + x2[0].toString(0x10)
+      + "\n" + y0.toString()
+      + "\n / "
+      + "\n" +  y1.toString()
+      + "\n -> "
+      + "\n" + y2.get(0).toString()
+      + "\n" + x3[0].toString(0x10));
+
+      Assertions.assertEquals(x2[1],x3[1],() ->
+      x0.toString(0x10)
+      + "\n rem "
+      + "\n" +  x1.toString(0x10)
+      + "\n -> "
+      + "\n" + x2[1].toString(0x10)
+      + "\n" + y0.toString()
+      + "\n rem "
+      + "\n" +  y1.toString()
+      + "\n -> "
+      + "\n" + y2.get(1).toString()
+      + "\n" + x3[1].toString(0x10)); } }
+
+  public static final <T extends Ringlike<T>> void
+  remainder (final Function<BigInteger,T> fromBI,
+             final Function<T,BigInteger> toBI,
              final BigInteger x0,
              final BigInteger x1) {
     if (0 != x1.signum()) {
-      final Ringlike y0 = fromBI.apply(x0);
-      final Ringlike y1 = fromBI.apply(x1);
+      final T y0 = fromBI.apply(x0);
+      final T y1 = fromBI.apply(x1);
       final BigInteger x2 = x0.remainder(x1);
-      final Ringlike y2 = y0.remainder(y1);
+      final T y2 = y0.remainder(y1);
       final BigInteger x3 = toBI.apply(y2);
 
       Assertions.assertEquals(x2,x3,() ->
@@ -338,16 +417,16 @@ public final class Common {
       + "\n" + y2.toString()
       + "\n" + x3.toString(0x10)); } }
 
-  public static final void
-  gcd (final Function<BigInteger,Ringlike> fromBI,
-       final Function<Ringlike,BigInteger> toBI,
+  public static final <T extends Ringlike<T>> void
+  gcd (final Function<BigInteger,T> fromBI,
+       final Function<T,BigInteger> toBI,
        final BigInteger x0,
        final BigInteger x1) {
     if (0 != x1.signum()) {
-      final Ringlike y0 = fromBI.apply(x0);
-      final Ringlike y1 = fromBI.apply(x1);
+      final T y0 = fromBI.apply(x0);
+      final T y1 = fromBI.apply(x1);
       final BigInteger x2 = x0.gcd(x1);
-      final Ringlike y2 = y0.gcd(y1);
+      final T y2 = y0.gcd(y1);
       final BigInteger x3 = toBI.apply(y2);
 
       Assertions.assertEquals(x2,x3,() ->
@@ -366,9 +445,9 @@ public final class Common {
   //--------------------------------------------------------------
 
   public static final void
-  naturalTest (final Function<String,Ringlike> valueOf,
-               final Function<BigInteger,Ringlike> fromBI,
-               final Function<Ringlike,BigInteger> toBI,
+  naturalTest (final Function<String,Natural> valueOf,
+               final Function<BigInteger,Natural> fromBI,
+               final Function<Natural,BigInteger> toBI,
                final BigInteger z0,
                final BigInteger z1) {
     assert 0<=z0.signum();
@@ -386,8 +465,6 @@ public final class Common {
     add(fromBI,toBI,z0,z0);
     absDiff(fromBI,toBI,z0,z1);
     absDiff(fromBI,toBI,z0,z0);
-    square(fromBI,toBI,z0);
-    square(fromBI,toBI,z1);
     multiply(fromBI,toBI,z0,z0);
     multiply(fromBI,toBI,z0,z1);
     multiply(fromBI,toBI,z0,z0);
@@ -395,16 +472,21 @@ public final class Common {
     divide(fromBI,toBI,z0,z0);
     divideAndRemainder(fromBI,toBI,z0,z1);
     divideAndRemainder(fromBI,toBI,z0,z0);
+    divideAndRemainderKnuth(fromBI,toBI,z0,z1);
+    divideAndRemainderKnuth(fromBI,toBI,z0,z0);
+//    divideAndRemainderBurnikelZiegler(fromBI,toBI,z0,z1);
+//    divideAndRemainderBurnikelZiegler(fromBI,toBI,z0,z0);
     remainder(fromBI,toBI,z0,z1);
     remainder(fromBI,toBI,z0,z0);
     gcd(fromBI,toBI,z0,z1);
-    gcd(fromBI,toBI,z0,z0); }
+    gcd(fromBI,toBI,z0,z0);
+    }
 
 
   public static final void
-  naturalTest (final Function<String,Ringlike> valueOf,
-               final Function<BigInteger,Ringlike> fromBI,
-               final Function<Ringlike,BigInteger> toBI) {
+  naturalTest (final Function<String,Natural> valueOf,
+               final Function<BigInteger,Natural> fromBI,
+               final Function<Natural,BigInteger> toBI) {
     final Generator gn =
       Generators.bigIntegerGenerator(
         PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));

@@ -778,7 +778,8 @@ public final class MutableNaturalBEI0 {
     if (((n%2) != 0) || (n < BURNIKEL_ZIEGLER_THRESHOLD)) {
       return divideKnuth(b,quotient,true); }
 
-    // step 2: view this as [a1,a2,a3,a4] where each ai is n/2 ints or less
+    // step 2: view this as [a1,a2,a3,a4] 
+    // where each ai is n/2 ints or less
     final MutableNaturalBEI0 aUpper = new MutableNaturalBEI0(this);
     aUpper.safeRightShift(32*(n/2));   // aUpper = [a1,a2,a3]
     keepLower(n/2);   // this = a4
@@ -913,7 +914,6 @@ public final class MutableNaturalBEI0 {
     for (int i=t-2; i > 0; i--) {
       // step 8a: compute (qi,ri) such that z=b*qi+ri
       ri = z.divide2n1n(bShifted, qi);
-
       // step 8b: z = [ri, a[i-1]]
       z = aShifted.getBlock(i-1, t, n);   // a[i-1]
       z.addDisjoint(ri, n);
