@@ -8,6 +8,10 @@ import java.util.Arrays;
 
 // Don't implement Comparable, because of mutability!
 
+/**
+ * @author palisades dot lakes at gmail dot com
+ * @version 2019-07-16
+ */
 public final class MutableNaturalBEI0 {
 
   //--------------------------------------------------------------
@@ -816,6 +820,7 @@ public final class MutableNaturalBEI0 {
 
     // step 1: view this as [a1,a2,a3] where each ai is n ints
     // or less; let a12=[a1,a2]
+                               
     final MutableNaturalBEI0 a12 = new MutableNaturalBEI0(this);
     a12.safeRightShift(32*n);
 
@@ -851,11 +856,14 @@ public final class MutableNaturalBEI0 {
     // step 6: add b until r>=d
     while (r.compareTo(d) < 0) {
       r.add(b);
-      quotient.subtract(MutableNaturalBEI0.ONE); }
+      quotient.subtract(one()); }
     r.subtract(d);
     return r; }
 
-  //--------------------------------------------------------------
+  public final static MutableNaturalBEI0 one () { 
+    return new MutableNaturalBEI0(1); }
+
+ //--------------------------------------------------------------
   /** Computes {@code this/b} and {@code this%b} using the
    * <a href="http://cr.yp.to/bib/1998/burnikel.ps">
    * Burnikel-Ziegler algorithm</a>. This method implements
@@ -878,17 +886,18 @@ public final class MutableNaturalBEI0 {
     quotient.offset = quotient.intLen = 0;
     if (r < s) { return this; }
     // step 1: let m = min{2^k | (2^k)*BURNIKEL_ZIEGLER_THRESHOLD > s}
-    final int m = 1
-      << (32-Integer.numberOfLeadingZeros(s/BURNIKEL_ZIEGLER_THRESHOLD));
+    final int s0 = s/NaturalBEI.BURNIKEL_ZIEGLER_THRESHOLD;
+    final int m = 1 << (32-Integer.numberOfLeadingZeros(s0));
 
     final int j = ((s+m)-1) / m; // step 2a: j = ceil(s/m)
     final int n = j * m; // step 2b: block length in 32-bit units
     final long n32 = 32L * n; // block length in bits
     // step 3: sigma = max{T | (2^T)*B < beta^n}
     final int sigma = (int) Math.max(0, n32 - b.hiBit());
-    final MutableNaturalBEI0 bShifted = new MutableNaturalBEI0(b);
     // step 4a: shift b so its length is a multiple of n
+    final MutableNaturalBEI0 bShifted = new MutableNaturalBEI0(b);
     bShifted.safeLeftShift(sigma);
+
     final MutableNaturalBEI0 aShifted = new MutableNaturalBEI0(this);
     // step 4b: shift a by the same amount
     aShifted.safeLeftShift(sigma);
@@ -927,6 +936,7 @@ public final class MutableNaturalBEI0 {
     ri.downShift(sigma);
     return ri; }
 
+  //--------------------------------------------------------------
   /** This method is used for division. It multiplies an n word
    * input a by one word input x, and subtracts the n word product
    * from q. This is needed when subtracting qhat*divisor from

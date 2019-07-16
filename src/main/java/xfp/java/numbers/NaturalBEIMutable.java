@@ -10,7 +10,7 @@ import xfp.java.exceptions.Exceptions;
 
 /**
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-15
+ * @version 2019-07-16
  */
 
 public final class NaturalBEIMutable implements Natural {
@@ -254,34 +254,6 @@ public final class NaturalBEIMutable implements Natural {
 
   //--------------------------------------------------------------
   // division
-  //-------------------------------------------------------------
-
-//  private final Natural divadd0 (final NaturalBEIMutable u,
-//                                 final int i) {
-//    final int[] a = words;
-//    final int[] result = u.words;
-//    long carry = 0;    
-//    for (int j=a.length-1; j>=0; j--) {
-//      final long sum =
-//        (unsigned(a[j])) + unsigned(result[j+i]) + carry;
-//      result[j+i] = (int)sum;
-//      carry = sum >>> 32; }
-//    return u; }
-//
-//  private static final void divaddCheck (final NaturalBEIMutable a,
-//                                         final NaturalBEIMutable b,
-//                                         final int i) {
-//    final NaturalBEIMutable a0 = (NaturalBEIMutable) a.copy();
-//    final NaturalBEIMutable b0 = (NaturalBEIMutable) b.copy();
-//    final Natural c0 = a0.divadd0(b0,i+1+b0.start);
-//    final NaturalBEIMutable a1 = (NaturalBEIMutable) a.copy();
-//    final NaturalBEIMutable b1 = (NaturalBEIMutable) b.copy();
-//    final Natural c1 = a1.divadd(b1,i);
-//    assert c0.equals(c1);
-//    assert a0.equals(a1);
-//    assert b0.equals(b1); }
-  
-  //--------------------------------------------------------------
   //--------------------------------------------------------------
   // Burnikel-Ziegler
   //--------------------------------------------------------------
@@ -293,7 +265,6 @@ public final class NaturalBEIMutable implements Natural {
   private final NaturalBEIMutable
   addDisjoint (final NaturalBEIMutable addend,
                final int n) {
-    System.out.println("addDisjoint");
     if (addend.isZero()) { return this; }
     final int n0 = endWord();
     final int n1 = addend.endWord();
@@ -322,6 +293,12 @@ public final class NaturalBEIMutable implements Natural {
     return this; }
 
   //--------------------------------------------------------------
+  /** Discards all words whose index is greater than {@code n}.
+   */
+  private final void keepLower (final int n) {
+    if (nWords >= n) { start += nWords - n; nWords = n; } }
+
+  //--------------------------------------------------------------
   /** This method implements algorithm 1 from pg. 4 of the
    * Burnikel-Ziegler paper. It divides a 2n-digit number by an
    * n-digit number.<br/>
@@ -341,7 +318,7 @@ public final class NaturalBEIMutable implements Natural {
 
     // step 1: base case
     if (((n%2) != 0) || (n < BURNIKEL_ZIEGLER_THRESHOLD)) {
-      final List<Natural> qr = divideAndRemainder(b);
+      final List<Natural> qr = divideAndRemainderKnuth(b);
       quotient.set(qr.get(0));
       return valueOf(qr.get(1)); }
 
@@ -350,8 +327,7 @@ public final class NaturalBEIMutable implements Natural {
     NaturalBEIMutable aUpper = new NaturalBEIMutable(this);
     // aUpper = [a1,a2,a3]
     aUpper = (NaturalBEIMutable) aUpper.shiftDown(32*(n/2));   
-    set(words(0,n/2));
-    //keepLower(n/2);   // this = a4
+    keepLower(n/2);   // this = a4
 
     // step 3: q1=aUpper/b, r1=aUpper%b
     final NaturalBEIMutable q1 = new NaturalBEIMutable();
@@ -509,10 +485,6 @@ public final class NaturalBEIMutable implements Natural {
    * algorithm 3 from pg. 9 of the Burnikel-Ziegler paper.
    * The parameter beta was chosen to b 2<sup>32</sup> so almost
    * all shifts are multiples of 32 bits.<br/>
-   * {@code this} and {@code b} must be nonnegative.
-   * @param b the divisor
-   * @param quotient output parameter for {@code this/b}
-   * @return the remainder
    */
 
   @Override
@@ -536,9 +508,10 @@ public final class NaturalBEIMutable implements Natural {
     final long n32 = 32L * n; // block length in bits
     // step 3: sigma = max{T | (2^T)*B < beta^n}
     final int sigma = (int) Math.max(0, n32 - b.hiBit());
-    NaturalBEIMutable bShifted = new NaturalBEIMutable(b);
     // step 4a: shift b so its length is a multiple of n
+    NaturalBEIMutable bShifted = new NaturalBEIMutable(b);
     bShifted = (NaturalBEIMutable) bShifted.shiftUp(sigma);
+
     NaturalBEIMutable aShifted = new NaturalBEIMutable(this);
     // step 4b: shift a by the same amount
     aShifted = (NaturalBEIMutable) aShifted.shiftUp(sigma);
@@ -572,22 +545,14 @@ public final class NaturalBEIMutable implements Natural {
     // final iteration of step 8: do the loop one more time
     // for i=0 but leave z unchanged
     ri = z.divide2n1n(bShifted, qi);
-    q = (NaturalBEIMutable) q.add(qi);
+    Natural qout = q.add(qi);
     // step 9: a and b were shifted, so shift back
     ri = (NaturalBEIMutable) ri.shiftDown(sigma);
-    return List.of(q,ri); }
+    return List.of(qout,ri); }
 
   //-------------------------------------------------------------
   // Comparable, DANGER to mutability
   //-------------------------------------------------------------
-  /** Compare two longs as if they were unsigned.
-   * Returns true iff a is bigger than a.
-   */
-
-  //  private static final boolean
-  //  unsignedGreaterThan (final long a,
-  //                       final long b) {
-  //    return (a+Long.MIN_VALUE) > (b+Long.MIN_VALUE); }
 
   private final int compareTo (final NaturalBEIMutable b) {
     final int blen = b.nWords;
