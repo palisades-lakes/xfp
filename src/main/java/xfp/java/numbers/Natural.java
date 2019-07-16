@@ -45,9 +45,27 @@ extends Uints<Natural>, Ringlike<Natural> {
       if (u0i>u1i) { return 1; } }
     return 0; }
 
+  default int compareTo (final Natural u,
+                         final int upShift) {
+    assert 0<=upShift;
+    if (0==upShift) { return compareTo(u); }
+    final int bShift = (upShift&0x1F);
+    if (0!=bShift) { return compareTo(u.shiftUp(upShift)); }
+    final int iShift = (upShift>>>5);
+    final int n0 = endWord() - iShift;
+    final int n1 = u.endWord();
+    if (n0 < n1) { return -1; }
+    if (n0 > n1) { return 1; }
+    // TODO: is this faster than unsigned long conversion?
+    for (int i = n0-1; i>=0; i--) {
+      final int c = 
+        Integer.compareUnsigned(word(i+iShift),u.word(i));
+      if (0!=c) { return c; } }
+    return 0; }
+
   default int compareTo (final int upShift,
                          final Natural u) {
-    return shiftUp(upShift).compareTo(u); }
+    return - u.compareTo(this,upShift); }
 
   default int compareTo (final long u) {
     assert 0L<=u;
@@ -160,7 +178,7 @@ extends Uints<Natural>, Ringlike<Natural> {
     if (isZero()) { return u.shiftUp(shift); }
     if (u.isZero()) { return this; }
     if (0==shift) { return add(u); }
-    // TODO: reduce to single builder op?
+    // TODO: reduce to single op?
     // TODO: shiftUp mutable version and add this to that
     return add(u.shiftUp(shift)); }
 

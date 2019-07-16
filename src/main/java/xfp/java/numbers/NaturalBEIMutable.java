@@ -206,8 +206,7 @@ public final class NaturalBEIMutable implements Natural {
       start = 0; }
     nWords = newLen;
     if (bShift == 0) { return this; }
-    if (bShift <= (32-bitsInHighWord)) {
-      smallUpShift(bShift); }
+    if (bShift <= (32-bitsInHighWord)) { smallUpShift(bShift); }
     else { smallDownShift(32-bShift); }
     return this; }
 
@@ -263,8 +262,10 @@ public final class NaturalBEIMutable implements Natural {
    */
 
   private final NaturalBEIMutable
-  addDisjoint (final NaturalBEIMutable addend,
+  addDisjoint (final Natural u,
                final int n) {
+    assert endWord()<=n;
+    final NaturalBEIMutable addend = valueOf(u);
     if (addend.isZero()) { return this; }
     final int n0 = endWord();
     final int n1 = addend.endWord();
@@ -280,7 +281,9 @@ public final class NaturalBEIMutable implements Natural {
     System.arraycopy(words, start, result, (rstart+1)-n0, n0);
     n1n -= n0;
     rstart -= n0;
-    final int len = Math.min(n1n, addend.words.length-addend.start);
+    final int len = Math.min(n1n, addend.endWord());
+    //    for (int i=0;i<len;i++) {
+    //      result[(rstart+1)-n1n+bei(i)] = addend.word(i); }
     System.arraycopy(
       addend.words, addend.start,
       result, (rstart+1)-n1n, len);
@@ -295,6 +298,7 @@ public final class NaturalBEIMutable implements Natural {
   //--------------------------------------------------------------
   /** Discards all words whose index is greater than {@code n}.
    */
+
   private final void keepLower (final int n) {
     if (nWords >= n) { start += nWords - n; nWords = n; } }
 
@@ -307,20 +311,16 @@ public final class NaturalBEIMutable implements Natural {
    * {@code this} must be a nonnegative number such that
    * {@code this.hiBit() <= 2*b.hiBit()}
    * @param b a positive number such that {@code b.hiBit()} is even
-   * @param quotient output parameter for {@code this/b}
-   * @return {@code this%b}
    */
 
-  private final NaturalBEIMutable
-  divide2n1n (final NaturalBEIMutable b,
-              final NaturalBEIMutable quotient) {
-    final int n = b.nWords;
+  private final List<Natural>
+  divide2n1n (final Natural b) {
+    final int n = b.endWord();
 
     // step 1: base case
     if (((n%2) != 0) || (n < BURNIKEL_ZIEGLER_THRESHOLD)) {
       final List<Natural> qr = divideAndRemainderKnuth(b);
-      quotient.set(qr.get(0));
-      return valueOf(qr.get(1)); }
+      return List.of(valueOf(qr.get(0)),valueOf(qr.get(1))); }
 
     // step 2: view this as [a1,a2,a3,a4] 
     // where each ai is n/2 ints or less
@@ -330,16 +330,21 @@ public final class NaturalBEIMutable implements Natural {
     keepLower(n/2);   // this = a4
 
     // step 3: q1=aUpper/b, r1=aUpper%b
-    final NaturalBEIMutable q1 = new NaturalBEIMutable();
-    final NaturalBEIMutable r1 =aUpper.divide3n2n(b, q1);
+    NaturalBEIMutable q1 = new NaturalBEIMutable();
+    final List<Natural> qr1 = aUpper.divide3n2n(b);
+    q1 = (NaturalBEIMutable) qr1.get(0);
+    final NaturalBEIMutable r1 = (NaturalBEIMutable) qr1.get(1);
 
     // step 4: quotient=[r1,this]/b, r2=[r1,this]%b
     addDisjoint(r1, n/2);   // this = [r1,this]
-    final NaturalBEIMutable r2 = divide3n2n(b, quotient);
+    NaturalBEIMutable quotient = make();
+    final List<Natural> qr2 = divide3n2n(b);
+    quotient = (NaturalBEIMutable) qr2.get(0);
+    final NaturalBEIMutable r2 = (NaturalBEIMutable) qr2.get(1);
 
     // step 5: let quotient=[q1,quotient] and return r2
     quotient.addDisjoint(q1, n/2);
-    return r2; }
+    return List.of(quotient,r2); }
 
   //--------------------------------------------------------------
   /** Makes this number an {@code n}-int number all of whose bits
@@ -366,10 +371,10 @@ public final class NaturalBEIMutable implements Natural {
    * @return {@code this%b}
    */
 
-  private final NaturalBEIMutable 
-  divide3n2n (final NaturalBEIMutable b,
-              final NaturalBEIMutable quotient) {
-    final int n = b.nWords / 2;   // half the length of b in ints
+  private final List<Natural> 
+  divide3n2n (final Natural b) {
+    final int n = b.endWord() / 2;   // half the length of b in ints
+    NaturalBEIMutable quotient = make();
 
     // step 1: view this as [a1,a2,a3] where each ai is n ints
     // or less; let a12=[a1,a2]
@@ -377,14 +382,16 @@ public final class NaturalBEIMutable implements Natural {
     a12 = (NaturalBEIMutable) a12.shiftDown(32*n);
 
     // step 2: view b as [b1,b2] where each bi is n ints or less
-    NaturalBEIMutable b1 = new NaturalBEIMutable(b);
-    b1 = (NaturalBEIMutable) b1.shiftDown(n * 32);
+    NaturalBEIMutable b1 = valueOf(b);
+    b1 = (NaturalBEIMutable) b1.shiftDown(n*32);
     final Natural b2 = b.words(0,n);
     Natural r;
     NaturalBEIMutable d;
-    if (compareShifted(b, n) < 0) {
+    if (compareTo(b, 32*n) < 0) {
       // step 3a: if a1<b1, let quotient=a12/b1 and r=a12%b1
-      r = a12.divide2n1n(b1, quotient);
+      final List<Natural> qr = a12.divide2n1n(b1);
+      quotient = (NaturalBEIMutable) qr.get(0);
+      r = qr.get(1);
       // step 4: d=quotient*b2
       final Natural qu = quotient.multiply(b2);
       d = valueOf(qu); }
@@ -397,86 +404,18 @@ public final class NaturalBEIMutable implements Natural {
       a12 = (NaturalBEIMutable) a12.subtract(b1);
       r = a12;
       // step 4: d=quotient*b2=(b2 << 32*n) - b2
-      d = NaturalBEIMutable.valueOf(b2);
-      d = (NaturalBEIMutable) d.shiftUp(32 * n);
-      d = (NaturalBEIMutable) d.subtract(NaturalBEIMutable.valueOf(b2)); }
+      d = valueOf(b2);
+      d = (NaturalBEIMutable) d.shiftUp(32*n);
+      d = (NaturalBEIMutable) d.subtract(valueOf(b2)); }
     // step 5: r = r*beta^n + a3 - d (paper says a4)
     // However, don't subtract d until after the while loop
     // so r doesn't become negative
-    //r = (NaturalBEIMutable) r.shiftUp(32 * n);
-    //r.addLower(this, n);
     r = r.shiftUp(n<<5).add(words(0,n));
     // step 6: add b until r>=d
     while (r.compareTo(d) < 0) {
       r = r.add(b);
-      quotient.subtract(one()); }
-    return valueOf(r.subtract(d)); }
-
-  //--------------------------------------------------------------
-  /** Adds the words of {@code addend} shifted {@code n} ints to
-   * the left. Has the same effect as
-   * {@code addend.upShift(32*ints); add(addend);}
-   * but doesn't change the words of {@code addend}.
-   */
-
-  private final void addShifted (final NaturalBEIMutable addend,
-                                 final int shift) {
-    if (addend.isZero()) { return; }
-    int x = nWords;
-    int y = addend.nWords + shift;
-    int resultLen = (nWords > y ? nWords : y);
-    int[] result =
-      (words.length < resultLen ? new int[resultLen] : words);
-
-    int rstart = result.length-1;
-    long sum;
-    long carry = 0;
-
-    // Add common parts of both numbers
-    while ((x > 0) && (y > 0)) {
-      x--; y--;
-      final int bval =
-        (y+addend.start) < addend.words.length
-        ? addend.words[y+addend.start]
-          : 0;
-        sum = unsigned(words[x+start]) +
-          (unsigned(bval)) + carry;
-        result[rstart--] = (int)sum;
-        carry = sum >>> 32; }
-
-    // Add remainder of the longer number
-    while (x > 0) {
-      x--;
-      if ((carry == 0)
-        && (result == words)
-        && (rstart == (x + start))) {
-        return; }
-      sum = unsigned(words[x+start]) + carry;
-      result[rstart--] = (int)sum;
-      carry = sum >>> 32; }
-    while (y > 0) {
-      y--;
-      final int bval = ((y+addend.start) < addend.words.length
-        ? addend.words[y+addend.start]
-          : 0);
-      sum = (unsigned(bval)) + carry;
-      result[rstart--] = (int)sum;
-      carry = sum >>> 32; }
-
-    if (carry > 0) { // Result must grow in length
-      resultLen++;
-      if (result.length < resultLen) {
-        final int temp[] = new int[resultLen];
-        // Result one word longer from carry-out; copy low-order
-        // bits into new result.
-        System.arraycopy(result, 0, temp, 1, result.length);
-        temp[0] = 1;
-        result = temp; }
-      else { result[rstart--] = 1; } }
-
-    words = result;
-    nWords = resultLen;
-    start = result.length - resultLen; }
+      quotient = (NaturalBEIMutable) quotient.subtract(one()); }
+    return List.of(quotient,valueOf(r.subtract(d))); }
 
   //--------------------------------------------------------------
   /** Computes {@code this/b} and {@code this%b} using the
@@ -493,28 +432,24 @@ public final class NaturalBEIMutable implements Natural {
     final int c = compareTo(u);
     if (0==c) { return List.of(NaturalBEI.ONE,NaturalBEI.ZERO); }
     if (0>c) { return List.of(NaturalBEI.ZERO,this); }
-    final NaturalBEIMutable b = valueOf(u);
-    final int r = nWords;
-    final int s = b.nWords;
+    final int s = u.endWord();
+    //final int r = endWord();
+    //if (r < s) { return List.of(NaturalBEI.ZERO,this); }
 
-    NaturalBEIMutable q = make();
-    if (r < s) { return List.of(NaturalBEI.ZERO,this); }
     // step 1: let m = min{2^k | (2^k)*BURNIKEL_ZIEGLER_THRESHOLD > s}
-    final int s0 = s/NaturalBEI.BURNIKEL_ZIEGLER_THRESHOLD;
+    final int s0 = s/BURNIKEL_ZIEGLER_THRESHOLD;
     final int m = 1 << (32-Integer.numberOfLeadingZeros(s0));
 
     final int j = ((s+m)-1) / m; // step 2a: j = ceil(s/m)
     final int n = j * m; // step 2b: block length in 32-bit units
     final long n32 = 32L * n; // block length in bits
     // step 3: sigma = max{T | (2^T)*B < beta^n}
-    final int sigma = (int) Math.max(0, n32 - b.hiBit());
-    // step 4a: shift b so its length is a multiple of n
-    NaturalBEIMutable bShifted = new NaturalBEIMutable(b);
-    bShifted = (NaturalBEIMutable) bShifted.shiftUp(sigma);
+    final int sigma = (int) Math.max(0, n32 - u.hiBit());
 
-    NaturalBEIMutable aShifted = new NaturalBEIMutable(this);
+    // step 4a: shift b so its length is a multiple of n
+    Natural bShifted = u.shiftUp(sigma);
     // step 4b: shift a by the same amount
-    aShifted = (NaturalBEIMutable) aShifted.shiftUp(sigma);
+    NaturalBEIMutable aShifted = (NaturalBEIMutable) shiftUp(sigma);
 
     // step 5: t is the number of blocks needed to accommodate a
     // plus one additional bit
@@ -523,70 +458,34 @@ public final class NaturalBEIMutable implements Natural {
 
     // step 6: conceptually split a into blocks a[t-1], ..., a[0]
     // the most significant block of a
-    final NaturalBEIMutable a1 = aShifted.getBlock(t-1, t, n);
+    final Natural a1 = aShifted.getBlock(t-1, t, n);
 
     // step 7: z[t-2] = [a[t-1], a[t-2]]
     // the second to most significant block
     NaturalBEIMutable z = aShifted.getBlock(t-2, t, n);
-    z.addDisjoint(a1, n);   // z[t-2]
+    z = z.addDisjoint(a1, n);   // z[t-2]
 
-    // do schoolbook division on blocks, dividing 2-block numbers
-    // by 1-block numbers
-    final NaturalBEIMutable qi = new NaturalBEIMutable();
-    NaturalBEIMutable ri;
+    // schoolbook division on blocks, dividing 2-block by 1-block
+    Natural q = zero();
+    NaturalBEIMutable qi = (NaturalBEIMutable) zero();
+    Natural ri;
     for (int i=t-2; i > 0; i--) {
       // step 8a: compute (qi,ri) such that z=b*qi+ri
-      ri = z.divide2n1n(bShifted, qi);
+      final List<Natural> qri = z.divide2n1n(bShifted);
+      qi = (NaturalBEIMutable) qri.get(0);
+      ri = qri.get(1);
       // step 8b: z = [ri, a[i-1]]
       z = aShifted.getBlock(i-1, t, n);   // a[i-1]
-      z.addDisjoint(ri, n);
+      z = z.addDisjoint(ri, n);
       // update q (part of step 9)
-      q.addShifted(qi, i*n); }
+      q = q.add(qi.immutable().shiftUp((i*n)<<5)); }
     // final iteration of step 8: do the loop one more time
     // for i=0 but leave z unchanged
-    ri = z.divide2n1n(bShifted, qi);
-    Natural qout = q.add(qi);
+    final List<Natural> qri = z.divide2n1n(bShifted);
+    qi = (NaturalBEIMutable) qri.get(0);
+    ri = qri.get(1);
     // step 9: a and b were shifted, so shift back
-    ri = (NaturalBEIMutable) ri.shiftDown(sigma);
-    return List.of(qout,ri); }
-
-  //-------------------------------------------------------------
-  // Comparable, DANGER to mutability
-  //-------------------------------------------------------------
-
-  private final int compareTo (final NaturalBEIMutable b) {
-    final int blen = b.nWords;
-    if (nWords < blen) { return -1; }
-    if (nWords > blen) { return 1; }
-    // TODO: is this faster than unsigned long conversion?
-    final int[] bval = b.words;
-    for (int i = start, j = b.start; i < (nWords + start); i++, j++) {
-      final int b1 = words[i] + 0x80000000;
-      final int b2 = bval[j]  + 0x80000000;
-      if (b1 < b2) { return -1; }
-      if (b1 > b2) { return 1; } }
-    return 0; }
-
-  @Override
-  public final int compareTo (final Natural that) {
-    if (that instanceof NaturalBEIMutable) {
-      return compareTo((NaturalBEIMutable) that); }
-    return Natural.super.compareTo(that); }
-
-  private final int compareShifted (final NaturalBEIMutable b,
-                                    final int ints) {
-    final int blen = b.nWords;
-    final int alen = nWords - ints;
-    if (alen < blen) { return -1; }
-    if (alen > blen) { return 1; }
-    // TODO: is this faster than unsigned long conversion?
-    final int[] bval = b.words;
-    for (int i = start, j = b.start; i < (alen + start); i++, j++) {
-      final int b1 = words[i] + 0x80000000;
-      final int b2 = bval[j]  + 0x80000000;
-      if (b1 < b2) { return -1; }
-      if (b1 > b2) { return 1; } }
-    return 0; }
+    return List.of(q.add(qi), ri.shiftDown(sigma)); }
 
   //--------------------------------------------------------------
   // Object methods
