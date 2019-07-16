@@ -1,5 +1,6 @@
 package xfp.java.numbers;
 
+import static xfp.java.numbers.Numbers.hiWord;
 import static xfp.java.numbers.Numbers.loWord;
 import static xfp.java.numbers.Numbers.unsigned;
 
@@ -732,35 +733,192 @@ extends Uints<Natural>, Ringlike<Natural> {
     return List.of(qq,from(r)); }
 
   //--------------------------------------------------------------
+  // division
+  //-------------------------------------------------------------
+  /** Fused multiply-subtract {@code this <- this - x*u}<br> 
+   * Modifies this!
+   */
+
+  default int fms (final long x,
+                   final Natural u,
+                   final int i0) {
+    assert 0L<=x;
+    assert 0<=i0;
+    assert ! isImmutable();
+    final int n0 = endWord();
+    final int n1 = u.endWord();
+    long carry = 0;
+    int i = n0 - 1 -n1 - i0;
+    for (int j=0;j<n1;j++,i++) {
+      final long prod = (u.uword(j)*x) + carry;
+      final long diff = uword(i)-prod;
+      setWord(i, (int) diff);
+      carry = hiWord(prod);
+      // TODO: is this related to possibility x*u > this,
+      // so difference is negative?
+      if (loWord(diff)>unsigned(~(int)prod)) { carry++; } }
+    return (int) carry; }
+
+  /** A primitive used for division. This method adds in one
+   * multiple of the divisor a back to the dividend result at a
+   * specified start. It is used when qhat was estimated too
+   * large, and must be adjusted.
+   * <p>
+   * Never called in testing, (prob less than 2^32),
+   * so DANGER that changes have made it incorrect...
+   */
+
+  default Natural divadd (final Natural u,
+                          final int i0) {
+    assert 0<=i0;
+    final int na = endWord();
+    final int nb = u.endWord();
+    final int off = nb - na - 1 - i0;
+    long carry = 0;   
+    Natural uu = u;
+    for (int j=0;j<na;j++) {
+      final int i = off + j;
+      final long sum = uword(j) + uu.uword(i) + carry;
+      uu = uu.setWord(i,(int)sum);
+      carry = sum >>> 32; }
+    return uu; }
 
   default List<Natural> 
   knuthDivision (final Natural u) {
-    throw 
-    Exceptions.unsupportedOperation(this,"knuthDivision",u); }
+//    throw 
+//    Exceptions.unsupportedOperation(this,"knuthDivision",u); }
+    assert !u.isZero();
+    // D1 compact the divisor
+    final int nu = u.endWord();
+    final int lShift = Integer.numberOfLeadingZeros(u.word(nu-1));
+    Natural d = recyclable(u,nu).shiftUp(lShift);
+    final int nd = d.endWord();
+    Natural r = copy().shiftUp(lShift);
+    final int nr = r.endWord();
+    r = r.setWord(nr,0);
+    final int limit = nr-nu+1;
+    Natural q = recyclable(limit);
+    final long dh = d.uword(nd-1);
+    final long dl = d.uword(nd-2);
+    // D2 Initialize j
+    for (int j=0;j<(limit-1);j++) {
+      // D3 Calculate qhat
+      boolean skipCorrection = false;
+      final int i = nr-j;
+      final long nh = r.uword(i);
+      final long nm = r.uword(i-1);
+      long qhat;
+      long qrem;
+      if (nh==dh) {
+        qhat = 0xFFFFFFFFL;
+        qrem = nh+nm;
+        skipCorrection = (qrem < nh); }
+      else {
+        final long nChunk = (nh<<32) | nm;
+        if (nChunk >= 0) {
+          qhat = loWord(nChunk/dh);
+          qrem = loWord(nChunk-(qhat*dh)); }
+        else {
+          final long tmp = Ints.divWord(nChunk,dh);
+          qhat = loWord(tmp);
+          qrem = hiWord(tmp); } }
+      if (qhat == 0L) { continue; }
+      if (!skipCorrection) { // Correct qhat
+        final long nl = r.uword(i-2);
+        long rs = (qrem << 32) | nl;
+        long estProduct = dl*qhat;
+        if (Long.compareUnsigned(estProduct, rs)>0) {
+          qhat--;
+          qrem = loWord(qrem+dh); 
+          if (qrem>=dh) {
+            estProduct -= (dl);
+            rs = (qrem << 32) | nl;
+            if (Long.compareUnsigned(estProduct, rs)>0) { qhat--; } } } }
+      // D4 Multiply and subtract
+      r.setWord(i,0);
+      final int borrow = r.fms(qhat,d,j);
+      // D5 Test remainder
+      //divaddCheck(d,r,j);
+      if (unsigned(borrow) > nh) { // D6 Add back
+        d.divadd(r,j); qhat--; }
+      // Store the quotient digit
+      q = q.setWord(q.endWord()-1-j,(int)qhat); } // D7 loop on j
+
+    // D3 Calculate qhat
+    // 1st estimate
+    long qhat;
+    long qrem;
+    boolean skipCorrection = false;
+    final int i = r.endWord() - limit;
+    final long nhl = r.uword(i);
+    final long nml =  r.uword(i-1);
+    if (nhl == dh) {
+      qhat = 0xFFFFFFFFL;
+      qrem = nhl+nml;
+      skipCorrection = (qrem < nhl); }
+    else {
+      final long nChunk = (nhl << 32) | nml;
+      if (nChunk >= 0) {
+        qhat = loWord(nChunk/dh);
+        qrem = loWord(nChunk-(qhat*dh)); }
+      else {
+        final long tmp = Ints.divWord(nChunk,dh);
+        qhat = loWord(tmp);
+        qrem = hiWord(tmp); } }
+    // 2nd correction
+    if (qhat != 0L) {
+      if (!skipCorrection) {
+        final long nl = r.uword(i-2);
+        long rs = (qrem << 32) | nl;
+        long estProduct = dl*qhat;
+        if (Long.compareUnsigned(estProduct, rs)>0) {
+          qhat--;
+          qrem = loWord(qrem + dh);
+          if (qrem >= dh) {
+            estProduct -= (dl);
+            rs = (qrem << 32) | nl;
+            if (Long.compareUnsigned(estProduct, rs)>0) { qhat--; } } } }
+      // D4 Multiply and subtract
+      r = r.setWord(i,0);
+      final int borrow = r.fms(qhat,d,(limit-1));
+      // D5 Test remainder
+      if (unsigned(borrow) > nhl) { // D6 Add back
+        d.divadd(r,limit-1); qhat--; }
+      // Store the quotient digit
+      q = q.setWord(q.endWord()-limit,(int)qhat); }
+
+    // D8 decompact
+    if (lShift > 0) { 
+      r = r.shiftDown(lShift); }
+    //r.compact(); 
+    //q.compact();
+    return List.of(q,r); }
 
   static final int KNUTH_POW2_THRESH_LEN = 6;
-  static final int KNUTH_POW2_THRESH_ZEROS = 3;
+  static final int KNUTH_POW2_THRESH_ZEROS = 3*32;
 
   default List<Natural> 
   divideAndRemainderKnuth (final Natural u) {
     assert ! u.isZero();
     if (u.isOne()) { return List.of(this.immutable(),zero()); }
     if (isZero()) { return List.of(zero(),zero()); }
+
     final int cmp = compareTo(u);
     if (0==cmp) { return List.of(one(),zero()); }
     if (0>cmp) { return List.of(zero(),this.immutable()); }
+
     if (1==u.endWord()) { return divideAndRemainder(u.word(0)); } 
 
     // Cancel common powers of 2 if above KNUTH_POW2_* thresholds
     if (endWord() >= KNUTH_POW2_THRESH_LEN) {
       final int shift = Math.min(loBit(),u.loBit());
-      if (shift >= (KNUTH_POW2_THRESH_ZEROS*32)) {
+      if (shift >= KNUTH_POW2_THRESH_ZEROS) {
         final Natural a = recyclable(this).shiftDown(shift);
         final Natural b = u.recyclable(u).shiftDown(shift);
         final List<Natural> qr = a.divideAndRemainderKnuth(b);
         final Natural r = qr.get(1).shiftUp(shift);
         return List.of(qr.get(0),r); } }
-    
+
     final Natural a = recyclable(this);
     final Natural b = u.recyclable(u);
     return a.knuthDivision(b); }
