@@ -327,13 +327,17 @@ public final class NaturalBEIMutable implements Natural {
     // aUpper = [a1,a2,a3]
     final NaturalBEIMutable aUpper =
       (NaturalBEIMutable) this.copy().shiftDown(32*(n/2));
+    
+    //MODIFIES this!!!
     keepLower(n/2); // this = a4
 
     // step 3: q1=aUpper/b, r1=aUpper%b
     final List<Natural> qr1 = aUpper.divide3n2n(b);
 
     // step 4: quotient=[r1,this]/b, r2=[r1,this]%b
+    //MODIFIES this!!!
     addDisjoint(qr1.get(1), n/2);   // this = [r1,this]
+    
     final List<Natural> qr2 = divide3n2n(b);
     // step 5: let quotient=[q1,quotient] and return r2
     final Natural q2 = 
@@ -341,17 +345,6 @@ public final class NaturalBEIMutable implements Natural {
     return List.of(q2,qr2.get(1)); }
 
   //--------------------------------------------------------------
-  /** Makes this number an {@code n}-int number all of whose bits
-   * are ones. Used by Burnikel-Ziegler division.
-   * @param n number of ints in the {@code words} array
-   * @return a number equal to {@code ((1<<(32*n)))-1}
-   */
-
-  //  private final void ones (final int n) {
-  //    if (n>words.length) { words = new int[n]; }
-  //    Arrays.fill(words, 0xFFFFFFFF);
-  //    start = 0;
-  //    nWords = n; }
 
   private static final NaturalBEIMutable ones (final int n) {
     final int[] w = new int[n];
@@ -391,7 +384,7 @@ public final class NaturalBEIMutable implements Natural {
       q = qr.get(0);
       r = qr.get(1);
       // step 4: d=quotient*b2
-      d = valueOf(q.multiply(b2)); }
+      d = q.multiply(b2); }
     else {
       // step 3b: if a1>=b1, let quotient=beta^n-1
       //and r=a12-b1*2^n+b1
@@ -400,7 +393,7 @@ public final class NaturalBEIMutable implements Natural {
       b1 = b1.shiftUp(32*n);
       r = a12.subtract(b1);
       // step 4: d=quotient*b2=(b2 << 32*n) - b2
-      d = valueOf(b2).shiftUp(32*n).subtract(b2); }
+      d = b2.copy().shiftUp(32*n).subtract(b2); }
     // step 5: r = r*beta^n + a3 - d (paper says a4)
     // However, don't subtract d until after the while loop
     // so r doesn't become negative
