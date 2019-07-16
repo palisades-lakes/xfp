@@ -317,6 +317,7 @@ public final class NaturalBEIMutable implements Natural {
   divide2n1n (final Natural b) {
     final int n = b.endWord();
 
+    NaturalBEIMutable a = (NaturalBEIMutable) copy();
     // step 1: base case
     if (((n%2) != 0) || (n < BURNIKEL_ZIEGLER_THRESHOLD)) {
       final List<Natural> qr = divideAndRemainderKnuth(b);
@@ -329,16 +330,16 @@ public final class NaturalBEIMutable implements Natural {
       (NaturalBEIMutable) this.copy().shiftDown(32*(n/2));
     
     //MODIFIES this!!!
-    keepLower(n/2); // this = a4
+    a.keepLower(n/2); // this = a4
 
     // step 3: q1=aUpper/b, r1=aUpper%b
     final List<Natural> qr1 = aUpper.divide3n2n(b);
 
     // step 4: quotient=[r1,this]/b, r2=[r1,this]%b
     //MODIFIES this!!!
-    addDisjoint(qr1.get(1), n/2);   // this = [r1,this]
+    a = a.addDisjoint(qr1.get(1), n/2);   // this = [r1,this]
     
-    final List<Natural> qr2 = divide3n2n(b);
+    final List<Natural> qr2 = a.divide3n2n(b);
     // step 5: let quotient=[q1,quotient] and return r2
     final Natural q2 = 
       ((NaturalBEIMutable) qr2.get(0)).addDisjoint(qr1.get(0), n/2);
@@ -380,6 +381,7 @@ public final class NaturalBEIMutable implements Natural {
     Natural q;
     if (compareTo(b, 32*n) < 0) {
       // step 3a: if a1<b1, let quotient=a12/b1 and r=a12%b1
+      // Doesn't need modified a12
       final List<Natural> qr = a12.divide2n1n(b1);
       q = qr.get(0);
       r = qr.get(1);
@@ -456,6 +458,7 @@ public final class NaturalBEIMutable implements Natural {
     Natural q = zero();
     for (int i=t-2; i > 0; i--) {
       // step 8a: compute (qi,ri) such that z=b*qi+ri
+      // Doesn't need modified z
       final List<Natural> qri = z.divide2n1n(bShifted);
       // step 8b: z = [ri, a[i-1]]
       z = aShifted.getBlock(i-1, t, n);   // a[i-1]
@@ -464,6 +467,7 @@ public final class NaturalBEIMutable implements Natural {
       q = q.add(qri.get(0).immutable(),(i*n)<<5); }
     // final iteration of step 8: do the loop one more time
     // for i=0 but leave z unchanged
+    // Doesn't need modified z
     final List<Natural> qri = z.divide2n1n(bShifted);
     // step 9: a and b were shifted, so shift back
     return List.of(
