@@ -340,17 +340,17 @@ public final class NaturalBEIMutable implements Natural {
     final int n = b.nWords;
 
     // step 1: base case
-    if (((n%2) != 0) 
-      || (n < NaturalBEI.BURNIKEL_ZIEGLER_THRESHOLD)) {
+    if (((n%2) != 0) || (n < BURNIKEL_ZIEGLER_THRESHOLD)) {
       final List<Natural> qr = divideAndRemainder(b);
-      return (NaturalBEIMutable) qr.get(1); }
+      quotient.set(qr.get(0));
+      return valueOf(qr.get(1)); }
 
     // step 2: view this as [a1,a2,a3,a4] 
     // where each ai is n/2 ints or less
     NaturalBEIMutable aUpper = new NaturalBEIMutable(this);
     // aUpper = [a1,a2,a3]
     aUpper = (NaturalBEIMutable) aUpper.shiftDown(32*(n/2));   
-    NaturalBEIMutable a4 = (NaturalBEIMutable) words(0,n/2);
+    set(words(0,n/2));
     //keepLower(n/2);   // this = a4
 
     // step 3: q1=aUpper/b, r1=aUpper%b
@@ -358,8 +358,8 @@ public final class NaturalBEIMutable implements Natural {
     final NaturalBEIMutable r1 =aUpper.divide3n2n(b, q1);
 
     // step 4: quotient=[r1,this]/b, r2=[r1,this]%b
-    a4 = a4.addDisjoint(r1, n/2);   // this = [r1,this]
-    final NaturalBEIMutable r2 = a4.divide3n2n(b, quotient);
+    addDisjoint(r1, n/2);   // this = [r1,this]
+    final NaturalBEIMutable r2 = divide3n2n(b, quotient);
 
     // step 5: let quotient=[q1,quotient] and return r2
     quotient.addDisjoint(q1, n/2);
@@ -411,7 +411,7 @@ public final class NaturalBEIMutable implements Natural {
       r = a12.divide2n1n(b1, quotient);
       // step 4: d=quotient*b2
       final Natural qu = quotient.multiply(b2);
-      d = (NaturalBEIMutable) qu.recyclable(qu); }
+      d = valueOf(qu); }
     else {
       // step 3b: if a1>=b1, let quotient=beta^n-1
       //and r=a12-b1*2^n+b1
@@ -434,7 +434,7 @@ public final class NaturalBEIMutable implements Natural {
     while (r.compareTo(d) < 0) {
       r = r.add(b);
       quotient.subtract(one()); }
-    return (NaturalBEIMutable) r.subtract(d); }
+    return valueOf(r.subtract(d)); }
 
   //--------------------------------------------------------------
   /** Adds the words of {@code addend} shifted {@code n} ints to
@@ -518,7 +518,10 @@ public final class NaturalBEIMutable implements Natural {
   @Override
   public final List<Natural>
   divideAndRemainderBurnikelZiegler (final Natural u) {
-    final NaturalBEIMutable b = (NaturalBEIMutable) u;
+    final int c = compareTo(u);
+    if (0==c) { return List.of(NaturalBEI.ONE,NaturalBEI.ZERO); }
+    if (0>c) { return List.of(NaturalBEI.ZERO,this); }
+    final NaturalBEIMutable b = valueOf(u);
     final int r = nWords;
     final int s = b.nWords;
 

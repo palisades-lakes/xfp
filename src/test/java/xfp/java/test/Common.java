@@ -474,8 +474,8 @@ public final class Common {
     divideAndRemainder(fromBI,toBI,z0,z0);
     divideAndRemainderKnuth(fromBI,toBI,z0,z1);
     divideAndRemainderKnuth(fromBI,toBI,z0,z0);
-//    divideAndRemainderBurnikelZiegler(fromBI,toBI,z0,z1);
-//    divideAndRemainderBurnikelZiegler(fromBI,toBI,z0,z0);
+    divideAndRemainderBurnikelZiegler(fromBI,toBI,z0,z1);
+    divideAndRemainderBurnikelZiegler(fromBI,toBI,z0,z0);
     remainder(fromBI,toBI,z0,z1);
     remainder(fromBI,toBI,z0,z0);
     gcd(fromBI,toBI,z0,z1);
