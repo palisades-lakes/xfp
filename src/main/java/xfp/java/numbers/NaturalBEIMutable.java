@@ -265,35 +265,36 @@ public final class NaturalBEIMutable implements Natural {
   addDisjoint (final Natural u,
                final int n) {
     assert endWord()<=n;
-    final NaturalBEIMutable addend = valueOf(u);
-    if (addend.isZero()) { return this; }
-    final int n0 = endWord();
-    final int n1 = addend.endWord();
+    final NaturalBEIMutable a = (NaturalBEIMutable) copy();
+    final NaturalBEIMutable b = valueOf(u);
+    if (b.isZero()) { return this; }
+    final int n0 = a.endWord();
+    final int n1 = b.endWord();
     int n1n = n1 + n;
-    final int resultLen = Math.max(endWord(),n1n);
+    final int resultLen = Math.max(n0,n1n);
     int[] result;
-    if (words.length < resultLen) { result = new int[resultLen]; }
+    if (a.words.length < resultLen) { result = new int[resultLen]; }
     else {
-      result = words;
-      Arrays.fill(words, start+nWords, words.length, 0); }
+      result = a.words;
+      Arrays.fill(a.words, a.start+a.nWords, a.words.length, 0); }
     int rstart = result.length-1;
     // copy from this if needed
-    System.arraycopy(words, start, result, (rstart+1)-n0, n0);
+    System.arraycopy(a.words, a.start, result, (rstart+1)-n0, n0);
     n1n -= n0;
     rstart -= n0;
-    final int len = Math.min(n1n, addend.endWord());
+    final int len = Math.min(n1n, b.endWord());
     //    for (int i=0;i<len;i++) {
     //      result[(rstart+1)-n1n+bei(i)] = addend.word(i); }
     System.arraycopy(
-      addend.words, addend.start,
+      b.words, b.start,
       result, (rstart+1)-n1n, len);
     // zero the gap
     for (int i=((rstart+1)-n1n)+len; i < (rstart+1); i++) {
       result[i] = 0; }
-    words = result;
-    nWords = resultLen;
-    start = result.length - resultLen;
-    return this; }
+    a.words = result;
+    a.nWords = resultLen;
+    a.start = result.length - resultLen;
+    return a; }
 
   //--------------------------------------------------------------
   /** Discards all words whose index is greater than {@code n}.
