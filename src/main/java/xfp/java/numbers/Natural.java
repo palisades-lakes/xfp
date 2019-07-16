@@ -18,7 +18,7 @@ import xfp.java.exceptions.Exceptions;
  * TODO: utilities class to hide private stuff?
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-13
+ * @version 2019-07-16
  */
 
 @SuppressWarnings("unchecked")
@@ -341,10 +341,10 @@ extends Uints<Natural>, Ringlike<Natural> {
   default Natural squareKaratsuba () {
     final int n = endWord();
     final int half = (n+1)/2;
-    final Natural xl = words(0,half);
-    final Natural xh = words(half,n);
-    final Natural xhs = xh.square();
-    final Natural xls = xl.square();
+    final Natural xl = words(0,half).immutable();
+    final Natural xh = words(half,n).immutable();
+    final Natural xhs = xh.square().immutable();
+    final Natural xls = xl.square().immutable();
     // (xh^2<<64) + (((xl+xh)^2-(xh^2+xl^2))<<32) + xl^2
     final int h32 = half*32;
     return 
@@ -469,10 +469,10 @@ extends Uints<Natural>, Ringlike<Natural> {
     final int n0 = endWord();
     final int n1 = u.endWord();
     final int half = (Math.max(n0,n1) + 1) / 2;
-    final Natural xl = words(0,half);
-    final Natural xh = words(half,endWord());
-    final Natural yl = u.words(0,half);
-    final Natural yh = u.words(half,u.endWord());
+    final Natural xl = words(0,half).immutable();
+    final Natural xh = words(half,endWord()).immutable();
+    final Natural yl = u.words(0,half).immutable();
+    final Natural yh = u.words(half,u.endWord()).immutable();
     final Natural p1 = xh.multiply(yh);
     final Natural p2 = xl.multiply(yl);
     final Natural p3 = xh.add(xl).multiply(yh.add(yl));
@@ -527,7 +527,7 @@ extends Uints<Natural>, Ringlike<Natural> {
     if ((0==start) && (sliceSize>=n)) { return this; }
     final int i1 = n-start;
     final int i0 = i1-sliceSize;
-    return words(i0,i1); }
+    return words(i0,i1).immutable(); }
   //    throw Exceptions.unsupportedOperation(this,"getToomSlice",
   //      lowerSize,upperSize,slice,fullsize); }
 

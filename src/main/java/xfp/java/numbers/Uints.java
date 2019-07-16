@@ -90,17 +90,19 @@ public interface Uints<T extends Uints> extends Transience<T> {
   /** Return the <code>[i0,i1)</code> words as a new 
    * <code>Uints</code> with <code>[0,i1-i0)</code> words.
    */
+
   default T words (final int i0,
                    final int i1) {
     assert 0<=i0;
     assert i0<i1;
-    //if ((0==i0) && (endWord()<=i1)) { return (T) this; }
-    if ((0==i0) && (endWord()<=i1)) { return immutable(); }
+    if ((0==i0) && (endWord()<=i1)) { return (T) this; }
+    //if ((0==i0) && (endWord()<=i1)) { return immutable(); }
     final int n = Math.max(0,i1-i0);
     if (0>=n) { return empty(); }
     T u = recyclable(n);
     for (int i=0;i<n;i++) { u = (T) u.setWord(i,word(i+i0)); }
-    return (T) u.immutable(); }
+    return u; }
+  //return (T) u.immutable(); }
 
   //--------------------------------------------------------------
   /** Return a sequence whose value is the same as <code>u</code>.

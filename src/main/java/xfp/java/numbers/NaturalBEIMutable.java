@@ -256,54 +256,6 @@ public final class NaturalBEIMutable implements Natural {
   //--------------------------------------------------------------
   // Burnikel-Ziegler
   //--------------------------------------------------------------
-  /** Like {@link #addShifted(NaturalBEIMutable, int)} but
-   * {@code this.intLen} must not be greater than {@code n}. In
-   * other words, concatenates {@code this} and {@code addend}.
-   */
-
-  private final NaturalBEIMutable
-  addDisjoint (final Natural u,
-               final int n) {
-    assert endWord()<=n;
-    final NaturalBEIMutable a = (NaturalBEIMutable) copy();
-    final NaturalBEIMutable b = valueOf(u);
-    if (b.isZero()) { return this; }
-    final int n0 = a.endWord();
-    final int n1 = b.endWord();
-    int n1n = n1 + n;
-    final int resultLen = Math.max(n0,n1n);
-    int[] result;
-    if (a.words.length < resultLen) { result = new int[resultLen]; }
-    else {
-      result = a.words;
-      Arrays.fill(a.words, a.start+a.nWords, a.words.length, 0); }
-    int rstart = result.length-1;
-    // copy from this if needed
-    System.arraycopy(a.words, a.start, result, (rstart+1)-n0, n0);
-    n1n -= n0;
-    rstart -= n0;
-    final int len = Math.min(n1n, b.endWord());
-    //    for (int i=0;i<len;i++) {
-    //      result[(rstart+1)-n1n+bei(i)] = addend.word(i); }
-    System.arraycopy(
-      b.words, b.start,
-      result, (rstart+1)-n1n, len);
-    // zero the gap
-    for (int i=((rstart+1)-n1n)+len; i < (rstart+1); i++) {
-      result[i] = 0; }
-    a.words = result;
-    a.nWords = resultLen;
-    a.start = result.length - resultLen;
-    return a; }
-
-  //--------------------------------------------------------------
-  /** Discards all words whose index is greater than {@code n}.
-   */
-
-  private final void keepLower (final int n) {
-    if (nWords >= n) { start += nWords - n; nWords = n; } }
-
-  //--------------------------------------------------------------
   /** This method implements algorithm 1 from pg. 4 of the
    * Burnikel-Ziegler paper. It divides a 2n-digit number by an
    * n-digit number.<br/>
@@ -318,7 +270,6 @@ public final class NaturalBEIMutable implements Natural {
   divide2n1n (final Natural b) {
     final int n = b.endWord();
 
-    NaturalBEIMutable a = (NaturalBEIMutable) copy();
     // step 1: base case
     if (((n%2) != 0) || (n < BURNIKEL_ZIEGLER_THRESHOLD)) {
       final List<Natural> qr = divideAndRemainderKnuth(b);
@@ -328,22 +279,19 @@ public final class NaturalBEIMutable implements Natural {
     // where each ai is n/2 ints or less
     // aUpper = [a1,a2,a3]
     final NaturalBEIMutable aUpper =
-      (NaturalBEIMutable) this.copy().shiftDown(32*(n/2));
+      (NaturalBEIMutable) copy().shiftDown(32*(n/2));
     
-    //MODIFIES this!!!
-    a.keepLower(n/2); // this = a4
+    NaturalBEIMutable a = (NaturalBEIMutable) words(0,n/2); // this = a4
 
     // step 3: q1=aUpper/b, r1=aUpper%b
     final List<Natural> qr1 = aUpper.divide3n2n(b);
 
     // step 4: quotient=[r1,this]/b, r2=[r1,this]%b
-    //MODIFIES this!!!
-    a = a.addDisjoint(qr1.get(1), n/2);   // this = [r1,this]
+    a = valueOf(a.add(qr1.get(1),32*(n/2)));   // this = [r1,this]
     
     final List<Natural> qr2 = a.divide3n2n(b);
     // step 5: let quotient=[q1,quotient] and return r2
-    final Natural q2 = 
-      ((NaturalBEIMutable) qr2.get(0)).addDisjoint(qr1.get(0), n/2);
+    final Natural q2 = qr2.get(0).add(qr1.get(0), 32*(n/2));
     return List.of(q2,qr2.get(1)); }
 
   //--------------------------------------------------------------
@@ -452,24 +400,24 @@ public final class NaturalBEIMutable implements Natural {
 
     // step 7: z[t-2] = [a[t-1], a[t-2]]
     // the second to most significant block
-    NaturalBEIMutable z = aShifted.getBlock(t-2, t, n);
-    z = z.addDisjoint(a1, n);   // z[t-2]
+    Natural z = aShifted.getBlock(t-2, t, n);
+    z = z.add(a1, 32*n);   // z[t-2]
 
     // schoolbook division on blocks, dividing 2-block by 1-block
     Natural q = zero();
     for (int i=t-2; i > 0; i--) {
       // step 8a: compute (qi,ri) such that z=b*qi+ri
       // Doesn't need modified z
-      final List<Natural> qri = z.divide2n1n(bShifted);
+      final List<Natural> qri = valueOf(z).divide2n1n(bShifted);
       // step 8b: z = [ri, a[i-1]]
       z = aShifted.getBlock(i-1, t, n);   // a[i-1]
-      z = z.addDisjoint(qri.get(1), n);
+      z = z.add(qri.get(1), 32*n);
       // update q (part of step 9)
       q = q.add(qri.get(0).immutable(),(i*n)<<5); }
     // final iteration of step 8: do the loop one more time
     // for i=0 but leave z unchanged
     // Doesn't need modified z
-    final List<Natural> qri = z.divide2n1n(bShifted);
+    final List<Natural> qri = valueOf(z).divide2n1n(bShifted);
     // step 9: a and b were shifted, so shift back
     return List.of(
       q.add(qri.get(0)),
