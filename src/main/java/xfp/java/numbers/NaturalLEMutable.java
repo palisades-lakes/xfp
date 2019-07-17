@@ -1,5 +1,7 @@
 package xfp.java.numbers;
 
+import java.util.Arrays;
+
 /** Little endian natural number builder.
  * <p>
  * Don't implement Comparable, because of mutability!
@@ -12,11 +14,34 @@ public final class NaturalLEMutable
 extends NaturalLEBase
 implements Natural {
 
-  private static final long serialVersionUID = 1L;
+  //--------------------------------------------------------------
+  // Uints
+  //--------------------------------------------------------------
 
+  @Override
+  public final Natural setWord (final int i,
+                                final int w) {
+    assert 0<=i;
+    Natural u = recyclable(this);
+    u = u.setWord(i,w);
+    return u.immutable(); }
+
+   @Override
+  public final Natural empty () { return new NaturalLEMutable(); }
+   
   //--------------------------------------------------------------
-  // state
+  // Transience
   //--------------------------------------------------------------
+  
+  @Override
+  public boolean isImmutable () { return false; }
+  
+  @Override
+  public final Natural immutable () { return NaturalLE.copy(this); }
+
+  @Override
+  public final Natural recyclable (final Natural init) { 
+    return copy((NaturalLEBase) init); }
 
   //--------------------------------------------------------------
   // construction
@@ -30,15 +55,16 @@ implements Natural {
 
   private NaturalLEMutable () { super(new int[0],-1,0,-1); }
 
-  @Override
-  public final Natural empty () { 
-    return new NaturalLEMutable(); }
-   
   //--------------------------------------------------------------
 
-  public static final NaturalLEMutable make () {
-    return new NaturalLEMutable(); }
-
+  public static final NaturalLEMutable 
+  copy (final NaturalLEBase u) {
+    return new NaturalLEMutable(
+      Arrays.copyOf(u.words(),u.words().length),
+      u.i0(),
+      u.i1(),
+      u.startWord()); }
+  
   //--------------------------------------------------------------
 }
 //--------------------------------------------------------------

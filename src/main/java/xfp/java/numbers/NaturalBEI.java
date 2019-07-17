@@ -125,7 +125,6 @@ implements Natural {
     return unsafe(Arrays.copyOf(m,m.length)); }
 
   public static final NaturalBEI valueOf (final byte[] a) {
-    //return valueOf(b,0,b.length); }
     final int nBytes = a.length;
     int keep = 0;
     while ((keep<nBytes) && (a[keep]==0)) { keep++; }

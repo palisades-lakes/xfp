@@ -1,5 +1,6 @@
 package xfp.java.numbers;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 
 /** immutable arbitrary-precision non-negative integers
@@ -7,13 +8,38 @@ import java.util.Arrays;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-05
+ * @version 2019-07-17
  */
 
-public final class NaturalLE extends NaturalLEBase
+public final class NaturalLE 
+extends NaturalLEBase
 implements Natural {
 
-  private static final long serialVersionUID = 1L;
+  //--------------------------------------------------------------
+  // Uints
+  //--------------------------------------------------------------
+
+  @Override
+  public final Natural setWord (final int i,
+                                final int w) {
+    assert 0<=i;
+    Natural u = recyclable(this);
+    u = u.setWord(i,w);
+    return u.immutable(); }
+
+  //--------------------------------------------------------------
+  // Transience
+  //--------------------------------------------------------------
+
+  @Override
+  public final Natural recyclable (final Natural init) {
+    return NaturalLEMutable.copy((NaturalLEBase) init); }
+
+  @Override
+  public boolean isImmutable () { return true; }
+
+  @Override
+  public final Natural immutable () { return this; }
 
   //--------------------------------------------------------------
   // Object methods
@@ -40,6 +66,7 @@ implements Natural {
                      final int i0,
                      final int i1,
                      final int startWord) {
+    // UNSAFE: doesn't copy words!!!
     super(words,i0,i1,startWord); }
 
   //-------------------------------------------------------------
@@ -54,15 +81,18 @@ implements Natural {
 
   /** Adjust i0, i1, and startWord to exclude zeros. */
 
-  static final NaturalLE unsafe (final int[] words,
-                                 final int i0,
-                                 final int i1,
-                                 final int startWord) {
+  private static final NaturalLE unsafe (final int[] words,
+                                         final int i0,
+                                         final int i1,
+                                         final int startWord) {
     int j0 = i0;
     while ((j0<i1)&&(0==words[j0])) { j0++; }
     int j1 = i1;
     while ((j0<j1)&&(0==words[j1-1])) { j1--; }
     return literal(words,j0,j1,startWord+j0);}
+
+  private static final NaturalLE unsafe (final int[] words) {
+    return unsafe(words,0,words.length,0); }
 
   /** Copy non-zero elements from words to minimal size array.
    * This is safe, because it always copies the elements*/
@@ -79,62 +109,51 @@ implements Natural {
     return literal(w,0,j1-j0,startWord+j0);}
 
   //--------------------------------------------------------------
+  /** From a big endian {@code byte[]}, as produced by
+   * {@link BigInteger#toByteArray()}.
+   */
 
-  @Override
-  public final Natural recyclable (final Natural init) {
-    assert null==init;
-    return NaturalLEMutable.make(); }
+  private static final NaturalLE valueOf (final byte[] a) {
+    final int nBytes = a.length;
+    int keep = 0;
+    while ((keep<nBytes) && (a[keep]==0)) { keep++; }
+    final int nInts = ((nBytes-keep) + 3) >>> 2;
+    final int[] result = new int[nInts];
+    int b = nBytes-1;
+    for (int i = nInts - 1; i >= 0; i--) {
+      result[i] = a[b--] & 0xff;
+      final int bytesRemaining = (b - keep) + 1;
+      final int bytesToTransfer = Math.min(3,bytesRemaining);
+      for (int j = 8; j <= (bytesToTransfer << 3); j += 8) {
+        result[i] |= ((a[b--] & 0xff) << j); } }
+    Ints.reverse(result);
+    return unsafe(result); }
 
-
-  //  public static final NaturalLE valueOf (final byte[] b,
-  //                                          final int off,
-  //                                          final int len) {
-  //    return unsafe(stripLeadingZeros(b,off,len)); }
-
-  //  public static final NaturalLE valueOf (final byte[] b) {
-  //    return valueOf(b,0,b.length); }
-
-  //  public static final NaturalLE valueOf (final BigInteger bi) {
-  //    return valueOf(bi.toByteArray()); }
+  public static final NaturalLE valueOf (final BigInteger bi) {
+    return valueOf(bi.toByteArray()); }
 
   //-------------------------------------------------------------
 
-  //  public static final NaturalLE valueOf (final String s,
-  //                                          final int radix) {
-  //    return unsafe(toInts(s,radix)); }
+  public static final NaturalLE valueOf (final String s,
+                                         final int radix) {
+    return unsafe(Ints.littleEndian(s,radix)); }
 
-  //  public static final NaturalLE valueOf (final String s) {
-  //    return valueOf(s,0x10); }
+  public static final NaturalLE valueOf (final String s) {
+    return valueOf(s,0x10); }
+
+  //--------------------------------------------------------------
+
+  public static final NaturalLE 
+  copy (final NaturalLEBase u) {
+    return literal(
+      Arrays.copyOf(u.words(),u.words().length),
+      u.i0(),
+      u.i1(),
+      u.startWord()); }
 
   //--------------------------------------------------------------
   // cached values
   //--------------------------------------------------------------
-
-  //  private static final int MAX_CONSTANT = 16;
-  //  private static final NaturalLE posConst[] =
-  //    new NaturalLE[MAX_CONSTANT+1];
-  //
-  //  private static volatile NaturalLE[][] powerCache;
-  //
-  //  /** The cache of logarithms of radices for base conversion. */
-  //  private static final double[] logCache;
-  //
-  //  static {
-  //    for (int i = 1; i <= MAX_CONSTANT; i++) {
-  //      final int[] magnitude = new int[1];
-  //      magnitude[0] = i;
-  //      posConst[i] = unsafe(magnitude); }
-  //    // Initialize the cache of radix^(2^x) values used for base
-  //    // conversion with just the very first value. Additional
-  //    // values will be created on demand.
-  //    powerCache = new NaturalLE[Character.MAX_RADIX + 1][];
-  //    logCache = new double[Character.MAX_RADIX + 1];
-  //    for (
-  //      int i = Character.MIN_RADIX;
-  //      i <= Character.MAX_RADIX;
-  //      i++) {
-  //      powerCache[i] = new NaturalLE[] { NaturalLE.valueOf(i) };
-  //      logCache[i] = Math.log(i); } }
 
   public static final NaturalLE ZERO = 
     new NaturalLE(new int[0],-1,0,-1);
@@ -144,22 +163,6 @@ implements Natural {
 
   @Override
   public final Natural empty () { return ZERO; }
-  
-  //--------------------------------------------------------------
-
-  //  public static final NaturalLE valueOf (final long x) {
-  //    if (x==0) { return ZERO; }
-  //    assert 0L < x;
-  //    if (x <= MAX_CONSTANT) { return posConst[(int) x]; }
-  //    return unsafe(toInts(x)); }
-
-  //--------------------------------------------------------------
-
-  //  public static final NaturalLE valueOf (final long x,
-  //                                          final int upShift) {
-  //    if (0L==x) { return ZERO; }
-  //    assert 0L < x;
-  //    return unsafe(shiftUp(x,upShift)); }
 
   //--------------------------------------------------------------
 }
