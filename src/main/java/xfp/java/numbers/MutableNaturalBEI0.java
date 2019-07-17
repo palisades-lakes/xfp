@@ -1,6 +1,5 @@
 package xfp.java.numbers;
 
-import static xfp.java.numbers.Bei0.BURNIKEL_ZIEGLER_THRESHOLD;
 import static xfp.java.numbers.Numbers.loWord;
 import static xfp.java.numbers.Numbers.unsigned;
 
@@ -820,7 +819,7 @@ public final class MutableNaturalBEI0 {
 
     // step 1: view this as [a1,a2,a3] where each ai is n ints
     // or less; let a12=[a1,a2]
-                               
+
     final MutableNaturalBEI0 a12 = new MutableNaturalBEI0(this);
     a12.safeRightShift(32*n);
 
@@ -863,7 +862,12 @@ public final class MutableNaturalBEI0 {
   public final static MutableNaturalBEI0 one () { 
     return new MutableNaturalBEI0(1); }
 
- //--------------------------------------------------------------
+  //--------------------------------------------------------------
+
+  private static final int BURNIKEL_ZIEGLER_THRESHOLD = 80;
+  //private static final int BURNIKEL_ZIEGLER_OFFSET = 40;
+
+  //--------------------------------------------------------------
   /** Computes {@code this/b} and {@code this%b} using the
    * <a href="http://cr.yp.to/bib/1998/burnikel.ps">
    * Burnikel-Ziegler algorithm</a>. This method implements
@@ -886,7 +890,7 @@ public final class MutableNaturalBEI0 {
     quotient.offset = quotient.intLen = 0;
     if (r < s) { return this; }
     // step 1: let m = min{2^k | (2^k)*BURNIKEL_ZIEGLER_THRESHOLD > s}
-    final int s0 = s/NaturalBEI.BURNIKEL_ZIEGLER_THRESHOLD;
+    final int s0 = s/BURNIKEL_ZIEGLER_THRESHOLD;
     final int m = 1 << (32-Integer.numberOfLeadingZeros(s0));
 
     final int j = ((s+m)-1) / m; // step 2a: j = ceil(s/m)

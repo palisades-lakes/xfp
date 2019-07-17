@@ -32,7 +32,7 @@ import xfp.java.prng.PRNG;
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-16
+ * @version 2019-07-17
  */
 @SuppressWarnings("unchecked")
 public final class Common {
@@ -323,7 +323,8 @@ public final class Common {
       final Natural y0 = fromBI.apply(x0);
       final Natural y1 = fromBI.apply(x1);
       final BigInteger[] x2 = x0.divideAndRemainder(x1);
-      final List<Natural> y2 = y0.divideAndRemainderKnuth(y1);
+      final List<Natural> y2 = 
+        y0.divideAndRemainderKnuth(y1);
       final BigInteger[] x3 = { toBI.apply(y2.get(0)), 
                                 toBI.apply(y2.get(1)),};
 
