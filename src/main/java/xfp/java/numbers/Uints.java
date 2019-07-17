@@ -354,7 +354,8 @@ public interface Uints<T extends Uints> extends Transience<T> {
     throw Exceptions.unsupportedOperation(
       this,"from",u); }
 
-  /** Return a new Uints whose value is <code>u</code>.
+  /** Return a new Uints whose value is <code>u</code>,
+   * interpreted as unsigned.
    * Does not modify <code>this</code>.
    */
 

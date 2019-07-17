@@ -1,10 +1,8 @@
 package xfp.java.numbers;
 
 import static xfp.java.numbers.Ints.stripLeadingZeros;
-import static xfp.java.numbers.Numbers.unsigned;
 
 import java.util.Arrays;
-import java.util.List;
 
 import xfp.java.exceptions.Exceptions;
 
@@ -126,9 +124,7 @@ public final class NaturalBEIMutable implements Natural {
   //--------------------------------------------------------------
   // bit operations
   //--------------------------------------------------------------
-  /** Down shift this NaturalBEIMutable n bits, where n is
-   * less than 32. Assumes that nWords > 0, n > 0 for speed
-   */
+  // DANGER!!!
 
   private final void smallDownShift (final int shift) {
     assert 0<=shift;
@@ -141,6 +137,7 @@ public final class NaturalBEIMutable implements Natural {
       val[i] = (c << lShift) | (b >>> shift); }
     val[start] >>>= shift; }
 
+  // DANGER!!!
   @Override
   public final Natural shiftDown (final int shift) {
     assert 0<=shift;
@@ -158,6 +155,7 @@ public final class NaturalBEIMutable implements Natural {
     return this; }
 
   //--------------------------------------------------------------
+  // DANGER!!!
 
   private final void smallUpShift (final int shift) {
     assert 0<=shift;
@@ -169,6 +167,8 @@ public final class NaturalBEIMutable implements Natural {
       c = val[i+1];
       val[i] = (b << shift) | (c >>> rShift); }
     val[(start+nWords)-1] <<= shift; }
+
+  // DANGER!!!
 
   @Override
   public final Natural shiftUp (final int shift) {
@@ -215,213 +215,49 @@ public final class NaturalBEIMutable implements Natural {
   //--------------------------------------------------------------
   // DANGER: overwrites this with result!
 
+//  @Override
+//  public final Natural subtract (final Natural u) {
+//    if (! (u instanceof NaturalBEIMutable)) {
+//      return Natural.super.subtract(u); }
+//
+//    final NaturalBEIMutable a = this;
+//    final NaturalBEIMutable b = (NaturalBEIMutable) u;
+//    int[] result = words;
+//    final int sign = a.compareTo(b);
+//    assert 0<=sign;
+//    if (sign == 0) { clear(); return this; }
+//    final int resultLen = a.nWords;
+//    if (result.length < resultLen) { result = new int[resultLen]; }
+//    long diff = 0;
+//    int x = a.nWords;
+//    int y = b.nWords;
+//    int rstart = result.length - 1;
+//    // Subtract common parts of both numbers
+//    while (y > 0) {
+//      x--; y--;
+//      diff = unsigned(a.words[x+a.start])
+//        - unsigned(b.words[y+b.start])
+//        - ((int)-(diff>>32));
+//      result[rstart--] = (int)diff; }
+//    // Subtract remainder of longer number
+//    while (x > 0) {
+//      x--;
+//      diff = unsigned(a.words[x+a.start]) - ((int)-(diff>>32));
+//      result[rstart--] = (int) diff; }
+//
+//    words = result;
+//    nWords = resultLen;
+//    start = words.length - resultLen;
+//    compact();
+//    return this; }
+
+  //--------------------------------------------------------------
+
   @Override
-  public final Natural subtract (final Natural u) {
-    if (! (u instanceof NaturalBEIMutable)) {
-      return Natural.super.subtract(u); }
-
-    final NaturalBEIMutable a = this;
-    final NaturalBEIMutable b = (NaturalBEIMutable) u;
-    int[] result = words;
-    final int sign = a.compareTo(b);
-    assert 0<=sign;
-    if (sign == 0) { clear(); return this; }
-    final int resultLen = a.nWords;
-    if (result.length < resultLen) { result = new int[resultLen]; }
-    long diff = 0;
-    int x = a.nWords;
-    int y = b.nWords;
-    int rstart = result.length - 1;
-    // Subtract common parts of both numbers
-    while (y > 0) {
-      x--; y--;
-      diff = unsigned(a.words[x+a.start])
-        - unsigned(b.words[y+b.start])
-        - ((int)-(diff>>32));
-      result[rstart--] = (int)diff; }
-    // Subtract remainder of longer number
-    while (x > 0) {
-      x--;
-      diff = unsigned(a.words[x+a.start]) - ((int)-(diff>>32));
-      result[rstart--] = (int) diff; }
-
-    words = result;
-    nWords = resultLen;
-    start = words.length - resultLen;
-    compact();
-    return this; }
-
-  //--------------------------------------------------------------
-  // division
-  //--------------------------------------------------------------
-  // Burnikel-Ziegler
-  //--------------------------------------------------------------
-  /** This method implements algorithm 1 from pg. 4 of the
-   * Burnikel-Ziegler paper. It divides a 2n-digit number by an
-   * n-digit number.<br/>
-   * The parameter beta is 2<sup>32</sup> so all shifts are
-   * multiples of 32 bits. <br/>
-   * {@code this} must be a nonnegative number such that
-   * {@code this.hiBit() <= 2*b.hiBit()}
-   * @param b a positive number such that {@code b.hiBit()} is even
-   */
-
-  private final List<Natural>
-  divide2n1n (final Natural b) {
-    final int n = b.endWord();
-
-    // step 1: base case
-    if (((n%2) != 0) || (n < BURNIKEL_ZIEGLER_THRESHOLD)) {
-      final List<Natural> qr = divideAndRemainderKnuth(b);
-      return List.of(qr.get(0),qr.get(1)); }
-
-    // step 2: view this as [a1,a2,a3,a4]
-    // where each ai is n/2 ints or less
-    // aUpper = [a1,a2,a3]
-    final NaturalBEIMutable aUpper =
-      (NaturalBEIMutable) copy().shiftDown(32*(n/2));
-    
-    NaturalBEIMutable a = (NaturalBEIMutable) words(0,n/2); // this = a4
-
-    // step 3: q1=aUpper/b, r1=aUpper%b
-    final List<Natural> qr1 = aUpper.divide3n2n(b);
-
-    // step 4: quotient=[r1,this]/b, r2=[r1,this]%b
-    a = valueOf(a.add(qr1.get(1),32*(n/2)));   // this = [r1,this]
-    
-    final List<Natural> qr2 = a.divide3n2n(b);
-    // step 5: let quotient=[q1,quotient] and return r2
-    final Natural q2 = qr2.get(0).add(qr1.get(0), 32*(n/2));
-    return List.of(q2,qr2.get(1)); }
-
-  //--------------------------------------------------------------
-
-  private static final NaturalBEIMutable ones (final int n) {
+  public final Natural ones (final int n) {
     final int[] w = new int[n];
     Arrays.fill(w, 0xFFFFFFFF);
     return unsafe(w); }
-
-  /** This method implements algorithm 2 from pg. 5 of the
-   * Burnikel-Ziegler paper. It divides a 3n-digit number by a
-   * 2n-digit number.<br/>
-   * The parameter beta is 2<sup>32</sup> so all shifts are
-   * multiples of 32 bits.<br/>
-   * <br/>
-   * {@code this} must be a nonnegative number such that
-   * {@code 2*this.hiBit() <= 3*b.hiBit()}
-   * @param quotient output parameter for {@code this/b}
-   * @return {@code this%b}
-   */
-
-  private final List<Natural>
-  divide3n2n (final Natural b) {
-    final int n = b.endWord() / 2;   // half the length of b in ints
-
-    // step 1: view this as [a1,a2,a3] where each ai is n ints
-    // or less; let a12=[a1,a2]
-    NaturalBEIMutable a12 =
-      (NaturalBEIMutable) copy().shiftDown(32*n);
-
-    // step 2: view b as [b1,b2] where each bi is n ints or less
-    Natural b1 = b.copy().shiftDown(n*32);
-    final Natural b2 = b.words(0,n);
-    Natural r;
-    Natural d;
-    Natural q;
-    if (compareTo(b, 32*n) < 0) {
-      // step 3a: if a1<b1, let quotient=a12/b1 and r=a12%b1
-      // Doesn't need modified a12
-      final List<Natural> qr = a12.divide2n1n(b1);
-      q = qr.get(0);
-      r = qr.get(1);
-      // step 4: d=quotient*b2
-      d = q.multiply(b2); }
-    else {
-      // step 3b: if a1>=b1, let quotient=beta^n-1
-      //and r=a12-b1*2^n+b1
-      q = ones(n);
-      a12 = (NaturalBEIMutable) a12.add(b1);
-      b1 = b1.shiftUp(32*n);
-      r = a12.subtract(b1);
-      // step 4: d=quotient*b2=(b2 << 32*n) - b2
-      d = b2.copy().shiftUp(32*n).subtract(b2); }
-    // step 5: r = r*beta^n + a3 - d (paper says a4)
-    // However, don't subtract d until after the while loop
-    // so r doesn't become negative
-    r = r.shiftUp(n<<5).add(words(0,n));
-    // step 6: add b until r>=d
-    while (r.compareTo(d) < 0) {
-      r = r.add(b);
-      q = q.subtract(one()); }
-    return List.of(q,r.subtract(d)); }
-
-  //--------------------------------------------------------------
-  /** Computes {@code this/b} and {@code this%b} using the
-   * <a href="http://cr.yp.to/bib/1998/burnikel.ps">
-   * Burnikel-Ziegler algorithm</a>. This method implements
-   * algorithm 3 from pg. 9 of the Burnikel-Ziegler paper.
-   * The parameter beta was chosen to b 2<sup>32</sup> so almost
-   * all shifts are multiples of 32 bits.<br/>
-   */
-
-  @Override
-  public final List<Natural>
-  divideAndRemainderBurnikelZiegler (final Natural u) {
-    final int c = compareTo(u);
-    if (0==c) { return List.of(NaturalBEI.ONE,NaturalBEI.ZERO); }
-    if (0>c) { return List.of(NaturalBEI.ZERO,this); }
-    final int s = u.endWord();
-    //final int r = endWord();
-    //if (r < s) { return List.of(NaturalBEI.ZERO,this); }
-
-    // step 1: let m = min{2^k | (2^k)*BURNIKEL_ZIEGLER_THRESHOLD > s}
-    final int s0 = s/BURNIKEL_ZIEGLER_THRESHOLD;
-    final int m = 1 << (32-Integer.numberOfLeadingZeros(s0));
-
-    final int j = ((s+m)-1) / m; // step 2a: j = ceil(s/m)
-    final int n = j * m; // step 2b: block length in 32-bit units
-    final long n32 = 32L * n; // block length in bits
-    // step 3: sigma = max{T | (2^T)*B < beta^n}
-    final int sigma = (int) Math.max(0, n32 - u.hiBit());
-
-    // step 4a: shift b so its length is a multiple of n
-    final Natural bShifted = u.shiftUp(sigma);
-    // step 4b: shift a by the same amount
-    final NaturalBEIMutable aShifted = (NaturalBEIMutable) shiftUp(sigma);
-
-    // step 5: t is the number of blocks needed to accommodate a
-    // plus one additional bit
-    int t = (int) ((aShifted.hiBit()+n32) / n32);
-    if (t < 2) { t = 2; }
-
-    // step 6: conceptually split a into blocks a[t-1], ..., a[0]
-    // the most significant block of a
-    final Natural a1 = aShifted.getBlock(t-1, t, n);
-
-    // step 7: z[t-2] = [a[t-1], a[t-2]]
-    // the second to most significant block
-    Natural z = aShifted.getBlock(t-2, t, n);
-    z = z.add(a1, 32*n);   // z[t-2]
-
-    // schoolbook division on blocks, dividing 2-block by 1-block
-    Natural q = zero();
-    for (int i=t-2; i > 0; i--) {
-      // step 8a: compute (qi,ri) such that z=b*qi+ri
-      // Doesn't need modified z
-      final List<Natural> qri = valueOf(z).divide2n1n(bShifted);
-      // step 8b: z = [ri, a[i-1]]
-      z = aShifted.getBlock(i-1, t, n);   // a[i-1]
-      z = z.add(qri.get(1), 32*n);
-      // update q (part of step 9)
-      q = q.add(qri.get(0).immutable(),(i*n)<<5); }
-    // final iteration of step 8: do the loop one more time
-    // for i=0 but leave z unchanged
-    // Doesn't need modified z
-    final List<Natural> qri = valueOf(z).divide2n1n(bShifted);
-    // step 9: a and b were shifted, so shift back
-    return List.of(
-      q.add(qri.get(0)),
-      qri.get(1).shiftDown(sigma)); }
 
   //--------------------------------------------------------------
   // Object methods
@@ -515,33 +351,6 @@ public final class NaturalBEIMutable implements Natural {
   @Override
   public final Natural from (final int x) {
     return new NaturalBEIMutable(x); }
-
-  //--------------------------------------------------------------
-  /** Returns a {@code NaturalBEIMutable} containing
-   * {@code blockLength} ints from {@code this} number, starting
-   * at {@code index*blockLength}.<br/>
-   * Used by Burnikel-Ziegler division.
-   * @param index the block index
-   * @param numBlocks the total number of blocks in {@code this}
-   * @param blockLength length of one block in units of 32 bits
-   * @return
-   */
-
-  private final NaturalBEIMutable getBlock (final int index,
-                                            final int numBlocks,
-                                            final int blockLength) {
-    final int blockStart = index * blockLength;
-    if (blockStart >= nWords) { return new NaturalBEIMutable(); }
-    int blockEnd;
-    if (index == (numBlocks-1)) { blockEnd = nWords; }
-    else { blockEnd = (index+1) * blockLength; }
-    if (blockEnd > nWords) { return new NaturalBEIMutable(); }
-    final int[] newVal =
-      Arrays.copyOfRange(
-        words,
-        (start+nWords)-blockEnd,
-        (start+nWords)-blockStart);
-    return new NaturalBEIMutable(newVal); }
 
   //--------------------------------------------------------------
 

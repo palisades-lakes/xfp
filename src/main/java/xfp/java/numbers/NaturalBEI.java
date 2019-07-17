@@ -8,7 +8,7 @@ import java.util.Arrays;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-14
+ * @version 2019-07-16
  */
 
 public final class NaturalBEI //extends Number
@@ -114,6 +114,12 @@ implements Natural {
   public static final NaturalBEI unsafe (final int[] m) {
     return new NaturalBEI(m); }
 
+  @Override
+  public final Natural ones (final int n) {
+    final int[] w = new int[n];
+    Arrays.fill(w, 0xFFFFFFFF);
+    return unsafe(w); }
+
   // assume no leading zeros
   public static final NaturalBEI valueOf (final int[] m) {
     return unsafe(Arrays.copyOf(m,m.length)); }
@@ -205,7 +211,8 @@ implements Natural {
   public final Natural from (final long u) { return valueOf(u); }
 
   @Override
-  public final Natural from (final int u) { return valueOf(u); }
+  public final Natural from (final int u) { 
+    return from(Numbers.unsigned(u)); }
 
   //--------------------------------------------------------------
 }
