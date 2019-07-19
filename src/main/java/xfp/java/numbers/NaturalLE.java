@@ -4,28 +4,78 @@ import java.math.BigInteger;
 import java.util.Arrays;
 
 /** immutable arbitrary-precision non-negative integers
- * (natural number) represented by big-endian
+ * (natural numbers) represented by little-endian
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-17
+ * @version 2019-07-19
  */
 
-public final class NaturalLE 
-extends NaturalLEBase
-implements Natural {
+public final class NaturalLE implements Natural {
+
+  //--------------------------------------------------------------
+  // fields
+  //--------------------------------------------------------------
+  /** This array is never modified.
+   */
+
+  private final int[] _words;
+  private final int[] words () { return _words; }
+
+  /** Don't drop trailing zeros. */
+  public final int[] copyWords () { 
+    return Arrays.copyOf(words(),words().length); }
+
+  //--------------------------------------------------------------
+  // Natural
+  //--------------------------------------------------------------
+
+  private static final NaturalLE ONE = unsafe(new int[] { 1 });
+
+  @Override
+  public final Natural one () { return ONE; }
 
   //--------------------------------------------------------------
   // Uints
   //--------------------------------------------------------------
 
   @Override
+  public final int startWord () { return 0; }
+  @Override
+  public final int endWord () { return words().length; }
+
+  @Override
+  public final int word (final int i) {
+    assert 0<=i : "Negative index: " + i;
+    if (endWord()<=i) { return 0; }
+    return words()[i]; }
+
+  @Override
   public final Natural setWord (final int i,
                                 final int w) {
     assert 0<=i;
-    Natural u = recyclable(this);
-    u = u.setWord(i,w);
-    return u.immutable(); }
+    final int n = Math.max(i+1,hiInt());
+    final  int[] u = Arrays.copyOf(words(),n);
+    u[i] = w;
+    return unsafe(u); }
+
+  /** Singleton.<br>
+   * TODO: Better to use a new array?
+   */
+  private static final NaturalLE ZERO = new NaturalLE(Ints.EMPTY); 
+
+  @Override
+  public final Natural empty () { return ZERO; }
+
+  @Override
+  public final Natural from (final int u) {
+    assert 0<=u;
+    return valueOf(u);  }
+
+  @Override
+  public final Natural from (final long u) {
+    assert 0<=u;
+    return valueOf(u);  }
 
   //--------------------------------------------------------------
   // Transience
@@ -33,13 +83,29 @@ implements Natural {
 
   @Override
   public final Natural recyclable (final Natural init) {
-    return NaturalLEMutable.copy((NaturalLEBase) init); }
+    return NaturalLEMutable.copy(init); }
+
+  @Override
+  public final Natural recyclable (final int init) {
+    return NaturalLEMutable.make(init); }
+
+  @Override
+  public final Natural recyclable (final Natural init,
+                                   final int nWords) {
+    if (null==init) {
+      return NaturalLEMutable.make(nWords); }
+    if (init instanceof NaturalLE) {
+      return NaturalLEMutable.make(words(),nWords); }
+    return init.recyclable(init,nWords); }
 
   @Override
   public boolean isImmutable () { return true; }
 
   @Override
   public final Natural immutable () { return this; }
+
+  @Override
+  public final Natural copy () {  return copy(this); }
 
   //--------------------------------------------------------------
   // Object methods
@@ -62,51 +128,21 @@ implements Natural {
   // construction
   //-------------------------------------------------------------
 
-  private NaturalLE (final int[] words,
-                     final int i0,
-                     final int i1,
-                     final int startWord) {
-    // UNSAFE: doesn't copy words!!!
-    super(words,i0,i1,startWord); }
+  /** UNSAFE: doesn't copy <code>words</code>. */
+  private NaturalLE (final int[] words) { _words = words; }
 
-  //-------------------------------------------------------------
-  // TODO: move these to NaturalLEMutable?
-  /** Take args as given. */
-
-  private static final NaturalLE literal (final int[] words,
-                                          final int i0,
-                                          final int i1,
-                                          final int startWord) {
-    return new NaturalLE(words,i0,i1,startWord); }
-
-  /** Adjust i0, i1, and startWord to exclude zeros. */
-
-  private static final NaturalLE unsafe (final int[] words,
-                                         final int i0,
-                                         final int i1,
-                                         final int startWord) {
-    int j0 = i0;
-    while ((j0<i1)&&(0==words[j0])) { j0++; }
-    int j1 = i1;
-    while ((j0<j1)&&(0==words[j1-1])) { j1--; }
-    return literal(words,j0,j1,startWord+j0);}
+  /** Doesn't copy <code>words</code>. 
+   */
 
   private static final NaturalLE unsafe (final int[] words) {
-    return unsafe(words,0,words.length,0); }
+    return new NaturalLE(words); }
 
-  /** Copy non-zero elements from words to minimal size array.
-   * This is safe, because it always copies the elements*/
-
-  public static final NaturalLE make (final int[] words,
-                                      final int i0,
-                                      final int i1,
-                                      final int startWord) {
-    int j0 = i0;
-    while ((j0<i1)&&(0==words[j0])) { j0++; }
-    int j1 = i1;
-    while ((j0<j1)&&(0==words[j1-1])) { j1--; }
-    final int[] w = Arrays.copyOfRange(words,j0,j1);
-    return literal(w,0,j1-j0,startWord+j0);}
+  /** Copy <code>words</code>. 
+   *  */
+  public static final NaturalLE make (final int[] words) {
+    final int end = Ints.hiInt(words);
+    return unsafe(Arrays.copyOf(words,end)); }
+    //return unsafe(Arrays.copyOf(words,words.length)); }
 
   //--------------------------------------------------------------
   /** From a big endian {@code byte[]}, as produced by
@@ -127,42 +163,50 @@ implements Natural {
       for (int j = 8; j <= (bytesToTransfer << 3); j += 8) {
         result[i] |= ((a[b--] & 0xff) << j); } }
     Ints.reverse(result);
-    return unsafe(result); }
+    return make(result); }
 
-  public static final NaturalLE valueOf (final BigInteger bi) {
-    return valueOf(bi.toByteArray()); }
+  public static final NaturalLE valueOf (final BigInteger u) {
+    assert 0<=u.signum();
+    return valueOf(u.toByteArray()); }
 
   //-------------------------------------------------------------
 
   public static final NaturalLE valueOf (final String s,
                                          final int radix) {
-    return unsafe(Ints.littleEndian(s,radix)); }
+    return make(Ints.littleEndian(s,radix)); }
 
   public static final NaturalLE valueOf (final String s) {
     return valueOf(s,0x10); }
 
+  public static final NaturalLE valueOf (final long u) {
+    assert 0L<=u;
+    if (u==0L) { return ZERO; }
+    return make(Ints.littleEndian(u)); }
+
+  public static final NaturalLE valueOf (final int u) {
+    assert 0L<=u;
+    if (u==0) { return ZERO; }
+    return unsafe(new int[] {u}); }
+
   //--------------------------------------------------------------
 
   public static final NaturalLE 
-  copy (final NaturalLEBase u) {
-    return literal(
-      Arrays.copyOf(u.words(),u.words().length),
-      u.i0(),
-      u.i1(),
-      u.startWord()); }
+  copy (final NaturalLE u) { return make(u.words()); }
 
-  //--------------------------------------------------------------
-  // cached values
-  //--------------------------------------------------------------
+  public static final NaturalLE 
+  copy (final NaturalLEMutable u) { 
+    return make(u.copyWords()); }
 
-  public static final NaturalLE ZERO = 
-    new NaturalLE(new int[0],-1,0,-1);
-  //  public static final NaturalLE ONE = valueOf(1);
-  //  public static final NaturalLE TWO = valueOf(2);
-  //  public static final NaturalLE TEN = valueOf(10);
-
-  @Override
-  public final Natural empty () { return ZERO; }
+  public static final NaturalLE
+  copy (final Natural u) { 
+    if (u instanceof NaturalLEMutable) {
+      return copy((NaturalLEMutable) u); }
+    if (u instanceof NaturalLE) {
+      return copy((NaturalLE) u); }
+    final int n = u.hiInt();
+    final int[] w = new int[n];
+    for (int i=0;i<n;i++) { w[i] = u.word(i); }
+    return unsafe(w); }
 
   //--------------------------------------------------------------
 }

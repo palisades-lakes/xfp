@@ -17,7 +17,7 @@ import xfp.java.exceptions.Exceptions;
  * TODO: max valid range limited by int hiBit!
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-17
+ * @version 2019-07-19
  */
 
 @SuppressWarnings("unchecked")
@@ -150,13 +150,10 @@ public interface Uints<T extends Uints> extends Transience<T> {
 
   default int hiInt () {
     final int end = endWord();
-    //Debug.println("hiInt end=" + end);
     if (0==end) { return 0; }
     int n = end-1;
     final int start = startWord();
-    //Debug.println("hiInt start=" + start);
     while ((start<n)&&(0==word(n))) { n--; }
-    //Debug.println("hiInt n=" + n);
     return n+1; }
 
   //--------------------------------------------------------------

@@ -11,7 +11,7 @@ import java.util.List;
  * Non-instantiable.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-17
+ * @version 2019-07-19
  */
 
 @SuppressWarnings("unchecked")
@@ -97,6 +97,10 @@ public final class NaturalDivide {
     final int n1 = v.endWord();
     long carry = 0;
     int i = n0 - 1 - n1 - i0;
+    assert 0<=i :
+      "\nu=\n" + u + "\nv=\n" + v
+      + "\nx= " + x 
+      + "\nn0= " + n0 + "\nn1= " + n1 + "\ni0= " + i0; 
     for (int j=0;j<n1;j++,i++) {
       final long prod = (v.uword(j)*x) + carry;
       final long diff = u.uword(i)-prod;
@@ -388,9 +392,9 @@ public final class NaturalDivide {
    */
 
   private static final Natural getBlock (final Natural u,
-                                   final int index,
-                                   final int numBlocks,
-                                   final int blockLength) {
+                                         final int index,
+                                         final int numBlocks,
+                                         final int blockLength) {
     final int blockStart = index * blockLength;
     if (blockStart >= u.endWord()) { return u.zero(); }
     final int blockEnd;
@@ -423,14 +427,14 @@ public final class NaturalDivide {
     final int sigma = (int) Math.max(0, n32 - v.hiBit());
 
     // step 4a: shift b so its length is a multiple of n
-    final Natural bShifted = v.shiftUp(sigma);
+    assert 0<=sigma;
+    final Natural bShifted = v.copy().shiftUp(sigma);
     // step 4b: shift a by the same amount
     final Natural aShifted = u.copy().shiftUp(sigma);
 
     // step 5: t is the number of blocks needed to accommodate a
     // plus one additional bit
-    int t = (int) ((aShifted.hiBit()+n32) / n32);
-    if (t < 2) { t = 2; }
+    final int t = Math.max(2,(int) ((aShifted.hiBit()+n32) / n32));
 
     // step 6: conceptually split a into blocks a[t-1], ..., a[0]
     // the most significant block of a
@@ -439,7 +443,7 @@ public final class NaturalDivide {
     // step 7: z[t-2] = [a[t-1], a[t-2]]
     // the second to most significant block
     Natural z = getBlock(aShifted,t-2, t, n);
-    z = z.add(a1, 32*n);   // z[t-2]
+    z = z.add(a1,32*n);   // z[t-2]
 
     // schoolbook division on blocks, dividing 2-block by 1-block
     Natural q = u.zero();
@@ -452,10 +456,16 @@ public final class NaturalDivide {
       z = z.add(qri.get(1), 32*n);
       // update q (part of step 9)
       q = q.add(qri.get(0).immutable(),(i*n)<<5); }
+    //System.out.println("q=\n"+q);
     // final iteration of step 8: do the loop one more time
     // for i=0 but leave z unchanged
     // Doesn't need modified z
     final List<Natural> qri = divide2n1n(z,bShifted);
+    //System.out.println("z=\n"+z);
+    //System.out.println("b=\n"+bShifted);
+    //System.out.println("q=\n"+qri.get(0));
+    //System.out.println("r=\n"+qri.get(1));
+    
     // step 9: a and b were shifted, so shift back
     return List.of(
       q.add(qri.get(0)),
@@ -480,7 +490,7 @@ public final class NaturalDivide {
   /** Algorithm B from Knuth section 4.5.2 */
 
   private static final Natural gcdKnuth (final Natural u,
-                                   final Natural v) {
+                                         final Natural v) {
     Natural a = u.recyclable(u);
     Natural b = v.recyclable(v);
     // B1
@@ -543,7 +553,7 @@ public final class NaturalDivide {
       return List.of(n.divide(g),d.divide(g)); }
     return List.of(n,d); }
 
-   //--------------------------------------------------------------
+  //--------------------------------------------------------------
   // disable constructor
   //--------------------------------------------------------------
 

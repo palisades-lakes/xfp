@@ -364,8 +364,9 @@ public final class Common {
       final Natural y1 = fromBI.apply(x1);
       final BigInteger[] x2 = x0.divideAndRemainder(x1);
       final List<Natural> y2 = y0.divideAndRemainderBurnikelZiegler(y1);
-      final BigInteger[] x3 = { toBI.apply(y2.get(0)), 
-                                toBI.apply(y2.get(1)),};
+      final Natural q = y2.get(0).immutable();
+      final Natural r = y2.get(1).immutable();
+      final BigInteger[] x3 = { toBI.apply(q), toBI.apply(r),};
 
       Assertions.assertEquals(x2[0],x3[0],() ->
       "\n" + x0.toString(0x10)
@@ -378,7 +379,7 @@ public final class Common {
       + "\n" +  y1.toString()
       + "\n -> "
       + "\n" + y2.get(0).toString()
-      + "\n" + x3[0].toString(0x10));
+      + "\n" + x3[0].toString(0x10) + "\n");
 
       Assertions.assertEquals(x2[1],x3[1],() ->
       "\n" + x0.toString(0x10)
@@ -391,7 +392,7 @@ public final class Common {
       + "\n" +  y1.toString()
       + "\n -> "
       + "\n" + y2.get(1).toString()
-      + "\n" + x3[1].toString(0x10)); } }
+      + "\n" + x3[1].toString(0x10) + "\n"); } }
 
   public static final <T extends Ringlike<T>> void
   remainder (final Function<BigInteger,T> fromBI,
@@ -469,18 +470,18 @@ public final class Common {
     multiply(fromBI,toBI,z0,z0);
     multiply(fromBI,toBI,z0,z1);
     multiply(fromBI,toBI,z0,z0);
-    divide(fromBI,toBI,z0,z1);
-    divide(fromBI,toBI,z0,z0);
-    divideAndRemainder(fromBI,toBI,z0,z1);
-    divideAndRemainder(fromBI,toBI,z0,z0);
-    divideAndRemainderKnuth(fromBI,toBI,z0,z1);
-    divideAndRemainderKnuth(fromBI,toBI,z0,z0);
-    divideAndRemainderBurnikelZiegler(fromBI,toBI,z0,z1);
-    divideAndRemainderBurnikelZiegler(fromBI,toBI,z0,z0);
-    remainder(fromBI,toBI,z0,z1);
-    remainder(fromBI,toBI,z0,z0);
-    gcd(fromBI,toBI,z0,z1);
-    gcd(fromBI,toBI,z0,z0);
+//    divide(fromBI,toBI,z0,z1);
+//    divide(fromBI,toBI,z0,z0);
+//    divideAndRemainder(fromBI,toBI,z0,z1);
+//    divideAndRemainder(fromBI,toBI,z0,z0);
+//    divideAndRemainderKnuth(fromBI,toBI,z0,z1);
+//    divideAndRemainderKnuth(fromBI,toBI,z0,z0);
+//    divideAndRemainderBurnikelZiegler(fromBI,toBI,z0,z1);
+//    divideAndRemainderBurnikelZiegler(fromBI,toBI,z0,z0);
+//    remainder(fromBI,toBI,z0,z1);
+//    remainder(fromBI,toBI,z0,z0);
+//    gcd(fromBI,toBI,z0,z1);
+//    gcd(fromBI,toBI,z0,z0);
     }
 
 

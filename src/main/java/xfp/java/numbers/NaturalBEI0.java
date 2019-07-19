@@ -14,7 +14,7 @@ import xfp.java.Debug;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-15
+ * @version 2019-07-19
  */
 
 public final class NaturalBEI0 extends Number
@@ -411,6 +411,13 @@ implements Natural {
 
   public final int bitCount () { return Bei0.bitCount(_words); }
 
+  //--------------------------------------------------------------
+  // Transience
+  //--------------------------------------------------------------
+
+    @Override
+    public final Natural immutable () { return this; }
+    
   //--------------------------------------------------------------
   // Comparable interface+
   //--------------------------------------------------------------
