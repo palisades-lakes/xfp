@@ -470,8 +470,8 @@ public final class Common {
     multiply(fromBI,toBI,z0,z0);
     multiply(fromBI,toBI,z0,z1);
     multiply(fromBI,toBI,z0,z0);
-//    divide(fromBI,toBI,z0,z1);
-//    divide(fromBI,toBI,z0,z0);
+    divide(fromBI,toBI,z0,z1);
+    divide(fromBI,toBI,z0,z0);
 //    divideAndRemainder(fromBI,toBI,z0,z1);
 //    divideAndRemainder(fromBI,toBI,z0,z0);
 //    divideAndRemainderKnuth(fromBI,toBI,z0,z1);

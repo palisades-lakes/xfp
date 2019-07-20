@@ -144,14 +144,14 @@ public final class NaturalDivide {
                  final Natural v) {
     assert !v.isZero();
     // D1 compact the divisor
-    final int nu = v.endWord();
-    final int lShift = Integer.numberOfLeadingZeros(v.word(nu-1));
-    Natural d = u.recyclable(v,nu).shiftUp(lShift);
-    final int nd = d.endWord();
-    Natural r = u.copy().shiftUp(lShift);
-    final int nr = r.endWord();
+    final int nv = v.hiInt();
+    final int lShift = Integer.numberOfLeadingZeros(v.word(nv-1));
+    Natural d = v.immutable().shiftUp(lShift);
+    final int nd = d.hiInt();
+    Natural r = u.immutable().shiftUp(lShift);
+    final int nr = r.hiInt();
     r = r.setWord(nr,0);
-    final int limit = nr-nu+1;
+    final int limit = nr-nv+1;
     Natural q = u.recyclable(limit);
     final long dh = d.uword(nd-1);
     final long dl = d.uword(nd-2);
@@ -195,18 +195,17 @@ public final class NaturalDivide {
       r = (Natural) rc.get(0);
       final long borrow = ((Long) rc.get(1)).longValue();
       // D5 Test remainder
-      //divaddCheck(d,r,j);
       if (borrow > nh) { // D6 Add back
         r = divadd(r,d,j); qhat--; }
       // Store the quotient digit
-      q = q.setWord(q.endWord()-1-j,(int)qhat); } // D7 loop on j
+      q = q.setWord(q.hiInt()-1-j,(int)qhat); } // D7 loop on j
 
     // D3 Calculate qhat
     // 1st estimate
     long qhat;
     long qrem;
     boolean skipCorrection = false;
-    final int i = r.endWord() - limit;
+    final int i = r.hiInt() - limit;
     final long nh = r.uword(i);
     final long nm =  r.uword(i-1);
     if (nh == dh) {
@@ -244,7 +243,7 @@ public final class NaturalDivide {
       if (borrow > nh) { // D6 Add back
         r = divadd(r,d,limit-1); qhat--; }
       // Store the quotient digit
-      q = q.setWord(q.endWord()-limit,(int)qhat); }
+      q = q.setWord(q.hiInt()-limit,(int)qhat); }
 
     // D8 decompact
     if (lShift > 0) { r = r.shiftDown(lShift); }
@@ -270,22 +269,25 @@ public final class NaturalDivide {
     if (0==cmp) { return List.of(u.one(),u.zero()); }
     if (0>cmp) { return List.of(u.zero(),u.immutable()); }
 
-    if (1==v.endWord()) { 
+    if (1==v.hiInt()) { 
       return divideAndRemainder(u,v.word(0)); } 
 
     // Cancel common powers of 2 if above KNUTH_POW2_* thresholds
     if (u.endWord() >= KNUTH_POW2_THRESH_LEN) {
       final int shift = Math.min(u.loBit(),v.loBit());
       if (shift >= KNUTH_POW2_THRESH_ZEROS) {
-        final Natural a = u.recyclable(u).shiftDown(shift);
-        final Natural b = v.recyclable(v).shiftDown(shift);
+        //final Natural a = u.recyclable(u).shiftDown(shift);
+        //final Natural b = v.recyclable(v).shiftDown(shift);
+        final Natural a = u.shiftDown(shift);
+        final Natural b = v.shiftDown(shift);
         final List<Natural> qr = divideAndRemainderKnuth(a,b);
         final Natural r = qr.get(1).shiftUp(shift);
         return List.of(qr.get(0),r); } }
 
-    final Natural a = u.recyclable(u);
-    final Natural b = v.recyclable(v);
-    return knuthDivision(a,b); }
+    //final Natural a = u.recyclable(u);
+    //final Natural b = v.recyclable(v);
+    //return knuthDivision(a,b); }
+  return knuthDivision(u,v); }
 
   //--------------------------------------------------------------
   /** This method implements algorithm 2 from pg. 5 of the
