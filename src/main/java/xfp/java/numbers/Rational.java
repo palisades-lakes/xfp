@@ -12,7 +12,7 @@ import xfp.java.exceptions.Exceptions;
 /** Ratios of {@link Natural}.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-01
+ * @version 2019-07-20
  */
 
 @SuppressWarnings("unchecked")
@@ -356,12 +356,11 @@ implements Ringlike<Rational> {
     final Natural d3 = sub ? d2.shiftUp(e3-e2) : d2;
     final Natural n3 = n1.shiftUp(Floats.STORED_SIGNIFICAND_BITS);
     final int e4 = e3 - Floats.STORED_SIGNIFICAND_BITS;
-    final Natural[] qr =
-      n3.divideAndRemainder(d3).toArray(new Natural[0]);
+    final List<Natural> qr = n3.divideAndRemainder(d3);
 
     // round down or up? <= implies half-even (?)
-    final int c = qr[1].shiftUp(1).compareTo(d3);
-    final int q4 = qr[0].intValue();
+    final int c = qr.get(1).shiftUp(1).compareTo(d3);
+    final int q4 = qr.get(0).intValue();
     final boolean even = (0x0 == (q4 & 0x1));
     final boolean down = (c < 0) || ((c == 0) && even);
 
@@ -499,8 +498,8 @@ implements Ringlike<Rational> {
     //    super();
     //assert (0 == numerator.loBit()) || (0 == denominator.loBit());
     _nonNegative = nonNegative;
-    _numerator = numerator;
-    _denominator = denominator; }
+    _numerator = numerator.immutable();
+    _denominator = denominator.immutable(); }
 
   //--------------------------------------------------------------
 

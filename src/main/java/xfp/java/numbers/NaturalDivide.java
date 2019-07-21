@@ -13,7 +13,7 @@ import xfp.java.Classes;
  * Non-instantiable.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-19
+ * @version 2019-07-20
  */
 
 @SuppressWarnings("unchecked")
@@ -43,8 +43,11 @@ public final class NaturalDivide {
   private static final List<Natural> 
   divideAndRemainder (final Natural u,
                       final int d) {
-    if (1==d) {
-      return List.of(u.immutable(),u.from(0)); }
+    
+    if (! u.isImmutable()) { 
+      return divideAndRemainder(u.immutable(),d); }
+    
+    if (1==d) { return List.of(u,u.zero()); }
 
     final long dd = unsigned(d);
     if (1==u.endWord()) {
@@ -82,13 +85,13 @@ public final class NaturalDivide {
     //qq.compact();
     // decompact
     if (shift > 0) { return List.of(qq,u.from(r % d)); }
-    return List.of(qq,u.from(r)); }
+    return List.of(qq.immutable(),u.from(r)); }
 
   //--------------------------------------------------------------
   /** Special shifted fused multiply-subtract 
    */
 
-  private static List fms (final Natural u0,
+  private static List fms (final Natural u,
                            final int n0,
                            final long x,
                            final Natural v,
@@ -96,28 +99,24 @@ public final class NaturalDivide {
                            final int i0) {
     assert 0L<=x;
     assert 0<=i0;
-    Natural u = u0.copy();
-    //final int n0 = u.endWord();
-    //final int n1 = v.endWord();
-//    assert n0==u.immutable().endWord() :
-//      "\nn0=" + n0
-//      + "\nvs=" + u.immutable().endWord();
+    Natural uu = u.recyclable(u);
+    uu = ((NaturalBEIMutable) uu).expandTo(n0-i0-2);
     long carry = 0;
-    int i = n0 - 1 - n1 - i0;
+    int i = n0-1-n1-i0;
     assert 0<=i :
-      "\nu=" + Classes.className(u) + "\n" + u + 
+      "\nu=" + Classes.className(uu) + "\n" + uu + 
       "\nv=" + Classes.className(v) + "\n" + v
       + "\nx= " + x 
       + "\nn0= " + n0 + "\nn1= " + n1 + "\ni0= " + i0; 
     for (int j=0;j<n1;j++,i++) {
       final long prod = (v.uword(j)*x) + carry;
-      final long diff = u.uword(i)-prod;
-      u = u.setWord(i, (int) diff);
+      final long diff = uu.uword(i)-prod;
+      uu = uu.setWord(i, (int) diff);
       carry = hiWord(prod);
       // TODO: is this related to possibility x*u > this,
       // so difference is negative?
       if (loWord(diff) > unsigned(~(int)prod)) { carry++; } }
-    return List.of(u, Long.valueOf(loWord(carry))); }
+    return List.of(uu.immutable(), Long.valueOf(loWord(carry))); }
 
   //--------------------------------------------------------------
   /** A primitive used for division. This method adds in one
@@ -137,7 +136,7 @@ public final class NaturalDivide {
     assert 0<=i0;
     //final int n0 = u.endWord();
     //final int n1 = v.endWord();
-    Natural uu = u;
+    Natural uu = u.recyclable(u);
     final int off = n0 - n1 - 1 - i0;
     long carry = 0;   
     for (int j=0;j<n1;j++) {
@@ -145,29 +144,35 @@ public final class NaturalDivide {
       final long sum = v.uword(j) + uu.uword(i) + carry;
       uu = uu.setWord(i,(int)sum);
       carry = sum >>> 32; }
-    return uu; }
+    return uu.immutable(); }
 
   //--------------------------------------------------------------
 
   private static final List<Natural> 
   knuthDivision (final Natural u,
                  final Natural v) {
+    //System.out.println("u:" + Classes.className(u));
+    //System.out.println("v:" + Classes.className(v));
+    assert u.isImmutable();
+    assert v.isImmutable();
     assert !v.isZero();
     // D1 compact the divisor
     final int nv = v.endWord();
     final int lShift = Integer.numberOfLeadingZeros(v.word(nv-1));
-    Natural d = v.recyclable(v,nv).shiftUp(lShift);
+    //Natural d = v.recyclable(v,nv).shiftUp(lShift);
     // this fails:
-    //Natural d = v.shiftUp(lShift);
+    Natural d = v.shiftUp(lShift);
     //d = d.recyclable(d);
     final int nd = d.endWord();
     assert nv==nd;
     final int nu = u.endWord();
-    //Natural r = u.recyclable(u).shiftUp(lShift);
-    Natural r = u.shiftUp(lShift);
+    Natural r = u.recyclable(u);
+    r = r.shiftUp(lShift);
+    r = r.immutable();
+    //Natural r = u.shiftUp(lShift);
     final int nr0 = r.endWord();
     // this is necessary:
-    r = r.recyclable(r);
+    //r = r.recyclable(r);
     assert (nu==nr0)||(nu+1==nr0) :
       "\nnu=" + nu + "\nnr=" + nr0;
     r = r.setWord(nr0,0);
@@ -278,8 +283,6 @@ public final class NaturalDivide {
   public static final List<Natural> 
   divideAndRemainderKnuth (final Natural u,
                            final Natural v) {
-//    assert u.isImmutable();
-//    assert v.isImmutable();
     assert ! v.isZero();
     if (v.isOne()) { return List.of(u.immutable(),u.zero()); }
     if (u.isZero()) { return List.of(u.zero(),u.zero()); }
@@ -303,9 +306,6 @@ public final class NaturalDivide {
         final Natural r = qr.get(1).shiftUp(shift);
         return List.of(qr.get(0),r); } }
 
-    //    final Natural a = u.recyclable(u);
-    //    final Natural b = v.recyclable(v);
-    //    return knuthDivision(a,b); }
     return knuthDivision(u,v); }
 
   //--------------------------------------------------------------
@@ -489,8 +489,8 @@ public final class NaturalDivide {
 
     // step 9: a and b were shifted, so shift back
     return List.of(
-      q.add(qri.get(0)),
-      qri.get(1).shiftDown(sigma)); }
+      q.add(qri.get(0)).immutable(),
+      qri.get(1).shiftDown(sigma).immutable()); }
 
   //--------------------------------------------------------------
 
@@ -498,6 +498,8 @@ public final class NaturalDivide {
   divideAndRemainder (final Natural u,
                       final Natural v) {
     assert (! v.isZero());
+    if (!(u.isImmutable()&&v.isImmutable())) {
+      return divideAndRemainder(u.immutable(),v.immutable()); }
     final List<Natural> qr;
     if (useKnuthDivision(u,v)) { 
       qr = NaturalDivide.divideAndRemainderKnuth(u,v); }
@@ -527,8 +529,8 @@ public final class NaturalDivide {
       // step B5
       if (0<tsign) { a = t; }
       else { b = t; }
-      final int an = a.endWord();
-      final int bn = b.endWord();
+      final int an = a.hiInt();
+      final int bn = b.hiInt();
       if ((an<2) && (bn<2)) {
         final int x = a.word(an-1);
         final int y = b.word(bn-1);
@@ -550,15 +552,14 @@ public final class NaturalDivide {
 
   public static final Natural gcd (final Natural u,
                                    final Natural v) {
-    Natural a = u.recyclable(u);
-    Natural b = v.recyclable(v);
-    while (b.endWord() != 0) {
-      if (Math.abs(a.endWord()-b.endWord()) < 2) { 
+    Natural a = u;
+    Natural b = v;
+    while (!b.isZero()) {
+      if (Math.abs(a.hiInt()-b.hiInt()) < 2) { 
         return gcdKnuth(a,b).immutable(); }
       final List<Natural> qr = divideAndRemainder(a,b);
       a = b;
-      final Natural r = qr.get(1);
-      b = r.recyclable(r); }
+      b = qr.get(1); }
     return a.immutable(); }
 
   public static final List<Natural> reduce (final Natural n0,
@@ -569,8 +570,8 @@ public final class NaturalDivide {
     if (n.equals(d)) { return List.of(n0.one(),n0.one()); }
     if (d.isOne()) { return List.of(n,n0.one()); }
     if (n.isOne()) { return List.of(n0.one(),d); }
-    final Natural g = n.gcd(d);
-    if (g.compareTo(n0.one()) > 0) {
+    final Natural g = gcd(n,d);
+    if (g.compareTo(n.one()) > 0) {
       return List.of(n.divide(g),d.divide(g)); }
     return List.of(n,d); }
 

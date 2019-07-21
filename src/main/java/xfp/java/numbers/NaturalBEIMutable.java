@@ -8,7 +8,7 @@ import xfp.java.exceptions.Exceptions;
 
 /**
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-16
+ * @version 2019-07-20
  */
 
 public final class NaturalBEIMutable implements Natural {
@@ -77,7 +77,7 @@ public final class NaturalBEIMutable implements Natural {
     nWords -= numZeros;
     start = (nWords == 0 ?  0 : start+numZeros); }
 
-  private final NaturalBEIMutable expandTo (final int i) {
+  final NaturalBEIMutable expandTo (final int i) {
     final int i1 = i+1;
     if (nWords<i1) {
       if (i1<words.length) {
@@ -126,16 +126,18 @@ public final class NaturalBEIMutable implements Natural {
   //--------------------------------------------------------------
   // DANGER!!!
 
-  private final void smallDownShift (final int shift) {
-    assert 0<=shift;
-    assert shift<32;
-    final int[] val = words;
-    final int lShift = 32-shift;
-    for (int i=(start+nWords)-1, c=val[i]; i > start; i--) {
-      final int b = c;
-      c = val[i-1];
-      val[i] = (c << lShift) | (b >>> shift); }
-    val[start] >>>= shift; }
+  private final Natural smallDownShift (final int rShift) {
+    assert 0<=rShift;
+    assert rShift<32;
+    if (0<rShift) {
+      final int lShift = 32-rShift;
+      int c = words[(start+nWords)-1];
+      for (int i=(start+nWords)-1; i > start; i--) {
+        final int b = c;
+        c = words[i-1];
+        words[i] = (c << lShift) | (b >>> rShift); }
+      words[start] >>>= rShift; }
+    return this; }
 
   // DANGER!!!
   @Override
@@ -157,16 +159,19 @@ public final class NaturalBEIMutable implements Natural {
   //--------------------------------------------------------------
   // DANGER!!!
 
-  private final void smallUpShift (final int shift) {
-    assert 0<=shift;
-    assert shift<32;
-    final int[] val = words;
-    final int rShift = 32-shift;
-    for (int i=start, c=val[i], m=(i+nWords)-1; i < m; i++) {
-      final int b = c;
-      c = val[i+1];
-      val[i] = (b << shift) | (c >>> rShift); }
-    val[(start+nWords)-1] <<= shift; }
+  private final Natural smallUpShift (final int lShift) {
+    assert 0<=lShift;
+    assert lShift<32;
+    if (0<lShift) {
+      final int rShift = 32-lShift;
+      final int m=start+nWords-1;
+      int c = words[start];
+      for (int i=start;i<m;i++) {
+        final int b = c;
+        c = words[i+1];
+        words[i] = (b<<lShift) | (c>>>rShift); }
+      words[m] <<= lShift; }
+    return this; }
 
   // DANGER!!!
 
@@ -182,14 +187,13 @@ public final class NaturalBEIMutable implements Natural {
     if (nWords == 0) { return this; }
     final int iShift = (shift>>>5);
     final int bShift = (shift&0x1F);
-    final int bitsInHighWord = Numbers.hiBit(word(endWord()-1));
+    final int maxShift =32- Numbers.hiBit(word(endWord()-1));
 
     // If shift can be done without moving words, do so
-    if (shift<=(32-bitsInHighWord)) {
-      smallUpShift(bShift); return this; }
+    if (shift<=maxShift) { return smallUpShift(bShift); }
 
     int newLen = nWords + iShift +1;
-    if (bShift <= (32-bitsInHighWord)) { newLen--; }
+    if (bShift<=maxShift) { newLen--; }
     if (words.length<newLen) {
       // The array must grow
       final int[] r = new int[newLen];
@@ -205,53 +209,57 @@ public final class NaturalBEIMutable implements Natural {
       for (int i=nWords; i<newLen; i++) { words[i] = 0; }
       start = 0; }
     nWords = newLen;
-    if (bShift == 0) { return this; }
-    if (bShift <= (32-bitsInHighWord)) { smallUpShift(bShift); }
-    else { smallDownShift(32-bShift); }
-    return this; }
+    if (bShift==0) { return this; }
+    if (bShift<=maxShift) { return smallUpShift(bShift); }
+    return smallDownShift(32-bShift); }
 
   //--------------------------------------------------------------
   // subtraction
   //--------------------------------------------------------------
   // DANGER: overwrites this with result!
 
-//  @Override
-//  public final Natural subtract (final Natural u) {
-//    if (! (u instanceof NaturalBEIMutable)) {
-//      return Natural.super.subtract(u); }
-//
-//    final NaturalBEIMutable a = this;
-//    final NaturalBEIMutable b = (NaturalBEIMutable) u;
-//    int[] result = words;
-//    final int sign = a.compareTo(b);
-//    assert 0<=sign;
-//    if (sign == 0) { clear(); return this; }
-//    final int resultLen = a.nWords;
-//    if (result.length < resultLen) { result = new int[resultLen]; }
-//    long diff = 0;
-//    int x = a.nWords;
-//    int y = b.nWords;
-//    int rstart = result.length - 1;
-//    // Subtract common parts of both numbers
-//    while (y > 0) {
-//      x--; y--;
-//      diff = unsigned(a.words[x+a.start])
-//        - unsigned(b.words[y+b.start])
-//        - ((int)-(diff>>32));
-//      result[rstart--] = (int)diff; }
-//    // Subtract remainder of longer number
-//    while (x > 0) {
-//      x--;
-//      diff = unsigned(a.words[x+a.start]) - ((int)-(diff>>32));
-//      result[rstart--] = (int) diff; }
-//
-//    words = result;
-//    nWords = resultLen;
-//    start = words.length - resultLen;
-//    compact();
-//    return this; }
+  //  @Override
+  //  public final Natural subtract (final Natural u) {
+  //    if (! (u instanceof NaturalBEIMutable)) {
+  //      return Natural.super.subtract(u); }
+  //
+  //    final NaturalBEIMutable a = this;
+  //    final NaturalBEIMutable b = (NaturalBEIMutable) u;
+  //    int[] result = words;
+  //    final int sign = a.compareTo(b);
+  //    assert 0<=sign;
+  //    if (sign == 0) { clear(); return this; }
+  //    final int resultLen = a.nWords;
+  //    if (result.length < resultLen) { result = new int[resultLen]; }
+  //    long diff = 0;
+  //    int x = a.nWords;
+  //    int y = b.nWords;
+  //    int rstart = result.length - 1;
+  //    // Subtract common parts of both numbers
+  //    while (y > 0) {
+  //      x--; y--;
+  //      diff = unsigned(a.words[x+a.start])
+  //        - unsigned(b.words[y+b.start])
+  //        - ((int)-(diff>>32));
+  //      result[rstart--] = (int)diff; }
+  //    // Subtract remainder of longer number
+  //    while (x > 0) {
+  //      x--;
+  //      diff = unsigned(a.words[x+a.start]) - ((int)-(diff>>32));
+  //      result[rstart--] = (int) diff; }
+  //
+  //    words = result;
+  //    nWords = resultLen;
+  //    start = words.length - resultLen;
+  //    compact();
+  //    return this; }
 
   //--------------------------------------------------------------
+
+  //--------------------------------------------------------------
+
+  @Override
+  public final Natural one () { return new NaturalBEIMutable(1); }
 
   @Override
   public final Natural ones (final int n) {
@@ -384,11 +392,10 @@ public final class NaturalBEIMutable implements Natural {
   public static final NaturalBEIMutable make (final Natural u,
                                               final int n) {
     if (u instanceof NaturalBEI) {
-      return make((NaturalBEI) u,n); }
+      return make((NaturalBEIMutable) u,n); }
     if (u instanceof NaturalBEIMutable) {
       return make((NaturalBEIMutable) u,n); }
-    throw Exceptions.unsupportedOperation(
-      null,"make",u,Integer.valueOf(n)); }
+    throw Exceptions.unsupportedOperation(null,"make",u,n); }
 
   public static final NaturalBEIMutable
   valueOf (final int[] val) {
@@ -422,11 +429,6 @@ public final class NaturalBEIMutable implements Natural {
     if (0==upShift) { return valueOf(u); }
     if (0L==u) { return make(); }
     return (NaturalBEIMutable) valueOf(u).shiftUp(upShift); }
-
-  //--------------------------------------------------------------
-
-  @Override
-  public final Natural one () { return new NaturalBEIMutable(1); }
 
   //--------------------------------------------------------------
 }
