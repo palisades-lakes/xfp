@@ -259,11 +259,14 @@ implements Ringlike<Rational> {
   private final Rational multiply (final boolean p,
                                    final Natural n,
                                    final Natural d) {
-    return
-      valueOf(
-        ! (nonNegative() ^ p),
-        numerator().multiply(n),
-        denominator().multiply(d)); }
+    final Natural nn = numerator().multiply(n);
+    System.out.println(nn);
+    final Natural dd =denominator().multiply(d); 
+    System.out.println(dd);
+    // infinite loop:
+    final Rational qq = valueOf(! (nonNegative() ^ p),nn,dd);
+    System.out.println(qq);
+    return qq; }
 
   @Override
   public final Rational multiply (final Rational q) {
@@ -279,7 +282,11 @@ implements Ringlike<Rational> {
   public final Rational add2 (final double z) {
     assert Double.isFinite(z);
     final Rational q = valueOf(z);
-    return add(q.multiply(q)); }
+    System.out.println(q);
+    // infinite loop:
+    final Rational q2 = q.multiply(q);
+    System.out.println(q2);
+    return add(q2); }
 
   //--------------------------------------------------------------
 

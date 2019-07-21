@@ -47,6 +47,7 @@ extends ExactAccumulator<RationalAccumulator> {
   @Override
   public final RationalAccumulator add2 (final double z) {
     assert Double.isFinite(z);
+    System.out.println(z);
     _sum = _sum.add2(z);
     return this; }
 

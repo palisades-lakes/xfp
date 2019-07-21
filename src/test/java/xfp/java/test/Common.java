@@ -1271,8 +1271,7 @@ public final class Common {
     final double[] x = (double[]) g.next();
     final double truth = exact.clear().add2All(x).doubleValue();
     for (final Accumulator a : accumulators) {
-      final double pred =
-        a.clear().add2All(x).doubleValue();
+      final double pred = a.clear().add2All(x).doubleValue();
       if (a.isExact()) { 
         Assertions.assertEquals(truth,pred,
           () ->

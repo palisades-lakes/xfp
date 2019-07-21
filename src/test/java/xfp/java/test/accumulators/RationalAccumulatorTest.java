@@ -21,7 +21,7 @@ import xfp.java.test.Common;
 public final class RationalAccumulatorTest {
 
   //--------------------------------------------------------------
-  private static final int DIM = 8;//256;
+  private static final int DIM = 256;
   private static final List<String> accumulators =
     List.of("xfp.java.accumulators.RationalAccumulator");
 
