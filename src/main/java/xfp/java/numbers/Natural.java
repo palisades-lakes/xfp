@@ -156,6 +156,7 @@ extends Uints<Natural>, Ringlike<Natural> {
   @Override
   default Natural add (final Natural u) {
     Natural t = recyclable(this);
+    //Natural t = this;
     if (isZero()) { return u; }
     if (u.isZero()) { return this; }
     // TODO: optimize by summing over joint range
@@ -186,6 +187,7 @@ extends Uints<Natural>, Ringlike<Natural> {
     if (0L==u) { return immutable(); }
     if (isZero()) { return from(u).immutable(); }
     Natural v = recyclable(this);
+    //Natural v = this;
     long sum = uword(0) + Numbers.loWord(u);
     v = v.setWord(0,(int) sum);
     long carry = (sum>>>32);
@@ -244,6 +246,7 @@ extends Uints<Natural>, Ringlike<Natural> {
     if (0L!=hi) { assert 2<=endWord(); }
     if (0L!=lo) { assert 1<=endWord(); }
     Uints v = recyclable(this);
+    //Uints v = copy();
     long dif = uword(0)-lo;
     v = v.setWord(0,(int) dif);
     long borrow = (dif>>32);
@@ -332,11 +335,12 @@ extends Uints<Natural>, Ringlike<Natural> {
     sum = (sum>>>32) +  hi*hi ;
     final int m2 = (int) sum;
     final int m3 = (int) (sum>>>32);
-    final Natural u = recyclable(4);
-    if (0!=m0) { u.setWord(0,m0); }
-    if (0!=m1) { u.setWord(1,m1); }
-    if (0!=m2) { u.setWord(2,m2); }
-    if (0!=m3) { u.setWord(3,m3); }
+    Natural u = recyclable(4);
+    //Natural u = copy();
+    if (0!=m0) { u = u.setWord(0,m0); }
+    if (0!=m1) { u = u.setWord(1,m1); }
+    if (0!=m2) { u = u.setWord(2,m2); }
+    if (0!=m3) { u = u.setWord(3,m3); }
     return u.immutable(); }
 
   //--------------------------------------------------------------
@@ -378,11 +382,12 @@ extends Uints<Natural>, Ringlike<Natural> {
     sum = (sum>>>32) + hihi ;
     final int m2 = (int) sum;
     final int m3 = (int) (sum>>>32);
-    final Natural u = recyclable(4);
-    if (0!=m0) { u.setWord(0,m0); }
-    if (0!=m1) { u.setWord(1,m1); }
-    if (0!=m2) { u.setWord(2,m2); }
-    if (0!=m3) { u.setWord(3,m3); }
+    Natural u = recyclable(4);
+    //Natural u = copy();
+    if (0!=m0) { u = u.setWord(0,m0); }
+    if (0!=m1) { u = u.setWord(1,m1); }
+    if (0!=m2) { u = u.setWord(2,m2); }
+    if (0!=m3) { u = u.setWord(3,m3); }
     return u.immutable(); }
 
   //--------------------------------------------------------------

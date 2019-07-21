@@ -17,7 +17,7 @@ import xfp.java.prng.PRNG;
  * jy --source 11 src/scripts/java/xfp/java/scripts/QnProfile.java
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-05
+ * @version 2019-07-21
  */
 
 @SuppressWarnings("unchecked")
@@ -74,7 +74,7 @@ public final class Profile {
           Set.URP,
           PRNG.well44497b("seeds/Well44497b-2019-01-09.txt")));
     for(final Predicate<Map<Set,Supplier>> law : s.laws()) {
-      System.out.println(law);
+      //System.out.println(law);
       for (int i=0; i<ntrys; i++) {
         if (! law.test(generators)) { return false; } } }
     return true; }

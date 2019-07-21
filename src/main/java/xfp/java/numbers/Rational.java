@@ -12,7 +12,7 @@ import xfp.java.exceptions.Exceptions;
 /** Ratios of {@link Natural}.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-20
+ * @version 2019-07-21
  */
 
 @SuppressWarnings("unchecked")
@@ -260,12 +260,12 @@ implements Ringlike<Rational> {
                                    final Natural n,
                                    final Natural d) {
     final Natural nn = numerator().multiply(n);
-    System.out.println(nn);
+    //System.out.println(nn);
     final Natural dd =denominator().multiply(d); 
-    System.out.println(dd);
+    //System.out.println(dd);
     // infinite loop:
     final Rational qq = valueOf(! (nonNegative() ^ p),nn,dd);
-    System.out.println(qq);
+    //System.out.println(qq);
     return qq; }
 
   @Override
@@ -282,10 +282,10 @@ implements Ringlike<Rational> {
   public final Rational add2 (final double z) {
     assert Double.isFinite(z);
     final Rational q = valueOf(z);
-    System.out.println(q);
+    //System.out.println(q);
     // infinite loop:
     final Rational q2 = q.multiply(q);
-    System.out.println(q2);
+    //System.out.println(q2);
     return add(q2); }
 
   //--------------------------------------------------------------
@@ -515,7 +515,7 @@ implements Ringlike<Rational> {
                                         final Natural d0) {
     if (n0.isZero()) { return ZERO; }
     if (d0.isOne()) {
-      return new Rational(nonNegative,n0,NaturalBEI.ONE); }
+      return new Rational(nonNegative,n0,d0.one()); }
     final List<Natural> nd = n0.reduce(d0);
     return new Rational(nonNegative,nd.get(0),nd.get(1)); }
 
