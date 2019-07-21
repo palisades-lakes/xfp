@@ -8,7 +8,7 @@ import java.util.Arrays;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-19
+ * @version 2019-07-20
  */
 
 public final class NaturalLE implements Natural {
@@ -67,11 +67,13 @@ public final class NaturalLE implements Natural {
   @Override
   public final Natural empty () { return ZERO; }
 
+  /** Return a {@link NaturalLE} equivalent to the unsigned 
+   * value of <code>u</code>.
+   */
   @Override
-  public final Natural from (final int u) {
-    assert 0<=u;
-    return valueOf(u);  }
+  public final Natural from (final int u) { return valueOf(u); }
 
+  /** <code>0<=u</code>.*/
   @Override
   public final Natural from (final long u) {
     assert 0<=u;
@@ -117,8 +119,8 @@ public final class NaturalLE implements Natural {
   @Override
   public final boolean equals (final Object x) {
     if (x==this) { return true; }
-    if (!(x instanceof NaturalLE)) { return false; }
-    return uintsEquals((NaturalLE) x); }
+    if (!(x instanceof Natural)) { return false; }
+    return uintsEquals((Natural) x); }
 
   /** hex string. */
   @Override
@@ -178,13 +180,17 @@ public final class NaturalLE implements Natural {
   public static final NaturalLE valueOf (final String s) {
     return valueOf(s,0x10); }
 
+  /** <code>0L<=u</code>. */
   public static final NaturalLE valueOf (final long u) {
     assert 0L<=u;
     if (u==0L) { return ZERO; }
     return make(Ints.littleEndian(u)); }
 
+  
+  /** Return a {@link NaturalLE} equivalent to the unsigned 
+   * value of <code>u</code>.
+   */
   public static final NaturalLE valueOf (final int u) {
-    assert 0L<=u;
     if (u==0) { return ZERO; }
     return unsafe(new int[] {u}); }
 

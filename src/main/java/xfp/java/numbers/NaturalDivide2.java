@@ -6,8 +6,6 @@ import static xfp.java.numbers.Numbers.unsigned;
 
 import java.util.List;
 
-import xfp.java.Classes;
-
 /** Division, gcd, etc., of natural numbers.
  * 
  * Non-instantiable.
@@ -17,7 +15,7 @@ import xfp.java.Classes;
  */
 
 @SuppressWarnings("unchecked")
-public final class NaturalDivide {
+public final class NaturalDivide2 {
 
   //--------------------------------------------------------------
   // division
@@ -89,24 +87,19 @@ public final class NaturalDivide {
    */
 
   private static List fms (final Natural u0,
-                           final int n0,
                            final long x,
                            final Natural v,
-                           final int n1,
                            final int i0) {
     assert 0L<=x;
     assert 0<=i0;
     Natural u = u0.copy();
-    //final int n0 = u.endWord();
-    //final int n1 = v.endWord();
-//    assert n0==u.immutable().endWord() :
-//      "\nn0=" + n0
-//      + "\nvs=" + u.immutable().endWord();
+    final int n0 = u.endWord();
+    final int n1 = v.endWord();
     long carry = 0;
     int i = n0 - 1 - n1 - i0;
     assert 0<=i :
-      "\nu=" + Classes.className(u) + "\n" + u + 
-      "\nv=" + Classes.className(v) + "\n" + v
+      "\nu=" + u.getClass() + "\n" + u 
+      + "\nv=" + v.getClass() + "\n" + v
       + "\nx= " + x 
       + "\nn0= " + n0 + "\nn1= " + n1 + "\ni0= " + i0; 
     for (int j=0;j<n1;j++,i++) {
@@ -129,23 +122,21 @@ public final class NaturalDivide {
    * so DANGER that changes have made it incorrect...
    */
 
-  private static final Natural divadd (final Natural u,
-                                       final int n0,
+  private static final Natural divadd (final Natural u0,
                                        final Natural v,
-                                       final int n1,
                                        final int i0) {
     assert 0<=i0;
-    //final int n0 = u.endWord();
-    //final int n1 = v.endWord();
-    Natural uu = u;
+    Natural u = u0;
+    final int n0 = u.endWord();
+    final int n1 = v.endWord();
     final int off = n0 - n1 - 1 - i0;
     long carry = 0;   
     for (int j=0;j<n1;j++) {
       final int i = off + j;
-      final long sum = v.uword(j) + uu.uword(i) + carry;
-      uu = uu.setWord(i,(int)sum);
+      final long sum = v.uword(j) + u.uword(i) + carry;
+      u = u.setWord(i,(int)sum);
       carry = sum >>> 32; }
-    return uu; }
+    return u; }
 
   //--------------------------------------------------------------
 
@@ -154,52 +145,42 @@ public final class NaturalDivide {
                  final Natural v) {
     assert !v.isZero();
     // D1 compact the divisor
-    final int nv = v.endWord();
+    final int nv = v.hiInt();
     final int lShift = Integer.numberOfLeadingZeros(v.word(nv-1));
-    Natural d = v.recyclable(v,nv).shiftUp(lShift);
-    // this fails:
-    //Natural d = v.shiftUp(lShift);
-    //d = d.recyclable(d);
-    final int nd = d.endWord();
-    assert nv==nd;
-    final int nu = u.endWord();
-    //Natural r = u.recyclable(u).shiftUp(lShift);
-    Natural r = u.shiftUp(lShift);
-    final int nr0 = r.endWord();
-    // this is necessary:
-    r = r.recyclable(r);
-    assert (nu==nr0)||(nu+1==nr0) :
-      "\nnu=" + nu + "\nnr=" + nr0;
-    r = r.setWord(nr0,0);
-    final int nr = nr0+1;
-    //final int nr = r.endWord();
-    //assert nr0+1==nr;
-    //final int limit = nr-nd;
-    //Natural q = u.recyclable(nr-nd);
-    Natural q = u.zero();
-    final int nq = nr-nd;
+    Natural d = v.immutable().shiftUp(lShift);
+    final int nd = d.hiInt();
+    Natural r = u.immutable().shiftUp(lShift);
+    final int nr = r.hiInt();
+    r = r.setWord(nr,0);
+    final int limit = nr-nv+1;
+    //Natural q = u.recyclable(limit);
+    Natural q = u.immutable();
     final long dh = d.uword(nd-1);
     final long dl = d.uword(nd-2);
     // D2 Initialize j
-    for (int j=0;j<(nq-1);j++) {
+    for (int j=0;j<(limit-1);j++) {
       // D3 Calculate qhat
-      boolean correctQhat = true;
-      final int i = nr-j-1;
-      final long rh = r.uword(i);
-      final long rm = r.uword(i-1);
-      long qhat; long qrem;
-      if (rh==dh) {
-        qhat=0xFFFFFFFFL; qrem=rh+rm; correctQhat=(qrem>=rh); }
+      boolean skipCorrection = false;
+      final int i = nr-j;
+      final long nh = r.uword(i);
+      final long nm = r.uword(i-1);
+      long qhat;
+      long qrem;
+      if (nh==dh) {
+        qhat = 0xFFFFFFFFL;
+        qrem = nh+nm;
+        skipCorrection = (qrem < nh); }
       else {
-        final long nChunk = (rh<<32) | rm;
+        final long nChunk = (nh<<32) | nm;
         if (nChunk >= 0) {
           qhat = loWord(nChunk/dh);
           qrem = loWord(nChunk-(qhat*dh)); }
         else {
           final long tmp = Ints.divWord(nChunk,dh);
-          qhat = loWord(tmp); qrem = hiWord(tmp); } }
-      if (0L==qhat) { continue; }
-      if (correctQhat) { 
+          qhat = loWord(tmp);
+          qrem = hiWord(tmp); } }
+      if (qhat == 0L) { continue; }
+      if (!skipCorrection) { // Correct qhat
         final long nl = r.uword(i-2);
         long rs = (qrem << 32) | nl;
         long estProduct = dl*qhat;
@@ -212,55 +193,59 @@ public final class NaturalDivide {
             if (Long.compareUnsigned(estProduct, rs)>0) { qhat--; } } } }
       // D4 Multiply and subtract
       r.setWord(i,0);
-      final List rc = fms(r,nr,qhat,d,nd,j);
+      final List rc = fms(r,qhat,d,j);
       r = (Natural) rc.get(0);
       final long borrow = ((Long) rc.get(1)).longValue();
-      // D5 Test remainder, D6 Add back
-      if (borrow>rh) { r = divadd(r,nr,d,nd,j); qhat--; }
+      // D5 Test remainder
+      if (borrow > nh) { // D6 Add back
+        r = divadd(r,d,j); qhat--; }
       // Store the quotient digit
-      //assert nq==q.endWord();
-      q = q.setWord(nq-1-j,(int) qhat); } // D7 loop on j
+      q = q.setWord(q.hiInt()-1-j,(int)qhat); } // D7 loop on j
 
     // D3 Calculate qhat
     // 1st estimate
-    long qhat; long qrem;
-    boolean correctQhat = true;
-    //assert r.endWord()==nr;
-    final long nh = r.uword(nd);
-    final long nm =  r.uword(nd-1);
-    if (nh==dh) {
-      qhat=0xFFFFFFFFL; qrem=nh+nm; correctQhat=(qrem>=nh); }
+    long qhat;
+    long qrem;
+    boolean skipCorrection = false;
+    final int i = r.hiInt() - limit;
+    final long nh = r.uword(i);
+    final long nm =  r.uword(i-1);
+    if (nh == dh) {
+      qhat = 0xFFFFFFFFL;
+      qrem = nh+nm;
+      skipCorrection = (qrem < nh); }
     else {
       final long nChunk = (nh << 32) | nm;
       if (nChunk >= 0) {
-        qhat = loWord(nChunk/dh); qrem = loWord(nChunk-(qhat*dh)); }
+        qhat = loWord(nChunk/dh);
+        qrem = loWord(nChunk-(qhat*dh)); }
       else {
         final long tmp = Ints.divWord(nChunk,dh);
-        qhat = loWord(tmp); qrem = hiWord(tmp); } }
+        qhat = loWord(tmp);
+        qrem = hiWord(tmp); } }
     // 2nd correction
-    if (0L!=qhat) {
-      if (correctQhat) {
-        final long nl = r.uword(nd-2);
+    if (qhat != 0L) {
+      if (!skipCorrection) {
+        final long nl = r.uword(i-2);
         long rs = (qrem << 32) | nl;
         long estProduct = dl*qhat;
         if (Long.compareUnsigned(estProduct, rs)>0) {
-          qhat--; qrem = loWord(qrem + dh);
+          qhat--;
+          qrem = loWord(qrem + dh);
           if (qrem >= dh) {
             estProduct -= (dl);
             rs = (qrem << 32) | nl;
             if (Long.compareUnsigned(estProduct, rs)>0) { qhat--; } } } }
       // D4 Multiply and subtract
-      r = r.setWord(nd,0);
-      final List rc = fms(r,nr,qhat,d,nd,nq-1);
+      r = r.setWord(i,0);
+      final List rc = fms(r,qhat,d,limit-1);
       r = (Natural) rc.get(0);
       final long borrow = ((Long) rc.get(1)).longValue();
       // D5 Test remainder
       if (borrow > nh) { // D6 Add back
-        r = divadd(r,nr,d,nd,nq-1); qhat--; }
+        r = divadd(r,d,limit-1); qhat--; }
       // Store the quotient digit
-      //assert nq==q.endWord();
-      //q = q.setWord(q.endWord()-nr+nd,(int)qhat); }
-      q = q.setWord(0,(int)qhat); }
+      q = q.setWord(q.hiInt()-limit,(int)qhat); }
 
     // D8 decompact
     if (lShift > 0) { r = r.shiftDown(lShift); }
@@ -278,8 +263,6 @@ public final class NaturalDivide {
   public static final List<Natural> 
   divideAndRemainderKnuth (final Natural u,
                            final Natural v) {
-//    assert u.isImmutable();
-//    assert v.isImmutable();
     assert ! v.isZero();
     if (v.isOne()) { return List.of(u.immutable(),u.zero()); }
     if (u.isZero()) { return List.of(u.zero(),u.zero()); }
@@ -288,7 +271,7 @@ public final class NaturalDivide {
     if (0==cmp) { return List.of(u.one(),u.zero()); }
     if (0>cmp) { return List.of(u.zero(),u.immutable()); }
 
-    if (1==v.endWord()) { 
+    if (1==v.hiInt()) { 
       return divideAndRemainder(u,v.word(0)); } 
 
     // Cancel common powers of 2 if above KNUTH_POW2_* thresholds
@@ -303,9 +286,9 @@ public final class NaturalDivide {
         final Natural r = qr.get(1).shiftUp(shift);
         return List.of(qr.get(0),r); } }
 
-    //    final Natural a = u.recyclable(u);
-    //    final Natural b = v.recyclable(v);
-    //    return knuthDivision(a,b); }
+    //final Natural a = u.recyclable(u);
+    //final Natural b = v.recyclable(v);
+    //return knuthDivision(a,b); }
     return knuthDivision(u,v); }
 
   //--------------------------------------------------------------
@@ -500,9 +483,9 @@ public final class NaturalDivide {
     assert (! v.isZero());
     final List<Natural> qr;
     if (useKnuthDivision(u,v)) { 
-      qr = NaturalDivide.divideAndRemainderKnuth(u,v); }
+      qr = NaturalDivide2.divideAndRemainderKnuth(u,v); }
     else { 
-      qr = NaturalDivide.divideAndRemainderBurnikelZiegler(u,v); }
+      qr = NaturalDivide2.divideAndRemainderBurnikelZiegler(u,v); }
     return List.of(qr.get(0).immutable(),qr.get(1).immutable()); }
 
   //--------------------------------------------------------------
@@ -578,7 +561,7 @@ public final class NaturalDivide {
   // disable constructor
   //--------------------------------------------------------------
 
-  private NaturalDivide () {
+  private NaturalDivide2 () {
     throw new
     UnsupportedOperationException(
       "can't instantiate " + getClass().getCanonicalName()); }

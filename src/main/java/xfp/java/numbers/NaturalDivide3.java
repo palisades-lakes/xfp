@@ -17,7 +17,7 @@ import xfp.java.Classes;
  */
 
 @SuppressWarnings("unchecked")
-public final class NaturalDivide {
+public final class NaturalDivide3 {
 
   //--------------------------------------------------------------
   // division
@@ -156,18 +156,14 @@ public final class NaturalDivide {
     // D1 compact the divisor
     final int nv = v.endWord();
     final int lShift = Integer.numberOfLeadingZeros(v.word(nv-1));
-    Natural d = v.recyclable(v,nv).shiftUp(lShift);
-    // this fails:
-    //Natural d = v.shiftUp(lShift);
-    //d = d.recyclable(d);
+    //Natural d = v.recyclable(v,nv).shiftUp(lShift);
+    Natural d = v.shiftUp(lShift);
     final int nd = d.endWord();
     assert nv==nd;
     final int nu = u.endWord();
     //Natural r = u.recyclable(u).shiftUp(lShift);
     Natural r = u.shiftUp(lShift);
     final int nr0 = r.endWord();
-    // this is necessary:
-    r = r.recyclable(r);
     assert (nu==nr0)||(nu+1==nr0) :
       "\nnu=" + nu + "\nnr=" + nr0;
     r = r.setWord(nr0,0);
@@ -175,8 +171,8 @@ public final class NaturalDivide {
     //final int nr = r.endWord();
     //assert nr0+1==nr;
     //final int limit = nr-nd;
-    //Natural q = u.recyclable(nr-nd);
-    Natural q = u.zero();
+    Natural q = u.recyclable(nr-nd);
+    //Natural q = u.zero();
     final int nq = nr-nd;
     final long dh = d.uword(nd-1);
     final long dl = d.uword(nd-2);
@@ -500,9 +496,9 @@ public final class NaturalDivide {
     assert (! v.isZero());
     final List<Natural> qr;
     if (useKnuthDivision(u,v)) { 
-      qr = NaturalDivide.divideAndRemainderKnuth(u,v); }
+      qr = NaturalDivide3.divideAndRemainderKnuth(u,v); }
     else { 
-      qr = NaturalDivide.divideAndRemainderBurnikelZiegler(u,v); }
+      qr = NaturalDivide3.divideAndRemainderBurnikelZiegler(u,v); }
     return List.of(qr.get(0).immutable(),qr.get(1).immutable()); }
 
   //--------------------------------------------------------------
@@ -578,7 +574,7 @@ public final class NaturalDivide {
   // disable constructor
   //--------------------------------------------------------------
 
-  private NaturalDivide () {
+  private NaturalDivide3 () {
     throw new
     UnsupportedOperationException(
       "can't instantiate " + getClass().getCanonicalName()); }

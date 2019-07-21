@@ -32,7 +32,7 @@ import xfp.java.prng.PRNG;
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-17
+ * @version 2019-07-20
  */
 @SuppressWarnings("unchecked")
 public final class Common {
@@ -117,7 +117,9 @@ public final class Common {
 
     final T r1 = valueOf.apply(rs);
     Assertions.assertEquals(r0,r1,() ->
-    "\n" + rs + "\n" + r1.toString());  }
+    "\n" + rs + "\n" 
+      + r0.toString() 
+    + "\n" + r1.toString() + "\n");  }
 
   public static final <T extends Ringlike<T>> void
   biRoundTrip (final Function<BigInteger,T> fromBI,
@@ -323,8 +325,7 @@ public final class Common {
       final Natural y0 = fromBI.apply(x0);
       final Natural y1 = fromBI.apply(x1);
       final BigInteger[] x2 = x0.divideAndRemainder(x1);
-      final List<Natural> y2 = 
-        y0.divideAndRemainderKnuth(y1);
+      final List<Natural> y2 = y0.divideAndRemainderKnuth(y1);
       final BigInteger[] x3 = { toBI.apply(y2.get(0)), 
                                 toBI.apply(y2.get(1)),};
 
@@ -334,10 +335,12 @@ public final class Common {
       + "\n" +  x1.toString(0x10)
       + "\n -> "
       + "\n" + x2[0].toString(0x10)
+      + "\n" + y0.getClass()
       + "\n" + y0.toString()
       + "\n / "
       + "\n" +  y1.toString()
       + "\n -> "
+      + "\n" + y2.get(0).getClass()
       + "\n" + y2.get(0).toString()
       + "\n" + x3[0].toString(0x10));
 
@@ -472,16 +475,16 @@ public final class Common {
     multiply(fromBI,toBI,z0,z0);
     divide(fromBI,toBI,z0,z1);
     divide(fromBI,toBI,z0,z0);
-//    divideAndRemainder(fromBI,toBI,z0,z1);
-//    divideAndRemainder(fromBI,toBI,z0,z0);
-//    divideAndRemainderKnuth(fromBI,toBI,z0,z1);
-//    divideAndRemainderKnuth(fromBI,toBI,z0,z0);
-//    divideAndRemainderBurnikelZiegler(fromBI,toBI,z0,z1);
-//    divideAndRemainderBurnikelZiegler(fromBI,toBI,z0,z0);
-//    remainder(fromBI,toBI,z0,z1);
-//    remainder(fromBI,toBI,z0,z0);
-//    gcd(fromBI,toBI,z0,z1);
-//    gcd(fromBI,toBI,z0,z0);
+    divideAndRemainder(fromBI,toBI,z0,z1);
+    divideAndRemainder(fromBI,toBI,z0,z0);
+    divideAndRemainderKnuth(fromBI,toBI,z0,z1);
+    divideAndRemainderKnuth(fromBI,toBI,z0,z0);
+    divideAndRemainderBurnikelZiegler(fromBI,toBI,z0,z1);
+    divideAndRemainderBurnikelZiegler(fromBI,toBI,z0,z0);
+    remainder(fromBI,toBI,z0,z1);
+    remainder(fromBI,toBI,z0,z0);
+    gcd(fromBI,toBI,z0,z1);
+    gcd(fromBI,toBI,z0,z0);
     }
 
 
@@ -1154,7 +1157,7 @@ public final class Common {
       if (a.isExact()) {
         Assertions.assertEquals(0.0,pred,
           "sum not zero: " + Classes.className(a)
-          + " = " + Double.toString(pred) + "\n");  }
+          + " = " + Double.toHexString(pred) + "\n");  }
       //final double l1d = Math.abs(pred);
       //Debug.println(
       //  String.format("%32s %8.2fms ",Classes.className(a),
@@ -1201,10 +1204,10 @@ public final class Common {
         if (a.isExact()) {
           Assertions.assertEquals(truth,pred,
             "\nexact: " + Classes.className(exact)
-            + "\n= " + Double.toString(truth)
+            + "\n= " + Double.toHexString(truth)
             + "\n= " + exact.value()
             + "\npred: " + Classes.className(a)
-            + "\n= " + Double.toString(pred)
+            + "\n= " + Double.toHexString(pred)
             + "\n= " + a.value()
             + "\n"); } } }
     //Debug.DEBUG=false;
@@ -1233,10 +1236,10 @@ public final class Common {
       if (a.isExact()) {
         Assertions.assertEquals(truth,pred,
           "\nexact: " + Classes.className(exact)
-          + " = " + Double.toString(truth)
+          + " = " + Double.toHexString(truth)
           + "\n= " + exact.value()
           + "\npred: " + Classes.className(a)
-          + " = " + Double.toString(pred)
+          + " = " + Double.toHexString(pred)
           + "\n= " + a.value()
           + "\n"); }
       //final double l1d = Math.abs(truth-pred);
@@ -1270,8 +1273,11 @@ public final class Common {
     for (final Accumulator a : accumulators) {
       final double pred =
         a.clear().add2All(x).doubleValue();
-      if (a.isExact()) { Assertions.assertEquals(truth,pred); }
-    } }
+      if (a.isExact()) { 
+        Assertions.assertEquals(truth,pred,
+          () ->
+        "\n" + Double.toHexString(truth)
+        + "\n" +  Double.toHexString(pred) + "\n"); } } }
 
   public static final void l2Tests (final List<Generator> generators,
                                     final List<Accumulator> accumulators,
@@ -1302,7 +1308,9 @@ public final class Common {
         "\n" + Classes.className(a) + "\n");
       if (a.isExact()) {
         Assertions.assertEquals(truth,pred,
-          "\n" + Classes.className(a) + "\n"); } } }
+          () ->
+        "\n" + Double.toHexString(truth)
+        + "\n" +  Double.toHexString(pred) + "\n"); } } }
 
   private static final void
   l2DistanceTest (final Generator g,
@@ -1322,7 +1330,9 @@ public final class Common {
         "\n" + Classes.className(a) + "\n");
       if (a.isExact()) {
         Assertions.assertEquals(truth,pred,
-          "\n" + Classes.className(a) + "\n"); } } }
+          () ->
+        "\n" + Double.toHexString(truth)
+        + "\n" +  Double.toHexString(pred) + "\n"); } } }
 
   public static final void
   l2DistanceTests (final List<Generator> generators,
