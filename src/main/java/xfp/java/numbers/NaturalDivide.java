@@ -30,8 +30,8 @@ public final class NaturalDivide {
 
   private static final boolean useKnuthDivision (final Natural u,
                                                  final Natural v) {
-    final int nn = u.endWord();
-    final int nd = v.endWord();
+    final int nn = u.hiInt();
+    final int nd = v.hiInt();
     return
       (nd < BURNIKEL_ZIEGLER_THRESHOLD)
       ||
@@ -43,33 +43,29 @@ public final class NaturalDivide {
   private static final List<Natural> 
   divideAndRemainder (final Natural u,
                       final int d) {
-    
-    if (! u.isImmutable()) { 
-      return divideAndRemainder(u.immutable(),d); }
-    
     if (1==d) { return List.of(u,u.zero()); }
 
     final long dd = unsigned(d);
-    if (1==u.endWord()) {
+    if (1==u.hiInt()) {
       final long nn = u.uword(0);
       final int q = (int) (nn/dd);
       final int r = (int) (nn-(q*dd));
       return List.of(u.from(q),u.from(r)); }
 
-    Natural qq = u.recyclable(u.endWord());
+    Natural qq = u;
 
     final int shift = Integer.numberOfLeadingZeros(d);
-    int r = u.word(u.endWord()-1);
+    int r = u.word(u.hiInt()-1);
     long rr = unsigned(r);
     if (rr < dd) { 
-      qq = qq.setWord(qq.endWord()-1,0); }
+      qq = qq.setWord(qq.hiInt()-1,0); }
     else {
       final int rrdd = (int) (rr / dd);
-      qq = qq.setWord(u.endWord()-1,rrdd);
+      qq = qq.setWord(u.hiInt()-1,rrdd);
       r = (int) (rr-(rrdd*dd));
       rr = unsigned(r); }
 
-    int xlen = u.endWord();
+    int xlen = u.hiInt();
     while (--xlen > 0) {
       final long nEst = (rr << 32) | u.uword(xlen-1);
       final int q;
@@ -82,10 +78,8 @@ public final class NaturalDivide {
         r = (int) Numbers.hiWord(tmp); }
       qq = qq.setWord(xlen-1,q);
       rr = unsigned(r); }
-    //qq.compact();
-    // decompact
-    if (shift > 0) { return List.of(qq,u.from(r % d)); }
-    return List.of(qq.immutable(),u.from(r)); }
+    if (shift > 0) { return List.of(qq,u.from(r%d)); }
+    return List.of(qq,u.from(r)); }
 
   //--------------------------------------------------------------
   /** Special shifted fused multiply-subtract 
@@ -99,25 +93,23 @@ public final class NaturalDivide {
                            final int i0) {
     assert 0L<=x;
     assert 0<=i0;
-  Natural uu = u;
-//  Natural uu = u.recyclable(u);
-//    uu = ((NaturalBEIMutable) uu).expandTo(n0-i0-2);
+    Natural w = u;
     long carry = 0;
     int i = n0-1-n1-i0;
     assert 0<=i :
-      "\nu=" + Classes.className(uu) + "\n" + uu + 
+      "\nu=" + Classes.className(w) + "\n" + w + 
       "\nv=" + Classes.className(v) + "\n" + v
       + "\nx= " + x 
       + "\nn0= " + n0 + "\nn1= " + n1 + "\ni0= " + i0; 
     for (int j=0;j<n1;j++,i++) {
       final long prod = (v.uword(j)*x) + carry;
-      final long diff = uu.uword(i)-prod;
-      uu = uu.setWord(i, (int) diff);
+      final long diff = w.uword(i)-prod;
+      w = w.setWord(i, (int) diff);
       carry = hiWord(prod);
       // TODO: is this related to possibility x*u > this,
       // so difference is negative?
       if (loWord(diff) > unsigned(~(int)prod)) { carry++; } }
-    return List.of(uu.immutable(), Long.valueOf(loWord(carry))); }
+    return List.of(w, Long.valueOf(loWord(carry))); }
 
   //--------------------------------------------------------------
   /** A primitive used for division. This method adds in one
@@ -135,56 +127,35 @@ public final class NaturalDivide {
                                        final int n1,
                                        final int i0) {
     assert 0<=i0;
-    //final int n0 = u.endWord();
-    //final int n1 = v.endWord();
-    Natural uu = u;//.recyclable(u);
+    Natural w = u;
     final int off = n0 - n1 - 1 - i0;
     long carry = 0;   
     for (int j=0;j<n1;j++) {
       final int i = off + j;
-      final long sum = v.uword(j) + uu.uword(i) + carry;
-      uu = uu.setWord(i,(int)sum);
+      final long sum = v.uword(j) + w.uword(i) + carry;
+      w = w.setWord(i,(int)sum);
       carry = sum >>> 32; }
-    return uu.immutable(); }
+    return w; }
 
   //--------------------------------------------------------------
 
   private static final List<Natural> 
   knuthDivision (final Natural u,
                  final Natural v) {
-    //System.out.println("knuthDivision");
-    //System.out.println("u:" + Classes.className(u));
-    //System.out.println("v:" + Classes.className(v));
-    assert u.isImmutable();
-    assert v.isImmutable();
     assert !v.isZero();
     // D1 compact the divisor
-    final int nv = v.endWord();
+    final int nv = v.hiInt();
     final int lShift = Integer.numberOfLeadingZeros(v.word(nv-1));
-    //Natural d = v.recyclable(v,nv).shiftUp(lShift);
-    // this fails:
     Natural d = v.shiftUp(lShift);
-    //d = d.recyclable(d);
-    final int nd = d.endWord();
+    final int nd = d.hiInt();
     assert nv==nd;
-    final int nu = u.endWord();
-    //Natural r = u.recyclable(u);
-    //r = r.shiftUp(lShift);
-    //r = r.immutable();
+    final int nu = u.hiInt();
     Natural r = u.shiftUp(lShift);
-    //System.out.println("initial r=\n" + r);
-    final int nr0 = r.endWord();
-    // this is necessary:
-    //r = r.recyclable(r);
+    final int nr0 = r.hiInt();
     assert (nu==nr0)||(nu+1==nr0) :
       "\nnu=" + nu + "\nnr=" + nr0;
     r = r.setWord(nr0,0);
-    //System.out.println("zero hi r=\n" + r);
     final int nr = nr0+1;
-    //final int nr = r.endWord();
-    //assert nr0+1==nr;
-    //final int limit = nr-nd;
-    //Natural q = u.recyclable(nr-nd);
     Natural q = u.zero();
     final int nq = nr-nd;
     final long dh = d.uword(nd-1);
@@ -227,14 +198,14 @@ public final class NaturalDivide {
       // D5 Test remainder, D6 Add back
       if (borrow>rh) { r = divadd(r,nr,d,nd,j); qhat--; }
       // Store the quotient digit
-      //assert nq==q.endWord();
+      //assert nq==q.hiInt();
       q = q.setWord(nq-1-j,(int) qhat); } // D7 loop on j
 
     // D3 Calculate qhat
     // 1st estimate
     long qhat; long qrem;
     boolean correctQhat = true;
-    //assert r.endWord()==nr;
+    //assert r.hiInt()==nr;
     final long nh = r.uword(nd);
     final long nm =  r.uword(nd-1);
     if (nh==dh) {
@@ -267,8 +238,8 @@ public final class NaturalDivide {
       if (borrow > nh) { // D6 Add back
         r = divadd(r,nr,d,nd,nq-1); qhat--; }
       // Store the quotient digit
-      //assert nq==q.endWord();
-      //q = q.setWord(q.endWord()-nr+nd,(int)qhat); }
+      //assert nq==q.hiInt();
+      //q = q.setWord(q.hiInt()-nr+nd,(int)qhat); }
       q = q.setWord(0,(int)qhat); }
 
     // D8 decompact
@@ -287,28 +258,23 @@ public final class NaturalDivide {
   public static final List<Natural> 
   divideAndRemainderKnuth (final Natural u,
                            final Natural v) {
-    //System.out.println("divideAndRemainderKnuth");
     assert ! v.isZero();
-    if (v.isOne()) { return List.of(u.immutable(),u.zero()); }
+    if (v.isOne()) { return List.of(u,u.zero()); }
     if (u.isZero()) { return List.of(u.zero(),u.zero()); }
 
     final int cmp = u.compareTo(v);
     if (0==cmp) { return List.of(u.one(),u.zero()); }
-    if (0>cmp) { return List.of(u.zero(),u.immutable()); }
+    if (0>cmp) { return List.of(u.zero(),u); }
 
     if (1==v.hiInt()) { 
-      //System.out.println("1 word");
       return divideAndRemainder(u,v.word(0)); } 
 
     // Cancel common powers of 2 if above KNUTH_POW2_* thresholds
     if (u.hiInt() >= KNUTH_POW2_THRESH_LEN) {
       final int shift = Math.min(u.loBit(),v.loBit());
       if (shift >= KNUTH_POW2_THRESH_ZEROS) {
-        //final Natural a = u.recyclable(u).shiftDown(shift);
-        //final Natural b = v.recyclable(v).shiftDown(shift);
         final Natural a = u.shiftDown(shift);
         final Natural b = v.shiftDown(shift);
-        //System.out.println("recursuve");
         final List<Natural> qr = divideAndRemainderKnuth(a,b);
         final Natural r = qr.get(1).shiftUp(shift);
         return List.of(qr.get(0),r); } }
@@ -323,21 +289,19 @@ public final class NaturalDivide {
    * <br/>
    * {@code this} must be a nonnegative number such that
    * {@code 2*this.hiBit() <= 3*b.hiBit()}
-   * @param quotient output parameter for {@code this/b}
-   * @return {@code this%b}
    */
 
   private static final List<Natural> 
   divide3n2n (final Natural a,
               final Natural b) {
-    final int n = b.endWord() / 2;   // half the length of b in ints
+    final int n = b.hiInt() / 2;   // half the length of b in ints
 
     // step 1: view this as [a1,a2,a3] where each ai is n ints
     // or less; let a12=[a1,a2]
-    Natural a12 = a.copy().shiftDown(32*n);
+    Natural a12 = a.shiftDown(32*n);
 
     // step 2: view b as [b1,b2] where each bi is n ints or less
-    Natural b1 = b.copy().shiftDown(n*32);
+    Natural b1 = b.shiftDown(n*32);
     final Natural b2 = b.words(0,n);
     Natural r;
     Natural d;
@@ -358,8 +322,8 @@ public final class NaturalDivide {
       b1 = b1.shiftUp(32*n);
       r = a12.subtract(b1);
       // step 4: d=quotient*b2=(b2 << 32*n) - b2
-      d = b2.copy().shiftUp(32*n).subtract(b2); }
-    // step 5: r = r*beta^n + a3 - d (paper says a4)
+      d = b2.shiftUp(32*n).subtract(b2); }
+     // step 5: r = r*beta^n + a3 - d (paper says a4)
     // However, don't subtract d until after the while loop
     // so r doesn't become negative
     r = r.shiftUp(n<<5).add(a.words(0,n));
@@ -383,7 +347,7 @@ public final class NaturalDivide {
   private static final List<Natural> 
   divide2n1n (final Natural a,
               final Natural b) {
-    final int n = b.endWord();
+    final int n = b.hiInt();
 
     // step 1: base case
     if (((n%2) != 0) || (n < BURNIKEL_ZIEGLER_THRESHOLD)) {
@@ -393,7 +357,7 @@ public final class NaturalDivide {
     // step 2: view this as [a1,a2,a3,a4]
     // where each ai is n/2 ints or less
     // aUpper = [a1,a2,a3]
-    final Natural aUpper = a.copy().shiftDown(32*(n/2));
+    final Natural aUpper = a.shiftDown(32*(n/2));
 
     Natural aa = a.words(0,n/2); // this = a4
 
@@ -423,11 +387,11 @@ public final class NaturalDivide {
                                          final int numBlocks,
                                          final int blockLength) {
     final int blockStart = index * blockLength;
-    if (blockStart >= u.endWord()) { return u.zero(); }
+    if (blockStart >= u.hiInt()) { return u.zero(); }
     final int blockEnd;
-    if (index == (numBlocks-1)) { blockEnd = u.endWord(); }
+    if (index == (numBlocks-1)) { blockEnd = u.hiInt(); }
     else { blockEnd = (index+1) * blockLength; }
-    if (blockEnd > u.endWord()) { return u.zero(); }
+    if (blockEnd > u.hiInt()) { return u.zero(); }
     return u.words(blockStart,blockEnd); }
 
   //--------------------------------------------------------------
@@ -435,13 +399,10 @@ public final class NaturalDivide {
   public static final List<Natural>
   divideAndRemainderBurnikelZiegler (final Natural u,
                                      final Natural v) {
-    if (u.isImmutable()) {
-      return
-        u.recyclable(u).divideAndRemainderBurnikelZiegler(v); }
     final int c = u.compareTo(v);
     if (0==c) { return List.of(u.one(),u.zero()); }
     if (0>c) { return List.of(u.zero(),u); }
-    final int s = v.endWord();
+    final int s = v.hiInt();
 
     // step 1: let m = min{2^k | (2^k)*BURNIKEL_ZIEGLER_THRESHOLD > s}
     final int s0 = s/BURNIKEL_ZIEGLER_THRESHOLD;
@@ -455,9 +416,9 @@ public final class NaturalDivide {
 
     // step 4a: shift b so its length is a multiple of n
     assert 0<=sigma;
-    final Natural bShifted = v.copy().shiftUp(sigma);
+    final Natural bShifted = v.shiftUp(sigma);
     // step 4b: shift a by the same amount
-    final Natural aShifted = u.copy().shiftUp(sigma);
+    final Natural aShifted = u.shiftUp(sigma);
 
     // step 5: t is the number of blocks needed to accommodate a
     // plus one additional bit
@@ -482,21 +443,15 @@ public final class NaturalDivide {
       z = getBlock(aShifted,i-1, t, n);   // a[i-1]
       z = z.add(qri.get(1), 32*n);
       // update q (part of step 9)
-      q = q.add(qri.get(0).immutable(),(i*n)<<5); }
-    //System.out.println("q=\n"+q);
+      q = q.add(qri.get(0),(i*n)<<5); }
     // final iteration of step 8: do the loop one more time
     // for i=0 but leave z unchanged
-    // Doesn't need modified z
     final List<Natural> qri = divide2n1n(z,bShifted);
-    //System.out.println("z=\n"+z);
-    //System.out.println("b=\n"+bShifted);
-    //System.out.println("q=\n"+qri.get(0));
-    //System.out.println("r=\n"+qri.get(1));
 
     // step 9: a and b were shifted, so shift back
     return List.of(
-      q.add(qri.get(0)).immutable(),
-      qri.get(1).shiftDown(sigma).immutable()); }
+      q.add(qri.get(0)),
+      qri.get(1).shiftDown(sigma)); }
 
   //--------------------------------------------------------------
 
@@ -504,14 +459,9 @@ public final class NaturalDivide {
   divideAndRemainder (final Natural u,
                       final Natural v) {
     assert (! v.isZero());
-//    if (!(u.isImmutable()&&v.isImmutable())) {
-//      return divideAndRemainder(u.immutable(),v.immutable()); }
-    final List<Natural> qr;
     if (useKnuthDivision(u,v)) { 
-      qr = NaturalDivide.divideAndRemainderKnuth(u,v); }
-    else { 
-      qr = NaturalDivide.divideAndRemainderBurnikelZiegler(u,v); }
-    return List.of(qr.get(0).immutable(),qr.get(1).immutable()); }
+      return NaturalDivide.divideAndRemainderKnuth(u,v); }
+    return NaturalDivide.divideAndRemainderBurnikelZiegler(u,v); }
 
   //--------------------------------------------------------------
   // gcd
@@ -520,8 +470,8 @@ public final class NaturalDivide {
 
   private static final Natural gcdKnuth (final Natural u,
                                          final Natural v) {
-    Natural a = u.recyclable(u);
-    Natural b = v.recyclable(v);
+    Natural a = u;
+    Natural b = v;
     // B1
     final int sa = a.loBit();
     final int s = Math.min(sa,b.loBit());
@@ -533,8 +483,7 @@ public final class NaturalDivide {
       // B3 and B4
       t = t.shiftDown(lb);
       // step B5
-      if (0<tsign) { a = t; }
-      else { b = t; }
+      if (0<tsign) { a = t; } else { b = t; }
       final int an = a.hiInt();
       final int bn = b.hiInt();
       if ((an<2) && (bn<2)) {
@@ -561,18 +510,12 @@ public final class NaturalDivide {
     Natural a = u;
     Natural b = v;
     while (!b.isZero()) {
-      //System.out.println("enter gcd");
-      //System.out.println("a=" + a.hiInt() + "\n" + a);
-      //System.out.println("b="  + b.hiInt() + "\n" + b);
       if (Math.abs(a.hiInt()-b.hiInt()) < 2) { 
-        //System.out.println("calling gcdKnuth");
-        return gcdKnuth(a,b).immutable(); }
+        return gcdKnuth(a,b); }
       final List<Natural> qr = divideAndRemainder(a,b);
-      //System.out.println("q=\n" + qr.get(0));
-      //System.out.println("r=\n" + qr.get(1));
       a = b;
       b = qr.get(1); }
-    return a.immutable(); }
+    return a; }
 
   public static final List<Natural> reduce (final Natural n0,
                                             final Natural d0) {
@@ -582,14 +525,10 @@ public final class NaturalDivide {
     if (n.equals(d)) { return List.of(n0.one(),n0.one()); }
     if (d.isOne()) { return List.of(n,n0.one()); }
     if (n.isOne()) { return List.of(n0.one(),d); }
-    //System.out.println("reduce");
     final Natural g = gcd(n,d);
-    //System.out.println("gcd=\n" + g);
     if (g.compareTo(n.one()) > 0) {
       final Natural ng = n.divide(g);
-      //System.out.println("ng");
       final Natural dg = d.divide(g);
-      //System.out.println("dg");
       return List.of(ng,dg); }
     return List.of(n,d); }
 

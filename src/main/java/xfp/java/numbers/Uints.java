@@ -17,7 +17,7 @@ import xfp.java.exceptions.Exceptions;
  * TODO: max valid range limited by int hiBit!
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-19
+ * @version 2019-07-21
  */
 
 @SuppressWarnings("unchecked")
@@ -262,8 +262,6 @@ public interface Uints<T extends Uints> extends Transience<T> {
     return (T) u.immutable(); }
 
   default T shiftDown (final int shift) {
-    //throw
-    //Exceptions.unsupportedOperation(this,"shiftDown",shift); }
     assert 0<=shift;
     if (shift==0) { return (T) this; }
     final int n0 = endWord();
