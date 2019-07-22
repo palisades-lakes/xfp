@@ -18,7 +18,7 @@ import xfp.java.exceptions.Exceptions;
  * TODO: utilities class to hide private stuff?
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-17
+ * @version 2019-07-22
  */
 
 @SuppressWarnings("unchecked")
@@ -578,20 +578,32 @@ extends Uints<Natural>, Ringlike<Natural> {
   // factories for default implementation
   //--------------------------------------------------------------
 
-  static Natural get (final int u) {
-    return get(Numbers.unsigned(u)); }
-
-  static Natural get (final long u) {
-    assert 0L<=u;
-    return NaturalBEI.valueOf(u); }
-
-  static Natural get (final BigInteger u) {
-    assert 0<=u.signum();
-    return NaturalBEI.valueOf(u); }
+//  static Natural get (final long u) {
+//    assert 0L<=u;
+//    return NaturalBEI.valueOf(u); }
+//
+//  static Natural get (final BigInteger u) {
+//    assert 0<=u.signum();
+//    return NaturalBEI.valueOf(u); }
+//
+//  static Natural get (final String u,
+//                      final int radix) {
+//    return NaturalBEI.valueOf(u,radix); }
 
   static Natural get (final String u,
                       final int radix) {
-    return NaturalBEI.valueOf(u,radix); }
+    return NaturalLE.valueOf(u,radix); }
+
+  static Natural get (final BigInteger u) {
+    assert 0<=u.signum();
+    return NaturalLE.valueOf(u); }
+
+  static Natural get (final long u) {
+    assert 0L<=u;
+    return NaturalLE.valueOf(u); }
+
+  static Natural get (final int u) {
+    return get(Numbers.unsigned(u)); }
 
   //--------------------------------------------------------------
 }
