@@ -25,7 +25,7 @@ import xfp.java.prng.Generators;
  * <code>Rational</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-18
+ * @version 2019-07-22
  */
 @SuppressWarnings("unchecked")
 public final class Rationals implements Set {
@@ -244,8 +244,8 @@ public final class Rationals implements Set {
         if (edge) { return edgeCases.sample(); }
         final BigInteger z0 = (BigInteger) g0.next();
         final BigInteger z1 = (BigInteger) g1.next();
-        final Natural u0 = NaturalBEI.valueOf(z0.abs());
-        final Natural u1 = NaturalBEI.valueOf(z1.abs());
+        final Natural u0 = Natural.get(z0.abs());
+        final Natural u1 = Natural.get(z1.abs());
         assert ! u1.isZero();
         return RationalFloat.valueOf(0<=z0.signum(),u0,u1); } }; }
 

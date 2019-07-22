@@ -24,7 +24,7 @@ import xfp.java.prng.Generators;
  * <code>RationalFloat</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-18
+ * @version 2019-07-22
  */
 @SuppressWarnings("unchecked")
 public final class RationalFloats implements Set {
@@ -171,8 +171,8 @@ public final class RationalFloats implements Set {
         final BigInteger z1 = (BigInteger) g1.next();
         return RationalFloat.valueOf(
           0<=z0.signum(),
-          NaturalBEI.valueOf(z0.abs()),
-          NaturalBEI.valueOf(z1),
+          Natural.get(z0.abs()),
+          Natural.get(z1),
           g2.nextInt()); } }; }
 
   // Is this characteristic of most inputs?

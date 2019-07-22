@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import xfp.java.numbers.BigFloat;
 import xfp.java.numbers.BigFloats;
-import xfp.java.numbers.NaturalBEI;
+import xfp.java.numbers.Natural;
 import xfp.java.numbers.Numbers;
 import xfp.java.prng.Generator;
 import xfp.java.prng.PRNG;
@@ -36,17 +36,17 @@ public final class BigFloatTest {
       final BigFloat[] f =
       {
        BigFloat.valueOf(
-         true,NaturalBEI.valueOf("232330747ceeab",0x10),-23),
+         true,Natural.get("232330747ceeab",0x10),-23),
        BigFloat.valueOf(
-         false,NaturalBEI.valueOf("232330747ceeab",0x10),-23),
+         false,Natural.get("232330747ceeab",0x10),-23),
        BigFloat.valueOf(
-         true,NaturalBEI.valueOf("2366052b8b801d",0x10),-22),
+         true,Natural.get("2366052b8b801d",0x10),-22),
        BigFloat.valueOf(
-         false,NaturalBEI.valueOf("21ab528c4dbc181",0x10),-26),
+         false,Natural.get("21ab528c4dbc181",0x10),-26),
        BigFloat.valueOf(
-         true,NaturalBEI.valueOf("8d9814ae2e0074",0x10),-25),
+         true,Natural.get("8d9814ae2e0074",0x10),-25),
        BigFloat.valueOf(
-         true,NaturalBEI.valueOf("2c94d1dcb123a56b9c1",0x10),-43), };
+         true,Natural.get("2c94d1dcb123a56b9c1",0x10),-43), };
       for (final BigFloat fi : f) {
         Common.doubleRoundingTest(
           BigFloat::valueOf,Numbers::doubleValue,dist,

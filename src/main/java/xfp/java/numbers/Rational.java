@@ -12,7 +12,7 @@ import xfp.java.exceptions.Exceptions;
 /** Ratios of {@link Natural}.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-21
+ * @version 2019-07-22
  */
 
 @SuppressWarnings("unchecked")
@@ -522,31 +522,6 @@ implements Ringlike<Rational> {
   public final Rational reduce () {
     return reduce(nonNegative(),numerator(),denominator()); }
 
-  //  private static final Rational reduce (final boolean nonNegative,
-  //                                         final Natural n0,
-  //                                         final Natural d0) {
-  //    if (n0.isZero()) { return EMPTY; }
-  //
-  //    final int shift =
-  //      Math.min(Numbers.loBit(n0),Numbers.loBit(d0));
-  //
-  //    final Natural n = (shift != 0) ? n0.shiftDown(shift) : n0;
-  //    final Natural d = (shift != 0) ? d0.shiftDown(shift) : d0;
-  //
-  //    if (n.equals(d)) { return (nonNegative ? ONE : MINUS_ONE); }
-  //    if (NaturalBEI.d.isOne()) {
-  //      return new Rational(nonNegative,n,NaturalBEI.ONE); }
-  //    if (NaturalBEI.n.isOne()) {
-  //      return new Rational(nonNegative,NaturalBEI.ONE,d); }
-  //    final Natural gcd = n.gcd(d);
-  //    if (gcd.compareTo(NaturalBEI.ONE) > 0) {
-  //      return
-  //        new Rational(
-  //          nonNegative,
-  //          n.divide(gcd),
-  //          d.divide(gcd)); }
-  //    return new Rational(nonNegative,n,d); }
-
   //--------------------------------------------------------------
 
   public static final Rational valueOf (final boolean nonNegative,
@@ -557,7 +532,7 @@ implements Ringlike<Rational> {
 
   public static final Rational valueOf (final boolean nonNegative,
                                         final Natural n) {
-    return reduce(nonNegative,n,NaturalBEI.ONE); }
+    return reduce(nonNegative,n,Natural.get(1)); }
 
   // TODO: compute gcd and reduce longs
 
@@ -568,8 +543,8 @@ implements Ringlike<Rational> {
     final boolean nonNegative = (0L <= n);
     return valueOf(
       nonNegative,
-      NaturalBEI.valueOf(nonNegative ? n : -n),
-      NaturalBEI.valueOf(d)); }
+      Natural.get(nonNegative ? n : -n),
+      Natural.get(d)); }
 
   // TODO: compute gcd and reduce ints
   public static final Rational valueOf (final int n,
@@ -579,8 +554,8 @@ implements Ringlike<Rational> {
     final boolean nonNegative = (0 <= n);
     return valueOf(
       nonNegative,
-      NaturalBEI.valueOf(nonNegative ? n : -n),
-      NaturalBEI.valueOf(d)); }
+      Natural.get(nonNegative ? n : -n),
+      Natural.get(d)); }
 
   //--------------------------------------------------------------
 
@@ -589,7 +564,7 @@ implements Ringlike<Rational> {
                                          final int e)  {
     if (0L == t) { return ZERO; }
     assert 0L < t;
-    final Natural n0 = NaturalBEI.valueOf(t);
+    final Natural n0 = Natural.get(t);
     if (0 == e) {  return valueOf(nonNegative,n0); }
     if (0 < e) {
       return valueOf(nonNegative,n0.shiftUp(e)); }
@@ -597,7 +572,7 @@ implements Ringlike<Rational> {
       valueOf(
         nonNegative,
         n0,
-        NaturalBEI.ZERO.setBit(-e)); }
+        Natural.get(0L).setBit(-e)); }
 
   public static final Rational valueOf (final double x)  {
     return valueOf(
@@ -612,7 +587,7 @@ implements Ringlike<Rational> {
                                          final int t)  {
     if (0 == t) { return ZERO; }
     assert 0 < t;
-    final Natural n0 = NaturalBEI.valueOf(t);
+    final Natural n0 = Natural.get(t);
     if (0 == e) {  return valueOf(nonNegative,n0); }
     if (0 < e) {
       return valueOf(
@@ -622,7 +597,7 @@ implements Ringlike<Rational> {
       valueOf(
         nonNegative,
         n0,
-        NaturalBEI.ZERO.setBit(-e)); }
+        Natural.get(0L).setBit(-e)); }
 
   public static final Rational valueOf (final float x)  {
     return valueOf(
@@ -636,25 +611,25 @@ implements Ringlike<Rational> {
     final boolean nonNegative = (0 <= x);
     return valueOf(
       nonNegative,
-      NaturalBEI.valueOf(nonNegative ? x : -x)); }
+      Natural.get(nonNegative ? x : -x)); }
 
   public static final Rational valueOf (final short x)  {
     final boolean nonNegative = (0 <= x);
     return valueOf(
       nonNegative,
-      NaturalBEI.valueOf(nonNegative ? x : -x)); }
+      Natural.get(nonNegative ? x : -x)); }
 
   public static final Rational valueOf (final int x)  {
     final boolean nonNegative = (0 <= x);
     return valueOf(
       nonNegative,
-      NaturalBEI.valueOf(nonNegative ? x : -x)); }
+      Natural.get(nonNegative ? x : -x)); }
 
   public static final Rational valueOf (final long x)  {
     final boolean nonNegative = (0 <= x);
     return valueOf(
       nonNegative,
-      NaturalBEI.valueOf(nonNegative ? x : -x)); }
+      Natural.get(nonNegative ? x : -x)); }
 
   //--------------------------------------------------------------
 
@@ -678,7 +653,7 @@ implements Ringlike<Rational> {
 
   public static final Rational valueOf (final BigDecimal x)  {
     throw Exceptions.unsupportedOperation(null,"valueOf",x); }
-  //    return valueOf(x, NaturalBEI.ONE); }
+  //    return valueOf(x, Natural.get(1)); }
 
   public static final Rational valueOf (final Natural x)  {
     return valueOf(true,x); }
@@ -688,13 +663,13 @@ implements Ringlike<Rational> {
     assert ! BigInteger.ZERO.equals(d);
     return valueOf(
       0 <= (n.signum()*d.signum()),
-      NaturalBEI.valueOf(n.abs()),
-      NaturalBEI.valueOf(d.abs())); }
+      Natural.get(n.abs()),
+      Natural.get(d.abs())); }
 
   public static final Rational valueOf (final BigInteger n) {
     return valueOf(
       0 <= (n.signum()),
-      NaturalBEI.valueOf(n.abs())); }
+      Natural.get(n.abs())); }
 
   public static final Rational valueOf (final BigFloat n0,
                                         final BigFloat d0) {
@@ -725,13 +700,13 @@ implements Ringlike<Rational> {
         valueOf(
           x.nonNegative(),
           t.shiftUp(e),
-          NaturalBEI.ONE); }
+          Natural.get(1)); }
     if (0 > e) {
       return valueOf(
         x.nonNegative(),
         t,
-        NaturalBEI.ZERO.setBit(-e)); }
-    return valueOf(x.nonNegative(),t,NaturalBEI.ONE); }
+        Natural.get(0L).setBit(-e)); }
+    return valueOf(x.nonNegative(),t,Natural.get(1)); }
 
   public static final Rational valueOf (final Number x)  {
     if (x instanceof Rational) { return (Rational) x; }
@@ -754,19 +729,19 @@ implements Ringlike<Rational> {
   //--------------------------------------------------------------
 
   public static final Rational ZERO =
-    new Rational(true,NaturalBEI.ZERO,NaturalBEI.ONE);
+    new Rational(true,Natural.get(0),Natural.get(1));
 
   public static final Rational ONE =
-    new Rational(true,NaturalBEI.ONE,NaturalBEI.ONE);
+    new Rational(true,Natural.get(1),Natural.get(1));
 
   public static final Rational TWO =
-    new Rational(true,NaturalBEI.TWO,NaturalBEI.ONE);
+    new Rational(true,Natural.get(2),Natural.get(1));
 
   public static final Rational TEN =
-    new Rational(true,NaturalBEI.TEN,NaturalBEI.ONE);
+    new Rational(true,Natural.get(10),Natural.get(1));
 
   public static final Rational MINUS_ONE =
-    new Rational(false,NaturalBEI.ONE,NaturalBEI.ONE);
+    new Rational(false,Natural.get(1),Natural.get(1));
 
   //--------------------------------------------------------------
 }

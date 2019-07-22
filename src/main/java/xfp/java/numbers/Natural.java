@@ -3,6 +3,7 @@ package xfp.java.numbers;
 import static xfp.java.numbers.Numbers.loWord;
 import static xfp.java.numbers.Numbers.unsigned;
 
+import java.math.BigInteger;
 import java.util.List;
 
 import xfp.java.exceptions.Exceptions;
@@ -572,6 +573,25 @@ extends Uints<Natural>, Ringlike<Natural> {
     // we round up (correctly) to Double.POSITIVE_INFINITY.
     bits |= 1 & Doubles.SIGN_MASK;
     return Double.longBitsToDouble(bits); }
+
+  //--------------------------------------------------------------
+  // factories for default implementation
+  //--------------------------------------------------------------
+
+  static Natural get (final int u) {
+    return get(Numbers.unsigned(u)); }
+
+  static Natural get (final long u) {
+    assert 0L<=u;
+    return NaturalBEI.valueOf(u); }
+
+  static Natural get (final BigInteger u) {
+    assert 0<=u.signum();
+    return NaturalBEI.valueOf(u); }
+
+  static Natural get (final String u,
+                      final int radix) {
+    return NaturalBEI.valueOf(u,radix); }
 
   //--------------------------------------------------------------
 }

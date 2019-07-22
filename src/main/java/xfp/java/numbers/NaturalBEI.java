@@ -86,21 +86,21 @@ implements Natural {
   public final boolean isImmutable () { return true; }
 
   //--------------------------------------------------------------
- // Object methods
- //--------------------------------------------------------------
+  // Object methods
+  //--------------------------------------------------------------
 
- @Override
- public final int hashCode () { return uintsHashCode(); }
+  @Override
+  public final int hashCode () { return uintsHashCode(); }
 
- @Override
- public final boolean equals (final Object x) {
-   if (x==this) { return true; }
-   if (!(x instanceof NaturalBEI)) { return false; }
-   return uintsEquals((NaturalBEI) x); }
+  @Override
+  public final boolean equals (final Object x) {
+    if (x==this) { return true; }
+    if (!(x instanceof NaturalBEI)) { return false; }
+    return uintsEquals((NaturalBEI) x); }
 
- /** hex string. */
- @Override
- public final String toString () { return toHexString(); }
+  /** hex string. */
+  @Override
+  public final String toString () { return toHexString(); }
 
   //--------------------------------------------------------------
   // construction
@@ -192,16 +192,16 @@ implements Natural {
   //--------------------------------------------------------------
 
   public static final NaturalBEI valueOf (final long x) {
-    if (x==0L) { return ZERO; }
-    assert 0L < x;
-    if (x <= MAX_CONSTANT) { return posConst[(int) x]; }
+    assert 0L<=x;
+    //if (x==0L) { return ZERO; }
+    //if (x==1L) { return ONE; }
+    //if (x==2L) { return TWO; }
+    //if (x==10L) { return TEN; }
+    //if (x <= MAX_CONSTANT) { return posConst[(int) x]; }
     return unsafe(Ints.bigEndian(x)); }
 
   public static final NaturalBEI valueOf (final int x) {
-    if (x==0) { return ZERO; }
-    assert 0L < x;
-    if (x <= MAX_CONSTANT) { return posConst[x]; }
-    return unsafe(new int[] {x}); }
+    return valueOf(Numbers.unsigned(x)); }
 
   //--------------------------------------------------------------
 

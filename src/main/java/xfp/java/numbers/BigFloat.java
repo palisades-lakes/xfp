@@ -171,8 +171,8 @@ implements Ringlike<BigFloat> {
     assert 0L<=m1;
     assert 0<=bitShift;
     return
-      NaturalBEI.valueOf(m0)
-      .add(NaturalBEI.valueOf(m1).shiftUp(bitShift)); }
+      Natural.get(m0)
+      .add(Natural.get(m1).shiftUp(bitShift)); }
 
   private static final Natural subtract (final long m0,
                                          final int bitShift,
@@ -181,8 +181,8 @@ implements Ringlike<BigFloat> {
     assert 0L<=m1;
     assert 0<=bitShift;
     return
-      NaturalBEI.valueOf(m0).shiftUp(bitShift)
-      .subtract(NaturalBEI.valueOf(m1)); }
+      Natural.get(m0).shiftUp(bitShift)
+      .subtract(Natural.get(m1)); }
 
   private static final Natural subtract (final long m0,
                                          final long m1,
@@ -192,7 +192,7 @@ implements Ringlike<BigFloat> {
     assert 0<=bitShift;
     final long dm = m0 - (m1<<bitShift);
     assert 0L<=dm;
-    return NaturalBEI.valueOf(dm); }
+    return Natural.get(dm); }
 
   private static final BigFloat
   addSameExponent (final boolean n0,
@@ -355,7 +355,7 @@ implements Ringlike<BigFloat> {
     return
       multiply(
         Doubles.nonNegative(z),
-        NaturalBEI.valueOf(Doubles.significand(z)),
+        Natural.get(Doubles.significand(z)),
         Doubles.exponent(z)); }
 
   //--------------------------------------------------------------
@@ -731,14 +731,14 @@ implements Ringlike<BigFloat> {
                                         final int e) {
     if (0L==t) { return ZERO; }
     if (0L < t) {
-      return valueOf(true,NaturalBEI.valueOf(t),e); }
-    return valueOf(false,NaturalBEI.valueOf(-t),e); }
+      return valueOf(true,Natural.get(t),e); }
+    return valueOf(false,Natural.get(-t),e); }
 
   public static final BigFloat valueOf (final int t,
                                         final int e) {
     if (0==t) { return ZERO; }
-    if (0<t) { return valueOf(true,NaturalBEI.valueOf(t),e); }
-    return valueOf(false,NaturalBEI.valueOf(-t),e); }
+    if (0<t) { return valueOf(true,Natural.get(t),e); }
+    return valueOf(false,Natural.get(-t),e); }
 
   //--------------------------------------------------------------
 
@@ -752,7 +752,7 @@ implements Ringlike<BigFloat> {
     final int e1;
     if ((0==shift)||(64==shift)) { t1=t0; e1=e0; }
     else { t1 = (t0 >>> shift); e1 = e0 + shift; }
-    return valueOf(nonNegative,NaturalBEI.valueOf(t1),e1); }
+    return valueOf(nonNegative,Natural.get(t1),e1); }
 
   public static final BigFloat valueOf (final double z)  {
     return valueOf(
@@ -766,7 +766,7 @@ implements Ringlike<BigFloat> {
                                          final int t0,
                                          final int e0)  {
     if (0==t0) { return ZERO; }
-    return valueOf(nonNegative,NaturalBEI.valueOf(t0),e0); }
+    return valueOf(nonNegative,Natural.get(t0),e0); }
 
   public static final BigFloat valueOf (final float x)  {
     return valueOf(
@@ -777,20 +777,20 @@ implements Ringlike<BigFloat> {
   //--------------------------------------------------------------
 
   public static final BigFloat valueOf (final byte t)  {
-    if (0<=t) { return valueOf(true,NaturalBEI.valueOf(t),0); }
-    return valueOf(false,NaturalBEI.valueOf(-t),0); }
+    if (0<=t) { return valueOf(true,Natural.get(t),0); }
+    return valueOf(false,Natural.get(-t),0); }
 
   public static final BigFloat valueOf (final short t)  {
-    if (0<=t) { return valueOf(true,NaturalBEI.valueOf(t),0); }
-    return valueOf(false,NaturalBEI.valueOf(-t),0); }
+    if (0<=t) { return valueOf(true,Natural.get(t),0); }
+    return valueOf(false,Natural.get(-t),0); }
 
   public static final BigFloat valueOf (final int t)  {
-    if (0<=t) { return valueOf(true,NaturalBEI.valueOf(t),0); }
-    return valueOf(false,NaturalBEI.valueOf(-t),0); }
+    if (0<=t) { return valueOf(true,Natural.get(t),0); }
+    return valueOf(false,Natural.get(-t),0); }
 
   public static final BigFloat valueOf (final long t)  {
-    if (0<=t) { return valueOf(true,NaturalBEI.valueOf(t),0); }
-    return valueOf(false,NaturalBEI.valueOf(-t),0); }
+    if (0<=t) { return valueOf(true,Natural.get(t),0); }
+    return valueOf(false,Natural.get(-t),0); }
 
   //--------------------------------------------------------------
 
@@ -836,19 +836,19 @@ implements Ringlike<BigFloat> {
   //--------------------------------------------------------------
 
   public static final BigFloat ZERO =
-    new BigFloat(true,NaturalBEI.ZERO,0);
+    new BigFloat(true,Natural.get(0),0);
 
   public static final BigFloat ONE =
-    new BigFloat(true,NaturalBEI.ONE,0);
+    new BigFloat(true,Natural.get(1),0);
 
   public static final BigFloat TWO =
-    new BigFloat(true,NaturalBEI.ONE,1);
+    new BigFloat(true,Natural.get(1),1);
 
   public static final BigFloat TEN =
-    new BigFloat(true,NaturalBEI.valueOf(5),1);
+    new BigFloat(true,Natural.get(5),1);
 
   public static final BigFloat MINUS_ONE =
-    new BigFloat(false,NaturalBEI.ONE,0);
+    new BigFloat(false,Natural.get(1),0);
 
   //--------------------------------------------------------------
 }
