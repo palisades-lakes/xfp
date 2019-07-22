@@ -11,7 +11,7 @@ import xfp.java.exceptions.Exceptions;
  * a sequence of <code>int</code> words, treated as unsigned.
  *
  * The value of the natural number is
- * <code>sum<sub>i=startWord()</sub><sup>i&lt;endWord</sup>
+ * <code>sum<sub>i=startWord()</sub><sup>i&lt;hiInt</sup>
  *  uword(i) * 2<sup>32*i</sup></code>.
  *
  * TODO: utilities class to hide private stuff?
@@ -35,7 +35,7 @@ extends Uints<Natural>, Ringlike<Natural> {
     final int b1 = u.hiBit();
     if (b0<b1) { return -1; }
     if (b0>b1) { return 1; }
-    final int end = Math.max(endWord(),u.endWord()) - 1;
+    final int end = Math.max(hiInt(),u.hiInt()) - 1;
     final int start = Math.min(startWord(),u.startWord());
     for (int i=end;i>=start;i--) {
       final long u0i = uword(i);
@@ -51,8 +51,8 @@ extends Uints<Natural>, Ringlike<Natural> {
     final int bShift = (upShift&0x1F);
     if (0!=bShift) { return compareTo(u.shiftUp(upShift)); }
     final int iShift = (upShift>>>5);
-    final int n0 = endWord() - iShift;
-    final int n1 = u.endWord();
+    final int n0 = hiInt() - iShift;
+    final int n1 = u.hiInt();
     if (n0 < n1) { return -1; }
     if (n0 > n1) { return 1; }
     // TODO: is this faster than unsigned long conversion?
@@ -142,7 +142,7 @@ extends Uints<Natural>, Ringlike<Natural> {
 
   @Override
   default boolean isZero () {
-    for (int i=0;i<endWord();i++) {
+    for (int i=0;i<hiInt();i++) {
       if (0!=word(i)) { return false; } }
     return true; }
 
@@ -160,7 +160,7 @@ extends Uints<Natural>, Ringlike<Natural> {
     if (u.isZero()) { return this; }
     // TODO: optimize by summing over joint range
     // and just carrying after that
-    final int end = Math.max(endWord(),u.endWord());
+    final int end = Math.max(hiInt(),u.hiInt());
     long sum = 0L;
     long carry = 0L;
     int i=0;
@@ -193,7 +193,7 @@ extends Uints<Natural>, Ringlike<Natural> {
     v = v.setWord(1,(int) sum);
     carry = (sum>>>32);
     int i=2;
-    final int n = endWord();
+    final int n = hiInt();
     for (;(0L!=carry)&&(i<n);i++) {
       sum = uword(i) + carry;
       v = v.setWord(i,(int) sum);
@@ -220,7 +220,7 @@ extends Uints<Natural>, Ringlike<Natural> {
     Natural v = this;
     long dif = 0L;
     long borrow = 0L;
-    final int n = Math.max(endWord(),u.endWord());
+    final int n = Math.max(hiInt(),u.hiInt());
     int i=0;
     // TODO: optimize by differencing over shared range
     // and then just borrowing
@@ -240,8 +240,8 @@ extends Uints<Natural>, Ringlike<Natural> {
     assert ! isZero();
     final long lo = Numbers.loWord(u);
     final long hi = Numbers.hiWord(u);
-    if (0L!=hi) { assert 2<=endWord(); }
-    if (0L!=lo) { assert 1<=endWord(); }
+    if (0L!=hi) { assert 2<=hiInt(); }
+    if (0L!=lo) { assert 1<=hiInt(); }
     Natural v = this;
     long dif = uword(0)-lo;
     v = v.setWord(0,(int) dif);
@@ -250,7 +250,7 @@ extends Uints<Natural>, Ringlike<Natural> {
     v = v.setWord(1,(int) dif);
     borrow = (dif>>32);
     int i=2;
-    final int n = endWord();
+    final int n = hiInt();
     for (;(0L!=borrow)&&(i<n);i++) {
       dif = uword(i)+borrow;
       v = v.setWord(i,(int) dif);
@@ -303,7 +303,7 @@ extends Uints<Natural>, Ringlike<Natural> {
   @Override
   default boolean isOne () {
     if (1!=word(0)) { return false; }
-    for (int i=Math.max(1,startWord());i<endWord();i++) {
+    for (int i=Math.max(1,startWord());i<hiInt();i++) {
       if (0!=word(i)) { return false; } }
     return true; }
 
@@ -448,7 +448,7 @@ extends Uints<Natural>, Ringlike<Natural> {
   @Override
   default float floatValue () {
     if (isZero()) { return 0.0F; }
-    final int n = endWord()-1;
+    final int n = hiInt()-1;
     final int exponent = hiBit()-1;
     // exponent == floor(log2(abs(this)))
     if (exponent < (Long.SIZE - 1)) { return longValue(); }
@@ -506,7 +506,7 @@ extends Uints<Natural>, Ringlike<Natural> {
   @Override
   default double doubleValue () {
     if (isZero()) { return 0.0; }
-    final int n = endWord()-1;
+    final int n = hiInt()-1;
     final int exponent = hiBit()-1;
     // exponent == floor(log2(abs(this))Double)
     if (exponent < (Long.SIZE - 1)) { return longValue(); }

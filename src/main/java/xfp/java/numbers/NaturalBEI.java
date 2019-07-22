@@ -47,7 +47,7 @@ implements Natural {
   public final int endWord () { return words().length; }
 
   public final int[] copyWords () {
-    return Arrays.copyOfRange(words(),0,endWord()); }
+    return Arrays.copyOfRange(words(),0,hiInt()); }
 
   public final void copyWords (final int[] dst,
                                final int start) {

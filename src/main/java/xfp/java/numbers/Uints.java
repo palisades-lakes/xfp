@@ -111,7 +111,7 @@ public interface Uints<T extends Uints> extends Transience<T> {
 
   default T set (final Uints u) {
     Uints x = clear();
-    for (int i=u.startWord();i<u.endWord();i++) {
+    for (int i=u.startWord();i<u.hiInt();i++) {
       x = x.setWord(i,u.word(i)); }
     return (T) this; }
 
@@ -184,7 +184,7 @@ public interface Uints<T extends Uints> extends Transience<T> {
   default int getShiftedInt (final int downShift) {
     assert 0<=downShift;
     final int iShift = (downShift>>>5);
-    if (endWord()<=iShift) { return 0; }
+    if (hiInt()<=iShift) { return 0; }
     final int rShift = (downShift & 0x1f);
     if (0==rShift) { return word(iShift); }
     final int r2 = 32-rShift;
@@ -200,7 +200,7 @@ public interface Uints<T extends Uints> extends Transience<T> {
   default long getShiftedLong (final int downShift) {
     assert 0<=downShift;
     final int iShift = (downShift>>>5);
-    if (endWord()<=iShift) { return 0L; }
+    if (hiInt()<=iShift) { return 0L; }
     final int rShift = (downShift & 0x1f);
     if (0==rShift) {
       return ((uword(iShift+1)<<32) | uword(iShift)); }
@@ -250,7 +250,7 @@ public interface Uints<T extends Uints> extends Transience<T> {
   default T shiftDownWords (final int iShift) {
     assert 0<=iShift;
     if (0==iShift) { return (T) this; }
-    final int n0 = endWord();
+    final int n0 = hiInt();
     if (0==n0) { return (T) this; }
     final int n1 = n0-iShift;
     if (0>=n1) { return empty(); }
@@ -262,7 +262,7 @@ public interface Uints<T extends Uints> extends Transience<T> {
   default T shiftDown (final int shift) {
     assert 0<=shift;
     if (shift==0) { return (T) this; }
-    final int n0 = endWord();
+    final int n0 = hiInt();
     if (0==n0) { return (T) this; }
     final int iShift = (shift >>> 5);
     final int n1 = n0-iShift;
@@ -282,7 +282,7 @@ public interface Uints<T extends Uints> extends Transience<T> {
   default T shiftUpWords (final int iShift) {
     assert 0<=iShift;
     if (0==iShift) { return (T) this; }
-    final int n = endWord();
+    final int n = hiInt();
     if (0==n) { return (T) this; }
     T u = empty();
     for (int i=0;i<iShift;i++) { u = (T) u.setWord(i,0); }
@@ -292,7 +292,7 @@ public interface Uints<T extends Uints> extends Transience<T> {
   default T shiftUp (final int shift) {
     assert 0<=shift;
     if (shift==0) { return (T) this; }
-    final int n0 = endWord();
+    final int n0 = hiInt();
     if (0==n0) { return (T) this; }
     //if (isZero()) { return ZERO; }
     final int iShift = (shift >>> 5);
@@ -402,7 +402,7 @@ public interface Uints<T extends Uints> extends Transience<T> {
 
   default String toHexString () {
     final StringBuilder b = new StringBuilder("");
-    final int n = endWord()-1;
+    final int n = hiInt()-1;
     if (0>n) { b.append('0'); }
     else {
       b.append(String.format("%x",Long.valueOf(uword(n))));
@@ -417,7 +417,7 @@ public interface Uints<T extends Uints> extends Transience<T> {
 
   default int uintsHashCode () {
     int hashCode = 0;
-    for (int i=0; i<endWord(); i++) {
+    for (int i=0; i<hiInt(); i++) {
       hashCode = (int) ((31 * hashCode) + uword(i)); }
     return hashCode; }
 
@@ -425,7 +425,7 @@ public interface Uints<T extends Uints> extends Transience<T> {
   default boolean uintsEquals (final Uints x) {
     if (x==this) { return true; }
     final Uints u = x;
-    final int n = Math.max(endWord(),u.endWord());
+    final int n = Math.max(hiInt(),u.hiInt());
     for (int i=0; i<n; i++) {
       if (word(i)!=u.word(i)) { return false; } }
     return true; }

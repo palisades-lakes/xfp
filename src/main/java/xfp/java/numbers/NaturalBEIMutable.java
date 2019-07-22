@@ -8,7 +8,7 @@ import xfp.java.exceptions.Exceptions;
 
 /**
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-20
+ * @version 2019-07-22
  */
 
 public final class NaturalBEIMutable implements Natural {
@@ -149,7 +149,7 @@ public final class NaturalBEIMutable implements Natural {
     final int bShift = (shift&0x1F);
     nWords -= iShift;
     if (bShift == 0) { return this; }
-    final int bitsInHighWord = Numbers.hiBit(word(endWord()-1));
+    final int bitsInHighWord = Numbers.hiBit(word(hiInt()-1));
     if (bShift >= bitsInHighWord) {
       smallUpShift(32-bShift);
       nWords--; }
@@ -187,7 +187,7 @@ public final class NaturalBEIMutable implements Natural {
     if (nWords == 0) { return this; }
     final int iShift = (shift>>>5);
     final int bShift = (shift&0x1F);
-    final int maxShift =32- Numbers.hiBit(word(endWord()-1));
+    final int maxShift =32- Numbers.hiBit(word(hiInt()-1));
 
     // If shift can be done without moving words, do so
     if (shift<=maxShift) { return smallUpShift(bShift); }
@@ -377,7 +377,7 @@ public final class NaturalBEIMutable implements Natural {
                                               final int n) {
     assert 0<=n;
     final int[] words = new int[n];
-    final int start = Math.max(0,n-init.endWord());
+    final int start = Math.max(0,n-init.hiInt());
     init.copyWords(words,start);
     return new NaturalBEIMutable(words); }
 
@@ -385,7 +385,7 @@ public final class NaturalBEIMutable implements Natural {
                                               final int n) {
     assert 0<=n;
     final int[] wrods = new int[n];
-    final int start = Math.max(0,n-init.endWord());
+    final int start = Math.max(0,n-init.hiInt());
     init.copyWords(wrods,start);
     return new NaturalBEIMutable(wrods); }
 

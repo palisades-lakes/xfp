@@ -8,7 +8,7 @@ import java.util.Arrays;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-19
+ * @version 2019-07-22
  */
 
 public final class NaturalLEMutable implements Natural {
@@ -28,8 +28,8 @@ public final class NaturalLEMutable implements Natural {
 
   // TODO: grow faster?
   private final void expandTo (final int i) {
-    final int n = Math.max(i+1,endWord());
-    if (endWord()<n) { _words = Arrays.copyOf(words(),n); } }
+    final int n = Math.max(i+1,hiInt());
+    if (hiInt()<n) { _words = Arrays.copyOf(words(),n); } }
 
   //--------------------------------------------------------------
   // Natural
@@ -214,7 +214,7 @@ public final class NaturalLEMutable implements Natural {
       return copy((NaturalLEMutable) u); }
     if (u instanceof NaturalLE) {
       return copy((NaturalLE) u); }
-    final int n = u.endWord();
+    final int n = u.hiInt();
     final int[] w = new int[n];
     for (int i=0;i<n;i++) { w[i] = u.word(i); }
     return unsafe(w); }
