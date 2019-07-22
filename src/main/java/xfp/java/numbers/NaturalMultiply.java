@@ -7,7 +7,7 @@ import static xfp.java.numbers.Numbers.loWord;
  * Non-instantiable.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-21
+ * @version 2019-07-22
  */
 
 @SuppressWarnings("unchecked")
@@ -26,9 +26,7 @@ public final class NaturalMultiply {
 
   private static final Natural squareSimple (final Natural u) {
     final int n = u.hiInt();
-    // using immutable implementation here has great cost.
-    Natural v = u.recyclable(2*n+1);
-    //Natural v = u;
+    Natural v = u.zero();
     long carry = 0L;
     for (int i0=0;i0<n;i0++) {
       carry = 0L;
@@ -42,7 +40,7 @@ public final class NaturalMultiply {
         carry = (prod>>>32); }
       final int i2 = i0+n;
       v = v.setWord(i2, (int) carry); }
-    return v.immutable(); }
+    return v; }
 
   //--------------------------------------------------------------
 
@@ -66,6 +64,8 @@ public final class NaturalMultiply {
   //--------------------------------------------------------------
 
   private static final Natural squareToomCook3 (final Natural u) {
+    // TODO: problems if u NaturalNEIMutable
+    assert u.isImmutable();
     final int n = u.hiInt();
     // k is the size (in ints) of the lower-order slices.
     final int k = (n+2)/3;   // Equal to ceil(largest/3)
@@ -96,7 +96,8 @@ public final class NaturalMultiply {
     Natural tm1 = v1.subtract(vm1).shiftDown(1);
     Natural t1 = v1.subtract(v0);
     t2 = t2.subtract(t1).shiftDown(1);
-    t1 = t1.subtract(tm1).subtract(vinf);
+    t1 = t1.subtract(tm1);
+    t1 = t1.subtract(vinf);
     t2 = t2.subtract(vinf.shiftUp(1));
     tm1 = tm1.subtract(t2);
     final int k32 = k*32;
@@ -132,9 +133,7 @@ public final class NaturalMultiply {
                                                final Natural v) {
     final int n0 = u.hiInt();
     final int n1 = v.hiInt();
-    // not using recyclable breaks RAT in last hex digit
-    Natural w = u.recyclable(n0+n1+1);
-    //Natural w = u;
+    Natural w = u.zero();
     long carry = 0L;
     for (int i0=0;i0<n0;i0++) {
       carry = 0L;
@@ -146,9 +145,7 @@ public final class NaturalMultiply {
         carry = (product>>>32); }
       final int i2 = i0+n1;
       w = w.setWord(i2, (int) carry); }
-    // not using immutable (after recyclable) breaks divWord in reduce in RAT
-    return w.immutable(); }
-  //return w; }
+    return w; }
 
   //--------------------------------------------------------------
 
@@ -156,7 +153,7 @@ public final class NaturalMultiply {
                                                   final Natural v) {
     final int n0 = u.hiInt();
     final int n1 = v.hiInt();
-    final int half = (Math.max(n0,n1) + 1) / 2;
+    final int half = (Math.max(n0,n1)+1) / 2;
     final Natural xl = u.words(0,half);
     final Natural xh = u.words(half,u.hiInt());
     final Natural yl = v.words(0,half);
@@ -204,9 +201,7 @@ public final class NaturalMultiply {
     final int offset = fullsize-n;
     int start;
     final int end;
-    if (0==slice) {
-      start = 0-offset;
-      end = upperSize-1-offset; }
+    if (0==slice) { start = -offset; end = upperSize-1-offset; }
     else {
       start = upperSize+((slice-1)*lowerSize)-offset;
       end = start+lowerSize-1; }
@@ -219,14 +214,15 @@ public final class NaturalMultiply {
     if ((0==start) && (sliceSize>=n)) { return u; }
     final int i1 = n-start;
     final int i0 = i1-sliceSize;
-    // not coercing to immutable breaks Toom-Cook square and multiply
-    return u.words(i0,i1).immutable(); }
-  //return u.words(i0,i1); }
+    return u.words(i0,i1); }
 
   //--------------------------------------------------------------
 
   private static final Natural multiplyToomCook3 (final Natural u,
                                                   final Natural v) {
+    // TODO: problems if u,v NaturalNEIMutable
+    assert u.isImmutable();
+    assert v.isImmutable();
     final int n0 = u.hiInt();
     final int n1 = v.hiInt();
     final int largest = Math.max(n0,n1);
@@ -290,7 +286,8 @@ public final class NaturalMultiply {
 
     Natural t1 = v1.subtract(v0);
     t2 = t2.subtract(t1).shiftDown(1);
-    t1 = t1.subtract(tm1).subtract(vinf);
+    t1 = t1.subtract(tm1);
+    t1 = t1.subtract(vinf);
     t2 = t2.subtract(vinf.shiftUp(1));
     tm1 = tm1.subtract(t2);
 

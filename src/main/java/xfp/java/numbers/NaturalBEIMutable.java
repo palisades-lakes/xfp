@@ -392,7 +392,7 @@ public final class NaturalBEIMutable implements Natural {
   public static final NaturalBEIMutable make (final Natural u,
                                               final int n) {
     if (u instanceof NaturalBEI) {
-      return make((NaturalBEIMutable) u,n); }
+      return make((NaturalBEI) u,n); }
     if (u instanceof NaturalBEIMutable) {
       return make((NaturalBEIMutable) u,n); }
     throw Exceptions.unsupportedOperation(null,"make",u,n); }

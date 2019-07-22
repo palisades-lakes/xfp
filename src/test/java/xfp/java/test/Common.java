@@ -32,12 +32,12 @@ import xfp.java.prng.PRNG;
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-20
+ * @version 2019-07-22
  */
 @SuppressWarnings("unchecked")
 public final class Common {
 
-  private static final int TRYS = 1 * 256;
+  private static final int TRYS = 8;//1 * 256;
 
   //--------------------------------------------------------------
 
@@ -118,7 +118,7 @@ public final class Common {
     final T r1 = valueOf.apply(rs);
     Assertions.assertEquals(r0,r1,() ->
     "\n" + rs + "\n" 
-      + r0.toString() 
+    + r0.toString() 
     + "\n" + r1.toString() + "\n");  }
 
   public static final <T extends Ringlike<T>> void
@@ -215,8 +215,7 @@ public final class Common {
     final T y2 = y0.square();
     final BigInteger x3 = toBI.apply(y2);
     final BigInteger dx = x2.subtract(x3);
-    Assertions.assertEquals(x2,x3,
-      () ->
+    Assertions.assertEquals(x2,x3,()->
     "\n" + x0.toString(0x10)
     + "\n square -> "
     + "\n" + x2.toString(0x10)
@@ -367,8 +366,8 @@ public final class Common {
       final Natural y1 = fromBI.apply(x1);
       final BigInteger[] x2 = x0.divideAndRemainder(x1);
       final List<Natural> y2 = y0.divideAndRemainderBurnikelZiegler(y1);
-      final Natural q = y2.get(0).immutable();
-      final Natural r = y2.get(1).immutable();
+      final Natural q = y2.get(0);
+      final Natural r = y2.get(1);
       final BigInteger[] x3 = { toBI.apply(q), toBI.apply(r),};
 
       Assertions.assertEquals(x2[0],x3[0],() ->
@@ -471,8 +470,11 @@ public final class Common {
     absDiff(fromBI,toBI,z0,z1);
     absDiff(fromBI,toBI,z0,z0);
     multiply(fromBI,toBI,z0,z0);
-    multiply(fromBI,toBI,z0,z1);
+    square(fromBI,toBI,z0);
+    multiply(fromBI,toBI,z1,z1);
+    square(fromBI,toBI,z1);
     multiply(fromBI,toBI,z0,z0);
+    multiply(fromBI,toBI,z0,z1);
     divide(fromBI,toBI,z0,z1);
     divide(fromBI,toBI,z0,z0);
     divideAndRemainder(fromBI,toBI,z0,z1);
@@ -485,7 +487,7 @@ public final class Common {
     remainder(fromBI,toBI,z0,z0);
     gcd(fromBI,toBI,z0,z1);
     gcd(fromBI,toBI,z0,z0);
-    }
+  }
 
 
   public static final void
@@ -746,13 +748,13 @@ public final class Common {
 
   //--------------------------------------------------------------
 
+  @SuppressWarnings("unused")
   public static final void
   doubleRoundingTest (final DoubleFunction<Comparable> fromDouble,
                       final ToDoubleFunction toDouble,
                       final BinaryOperator<Comparable> dist,
-                      @SuppressWarnings("unused")
-  final Function<Comparable,String> toString,
-  final Comparable f) {
+                      final Function<Comparable,String> toString,
+                      final Comparable f) {
 
     //Debug.println("f=" + toString.apply(f));
 

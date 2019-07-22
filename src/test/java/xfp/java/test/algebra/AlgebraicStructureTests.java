@@ -31,13 +31,13 @@ import xfp.java.prng.PRNG;
  * mvn -q -Dtest=xfp/java/test/algebra/AlgebraicStructureTests test > AST.txt
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-24
+ * @version 2019-07-22
  */
 
 @SuppressWarnings("unchecked")
 public final class AlgebraicStructureTests {
-  private static final int TRYS = 32;
-  static final int SPACE_TRYS = 4;
+  private static final int TRYS = 2;//32;
+  static final int SPACE_TRYS = 2;//4;
 
   //--------------------------------------------------------------
 

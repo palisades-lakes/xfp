@@ -155,8 +155,7 @@ extends Uints<Natural>, Ringlike<Natural> {
 
   @Override
   default Natural add (final Natural u) {
-    Natural t = recyclable(this);
-    //Natural t = this;
+    Natural t = zero();
     if (isZero()) { return u; }
     if (u.isZero()) { return this; }
     // TODO: optimize by summing over joint range
@@ -170,7 +169,7 @@ extends Uints<Natural>, Ringlike<Natural> {
       carry = (sum>>>32);
       t = t.setWord(i,(int) sum); }
     if (0L!=carry) { t = t.setWord(i,(int) carry); }
-    return t.immutable(); }
+    return t; }
 
   default Natural add (final Natural u,
                        final int shift) {
@@ -184,10 +183,9 @@ extends Uints<Natural>, Ringlike<Natural> {
 
   default Natural add (final long u) {
     assert 0L<=u;
-    if (0L==u) { return immutable(); }
-    if (isZero()) { return from(u).immutable(); }
-    Natural v = recyclable(this);
-    //Natural v = this;
+    if (0L==u) { return this; }
+    if (isZero()) { return from(u); }
+    Natural v = this;
     long sum = uword(0) + Numbers.loWord(u);
     v = v.setWord(0,(int) sum);
     long carry = (sum>>>32);
@@ -201,26 +199,25 @@ extends Uints<Natural>, Ringlike<Natural> {
       v = v.setWord(i,(int) sum);
       carry = (sum>>>32); }
     if (0L!=carry) { v = v.setWord(i,(int) carry); }
-    //return v; }
-    return v.immutable(); }
+    return v; }
 
   default Natural add (final long u,
                        final int upShift) {
     assert 0<=upShift;
     if (0==upShift) { return add(u); }
     assert 0L<=u;
-    if (0L==u) { return immutable(); }
-    return add(from(u,upShift)).immutable(); }
+    if (0L==u) { return this; }
+    return add(from(u,upShift)); }
 
   //--------------------------------------------------------------
 
   @Override
   default Natural subtract (final Natural u) {
-    // TODO: fast correct check of u<=this
+    // TODO: fast correct check of u<=this?
     assert 0<=compareTo(u);
     if (u.isZero()) { return this; }
     assert ! isZero();
-    Natural v = recyclable(this);
+    Natural v = this;
     long dif = 0L;
     long borrow = 0L;
     final int n = Math.max(endWord(),u.endWord());
@@ -232,7 +229,7 @@ extends Uints<Natural>, Ringlike<Natural> {
       borrow = (dif>>32);
       v = v.setWord(i,(int) dif); }
     assert 0L==borrow;
-    return v.immutable(); }
+    return v; }
 
   default Natural subtract (final long u) {
     assert 0L<=u;
@@ -245,8 +242,7 @@ extends Uints<Natural>, Ringlike<Natural> {
     final long hi = Numbers.hiWord(u);
     if (0L!=hi) { assert 2<=endWord(); }
     if (0L!=lo) { assert 1<=endWord(); }
-    Uints v = recyclable(this);
-    //Uints v = copy();
+    Natural v = this;
     long dif = uword(0)-lo;
     v = v.setWord(0,(int) dif);
     long borrow = (dif>>32);
@@ -260,7 +256,7 @@ extends Uints<Natural>, Ringlike<Natural> {
       v = v.setWord(i,(int) dif);
       borrow = (dif>>32); }
     assert 0L==borrow : borrow;
-    return ((Natural) v).immutable(); }
+    return v; }
 
   default Natural subtract (final long u,
                             final int upShift) {
@@ -335,13 +331,12 @@ extends Uints<Natural>, Ringlike<Natural> {
     sum = (sum>>>32) +  hi*hi ;
     final int m2 = (int) sum;
     final int m3 = (int) (sum>>>32);
-    Natural u = recyclable(4);
-    //Natural u = copy();
+    Natural u = zero();
     if (0!=m0) { u = u.setWord(0,m0); }
     if (0!=m1) { u = u.setWord(1,m1); }
     if (0!=m2) { u = u.setWord(2,m2); }
     if (0!=m3) { u = u.setWord(3,m3); }
-    return u.immutable(); }
+    return u; }
 
   //--------------------------------------------------------------
   // multiply
@@ -382,23 +377,22 @@ extends Uints<Natural>, Ringlike<Natural> {
     sum = (sum>>>32) + hihi ;
     final int m2 = (int) sum;
     final int m3 = (int) (sum>>>32);
-    Natural u = recyclable(4);
-    //Natural u = copy();
+    Natural u = zero();
     if (0!=m0) { u = u.setWord(0,m0); }
     if (0!=m1) { u = u.setWord(1,m1); }
     if (0!=m2) { u = u.setWord(2,m2); }
     if (0!=m3) { u = u.setWord(3,m3); }
-    return u.immutable(); }
+    return u; }
 
   //--------------------------------------------------------------
   // division
   //-------------------------------------------------------------
 
-  // tmp for testing
+  // for testing
   default List<Natural> divideAndRemainderKnuth (final Natural u) {
     return NaturalDivide.divideAndRemainderKnuth(this,u); }
 
-  // tmp for testing
+  // for testing
   default List<Natural> divideAndRemainderBurnikelZiegler (final Natural u) {
     return NaturalDivide.divideAndRemainderBurnikelZiegler(this,u); }
 

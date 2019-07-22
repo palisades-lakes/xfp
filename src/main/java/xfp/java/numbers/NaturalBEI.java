@@ -8,7 +8,7 @@ import java.util.Arrays;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-16
+ * @version 2019-07-22
  */
 
 public final class NaturalBEI //extends Number
@@ -74,8 +74,7 @@ implements Natural {
   @Override
   public final Natural recyclable (final Natural init,
                                    final int nWords) {
-    if (null==init) {
-      return NaturalBEIMutable.make(nWords); }
+    if (null==init) { return NaturalBEIMutable.make(nWords); }
     return NaturalBEIMutable.make(init,nWords); }
 
   @Override
