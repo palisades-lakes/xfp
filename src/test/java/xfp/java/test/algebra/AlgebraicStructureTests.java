@@ -36,8 +36,8 @@ import xfp.java.prng.PRNG;
 
 @SuppressWarnings("unchecked")
 public final class AlgebraicStructureTests {
-  private static final int TRYS = 2;//32;
-  static final int SPACE_TRYS = 2;//4;
+  private static final int TRYS = 8;//32;
+  static final int SPACE_TRYS = 4;//4;
 
   //--------------------------------------------------------------
 

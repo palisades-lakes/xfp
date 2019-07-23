@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import xfp.java.numbers.NaturalBEI;
 import xfp.java.numbers.NaturalBEI0;
 import xfp.java.numbers.NaturalLE;
-import xfp.java.numbers.NaturalLEMutable;
 import xfp.java.test.Common;
 
 //----------------------------------------------------------------
