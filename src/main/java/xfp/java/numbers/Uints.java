@@ -271,11 +271,31 @@ public interface Uints<T extends Uints> extends Transience<T> {
     if (0==bShift) { return shiftDownWords(iShift); }
     T u = empty();
     final int rShift = 32-bShift;
+    int w0 = word(iShift);
     for (int j=0;j<n1;j++) { 
-      final int i = j+iShift;
-      final int w = ((word(i+1)<<rShift) | (word(i)>>>bShift));
+      final int w1 = word(j+iShift+1);
+      final int w = ((w1<<rShift) | (w0>>>bShift));
+      w0 = w1;
       u = (T) u.setWord(j,w); }
     return u; }
+
+  //  default T shiftDown (final int shift) {
+//    assert 0<=shift;
+//    if (shift==0) { return (T) this; }
+//    final int n0 = hiInt();
+//    if (0==n0) { return (T) this; }
+//    final int iShift = (shift >>> 5);
+//    final int n1 = n0-iShift;
+//    if (0>=n1) { return empty(); }
+//    final int bShift = (shift & 0x1f);
+//    if (0==bShift) { return shiftDownWords(iShift); }
+//    T u = empty();
+//    final int rShift = 32-bShift;
+//    for (int j=0;j<n1;j++) { 
+//      final int i = j+iShift;
+//      final int w = ((word(i+1)<<rShift) | (word(i)>>>bShift));
+//      u = (T) u.setWord(j,w); }
+//    return u; }
 
   //--------------------------------------------------------------
 

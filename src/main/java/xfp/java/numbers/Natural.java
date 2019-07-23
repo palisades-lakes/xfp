@@ -212,13 +212,38 @@ extends Uints<Natural>, Ringlike<Natural> {
 
   //--------------------------------------------------------------
 
+  // very slow --n obvious reason
+//  @Override
+//  default Natural subtract (final Natural u) {
+//    // TODO: fast correct check of u<=this?
+//    //assert 0<=compareTo(u);
+//    if (u.isZero()) { return this; }
+//    assert ! isZero();
+//    Natural v = zero();
+//    final int n0 = hiInt();
+//    final int n1 = u.hiInt();
+//    assert n1<=n0;
+//    long borrow = 0L;
+//    int i=0;
+//    for (;i<n1;i++) {
+//      final long dif = (uword(i) - u.uword(i)) + borrow;
+//      borrow = (dif>>32);
+//      v = v.setWord(i,(int) dif); }
+//    for (;i<=n0;i++) {
+//      if (0L==borrow) { break; }
+//      final long dif = uword(i) + borrow;
+//      borrow = (dif>>32);
+//      v = v.setWord(i,(int)dif); }
+//    assert 0L==borrow;
+//    return v; }
+
   @Override
   default Natural subtract (final Natural u) {
     // TODO: fast correct check of u<=this?
     assert 0<=compareTo(u);
     if (u.isZero()) { return this; }
     assert ! isZero();
-    Natural v = this;
+    Natural v = zero();
     long dif = 0L;
     long borrow = 0L;
     final int n = Math.max(hiInt(),u.hiInt());

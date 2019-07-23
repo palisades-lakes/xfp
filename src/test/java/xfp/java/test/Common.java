@@ -37,7 +37,7 @@ import xfp.java.prng.PRNG;
 @SuppressWarnings("unchecked")
 public final class Common {
 
-  private static final int TRYS = 63;//1 * 256;
+  private static final int TRYS = 257;
 
   //--------------------------------------------------------------
 
@@ -47,13 +47,14 @@ public final class Common {
         new String[]
           { "xfp.java.accumulators.DoubleAccumulator",
             "xfp.java.accumulators.KahanAccumulator",
+            // failing sumTest with some TRYS, passing with others
+            "xfp.java.accumulators.DistilledAccumulator",
+            "xfp.java.accumulators.ZhuHayesAccumulator",
+            // ok
             "xfp.java.accumulators.BigFloatAccumulator0",
             "xfp.java.accumulators.BigFloatAccumulator",
             "xfp.java.accumulators.RationalFloatAccumulator",
             "xfp.java.accumulators.RationalAccumulator",
-            // failing sumTest with some TRYS, passing with others
-            "xfp.java.accumulators.DistilledAccumulator",
-            "xfp.java.accumulators.ZhuHayesAccumulator",
           }); }
 
   //--------------------------------------------------------------
