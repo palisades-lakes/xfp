@@ -15,13 +15,13 @@ import xfp.java.test.Common;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-24
+ * @version 2019-07-23
  */
 
 public final class RationalAccumulatorTest {
 
   //--------------------------------------------------------------
-  private static final int DIM = 256;
+  private static final int DIM = 63;//256;
   private static final List<String> accumulators =
     List.of("xfp.java.accumulators.RationalAccumulator");
 

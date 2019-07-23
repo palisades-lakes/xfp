@@ -32,12 +32,12 @@ import xfp.java.prng.PRNG;
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-22
+ * @version 2019-07-23
  */
 @SuppressWarnings("unchecked")
 public final class Common {
 
-  private static final int TRYS = 257;
+  private static final int TRYS = 17;
 
   //--------------------------------------------------------------
 

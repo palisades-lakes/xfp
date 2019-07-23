@@ -31,13 +31,13 @@ import xfp.java.prng.PRNG;
  * mvn -q -Dtest=xfp/java/test/algebra/AlgebraicStructureTests test > AST.txt
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-22
+ * @version 2019-07-23
  */
 
 @SuppressWarnings("unchecked")
 public final class AlgebraicStructureTests {
-  private static final int TRYS = 8;//32;
-  static final int SPACE_TRYS = 4;//4;
+  private static final int TRYS = 7;//32;
+  static final int SPACE_TRYS = 3;//4;
 
   //--------------------------------------------------------------
 
@@ -89,7 +89,7 @@ public final class AlgebraicStructureTests {
     structureTests(Doubles.MULTIPLICATIVE_MAGMA,TRYS);
     structureTests(Doubles.FLOATING_POINT,TRYS);
 
-    for (final int n : new int[] { 1, 3, 255}) {
+    for (final int n : new int[] { 1, 3, 63, }) {//255}) {
       structureTests(BigDecimalsN.group(n),SPACE_TRYS);
       structureTests(BigDecimalsN.space(n),SPACE_TRYS);
 
