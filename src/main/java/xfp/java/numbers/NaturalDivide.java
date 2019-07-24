@@ -47,7 +47,6 @@ public final class NaturalDivide {
     if (1==d) { return List.of(u,u.zero()); }
 
     final int nu = u.hiInt();
-    final int nu1 = nu-1;
     final long dd = unsigned(d);
     if (1==nu) {
       final long nn = u.uword(0);
