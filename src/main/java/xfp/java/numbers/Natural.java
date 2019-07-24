@@ -670,32 +670,31 @@ extends Uints<Natural>, Ringlike<Natural> {
 
   //--------------------------------------------------------------
 
-
-  static Natural get (final String u,
-                      final int radix) {
-    return NaturalLE.valueOf(u,radix); }
-
-  static Natural get (final BigInteger u) {
-    assert 0<=u.signum();
-    return NaturalLE.valueOf(u); }
-
-  static Natural get (final long u) {
-    assert 0L<=u;
-    return NaturalLE.valueOf(u); }
-
-  //--------------------------------------------------------------
-
 //  static Natural get (final String u,
 //                      final int radix) {
-//    return NaturalLEMutable.valueOf(u,radix); }
+//    return NaturalLE.valueOf(u,radix); }
 //
 //  static Natural get (final BigInteger u) {
 //    assert 0<=u.signum();
-//    return NaturalLEMutable.valueOf(u); }
+//    return NaturalLE.valueOf(u); }
 //
 //  static Natural get (final long u) {
 //    assert 0L<=u;
-//    return NaturalLEMutable.valueOf(u); }
+//    return NaturalLE.valueOf(u); }
+
+  //--------------------------------------------------------------
+
+  static Natural get (final String u,
+                      final int radix) {
+    return NaturalLEMutable.valueOf(u,radix); }
+
+  static Natural get (final BigInteger u) {
+    assert 0<=u.signum();
+    return NaturalLEMutable.valueOf(u); }
+
+  static Natural get (final long u) {
+    assert 0L<=u;
+    return NaturalLEMutable.valueOf(u); }
 
   //--------------------------------------------------------------
 
