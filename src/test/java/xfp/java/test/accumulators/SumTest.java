@@ -2,7 +2,7 @@ package xfp.java.test.accumulators;
 
 import org.junit.jupiter.api.Test;
 
-import xfp.java.accumulators.ERationalAccumulator;
+import xfp.java.accumulators.BigFloatAccumulator0;
 import xfp.java.test.Common;
 
 //----------------------------------------------------------------
@@ -13,7 +13,7 @@ import xfp.java.test.Common;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-23
+ * @version 2019-07-24
  */
 
 public final class SumTest {
@@ -41,7 +41,7 @@ public final void overflowSum () {
     Common.sumTests(
       Common.generators(DIM),
       Common.makeAccumulators(Common.accumulators()),
-      ERationalAccumulator.make());
+      BigFloatAccumulator0.make());
     //Debug.DEBUG=false;
   }
 
@@ -64,7 +64,7 @@ public final void overflowSum () {
     Common.l2DistanceTests(
       Common.generators(DIM),
       Common.makeAccumulators(Common.accumulators()),
-      ERationalAccumulator.make());
+      BigFloatAccumulator0.make());
     //Debug.DEBUG=false;
   }
 
@@ -77,7 +77,7 @@ public final void overflowSum () {
     Common.l1DistanceTests(
       Common.generators(DIM),
       Common.makeAccumulators(Common.accumulators()),
-      ERationalAccumulator.make());
+      BigFloatAccumulator0.make());
     //Debug.DEBUG=false;
   }
 
@@ -90,7 +90,7 @@ public final void overflowSum () {
     Common.dotTests(
       Common.generators(DIM),
       Common.makeAccumulators(Common.accumulators()),
-      ERationalAccumulator.make());
+      BigFloatAccumulator0.make());
     //Debug.DEBUG=false;
   }
 
@@ -104,7 +104,7 @@ public final void overflowSum () {
     Common.l2Tests(
       Common.generators(DIM),
       Common.makeAccumulators(Common.accumulators()),
-      ERationalAccumulator.make());
+      BigFloatAccumulator0.make());
     //Debug.DEBUG=false;
   }
 
