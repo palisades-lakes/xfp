@@ -12,7 +12,7 @@ import org.apache.commons.rng.sampling.distribution.ContinuousUniformSampler;
  * that return different values on each call.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-22
+ * @version 2019-07-24
  */
 
 @SuppressWarnings("unchecked")
@@ -282,11 +282,7 @@ public final class Generators {
         for (int i=0;i<n;i++) { z[i] = (BigInteger) g.next(); }
         return z; } }; }
 
-  //--------------------------------------------------------------
-
-
-
-  //--------------------------------------------------------------
+   //--------------------------------------------------------------
   // disable constructor
   //--------------------------------------------------------------
 

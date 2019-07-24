@@ -39,8 +39,8 @@ import xfp.java.prng.PRNG;
 @SuppressWarnings("unchecked")
 public final class Common {
 
-  private static final int TRYS = 17;
-
+  public static final int TRYS = 131; 
+  
   //--------------------------------------------------------------
 
   public static final List<String> accumulators () {

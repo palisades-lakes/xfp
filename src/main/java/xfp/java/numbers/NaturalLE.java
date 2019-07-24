@@ -74,7 +74,8 @@ public final class NaturalLE implements Natural {
   /** Singleton.<br>
    * TODO: Better to use a new array?
    */
-  private static final NaturalLE ZERO = new NaturalLE(Ints.EMPTY); 
+  private static final NaturalLE ZERO = 
+    new NaturalLE(Ints.EMPTY,0); 
 
   @Override
   public final Natural empty () { return ZERO; }
@@ -155,22 +156,23 @@ public final class NaturalLE implements Natural {
   //-------------------------------------------------------------
 
   /** UNSAFE: doesn't copy <code>words</code>. */
-  private NaturalLE (final int[] words) { 
+  private NaturalLE (final int[] words,
+                     final int hiInt) { 
     _words = words; 
-    _hiInt = Ints.hiInt(words); }
+    _hiInt = hiInt; }
 
   /** Doesn't copy <code>words</code>. 
    */
 
   static final NaturalLE unsafe (final int[] words) {
-    return new NaturalLE(words); }
+    return new NaturalLE(words,Ints.hiInt(words)); }
 
   /** Copy <code>words</code>. 
    *  */
   public static final NaturalLE make (final int[] words) {
-    final int end = Ints.hiInt(words);
-    return unsafe(Arrays.copyOf(words,end)); }
-    //return unsafe(Arrays.copyOf(words,words.length)); }
+//    final int end = Ints.hiInt(words);
+//    return unsafe(Arrays.copyOf(words,end)); }
+    return unsafe(Arrays.copyOf(words,words.length)); }
 
   //--------------------------------------------------------------
   /** From a big endian {@code byte[]}, as produced by

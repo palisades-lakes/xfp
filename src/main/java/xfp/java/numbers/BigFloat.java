@@ -337,10 +337,21 @@ implements Ringlike<BigFloat> {
   multiply (final boolean p,
             final Natural t,
             final int e) {
+    final int ee;
+    try { ee = Math.addExact(exponent(),e); }
+    catch (final Throwable th) {
+      System.err.println("nonNegative=" + nonNegative());
+      System.err.println("significand=" + significand());
+      System.err.println("hiBit=" + significand().hiBit());
+      System.err.println("exponent=" + exponent());
+      System.err.println();
+      System.err.println("p=" + p);
+      System.err.println("t=" + t);
+      System.err.println("hiBit=" + t.hiBit());
+      System.err.println("e=" + e);
+      throw th; }
     return valueOf(
-      (! (nonNegative() ^ p)),
-      significand().multiply(t),
-      Math.addExact(exponent(),e)); }
+      (! (nonNegative() ^ p)), significand().multiply(t), ee); }
 
   @Override
   public final BigFloat
@@ -362,7 +373,10 @@ implements Ringlike<BigFloat> {
   @Override
   public final BigFloat
   square () {
-    return valueOf(true,significand().square(),(exponent()<<1)); }
+    return valueOf(
+      true,
+      significand().square(),
+      Math.addExact(exponent(),exponent())); }
 
   //--------------------------------------------------------------
 

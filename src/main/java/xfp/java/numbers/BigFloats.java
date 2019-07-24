@@ -130,25 +130,18 @@ public final class BigFloats implements Set {
 
   //--------------------------------------------------------------
 
-  /** Intended primarily for testing. Sample a random double
-   * (see {@link xfp.java.prng.DoubleSampler})
-   * and convert to <code></code>
-   * with {@link #DOUBLE_P} probability;
-   * otherwise return {@link #EMPTY} or
-   * {@link #ONE}, {@link #MINUS_ONE},
-   * with equal probability (these are potential edge cases).
-   */
-
   public static final Generator
-  fromBigIntegerGenerator (final UniformRandomProvider urp) {
+  fromBigIntegerGenerator (final UniformRandomProvider urp,
+                           final int eMin,
+                           final int eMax) {
+    assert eMin<eMax;
+    final int eRan = eMax-eMin;
     final double dp = 0.9;
     return new GeneratorBase ("fromBigIntegerGenerator") {
       private final ContinuousSampler choose =
         new ContinuousUniformSampler(urp,0.0,1.0);
       private final Generator g0 =
         Generators.bigIntegerGenerator(urp);
-      private final Generator g2 =
-        Generators.intGenerator(urp);
       private final CollectionSampler edgeCases =
         new CollectionSampler(
           urp,
@@ -166,9 +159,16 @@ public final class BigFloats implements Set {
         final boolean nonNegative = (0 <= bi.signum());
         final Natural significand =
           Natural.get(nonNegative ? bi : bi.negate());
-        final int exponent = g2.nextInt();
+        final int exponent = urp.nextInt(eRan) + eMin;
         return
           BigFloat.valueOf(nonNegative,significand,exponent); } }; }
+
+  public static final Generator
+  fromBigIntegerGenerator (final UniformRandomProvider urp) {
+    // default bounds allow multiply within int exponent range. 
+    return 
+      fromBigIntegerGenerator(
+        urp,Integer.MIN_VALUE/2,Integer.MAX_VALUE/2); }
 
   // Is this characteristic of most inputs?
   public static final Generator

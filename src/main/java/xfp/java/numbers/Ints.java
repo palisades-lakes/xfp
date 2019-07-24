@@ -85,9 +85,9 @@ public final class Ints implements Set {
 
   public static final int hiInt (final int[] x) {
     final int n = x.length;
-    int k = -1;
-    for (int i=0;i<n;i++) { if (0!=x[i]) { k = i; } }
-    return k+1; }
+    int i = n-1;
+    while ((0<=i) && (0==x[i])) { i--; }
+    return i+1; }
 
   /** <em>DANGER:</em> may return <code>m</code> or a new array. 
    */
