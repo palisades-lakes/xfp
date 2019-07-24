@@ -8,7 +8,7 @@ import java.util.Arrays;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-23
+ * @version 2019-07-24
  */
 
 public final class NaturalLE implements Natural {
@@ -139,7 +139,7 @@ public final class NaturalLE implements Natural {
   /** Doesn't copy <code>words</code>. 
    */
 
-  private static final NaturalLE unsafe (final int[] words) {
+  static final NaturalLE unsafe (final int[] words) {
     return new NaturalLE(words); }
 
   /** Copy <code>words</code>. 

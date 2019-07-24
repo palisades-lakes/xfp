@@ -8,7 +8,7 @@ import java.util.Arrays;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-23
+ * @version 2019-07-24
  */
 
 public final class NaturalLEMutable implements Natural {
@@ -110,8 +110,8 @@ public final class NaturalLEMutable implements Natural {
   public final boolean equals (final Object x) {
     assert isValid();
     if (x==this) { return true; }
-    if (!(x instanceof NaturalLEMutable)) { return false; }
-    return uintsEquals((NaturalLEMutable) x); }
+    if (!(x instanceof Natural)) { return false; }
+    return uintsEquals((Natural) x); }
 
   /** hex string. */
   @Override
@@ -127,9 +127,19 @@ public final class NaturalLEMutable implements Natural {
     return false; }
 
   @Override
+  public final Natural recycle () { 
+    assert isValid();
+   final int[] t = _words;
+    _words = null;
+    return unsafe(t); }
+
+  @Override
   public final Natural immutable () { 
     assert isValid();
-    return NaturalLE.make(words()); }
+    final int[] t = Ints.stripTrailingZeros(_words);
+    //final int[] t = _words;
+    _words = null;
+    return NaturalLE.unsafe(t); }
 
   @Override
   public final Natural recyclable (final Natural init) { 
@@ -155,13 +165,6 @@ public final class NaturalLEMutable implements Natural {
   public final Natural copy () { 
     assert isValid();
     return copy(this); }
-
-  @Override
-  public final Natural recycle () { 
-    assert isValid();
-   final int[] t = _words;
-    _words = null;
-    return unsafe(t); }
 
   @Override
   public final boolean isValid () { return null!=_words; }

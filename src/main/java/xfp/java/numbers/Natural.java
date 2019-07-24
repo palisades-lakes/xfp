@@ -18,7 +18,7 @@ import xfp.java.exceptions.Exceptions;
  * TODO: utilities class to hide private stuff?
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-23
+ * @version 2019-07-24
  */
 
 @SuppressWarnings("unchecked")
@@ -232,51 +232,53 @@ extends Uints<Natural>, Ringlike<Natural> {
   //--------------------------------------------------------------
 
   // very slow --no obvious reason
-//  @Override
-//  default Natural subtract (final Natural u) {
-//    // TODO: fast correct check of u<=this?
-//    //assert 0<=compareTo(u);
-//    if (u.isZero()) { return this; }
-//    assert ! isZero();
-//    Natural v = zero();
-//    final int n0 = hiInt();
-//    final int n1 = u.hiInt();
-//    assert n1<=n0;
-//    long borrow = 0L;
-//    int i=0;
-//    for (;i<n1;i++) {
-//      final long dif = (uword(i) - u.uword(i)) + borrow;
-//      borrow = (dif>>32);
-//      v = v.setWord(i,(int) dif); }
-//    for (;i<=n0;i++) {
-//      if (0L==borrow) { break; }
-//      final long dif = uword(i) + borrow;
-//      borrow = (dif>>32);
-//      v = v.setWord(i,(int)dif); }
-//    assert 0L==borrow;
-//    return v; }
-
   @Override
   default Natural subtract (final Natural u) {
     assert isValid();
     assert u.isValid();
     // TODO: fast correct check of u<=this?
-    assert 0<=compareTo(u);
+    //assert 0<=compareTo(u);
     if (u.isZero()) { return this; }
     assert ! isZero();
-    Natural v = zero();
-    long dif = 0L;
+    final int n0 = hiInt();
+    final int n1 = u.hiInt();
+    assert n1<=n0;
+    Natural v = recyclable(n0);
     long borrow = 0L;
-    final int n = Math.max(hiInt(),u.hiInt());
     int i=0;
-    // TODO: optimize by differencing over shared range
-    // and then just borrowing
-    for (;i<n;i++) {
-      dif = (uword(i) - u.uword(i)) + borrow;
+    for (;i<n1;i++) {
+      final long dif = (uword(i)-u.uword(i)) + borrow;
       borrow = (dif>>32);
       v = v.setWord(i,(int) dif); }
+    assert n1==i;
+    for (;i<=n0;i++) {
+      final long dif = uword(i) + borrow;
+      v = v.setWord(i,(int)dif);
+      borrow = (dif>>32); }
     assert 0L==borrow;
-    return v; }
+    return v.immutable(); }
+
+//  @Override
+//  default Natural subtract (final Natural u) {
+//    assert isValid();
+//    assert u.isValid();
+//    // TODO: fast correct check of u<=this?
+//    assert 0<=compareTo(u);
+//    if (u.isZero()) { return this; }
+//    assert ! isZero();
+//    Natural v = zero();
+//    long dif = 0L;
+//    long borrow = 0L;
+//    final int n = Math.max(hiInt(),u.hiInt());
+//    int i=0;
+//    // TODO: optimize by differencing over shared range
+//    // and then just borrowing
+//    for (;i<n;i++) {
+//      dif = (uword(i) - u.uword(i)) + borrow;
+//      borrow = (dif>>32);
+//      v = v.setWord(i,(int) dif); }
+//    assert 0L==borrow;
+//    return v; }
 
   default Natural subtract (final long u) {
     assert isValid();
@@ -670,31 +672,31 @@ extends Uints<Natural>, Ringlike<Natural> {
 
   //--------------------------------------------------------------
 
-//  static Natural get (final String u,
-//                      final int radix) {
-//    return NaturalLE.valueOf(u,radix); }
-//
-//  static Natural get (final BigInteger u) {
-//    assert 0<=u.signum();
-//    return NaturalLE.valueOf(u); }
-//
-//  static Natural get (final long u) {
-//    assert 0L<=u;
-//    return NaturalLE.valueOf(u); }
-
-  //--------------------------------------------------------------
-
   static Natural get (final String u,
                       final int radix) {
-    return NaturalLEMutable.valueOf(u,radix); }
+    return NaturalLE.valueOf(u,radix); }
 
   static Natural get (final BigInteger u) {
     assert 0<=u.signum();
-    return NaturalLEMutable.valueOf(u); }
+    return NaturalLE.valueOf(u); }
 
   static Natural get (final long u) {
     assert 0L<=u;
-    return NaturalLEMutable.valueOf(u); }
+    return NaturalLE.valueOf(u); }
+
+  //--------------------------------------------------------------
+
+//  static Natural get (final String u,
+//                      final int radix) {
+//    return NaturalLEMutable.valueOf(u,radix); }
+//
+//  static Natural get (final BigInteger u) {
+//    assert 0<=u.signum();
+//    return NaturalLEMutable.valueOf(u); }
+//
+//  static Natural get (final long u) {
+//    assert 0L<=u;
+//    return NaturalLEMutable.valueOf(u); }
 
   //--------------------------------------------------------------
 

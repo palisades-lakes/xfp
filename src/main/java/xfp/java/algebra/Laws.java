@@ -10,6 +10,8 @@ import java.util.function.UnaryOperator;
 
 import com.google.common.collect.ImmutableList;
 
+import xfp.java.Classes;
+
 /** Constructor methods for Predicates/BiPredicate closures on
  * sets and operations.
  *
@@ -31,7 +33,7 @@ import com.google.common.collect.ImmutableList;
  * no instance state or methods.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-28
+ * @version 2019-07-24
  */
 
 @SuppressWarnings("unchecked")
@@ -331,6 +333,9 @@ public final class Laws {
             System.out.println("a=" + a);
             System.out.println("b=" + b);
             System.out.println("c=" + c);
+            System.out.println(
+              Classes.className(left) 
+              + " != " + Classes.className(right));
             System.out.println("a*(b+c)    =" + left);
             System.out.println("(a*b)+(a*c)=" + right);}
         }

@@ -25,7 +25,7 @@ import xfp.java.prng.Generators;
  * represented by <code>BigFloat</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-23
+ * @version 2019-07-24
  */
 @SuppressWarnings("unchecked")
 public final class BigFloats implements Set {
@@ -113,7 +113,20 @@ public final class BigFloats implements Set {
       @Override
       public final boolean test (final BigFloat q0,
                                  final BigFloat q1) {
-        return q0.equals(q1); } }; }
+        final boolean result = q0.equals(q1); 
+//        if (! result) {
+//          System.out.println("nonNegative:" + 
+//            (q0.nonNegative()==q1.nonNegative()));
+//          System.out.println("exponent:" + 
+//            (q0.exponent()==q1.exponent()));
+//          System.out.println("significand:" + 
+//            (q0.significand()==q1.significand()));
+//          System.out.println(q0.significand().getClass());
+//          System.out.println(q0.significand());
+//          System.out.println(q1.significand().getClass());
+//          System.out.println(q1.significand());
+//        }
+      return result;} }; }
 
   //--------------------------------------------------------------
 
