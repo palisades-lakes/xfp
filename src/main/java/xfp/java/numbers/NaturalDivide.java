@@ -4,6 +4,7 @@ import static xfp.java.numbers.Numbers.hiWord;
 import static xfp.java.numbers.Numbers.loWord;
 import static xfp.java.numbers.Numbers.unsigned;
 
+import java.math.BigInteger;
 import java.util.List;
 
 import xfp.java.Classes;
@@ -13,7 +14,7 @@ import xfp.java.Classes;
  * Non-instantiable.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-21
+ * @version 2019-07-23
  */
 
 @SuppressWarnings("unchecked")
@@ -45,14 +46,16 @@ public final class NaturalDivide {
                       final int d) {
     if (1==d) { return List.of(u,u.zero()); }
 
+    final int nu = u.hiInt();
+    final int nu1 = nu-1;
     final long dd = unsigned(d);
-    if (1==u.hiInt()) {
+    if (1==nu) {
       final long nn = u.uword(0);
       final int q = (int) (nn/dd);
       final int r = (int) (nn-(q*dd));
       return List.of(u.from(q),u.from(r)); }
 
-    Natural qq = u;
+    Natural qq = u.copy();
 
     final int shift = Integer.numberOfLeadingZeros(d);
     int r = u.word(u.hiInt()-1);
@@ -142,19 +145,24 @@ public final class NaturalDivide {
   private static final List<Natural> 
   knuthDivision (final Natural u,
                  final Natural v) {
+    assert u.isValid();
+    assert v.isValid();
     assert !v.isZero();
     // D1 compact the divisor
     final int nv = v.hiInt();
     final int lShift = Integer.numberOfLeadingZeros(v.word(nv-1));
-    Natural d = v.shiftUp(lShift);
+    Natural d = v.copy().shiftUp(lShift);
+    assert v.isValid();
     final int nd = d.hiInt();
     assert nv==nd;
     final int nu = u.hiInt();
-    Natural r = u.shiftUp(lShift);
+    Natural r = u.copy().shiftUp(lShift);
+    assert u.isValid();
     final int nr0 = r.hiInt();
     assert (nu==nr0)||(nu+1==nr0) :
       "\nnu=" + nu + "\nnr=" + nr0;
     r = r.setWord(nr0,0);
+    assert u.isValid();
     final int nr = nr0+1;
     Natural q = u.zero();
     final int nq = nr-nd;
@@ -266,8 +274,9 @@ public final class NaturalDivide {
     if (0==cmp) { return List.of(u.one(),u.zero()); }
     if (0>cmp) { return List.of(u.zero(),u); }
 
-    if (1==v.hiInt()) { 
-      return divideAndRemainder(u,v.word(0)); } 
+    assert u.isValid();
+    assert v.isValid();
+    if (1==v.hiInt()) { return divideAndRemainder(u,v.word(0)); } 
 
     // Cancel common powers of 2 if above KNUTH_POW2_* thresholds
     if (u.hiInt() >= KNUTH_POW2_THRESH_LEN) {
@@ -349,6 +358,8 @@ public final class NaturalDivide {
               final Natural b) {
     final int n = b.hiInt();
 
+    assert a.isValid();
+    assert b.isValid();
     // step 1: base case
     if (((n%2) != 0) || (n < BURNIKEL_ZIEGLER_THRESHOLD)) {
       final List<Natural> qr = divideAndRemainderKnuth(a,b);
@@ -408,17 +419,17 @@ public final class NaturalDivide {
     final int s0 = s/BURNIKEL_ZIEGLER_THRESHOLD;
     final int m = 1 << (32-Integer.numberOfLeadingZeros(s0));
 
-    final int j = ((s+m)-1) / m; // step 2a: j = ceil(s/m)
+    final int j = (s+m-1) / m; // step 2a: j = ceil(s/m)
     final int n = j * m; // step 2b: block length in 32-bit units
     final long n32 = 32L * n; // block length in bits
     // step 3: sigma = max{T | (2^T)*B < beta^n}
-    final int sigma = (int) Math.max(0, n32 - v.hiBit());
+    final int sigma = (int) Math.max(0, n32-v.hiBit());
 
     // step 4a: shift b so its length is a multiple of n
     assert 0<=sigma;
-    final Natural bShifted = v.shiftUp(sigma);
+    final Natural bShifted = v.copy().shiftUp(sigma);
     // step 4b: shift a by the same amount
-    final Natural aShifted = u.shiftUp(sigma);
+    final Natural aShifted = u.copy().shiftUp(sigma);
 
     // step 5: t is the number of blocks needed to accommodate a
     // plus one additional bit
@@ -435,7 +446,7 @@ public final class NaturalDivide {
 
     // schoolbook division on blocks, dividing 2-block by 1-block
     Natural q = u.zero();
-    for (int i=t-2; i > 0; i--) {
+    for (int i=t-2;i>0;i--) {
       // step 8a: compute (qi,ri) such that z=b*qi+ri
       // Doesn't need modified z
       final List<Natural> qri = divide2n1n(z,bShifted);
@@ -446,6 +457,8 @@ public final class NaturalDivide {
       q = q.add(qri.get(0),(i*n)<<5); }
     // final iteration of step 8: do the loop one more time
     // for i=0 but leave z unchanged
+    assert z.isValid();
+    assert bShifted.isValid();
     final List<Natural> qri = divide2n1n(z,bShifted);
 
     // step 9: a and b were shifted, so shift back
@@ -529,6 +542,28 @@ public final class NaturalDivide {
     if (g.compareTo(n.one()) > 0) {
       final Natural ng = n.divide(g);
       final Natural dg = d.divide(g);
+      return List.of(ng,dg); }
+    return List.of(n,d); }
+
+  public static final List<BigInteger> 
+  reduce (final BigInteger n0,
+          final BigInteger d0) {
+    final int shift = 
+      Math.min(Numbers.loBit(n0),Numbers.loBit(d0));
+    final BigInteger n = 
+      ((shift != 0) ? n0.shiftRight(shift) : n0);
+    final BigInteger d = 
+      ((shift != 0) ? d0.shiftRight(shift) : d0);
+    if (n.equals(d)) { 
+      return List.of(BigInteger.ONE,BigInteger.ONE); }
+    if (d.equals(BigInteger.ONE)) {
+      return List.of(n,BigInteger.ONE); }
+    if (n.equals(BigInteger.ONE)) { 
+      return List.of(BigInteger.ONE,d); }
+    final BigInteger g = n.gcd(d);
+    if (g.compareTo(BigInteger.ONE) > 0) {
+      final BigInteger ng = n.divide(g);
+      final BigInteger dg = d.divide(g);
       return List.of(ng,dg); }
     return List.of(n,d); }
 

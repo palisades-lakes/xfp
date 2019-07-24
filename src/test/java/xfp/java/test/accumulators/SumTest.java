@@ -2,7 +2,7 @@ package xfp.java.test.accumulators;
 
 import org.junit.jupiter.api.Test;
 
-import xfp.java.accumulators.BigFloatAccumulator;
+import xfp.java.accumulators.ERationalAccumulator;
 import xfp.java.test.Common;
 
 //----------------------------------------------------------------
@@ -20,6 +20,18 @@ public final class SumTest {
 
   private static final int DIM = 63;//1024;
 
+
+@SuppressWarnings("static-method")
+@Test
+public final void overflowSum () {
+  //Debug.DEBUG=false;
+  //Debug.println();
+  //Debug.println("overflow");
+  Common.overflowTests(
+    Common.makeAccumulators(Common.accumulators()));
+  //Debug.DEBUG=false;
+}
+
   @SuppressWarnings("static-method")
   @Test
   public final void sum () {
@@ -29,7 +41,7 @@ public final class SumTest {
     Common.sumTests(
       Common.generators(DIM),
       Common.makeAccumulators(Common.accumulators()),
-      BigFloatAccumulator.make());
+      ERationalAccumulator.make());
     //Debug.DEBUG=false;
   }
 
@@ -52,7 +64,7 @@ public final class SumTest {
     Common.l2DistanceTests(
       Common.generators(DIM),
       Common.makeAccumulators(Common.accumulators()),
-      BigFloatAccumulator.make());
+      ERationalAccumulator.make());
     //Debug.DEBUG=false;
   }
 
@@ -65,7 +77,7 @@ public final class SumTest {
     Common.l1DistanceTests(
       Common.generators(DIM),
       Common.makeAccumulators(Common.accumulators()),
-      BigFloatAccumulator.make());
+      ERationalAccumulator.make());
     //Debug.DEBUG=false;
   }
 
@@ -78,7 +90,7 @@ public final class SumTest {
     Common.dotTests(
       Common.generators(DIM),
       Common.makeAccumulators(Common.accumulators()),
-      BigFloatAccumulator.make());
+      ERationalAccumulator.make());
     //Debug.DEBUG=false;
   }
 
@@ -92,18 +104,7 @@ public final class SumTest {
     Common.l2Tests(
       Common.generators(DIM),
       Common.makeAccumulators(Common.accumulators()),
-      BigFloatAccumulator.make());
-    //Debug.DEBUG=false;
-  }
-
-  @SuppressWarnings("static-method")
-  @Test
-  public final void overflowSum () {
-    //Debug.DEBUG=false;
-    //Debug.println();
-    //Debug.println("overflow");
-    Common.overflowTests(
-      Common.makeAccumulators(Common.accumulators()));
+      ERationalAccumulator.make());
     //Debug.DEBUG=false;
   }
 

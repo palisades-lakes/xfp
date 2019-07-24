@@ -23,15 +23,15 @@ public final class BFProfile {
       final double[] x1 = (double[]) g.next();
       final long t = System.nanoTime();
       for (int i=0;i<trys;i++) {
-        BigFloat a = BigFloat.ZERO;
+        BigFloat a = BigFloat.valueOf(0L);
         for (int j=0;j<dim;j++) { a = a.addProduct(x0[j],x1[j]); }
-        a = BigFloat.ZERO;
+        a = BigFloat.valueOf(0L);
         for (int j=0;j<dim;j++) { a = a.add2(x0[j]).add2(x1[j]); }
-        a = BigFloat.ZERO;
+        a = BigFloat.valueOf(0L);
         for (int j=0;j<dim;j++) { a = a.addL1(x0[j],x1[j]); }
-        a = BigFloat.ZERO;
+        a = BigFloat.valueOf(0L);
         for (int j=0;j<dim;j++) { a = a.addL2(x0[j],x1[j]); }
-        a = BigFloat.ZERO;
+        a = BigFloat.valueOf(0L);
         for (int j=0;j<dim;j++) { a = a.add(x0[j]).add(x1[j]); }
         final double z0 = a.doubleValue();
         if (0.0 != z0) {

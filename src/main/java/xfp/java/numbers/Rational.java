@@ -12,7 +12,7 @@ import xfp.java.exceptions.Exceptions;
 /** Ratios of {@link Natural}.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-22
+ * @version 2019-07-23
  */
 
 @SuppressWarnings("unchecked")
@@ -34,11 +34,23 @@ implements Ringlike<Rational> {
 
   //--------------------------------------------------------------
 
-  private static final boolean isZero (final Natural i) {
-    return i.isZero(); }
+  public static final Rational get (final long k) {
+    
+    return new Rational(
+      (0<=k),Natural.get(Math.abs(k)),Natural.get(1L)); }
+
+  public static final Rational getZero () {
+    return new Rational(true,Natural.get(0L),Natural.get(1L)); }
 
   @Override
-  public final boolean isZero () { return isZero(numerator()); }
+  public final Rational zero () { return getZero(); }
+
+  @Override
+  public final boolean isZero () { return numerator().isZero(); }
+
+  public static final Rational getOne () {
+    final Natural one = Natural.get(1L);
+    return new Rational(true,one,one); }
 
   private static final boolean isOne (final boolean nonNegative,
                                       final Natural n,
@@ -57,7 +69,7 @@ implements Ringlike<Rational> {
     return valueOf(! nonNegative(), numerator(), denominator()); }
 
   public final Rational reciprocal () {
-    assert !isZero(numerator());
+    assert !numerator().isZero();
     return valueOf(nonNegative(),denominator(),numerator()); }
 
   //--------------------------------------------------------------
@@ -76,13 +88,13 @@ implements Ringlike<Rational> {
       if (p1) { n = n0d1.add(n1d0); p = true; }
       else {
         final int c = n0d1.compareTo(n1d0);
-        if (0 == c) { return ZERO; }
+        if (0 == c) { return getZero(); }
         if (0 < c) { n = n0d1.subtract(n1d0); p = true; }
         else { n = n1d0.subtract(n0d1); p = false; } } }
     else {
       if (p1) {
         final int c = n1d0.compareTo(n0d1);
-        if (0 == c) { return ZERO; }
+        if (0 == c) { return getZero(); }
         if (0 < c) { n = n1d0.subtract(n0d1); p = true; }
         else { n = n0d1.subtract(n1d0); p = false; } }
       else { n = n0d1.add(n1d0); p = false; } }
@@ -107,24 +119,23 @@ implements Ringlike<Rational> {
                                      final Natural d0,
                                      final boolean p1,
                                      final long n1) {
-    final Natural n0d1 = n0;
     final Natural n1d0 = d0.multiply(n1);
     final boolean p;
     final Natural n;
     if (p0) {
-      if (p1) { n = n0d1.add(n1d0); p = true; }
+      if (p1) { n = n0.add(n1d0); p = true; }
       else {
-        final int c = n0d1.compareTo(n1d0);
-        if (0 == c) { return ZERO; }
-        if (0 < c) { n = n0d1.subtract(n1d0); p = true; }
-        else { n = n1d0.subtract(n0d1); p = false; } } }
+        final int c = n0.compareTo(n1d0);
+        if (0==c) { return getZero(); }
+        if (0<c) { n = n0.subtract(n1d0); p = true; }
+        else { n = n1d0.subtract(n0); p = false; } } }
     else {
       if (p1) {
-        final int c = n1d0.compareTo(n0d1);
-        if (0 == c) { return ZERO; }
-        if (0 < c) { n = n1d0.subtract(n0d1); p = true; }
-        else { n = n0d1.subtract(n1d0); p = false; } }
-      else { n = n0d1.add(n1d0); p = false; } }
+        final int c = n1d0.compareTo(n0);
+        if (0==c) { return getZero(); }
+        if (0<c) { n = n1d0.subtract(n0); p = true; }
+        else { n = n0.subtract(n1d0); p = false; } }
+      else { n = n0.add(n1d0); p = false; } }
     final Natural d = d0;
     return valueOf(p,n,d); }
 
@@ -148,13 +159,13 @@ implements Ringlike<Rational> {
       if (p1) { n = n0d1.add(n1d0); p = true; }
       else {
         final int c = n0d1.compareTo(n1d0);
-        if (0 == c) { return ZERO; }
+        if (0 == c) { return getZero(); }
         if (0 < c) { n = n0d1.subtract(n1d0); p = true; }
         else { n = n1d0.subtract(n0d1); p = false; } } }
     else {
       if (p1) {
         final int c = n1d0.compareTo(n0d1);
-        if (0 == c) { return ZERO; }
+        if (0 == c) { return getZero(); }
         if (0 < c) { n = n1d0.subtract(n0d1); p = true; }
         else { n = n0d1.subtract(n1d0); p = false; } }
       else { n = n0d1.add(n1d0); p = false; } }
@@ -229,16 +240,15 @@ implements Ringlike<Rational> {
 
   public final Rational add (final double z) {
     assert Double.isFinite(z);
-    // TODO: do this for BigFloat and RationalFloat?
     final long t0 = Doubles.significand(z);
     if (0L==t0) { return this; }
     final int shift = Numbers.loBit(t0);
-    final long t = (t0 >>> shift);
-    assert 0L < t;
+    final long t = (t0>>>shift);
+    assert 0L<t;
     final int e = Doubles.exponent(z) + shift;
     final boolean nonNegative = Doubles.nonNegative(z);
-    if (0 == e) { return add(nonNegative,t); }
-    if (0 < e) { return add(nonNegative,t,e); }
+    if (0==e) { return add(nonNegative,t); }
+    if (0<e) { return add(nonNegative,t,e); }
     return addWithDenom(nonNegative,t,-e); }
 
   //--------------------------------------------------------------
@@ -270,8 +280,8 @@ implements Ringlike<Rational> {
 
   @Override
   public final Rational multiply (final Rational q) {
-    if (isZero() ) { return ZERO; }
-    if (q.isZero()) { return ZERO; }
+    if (isZero() ) { return getZero(); }
+    if (q.isZero()) { return getZero(); }
     if (q.isOne()) { return this; }
     if (isOne()) { return q; }
     return multiply(
@@ -505,15 +515,16 @@ implements Ringlike<Rational> {
     //    super();
     //assert (0 == numerator.loBit()) || (0 == denominator.loBit());
     _nonNegative = nonNegative;
-    _numerator = numerator.immutable();
-    _denominator = denominator.immutable(); }
+    _numerator = numerator;//.immutable();
+    _denominator = denominator;//.immutable(); 
+    }
 
   //--------------------------------------------------------------
 
   private static final Rational reduce (final boolean nonNegative,
                                         final Natural n0,
                                         final Natural d0) {
-    if (n0.isZero()) { return ZERO; }
+    if (n0.isZero()) { return getZero(); }
     if (d0.isOne()) {
       return new Rational(nonNegative,n0,d0.one()); }
     final List<Natural> nd = n0.reduce(d0);
@@ -562,7 +573,7 @@ implements Ringlike<Rational> {
   private static final Rational valueOf (final boolean nonNegative,
                                          final long t,
                                          final int e)  {
-    if (0L == t) { return ZERO; }
+    if (0L == t) { return getZero(); }
     assert 0L < t;
     final Natural n0 = Natural.get(t);
     if (0 == e) {  return valueOf(nonNegative,n0); }
@@ -585,7 +596,7 @@ implements Ringlike<Rational> {
   private static final Rational valueOf (final boolean nonNegative,
                                          final int e,
                                          final int t)  {
-    if (0 == t) { return ZERO; }
+    if (0 == t) { return getZero(); }
     assert 0 < t;
     final Natural n0 = Natural.get(t);
     if (0 == e) {  return valueOf(nonNegative,n0); }
@@ -728,20 +739,20 @@ implements Ringlike<Rational> {
 
   //--------------------------------------------------------------
 
-  public static final Rational ZERO =
-    new Rational(true,Natural.get(0),Natural.get(1));
+//  public static final Rational ZERO =
+//    new Rational(true,Natural.get(0),Natural.get(1));
 
-  public static final Rational ONE =
-    new Rational(true,Natural.get(1),Natural.get(1));
-
-  public static final Rational TWO =
-    new Rational(true,Natural.get(2),Natural.get(1));
-
-  public static final Rational TEN =
-    new Rational(true,Natural.get(10),Natural.get(1));
-
-  public static final Rational MINUS_ONE =
-    new Rational(false,Natural.get(1),Natural.get(1));
+//  public static final Rational ONE =
+//    new Rational(true,Natural.get(1),Natural.get(1));
+//
+//  public static final Rational TWO =
+//    new Rational(true,Natural.get(2),Natural.get(1));
+//
+//  public static final Rational TEN =
+//    new Rational(true,Natural.get(10),Natural.get(1));
+//
+//  public static final Rational MINUS_ONE =
+//    new Rational(false,Natural.get(1),Natural.get(1));
 
   //--------------------------------------------------------------
 }

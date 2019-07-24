@@ -9,7 +9,7 @@ import java.util.Arrays;
 
 /**
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-16
+ * @version 2019-07-23
  */
 public final class MutableNaturalBEI0 {
 
@@ -36,7 +36,7 @@ public final class MutableNaturalBEI0 {
    * low ints of this number.
    */
   private final int[] getLower (final int n) {
-    if (isZero()) { return Bei0.ZERO; }
+    if (isZero()) { return Bei0.valueOf(0L); }
     // TODO: copy here? DANGER!!!
     else if (intLen < n) { return getValue(); }
     else {

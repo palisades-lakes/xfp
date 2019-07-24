@@ -184,7 +184,7 @@ implements Natural {
   public static final NaturalBEI TEN = valueOf(10);
 
   @Override
-  public final Natural empty () { return ZERO; }
+  public final Natural empty () { return valueOf(0L); }
 
   @Override
   public final Natural one () { return ONE; }
@@ -193,7 +193,7 @@ implements Natural {
 
   public static final NaturalBEI valueOf (final long x) {
     assert 0L<=x;
-    //if (x==0L) { return ZERO; }
+    //if (x==0L) { return valueOf(0L); }
     //if (x==1L) { return ONE; }
     //if (x==2L) { return TWO; }
     //if (x==10L) { return TEN; }

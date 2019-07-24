@@ -137,9 +137,6 @@ implements Accumulator<KahanAccumulator> {
   @Override
   public KahanAccumulator addL2 (final double x0,
                                  final double x1) {
-    //Debug.println(Classes.className(this)+".addL2");
-    //Debug.println("before=" + this);
-    //Debug.println("before=" + doubleValue());
     assert Double.isFinite(x0);
     assert Double.isFinite(x1);
     // preserve exactness using twoAdd and twoMul to convert to 8
@@ -163,19 +160,6 @@ implements Accumulator<KahanAccumulator> {
     final double eee = Math.fma(e,e,-ee);
     add(ee);
     add(eee);
-    //Debug.println("x0,x1=" + x0+ ", " + x1);
-    //Debug.println("x0-x1=" + (x0-x1));
-    //Debug.println("(x0-x1)^2=" + (x0-x1)*(x0-x1));
-    //Debug.println("s=" + s);
-    //Debug.println("z=" + z);
-    //Debug.println("e=" + e);
-    //Debug.println("ss=" + ss);
-    //Debug.println("ess=" + ess);
-    //Debug.println("es=" + es);
-    //Debug.println("ees=" + ees);
-    //Debug.println("ee=" + ee);
-    //Debug.println("eee=" + eee);
-    //Debug.println("after=" + doubleValue());
     return this; }
 
   //--------------------------------------------------------------

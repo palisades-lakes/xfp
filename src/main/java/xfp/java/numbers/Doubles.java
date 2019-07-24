@@ -34,7 +34,7 @@ import xfp.java.prng.GeneratorBase;
 /** Utilities for <code>double</code>, <code>double[]</code>.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-19
+ * @version 2019-07-23
  */
 public final class Doubles implements Set {
 

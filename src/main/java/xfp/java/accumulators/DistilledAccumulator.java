@@ -7,7 +7,7 @@ import java.util.Arrays;
  * Mutable! Not thread safe!
  * <p>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-05
+ * @version 2019-07-23
  */
 @SuppressWarnings("unchecked")
 public final class DistilledAccumulator

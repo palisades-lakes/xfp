@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import xfp.java.accumulators.BigFloatAccumulator0;
+import xfp.java.accumulators.ERationalAccumulator;
 import xfp.java.test.Common;
 
 //----------------------------------------------------------------
@@ -34,15 +34,15 @@ public final class RationalAccumulatorTest {
     Common.l2Tests(
       Common.generators(DIM),
       Common.makeAccumulators(accumulators),
-      BigFloatAccumulator0.make());
+      ERationalAccumulator.make());
     Common.sumTests(
       Common.generators(DIM),
       Common.makeAccumulators(accumulators),
-      BigFloatAccumulator0.make());
+      ERationalAccumulator.make());
     Common.dotTests(
       Common.generators(DIM),
       Common.makeAccumulators(accumulators),
-      BigFloatAccumulator0.make());
+      ERationalAccumulator.make());
     //Debug.DEBUG=false;
   }
 

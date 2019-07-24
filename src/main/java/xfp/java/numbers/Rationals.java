@@ -25,7 +25,7 @@ import xfp.java.prng.Generators;
  * <code>Rational</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-22
+ * @version 2019-07-23
  */
 @SuppressWarnings("unchecked")
 public final class Rationals implements Set {
@@ -130,7 +130,7 @@ public final class Rationals implements Set {
 
   @SuppressWarnings("static-method")
   public final Rational additiveIdentity () {
-    return Rational.ZERO; }
+    return Rational.getZero(); }
 
   //--------------------------------------------------------------
 
@@ -171,7 +171,7 @@ public final class Rationals implements Set {
 
   @SuppressWarnings("static-method")
   public final Rational multiplicativeIdentity () {
-    return Rational.ONE; }
+    return Rational.getOne(); }
 
   //--------------------------------------------------------------
 
@@ -233,11 +233,11 @@ public final class Rationals implements Set {
         new CollectionSampler(
           urp,
           List.of(
-            Rational.ZERO,
-            Rational.ONE,
-            Rational.TWO,
-            Rational.TEN,
-            Rational.MINUS_ONE));
+            Rational.getZero(),
+            Rational.getOne(),
+            Rational.get(2L),
+            Rational.get(10L),
+            Rational.get(-1L)));
       @Override
       public Object next () {
         final boolean edge = choose.sample() > dp;
@@ -261,11 +261,11 @@ public final class Rationals implements Set {
         new CollectionSampler(
           urp,
           List.of(
-            Rational.ZERO,
-            Rational.ONE,
-            Rational.TWO,
-            Rational.TEN,
-            Rational.MINUS_ONE));
+            Rational.getZero(),
+            Rational.getOne(),
+            Rational.get(2L),
+            Rational.get(10L),
+            Rational.get(-1L)));
       @Override
       public Object next () {
         final boolean edge = choose.sample() > dp;

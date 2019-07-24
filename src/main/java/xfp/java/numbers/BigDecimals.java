@@ -54,7 +54,7 @@ public final class BigDecimals implements Set {
 
   @SuppressWarnings("static-method")
   public final BigDecimal additiveIdentity () {
-    return BigDecimal.ZERO; }
+    return BigDecimal.valueOf(0L); }
 
   //--------------------------------------------------------------
 
@@ -101,7 +101,7 @@ public final class BigDecimals implements Set {
   private final BigDecimal reciprocal (final BigDecimal q) {
     assert contains(q);
     // only a partial inverse
-    if (BigDecimal.ZERO.equals(q)) { return null; }
+    if (BigDecimal.valueOf(0L).equals(q)) { return null; }
     return BigDecimal.ONE.divide(q);  }
 
 
@@ -199,9 +199,9 @@ public final class BigDecimals implements Set {
         new CollectionSampler(
           urp,
           List.of(
-            BigDecimal.ZERO,
+            BigDecimal.valueOf(0L),
             BigDecimal.ONE,
-            BigDecimal.TEN));
+            BigDecimal.valueOf(10L)));
       @Override
       public Object next () {
         final boolean edge = choose.sample() > dp;

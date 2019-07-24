@@ -65,8 +65,9 @@ public interface Accumulator<T extends Accumulator> {
     Exceptions.unsupportedOperation(this,"add",z); }
 
   default T addAll (final double[] z)  {
-    for (final double zi : z) { add(zi); }
-    return (T) this; }
+    T a = (T) this;
+    for (final double zi : z) { a = (T) a.add(zi); }
+    return a; }
 
   default T addAbs (final double z) {
     add(Math.abs(z));

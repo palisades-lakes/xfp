@@ -55,7 +55,7 @@ public final class RationalFloats implements Set {
 
   @SuppressWarnings("static-method")
   public final RationalFloat additiveIdentity () {
-    return RationalFloat.ZERO; }
+    return RationalFloat.valueOf(0L); }
 
   //--------------------------------------------------------------
 
@@ -158,11 +158,11 @@ public final class RationalFloats implements Set {
         new CollectionSampler(
           urp,
           List.of(
-            RationalFloat.ZERO,
+            RationalFloat.valueOf(0L),
             RationalFloat.ONE,
-            RationalFloat.TWO,
-            RationalFloat.TEN,
-            RationalFloat.MINUS_ONE));
+            RationalFloat.valueOf(2L),
+            RationalFloat.valueOf(10L),
+            RationalFloat.valueOf(-1L)));
       @Override
       public Object next () {
         final boolean edge = choose.sample() > dp;
@@ -187,11 +187,11 @@ public final class RationalFloats implements Set {
         new CollectionSampler(
           urp,
           List.of(
-            RationalFloat.ZERO,
+            RationalFloat.valueOf(0L),
             RationalFloat.ONE,
-            RationalFloat.TWO,
-            RationalFloat.TEN,
-            RationalFloat.MINUS_ONE));
+            RationalFloat.valueOf(2L),
+            RationalFloat.valueOf(10L),
+            RationalFloat.valueOf(-1L)));
       @Override
       public Object next () {
         final boolean edge = choose.sample() > dp;

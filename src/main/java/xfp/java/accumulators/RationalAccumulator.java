@@ -6,7 +6,7 @@ import xfp.java.numbers.Rational;
  * accumulator.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-21
+ * @version 2019-07-23
  */
 public final class RationalAccumulator
 extends ExactAccumulator<RationalAccumulator> {
@@ -31,17 +31,13 @@ extends ExactAccumulator<RationalAccumulator> {
 
   @Override
   public final RationalAccumulator clear () {
-    _sum = Rational.ZERO;
+    _sum = Rational.getZero();
     return this; }
 
   @Override
   public final RationalAccumulator add (final double z) {
     assert Double.isFinite(z);
-    //Debug.println(Classes.className(this));
-    //Debug.println("sum=" + _sum);
-    //Debug.println("z=" + z);
     _sum = _sum.add(z);
-    //Debug.println("sum=" + _sum);
     return this; }
 
   @Override

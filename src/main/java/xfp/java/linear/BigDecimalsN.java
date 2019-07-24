@@ -54,7 +54,7 @@ public final class BigDecimalsN extends LinearSpaceLike {
   @Override
   public final Object zero (final int n) {
     final BigDecimal[] z = new BigDecimal[n];
-    Arrays.fill(z,BigDecimal.ZERO);
+    Arrays.fill(z,BigDecimal.valueOf(0L));
     return z; }
 
   //--------------------------------------------------------------

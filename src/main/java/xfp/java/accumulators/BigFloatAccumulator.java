@@ -6,7 +6,7 @@ import xfp.java.numbers.BigFloat;
  * accumulator.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-01
+ * @version 2019-07-23
  */
 public final class BigFloatAccumulator
 extends ExactAccumulator<BigFloatAccumulator> {
@@ -31,7 +31,7 @@ extends ExactAccumulator<BigFloatAccumulator> {
 
   @Override
   public final BigFloatAccumulator clear () {
-    _sum = BigFloat.ZERO;
+    _sum = BigFloat.valueOf(0L);
     return this; }
 
   @Override

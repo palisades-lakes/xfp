@@ -14,7 +14,7 @@ import xfp.java.Debug;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-19
+ * @version 2019-07-23
  */
 
 public final class NaturalBEI0 extends Number
@@ -146,7 +146,7 @@ implements Natural {
     final int c01 = compareTo(u);
     if (0<c01) { return subtract(u); }
     if (0>c01) { return u.subtract(this); }
-    return ZERO; }
+    return valueOf(0L); }
 
   //--------------------------------------------------------------
 
@@ -177,7 +177,7 @@ implements Natural {
     if (0!=m1) { return unsafe(new int[] { m1,m2,m3, }); }
     if (0!=m2) { return unsafe(new int[] { m2,m3, }); }
     if (0!=m3) { return unsafe(new int[] { m3, }); }
-    return ZERO; }
+    return valueOf(0L); }
 
   @Override
   public final NaturalBEI0 square (final long t) {
@@ -199,7 +199,7 @@ implements Natural {
 
   @Override
   public final NaturalBEI0 square () {
-    if (isZero()) { return ZERO; }
+    if (isZero()) { return valueOf(0L); }
     if (isOne()) { return ONE; }
     return unsafe(Bei0.square(_words,false)); }
 
@@ -272,9 +272,9 @@ implements Natural {
     final MutableNaturalBEI0 r =
       num.divideAndRemainderBurnikelZiegler(den,q);
     final NaturalBEI0 qq =
-      q.isZero() ? ZERO : valueOf(q.getValue());
+      q.isZero() ? valueOf(0L) : valueOf(q.getValue());
     final NaturalBEI0 rr =
-      r.isZero() ? ZERO : valueOf(r.getValue());
+      r.isZero() ? valueOf(0L) : valueOf(r.getValue());
     return List.of(qq,rr); }
 
   private final NaturalBEI0
@@ -576,7 +576,7 @@ implements Natural {
   public static final NaturalBEI0 TEN = valueOf(10);
 
   @Override
-  public final Natural empty () { return ZERO; }
+  public final Natural empty () { return valueOf(0L); }
   
   //--------------------------------------------------------------
 
@@ -590,7 +590,7 @@ implements Natural {
 
   public static final NaturalBEI0 valueOf (final long x,
                                            final int upShift) {
-    if (0L==x) { return ZERO; }
+    if (0L==x) { return valueOf(0L); }
     assert 0L < x;
     return unsafe(Bei0.shiftUp(x,upShift)); }
 

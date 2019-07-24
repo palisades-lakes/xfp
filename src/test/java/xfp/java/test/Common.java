@@ -17,12 +17,14 @@ import org.apache.commons.rng.UniformRandomProvider;
 import org.junit.jupiter.api.Assertions;
 
 import xfp.java.Classes;
+import xfp.java.Debug;
 import xfp.java.accumulators.Accumulator;
 import xfp.java.function.FloatFunction;
 import xfp.java.function.ToFloatFunction;
 import xfp.java.numbers.Doubles;
 import xfp.java.numbers.Floats;
 import xfp.java.numbers.Natural;
+import xfp.java.numbers.NaturalDivide;
 import xfp.java.numbers.Ringlike;
 import xfp.java.numbers.Uints;
 import xfp.java.prng.Generator;
@@ -47,10 +49,10 @@ public final class Common {
         new String[]
           { "xfp.java.accumulators.DoubleAccumulator",
             "xfp.java.accumulators.KahanAccumulator",
-            // failing sumTest with some TRYS, passing with others
+            //"xfp.java.accumulators.ERationalAccumulator",
+            //"xfp.java.accumulators.EFloatAccumulator",
             "xfp.java.accumulators.DistilledAccumulator",
             "xfp.java.accumulators.ZhuHayesAccumulator",
-            // ok
             "xfp.java.accumulators.BigFloatAccumulator0",
             "xfp.java.accumulators.BigFloatAccumulator",
             "xfp.java.accumulators.RationalFloatAccumulator",
@@ -448,6 +450,46 @@ public final class Common {
       + "\n" + y2.toString()
       + "\n" + x3.toString(0x10)); } }
 
+  public static final <T extends Ringlike<T>> void
+  reduce (final Function<BigInteger,T> fromBI,
+                      final Function<T,BigInteger> toBI,
+                      final BigInteger x0,
+                      final BigInteger x1) {
+    if (0 != x1.signum()) {
+      final Ringlike y0 = fromBI.apply(x0);
+      final Ringlike y1 = fromBI.apply(x1);
+      final List<BigInteger> x2 = NaturalDivide.reduce(x0,x1);
+      final List<T> y2 = y0.reduce(y1);
+      final List<BigInteger> x3 = 
+        List.of (toBI.apply(y2.get(0)), 
+          toBI.apply(y2.get(1)));
+
+      Assertions.assertEquals(x2.get(0),x3.get(0),() ->
+      x0.toString(0x10)
+      + "\n / "
+      + "\n" +  x1.toString(0x10)
+      + "\n -> "
+      + "\n" + x2.get(0).toString(0x10)
+      + "\n" + y0.toString()
+      + "\n / "
+      + "\n" +  y1.toString()
+      + "\n -> "
+      + "\n" + y2.get(0).toString()
+      + "\n" + x3.get(0).toString(0x10));
+
+      Assertions.assertEquals(x2.get(1),x3.get(1),() ->
+      x0.toString(0x10)
+      + "\n rem "
+      + "\n" +  x1.toString(0x10)
+      + "\n -> "
+      + "\n" + x2.get(1).toString(0x10)
+      + "\n" + y0.toString()
+      + "\n rem "
+      + "\n" +  y1.toString()
+      + "\n -> "
+      + "\n" + y2.get(1).toString()
+      + "\n" + x3.get(1).toString(0x10)); } }
+
   //--------------------------------------------------------------
 
   public static final void
@@ -489,6 +531,8 @@ public final class Common {
     remainder(fromBI,toBI,z0,z0);
     gcd(fromBI,toBI,z0,z1);
     gcd(fromBI,toBI,z0,z0);
+    reduce(fromBI,toBI,z0,z1);
+    reduce(fromBI,toBI,z0,z0);
   }
 
 
@@ -1024,58 +1068,99 @@ public final class Common {
   //--------------------------------------------------------------
 
   public static final void
-  overflowTest (final Accumulator a) {
+  overflowTest (final Accumulator aa) {
 
-    final double ss =
-      a.clear()
-      .addAll(
-        new double[]
-          { 100.0,
-            100.0,
-            1.0,
-            -100.0,
-            -100.0})
-      .doubleValue();
+    Accumulator a = aa.clear();
+    a = a.add(0x0.1p0);
+    double s = a.doubleValue();
     if (a.noOverflow()) {
-      Assertions.assertEquals(1.0,ss,Classes.className(a)); }
-
-    final double s =
-      a.clear()
-      .addAll(
-        new double[]
-          { 1.0e-1,
-            1.0e-1,
-            1.0,
-            -1.0e-1,
-            -1.0e-1})
-      .doubleValue();
+      Assertions.assertEquals(0x0.1p0,s,
+        "\n" + Classes.className(aa)
+        + "\n!= " + Double.toHexString(s)
+        + "\n!= " + s
+        + "\n"); }
+    a = a.add(0x0.1p0);
+    s = a.doubleValue();
     if (a.noOverflow()) {
-      Assertions.assertEquals(1.0,s,Classes.className(a)); }
-
-    final double s0 =
-      a.clear()
-      .addAll(
-        new double[]
-          { Double.MAX_VALUE,
-            Double.MAX_VALUE,
-            1.0,
-            -Double.MAX_VALUE,
-            -Double.MAX_VALUE})
-      .doubleValue();
+      Assertions.assertEquals(0x0.2p0,s,
+        "\n" + Classes.className(aa)
+        + "\n!= " + Double.toHexString(s)
+        + "\n"); }
+    a = a.add(0x1.0p0);
+    s = a.doubleValue();
     if (a.noOverflow()) {
-      Assertions.assertEquals(1.0,s0,Classes.className(a)); }
+      Assertions.assertEquals(0x1.2p0,s,
+        "\n" + Classes.className(aa)
+        + "\n!= " + Double.toHexString(s)
+        + "\n"); }
+    a = a.add(-0x0.1p0);
+    s = a.doubleValue();
+    if (a.noOverflow()) {
+      Assertions.assertEquals(0x1.1p0,s,
+        "\n" + Classes.className(aa)
+        + "\n!= " + Double.toHexString(s)
+        + "\n"); }
+    a = a.add(-0x0.1p0);
+    s = a.doubleValue();
+    if (a.noOverflow()) {
+      Assertions.assertEquals(0x1.0p0,s,
+        "\n" + Classes.className(aa)
+        + "\n1.0p0!= " + Double.toHexString(s)
+        + "\n"); }
 
-    final double s1 =
-      a.clear()
-      .addAll(new double[]
+    Accumulator a0 = aa.clear();
+    a0 = a0.addAll(new double[]
+          { 100.0, 100.0, 1.0, -100.0, -100.0});
+    final double s0 = a0.doubleValue();
+    if (a0.noOverflow()) {
+      Assertions.assertEquals(1.0,s0,()->
+      "\n" + Classes.className(aa)
+      + "\n1.0p0!= " + Double.toHexString(s0)
+      + "\n1.0e0!= " + s0
+      + "\n"); }
+
+    Debug.DEBUG=true;
+    Accumulator a1 = aa.clear();
+    a1 = a1.addAll(new double[]
+      { 1.0e-1, 1.0e-1, 1.0, -1.0e-1, -1.0e-1});
+    final double s1 = a1.doubleValue();
+    if (a1.noOverflow()) {
+      Assertions.assertEquals(1.0,s1,()->
+        "\n" + Classes.className(aa)
+        + "\n1.0p0!= " + Double.toHexString(s1)
+        + "\n1.0e0!= " + s1
+        + "\n"); }
+    Debug.DEBUG=false;
+
+    Accumulator a2 = aa.clear();
+    a2 = a2.addAll(new double[]
+        { Double.MAX_VALUE,
+          Double.MAX_VALUE,
+          1.0,
+          -Double.MAX_VALUE,
+          -Double.MAX_VALUE});
+    final double s2 = a2.doubleValue();
+    if (a2.noOverflow()) {
+      Assertions.assertEquals(1.0,s2,()->
+      "\n" + Classes.className(aa)
+      + "\n1.0p0!= " + Double.toHexString(s2)
+      + "\n1.0e0!= " + s2
+      + "\n"); }
+
+    Accumulator a3 = aa.clear();
+    a3 = a3.addAll(new double[]
         { -Double.MAX_VALUE,
           -Double.MAX_VALUE,
           -1.0,
           Double.MAX_VALUE,
-          Double.MAX_VALUE})
-      .doubleValue();
-    if (a.noOverflow()) {
-      Assertions.assertEquals(-1.0,s1,Classes.className(a));  } }
+          Double.MAX_VALUE});
+    final double s3 = a3.doubleValue();
+    if (a3.noOverflow()) {
+      Assertions.assertEquals(-1.0,s3,()->
+      "\n" + Classes.className(aa)
+      + "\n-1.0p0!= " + Double.toHexString(s3)
+      + "\n-1.0e0!= " + s3
+      + "\n"); } }
 
   public static final void
   overflowTests (final List<Accumulator> accumulators) {
@@ -1151,10 +1236,8 @@ public final class Common {
   private static final void
   zeroSumTest (final Generator g,
                final List<Accumulator> accumulators) {
-    //System.out.println(g.name());
     final double[] x = (double[]) g.next();
     for (final Accumulator a : accumulators) {
-      //System.out.println(Classes.className(a));
       //final long t0 = System.nanoTime();
       final double pred = a.clear().addAll(x).doubleValue();
       //final long t1 = (System.nanoTime()-t0);
@@ -1272,6 +1355,21 @@ public final class Common {
     //Debug.println("generator=" +g.name());
     Assertions.assertTrue(exact.isExact());
     final double[] x = (double[]) g.next();
+    for (final Accumulator aa : accumulators) {
+      Accumulator ex = exact.clear();
+      Accumulator a = aa.clear();
+      for (int i=0; i<x.length;i++) {
+        final int ii = i;
+        final double xi = x[i];
+        ex = ex.add2(xi); 
+        final double truth = ex.doubleValue();
+        a = a.add2(xi);
+        final double pred = a.doubleValue();
+        if (a.isExact()) { 
+          Assertions.assertEquals(truth,pred,()->
+          Classes.className(aa)
+          + "\ni=" + ii + "\n" + Double.toHexString(truth)
+          + "\n" +  Double.toHexString(pred) + "\n"); } }}
     final double truth = exact.clear().add2All(x).doubleValue();
     for (final Accumulator a : accumulators) {
       final double pred = a.clear().add2All(x).doubleValue();

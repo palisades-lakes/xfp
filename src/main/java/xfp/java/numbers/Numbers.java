@@ -157,7 +157,7 @@ public final class Numbers implements Set {
     return 0 == x.signum(); }
 
   public static final boolean isZero (final BigDecimal x) {
-    return 0 == BigDecimal.ZERO.compareTo(x); }
+    return 0 == BigDecimal.valueOf(0L).compareTo(x); }
 
   public static final boolean isZero (final Number x) {
     if (x instanceof Rational) { return ((Rational) x).isZero(); }

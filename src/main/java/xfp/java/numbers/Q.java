@@ -19,7 +19,7 @@ import xfp.java.prng.Generator;
  * necessary.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-25
+ * @version 2019-07-23
  */
 
 // TODO: change name to 'QQ', imitating tex font?
@@ -54,7 +54,7 @@ public final class Q implements Set {
 
   @SuppressWarnings("static-method")
   public final Object additiveIdentity () {
-    return Rational.ZERO; }
+    return Rational.getZero(); }
 
   //--------------------------------------------------------------
 
@@ -98,7 +98,7 @@ public final class Q implements Set {
 
   @SuppressWarnings("static-method")
   public final Object multiplicativeIdentity () {
-    return Rational.ONE; }
+    return Rational.getOne(); }
 
   //--------------------------------------------------------------
 

@@ -314,7 +314,7 @@ public interface Uints<T extends Uints> extends Transience<T> {
     if (shift==0) { return (T) this; }
     final int n0 = hiInt();
     if (0==n0) { return (T) this; }
-    //if (isZero()) { return ZERO; }
+    //if (isZero()) { return valueOf(0L); }
     final int iShift = (shift >>> 5);
     final int bShift = (shift & 0x1f);
     if (0==bShift) { return shiftUpWords(iShift); }

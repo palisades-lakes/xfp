@@ -33,7 +33,7 @@ extends ExactAccumulator<RationalFloatAccumulator1> {
 
   @Override
   public final RationalFloatAccumulator1 clear () {
-    _sum = RationalFloat.ZERO;
+    _sum = RationalFloat.valueOf(0L);
     return this; }
 
   @Override

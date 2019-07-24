@@ -8,7 +8,7 @@ import java.util.Arrays;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-20
+ * @version 2019-07-23
  */
 
 public final class NaturalLE implements Natural {
@@ -83,6 +83,9 @@ public final class NaturalLE implements Natural {
   // Transience
   //--------------------------------------------------------------
 
+  @Override
+  public final boolean isValid () { return true; }
+  
   @Override
   public final Natural recyclable (final Natural init) {
     return NaturalLEMutable.copy(init); }
@@ -191,7 +194,7 @@ public final class NaturalLE implements Natural {
    * value of <code>u</code>.
    */
   public static final NaturalLE valueOf (final int u) {
-    if (u==0) { return ZERO; }
+    if (u==0) { return valueOf(0L); }
     return unsafe(new int[] {u}); }
 
   //--------------------------------------------------------------

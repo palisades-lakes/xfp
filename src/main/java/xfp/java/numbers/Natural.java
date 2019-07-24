@@ -18,7 +18,7 @@ import xfp.java.exceptions.Exceptions;
  * TODO: utilities class to hide private stuff?
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-22
+ * @version 2019-07-23
  */
 
 @SuppressWarnings("unchecked")
@@ -31,6 +31,8 @@ extends Uints<Natural>, Ringlike<Natural> {
 
   @Override
   default int compareTo (final Natural u) {
+    assert isValid();
+    assert u.isValid();
     // TODO: should really compare hiBits
     final int b0 = hiBit();
     final int b1 = u.hiBit();
@@ -47,6 +49,8 @@ extends Uints<Natural>, Ringlike<Natural> {
 
   default int compareTo (final Natural u,
                          final int upShift) {
+    assert isValid();
+    assert u.isValid();
     assert 0<=upShift;
     if (0==upShift) { return compareTo(u); }
     final int bShift = (upShift&0x1F);
@@ -65,9 +69,12 @@ extends Uints<Natural>, Ringlike<Natural> {
 
   default int compareTo (final int upShift,
                          final Natural u) {
+    assert isValid();
+    assert u.isValid();
     return - u.compareTo(this,upShift); }
 
   default int compareTo (final long u) {
+    assert isValid();
     assert 0L<=u;
     if (2<hiInt()) { return 1; }
     final long hi0 = uword(1);
@@ -82,6 +89,7 @@ extends Uints<Natural>, Ringlike<Natural> {
 
   default int compareTo (final long u,
                          final int upShift) {
+    assert isValid();
     assert 0L<=u;
     assert 0<=upShift : "upShift=" + upShift;
     if (0==upShift) { return compareTo(u); }
@@ -139,10 +147,13 @@ extends Uints<Natural>, Ringlike<Natural> {
   // implementations usually return a pre-allocated constant
 
   @Override
-  default Natural zero () { return empty(); }
+  default Natural zero () { 
+    assert isValid();
+    return empty(); }
 
   @Override
   default boolean isZero () {
+    assert isValid();
     for (int i=0;i<hiInt();i++) {
       if (0!=word(i)) { return false; } }
     return true; }
@@ -150,12 +161,16 @@ extends Uints<Natural>, Ringlike<Natural> {
   // Natural numbers are nonnegative
 
   @Override
-  default Natural abs () { return this; }
+  default Natural abs () {
+    assert isValid();
+    return this; }
 
   //--------------------------------------------------------------
 
   @Override
   default Natural add (final Natural u) {
+    assert isValid();
+    assert u.isValid();
     Natural t = zero();
     if (isZero()) { return u; }
     if (u.isZero()) { return this; }
@@ -174,6 +189,8 @@ extends Uints<Natural>, Ringlike<Natural> {
 
   default Natural add (final Natural u,
                        final int shift) {
+    assert isValid();
+    assert u.isValid();
     assert 0<=shift;
     if (isZero()) { return u.shiftUp(shift); }
     if (u.isZero()) { return this; }
@@ -183,10 +200,11 @@ extends Uints<Natural>, Ringlike<Natural> {
     return add(u.shiftUp(shift)); }
 
   default Natural add (final long u) {
+    assert isValid();
     assert 0L<=u;
     if (0L==u) { return this; }
     if (isZero()) { return from(u); }
-    Natural v = this;
+    Natural v = copy();
     long sum = uword(0) + Numbers.loWord(u);
     v = v.setWord(0,(int) sum);
     long carry = (sum>>>32);
@@ -204,6 +222,7 @@ extends Uints<Natural>, Ringlike<Natural> {
 
   default Natural add (final long u,
                        final int upShift) {
+    assert isValid();
     assert 0<=upShift;
     if (0==upShift) { return add(u); }
     assert 0L<=u;
@@ -212,7 +231,7 @@ extends Uints<Natural>, Ringlike<Natural> {
 
   //--------------------------------------------------------------
 
-  // very slow --n obvious reason
+  // very slow --no obvious reason
 //  @Override
 //  default Natural subtract (final Natural u) {
 //    // TODO: fast correct check of u<=this?
@@ -239,6 +258,8 @@ extends Uints<Natural>, Ringlike<Natural> {
 
   @Override
   default Natural subtract (final Natural u) {
+    assert isValid();
+    assert u.isValid();
     // TODO: fast correct check of u<=this?
     assert 0<=compareTo(u);
     if (u.isZero()) { return this; }
@@ -258,6 +279,7 @@ extends Uints<Natural>, Ringlike<Natural> {
     return v; }
 
   default Natural subtract (final long u) {
+    assert isValid();
     assert 0L<=u;
     assert 0<=compareTo(u);
     if (0L==u) { return this; }
@@ -268,7 +290,7 @@ extends Uints<Natural>, Ringlike<Natural> {
     final long hi = Numbers.hiWord(u);
     if (0L!=hi) { assert 2<=hiInt(); }
     if (0L!=lo) { assert 1<=hiInt(); }
-    Natural v = this;
+    Natural v = copy();
     long dif = uword(0)-lo;
     v = v.setWord(0,(int) dif);
     long borrow = (dif>>32);
@@ -286,6 +308,7 @@ extends Uints<Natural>, Ringlike<Natural> {
 
   default Natural subtract (final long u,
                             final int upShift) {
+    assert isValid();
     assert 0L<=u;
     assert 0<=upShift;
     assert compareTo(u,upShift)>=0;
@@ -294,12 +317,14 @@ extends Uints<Natural>, Ringlike<Natural> {
   //--------------------------------------------------------------
 
   default Natural subtractFrom (final long u) {
+    assert isValid();
     assert 0L<=u;
     assert compareTo(u)<=0;
     return from(u).subtract(this); }
 
   default Natural subtractFrom (final long u,
                                 final int upShift) {
+    assert isValid();
     assert 0L<=u;
     assert 0<=upShift;
     assert compareTo(u,upShift)<=0;
@@ -309,6 +334,8 @@ extends Uints<Natural>, Ringlike<Natural> {
 
   @Override
   default Natural absDiff (final Natural u) {
+    assert isValid();
+    assert u.isValid();
     final int c = compareTo(u);
     if (c==0) { return zero(); }
     if (c<0) { return u.subtract(this); }
@@ -328,6 +355,7 @@ extends Uints<Natural>, Ringlike<Natural> {
 
   @Override
   default boolean isOne () {
+    assert isValid();
     if (1!=word(0)) { return false; }
     for (int i=Math.max(1,startWord());i<hiInt();i++) {
       if (0!=word(i)) { return false; } }
@@ -339,6 +367,7 @@ extends Uints<Natural>, Ringlike<Natural> {
 
   @Override
   default Natural square () {
+    assert isValid();
     return NaturalMultiply.square(this); }
 
   //--------------------------------------------------------------
@@ -347,6 +376,7 @@ extends Uints<Natural>, Ringlike<Natural> {
    */
 
   default Natural square (final long t) {
+    assert isValid();
     assert 0L<=t;
     final long hi = Numbers.hiWord(t);
     final long lo = loWord(t);
@@ -370,15 +400,19 @@ extends Uints<Natural>, Ringlike<Natural> {
 
   @Override
   default Natural multiply (final Natural u) {
+    assert isValid();
+    assert u.isValid();
     return NaturalMultiply.multiply(this,u); }
 
   //--------------------------------------------------------------
 
   default Natural multiply (final long u) {
+    assert isValid();
     return NaturalMultiply.multiply(this,u); }
 
   default Natural multiply (final long u,
                             final int upShift) {
+    assert isValid();
     assert 0L<=u;
     if (0L==u) { return zero(); }
     assert 0<=upShift;
@@ -387,6 +421,7 @@ extends Uints<Natural>, Ringlike<Natural> {
 
   default Natural fromProduct (final long t0,
                                final long t1) {
+    assert isValid();
     assert 0L<=t0;
     assert 0L<=t1;
     final long hi0 = Numbers.hiWord(t0);
@@ -416,22 +451,32 @@ extends Uints<Natural>, Ringlike<Natural> {
 
   // for testing
   default List<Natural> divideAndRemainderKnuth (final Natural u) {
+    assert isValid();
+    assert u.isValid();
     return NaturalDivide.divideAndRemainderKnuth(this,u); }
 
   // for testing
   default List<Natural> divideAndRemainderBurnikelZiegler (final Natural u) {
+    assert isValid();
+    assert u.isValid();
     return NaturalDivide.divideAndRemainderBurnikelZiegler(this,u); }
 
   @Override
   default List<Natural> divideAndRemainder (final Natural u) {
+    assert isValid();
+    assert u.isValid();
     return NaturalDivide.divideAndRemainder(this,u); }
 
   @Override
   default Natural divide (final Natural u) {
+    assert isValid();
+    assert u.isValid();
     return divideAndRemainder(u).get(0); }
 
   @Override
   default Natural remainder (final Natural u) {
+    assert isValid();
+    assert u.isValid();
     return divideAndRemainder(u).get(1); }
 
   //--------------------------------------------------------------
@@ -443,12 +488,15 @@ extends Uints<Natural>, Ringlike<Natural> {
 
   @Override
   default Natural gcd (final Natural u) { 
+    assert isValid();
+    assert u.isValid();
     return NaturalDivide.gcd(this,u); }
 
   //--------------------------------------------------------------
 
   @Override
   default List<Natural> reduce (final Natural d) {
+    assert isValid();
     return NaturalDivide.reduce(this,d); }
 
   //--------------------------------------------------------------
@@ -463,16 +511,20 @@ extends Uints<Natural>, Ringlike<Natural> {
   // TODO: exceptions on truncation?
 
   @Override
-  default int intValue () { return word(0); }
+  default int intValue () { 
+    assert isValid();
+    return word(0); }
 
   @Override
   default long longValue () {
+    assert isValid();
     return (uword(1)<<32) | uword(0); }
 
   //--------------------------------------------------------------
 
   @Override
   default float floatValue () {
+    assert isValid();
     if (isZero()) { return 0.0F; }
     final int n = hiInt()-1;
     final int exponent = hiBit()-1;
@@ -531,6 +583,7 @@ extends Uints<Natural>, Ringlike<Natural> {
 
   @Override
   default double doubleValue () {
+    assert isValid();
     if (isZero()) { return 0.0; }
     final int n = hiInt()-1;
     final int exponent = hiBit()-1;
@@ -615,6 +668,9 @@ extends Uints<Natural>, Ringlike<Natural> {
 //                      final int radix) {
 //    return NaturalBEI.valueOf(u,radix); }
 
+  //--------------------------------------------------------------
+
+
   static Natural get (final String u,
                       final int radix) {
     return NaturalLE.valueOf(u,radix); }
@@ -626,6 +682,22 @@ extends Uints<Natural>, Ringlike<Natural> {
   static Natural get (final long u) {
     assert 0L<=u;
     return NaturalLE.valueOf(u); }
+
+  //--------------------------------------------------------------
+
+//  static Natural get (final String u,
+//                      final int radix) {
+//    return NaturalLEMutable.valueOf(u,radix); }
+//
+//  static Natural get (final BigInteger u) {
+//    assert 0<=u.signum();
+//    return NaturalLEMutable.valueOf(u); }
+//
+//  static Natural get (final long u) {
+//    assert 0L<=u;
+//    return NaturalLEMutable.valueOf(u); }
+
+  //--------------------------------------------------------------
 
   static Natural get (final int u) {
     return get(Numbers.unsigned(u)); }

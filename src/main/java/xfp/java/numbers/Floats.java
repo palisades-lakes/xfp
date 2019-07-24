@@ -33,7 +33,7 @@ import xfp.java.prng.GeneratorBase;
 /** Utilities for <code>float</code>, <code>float[]</code>.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-11
+ * @version 2019-07-23
  */
 public final class Floats implements Set {
 
@@ -494,13 +494,13 @@ public final class Floats implements Set {
     int m              = bits & STORED_SIGNIFICAND_MASK;
     if (exponent == 0) { // subnormal
       if (0 == m) {
-        numerator   = BigInteger.ZERO;
+        numerator   = BigInteger.valueOf(0L);
         denominator = BigInteger.ONE; }
       else {
         if (sign != 0) { m = -m; }
         numerator   = BigInteger.valueOf(m);
         denominator =
-          BigInteger.ZERO.setBit(-MINIMUM_SUBNORMAL_EXPONENT); } }
+          BigInteger.valueOf(0L).setBit(-MINIMUM_SUBNORMAL_EXPONENT); } }
     else { // normal
       // add the implicit most significant bit
       m |= (1L << STORED_SIGNIFICAND_BITS);
@@ -515,10 +515,10 @@ public final class Floats implements Set {
     ++k; }
       if (k < 0) {
         numerator   = BigInteger.valueOf(m);
-        denominator = BigInteger.ZERO.flipBit(-k); }
+        denominator = BigInteger.valueOf(0L).flipBit(-k); }
       else {
         numerator   = BigInteger.valueOf(m)
-          .multiply(BigInteger.ZERO.flipBit(k));
+          .multiply(BigInteger.valueOf(0L).flipBit(k));
         denominator = BigInteger.ONE; } }
 
     return new BigInteger[]{ numerator, denominator}; }

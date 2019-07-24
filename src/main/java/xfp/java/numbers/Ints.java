@@ -20,7 +20,7 @@ import xfp.java.prng.Generators;
 /** Utilities for <code>int</code>, <code>int[]</code>.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-14
+ * @version 2019-07-23
  */
 public final class Ints implements Set {
 

@@ -71,7 +71,7 @@ public final class Qn extends LinearSpaceLike {
   @Override
   public final Rational[] zero (final int n) {
     final Rational[] z = new Rational[n];
-    Arrays.fill(z,Rational.ZERO);
+    Arrays.fill(z,Rational.getZero());
     return z; }
 
   //--------------------------------------------------------------

@@ -24,7 +24,7 @@ public final class RationalFloatProfile {
       final double[] x = (double[]) g.next();
       final long t = System.nanoTime();
       for (int i=0;i<trys;i++) {
-        RationalFloat a = RationalFloat.ZERO;
+        RationalFloat a = RationalFloat.valueOf(0L);
         for (final double xi : x) { a = a.add(xi); }
         final double z0 = a.doubleValue();
         if (0.0 != z0) {

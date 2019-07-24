@@ -18,7 +18,7 @@ import xfp.java.exceptions.Exceptions;
  * arithmetic on them faster.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-22
+ * @version 2019-07-23
  */
 
 @SuppressWarnings("unchecked")
@@ -194,7 +194,7 @@ implements Ringlike<RationalFloat> {
     //assert t0.signum() >= 0;
     if (n0 ^ n1) { // different signs
       final int c01 = t0.compareTo(t1);
-      if (0 == c01) { return ZERO; }
+      if (0 == c01) { return valueOf(0L); }
       // t1 > t0
       if (0 > c01) {
         return valueOf(n1, t0.subtractFrom(t1), e); }
@@ -217,7 +217,7 @@ implements Ringlike<RationalFloat> {
     if (0==upShift) { return add(n0,t0,e,n1,t1); }
     if (n0 ^ n1) { // different signs
       final int c01 = t0.compareTo(t1,upShift);
-      if (0 == c01) { return ZERO; }
+      if (0 == c01) { return valueOf(0L); }
       // t1 > t0
       if (0 > c01) {
         return valueOf(n1, t0.subtractFrom(t1,upShift), e); }
@@ -305,7 +305,7 @@ implements Ringlike<RationalFloat> {
 
   @Override
   public final RationalFloat square () {
-    if (isZero() ) { return ZERO; }
+    if (isZero() ) { return valueOf(0L); }
     if (isOne()) { return this; }
     return multiply(
       nonNegative(),numerator(),denominator(),exponent()); }
@@ -358,16 +358,7 @@ implements Ringlike<RationalFloat> {
     assert Double.isFinite(z1);
     final RationalFloat dz = valueOf(z0).subtract(z1);
     final RationalFloat dz2 = dz.square();
-    //Debug.println(Classes.className(this)+".addL2");
-    //Debug.println("z0, z1=" + z0 + ", " + z1);
-    //Debug.println("dz=" + dz);
-    //Debug.println("dz2=" + dz2);
-    //Debug.println("dz2=" + dz2.doubleValue());
-    //Debug.println("before=" + this);
-    //Debug.println("before=" + doubleValue());
     final RationalFloat after = add(dz2);
-    //Debug.println("after=" + after);
-    //Debug.println("after=" + after.doubleValue());
     return after; }
 
   //--------------------------------------------------------------
@@ -400,13 +391,6 @@ implements Ringlike<RationalFloat> {
     final BigInteger x =
       numerator().divide(denominator()).bigIntegerValue();
     return (nonNegative() ? x : x.negate()); }
-
-  //  public final Rational rationalValue () {
-  //    if (0 <= exponent()) {
-  //      return Rational.valueOf(
-  //        numerator().shiftUp(exponent()),denominator()); }
-  //    return Rational.valueOf(
-  //      numerator(),denominator().shiftUp(-exponent())); }
 
   //--------------------------------------------------------------
   /** Half-even rounding from {@link Natural} ratio to
@@ -657,9 +641,9 @@ implements Ringlike<RationalFloat> {
           final Natural n,
           final int e) {
 
-    if (n.isZero()) { return ZERO; }
-
-    // TODO: is numerator 1 case worth optimizing?
+    if (n.isZero()) {       
+      return new RationalFloat(
+        nonNegative,Natural.get(0L),Natural.get(1L),0); }
     if (n.isOne()) {
       return new RationalFloat(
         nonNegative,Natural.get(1L),Natural.get(1L),e); }
@@ -676,7 +660,7 @@ implements Ringlike<RationalFloat> {
           final Natural d,
           final int e) {
 
-    if (n.isZero()) { return ZERO; }
+    if (n.isZero()) { return valueOf(0L); }
 
     if (d.isOne()) {
       return reduce(nonNegative,n,e); }
@@ -722,7 +706,7 @@ implements Ringlike<RationalFloat> {
   public static final RationalFloat valueOf (final boolean nonNegative,
                                              final Natural n,
                                              final int e) {
-    return reduce(nonNegative,n,Natural.get(1L),e); }
+    return reduce(nonNegative,n,e); }
 
   public static final RationalFloat valueOf (final boolean nonNegative,
                                              final Natural n,
@@ -731,7 +715,7 @@ implements Ringlike<RationalFloat> {
 
   public static final RationalFloat valueOf (final boolean nonNegative,
                                              final Natural x)  {
-    return valueOf(nonNegative, x, 0); }
+    return reduce(nonNegative, x, 0); }
 
   public static final RationalFloat valueOf (final BigInteger n,
                                              final BigInteger d) {
@@ -772,7 +756,7 @@ implements Ringlike<RationalFloat> {
   private static final RationalFloat valueOf (final boolean p0,
                                               final long t0,
                                               final int e0)  {
-    if (0L==t0) { return ZERO; }
+    if (0L==t0) { return valueOf(0L); }
     assert 0L < t0;
     final int shift = Numbers.loBit(t0);
     final long t1;
@@ -792,7 +776,7 @@ implements Ringlike<RationalFloat> {
   private static final RationalFloat valueOf (final boolean nonNegative,
                                               final int e,
                                               final int t)  {
-    if (0 == t) { return ZERO; }
+    if (0 == t) { return valueOf(0L); }
     assert 0 < t;
     return valueOf(nonNegative,Natural.get(t),e); }
 
@@ -824,9 +808,8 @@ implements Ringlike<RationalFloat> {
 
   public static final RationalFloat valueOf (final long x)  {
     final boolean nonNegative = (0L <= x);
-    return valueOf(
-      nonNegative,
-      Natural.get(nonNegative ? x : -x)); }
+    return 
+      valueOf(nonNegative,Natural.get(nonNegative ? x : -x)); }
 
   //--------------------------------------------------------------
 

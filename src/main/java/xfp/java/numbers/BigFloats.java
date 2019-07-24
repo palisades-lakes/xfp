@@ -25,7 +25,7 @@ import xfp.java.prng.Generators;
  * represented by <code>BigFloat</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-22
+ * @version 2019-07-23
  */
 @SuppressWarnings("unchecked")
 public final class BigFloats implements Set {
@@ -56,7 +56,7 @@ public final class BigFloats implements Set {
 
   @SuppressWarnings("static-method")
   public final BigFloat additiveIdentity () {
-    return BigFloat.ZERO; }
+    return BigFloat.valueOf(0L); }
 
   //--------------------------------------------------------------
   // TODO: is consistency with other algebraic structure classes
@@ -95,7 +95,7 @@ public final class BigFloats implements Set {
 
   @SuppressWarnings("static-method")
   public final BigFloat multiplicativeIdentity () {
-    return BigFloat.ONE; }
+    return BigFloat.valueOf(1L); }
 
   //--------------------------------------------------------------
   // Set methods
@@ -140,11 +140,11 @@ public final class BigFloats implements Set {
         new CollectionSampler(
           urp,
           List.of(
-            BigFloat.ZERO,
-            BigFloat.ONE,
-            BigFloat.TWO,
-            BigFloat.TEN,
-            BigFloat.MINUS_ONE));
+            BigFloat.valueOf(0L),
+            BigFloat.valueOf(1L),
+            BigFloat.valueOf(2L),
+            BigFloat.valueOf(10L),
+            BigFloat.valueOf(-1L)));
       @Override
       public Object next () {
         final boolean edge = choose.sample() > dp;
@@ -169,11 +169,11 @@ public final class BigFloats implements Set {
         new CollectionSampler(
           urp,
           List.of(
-            BigFloat.ZERO,
-            BigFloat.ONE,
-            BigFloat.TWO,
-            BigFloat.TEN,
-            BigFloat.MINUS_ONE));
+            BigFloat.valueOf(0L),
+            BigFloat.valueOf(1L),
+            BigFloat.valueOf(2L),
+            BigFloat.valueOf(10L),
+            BigFloat.valueOf(-1L)));
       @Override
       public Object next () {
         final boolean edge = choose.sample() > dp;

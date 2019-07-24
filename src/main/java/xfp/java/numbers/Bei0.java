@@ -16,7 +16,7 @@ import java.util.Arrays;
  * compression/optimization step?
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-10
+ * @version 2019-07-23
  */
 
 public final class Bei0 {
@@ -380,7 +380,7 @@ public final class Bei0 {
     final int hi = (int) hiWord(sum);
     if (0==hi) {
       if (0==mid) {
-        if (0==lo) { return ZERO; }
+        if (0==lo) { return valueOf(0L); }
         return new int[] { lo, }; }
       return new int[] { mid, lo, }; }
     return new int[] { hi, mid, lo, }; }
@@ -613,7 +613,7 @@ public final class Bei0 {
     if (isZero(m1)) { return m0; }
 
     final int c = compare(m0,m1);
-    if (c == 0) { return ZERO; }
+    if (c == 0) { return valueOf(0L); }
     if (0<=c) { return subtract(m0,m1); }
 
     return subtract(m1,m0); }
@@ -814,7 +814,7 @@ public final class Bei0 {
   public static final int[] square (final int[] m,
                                     final boolean isRecursion) {
     assert (! leadingZero(m));
-    if (isZero(m)) { return ZERO; }
+    if (isZero(m)) { return valueOf(0L); }
     final int len = m.length;
     if (len < KARATSUBA_SQUARE_THRESHOLD) {
       //System.out.println("squareToLen");
@@ -998,9 +998,9 @@ public final class Bei0 {
       start = (upperSize + ((slice-1) * lowerSize))-offset;
       end = (start + lowerSize)-1; }
     if (start < 0) { start = 0; }
-    if (end < 0) { return ZERO; }
+    if (end < 0) { return valueOf(0L); }
     final int sliceSize = (end-start) + 1;
-    if (sliceSize <= 0) { return ZERO; }
+    if (sliceSize <= 0) { return valueOf(0L); }
     // While performing Toom-Cook, all slices are positive and
     // the sign is adjusted when the final number is composed.
     if ((start == 0) && (sliceSize >= len)) {
@@ -1079,7 +1079,7 @@ public final class Bei0 {
                                        final int n) {
     assert (! leadingZero(m));
     final int len = m.length;
-    if (len <= n) { return ZERO; }
+    if (len <= n) { return valueOf(0L); }
     final int upperLen = len-n;
     final int upperInts[] = new int[upperLen];
     System.arraycopy(m,0,upperInts,0,upperLen);
@@ -1238,7 +1238,7 @@ public final class Bei0 {
   private static final int[] multiply (final int[] m0,
                                        final int m1) {
     assert (! leadingZero(m0));
-    if (0==m1) { return ZERO; }
+    if (0==m1) { return valueOf(0L); }
     if (Integer.bitCount(m1) == 1) {
       return shiftUp(m0,Integer.numberOfTrailingZeros(m1)); }
     //    stripLeadingZeros(
@@ -1261,7 +1261,7 @@ public final class Bei0 {
   public static final int[] multiply (final int[] m0,
                                       final long m1) {
     assert (! leadingZero(m0));
-    if (0L==m1) { return ZERO; }
+    if (0L==m1) { return valueOf(0L); }
     assert 0L < m1;
 
     final long dh = m1 >>> 32;      // higher order bits
@@ -1351,7 +1351,7 @@ public final class Bei0 {
     assert (! leadingZero(x));
     assert (! leadingZero(y));
 
-    if ((isZero(y)) || (isZero(x))) { return ZERO; }
+    if ((isZero(y)) || (isZero(x))) { return valueOf(0L); }
     final int xlen = x.length;
     if ((y == x)
       &&
@@ -1580,7 +1580,7 @@ public final class Bei0 {
     int m1[] = null;
 
     // Special case: entire contents shifted off the end
-    if (intShift >= n0) { return ZERO; }
+    if (intShift >= n0) { return valueOf(0L); }
 
     if (remShift == 0) {
       final int newMagLen = n0-intShift;
@@ -1605,7 +1605,7 @@ public final class Bei0 {
     assert 0<=n;
     if (n==0) { return stripLeadingZeros(m); }
     //if (n == 0) { return m; }
-    if (isZero(m)) { return ZERO; }
+    if (isZero(m)) { return valueOf(0L); }
     return shiftDown0(m,n); }
   //if (n > 0) { return shiftDown0(m,n); }
   //return shiftUp(m,-n); }
@@ -1959,7 +1959,7 @@ public final class Bei0 {
     while ((cursor < len)
       && (Character.digit(s.charAt(cursor),radix) == 0)) {
       cursor++; }
-    if (cursor == len) { return ZERO; }
+    if (cursor == len) { return valueOf(0L); }
 
     final int numDigits = len-cursor;
 
@@ -2011,7 +2011,7 @@ public final class Bei0 {
 
   public static final int[] valueOf (final long x,
                                      final int upShift) {
-    if (0L == x) { return ZERO; }
+    if (0L == x) { return valueOf(0L); }
     assert 0L < x;
     return shiftUp(x,upShift); }
 

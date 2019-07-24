@@ -8,7 +8,7 @@ import java.util.Arrays;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-22
+ * @version 2019-07-23
  */
 
 public final class NaturalLEMutable implements Natural {
@@ -16,18 +16,19 @@ public final class NaturalLEMutable implements Natural {
   //--------------------------------------------------------------
   // fields
   //--------------------------------------------------------------
-  /** This array is never modified.
-   */
 
   private int[] _words;
-  private final int[] words () { return _words; }
+  private final int[] words () { 
+    assert isValid();
+    return _words; }
 
-  /** Don't drop trailing zeros. */
   public final int[] copyWords () { 
+    assert isValid();
     return Arrays.copyOf(words(),words().length); }
 
   // TODO: grow faster?
   private final void expandTo (final int i) {
+    assert isValid();
     final int n = Math.max(i+1,hiInt());
     if (hiInt()<n) { _words = Arrays.copyOf(words(),n); } }
 
@@ -36,19 +37,32 @@ public final class NaturalLEMutable implements Natural {
   //--------------------------------------------------------------
 
   @Override
-  public final Natural one () { return unsafe(new int[] { 1 }); }
+  public final Natural zero () { 
+    assert isValid();
+    return unsafe(Ints.EMPTY); }
+
+  @Override
+  public final Natural one () { 
+    assert isValid();
+    return unsafe(new int[] { 1 }); }
 
   //--------------------------------------------------------------
   // Uints
   //--------------------------------------------------------------
 
   @Override
-  public final int startWord () { return 0; }
+  public final int startWord () { 
+    assert isValid();
+    return 0; }
+  
   @Override
-  public final int endWord () { return words().length; }
+  public final int endWord () { 
+    assert isValid();
+    return words().length; }
 
   @Override
   public final int word (final int i) {
+    assert isValid();
     assert 0<=i : "Negative index: " + i;
     if (endWord()<=i) { return 0; }
     return words()[i]; }
@@ -56,24 +70,28 @@ public final class NaturalLEMutable implements Natural {
   @Override
   public final Natural setWord (final int i,
                                 final int w) {
+    assert isValid();
     assert 0<=i;
     expandTo(i);
     words()[i] = w;
-    //return recycle(); }
-    return this; }
+    return recycle(); }
+    //return this; }
 
   @Override
   public final Natural empty () { 
+    assert isValid();
     // safe because Ints.EMPTY is immutable
     return unsafe(Ints.EMPTY); }
 
   @Override
   public final Natural from (final int u) {
+    assert isValid();
     assert 0<=u;
     return valueOf(u);  }
 
   @Override
   public final Natural from (final long u) {
+    assert isValid();
     assert 0<=u;
     return valueOf(u);  }
 
@@ -83,11 +101,14 @@ public final class NaturalLEMutable implements Natural {
 
    /** DANGER!!! Mutable!!! */
   @Override
-  public final int hashCode () { return 0; }
+  public final int hashCode () { 
+    assert isValid();
+    return 0; }
 
    /** DANGER!!! Mutable!!! used in testing only!!! */
   @Override
   public final boolean equals (final Object x) {
+    assert isValid();
     if (x==this) { return true; }
     if (!(x instanceof NaturalLEMutable)) { return false; }
     return uintsEquals((NaturalLEMutable) x); }
@@ -101,23 +122,29 @@ public final class NaturalLEMutable implements Natural {
   //--------------------------------------------------------------
 
   @Override
-  public boolean isImmutable () { return false; }
+  public boolean isImmutable () { 
+    assert isValid();
+    return false; }
 
   @Override
   public final Natural immutable () { 
+    assert isValid();
     return NaturalLE.make(words()); }
 
   @Override
   public final Natural recyclable (final Natural init) { 
-    return copy(init); }
+    assert isValid();
+   return copy(init); }
 
   @Override
   public final Natural recyclable (final int init) {
+    assert isValid();
     return NaturalLEMutable.make(init); }
 
   @Override
   public final Natural recyclable (final Natural init,
                                    final int nWords) {
+    assert isValid();
     if (null==init) {
       return NaturalLEMutable.make(nWords); }
     if (init instanceof NaturalLEMutable) {
@@ -125,7 +152,19 @@ public final class NaturalLEMutable implements Natural {
     return init.recyclable(init,nWords); }
 
   @Override
-  public final Natural copy () {  return copy(this); }
+  public final Natural copy () { 
+    assert isValid();
+    return copy(this); }
+
+  @Override
+  public final Natural recycle () { 
+    assert isValid();
+   final int[] t = _words;
+    _words = null;
+    return unsafe(t); }
+
+  @Override
+  public final boolean isValid () { return null!=_words; }
 
   //--------------------------------------------------------------
   // construction
@@ -202,14 +241,13 @@ public final class NaturalLEMutable implements Natural {
 
   //--------------------------------------------------------------
 
-  public static final NaturalLEMutable 
-  copy (final NaturalLE u) { return unsafe(u.copyWords()); }
+  public static final NaturalLEMutable copy (final NaturalLE u) { 
+    return unsafe(u.copyWords()); }
 
   public static final NaturalLEMutable 
   copy (final NaturalLEMutable u) { return unsafe(u.copyWords()); }
 
-  public static final NaturalLEMutable 
-  copy (final Natural u) { 
+  public static final NaturalLEMutable copy (final Natural u) { 
     if (u instanceof NaturalLEMutable) {
       return copy((NaturalLEMutable) u); }
     if (u instanceof NaturalLE) {

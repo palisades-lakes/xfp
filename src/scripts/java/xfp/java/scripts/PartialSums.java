@@ -3,7 +3,7 @@ package xfp.java.scripts;
 import org.apache.commons.rng.UniformRandomProvider;
 
 import xfp.java.accumulators.Accumulator;
-import xfp.java.accumulators.BigFloatAccumulator0;
+import xfp.java.accumulators.EFloatAccumulator;
 import xfp.java.numbers.Doubles;
 import xfp.java.prng.Generator;
 import xfp.java.prng.PRNG;
@@ -15,7 +15,7 @@ import xfp.java.test.Common;
  * jy --source 11 src/scripts/java/xfp/java/scripts/PartialSums.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-24
+ * @version 2019-07-23
  */
 @SuppressWarnings("unchecked")
 public final class PartialSums {
@@ -29,7 +29,7 @@ public final class PartialSums {
     final int emax = Common.deMax(n)/2;
     //Debug.println("emax=" + emax);
     final Generator g = Doubles.finiteGenerator(n,urp,emax);
-    final Accumulator a = BigFloatAccumulator0.make();
+    final Accumulator a = EFloatAccumulator.make();
     //final Accumulator a = RationalFloatAccumulator.make();
     //final Accumulator a = ZhuHayesAccumulator.make();
     //final Accumulator a = DistilledAccumulator.make();

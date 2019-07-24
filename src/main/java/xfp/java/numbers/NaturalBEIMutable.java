@@ -303,7 +303,7 @@ public final class NaturalBEIMutable implements Natural {
   @Override
   public final Natural immutable () {
     // TODO: other constants?
-    if (isZero()) { return NaturalBEI.ZERO; }
+    if (isZero()) { return NaturalBEI.valueOf(0L); }
     return
       NaturalBEI.unsafe(
         stripLeadingZeros(

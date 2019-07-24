@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import org.junit.jupiter.api.Test;
 
 import xfp.java.numbers.NaturalLE;
+import xfp.java.numbers.NaturalLEMutable;
 import xfp.java.test.Common;
 
 //----------------------------------------------------------------
@@ -15,7 +16,7 @@ import xfp.java.test.Common;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-22
+ * @version 2019-07-23
  */
 
 public final class NaturalTest {

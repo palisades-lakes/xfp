@@ -292,6 +292,8 @@ extends ExactAccumulator<ZhuHayesAccumulator> {
     i = 0;
     Arrays.fill(a1,0.0);
     Arrays.fill(a2,0.0);
+    Arrays.fill(b1,0.0);
+    Arrays.fill(b2,0.0);
     return this; }
 
   //--------------------------------------------------------------

@@ -185,10 +185,10 @@ public final class Generators {
         new CollectionSampler(
           urp,
           List.of(
-            BigInteger.ZERO,
+            BigInteger.valueOf(0L),
             BigInteger.ONE,
-            BigInteger.TWO,
-            BigInteger.TEN));
+            BigInteger.valueOf(2L),
+            BigInteger.valueOf(10L)));
       @Override
       public Object next () {
         final boolean edge = choose.sample() > dp;
@@ -221,8 +221,8 @@ public final class Generators {
           urp,
           List.of(
             BigInteger.ONE,
-            BigInteger.TWO,
-            BigInteger.TEN));
+            BigInteger.valueOf(2L),
+            BigInteger.valueOf(10L)));
       @Override
       public Object next () {
         final boolean edge = choose.sample() > dp;
@@ -260,8 +260,8 @@ public final class Generators {
           urp,
           List.of(
             BigInteger.ONE,
-            BigInteger.TWO,
-            BigInteger.TEN));
+            BigInteger.valueOf(2L),
+            BigInteger.valueOf(10L)));
       @Override
       public Object next () {
         final boolean edge = choose.sample() > dp;

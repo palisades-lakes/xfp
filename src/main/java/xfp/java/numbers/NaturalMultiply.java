@@ -7,7 +7,7 @@ import static xfp.java.numbers.Numbers.loWord;
  * Non-instantiable.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-22
+ * @version 2019-07-23
  */
 
 @SuppressWarnings("unchecked")
@@ -65,7 +65,7 @@ public final class NaturalMultiply {
 
   private static final Natural squareToomCook3 (final Natural u) {
     // TODO: problems if u NaturalNEIMutable
-    assert u.isImmutable();
+    //assert u.isImmutable();
     final int n = u.hiInt();
     // k is the size (in ints) of the lower-order slices.
     final int k = (n+2)/3;   // Equal to ceil(largest/3)
@@ -112,7 +112,7 @@ public final class NaturalMultiply {
 
   public static final Natural square (final Natural u) {
     if (u.isZero()) { return u.zero(); }
-    if (u.isOne()) { return u; }
+    if (u.isOne()) { return u.one(); }
     final int n = u.hiInt();
     if (n < NaturalMultiply.KARATSUBA_SQUARE_THRESHOLD) { 
       return squareSimple(u); }
@@ -172,7 +172,7 @@ public final class NaturalMultiply {
 
   private static final Natural exactDivideBy3 (final Natural u) {
     final int n = u.hiInt();
-    Natural t = u;
+    Natural t = u.copy();
     long borrow = 0L;
     for (int i=0;i<n;i++) {
       final long x = u.uword(i);
@@ -221,8 +221,8 @@ public final class NaturalMultiply {
   private static final Natural multiplyToomCook3 (final Natural u,
                                                   final Natural v) {
     // TODO: problems if u,v NaturalNEIMutable
-    assert u.isImmutable();
-    assert v.isImmutable();
+    //assert u.isImmutable();
+    //assert v.isImmutable();
     final int n0 = u.hiInt();
     final int n1 = v.hiInt();
     final int largest = Math.max(n0,n1);
@@ -326,7 +326,7 @@ public final class NaturalMultiply {
     final long hi = Numbers.hiWord(v);
     final long lo = Numbers.loWord(v);
     final int n0 = u.hiInt();
-    Natural t = u;
+    Natural t = u.copy();
     long carry = 0;
     int i=0;
     for (;i<n0;i++) {
