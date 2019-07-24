@@ -231,7 +231,6 @@ extends Uints<Natural>, Ringlike<Natural> {
 
   //--------------------------------------------------------------
 
-  // very slow --no obvious reason
   @Override
   default Natural subtract (final Natural u) {
     assert isValid();
@@ -256,7 +255,8 @@ extends Uints<Natural>, Ringlike<Natural> {
       v = v.setWord(i,(int)dif);
       borrow = (dif>>32); }
     assert 0L==borrow;
-    return v.immutable(); }
+    if (isImmutable()) { return v.immutable(); }
+    return v; }
 
 //  @Override
 //  default Natural subtract (final Natural u) {
@@ -266,10 +266,10 @@ extends Uints<Natural>, Ringlike<Natural> {
 //    assert 0<=compareTo(u);
 //    if (u.isZero()) { return this; }
 //    assert ! isZero();
-//    Natural v = zero();
+//    final int n = Math.max(hiInt(),u.hiInt());
+//    Natural v = recyclable(n);
 //    long dif = 0L;
 //    long borrow = 0L;
-//    final int n = Math.max(hiInt(),u.hiInt());
 //    int i=0;
 //    // TODO: optimize by differencing over shared range
 //    // and then just borrowing
@@ -278,6 +278,7 @@ extends Uints<Natural>, Ringlike<Natural> {
 //      borrow = (dif>>32);
 //      v = v.setWord(i,(int) dif); }
 //    assert 0L==borrow;
+//    if (isImmutable()) { return v.immutable(); }
 //    return v; }
 
   default Natural subtract (final long u) {

@@ -17,11 +17,12 @@ import xfp.java.exceptions.Exceptions;
  * TODO: max valid range limited by int hiBit!
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-22
+ * @version 2019-07-24
  */
 
 @SuppressWarnings("unchecked")
-public interface Uints<T extends Uints> extends Transience<T> {
+public interface Uints<T extends Uints> 
+extends Transience<T> {
 
   //--------------------------------------------------------------
   // word ops
@@ -81,8 +82,6 @@ public interface Uints<T extends Uints> extends Transience<T> {
 
   //--------------------------------------------------------------
 
-  //T empty ();
-
   default T empty () {
     throw Exceptions.unsupportedOperation(this,"empty"); }
 
@@ -95,7 +94,7 @@ public interface Uints<T extends Uints> extends Transience<T> {
                    final int i1) {
     assert 0<=i0;
     assert i0<i1;
-    if ((0==i0) && (hiInt()<=i1)) { return (T) this; }
+    if ((0==i0) && (hiInt()<=i1)) { return copy(); }
     final int n = Math.max(0,i1-i0);
     if (0>=n) { return empty(); }
     T u = empty();
@@ -254,9 +253,10 @@ public interface Uints<T extends Uints> extends Transience<T> {
     if (0==n0) { return (T) this; }
     final int n1 = n0-iShift;
     if (0>=n1) { return empty(); }
-    T u = empty();
+    T u = recyclable(n1);
     for (int i=0;i<n1;i++) { 
       u = (T) u.setWord(i,word(i+iShift)); }
+    if (isImmutable()) { return (T) u.immutable(); }
     return u; }
 
   default T shiftDown (final int shift) {
@@ -264,12 +264,12 @@ public interface Uints<T extends Uints> extends Transience<T> {
     if (shift==0) { return (T) this; }
     final int n0 = hiInt();
     if (0==n0) { return (T) this; }
-    final int iShift = (shift >>> 5);
+    final int iShift = (shift>>>5);
     final int n1 = n0-iShift;
     if (0>=n1) { return empty(); }
     final int bShift = (shift & 0x1f);
     if (0==bShift) { return shiftDownWords(iShift); }
-    T u = empty();
+    T u = recyclable(n1);
     final int rShift = 32-bShift;
     int w0 = word(iShift);
     for (int j=0;j<n1;j++) { 
@@ -277,6 +277,7 @@ public interface Uints<T extends Uints> extends Transience<T> {
       final int w = ((w1<<rShift) | (w0>>>bShift));
       w0 = w1;
       u = (T) u.setWord(j,w); }
+    if (isImmutable()) { return (T) u.immutable(); }
     return u; }
 
   //  default T shiftDown (final int shift) {

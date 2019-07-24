@@ -46,6 +46,32 @@ public final class NaturalLEMutable implements Natural {
     assert isValid();
     return unsafe(new int[] { 1 }); }
 
+  @Override
+  public final Natural subtract (final Natural u) {
+    assert isValid();
+    assert u.isValid();
+    // TODO: fast correct check of u<=this?
+    //assert 0<=compareTo(u);
+    if (u.isZero()) { return this; }
+    assert ! isZero();
+    final int n0 = hiInt();
+    final int n1 = u.hiInt();
+    assert n1<=n0;
+    final NaturalLEMutable v = make(n0+1);
+    long borrow = 0L;
+    int i=0;
+    for (;i<n1;i++) {
+      final long dif = (uword(i)-u.uword(i)) + borrow;
+      borrow = (dif>>32);
+      v._words[i] = (int) dif; }
+    assert n1==i;
+    for (;i<=n0;i++) {
+      final long dif = uword(i) + borrow;
+      borrow = (dif>>32);
+      v._words[i] = (int) dif; }
+    assert 0L==borrow;
+    return v; }
+
   //--------------------------------------------------------------
   // Uints
   //--------------------------------------------------------------
@@ -95,6 +121,40 @@ public final class NaturalLEMutable implements Natural {
     assert 0<=u;
     return valueOf(u);  }
 
+  @Override
+  public final Natural shiftDownWords (final int iShift) {
+    assert 0<=iShift;
+    if (0==iShift) { return this; }
+    final int n0 = hiInt();
+    if (0==n0) { return this; }
+    final int n1 = n0-iShift;
+    if (0>=n1) { return empty(); }
+    NaturalLEMutable u = make(n1);
+    for (int i=0;i<n1;i++) { 
+      u._words[i] = word(i+iShift); }
+    return u; }
+
+  @Override
+  public final Natural shiftDown (final int shift) {
+    assert 0<=shift;
+    if (shift==0) { return this; }
+    final int n0 = hiInt();
+    if (0==n0) { return this; }
+    final int iShift = (shift>>>5);
+    final int n1 = n0-iShift;
+    if (0>=n1) { return empty(); }
+    final int bShift = (shift & 0x1f);
+    if (0==bShift) { return shiftDownWords(iShift); }
+    NaturalLEMutable u = make(n1);
+    final int rShift = 32-bShift;
+    int w0 = word(iShift);
+    for (int j=0;j<n1;j++) { 
+      final int w1 = word(j+iShift+1);
+      final int w = ((w1<<rShift) | (w0>>>bShift));
+      w0 = w1;
+      u._words[j] = w; }
+    return u; }
+
   //--------------------------------------------------------------
   // Object methods
   //--------------------------------------------------------------
@@ -115,7 +175,9 @@ public final class NaturalLEMutable implements Natural {
 
   /** hex string. */
   @Override
-  public final String toString () { return toHexString(); }
+  public final String toString () { 
+    if (! isValid()) { return "invalid NaturalLEMutable"; }
+    return toHexString(); }
 
   //--------------------------------------------------------------
   // Transience

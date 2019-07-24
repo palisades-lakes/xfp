@@ -368,11 +368,15 @@ public final class NaturalDivide {
     // where each ai is n/2 ints or less
     // aUpper = [a1,a2,a3]
     final Natural aUpper = a.shiftDown(32*(n/2));
-
+    assert a.isValid();
+    assert aUpper.isValid();
     Natural aa = a.words(0,n/2); // this = a4
+    assert aa.isValid();
 
     // step 3: q1=aUpper/b, r1=aUpper%b
     final List<Natural> qr1 = divide3n2n(aUpper,b);
+    assert aa.isValid();
+    assert qr1.get(1).isValid();
 
     // step 4: quotient=[r1,this]/b, r2=[r1,this]%b
     aa = aa.add(qr1.get(1),32*(n/2));   // this = [r1,this]
@@ -482,18 +486,38 @@ public final class NaturalDivide {
 
   private static final Natural gcdKnuth (final Natural u,
                                          final Natural v) {
+//    Natural a = u.copy();
+//    Natural b = v.copy();
     Natural a = u;
     Natural b = v;
+    assert a.isValid();
+    assert b.isValid();
+    assert u.isValid();
+    assert v.isValid();
     // B1
     final int sa = a.loBit();
     final int s = Math.min(sa,b.loBit());
     if (s!=0) { a = a.shiftDown(s); b = b.shiftDown(s); }
+    assert a.isValid();
+    assert b.isValid();
+    assert u.isValid();
+    assert v.isValid();
     // B2
     int tsign = (s==sa) ? -1 : 1;
     Natural t = (0<tsign) ? a : b;
     for (int lb=t.loBit();lb>=0;lb=t.loBit()) {
+      assert a.isValid();
+      assert b.isValid();
+      assert u.isValid();
+      assert v.isValid();
       // B3 and B4
+      assert t.isValid() : Classes.className(t) + "\n" + t;
       t = t.shiftDown(lb);
+      assert t.isValid() : Classes.className(t) + "\n" + t;
+      assert a.isValid();
+      assert b.isValid() : Classes.className(b) + "\n" + b;
+      assert u.isValid();
+      assert v.isValid();
       // step B5
       if (0<tsign) { a = t; } else { b = t; }
       final int an = a.hiInt();
@@ -503,13 +527,35 @@ public final class NaturalDivide {
         final int y = b.word(bn-1);
         Natural r = u.from(Ints.unsignedGcd(x,y));
         if (s > 0) { r = r.shiftUp(s); }
+        assert a.isValid();
+        assert b.isValid();
+        assert u.isValid();
+        assert v.isValid();
         return r; }
       // B6
       tsign = a.compareTo(b);
-      if (0==tsign) { break; }
+      if (0==tsign) { 
+        assert a.isValid();
+        assert b.isValid();
+        assert u.isValid();
+        assert v.isValid();
+        break; }
       else if (0<tsign) { a = a.subtract(b); t = a;  }
-      else { b = b.subtract(a); t = b; } }
+      else { b = b.subtract(a); t = b; } 
+      assert a.isValid();
+      assert b.isValid();
+      assert u.isValid();
+      assert v.isValid();
+    }
+    assert a.isValid();
+    assert b.isValid();
+    assert u.isValid();
+    assert v.isValid();
     if (s > 0) { a = a.shiftUp(s); }
+    assert a.isValid();
+    assert b.isValid();
+    assert u.isValid();
+    assert v.isValid();
     return a; }
 
   //--------------------------------------------------------------
@@ -521,26 +567,42 @@ public final class NaturalDivide {
                                    final Natural v) {
     Natural a = u;
     Natural b = v;
+    assert a.isValid();
+    assert b.isValid();
     while (!b.isZero()) {
       if (Math.abs(a.hiInt()-b.hiInt()) < 2) { 
-        return gcdKnuth(a,b); }
+        final Natural g = gcdKnuth(a,b); 
+        assert a.isValid();
+        assert b.isValid();
+        return g; }
       final List<Natural> qr = divideAndRemainder(a,b);
+      assert a.isValid();
+      assert b.isValid();
       a = b;
       b = qr.get(1); }
     return a; }
 
   public static final List<Natural> reduce (final Natural n0,
                                             final Natural d0) {
+    assert n0.isValid();
+    assert d0.isValid();
     final int shift = Math.min(n0.loBit(),d0.loBit());
     final Natural n = ((shift != 0) ? n0.shiftDown(shift) : n0);
     final Natural d = ((shift != 0) ? d0.shiftDown(shift) : d0);
+    assert n.isValid();
+    assert d.isValid();
     if (n.equals(d)) { return List.of(n0.one(),n0.one()); }
     if (d.isOne()) { return List.of(n,n0.one()); }
     if (n.isOne()) { return List.of(n0.one(),d); }
     final Natural g = gcd(n,d);
+    assert g.isValid();
+    assert n.isValid();
+    assert d.isValid();
     if (g.compareTo(n.one()) > 0) {
       final Natural ng = n.divide(g);
       final Natural dg = d.divide(g);
+      assert ng.isValid();
+      assert dg.isValid();
       return List.of(ng,dg); }
     return List.of(n,d); }
 

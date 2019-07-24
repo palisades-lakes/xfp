@@ -25,6 +25,12 @@ public final class NaturalLE implements Natural {
   /** Don't drop trailing zeros. */
   public final int[] copyWords () { 
     return Arrays.copyOf(words(),words().length); }
+  
+  // ought to be _words.length, but safer to compute and cache
+  // in case we want to allow over-large arrays in the future
+  private final int _hiInt;
+  @Override
+  public final int hiInt () { return _hiInt; }
 
   //--------------------------------------------------------------
   // Natural
@@ -35,6 +41,12 @@ public final class NaturalLE implements Natural {
   @Override
   public final Natural one () { return ONE; }
 
+  @Override
+  public final Natural subtract (final Natural u) {
+    assert isValid();
+    assert u.isValid();
+    return recyclable(this).subtract(u).immutable();  }
+  
   //--------------------------------------------------------------
   // Uints
   //--------------------------------------------------------------
@@ -78,6 +90,15 @@ public final class NaturalLE implements Natural {
   public final Natural from (final long u) {
     assert 0<=u;
     return valueOf(u);  }
+
+  @Override
+  public final Natural shiftDownWords (final int iShift) {
+    assert 0<=iShift;
+    return recyclable(this).shiftDownWords(iShift).immutable(); }
+
+  @Override
+  public final Natural shiftDown (final int shift) {
+    return recyclable(this).shiftDown(shift).immutable(); }
 
   //--------------------------------------------------------------
   // Transience
@@ -134,7 +155,9 @@ public final class NaturalLE implements Natural {
   //-------------------------------------------------------------
 
   /** UNSAFE: doesn't copy <code>words</code>. */
-  private NaturalLE (final int[] words) { _words = words; }
+  private NaturalLE (final int[] words) { 
+    _words = words; 
+    _hiInt = Ints.hiInt(words); }
 
   /** Doesn't copy <code>words</code>. 
    */

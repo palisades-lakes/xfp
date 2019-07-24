@@ -461,7 +461,8 @@ public final class Common {
       final List<BigInteger> x2 = NaturalDivide.reduce(x0,x1);
       final List<T> y2 = y0.reduce(y1);
       final List<BigInteger> x3 = 
-        List.of (toBI.apply(y2.get(0)), 
+        List.of (
+          toBI.apply(y2.get(0)), 
           toBI.apply(y2.get(1)));
 
       Assertions.assertEquals(x2.get(0),x3.get(0),() ->
