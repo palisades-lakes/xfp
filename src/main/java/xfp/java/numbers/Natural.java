@@ -15,7 +15,7 @@ import xfp.java.exceptions.Exceptions;
  * TODO: utilities class to hide private stuff?
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-25
+ * @version 2019-07-26
  */
 
 @SuppressWarnings("unchecked")
@@ -113,7 +113,7 @@ extends Uints<Natural>, Ringlike<Natural> {
       if (lo0<lo1) { return -1; }
       if (lo0>lo1) { return 1; } }
     else {
-      // most significant word in u << upShift
+      // most significant word in u<<upShift
       final long hi0 = uword(iShift+2);
       final long hi1 = (u>>>(64-rShift));
       if (hi0<hi1) { return -1; }
@@ -218,10 +218,10 @@ extends Uints<Natural>, Ringlike<Natural> {
   default Natural add (final long u,
                        final int upShift) {
     assert isValid();
-    assert 0<=upShift;
-    if (0==upShift) { return add(u); }
     assert 0L<=u;
+    assert 0<=upShift;
     if (0L==u) { return this; }
+    if (0==upShift) { return add(u); }
     return add(from(u,upShift)); }
 
   //--------------------------------------------------------------
@@ -287,6 +287,8 @@ extends Uints<Natural>, Ringlike<Natural> {
     assert 0L<=u;
     assert 0<=upShift;
     assert compareTo(u,upShift)>=0;
+    if (0L==u) { return this; }
+    if (0==upShift) { return subtract(u); }
     return subtract(from(u,upShift)); }
 
   //--------------------------------------------------------------
@@ -389,12 +391,13 @@ extends Uints<Natural>, Ringlike<Natural> {
                             final int upShift) {
     assert isValid();
     assert 0L<=u;
-    if (0L==u) { return zero(); }
     assert 0<=upShift;
+    if (0L==u) { return zero(); }
     if (0==upShift) { return multiply(u); }
+    if (isZero()) { return this; }
     return multiply(from(u,upShift)); }
 
-  default Natural fromProduct (final long t0,
+  default Natural product (final long t0,
                                final long t1) {
     assert isValid();
     assert 0L<=t0;

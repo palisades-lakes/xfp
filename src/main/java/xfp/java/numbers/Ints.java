@@ -20,8 +20,9 @@ import xfp.java.prng.Generators;
 /** Utilities for <code>int</code>, <code>int[]</code>.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-23
+ * @version 2019-07-26
  */
+
 public final class Ints implements Set {
 
   //--------------------------------------------------------------
@@ -123,13 +124,13 @@ public final class Ints implements Set {
                                          final int lShift) {
     assert 0<lShift;
     assert lShift<32;
-      final int rShift = 32-lShift;
-      int c=src[isrc];
-      for (int i0=idst,i1=isrc;i0<idst+n-1; i0++) {
-        final int b = c;
-        c = src[++i1];
-        dst[i0] = (b << lShift) | (c >>> rShift); }
-      dst[idst+n-1] = (c<<lShift); } 
+    final int rShift = 32-lShift;
+    int c=src[isrc];
+    for (int i0=idst,i1=isrc;i0<idst+n-1; i0++) {
+      final int b = c;
+      c = src[++i1];
+      dst[i0] = (b << lShift) | (c >>> rShift); }
+    dst[idst+n-1] = (c<<lShift); } 
 
   //-------------------------------------------------------------
   // string parsing
@@ -231,6 +232,11 @@ public final class Ints implements Set {
     return x; }
 
   //--------------------------------------------------------------
+  // TODO: move to Uints?
+  
+  /** Return the non-zero words in <code>u</code> as an 
+   * (unsigned) <code>int[]</code> in big endian order.
+   */
 
   public static final int[] bigEndian (final long u) {
     assert 0<=u;
@@ -241,6 +247,10 @@ public final class Ints implements Set {
       return new int[] { lo, }; }
     return new int[] { hi, lo, }; }
 
+  /** Return the non-zero words in <code>u</code> as an 
+   * (unsigned) <code>int[]</code> in little endian order.
+   */
+
   public static final int[] littleEndian (final long u) {
     assert 0<=u;
     final int hi = (int) (u>>>32);
@@ -249,6 +259,69 @@ public final class Ints implements Set {
       if (0==lo) { return Ints.EMPTY; }
       return new int[] { lo, }; }
     return new int[] { lo, hi, }; }
+
+  /** Return the non-zero (unsigned) <code>u</code>,
+   * shifted up <code>upShift</code> bits, as an 
+   * (unsigned) <code>int[]</code> in little endian order.
+   */
+
+  public static final int[] littleEndian (final int u,
+                                          final int upShift) {
+    assert 0<=upShift;
+    if (0==u) { return EMPTY; }
+    if (0==upShift) { return new int[] {u}; }
+    final int iShift = (upShift>>>5);
+    final int bShift = (upShift&0x1f);
+    if (0==bShift) { 
+      final int[] uu = new int[iShift+1];
+      uu[iShift] = u;
+      return uu; }
+    final int rShift = 32-bShift;
+    final int lo = (u<<bShift);
+    final int hi = (u>>>rShift);
+    if (0==hi) {
+      final int[] uu = new int[iShift+1];
+      uu[iShift] = lo;
+      return uu; }
+    final int[] uu = new int[iShift+2];
+    uu[iShift] = lo;
+    uu[iShift+1] = hi;
+    return uu; }
+
+  /** Return the non-zero words in <code>u</code>,
+   * shifted up <code>upShift</code> bits, as an 
+   * (unsigned) <code>int[]</code> in little endian order.
+   */
+
+  public static final int[] littleEndian (final long u,
+                                          final int upShift) {
+    assert 0L<=u;
+    assert 0<=upShift;
+    if (0==upShift) { return littleEndian(u); }
+    final int hi = (int) (u>>>32);
+    final int lo = (int) u;
+    if (0==hi) { return littleEndian(lo,upShift); }
+    final int iShift = (upShift>>>5);
+    final int bShift = (upShift&0x1f);
+    if (0==bShift) {
+      final int[] uu = new int[iShift+2];
+      uu[iShift] = lo;
+      uu[iShift+1] = hi;
+      return uu; }
+    final int rShift = 32-bShift;
+    final int uu0 = (lo<<bShift);
+    final int uu1 = ((hi<<bShift)|(lo>>>rShift));
+    final int uu2 =  (hi>>>rShift);
+    final int nuu;
+    if (0==uu2) {
+      if (0==uu1) { nuu = 1; }
+      else { nuu = 2; } }
+    else { nuu = 3; }
+    final int[] uu = new int[iShift+nuu];
+    uu[iShift] = uu0;
+    if (0!=uu1) { uu[iShift+1] = uu1; }
+    if (0!=uu2) { uu[iShift+2] = uu2; }
+    return uu; }
 
   //--------------------------------------------------------------
   // operations for algebraic structures over

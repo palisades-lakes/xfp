@@ -8,7 +8,7 @@ import java.util.Arrays;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-25
+ * @version 2019-07-26
  */
 
 public final class NaturalLEMutable implements Natural {
@@ -56,9 +56,11 @@ public final class NaturalLEMutable implements Natural {
     final int m3 = (int) (sum>>>32);
     return unsafe(new int[] {m0,m1,m2,m3,}); }
 
+  //--------------------------------------------------------------
+
   @Override
-  public final Natural fromProduct (final long t0,
-                                    final long t1) {
+  public final Natural product (final long t0,
+                                final long t1) {
     assert isValid();
     assert 0L<=t0;
     assert 0L<=t1;
@@ -79,6 +81,120 @@ public final class NaturalLEMutable implements Natural {
     final int m2 = (int) sum;
     final int m3 = (int) (sum>>>32);
     return unsafe(new int[] {m0,m1,m2,m3,}); }
+
+  //--------------------------------------------------------------
+  
+  @Override
+  public final Natural add (final Natural u,
+                            final int shift) {
+    assert isValid();
+    assert u.isValid();
+    assert 0<=shift;
+    if (isZero()) { return u.shiftUp(shift); }
+    if (u.isZero()) { return this; }
+    if (0==shift) { return add(u); }
+    final int iShift = (shift>>>5);
+    final int bShift = (shift&0x1f);
+    // TODO: special case whole word shift?
+    final int rShift = 32-bShift;
+    final int n0 = hiInt();
+    final int n1 = u.hiInt()+iShift+1;
+    final int n = Math.max(n0,n1);
+    //final Natural us = u.shiftUp(shift);
+    NaturalLEMutable t = make(n);
+    int i=0;
+    for (;i<iShift;i++) { t._words[i] = word(i); }
+    long carry = 0L;
+    int u0 = 0;
+    for (;i<n;i++) {
+      final int u1 = u.word(i-iShift);
+      final int ui = 
+        ((bShift==0) ? u1 : ((u1<<bShift)|(u0>>>rShift)));
+      u0 = u1;
+      final long sum = uword(i) + Numbers.unsigned(ui) + carry;
+      carry = (sum>>>32);
+      t._words[i] = (int) sum; }
+    if (0L!=carry) { t._words[i] = (int) carry; }
+    return t; }
+
+  //--------------------------------------------------------------
+  
+  @Override
+  public final Natural add (final long u,
+                            final int upShift) {
+    assert isValid();
+    assert 0<=u;
+    assert 0<=upShift;
+    if (isZero()) { return from(u,upShift); }
+    if (0L==u) { return this; }
+    if (0==upShift) { return add(u); }
+    final int iShift = (upShift>>>5);
+    final int bShift = (upShift&0x1f);
+    final int[] uu = Ints.littleEndian(u,bShift);
+    final int n0 = hiInt();
+    final int n1 = iShift+uu.length;
+    final int n = Math.max(n0,n1)+1;
+    //final Natural us = u.shiftUp(shift);
+    NaturalLEMutable t = make(n);
+    int i=0;
+    for (;i<iShift;i++) { t._words[i] = word(i); }
+    long carry = 0L;
+    for (;i<n1;i++) {
+      final long ui = Numbers.unsigned(uu[i-iShift]);
+      final long sum = (uword(i) + ui) + carry;
+      carry = (sum>>>32);
+      t._words[i] = (int) sum; }
+    for (;i<n;i++) {
+      final long sum = uword(i) + carry;
+      carry = (sum>>>32);
+      t._words[i] = (int) sum; }
+    if (0L!=carry) { t._words[i] = (int) carry; }
+    return t; }
+
+ //--------------------------------------------------------------
+  
+  @Override
+  public final Natural subtract (final long u,
+                                 final int upShift) {
+    assert isValid();
+    assert 0L<=u;
+    assert 0<=upShift;
+    if (0L==u) { return this; }
+    if (0==upShift) { return subtract(u); }
+    final int iShift = (upShift>>>5);
+    final int bShift = (upShift&0x1f);
+    final int[] uu = Ints.littleEndian(u,bShift);
+    final int n0 = hiInt();
+    final int n1 = iShift+uu.length;
+    assert n1<=n0;
+//    final Natural us = copy().subtract(from(u,upShift));
+    NaturalLEMutable v = make(n0);
+    for (int i=0;i<iShift;i++) { 
+      v._words[i] = word(i); 
+//      assert us.word(i) == v._words[i]; 
+      }
+    long borrow = 0L;
+    for (int i=iShift;i<n1;i++) {
+      final long ui = Numbers.unsigned(uu[i-iShift]);
+      final long dif = (uword(i)-ui) + borrow;
+      borrow = (dif>>32);
+      v._words[i] = (int) dif; 
+//      assert us.word(i) == v._words[i] :
+//        "\ni=" + i
+//        + "\niShift=" + iShift
+//        + "\nborrow=" + Long.toHexString(borrow)
+//        + "\nusi=" + Integer.toHexString(us.word(i))
+//        + "\ni=" + Integer.toHexString(uu[i-iShift])
+//        + "\nvi =" + Integer.toHexString(v.word(i)); 
+      }
+    for (int i=n1;i<n0;i++) {
+      final long dif = uword(i) + borrow;
+      borrow = (dif>>32);
+      v._words[i] = (int) dif; 
+      //assert us.word(i) == v._words[i]; 
+      }
+    assert 0L==borrow;
+    return v; }
 
   //--------------------------------------------------------------
   // Ringlike
@@ -117,67 +233,18 @@ public final class NaturalLEMutable implements Natural {
     return t; }
 
   //--------------------------------------------------------------
-  
-  @Override
-  public final Natural add (final Natural u,
-                            final int shift) {
-    assert isValid();
-    assert u.isValid();
-    assert 0<=shift;
-    if (isZero()) { return u.shiftUp(shift); }
-    if (u.isZero()) { return this; }
-    if (0==shift) { return add(u); }
-    final int iShift = (shift>>>5);
-    final int bShift = (shift&0x1f);
-    // TODO: special case whole word shift?
-    final int rShift = 32-bShift;
-    final int n0 = hiInt();
-    final int n1 = u.hiInt()+iShift+1;
-    final int n = Math.max(n0,n1);
-    //final Natural us = u.shiftUp(shift);
-    NaturalLEMutable t = make(n);
-    int i=0;
-    for (;i<iShift;i++) { t._words[i] = word(i); }
-    long carry = 0L;
-    int u0 = 0;
-    for (;i<n;i++) {
-      final int u1 = u.word(i-iShift);
-      final int ui = 
-        ((bShift==0) ? u1 : ((u1<<bShift)|(u0>>>rShift)));
-//      assert ui==us.word(i) : "\n"
-//        + "\ni=" + i
-//        + "\nshift=" + shift
-//        + "\niShift=" + iShift
-//        + "\nbShift=" + bShift
-//        + "\nrShift=" + rShift
-//        + "\nui=" + Integer.toHexString(ui)
-//        + "\nus=" + Integer.toHexString(us.word(i))
-//        + "\nu0=" + Integer.toHexString(u0)
-//        + "\nui=" 
-//        + Integer.toHexString(u1<<bShift) +" | "
-//        + Integer.toHexString((u0>>>rShift))
-//        + "\n";
-      u0 = u1;
-      final long sum = uword(i) + Numbers.unsigned(ui) + carry;
-      carry = (sum>>>32);
-      t._words[i] = (int) sum; }
-    if (0L!=carry) { t._words[i] = (int) carry; }
-    return t; }
-
-  //--------------------------------------------------------------
 
   @Override
   public final Natural subtract (final Natural u) {
     assert isValid();
     assert u.isValid();
-    // TODO: fast correct check of u<=this?
-    //assert 0<=compareTo(u);
+    assert 0<=compareTo(u);
     if (u.isZero()) { return this; }
     assert ! isZero();
     final int n0 = hiInt();
     final int n1 = u.hiInt();
     assert n1<=n0;
-    final NaturalLEMutable v = make(n0+1);
+    final NaturalLEMutable v = make(n0);
     long borrow = 0L;
     int i=0;
     for (;i<n1;i++) {
@@ -185,7 +252,7 @@ public final class NaturalLEMutable implements Natural {
       borrow = (dif>>32);
       v._words[i] = (int) dif; }
     assert n1==i;
-    for (;i<=n0;i++) {
+    for (;i<n0;i++) {
       final long dif = uword(i) + borrow;
       borrow = (dif>>32);
       v._words[i] = (int) dif; }

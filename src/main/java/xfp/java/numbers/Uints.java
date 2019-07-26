@@ -331,31 +331,6 @@ extends Transience<T> {
     return u; }
 
   //--------------------------------------------------------------
-  /** Return a Uints whose value is
-   * <code>u * 2<sup>shift</sup></code>.
-   * Usually the same object as <code>this</code>.
-   *
-   * <code>0&lt;=shift</code>
-   */
-
-  default T shiftUp (final T u,
-                     final int shift) {
-    // TODO: optimize as single op
-    return (T) set(u).shiftUp(shift); }
-
-  /** Return a Uints whose value is
-   * <code>u * 2<sup>shift</sup></code>.
-   * Usually the same object as <code>this</code>.
-   *
-   * <code>0&lt;=shift</code>
-   */
-
-  default T shiftUp (final long u,
-                     final int shift) {
-    // TODO: optimize as single op
-    return (T) set(u).shiftUp(shift); }
-
-  //--------------------------------------------------------------
   // construction
   //--------------------------------------------------------------
   /** Return a new Uints whose value is <code>u</code>.
@@ -372,8 +347,11 @@ extends Transience<T> {
    */
 
   default T from (final int u) {
-    throw Exceptions.unsupportedOperation(
-      this,"from",u); }
+    return from(Numbers.unsigned(u)); }
+
+  default T littleEnd (final long u,
+                  final int shift) {
+    return (T) from(u).shiftUp(shift); }
 
   /** Return a new Uints whose value is
    * <code>u * 2<sup>shift</sup></code>.

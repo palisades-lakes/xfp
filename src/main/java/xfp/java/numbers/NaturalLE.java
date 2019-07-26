@@ -8,7 +8,7 @@ import java.util.Arrays;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-25
+ * @version 2019-07-26
  */
 
 public final class NaturalLE implements Natural {
@@ -25,7 +25,7 @@ public final class NaturalLE implements Natural {
   /** Don't drop trailing zeros. */
   public final int[] copyWords () { 
     return Arrays.copyOf(words(),words().length); }
-  
+
   // ought to be _words.length, but safer to compute and cache
   // in case we want to allow over-large arrays in the future
   private final int _hiInt;
@@ -57,8 +57,8 @@ public final class NaturalLE implements Natural {
     return unsafe(new int[] {m0,m1,m2,m3,}); }
 
   @Override
-  public final Natural fromProduct (final long t0,
-                                    final long t1) {
+  public final Natural product (final long t0,
+                                final long t1) {
     assert isValid();
     assert 0L<=t0;
     assert 0L<=t1;
@@ -80,6 +80,38 @@ public final class NaturalLE implements Natural {
     final int m3 = (int) (sum>>>32);
     return unsafe(new int[] {m0,m1,m2,m3,}); }
 
+  @Override
+  public final Natural add (final Natural u,
+                            final int upShift) {
+    assert isValid();
+    assert u.isValid();
+    assert 0<=upShift;
+    if (isZero()) { return u.shiftUp(upShift); }
+    if (u.isZero()) { return this; }
+    if (0==upShift) { return add(u); }
+    return recyclable(this).add(u,upShift).immutable();  }
+
+  @Override
+  public final Natural subtract (final long u,
+                                 final int upShift) {
+    assert isValid();
+    assert 0<=u;
+    assert 0<=upShift;
+    if (0L==u) { return this; }
+    if (0==upShift) { return subtract(u); }
+    assert compareTo(u,upShift)>=0;
+    return recyclable(this).subtract(u,upShift).immutable();  }
+
+  @Override
+  public final Natural add (final long u,
+                            final int upShift) {
+    assert isValid();
+    assert 0<=u;
+    assert 0<=upShift;
+    if (0L==u) { return this; }
+    if (0==upShift) { return add(u); }
+    return recyclable(this).add(u,upShift).immutable();  }
+
   //--------------------------------------------------------------
   // Ringlike
   //--------------------------------------------------------------
@@ -96,22 +128,12 @@ public final class NaturalLE implements Natural {
     return recyclable(this).add(u).immutable();  }
 
   @Override
-  public final Natural add (final Natural u,
-                            final int shift) {
-    assert isValid();
-    assert u.isValid();
-    assert 0<=shift;
-    if (isZero()) { return u.shiftUp(shift); }
-    if (u.isZero()) { return this; }
-    if (0==shift) { return add(u); }
-    return recyclable(this).add(u,shift).immutable();  }
-
-  @Override
   public final Natural subtract (final Natural u) {
     assert isValid();
     assert u.isValid();
+    assert compareTo(u)>=0;
     return recyclable(this).subtract(u).immutable();  }
-  
+
   //--------------------------------------------------------------
   // Uints
   //--------------------------------------------------------------
@@ -181,7 +203,7 @@ public final class NaturalLE implements Natural {
 
   @Override
   public final boolean isValid () { return true; }
-  
+
   @Override
   public final Natural recyclable (final Natural init) {
     return NaturalLEMutable.copy(init); }
@@ -247,8 +269,8 @@ public final class NaturalLE implements Natural {
   /** Copy <code>words</code>. 
    *  */
   public static final NaturalLE make (final int[] words) {
-//    final int end = Ints.hiInt(words);
-//    return unsafe(Arrays.copyOf(words,end)); }
+    //    final int end = Ints.hiInt(words);
+    //    return unsafe(Arrays.copyOf(words,end)); }
     return unsafe(Arrays.copyOf(words,words.length)); }
 
   //--------------------------------------------------------------
@@ -291,7 +313,7 @@ public final class NaturalLE implements Natural {
     if (u==0L) { return ZERO; }
     return make(Ints.littleEndian(u)); }
 
-  
+
   /** Return a {@link NaturalLE} equivalent to the unsigned 
    * value of <code>u</code>.
    */

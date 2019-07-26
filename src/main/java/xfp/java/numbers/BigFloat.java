@@ -478,7 +478,7 @@ implements Ringlike<BigFloat> {
         significand(),
         exponent(),
         ! (p0 ^ p1),
-        significand().fromProduct(t00,t11),
+        significand().product(t00,t11),
         e00+e11); }
 
 //    public final BigFloat
