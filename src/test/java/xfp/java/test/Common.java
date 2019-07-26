@@ -590,7 +590,44 @@ public final class Common {
         (BigInteger) gn.next(), (BigInteger) gn.next()); } }
 
   //--------------------------------------------------------------
-  // TODO: java missing corresponding FloatFunction, etc.
+
+  public static final void
+  ringlikeTest (final Function<String,Ringlike> valueOf,
+               final Function<BigInteger,Ringlike> fromBI,
+               final Function<Ringlike,BigInteger> toBI) {
+    final Generator gn =
+      Generators.bigIntegerGenerator(
+        PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
+    for (int i=0;i<TRYS;i++) {
+      integerTest(valueOf,fromBI,toBI,
+        (BigInteger) gn.next(), (BigInteger) gn.next()); } }
+
+  public static final void
+  ringlikeTest (final Function<String,Ringlike> valueOf,
+               final Function<BigInteger,Ringlike> fromBI,
+               final Function<Ringlike,BigInteger> toBI,
+               final BigInteger z0,
+               final BigInteger z1) {
+    // TODO: more tests
+    hexRoundTrip(fromBI,valueOf,z0);
+    hexRoundTrip(fromBI,valueOf,z1);
+    biRoundTrip(fromBI,toBI,z0);
+    biRoundTrip(fromBI,toBI,z1);
+    add(fromBI,toBI,z0,z1);
+    add(fromBI,toBI,z0,z0);
+    absDiff(fromBI,toBI,z0,z1);
+    absDiff(fromBI,toBI,z0,z0);
+    subtract(fromBI,toBI,z0,z1);
+    subtract(fromBI,toBI,z0,z0);
+    square(fromBI,toBI,z0);
+    square(fromBI,toBI,z1);
+    multiply(fromBI,toBI,z0,z1);
+    multiply(fromBI,toBI,z0,z0);
+    divide(fromBI,toBI,z0,z1);
+    divide(fromBI,toBI,z0,z0); }
+
+  //--------------------------------------------------------------
+ // TODO: java missing corresponding FloatFunction, etc.
 
   public static final void
   floatRoundTripTest (final FloatFunction fromFloat,

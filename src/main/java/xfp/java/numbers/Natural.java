@@ -1,8 +1,5 @@
 package xfp.java.numbers;
 
-import static xfp.java.numbers.Numbers.loWord;
-import static xfp.java.numbers.Numbers.unsigned;
-
 import java.math.BigInteger;
 import java.util.List;
 
@@ -18,7 +15,7 @@ import xfp.java.exceptions.Exceptions;
  * TODO: utilities class to hide private stuff?
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-24
+ * @version 2019-07-25
  */
 
 @SuppressWarnings("unchecked")
@@ -171,17 +168,16 @@ extends Uints<Natural>, Ringlike<Natural> {
   default Natural add (final Natural u) {
     assert isValid();
     assert u.isValid();
-    Natural t = zero();
     if (isZero()) { return u; }
     if (u.isZero()) { return this; }
     // TODO: optimize by summing over joint range
     // and just carrying after that
     final int end = Math.max(hiInt(),u.hiInt());
-    long sum = 0L;
+    Natural t = zero();
     long carry = 0L;
     int i=0;
     for (;i<end;i++) {
-      sum = uword(i) + u.uword(i) + carry;
+      final long sum = uword(i) + u.uword(i) + carry;
       carry = (sum>>>32);
       t = t.setWord(i,(int) sum); }
     if (0L!=carry) { t = t.setWord(i,(int) carry); }
@@ -196,7 +192,6 @@ extends Uints<Natural>, Ringlike<Natural> {
     if (u.isZero()) { return this; }
     if (0==shift) { return add(u); }
     // TODO: reduce to single op?
-    // TODO: shiftUp mutable version and add this to that
     return add(u.shiftUp(shift)); }
 
   default Natural add (final long u) {
@@ -257,29 +252,6 @@ extends Uints<Natural>, Ringlike<Natural> {
     assert 0L==borrow;
     if (isImmutable()) { return v.immutable(); }
     return v; }
-
-//  @Override
-//  default Natural subtract (final Natural u) {
-//    assert isValid();
-//    assert u.isValid();
-//    // TODO: fast correct check of u<=this?
-//    assert 0<=compareTo(u);
-//    if (u.isZero()) { return this; }
-//    assert ! isZero();
-//    final int n = Math.max(hiInt(),u.hiInt());
-//    Natural v = recyclable(n);
-//    long dif = 0L;
-//    long borrow = 0L;
-//    int i=0;
-//    // TODO: optimize by differencing over shared range
-//    // and then just borrowing
-//    for (;i<n;i++) {
-//      dif = (uword(i) - u.uword(i)) + borrow;
-//      borrow = (dif>>32);
-//      v = v.setWord(i,(int) dif); }
-//    assert 0L==borrow;
-//    if (isImmutable()) { return v.immutable(); }
-//    return v; }
 
   default Natural subtract (final long u) {
     assert isValid();
@@ -382,7 +354,7 @@ extends Uints<Natural>, Ringlike<Natural> {
     assert isValid();
     assert 0L<=t;
     final long hi = Numbers.hiWord(t);
-    final long lo = loWord(t);
+    final long lo = Numbers.loWord(t);
     long sum = lo*lo;
     final int m0 = (int) sum;
     sum = (sum>>>32) + ((hi*lo)<<1);
@@ -428,9 +400,9 @@ extends Uints<Natural>, Ringlike<Natural> {
     assert 0L<=t0;
     assert 0L<=t1;
     final long hi0 = Numbers.hiWord(t0);
-    final long lo0 = loWord(t0);
+    final long lo0 = Numbers.loWord(t0);
     final long hi1 = Numbers.hiWord(t1);
-    final long lo1 = loWord(t1);
+    final long lo1 = Numbers.loWord(t1);
     final long lolo = lo0*lo1;
     final long hilo2 = (hi0*lo1) + (hi1*lo0);
     final long hihi = hi0*hi1;
@@ -441,12 +413,12 @@ extends Uints<Natural>, Ringlike<Natural> {
     sum = (sum>>>32) + hihi ;
     final int m2 = (int) sum;
     final int m3 = (int) (sum>>>32);
-    Natural u = zero();
+    Natural u = recyclable(4);
     if (0!=m0) { u = u.setWord(0,m0); }
     if (0!=m1) { u = u.setWord(1,m1); }
     if (0!=m2) { u = u.setWord(2,m2); }
     if (0!=m3) { u = u.setWord(3,m3); }
-    return u; }
+    return u.immutable(); }
 
   //--------------------------------------------------------------
   // division
@@ -625,7 +597,7 @@ extends Uints<Natural>, Ringlike<Natural> {
         lowBits = (w1 << nBits2) | (w2 >>> nBits); } }
 
     twiceSignifFloor =
-      (unsigned(highBits) << 32) | unsigned(lowBits);
+      (Numbers.unsigned(highBits)<<32)|Numbers.unsigned(lowBits);
 
     // remove the implied bit
     final long signifFloor =

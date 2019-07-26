@@ -8,7 +8,7 @@ import java.util.Arrays;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-24
+ * @version 2019-07-25
  */
 
 public final class NaturalLE implements Natural {
@@ -36,10 +36,75 @@ public final class NaturalLE implements Natural {
   // Natural
   //--------------------------------------------------------------
 
+  @Override
+  public final Natural square (final long t) {
+    assert isValid();
+    assert 0L<=t;
+    final long hi = Numbers.hiWord(t);
+    final long lo = Numbers.loWord(t);
+    final long lolo = lo*lo;
+    // TODO: overflow?
+    //final long hilo2 = ((hi*lo)<<1);
+    final long hilo2 = Math.multiplyExact(2,hi*lo);
+    final long hihi = hi*hi;
+    long sum = lolo;
+    final int m0 = (int) sum;
+    sum = (sum>>>32) + hilo2;
+    final int m1 = (int) sum;
+    sum = (sum>>>32) + hihi ;
+    final int m2 = (int) sum;
+    final int m3 = (int) (sum>>>32);
+    return unsafe(new int[] {m0,m1,m2,m3,}); }
+
+  @Override
+  public final Natural fromProduct (final long t0,
+                                    final long t1) {
+    assert isValid();
+    assert 0L<=t0;
+    assert 0L<=t1;
+    final long hi0 = Numbers.hiWord(t0);
+    final long lo0 = Numbers.loWord(t0);
+    final long hi1 = Numbers.hiWord(t1);
+    final long lo1 = Numbers.loWord(t1);
+    final long lolo = lo0*lo1;
+    // TODO: overflow?
+    //final long hilo2 = (hi0*lo1) + (hi1*lo0);
+    final long hilo2 = Math.addExact(hi0*lo1,hi1*lo0);
+    final long hihi = hi0*hi1;
+    long sum = lolo;
+    final int m0 = (int) sum;
+    sum = (sum>>>32) + hilo2;
+    final int m1 = (int) sum;
+    sum = (sum>>>32) + hihi ;
+    final int m2 = (int) sum;
+    final int m3 = (int) (sum>>>32);
+    return unsafe(new int[] {m0,m1,m2,m3,}); }
+
+  //--------------------------------------------------------------
+  // Ringlike
+  //--------------------------------------------------------------
+
   private static final NaturalLE ONE = unsafe(new int[] { 1 });
 
   @Override
   public final Natural one () { return ONE; }
+
+  @Override
+  public final Natural add (final Natural u) {
+    assert isValid();
+    assert u.isValid();
+    return recyclable(this).add(u).immutable();  }
+
+  @Override
+  public final Natural add (final Natural u,
+                            final int shift) {
+    assert isValid();
+    assert u.isValid();
+    assert 0<=shift;
+    if (isZero()) { return u.shiftUp(shift); }
+    if (u.isZero()) { return this; }
+    if (0==shift) { return add(u); }
+    return recyclable(this).add(u,shift).immutable();  }
 
   @Override
   public final Natural subtract (final Natural u) {
@@ -101,6 +166,15 @@ public final class NaturalLE implements Natural {
   public final Natural shiftDown (final int shift) {
     return recyclable(this).shiftDown(shift).immutable(); }
 
+  @Override
+  public final Natural shiftUpWords (final int iShift) {
+    assert 0<=iShift;
+    return recyclable(this).shiftUpWords(iShift).immutable(); }
+
+  @Override
+  public final Natural shiftUp (final int shift) {
+    return recyclable(this).shiftUp(shift).immutable(); }
+
   //--------------------------------------------------------------
   // Transience
   //--------------------------------------------------------------
@@ -129,10 +203,13 @@ public final class NaturalLE implements Natural {
   public boolean isImmutable () { return true; }
 
   @Override
+  public final Natural recycle () { return this; }
+
+  @Override
   public final Natural immutable () { return this; }
 
   @Override
-  public final Natural copy () {  return copy(this); }
+  public final Natural copy () {  return this; }
 
   //--------------------------------------------------------------
   // Object methods

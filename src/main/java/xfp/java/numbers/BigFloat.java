@@ -481,14 +481,14 @@ implements Ringlike<BigFloat> {
         significand().fromProduct(t00,t11),
         e00+e11); }
 
-  //  public final BigFloat
-  //  addProduct (final double z0,
-  //              final double z1) {
-  //    // use twoMul to convert exactly to 2 adds.
-  //    final double z01 = z0*z1;
-  //    assert Double.isFinite(z01);
-  //    final double e = Math.fma(z0,z1,-z01);
-  //    return add(z01).add(e); }
+//    public final BigFloat
+//    addProduct (final double z0,
+//                final double z1) {
+//      // use twoMul to convert exactly to 2 adds.
+//      final double z01 = z0*z1;
+//      assert Double.isFinite(z01);
+//      final double e = Math.fma(z0,z1,-z01);
+//      return add(z01).add(e); }
 
   //--------------------------------------------------------------
   // Number methods
