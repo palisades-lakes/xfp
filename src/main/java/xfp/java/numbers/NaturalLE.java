@@ -80,17 +80,55 @@ public final class NaturalLE implements Natural {
     final int m3 = (int) (sum>>>32);
     return unsafe(new int[] {m0,m1,m2,m3,}); }
 
+  //--------------------------------------------------------------
+  
+//  @Override
+//  public final Natural add (final Natural u,
+//                            final int upShift) {
+//    assert isValid();
+//    assert u.isValid();
+//    assert 0<=upShift;
+//    if (isZero()) { return u.shiftUp(upShift); }
+//    if (u.isZero()) { return this; }
+//    if (0==upShift) { return add(u); }
+//    return recyclable(this).add(u,upShift).immutable();  }
+
   @Override
   public final Natural add (final Natural u,
-                            final int upShift) {
+                            final int shift) {
     assert isValid();
     assert u.isValid();
-    assert 0<=upShift;
-    if (isZero()) { return u.shiftUp(upShift); }
+    assert 0<=shift;
+    if (isZero()) { return u.shiftUp(shift); }
     if (u.isZero()) { return this; }
-    if (0==upShift) { return add(u); }
-    return recyclable(this).add(u,upShift).immutable();  }
-
+    if (0==shift) { return add(u); }
+    final int iShift = (shift>>>5);
+    final int bShift = (shift&0x1f);
+    // TODO: special case whole word shift?
+    final int rShift = 32-bShift;
+    final int n0 = hiInt();
+    final int n1 = u.hiInt()+iShift+1;
+    final int n = Math.max(n0,n1);
+    //final Natural us = u.shiftUp(shift);
+    NaturalLEMutable v = (NaturalLEMutable) recyclable(n);
+    // DANGER!!!!
+    final int[] vv = v.words();
+    int i=0;
+    for (;i<iShift;i++) { vv[i] = word(i); }
+    long carry = 0L;
+    int u0 = 0;
+    for (;i<n;i++) {
+      final int u1 = u.word(i-iShift);
+      final int ui = 
+        ((bShift==0) ? u1 : ((u1<<bShift)|(u0>>>rShift)));
+      u0 = u1;
+      final long sum = uword(i) + Numbers.unsigned(ui) + carry;
+      carry = (sum>>>32);
+      vv[i] = (int) sum; }
+    if (0L!=carry) { vv[i] = (int) carry; }
+    return v; }
+  //--------------------------------------------------------------
+  
   @Override
   public final Natural subtract (final long u,
                                  final int upShift) {
@@ -121,18 +159,70 @@ public final class NaturalLE implements Natural {
   @Override
   public final Natural one () { return ONE; }
 
+  //--------------------------------------------------------------
+  //  @Override
+  //  public final Natural add (final Natural u) {
+  //    assert isValid();
+  //    assert u.isValid();
+  //    return recyclable(this).add(u).immutable();  }
+
   @Override
   public final Natural add (final Natural u) {
     assert isValid();
     assert u.isValid();
-    return recyclable(this).add(u).immutable();  }
+    if (isZero()) { return u; }
+    if (u.isZero()) { return this; }
+    // TODO: optimize by summing over joint range
+    // and just carrying after that?
+    final int n = Math.max(hiInt(),u.hiInt());
+    NaturalLEMutable v = (NaturalLEMutable) recyclable(n+1);
+    // DANGER!!!
+    final int[] vv = v.words();
+    long sum = 0L;
+    long carry = 0L;
+    int i=0;
+    for (;i<n;i++) {
+      sum = uword(i) + u.uword(i) + carry;
+      carry = (sum>>>32);
+      vv[i] = (int) sum; }
+    if (0L!=carry) { vv[i] = (int) carry; }
+    return v.immutable(); }
+
+  //--------------------------------------------------------------
+
+  //  @Override
+  //  public final Natural subtract (final Natural u) {
+  //    assert isValid();
+  //    assert u.isValid();
+  //    assert compareTo(u)>=0;
+  //    return recyclable(this).subtract(u).immutable();  }
+
 
   @Override
   public final Natural subtract (final Natural u) {
     assert isValid();
     assert u.isValid();
-    assert compareTo(u)>=0;
-    return recyclable(this).subtract(u).immutable();  }
+    if (u.isZero()) { return this; }
+    assert 0<=compareTo(u);
+    final int n0 = hiInt();
+    final int n1 = u.hiInt();
+    assert n1<=n0;
+    final NaturalLEMutable v = (NaturalLEMutable) recyclable(n0);
+    // DANGER!!!
+    final int[] vv = v.words();
+    long borrow = 0L;
+    int i=0;
+    for (;i<n1;i++) {
+      final long dif = (uword(i)-u.uword(i)) + borrow;
+      borrow = (dif>>32);
+      vv[i] = (int) dif; }
+    assert n1==i;
+    for (;i<n0;i++) {
+      final long dif = uword(i) + borrow;
+      borrow = (dif>>32);
+      vv[i] = (int) dif; }
+    assert 0L==borrow;
+    return v.immutable(); }
 
   //--------------------------------------------------------------
   // Uints
