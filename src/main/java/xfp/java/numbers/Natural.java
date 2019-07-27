@@ -215,8 +215,10 @@ extends Uints<Natural>, Ringlike<Natural> {
     if (0L!=carry) { v = v.setWord(i,(int) carry); }
     return v; }
 
-  default Natural add (final long u,
-                       final int upShift) {
+//  Natural add (final long u,
+//               final int upShift);
+    default Natural add (final long u,
+                         final int upShift) {
     assert isValid();
     assert 0L<=u;
     assert 0<=upShift;
@@ -281,6 +283,8 @@ extends Uints<Natural>, Ringlike<Natural> {
     assert 0L==borrow : borrow;
     return v; }
 
+//  Natural subtract (final long u,
+//                    final int upShift);
   default Natural subtract (final long u,
                             final int upShift) {
     assert isValid();

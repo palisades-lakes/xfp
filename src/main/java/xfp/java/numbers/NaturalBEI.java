@@ -8,7 +8,7 @@ import java.util.Arrays;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-22
+ * @version 2019-07-27
  */
 
 public final class NaturalBEI //extends Number

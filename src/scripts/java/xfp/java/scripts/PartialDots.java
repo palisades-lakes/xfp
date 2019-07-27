@@ -31,8 +31,6 @@ public final class PartialDots {
     final Accumulator a = BigFloatAccumulator.make();
     assert a.isExact();
     for (int i=0;i<trys;i++) {
-      //Debug.println();
-      //Debug.println(g.name());
       final double[] x0 = (double[]) g.next();
       final double[] x1 = (double[]) g.next();
       final double[] z = a.partialDots(x0,x1); 

@@ -11,7 +11,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-23
+ * @version 2019-07-27
  */
 
 @SuppressWarnings("unchecked")
@@ -78,14 +78,22 @@ implements Ringlike<BigFloat> {
       final int c01 = t02.compareTo(t12);
       if (0==c01) { return valueOf(0L); }
       // t12 > t02
-      if (0 > c01) { return valueOf(p1,t12.subtract(t02),e2); }
+      if (0 > c01) { 
+        final Natural u = t12.subtract(t02);
+        return valueOf(p1,u,e2); }
       // t02 > t12
-      return valueOf(p0,t02.subtract(t12),e2); }
+      final Natural u = t02.subtract(t12);
+      return valueOf(p0,u,e2); }
 
     // same signs
-    if (e0<e1) { return valueOf(p0,t0.add(t1,e1-e0),e0);}
-    if (e0>e1) { return valueOf(p0,t1.add(t0,e0-e1),e1);}
-    return valueOf(p0,t0.add(t1),e0);}
+    if (e0<e1) { 
+      final Natural u = t0.add(t1,e1-e0);
+      return valueOf(p0,u,e0);}
+    if (e0>e1) { 
+      final Natural u = t1.add(t0,e0-e1);
+      return valueOf(p0,u,e1);}
+    final Natural u = t0.add(t1);
+    return valueOf(p0,u,e0);}
 
   //--------------------------------------------------------------
 
@@ -126,24 +134,24 @@ implements Ringlike<BigFloat> {
     return valueOf(p0,t,e); }
 
   private static final BigFloat
-  addSameExponent (final boolean n0,
+  addSameExponent (final boolean p0,
                    final Natural t0,
-                   final boolean n1,
+                   final boolean p1,
                    final long t1,
                    final int upShift,
                    final int e) {
-    if (n0 ^ n1) { // different signs
+    if (p0 ^ p1) { // different signs
       final int c = t0.compareTo(t1,upShift);
       if (0==c) { return valueOf(0L); }
       // t1 > t0
-      if (0 > c) {
+      if (0>c) {
         final Natural t = t0.subtractFrom(t1,upShift);
-        return valueOf(n1,t,e); }
+        return valueOf(p1,t,e); }
       // t0 > t1
       final Natural t = t0.subtract(t1,upShift);
-      return valueOf(n0,t,e); }
+      return valueOf(p0,t,e); }
     final Natural t = t0.add(t1,upShift);
-    return valueOf(n0,t,e); }
+    return valueOf(p0,t,e); }
 
   private static final int compare (final long m0,
                                     final long m1,

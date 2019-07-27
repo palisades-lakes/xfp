@@ -132,6 +132,13 @@ public interface Accumulator<T extends Accumulator> {
 
   //--------------------------------------------------------------
 
+  default void partialSums (final double[] x,
+                            final double[] s) {
+    final int n = x.length;
+    assert s.length==n;
+    clear();
+    for (int i=0;i<n;i++) { s[i] = add(x[i]).doubleValue(); } }
+
   default double[] partialSums (final double[] x) {
     final int n = x.length;
     final double[] s = new double[n];

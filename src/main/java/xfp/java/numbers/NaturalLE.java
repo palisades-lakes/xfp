@@ -8,7 +8,7 @@ import java.util.Arrays;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-26
+ * @version 2019-07-27
  */
 
 public final class NaturalLE implements Natural {
@@ -82,22 +82,9 @@ public final class NaturalLE implements Natural {
 
   //--------------------------------------------------------------
 
-  //  @Override
-  //  public final Natural add (final Natural u,
-  //                            final int upShift) {
-  //    assert isValid();
-  //    assert u.isValid();
-  //    assert 0<=upShift;
-  //    if (isZero()) { return u.shiftUp(upShift); }
-  //    if (u.isZero()) { return this; }
-  //    if (0==upShift) { return add(u); }
-  //    return recyclable(this).add(u,upShift).immutable();  }
-
   @Override
   public final Natural add (final Natural u,
                             final int shift) {
-    assert isValid();
-    assert u.isValid();
     assert 0<=shift;
     if (isZero()) { return u.shiftUp(shift); }
     if (u.isZero()) { return this; }
@@ -128,104 +115,156 @@ public final class NaturalLE implements Natural {
 
   //--------------------------------------------------------------
 
-  //  @Override
-  //  public final Natural add (final long u,
-  //                            final int upShift) {
-  //    assert isValid();
-  //    assert 0<=u;
-  //    assert 0<=upShift;
-  //    if (0L==u) { return this; }
-  //    if (0==upShift) { return add(u); }
-  //    return recyclable(this).add(u,upShift).immutable();  }
-
   @Override
   public final Natural add (final long u,
                             final int upShift) {
-    assert isValid();
     assert 0<=u;
     assert 0<=upShift;
-    if (isZero()) { return from(u,upShift); }
-    if (0L==u) { return this; }
-    if (0==upShift) { return add(u); }
+    //if (isZero()) { return from(u,upShift); }
+    //if (0L==u) { return this; }
+    //if (0==upShift) { return add(u); }
     final int iShift = (upShift>>>5);
     final int bShift = (upShift&0x1f);
-    final int[] uu = Ints.littleEndian(u,bShift);
+    final int hi = (int) (u>>>32);
+    final int lo = (int) u;
+    final int uu0,uu1,uu2;
+    if (0==bShift) { uu0=lo; uu1=hi; uu2=0; }
+    else {
+      final int rShift = 32-bShift;
+      uu0 = (lo<<bShift);
+      uu1 = ((hi<<bShift)|(lo>>>rShift));
+      uu2 =  (hi>>>rShift); }
     final int n0 = hiInt();
-    final int n1 = iShift+uu.length;
-    final int n = Math.max(n0,n1)+1;
-    //final Natural us = u.shiftUp(shift);
-    final int[] v = new int[n];
+    final int n = Math.max(n0,iShift+3);
+    final int[] v = new int[n+1];
     int i=0;
     for (;i<Math.min(iShift,n0);i++) { v[i] = word(i); }
     long carry = 0L;
     i=iShift;
-    for (;i<n1;i++) {
-      final long ui = Numbers.unsigned(uu[i-iShift]);
-      final long sum = (uword(i) + ui) + carry;
-      carry = (sum>>>32);
-      v[i] = (int) sum; }
+    final long u0 = Numbers.unsigned(uu0);
+    final long sum0 = (uword(i) + u0) + carry;
+    carry = (sum0>>>32);
+    v[i++] = (int) sum0; 
+    final long u1 = Numbers.unsigned(uu1);
+    final long sum1 = (uword(i) + u1) + carry;
+    carry = (sum1>>>32);
+    v[i++] = (int) sum1; 
+    final long u2 = Numbers.unsigned(uu2);
+    final long sum2 = (uword(i) + u2) + carry;
+    carry = (sum2>>>32);
+    v[i++] = (int) sum2; 
     for (;i<n;i++) {
       final long sum = uword(i) + carry;
       carry = (sum>>>32);
       v[i] = (int) sum; }
-    if (0L!=carry) { v[i] = (int) carry; }
+    v[n] = (int) carry; 
     return unsafe(v); }
 
-  //--------------------------------------------------------------
+//  @Override
+//  public final Natural add (final long u,
+//                            final int upShift) {
+//    assert 0<=u;
+//    assert 0<=upShift;
+//    //if (isZero()) { return from(u,upShift); }
+//    //if (0L==u) { return this; }
+//    //if (0==upShift) { return add(u); }
+//    final int iShift = (upShift>>>5);
+//    final int bShift = (upShift&0x1f);
+//    final int[] uu = Ints.littleEndian(u,bShift);
+//    
+//    final int n0 = hiInt();
+//    final int n1 = iShift+uu.length;
+//    final int n = Math.max(n0,n1);
+//    final int[] v = new int[n+1];
+//    int i=0;
+//    for (;i<Math.min(iShift,n0);i++) { v[i] = word(i); }
+//    long carry = 0L;
+//    i=iShift;
+//    for (;i<n1;i++) {
+//      final long ui = Numbers.unsigned(uu[i-iShift]);
+//      final long sum = (uword(i) + ui) + carry;
+//      carry = (sum>>>32);
+//      v[i] = (int) sum; }
+//    for (;i<n;i++) {
+//      final long sum = uword(i) + carry;
+//      carry = (sum>>>32);
+//      v[i] = (int) sum; }
+//    v[n] = (int) carry; 
+//    return unsafe(v); }
 
-  //  @Override
-  //  public final Natural subtract (final long u,
-  //                                 final int upShift) {
-  //    assert isValid();
-  //    assert 0<=u;
-  //    assert 0<=upShift;
-  //    if (0L==u) { return this; }
-  //    if (0==upShift) { return subtract(u); }
-  //    assert compareTo(u,upShift)>=0;
-  //    return recyclable(this).subtract(u,upShift).immutable();  }
+  //--------------------------------------------------------------
 
   @Override
   public final Natural subtract (final long u,
                                  final int upShift) {
-    assert isValid();
     assert 0L<=u;
     assert 0<=upShift;
-    if (0L==u) { return this; }
-    if (0==upShift) { return subtract(u); }
+    //if (0L==u) { return this; }
+    //if (0==upShift) { return subtract(u); }
     final int iShift = (upShift>>>5);
     final int bShift = (upShift&0x1f);
-    final int[] uu = Ints.littleEndian(u,bShift);
     final int n0 = hiInt();
-    final int n1 = iShift+uu.length;
-    assert n1<=n0;
-    //    final Natural us = copy().subtract(from(u,upShift));
-    final int[] v = new int[n0];
-    for (int i=0;i<iShift;i++) { 
-      v[i] = word(i); 
-      //      assert us.word(i) == v._words[i]; 
-    }
+    final int hi = (int) (u>>>32);
+    final int lo = (int) u;
+    final int uu0,uu1,uu2;
+    if (0==bShift) { uu0=lo; uu1=hi; uu2=0; }
+    else {
+      final int rShift = 32-bShift;
+      uu0 = (lo<<bShift);
+      uu1 = ((hi<<bShift)|(lo>>>rShift));
+      uu2 =  (hi>>>rShift); }
+    // extra elements in case uu1,uu2 are 0
+    final int[] v = new int[n0+2];
+    int i=0;
+    for (;i<iShift;i++) { v[i] = word(i); }
     long borrow = 0L;
-    for (int i=iShift;i<n1;i++) {
-      final long ui = Numbers.unsigned(uu[i-iShift]);
-      final long dif = (uword(i)-ui) + borrow;
-      borrow = (dif>>32);
-      v[i] = (int) dif; 
-      //      assert us.word(i) == v._words[i] :
-      //        "\ni=" + i
-      //        + "\niShift=" + iShift
-      //        + "\nborrow=" + Long.toHexString(borrow)
-      //        + "\nusi=" + Integer.toHexString(us.word(i))
-      //        + "\ni=" + Integer.toHexString(uu[i-iShift])
-      //        + "\nvi =" + Integer.toHexString(v.word(i)); 
-    }
-    for (int i=n1;i<n0;i++) {
+    i=iShift;
+    final long u0 = Numbers.unsigned(uu0);
+    final long dif0 = (uword(i)-u0) + borrow;
+    borrow = (dif0>>32);
+    v[i++] = (int) dif0; 
+    final long u1 = Numbers.unsigned(uu1);
+    final long dif1 = (uword(i)-u1) + borrow;
+    borrow = (dif1>>32);
+    v[i++] = (int) dif1; 
+    final long u2 = Numbers.unsigned(uu2);
+    final long dif2 = (uword(i)-u2) + borrow;
+    borrow = (dif2>>32);
+    v[i++] = (int) dif2; 
+    for (;i<n0;i++) {
       final long dif = uword(i) + borrow;
       borrow = (dif>>32);
-      v[i] = (int) dif; 
-      //assert us.word(i) == v._words[i]; 
-    }
-    assert 0L==borrow;
+      v[i] = (int) dif; }
+    //assert 0L==borrow;
     return unsafe(v); }
+  
+//  @Override
+//  public final Natural subtract (final long u,
+//                                 final int upShift) {
+//    assert 0L<=u;
+//    assert 0<=upShift;
+//    //if (0L==u) { return this; }
+//    //if (0==upShift) { return subtract(u); }
+//    final int iShift = (upShift>>>5);
+//    final int bShift = (upShift&0x1f);
+//    final int[] uu = Ints.littleEndian(u,bShift);
+//    final int n0 = hiInt();
+//    final int n1 = iShift+uu.length;
+//    //assert n1<=n0;
+//    final int[] v = new int[n0];
+//    for (int i=0;i<iShift;i++) { v[i] = word(i); }
+//    long borrow = 0L;
+//    for (int i=iShift;i<n1;i++) {
+//      final long ui = Numbers.unsigned(uu[i-iShift]);
+//      final long dif = (uword(i)-ui) + borrow;
+//      borrow = (dif>>32);
+//      v[i] = (int) dif; }
+//    for (int i=n1;i<n0;i++) {
+//      final long dif = uword(i) + borrow;
+//      borrow = (dif>>32);
+//      v[i] = (int) dif; }
+//    //assert 0L==borrow;
+//    return unsafe(v); }
   
   //--------------------------------------------------------------
   // Ringlike
@@ -237,16 +276,9 @@ public final class NaturalLE implements Natural {
   public final Natural one () { return ONE; }
 
   //--------------------------------------------------------------
-  //  @Override
-  //  public final Natural add (final Natural u) {
-  //    assert isValid();
-  //    assert u.isValid();
-  //    return recyclable(this).add(u).immutable();  }
 
   @Override
   public final Natural add (final Natural u) {
-    assert isValid();
-    assert u.isValid();
     if (isZero()) { return u; }
     if (u.isZero()) { return this; }
     // TODO: optimize by summing over joint range
@@ -265,18 +297,8 @@ public final class NaturalLE implements Natural {
 
   //--------------------------------------------------------------
 
-  //  @Override
-  //  public final Natural subtract (final Natural u) {
-  //    assert isValid();
-  //    assert u.isValid();
-  //    assert compareTo(u)>=0;
-  //    return recyclable(this).subtract(u).immutable();  }
-
-
   @Override
   public final Natural subtract (final Natural u) {
-    assert isValid();
-    assert u.isValid();
     if (u.isZero()) { return this; }
     assert 0<=compareTo(u);
     final int n0 = hiInt();
@@ -342,23 +364,78 @@ public final class NaturalLE implements Natural {
     assert 0<=u;
     return valueOf(u);  }
 
+  //--------------------------------------------------------------
+
   @Override
   public final Natural shiftDownWords (final int iShift) {
+    assert isValid();
     assert 0<=iShift;
-    return recyclable(this).shiftDownWords(iShift).immutable(); }
+    if (0==iShift) { return this; }
+    if (isZero()) { return this; }
+    final int n0 = hiInt();
+    final int n1 = n0-iShift;
+    if (0>=n1) { return empty(); }
+    final int[] u = new int[n1];
+    for (int i=0;i<n1;i++) { 
+      u[i] = word(i+iShift); }
+    return unsafe(u); }
 
   @Override
   public final Natural shiftDown (final int shift) {
-    return recyclable(this).shiftDown(shift).immutable(); }
+    assert isValid();
+    assert 0<=shift;
+    if (shift==0) { return this; }
+    if (isZero()) { return this; }
+    final int iShift = (shift>>>5);
+    final int n0 = hiInt();
+    final int n1 = n0-iShift;
+    if (0>=n1) { return empty(); }
+    final int bShift = (shift & 0x1f);
+    if (0==bShift) { return shiftDownWords(iShift); }
+    final int[] u = new int[n1];
+    final int rShift = 32-bShift;
+    int w0 = word(iShift);
+    for (int j=0;j<n1;j++) { 
+      final int w1 = word(j+iShift+1);
+      final int w = ((w1<<rShift) | (w0>>>bShift));
+      w0 = w1;
+      u[j] = w; }
+    return unsafe(u); }
+
+  //--------------------------------------------------------------
 
   @Override
   public final Natural shiftUpWords (final int iShift) {
+    assert isValid();
     assert 0<=iShift;
-    return recyclable(this).shiftUpWords(iShift).immutable(); }
+    if (0==iShift) { return this; }
+    if (isZero()) { return this; }
+    final int n = hiInt();
+    if (0==n) { return this; }
+    final int[] u = new int[n+iShift];
+    for (int i=0;i<n;i++) { u[i+iShift] = word(i); }
+    return unsafe(u); }
 
   @Override
   public final Natural shiftUp (final int shift) {
-    return recyclable(this).shiftUp(shift).immutable(); }
+    assert 0<=shift;
+    if (shift==0) { return this; }
+    if (isZero()) { return this; }
+    final int iShift = (shift>>>5);
+    final int bShift = (shift&0x1f);
+    if (0==bShift) { return shiftUpWords(iShift); }
+    final int rShift = 32-bShift;
+    final int n0 = hiInt();
+    final int n1 = n0+iShift;
+    final int[] u = new int[n1+1];
+    int w0 = 0;
+    for (int i=0;i<n0;i++) { 
+      final int w1 = word(i);
+      final int w = ((w1<<bShift) | (w0>>>rShift));
+      w0 = w1;
+      u[i+iShift] = w; }
+    u[n1] = (w0>>>rShift);
+    return unsafe(u); }
 
   //--------------------------------------------------------------
   // Transience

@@ -8,7 +8,7 @@ import java.util.Arrays;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-26
+ * @version 2019-07-27
  */
 
 public final class NaturalLEMutable implements Natural {
@@ -309,10 +309,10 @@ public final class NaturalLEMutable implements Natural {
     final int n0 = hiInt();
     final int n1 = n0-iShift;
     if (0>=n1) { return empty(); }
-    NaturalLEMutable u = make(n1);
+    final int[] u = new int[n1];
     for (int i=0;i<n1;i++) { 
-      u._words[i] = word(i+iShift); }
-    return u; }
+      u[i] = word(i+iShift); }
+    return unsafe(u); }
 
   @Override
   public final Natural shiftDown (final int shift) {
@@ -326,15 +326,15 @@ public final class NaturalLEMutable implements Natural {
     if (0>=n1) { return empty(); }
     final int bShift = (shift & 0x1f);
     if (0==bShift) { return shiftDownWords(iShift); }
-    NaturalLEMutable u = make(n1);
+    final int[] u = new int[n1];
     final int rShift = 32-bShift;
     int w0 = word(iShift);
     for (int j=0;j<n1;j++) { 
       final int w1 = word(j+iShift+1);
       final int w = ((w1<<rShift) | (w0>>>bShift));
       w0 = w1;
-      u._words[j] = w; }
-    return u; }
+      u[j] = w; }
+    return unsafe(u); }
 
   //--------------------------------------------------------------
 
@@ -346,9 +346,9 @@ public final class NaturalLEMutable implements Natural {
     if (isZero()) { return this; }
     final int n = hiInt();
     if (0==n) { return this; }
-    NaturalLEMutable u = make(n+iShift);
-    for (int i=0;i<n;i++) { u._words[i+iShift] = word(i); }
-    return u; }
+    final int[] u = new int[n+iShift];
+    for (int i=0;i<n;i++) { u[i+iShift] = word(i); }
+    return unsafe(u); }
 
   @Override
   public final Natural shiftUp (final int shift) {
@@ -361,15 +361,15 @@ public final class NaturalLEMutable implements Natural {
     final int rShift = 32-bShift;
     final int n0 = hiInt();
     final int n1 = n0+iShift;
-    NaturalLEMutable u = make(n1+1);
+    final int[] u = new int[n1+1];
     int w0 = 0;
     for (int i=0;i<n0;i++) { 
       final int w1 = word(i);
       final int w = ((w1<<bShift) | (w0>>>rShift));
       w0 = w1;
-      u._words[i+iShift] = w; }
-    u._words[n1] = (w0>>>rShift);
-    return u; }
+      u[i+iShift] = w; }
+    u[n1] = (w0>>>rShift);
+    return unsafe(u); }
 
   //--------------------------------------------------------------
   // Object methods
