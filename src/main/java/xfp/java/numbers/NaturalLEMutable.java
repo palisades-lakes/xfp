@@ -167,32 +167,18 @@ public final class NaturalLEMutable implements Natural {
     final int n0 = hiInt();
     final int n1 = iShift+uu.length;
     assert n1<=n0;
-    //    final Natural us = copy().subtract(from(u,upShift));
     final int[] v = new int[n0];
-    for (int i=0;i<iShift;i++) { 
-      v[i] = word(i); 
-      //      assert us.word(i) == v._words[i]; 
-    }
+    for (int i=0;i<iShift;i++) { v[i] = word(i); }
     long borrow = 0L;
     for (int i=iShift;i<n1;i++) {
       final long ui = Numbers.unsigned(uu[i-iShift]);
       final long dif = (uword(i)-ui) + borrow;
       borrow = (dif>>32);
-      v[i] = (int) dif; 
-      //      assert us.word(i) == v._words[i] :
-      //        "\ni=" + i
-      //        + "\niShift=" + iShift
-      //        + "\nborrow=" + Long.toHexString(borrow)
-      //        + "\nusi=" + Integer.toHexString(us.word(i))
-      //        + "\ni=" + Integer.toHexString(uu[i-iShift])
-      //        + "\nvi =" + Integer.toHexString(v.word(i)); 
-    }
+      v[i] = (int) dif; }
     for (int i=n1;i<n0;i++) {
       final long dif = uword(i) + borrow;
       borrow = (dif>>32);
-      v[i] = (int) dif; 
-      //assert us.word(i) == v._words[i]; 
-    }
+      v[i] = (int) dif; }
     assert 0L==borrow;
     return unsafe(v); }
 
