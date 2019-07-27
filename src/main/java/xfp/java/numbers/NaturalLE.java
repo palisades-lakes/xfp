@@ -81,17 +81,17 @@ public final class NaturalLE implements Natural {
     return unsafe(new int[] {m0,m1,m2,m3,}); }
 
   //--------------------------------------------------------------
-  
-//  @Override
-//  public final Natural add (final Natural u,
-//                            final int upShift) {
-//    assert isValid();
-//    assert u.isValid();
-//    assert 0<=upShift;
-//    if (isZero()) { return u.shiftUp(upShift); }
-//    if (u.isZero()) { return this; }
-//    if (0==upShift) { return add(u); }
-//    return recyclable(this).add(u,upShift).immutable();  }
+
+  //  @Override
+  //  public final Natural add (final Natural u,
+  //                            final int upShift) {
+  //    assert isValid();
+  //    assert u.isValid();
+  //    assert 0<=upShift;
+  //    if (isZero()) { return u.shiftUp(upShift); }
+  //    if (u.isZero()) { return this; }
+  //    if (0==upShift) { return add(u); }
+  //    return recyclable(this).add(u,upShift).immutable();  }
 
   @Override
   public final Natural add (final Natural u,
@@ -125,19 +125,18 @@ public final class NaturalLE implements Natural {
       v[i] = (int) sum; }
     if (0L!=carry) { v[i] = (int) carry; }
     return unsafe(v); }
-  
+
   //--------------------------------------------------------------
-  
-  @Override
-  public final Natural subtract (final long u,
-                                 final int upShift) {
-    assert isValid();
-    assert 0<=u;
-    assert 0<=upShift;
-    if (0L==u) { return this; }
-    if (0==upShift) { return subtract(u); }
-    assert compareTo(u,upShift)>=0;
-    return recyclable(this).subtract(u,upShift).immutable();  }
+
+  //  @Override
+  //  public final Natural add (final long u,
+  //                            final int upShift) {
+  //    assert isValid();
+  //    assert 0<=u;
+  //    assert 0<=upShift;
+  //    if (0L==u) { return this; }
+  //    if (0==upShift) { return add(u); }
+  //    return recyclable(this).add(u,upShift).immutable();  }
 
   @Override
   public final Natural add (final long u,
@@ -145,10 +144,89 @@ public final class NaturalLE implements Natural {
     assert isValid();
     assert 0<=u;
     assert 0<=upShift;
+    if (isZero()) { return from(u,upShift); }
     if (0L==u) { return this; }
     if (0==upShift) { return add(u); }
-    return recyclable(this).add(u,upShift).immutable();  }
+    final int iShift = (upShift>>>5);
+    final int bShift = (upShift&0x1f);
+    final int[] uu = Ints.littleEndian(u,bShift);
+    final int n0 = hiInt();
+    final int n1 = iShift+uu.length;
+    final int n = Math.max(n0,n1)+1;
+    //final Natural us = u.shiftUp(shift);
+    final int[] v = new int[n];
+    int i=0;
+    for (;i<Math.min(iShift,n0);i++) { v[i] = word(i); }
+    long carry = 0L;
+    i=iShift;
+    for (;i<n1;i++) {
+      final long ui = Numbers.unsigned(uu[i-iShift]);
+      final long sum = (uword(i) + ui) + carry;
+      carry = (sum>>>32);
+      v[i] = (int) sum; }
+    for (;i<n;i++) {
+      final long sum = uword(i) + carry;
+      carry = (sum>>>32);
+      v[i] = (int) sum; }
+    if (0L!=carry) { v[i] = (int) carry; }
+    return unsafe(v); }
 
+  //--------------------------------------------------------------
+
+  //  @Override
+  //  public final Natural subtract (final long u,
+  //                                 final int upShift) {
+  //    assert isValid();
+  //    assert 0<=u;
+  //    assert 0<=upShift;
+  //    if (0L==u) { return this; }
+  //    if (0==upShift) { return subtract(u); }
+  //    assert compareTo(u,upShift)>=0;
+  //    return recyclable(this).subtract(u,upShift).immutable();  }
+
+  @Override
+  public final Natural subtract (final long u,
+                                 final int upShift) {
+    assert isValid();
+    assert 0L<=u;
+    assert 0<=upShift;
+    if (0L==u) { return this; }
+    if (0==upShift) { return subtract(u); }
+    final int iShift = (upShift>>>5);
+    final int bShift = (upShift&0x1f);
+    final int[] uu = Ints.littleEndian(u,bShift);
+    final int n0 = hiInt();
+    final int n1 = iShift+uu.length;
+    assert n1<=n0;
+    //    final Natural us = copy().subtract(from(u,upShift));
+    final int[] v = new int[n0];
+    for (int i=0;i<iShift;i++) { 
+      v[i] = word(i); 
+      //      assert us.word(i) == v._words[i]; 
+    }
+    long borrow = 0L;
+    for (int i=iShift;i<n1;i++) {
+      final long ui = Numbers.unsigned(uu[i-iShift]);
+      final long dif = (uword(i)-ui) + borrow;
+      borrow = (dif>>32);
+      v[i] = (int) dif; 
+      //      assert us.word(i) == v._words[i] :
+      //        "\ni=" + i
+      //        + "\niShift=" + iShift
+      //        + "\nborrow=" + Long.toHexString(borrow)
+      //        + "\nusi=" + Integer.toHexString(us.word(i))
+      //        + "\ni=" + Integer.toHexString(uu[i-iShift])
+      //        + "\nvi =" + Integer.toHexString(v.word(i)); 
+    }
+    for (int i=n1;i<n0;i++) {
+      final long dif = uword(i) + borrow;
+      borrow = (dif>>32);
+      v[i] = (int) dif; 
+      //assert us.word(i) == v._words[i]; 
+    }
+    assert 0L==borrow;
+    return unsafe(v); }
+  
   //--------------------------------------------------------------
   // Ringlike
   //--------------------------------------------------------------
