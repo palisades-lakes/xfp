@@ -110,11 +110,9 @@ public final class NaturalLE implements Natural {
     final int n1 = u.hiInt()+iShift+1;
     final int n = Math.max(n0,n1);
     //final Natural us = u.shiftUp(shift);
-    NaturalLEMutable v = (NaturalLEMutable) recyclable(n);
-    // DANGER!!!!
-    final int[] vv = v.words();
+    final int[] v = new int[n];
     int i=0;
-    for (;i<iShift;i++) { vv[i] = word(i); }
+    for (;i<iShift;i++) { v[i] = word(i); }
     long carry = 0L;
     int u0 = 0;
     for (;i<n;i++) {
@@ -124,9 +122,10 @@ public final class NaturalLE implements Natural {
       u0 = u1;
       final long sum = uword(i) + Numbers.unsigned(ui) + carry;
       carry = (sum>>>32);
-      vv[i] = (int) sum; }
-    if (0L!=carry) { vv[i] = (int) carry; }
-    return v; }
+      v[i] = (int) sum; }
+    if (0L!=carry) { v[i] = (int) carry; }
+    return unsafe(v); }
+  
   //--------------------------------------------------------------
   
   @Override
@@ -175,18 +174,16 @@ public final class NaturalLE implements Natural {
     // TODO: optimize by summing over joint range
     // and just carrying after that?
     final int n = Math.max(hiInt(),u.hiInt());
-    NaturalLEMutable v = (NaturalLEMutable) recyclable(n+1);
-    // DANGER!!!
-    final int[] vv = v.words();
+    final int[] v = new int[n+1];
     long sum = 0L;
     long carry = 0L;
     int i=0;
     for (;i<n;i++) {
       sum = uword(i) + u.uword(i) + carry;
       carry = (sum>>>32);
-      vv[i] = (int) sum; }
-    if (0L!=carry) { vv[i] = (int) carry; }
-    return v.immutable(); }
+      v[i] = (int) sum; }
+    if (0L!=carry) { v[i] = (int) carry; }
+    return unsafe(v); }
 
   //--------------------------------------------------------------
 
@@ -207,22 +204,20 @@ public final class NaturalLE implements Natural {
     final int n0 = hiInt();
     final int n1 = u.hiInt();
     assert n1<=n0;
-    final NaturalLEMutable v = (NaturalLEMutable) recyclable(n0);
-    // DANGER!!!
-    final int[] vv = v.words();
+    final int[] v = new int[n0];
     long borrow = 0L;
     int i=0;
     for (;i<n1;i++) {
       final long dif = (uword(i)-u.uword(i)) + borrow;
       borrow = (dif>>32);
-      vv[i] = (int) dif; }
+      v[i] = (int) dif; }
     assert n1==i;
     for (;i<n0;i++) {
       final long dif = uword(i) + borrow;
       borrow = (dif>>32);
-      vv[i] = (int) dif; }
+      v[i] = (int) dif; }
     assert 0L==borrow;
-    return v.immutable(); }
+    return unsafe(v); }
 
   //--------------------------------------------------------------
   // Uints
