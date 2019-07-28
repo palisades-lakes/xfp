@@ -86,9 +86,9 @@ public final class NaturalLE implements Natural {
   public final Natural add (final Natural u,
                             final int shift) {
     assert 0<=shift;
-    if (isZero()) { return u.shiftUp(shift); }
-    if (u.isZero()) { return this; }
-    if (0==shift) { return add(u); }
+    //if (isZero()) { return u.shiftUp(shift); }
+    //if (u.isZero()) { return this; }
+    //if (0==shift) { return add(u); }
     final int iShift = (shift>>>5);
     final int bShift = (shift&0x1f);
     // TODO: special case whole word shift?
@@ -96,12 +96,12 @@ public final class NaturalLE implements Natural {
     final int n0 = hiInt();
     final int n1 = u.hiInt()+iShift+1;
     final int n = Math.max(n0,n1);
-    //final Natural us = u.shiftUp(shift);
     final int[] v = new int[n];
     int i=0;
     for (;i<iShift;i++) { v[i] = word(i); }
     long carry = 0L;
     int u0 = 0;
+    // TODO: separate cases where one term's words are known zero
     for (;i<n;i++) {
       final int u1 = u.word(i-iShift);
       final int ui = 
@@ -299,11 +299,11 @@ public final class NaturalLE implements Natural {
 
   @Override
   public final Natural subtract (final Natural u) {
-    if (u.isZero()) { return this; }
+    //if (u.isZero()) { return this; }
     assert 0<=compareTo(u);
     final int n0 = hiInt();
     final int n1 = u.hiInt();
-    assert n1<=n0;
+    //assert n1<=n0;
     final int[] v = new int[n0];
     long borrow = 0L;
     int i=0;
@@ -311,12 +311,12 @@ public final class NaturalLE implements Natural {
       final long dif = (uword(i)-u.uword(i)) + borrow;
       borrow = (dif>>32);
       v[i] = (int) dif; }
-    assert n1==i;
+    //assert n1==i;
     for (;i<n0;i++) {
       final long dif = uword(i) + borrow;
       borrow = (dif>>32);
       v[i] = (int) dif; }
-    assert 0L==borrow;
+    //assert 0L==borrow;
     return unsafe(v); }
 
   //--------------------------------------------------------------
