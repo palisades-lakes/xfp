@@ -6,7 +6,7 @@ import xfp.java.numbers.BigFloat;
  * accumulator.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-23
+ * @version 2019-07-28
  */
 public final class BigFloatAccumulator
 extends ExactAccumulator<BigFloatAccumulator> {

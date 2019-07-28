@@ -444,22 +444,46 @@ implements Ringlike<BigFloat> {
 
   //--------------------------------------------------------------
 
-  public final BigFloat
-  addL2 (final double z0,
-         final double z1) {
-    assert Double.isFinite(z0);
-    assert Double.isFinite(z1);
-    final BigFloat dz = subtract(z0,z1);
-    final Natural t2 = dz.significand().square();
-    final int e2 = 2*dz.exponent();
-    return add(
-      nonNegative(),
-      significand(),
-      exponent(),
-      true,
-      t2,
-      e2); }
+//  public final BigFloat
+//  addL2 (final double z0,
+//         final double z1) {
+//    assert Double.isFinite(z0);
+//    assert Double.isFinite(z1);
+//    final BigFloat dz = subtract(z0,z1);
+//    final Natural t2 = dz.significand().square();
+//    final int e2 = 2*dz.exponent();
+//    return add(
+//      nonNegative(),
+//      significand(),
+//      exponent(),
+//      true,
+//      t2,
+//      e2); }
 
+  public final BigFloat
+  addL2 (final double x0,
+         final double x1) {
+    assert Double.isFinite(x0);
+    assert Double.isFinite(x1);
+    // preserve exactness using twoAdd and twoMul to convert to 8
+    // adds.
+    // twoAdd (twoSub):
+    final double s = x0-x1;
+    final double z = s-x0;
+    final double e = (x0-(s-z)) + ((-x1)-z);
+    // twoMul:
+    final double ss = s*s;
+    final double ess = Math.fma(s,s,-ss);
+    // twoMul:
+    final double es = e*s;
+    final double ees = Math.fma(e,s,-es);
+    // twoMul:
+    final double ee = e*e;
+    final double eee = Math.fma(e,e,-ee);
+    return
+      add(ss).add(ess).add(es).add(es)
+      .add(ees).add(ees).add(ee).add(eee); }
+  
   //--------------------------------------------------------------
 
   public final BigFloat
@@ -736,7 +760,6 @@ implements Ringlike<BigFloat> {
     else {
       significand = t0.shiftDown(e1);
       exponent = Math.addExact(e0,e1); }
-    //assert significand.isImmutable();
     _significand = significand;
     _exponent = exponent; }
 
@@ -745,14 +768,12 @@ implements Ringlike<BigFloat> {
   public static final BigFloat valueOf (final boolean nonNegative,
                                         final Natural t,
                                         final int e) {
-    if (t.isZero()) { 
-      return new BigFloat(true,Natural.get(0L),0); }
     return new BigFloat(nonNegative,t,e); }
 
   public static final BigFloat valueOf (final long t,
                                         final int e) {
     if (0L==t) { return valueOf(0L); }
-    if (0L < t) {
+    if (0L<t) {
       return valueOf(true,Natural.get(t),e); }
     return valueOf(false,Natural.get(-t),e); }
 

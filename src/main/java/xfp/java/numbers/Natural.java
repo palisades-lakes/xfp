@@ -348,7 +348,7 @@ extends Uints<Natural>, Ringlike<Natural> {
 
   @Override
   default Natural square () {
-    assert isValid();
+    //assert isValid();
     return NaturalMultiply.square(this); }
 
   //--------------------------------------------------------------

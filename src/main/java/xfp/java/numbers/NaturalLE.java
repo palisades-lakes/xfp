@@ -139,58 +139,26 @@ public final class NaturalLE implements Natural {
     final int[] v = new int[n+1];
     int i=0;
     for (;i<Math.min(iShift,n0);i++) { v[i] = word(i); }
-    long carry = 0L;
     i=iShift;
-    final long u0 = Numbers.unsigned(uu0);
-    final long sum0 = (uword(i) + u0) + carry;
-    carry = (sum0>>>32);
+    final long sum0 = uword(i) + Numbers.unsigned(uu0);
+    long carry = (sum0>>>32);
     v[i++] = (int) sum0; 
-    final long u1 = Numbers.unsigned(uu1);
-    final long sum1 = (uword(i) + u1) + carry;
+    final long u1 = uword(i) + Numbers.unsigned(uu1);
+    final long sum1 = u1 + carry;
     carry = (sum1>>>32);
     v[i++] = (int) sum1; 
-    final long u2 = Numbers.unsigned(uu2);
-    final long sum2 = (uword(i) + u2) + carry;
+    final long u2 = uword(i) + Numbers.unsigned(uu2);
+    final long sum2 = u2 + carry;
     carry = (sum2>>>32);
     v[i++] = (int) sum2; 
     for (;i<n;i++) {
+      if (0L==carry) { break; }
       final long sum = uword(i) + carry;
       carry = (sum>>>32);
       v[i] = (int) sum; }
-    v[n] = (int) carry; 
+    for (;i<n;i++) { v[i] = word(i); }
+    if (0L!=carry) { v[n] = (int) carry; }
     return unsafe(v); }
-
-//  @Override
-//  public final Natural add (final long u,
-//                            final int upShift) {
-//    assert 0<=u;
-//    assert 0<=upShift;
-//    //if (isZero()) { return from(u,upShift); }
-//    //if (0L==u) { return this; }
-//    //if (0==upShift) { return add(u); }
-//    final int iShift = (upShift>>>5);
-//    final int bShift = (upShift&0x1f);
-//    final int[] uu = Ints.littleEndian(u,bShift);
-//    
-//    final int n0 = hiInt();
-//    final int n1 = iShift+uu.length;
-//    final int n = Math.max(n0,n1);
-//    final int[] v = new int[n+1];
-//    int i=0;
-//    for (;i<Math.min(iShift,n0);i++) { v[i] = word(i); }
-//    long carry = 0L;
-//    i=iShift;
-//    for (;i<n1;i++) {
-//      final long ui = Numbers.unsigned(uu[i-iShift]);
-//      final long sum = (uword(i) + ui) + carry;
-//      carry = (sum>>>32);
-//      v[i] = (int) sum; }
-//    for (;i<n;i++) {
-//      final long sum = uword(i) + carry;
-//      carry = (sum>>>32);
-//      v[i] = (int) sum; }
-//    v[n] = (int) carry; 
-//    return unsafe(v); }
 
   //--------------------------------------------------------------
 
@@ -217,54 +185,25 @@ public final class NaturalLE implements Natural {
     final int[] v = new int[n0+2];
     int i=0;
     for (;i<iShift;i++) { v[i] = word(i); }
-    long borrow = 0L;
     i=iShift;
-    final long u0 = Numbers.unsigned(uu0);
-    final long dif0 = (uword(i)-u0) + borrow;
-    borrow = (dif0>>32);
+    final long dif0 = uword(i)-Numbers.unsigned(uu0);
+    long borrow = (dif0>>32);
     v[i++] = (int) dif0; 
-    final long u1 = Numbers.unsigned(uu1);
-    final long dif1 = (uword(i)-u1) + borrow;
+    final long u1 = uword(i)-Numbers.unsigned(uu1);
+    final long dif1 = u1 + borrow;
     borrow = (dif1>>32);
     v[i++] = (int) dif1; 
-    final long u2 = Numbers.unsigned(uu2);
-    final long dif2 = (uword(i)-u2) + borrow;
+    final long u2 = uword(i)-Numbers.unsigned(uu2);
+    final long dif2 = u2 + borrow;
     borrow = (dif2>>32);
     v[i++] = (int) dif2; 
     for (;i<n0;i++) {
+      if (0L==borrow) { break; }
       final long dif = uword(i) + borrow;
       borrow = (dif>>32);
       v[i] = (int) dif; }
-    //assert 0L==borrow;
+    for (;i<n0;i++) { v[i] = word(i); }
     return unsafe(v); }
-  
-//  @Override
-//  public final Natural subtract (final long u,
-//                                 final int upShift) {
-//    assert 0L<=u;
-//    assert 0<=upShift;
-//    //if (0L==u) { return this; }
-//    //if (0==upShift) { return subtract(u); }
-//    final int iShift = (upShift>>>5);
-//    final int bShift = (upShift&0x1f);
-//    final int[] uu = Ints.littleEndian(u,bShift);
-//    final int n0 = hiInt();
-//    final int n1 = iShift+uu.length;
-//    //assert n1<=n0;
-//    final int[] v = new int[n0];
-//    for (int i=0;i<iShift;i++) { v[i] = word(i); }
-//    long borrow = 0L;
-//    for (int i=iShift;i<n1;i++) {
-//      final long ui = Numbers.unsigned(uu[i-iShift]);
-//      final long dif = (uword(i)-ui) + borrow;
-//      borrow = (dif>>32);
-//      v[i] = (int) dif; }
-//    for (int i=n1;i<n0;i++) {
-//      final long dif = uword(i) + borrow;
-//      borrow = (dif>>32);
-//      v[i] = (int) dif; }
-//    //assert 0L==borrow;
-//    return unsafe(v); }
   
   //--------------------------------------------------------------
   // Ringlike
@@ -292,7 +231,7 @@ public final class NaturalLE implements Natural {
       sum = uword(i) + u.uword(i) + carry;
       carry = (sum>>>32);
       v[i] = (int) sum; }
-    if (0L!=carry) { v[i] = (int) carry; }
+    if (0L!=carry) { v[n] = (int) carry; }
     return unsafe(v); }
 
   //--------------------------------------------------------------
@@ -509,9 +448,8 @@ public final class NaturalLE implements Natural {
   /** Copy <code>words</code>. 
    *  */
   public static final NaturalLE make (final int[] words) {
-    //    final int end = Ints.hiInt(words);
-    //    return unsafe(Arrays.copyOf(words,end)); }
-    return unsafe(Arrays.copyOf(words,words.length)); }
+    final int end = Ints.hiInt(words);
+    return unsafe(Arrays.copyOf(words,end)); }
 
   //--------------------------------------------------------------
   /** From a big endian {@code byte[]}, as produced by
