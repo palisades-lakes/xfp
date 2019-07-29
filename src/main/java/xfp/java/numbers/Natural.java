@@ -15,7 +15,7 @@ import xfp.java.exceptions.Exceptions;
  * TODO: utilities class to hide private stuff?
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-26
+ * @version 2019-07-28
  */
 
 @SuppressWarnings("unchecked")
@@ -402,7 +402,7 @@ extends Uints<Natural>, Ringlike<Natural> {
     return multiply(from(u,upShift)); }
 
   default Natural product (final long t0,
-                               final long t1) {
+                           final long t1) {
     assert isValid();
     assert 0L<=t0;
     assert 0L<=t1;

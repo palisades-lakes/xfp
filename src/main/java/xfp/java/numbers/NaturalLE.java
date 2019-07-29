@@ -38,8 +38,8 @@ public final class NaturalLE implements Natural {
 
   @Override
   public final Natural square (final long t) {
-    assert isValid();
-    assert 0L<=t;
+    //assert isValid();
+    //assert 0L<=t;
     final long hi = Numbers.hiWord(t);
     final long lo = Numbers.loWord(t);
     final long lolo = lo*lo;
@@ -59,9 +59,9 @@ public final class NaturalLE implements Natural {
   @Override
   public final Natural product (final long t0,
                                 final long t1) {
-    assert isValid();
-    assert 0L<=t0;
-    assert 0L<=t1;
+    //assert isValid();
+    //assert 0L<=t0;
+    //assert 0L<=t1;
     final long hi0 = Numbers.hiWord(t0);
     final long lo0 = Numbers.loWord(t0);
     final long hi1 = Numbers.hiWord(t1);
@@ -85,7 +85,7 @@ public final class NaturalLE implements Natural {
   @Override
   public final Natural add (final Natural u,
                             final int shift) {
-    assert 0<=shift;
+    //assert 0<=shift;
     //if (isZero()) { return u.shiftUp(shift); }
     //if (u.isZero()) { return this; }
     //if (0==shift) { return add(u); }
@@ -118,8 +118,8 @@ public final class NaturalLE implements Natural {
   @Override
   public final Natural add (final long u,
                             final int upShift) {
-    assert 0<=u;
-    assert 0<=upShift;
+    //assert 0<=u;
+    //assert 0<=upShift;
     //if (isZero()) { return from(u,upShift); }
     //if (0L==u) { return this; }
     //if (0==upShift) { return add(u); }
@@ -165,8 +165,8 @@ public final class NaturalLE implements Natural {
   @Override
   public final Natural subtract (final long u,
                                  final int upShift) {
-    assert 0L<=u;
-    assert 0<=upShift;
+    //assert 0L<=u;
+    //assert 0<=upShift;
     //if (0L==u) { return this; }
     //if (0==upShift) { return subtract(u); }
     final int iShift = (upShift>>>5);
@@ -239,7 +239,7 @@ public final class NaturalLE implements Natural {
   @Override
   public final Natural subtract (final Natural u) {
     //if (u.isZero()) { return this; }
-    assert 0<=compareTo(u);
+    //assert 0<=compareTo(u);
     final int n0 = hiInt();
     final int n1 = u.hiInt();
     //assert n1<=n0;
@@ -269,24 +269,23 @@ public final class NaturalLE implements Natural {
 
   @Override
   public final int word (final int i) {
-    assert 0<=i : "Negative index: " + i;
+    //assert 0<=i : "Negative index: " + i;
     if (endWord()<=i) { return 0; }
     return words()[i]; }
 
   @Override
   public final Natural setWord (final int i,
                                 final int w) {
-    assert 0<=i;
+    //assert 0<=i;
     final int n = Math.max(i+1,hiInt());
     final  int[] u = Arrays.copyOf(words(),n);
     u[i] = w;
     return unsafe(u); }
 
   /** Singleton.<br>
-   * TODO: Better to use a new array?
    */
-  private static final NaturalLE ZERO = 
-    new NaturalLE(Ints.EMPTY,0); 
+  public static final NaturalLE ZERO = 
+    new NaturalLE(new int[0],0); 
 
   @Override
   public final Natural empty () { return ZERO; }
@@ -300,15 +299,15 @@ public final class NaturalLE implements Natural {
   /** <code>0<=u</code>.*/
   @Override
   public final Natural from (final long u) {
-    assert 0<=u;
+    //assert 0<=u;
     return valueOf(u);  }
 
   //--------------------------------------------------------------
 
   @Override
   public final Natural shiftDownWords (final int iShift) {
-    assert isValid();
-    assert 0<=iShift;
+    //assert isValid();
+    //assert 0<=iShift;
     if (0==iShift) { return this; }
     if (isZero()) { return this; }
     final int n0 = hiInt();
@@ -321,8 +320,8 @@ public final class NaturalLE implements Natural {
 
   @Override
   public final Natural shiftDown (final int shift) {
-    assert isValid();
-    assert 0<=shift;
+    //assert isValid();
+    //assert 0<=shift;
     if (shift==0) { return this; }
     if (isZero()) { return this; }
     final int iShift = (shift>>>5);
@@ -345,8 +344,8 @@ public final class NaturalLE implements Natural {
 
   @Override
   public final Natural shiftUpWords (final int iShift) {
-    assert isValid();
-    assert 0<=iShift;
+    //assert isValid();
+    //assert 0<=iShift;
     if (0==iShift) { return this; }
     if (isZero()) { return this; }
     final int n = hiInt();
@@ -357,7 +356,7 @@ public final class NaturalLE implements Natural {
 
   @Override
   public final Natural shiftUp (final int shift) {
-    assert 0<=shift;
+    //assert 0<=shift;
     if (shift==0) { return this; }
     if (isZero()) { return this; }
     final int iShift = (shift>>>5);
@@ -473,7 +472,7 @@ public final class NaturalLE implements Natural {
     return make(result); }
 
   public static final NaturalLE valueOf (final BigInteger u) {
-    assert 0<=u.signum();
+    //assert 0<=u.signum();
     return valueOf(u.toByteArray()); }
 
   //-------------------------------------------------------------
@@ -487,7 +486,7 @@ public final class NaturalLE implements Natural {
 
   /** <code>0L<=u</code>. */
   public static final NaturalLE valueOf (final long u) {
-    assert 0L<=u;
+    //assert 0L<=u;
     if (u==0L) { return ZERO; }
     return make(Ints.littleEndian(u)); }
 
