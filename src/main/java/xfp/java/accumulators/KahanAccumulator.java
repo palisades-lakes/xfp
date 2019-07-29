@@ -56,33 +56,15 @@ implements Accumulator<KahanAccumulator> {
     s = szc;
     return this; }
 
-//  @Override
-//  public final KahanAccumulator addAll (final double[] z) {
-//    final int n = z.length;
-//    for (int i=0;i<n;i++) { add(z[i]); }
-//    return this; }
-
   @Override
   public final KahanAccumulator add2 (final double z) {
     //assert Double.isFinite(z);
-    // preserve exactness using twoMul to convert to 2 adds.
+    // twoMul -> 2 adds.
     final double zz = z*z;
     add(zz);
     final double e = Math.fma(z,z,-zz);
     add(e);
     return this; }
-
-//  @Override
-//  public final KahanAccumulator add2All (final double[] z) {
-//    final int n = z.length;
-//    for (int i=0;i<n;i++) {
-//      final double zi = z[i];
-//      //assert Double.isFinite(zi);
-//      final double zz = (zi*zi) -c;
-//      add(zz);
-//      final double e = Math.fma(zi,zi,-zz);
-//      add(e); }
-//    return this; }
 
   @Override
   public final KahanAccumulator addProduct (final double z0,
@@ -96,22 +78,6 @@ implements Accumulator<KahanAccumulator> {
     add(e);
     return this; }
 
-//  @Override
-//  public final KahanAccumulator addProducts (final double[] z0,
-//                                             final double[] z1) {
-//    final int n = z0.length;
-//    //assert n == z1.length;
-//    for (int i=0;i<n;i++) {
-//      //assert Double.isFinite(z0[i]);
-//      //assert Double.isFinite(z1[i]);
-//      final double z0i = z0[i];
-//      final double z1i = z1[i];
-//      final double zz = z0i*z1i;
-//      add(zz);
-//      final double e = Math.fma(z0i,z1i,-zz);
-//      add(e); }
-//    return this; }
-
   @Override
   public KahanAccumulator addL1 (final double z0,
                                  final double z1) {
@@ -122,25 +88,13 @@ implements Accumulator<KahanAccumulator> {
     final double dz = zz - z0;
     final double e = (z0 - (zz - dz)) + ((-z1) - dz);
     if (0<=zz) {
-      if (0<=e) { 
-        add(zz); 
-        add(e); }
-      else if (Math.abs(e)<=Math.abs(zz)) { 
-        add(zz); 
-        add(e); }
-      else { 
-        add(-zz); 
-        add(-e); } }
+      if (0<=e) { add(zz); add(e); }
+      else if (Math.abs(e)<=Math.abs(zz)) { add(zz); add(e); }
+      else { add(-zz); add(-e); } }
     else {
-      if (0>e) { 
-        add(-zz); 
-        add(-e); }
-      else if (Math.abs(e)<=Math.abs(zz)) { 
-        add(-zz); 
-        add(-e); }
-      else { 
-        add(zz); 
-        add(e); } }
+      if (0>e) { add(-zz); add(-e); }
+      else if (Math.abs(e)<=Math.abs(zz)) { add(-zz); add(-e); }
+      else { add(zz); add(e); } }
     return this; }
 
   @Override
@@ -168,7 +122,7 @@ implements Accumulator<KahanAccumulator> {
     final double eee = Math.fma(e,e,-ee);
     add(ee);
     add(eee);
-    return this; } 
+    return this; }
 
   //--------------------------------------------------------------
   // construction

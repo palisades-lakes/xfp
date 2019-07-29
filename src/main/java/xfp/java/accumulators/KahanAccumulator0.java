@@ -4,6 +4,9 @@ package xfp.java.accumulators;
 /** Compensated summation for lots of numbers.
  * Only makes sense for floating point numbers of various kinds.
  * <p>
+ * Use twoAdd and twoMul to convert, eg, dot products to 
+ * multiple compensated additions. 
+ * <p>
  * Mutable! Not thread safe!
  * <p>
  * @see <a
@@ -47,10 +50,10 @@ implements Accumulator<KahanAccumulator0> {
   @Override
   public final KahanAccumulator0 add (final double z) {
     //assert Double.isFinite(z);
-    final double zz = z - c;
-    final double ss = s + zz;
-    c = (ss - s) - zz;
-    s = ss;
+    final double zc = z - c;
+    final double szc = s + zc;
+    c = (szc - s) - zc;
+    s = szc;
     return this; }
 
   @Override
@@ -58,8 +61,8 @@ implements Accumulator<KahanAccumulator0> {
     //assert Double.isFinite(z);
     // twoMul -> 2 adds.
     final double zz = z*z;
-    final double e = Math.fma(z,z,-zz);
     add(zz);
+    final double e = Math.fma(z,z,-zz);
     add(e);
     return this; }
 
@@ -105,15 +108,15 @@ implements Accumulator<KahanAccumulator0> {
     final double dz = zz-z0;
     final double e = (z0-(zz-dz)) + ((-z1)-dz);
     // twoMul:
-    final double ss = zz*zz;
-    final double ess = Math.fma(zz,zz,-ss);
-    add(ss);
-    add(ess);
+    final double zzzz = zz*zz;
+    final double ezzzz = Math.fma(zz,zz,-zzzz);
+    add(zzzz);
+    add(ezzzz);
     // twoMul:
-    final double es = e*zz;
-    final double ees = Math.fma(e,zz,-es);
-    add(es); add(es);
-    add(ees); add(ees);
+    final double ezz = e*zz;
+    final double eezz = Math.fma(e,zz,-ezz);
+    add(ezz); add(ezz);
+    add(eezz); add(eezz);
     // twoMul:
     final double ee = e*e;
     final double eee = Math.fma(e,e,-ee);
