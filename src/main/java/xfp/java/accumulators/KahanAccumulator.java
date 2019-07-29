@@ -56,34 +56,20 @@ implements Accumulator<KahanAccumulator> {
     s = szc;
     return this; }
 
-  @Override
-  public final KahanAccumulator addAll (final double[] z) {
-    final int n = z.length;
-    for (int i=0;i<n;i++) {
-      final double zi = z[i];
-      //assert Double.isFinite(zi);
-      final double zz = zi - c;
-      final double szz = s + zz;
-      c = (szz - s) - zz;
-      s = szz; }
-    return this; }
+//  @Override
+//  public final KahanAccumulator addAll (final double[] z) {
+//    final int n = z.length;
+//    for (int i=0;i<n;i++) { add(z[i]); }
+//    return this; }
 
   @Override
   public final KahanAccumulator add2 (final double z) {
     //assert Double.isFinite(z);
     // preserve exactness using twoMul to convert to 2 adds.
     final double zz = z*z;
-    //add(zz);
-    final double zc = zz - c;
-    final double szc = s + zc;
-    c = (szc - s) - zc;
-    s = szc;
+    add(zz);
     final double e = Math.fma(z,z,-zz);
-    //add(e);
-    final double ec = e - c;
-    final double sec = s + ec;
-    c = (sec - s) - ec;
-    s = sec;
+    add(e);
     return this; }
 
 //  @Override
@@ -93,9 +79,9 @@ implements Accumulator<KahanAccumulator> {
 //      final double zi = z[i];
 //      //assert Double.isFinite(zi);
 //      final double zz = (zi*zi) -c;
-//      final double ss = s + zz;
-//      c = (ss - s) - zz;
-//      s = ss; }
+//      add(zz);
+//      final double e = Math.fma(zi,zi,-zz);
+//      add(e); }
 //    return this; }
 
   @Override
@@ -103,19 +89,11 @@ implements Accumulator<KahanAccumulator> {
                                             final double z1) {
     //assert Double.isFinite(z0);
     //assert Double.isFinite(z1);
-    // preserve exactness using twoMul to convert to 2 adds.
+    // twoMul -> 2 adds.
     final double zz = z0*z1;
-    //add(zz);
-    final double zc = zz - c;
-    final double szc = s + zc;
-    c = (szc - s) - zc;
-    s = szc;
+    add(zz);
     final double e = Math.fma(z0,z1,-zz);
-    //add(e);
-    final double ec = e - c;
-    final double sec = s + ec;
-    c = (sec - s) - ec;
-    s = sec;
+    add(e);
     return this; }
 
 //  @Override
@@ -129,13 +107,9 @@ implements Accumulator<KahanAccumulator> {
 //      final double z0i = z0[i];
 //      final double z1i = z1[i];
 //      final double zz = z0i*z1i;
-//      final double szz = s + zz;
-//      c = (szz - s) - zz;
-//      s = szz;
+//      add(zz);
 //      final double e = Math.fma(z0i,z1i,-zz);
-//      final double se = s + e;
-//      c = (se - s) - e;
-//      s = se; }
+//      add(e); }
 //    return this; }
 
   @Override

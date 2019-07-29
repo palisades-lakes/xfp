@@ -15,7 +15,7 @@ package xfp.java.accumulators;
  *      Graillat, Langlois, and Louvet, Accurate dot products with FMA"</a>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-05
+ * @version 2019-07-29
  */
 
 public final class KahanAccumulator0

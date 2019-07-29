@@ -25,6 +25,7 @@ public final class KahanAccumulatorTest {
   private static final List<String> accumulators =
     List.of("xfp.java.accumulators.KahanAccumulator");
 
+  // TODO: compare to exact accumulator for accuracy
   @SuppressWarnings("static-method")
   @Test
   public final void tests () {
