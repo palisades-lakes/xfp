@@ -34,22 +34,28 @@ import xfp.java.prng.PRNG;
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-24
+ * @version 2019-07-29
  */
 @SuppressWarnings("unchecked")
 public final class Common {
 
   public static final int TRYS = 131; 
-  
+
   //--------------------------------------------------------------
 
-  public static final List<String> accumulators () {
+  public static final List<String> inexactAccumulators () {
     return
       Arrays.asList(
         new String[]
           { "xfp.java.accumulators.DoubleAccumulator",
             "xfp.java.accumulators.KahanAccumulator",
-            //"xfp.java.accumulators.ERationalAccumulator",
+          }); }
+
+  public static final List<String> accumulators () {
+    return
+      Arrays.asList(
+        new String[]
+          { //"xfp.java.accumulators.ERationalAccumulator",
             //"xfp.java.accumulators.EFloatAccumulator",
             "xfp.java.accumulators.DistilledAccumulator",
             "xfp.java.accumulators.ZhuHayesAccumulator",
@@ -452,9 +458,9 @@ public final class Common {
 
   public static final <T extends Ringlike<T>> void
   reduce (final Function<BigInteger,T> fromBI,
-                      final Function<T,BigInteger> toBI,
-                      final BigInteger x0,
-                      final BigInteger x1) {
+          final Function<T,BigInteger> toBI,
+          final BigInteger x0,
+          final BigInteger x1) {
     if (0 != x1.signum()) {
       final Ringlike y0 = fromBI.apply(x0);
       final Ringlike y1 = fromBI.apply(x1);
@@ -593,8 +599,8 @@ public final class Common {
 
   public static final void
   ringlikeTest (final Function<String,Ringlike> valueOf,
-               final Function<BigInteger,Ringlike> fromBI,
-               final Function<Ringlike,BigInteger> toBI) {
+                final Function<BigInteger,Ringlike> fromBI,
+                final Function<Ringlike,BigInteger> toBI) {
     final Generator gn =
       Generators.bigIntegerGenerator(
         PRNG.well44497b("seeds/Well44497b-2019-01-05.txt"));
@@ -604,10 +610,10 @@ public final class Common {
 
   public static final void
   ringlikeTest (final Function<String,Ringlike> valueOf,
-               final Function<BigInteger,Ringlike> fromBI,
-               final Function<Ringlike,BigInteger> toBI,
-               final BigInteger z0,
-               final BigInteger z1) {
+                final Function<BigInteger,Ringlike> fromBI,
+                final Function<Ringlike,BigInteger> toBI,
+                final BigInteger z0,
+                final BigInteger z1) {
     // TODO: more tests
     hexRoundTrip(fromBI,valueOf,z0);
     hexRoundTrip(fromBI,valueOf,z1);
@@ -627,7 +633,7 @@ public final class Common {
     divide(fromBI,toBI,z0,z0); }
 
   //--------------------------------------------------------------
- // TODO: java missing corresponding FloatFunction, etc.
+  // TODO: java missing corresponding FloatFunction, etc.
 
   public static final void
   floatRoundTripTest (final FloatFunction fromFloat,
@@ -1148,7 +1154,7 @@ public final class Common {
 
     Accumulator a0 = aa.clear();
     a0 = a0.addAll(new double[]
-          { 100.0, 100.0, 1.0, -100.0, -100.0});
+      { 100.0, 100.0, 1.0, -100.0, -100.0});
     final double s0 = a0.doubleValue();
     if (a0.noOverflow()) {
       Assertions.assertEquals(1.0,s0,()->
@@ -1164,19 +1170,19 @@ public final class Common {
     final double s1 = a1.doubleValue();
     if (a1.noOverflow()) {
       Assertions.assertEquals(1.0,s1,()->
-        "\n" + Classes.className(aa)
-        + "\n1.0p0!= " + Double.toHexString(s1)
-        + "\n1.0e0!= " + s1
-        + "\n"); }
+      "\n" + Classes.className(aa)
+      + "\n1.0p0!= " + Double.toHexString(s1)
+      + "\n1.0e0!= " + s1
+      + "\n"); }
     Debug.DEBUG=false;
 
     Accumulator a2 = aa.clear();
     a2 = a2.addAll(new double[]
-        { Double.MAX_VALUE,
-          Double.MAX_VALUE,
-          1.0,
-          -Double.MAX_VALUE,
-          -Double.MAX_VALUE});
+      { Double.MAX_VALUE,
+        Double.MAX_VALUE,
+        1.0,
+        -Double.MAX_VALUE,
+        -Double.MAX_VALUE});
     final double s2 = a2.doubleValue();
     if (a2.noOverflow()) {
       Assertions.assertEquals(1.0,s2,()->
@@ -1187,11 +1193,11 @@ public final class Common {
 
     Accumulator a3 = aa.clear();
     a3 = a3.addAll(new double[]
-        { -Double.MAX_VALUE,
-          -Double.MAX_VALUE,
-          -1.0,
-          Double.MAX_VALUE,
-          Double.MAX_VALUE});
+      { -Double.MAX_VALUE,
+        -Double.MAX_VALUE,
+        -1.0,
+        Double.MAX_VALUE,
+        Double.MAX_VALUE});
     final double s3 = a3.doubleValue();
     if (a3.noOverflow()) {
       Assertions.assertEquals(-1.0,s3,()->
@@ -1305,15 +1311,15 @@ public final class Common {
   private static final void
   addTest (final Generator g,
            final List<Accumulator> accumulators,
-           final Accumulator exact) {
+           final Accumulator base) {
     //Debug.DEBUG=false;
-    Assertions.assertTrue(exact.isExact());
+    //Assertions.assertTrue(base.isExact());
     final double[] x = (double[]) g.next();
-    //Debug.println(Classes.className(exact));
-    //Debug.println(exact.toString());
+    //Debug.println(Classes.className(base));
+    //Debug.println(base.toString());
     //Debug.println(g.name());
     for (final Accumulator a : accumulators) {
-      Accumulator e = exact.clear();
+      Accumulator e = base.clear();
       Accumulator p = a.clear();
       //Debug.println(Classes.className(p));
       for (final double xi : x) {
@@ -1326,29 +1332,28 @@ public final class Common {
         final double pred = p.doubleValue();
         //Debug.println("truth=" + Double.toString(truth));
         //Debug.println("pred=" + Double.toString(pred));
-        if (a.isExact()) {
           Assertions.assertEquals(truth,pred,
-            "\nexact: " + Classes.className(exact)
+            "\nbase: " + Classes.className(base)
             + "\n= " + Double.toHexString(truth)
-            + "\n= " + exact.value()
+            + "\n= " + base.value()
             + "\npred: " + Classes.className(a)
             + "\n= " + Double.toHexString(pred)
             + "\n= " + a.value()
-            + "\n"); } } }
+            + "\n"); } } 
     //Debug.DEBUG=false;
   }
 
   private static final void
   addAllTest (final Generator g,
               final List<Accumulator> accumulators,
-              final Accumulator exact) {
+              final Accumulator base) {
     //Debug.DEBUG=false;
-    Assertions.assertTrue(exact.isExact());
+    //Assertions.assertTrue(base.isExact());
     final double[] x = (double[]) g.next();
-    final Accumulator efinal = exact.clear().addAll(x);
-    //Debug.println(Classes.className(exact));
-    //Debug.println(exact.toString());
-    final double truth = efinal.doubleValue();
+    final Accumulator e = base.clear().addAll(x);
+    //Debug.println(Classes.className(base));
+    //Debug.println(base.toString());
+    final double truth = e.doubleValue();
     //Debug.println(g.name());
     for (final Accumulator a : accumulators) {
       //final long t0 = System.nanoTime();
@@ -1357,15 +1362,14 @@ public final class Common {
       //Debug.println(pfinal.value().toString());
       final double pred = pfinal.doubleValue();
       //final long t1 = (System.nanoTime()-t0);
-      if (a.isExact()) {
-        Assertions.assertEquals(truth,pred,
-          "\nexact: " + Classes.className(exact)
-          + " = " + Double.toHexString(truth)
-          + "\n= " + exact.value()
-          + "\npred: " + Classes.className(a)
-          + " = " + Double.toHexString(pred)
-          + "\n= " + a.value()
-          + "\n"); }
+      Assertions.assertEquals(truth,pred,
+        "\nbase: " + Classes.className(base)
+        + " = " + Double.toHexString(truth)
+        + "\n= " + base.value()
+        + "\npred: " + Classes.className(a)
+        + " = " + Double.toHexString(pred)
+        + "\n= " + a.value()
+        + "\n"); 
       //final double l1d = Math.abs(truth-pred);
       //final double l1n = Math.max(1.0,Math.abs(truth));
       //      //Debug.println(
@@ -1380,124 +1384,118 @@ public final class Common {
   public static final void
   sumTests (final List<Generator> generators,
             final List<Accumulator> accumulators,
-            final Accumulator exact) {
+            final Accumulator base) {
     for (final Generator g : generators) {
-      Common.addTest(g,accumulators,exact);
-      Common.addAllTest(g,accumulators,exact); } }
+      Common.addTest(g,accumulators,base);
+      Common.addAllTest(g,accumulators,base); } }
 
   //--------------------------------------------------------------
 
   private static final void l2Test (final Generator g,
                                     final List<Accumulator> accumulators,
-                                    final Accumulator exact) {
+                                    final Accumulator base) {
     //Debug.println("generator=" +g.name());
-    Assertions.assertTrue(exact.isExact());
+    //Assertions.assertTrue(base.isExact());
     final double[] x = (double[]) g.next();
     for (final Accumulator aa : accumulators) {
-      Accumulator ex = exact.clear();
+      Accumulator e = base.clear();
       Accumulator a = aa.clear();
       for (int i=0; i<x.length;i++) {
         final int ii = i;
         final double xi = x[i];
-        ex = ex.add2(xi); 
-        final double truth = ex.doubleValue();
+        e = e.add2(xi); 
+        final double truth = e.doubleValue();
         a = a.add2(xi);
         final double pred = a.doubleValue();
-        if (a.isExact()) { 
           Assertions.assertEquals(truth,pred,()->
           Classes.className(aa)
           + "\ni=" + ii + "\n" + Double.toHexString(truth)
-          + "\n" +  Double.toHexString(pred) + "\n"); } }}
-    final double truth = exact.clear().add2All(x).doubleValue();
+          + "\n" +  Double.toHexString(pred) + "\n"); } }
+    final double truth = base.clear().add2All(x).doubleValue();
     for (final Accumulator a : accumulators) {
       final double pred = a.clear().add2All(x).doubleValue();
-      if (a.isExact()) { 
         Assertions.assertEquals(truth,pred,
           () ->
         "\n" + Double.toHexString(truth)
-        + "\n" +  Double.toHexString(pred) + "\n"); } } }
+        + "\n" +  Double.toHexString(pred) + "\n"); } } 
 
   public static final void l2Tests (final List<Generator> generators,
                                     final List<Accumulator> accumulators,
-                                    final Accumulator exact) {
+                                    final Accumulator base) {
 
     for (final Generator g : generators) {
-      l2Test(g,accumulators,exact); } }
+      l2Test(g,accumulators,base); } }
 
   //--------------------------------------------------------------
 
   private static final void
   l2DistanceTest (final List<Accumulator> accumulators,
-                  final Accumulator exact) {
-    Assertions.assertTrue(exact.isExact());
+                  final Accumulator base) {
+    //Assertions.assertTrue(base.isExact());
     final double[] x0 = new double[4];
     final double[] x1 = new double[4];
     Arrays.fill(x0,1.0/3.0);
     final double truth =
-      exact.clear().addL2Distance(x0,x1).doubleValue();
+      base.clear().addL2Distance(x0,x1).doubleValue();
     Assertions.assertTrue(0.0<=truth,
-      "\n" + Classes.className(exact) + "\n");
+      "\n" + Classes.className(base) + "\n");
     //    Assertions.assertEquals(4.0,truth,
-    //      "\n" + Classes.className(exact) + "\n");
+    //      "\n" + Classes.className(base) + "\n");
     for (final Accumulator a : accumulators) {
       final double pred =
         a.clear().addL2Distance(x0,x1).doubleValue();
       Assertions.assertTrue(0.0<=pred,
         "\n" + Classes.className(a) + "\n");
-      if (a.isExact()) {
         Assertions.assertEquals(truth,pred,
           () ->
         "\n" + Double.toHexString(truth)
-        + "\n" +  Double.toHexString(pred) + "\n"); } } }
+        + "\n" +  Double.toHexString(pred) + "\n"); } } 
 
   private static final void
   l2DistanceTest (final Generator g,
                   final List<Accumulator> accumulators,
-                  final Accumulator exact) {
-    Assertions.assertTrue(exact.isExact());
+                  final Accumulator base) {
+    //Assertions.assertTrue(base.isExact());
     final double[] x0 = (double[]) g.next();
     final double[] x1 = (double[]) g.next();
     final double truth =
-      exact.clear().addL2Distance(x0,x1).doubleValue();
+      base.clear().addL2Distance(x0,x1).doubleValue();
     Assertions.assertTrue(0.0<=truth,
-      "\n" + Classes.className(exact) + "\n");
+      "\n" + Classes.className(base) + "\n");
     for (final Accumulator a : accumulators) {
       final double pred =
         a.clear().addL2Distance(x0,x1).doubleValue();
       Assertions.assertTrue(0.0<=pred,
         "\n" + Classes.className(a) + "\n");
-      if (a.isExact()) {
         Assertions.assertEquals(truth,pred,
           () ->
         "\n" + Double.toHexString(truth)
-        + "\n" +  Double.toHexString(pred) + "\n"); } } }
+        + "\n" +  Double.toHexString(pred) + "\n"); } } 
 
   public static final void
   l2DistanceTests (final List<Generator> generators,
                    final List<Accumulator> accumulators,
-                   final Accumulator exact) {
-    l2DistanceTest(accumulators,exact);
+                   final Accumulator base) {
+    l2DistanceTest(accumulators,base);
     for (final Generator g : generators) {
-      l2DistanceTest(g,accumulators,exact); } }
+      l2DistanceTest(g,accumulators,base); } }
 
   //--------------------------------------------------------------
 
   private static final void
   l1DistanceTest (final Generator g,
                   final List<Accumulator> accumulators,
-                  final Accumulator exact) {
-    Assertions.assertTrue(exact.isExact());
+                  final Accumulator base) {
+    //Assertions.assertTrue(base.isExact());
     final double[] x0 = (double[]) g.next();
     final double[] x1 = (double[]) g.next();
-    final double truth = exact.clear().addL1Distance(x0,x1).doubleValue();
+    final double truth = base.clear().addL1Distance(x0,x1).doubleValue();
     //Debug.println(g.name());
     for (final Accumulator a : accumulators) {
       //final long t0 = System.nanoTime();
       final double pred = a.clear().addL1Distance(x0,x1).doubleValue();
       //final long t1 = (System.nanoTime()-t0);
-      if (a.isExact()) {
-        Assertions.assertEquals(truth,pred,
-          Classes.className(a)); }
+        Assertions.assertEquals(truth,pred,Classes.className(a)); }
       //final double l1d = Math.abs(truth - pred);
       //final double l1n = Math.max(1.0,Math.abs(truth));
       //Debug.println(
@@ -1506,32 +1504,32 @@ public final class Common {
       //  + toString(l1d)
       //  + " / " + toString(l1n) + " = "
       //  + String.format("%8.2e",Double.valueOf(l1d/l1n)));
-    } }
+    }
 
   public static final void
   l1DistanceTests (final List<Generator> generators,
                    final List<Accumulator> accumulators,
-                   final Accumulator exact) {
+                   final Accumulator base) {
 
     for (final Generator g : generators) {
-      l1DistanceTest(g,accumulators,exact); } }
+      l1DistanceTest(g,accumulators,base); } }
 
   //--------------------------------------------------------------
 
   private static final void dotTest (final Generator g,
                                      final List<Accumulator> accumulators,
-                                     final Accumulator exact) {
-    Assertions.assertTrue(exact.isExact());
+                                     final Accumulator base) {
+    //Assertions.assertTrue(base.isExact());
     final double[] x0 = (double[]) g.next();
     final double[] x1 = (double[]) g.next();
-    final double truth = exact.clear().addProducts(x0,x1).doubleValue();
+    final double truth = base.clear().addProducts(x0,x1).doubleValue();
     //Debug.println(g.name());
     for (final Accumulator a : accumulators) {
       //final long t0 = System.nanoTime();
       final double pred =
         a.clear().addProducts(x0,x1).doubleValue();
       //final long t1 = (System.nanoTime()-t0);
-      if (a.isExact()) { Assertions.assertEquals(truth,pred); }
+      Assertions.assertEquals(truth,pred); 
       //final double l1d = Math.abs(truth - pred);
       //final double l1n = Math.max(1.0,Math.abs(truth));
       //Debug.println(
@@ -1544,10 +1542,10 @@ public final class Common {
 
   public static final void dotTests (final List<Generator> generators,
                                      final List<Accumulator> accumulators,
-                                     final Accumulator exact) {
+                                     final Accumulator base) {
 
     for (final Generator g : generators) {
-      dotTest(g,accumulators,exact); } }
+      dotTest(g,accumulators,base); } }
 
   //--------------------------------------------------------------
 }

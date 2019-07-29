@@ -1,9 +1,12 @@
 package xfp.java.accumulators;
 
 /** Base class for some exact accumulators.
- *
+ * <p>
+ * Use twoAdd and twoMul to convert operations to sequence of 
+ * adds, so that they are exact if {@link #add(double)} is.
+ * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-28
+ * @version 2019-07-29
  */
 @SuppressWarnings("unchecked")
 public abstract class ExactAccumulator<T extends ExactAccumulator>
@@ -18,9 +21,9 @@ implements Accumulator<T> {
   public T add2 (final double z) {
     //assert Double.isFinite(z);
     // preserve exactness using twoMul to convert to 2 adds.
-    final double z2 = z*z;
-    final double e = Math.fma(z,z,-z2);
-    add(z2);
+    final double zz = z*z;
+    final double e = Math.fma(z,z,-zz);
+    add(zz);
     add(e);
     return (T) this; }
 
@@ -30,9 +33,9 @@ implements Accumulator<T> {
     //assert Double.isFinite(z0);
     //assert Double.isFinite(z1);
     // preserve exactness using twoMul to convert to 2 adds.
-    final double z01 = z0*z1;
-    final double e = Math.fma(z0,z1,-z01);
-    add(z01);
+    final double zz = z0*z1;
+    final double e = Math.fma(z0,z1,-zz);
+    add(zz);
     add(e);
     return (T) this; }
 
@@ -41,19 +44,18 @@ implements Accumulator<T> {
                   final double z1) {
     //assert Double.isFinite(z0);
     //assert Double.isFinite(z1);
-    // preserve exactness using twoAdd and twoMul to convert to 2
-    // adds.
-    final double s = z0 - z1;
-    final double z = s - z0;
-    final double e = (z0 - (s - z)) + ((-z1) - z);
-    if (0<=s) {
-      if (0<=e) { add(s); add(e); }
-      else if (Math.abs(e)<=Math.abs(s)) { add(s); add(e); }
-      else { add(-s); add(-e); } }
+    // twoAdd -> 2 adds.
+    final double zz = z0 - z1;
+    final double dz = zz - z0;
+    final double e = (z0 - (zz - dz)) + ((-z1) - dz);
+    if (0<=zz) {
+      if (0<=e) { add(zz); add(e); }
+      else if (Math.abs(e)<=Math.abs(zz)) { add(zz); add(e); }
+      else { add(-zz); add(-e); } }
     else {
-      if (0>e) { add(-s); add(-e); }
-      else if (Math.abs(e)<=Math.abs(s)) { add(-s); add(-e); }
-      else { add(s); add(e); } }
+      if (0>e) { add(-zz); add(-e); }
+      else if (Math.abs(e)<=Math.abs(zz)) { add(-zz); add(-e); }
+      else { add(zz); add(e); } }
     return (T) this; }
 
   @Override
@@ -64,25 +66,25 @@ implements Accumulator<T> {
     // preserve exactness using twoAdd and twoMul to convert to 8
     // adds.
     // twoAdd (twoSub):
-    final double s = z0-z1;
-    final double z = s-z0;
-    final double e = (z0-(s-z)) + ((-z1)-z);
+    final double zz = z0-z1;
+    final double dz = zz-z0;
+    final double e = (z0-(zz-dz)) + ((-z1)-dz);
     // twoMul:
-    final double ss = s*s;
-    final double ess = Math.fma(s,s,-ss);
-    add(ss);
-    add(ess);
+    final double zzzz = zz*zz;
+    final double ezzzz = Math.fma(zz,zz,-zzzz);
+    add(zzzz);
+    add(ezzzz);
     // twoMul:
-    final double es = e*s;
-    final double ees = Math.fma(e,s,-es);
-    add(es); add(es);
-    add(ees); add(ees);
+    final double ezz = e*zz;
+    final double eezz = Math.fma(e,zz,-ezz);
+    add(ezz); add(ezz);
+    add(eezz); add(eezz);
     // twoMul:
     final double ee = e*e;
     final double eee = Math.fma(e,e,-ee);
     add(ee);
     add(eee);
-    return (T) this; }
+    return (T) this; } 
 
   //--------------------------------------------------------------
   // construction
