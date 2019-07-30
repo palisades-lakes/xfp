@@ -8,12 +8,12 @@ import xfp.java.exceptions.Exceptions;
  * <p>
  * All methods are optional.
  * <p>
- * Must throw an AssertionError for non-finite
+ * Must throw an //assertionError for non-finite
  * input data, either on add or doubleValue.
  * TODO: tighten this requirement.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-24
+ * @version 2019-07-29
  */
 
 @SuppressWarnings("unchecked")
@@ -98,7 +98,7 @@ public interface Accumulator<T extends Accumulator> {
   default T addProducts (final double[] z0,
                          final double[] z1)  {
     final int n = z0.length;
-    assert n == z1.length;
+    //assert n == z1.length;
     for (int i=0;i<n;i++) { addProduct(z0[i],z1[i]); }
     return (T) this; }
 
@@ -113,7 +113,7 @@ public interface Accumulator<T extends Accumulator> {
     //Debug.println("addL2Distance");
     //Debug.println(Classes.className(this));
     final int n = z0.length;
-    assert n == z1.length;
+    //assert n == z1.length;
     for (int i=0;i<n;i++) { addL2(z0[i],z1[i]); }
     return (T) this; }
 
@@ -126,7 +126,7 @@ public interface Accumulator<T extends Accumulator> {
   default T addL1Distance (final double[] z0,
                            final double[] z1)  {
     final int n = z0.length;
-    assert n == z1.length;
+    //assert n == z1.length;
     for (int i=0;i<n;i++) { addL1(z0[i],z1[i]); }
     return (T) this; }
 
@@ -135,7 +135,7 @@ public interface Accumulator<T extends Accumulator> {
   default void partialSums (final double[] x,
                             final double[] s) {
     final int n = x.length;
-    assert s.length==n;
+    //assert s.length==n;
     clear();
     for (int i=0;i<n;i++) { s[i] = add(x[i]).doubleValue(); } }
 

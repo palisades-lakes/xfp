@@ -25,9 +25,9 @@ import xfp.java.prng.Generators;
  * represented by <code>BigFloat</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-24
+ * @version 2019-07-29
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked","static-method"})
 public final class BigFloats implements Set {
 
   //--------------------------------------------------------------
@@ -39,8 +39,8 @@ public final class BigFloats implements Set {
 
   private final BigFloat add (final BigFloat q0,
                               final BigFloat q1) {
-    assert contains(q0);
-    assert contains(q1);
+    //assert contains(q0);
+    //assert contains(q1);
     return q0.add(q1); }
 
   public final BinaryOperator<BigFloat> adder () {
@@ -54,7 +54,6 @@ public final class BigFloats implements Set {
 
   //--------------------------------------------------------------
 
-  @SuppressWarnings("static-method")
   public final BigFloat additiveIdentity () {
     return BigFloat.valueOf(0L); }
 
@@ -63,7 +62,7 @@ public final class BigFloats implements Set {
   // worth the indirection?
 
   private final BigFloat negate (final BigFloat q) {
-    assert contains(q);
+    //assert contains(q);
     return q.negate(); }
 
   public final UnaryOperator<BigFloat> additiveInverse () {
@@ -78,8 +77,8 @@ public final class BigFloats implements Set {
 
   private final BigFloat multiply (final BigFloat q0,
                                    final BigFloat q1) {
-    assert contains(q0);
-    assert contains(q1);
+    //assert contains(q0);
+    //assert contains(q1);
     return q0.multiply(q1); }
 
   public final BinaryOperator<BigFloat> multiplier () {
@@ -93,7 +92,6 @@ public final class BigFloats implements Set {
 
   //--------------------------------------------------------------
 
-  @SuppressWarnings("static-method")
   public final BigFloat multiplicativeIdentity () {
     return BigFloat.valueOf(1L); }
 
@@ -134,7 +132,7 @@ public final class BigFloats implements Set {
   fromBigIntegerGenerator (final UniformRandomProvider urp,
                            final int eMin,
                            final int eMax) {
-    assert eMin<eMax;
+    //assert eMin<eMax;
     final int eRan = eMax-eMin;
     final double dp = 0.9;
     return new GeneratorBase ("fromBigIntegerGenerator") {

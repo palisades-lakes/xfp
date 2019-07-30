@@ -9,7 +9,7 @@ import java.util.Arrays;
 
 /**
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-23
+ * @version 2019-07-29
  */
 public final class MutableNaturalBEI0 {
 
@@ -523,7 +523,7 @@ public final class MutableNaturalBEI0 {
   divideMagnitude (final MutableNaturalBEI0 div,
                    final MutableNaturalBEI0 quotient,
                    final boolean needRemainder ) {
-    assert div.intLen > 1;
+    //assert div.intLen > 1;
     // D1 normalize the divisor
     final int shift =
       Integer.numberOfLeadingZeros(div.value[div.offset]);
@@ -712,7 +712,7 @@ public final class MutableNaturalBEI0 {
   divideKnuth (final MutableNaturalBEI0 b,
                final MutableNaturalBEI0 quotient,
                final boolean needRemainder) {
-    assert 0 != b.intLen;
+    //assert 0 != b.intLen;
     // Dividend is zero
     if (intLen == 0) {
       quotient.intLen = 0;

@@ -7,7 +7,7 @@ import static xfp.java.numbers.Numbers.loWord;
  * Non-instantiable.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-23
+ * @version 2019-07-29
  */
 
 @SuppressWarnings("unchecked")
@@ -322,7 +322,7 @@ public final class NaturalMultiply {
                                         final long v) {
     if (0L==v) { return u.zero(); }
     if (1L==v) { return u; }
-    assert 0L < v;
+    //assert 0L < v;
     final long hi = Numbers.hiWord(v);
     final long lo = Numbers.loWord(v);
     final int n0 = u.hiInt();

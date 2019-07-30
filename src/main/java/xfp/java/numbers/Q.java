@@ -8,7 +8,6 @@ import java.util.function.UnaryOperator;
 
 import org.apache.commons.rng.UniformRandomProvider;
 
-import xfp.java.Classes;
 import xfp.java.algebra.OneSetOneOperation;
 import xfp.java.algebra.OneSetTwoOperations;
 import xfp.java.algebra.Set;
@@ -24,6 +23,7 @@ import xfp.java.prng.Generator;
 
 // TODO: change name to 'QQ', imitating tex font?
 
+@SuppressWarnings({"unchecked","static-method"})
 public final class Q implements Set {
 
   //--------------------------------------------------------------
@@ -35,8 +35,8 @@ public final class Q implements Set {
 
   private final Object add (final Object x0,
                             final Object x1) {
-    assert(contains(x0));
-    assert(contains(x1));
+    //assert(contains(x0));
+    //assert(contains(x1));
     final Rational q0 = Rational.valueOf(x0);
     final Rational q1 = Rational.valueOf(x1);
     return q0.add(q1); }
@@ -52,7 +52,6 @@ public final class Q implements Set {
 
   //--------------------------------------------------------------
 
-  @SuppressWarnings("static-method")
   public final Object additiveIdentity () {
     return Rational.getZero(); }
 
@@ -62,7 +61,7 @@ public final class Q implements Set {
   // worth the indirection?
 
   private final Rational negate (final Object x) {
-    assert contains(x);
+    //assert contains(x);
     return Rational.valueOf(x).negate(); }
 
   public final UnaryOperator additiveInverse () {
@@ -77,10 +76,10 @@ public final class Q implements Set {
 
   private final Rational multiply (final Object x0,
                                    final Object x1) {
-    assert contains(x0) :
-      "x0 " + Classes.className(x0) + ":" + x0 + " not in " + this;
-    assert contains(x1)  :
-      "x1 " + Classes.className(x1) + ":" + x1 + " not in " + this;
+    //assert contains(x0) :
+     // "x0 " + Classes.className(x0) + ":" + x0 + " not in " + this;
+    //assert contains(x1)  :
+    //  "x1 " + Classes.className(x1) + ":" + x1 + " not in " + this;
     final Rational q0 = Rational.valueOf(x0);
     final Rational q1 = Rational.valueOf(x1);
     return q0.multiply(q1); }
@@ -96,14 +95,13 @@ public final class Q implements Set {
 
   //--------------------------------------------------------------
 
-  @SuppressWarnings("static-method")
   public final Object multiplicativeIdentity () {
     return Rational.getOne(); }
 
   //--------------------------------------------------------------
 
   private final Rational reciprocal (final Object x) {
-    assert contains(x);
+    //assert contains(x);
     // only a partial inverse
     // TODO: throw exception
     if (Numbers.isZero((Number) x)) { return null; }
@@ -181,8 +179,8 @@ public final class Q implements Set {
 
   private final boolean equals (final Object x0,
                                 final Object x1) {
-    assert(contains(x0));
-    assert(contains(x1));
+    //assert(contains(x0));
+    //assert(contains(x1));
     final Rational q0 = Rational.valueOf(x0);
     final Rational q1 = Rational.valueOf(x1);
     return q0.equals(q1); }

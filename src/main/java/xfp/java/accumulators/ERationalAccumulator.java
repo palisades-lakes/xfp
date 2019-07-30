@@ -9,7 +9,7 @@ import xfp.java.numbers.ERationals;
  * accumulator (for testing).
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-23
+ * @version 2019-07-29
  */
 public final class ERationalAccumulator
 
@@ -49,13 +49,13 @@ extends ExactAccumulator<ERationalAccumulator> {
 
   @Override
   public final ERationalAccumulator add (final double z) {
-    assert Double.isFinite(z);
+    //assert Double.isFinite(z);
     _sum = reduce(_sum.Add(ERational.FromDouble(z)));
     return this; }
 
   @Override
   public final ERationalAccumulator add2 (final double z) {
-    assert Double.isFinite(z);
+    //assert Double.isFinite(z);
     final ERational zz = ERational.FromDouble(z);
     _sum = reduce(_sum.Add(zz.Multiply(zz)));
     return this; }
@@ -63,8 +63,8 @@ extends ExactAccumulator<ERationalAccumulator> {
   @Override
   public final ERationalAccumulator addL2 (final double z0,
                                            final double z1) {
-    assert Double.isFinite(z0);
-    assert Double.isFinite(z1);
+    //assert Double.isFinite(z0);
+    //assert Double.isFinite(z1);
     final ERational zz0 = ERational.FromDouble(z0);
     final ERational zz1 = ERational.FromDouble(z1);
     final ERational dz = zz0.Subtract(zz1);
@@ -75,8 +75,8 @@ extends ExactAccumulator<ERationalAccumulator> {
   @Override
   public final ERationalAccumulator addProduct (final double z0,
                                                 final double z1) {
-    assert Double.isFinite(z0);
-    assert Double.isFinite(z1);
+    //assert Double.isFinite(z0);
+    //assert Double.isFinite(z1);
     _sum = reduce(
       _sum.Add(
         ERational.FromDouble(z0)

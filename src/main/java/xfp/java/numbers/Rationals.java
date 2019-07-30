@@ -25,9 +25,9 @@ import xfp.java.prng.Generators;
  * <code>Rational</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-23
+ * @version 2019-07-29
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked","static-method"})
 public final class Rationals implements Set {
 
   //--------------------------------------------------------------
@@ -113,8 +113,8 @@ public final class Rationals implements Set {
 
   private final Rational add (final Rational q0,
                               final Rational q1) {
-    assert contains(q0);
-    assert contains(q1);
+    //assert contains(q0);
+    //assert contains(q1);
     return q0.add(q1); }
 
   public final BinaryOperator<Rational> adder () {
@@ -128,7 +128,6 @@ public final class Rationals implements Set {
 
   //--------------------------------------------------------------
 
-  @SuppressWarnings("static-method")
   public final Rational additiveIdentity () {
     return Rational.getZero(); }
 
@@ -138,7 +137,7 @@ public final class Rationals implements Set {
   // worth the indirection?
 
   private final Rational negate (final Rational q) {
-    assert contains(q);
+    //assert contains(q);
     return q.negate(); }
 
   public final UnaryOperator<Rational> additiveInverse () {
@@ -153,8 +152,8 @@ public final class Rationals implements Set {
 
   private final Rational multiply (final Rational q0,
                                    final Rational q1) {
-    assert contains(q0);
-    assert contains(q1);
+    //assert contains(q0);
+    //assert contains(q1);
     return q0.multiply(q1); }
 
   public final BinaryOperator<Rational> multiplier () {
@@ -169,14 +168,13 @@ public final class Rationals implements Set {
 
   //--------------------------------------------------------------
 
-  @SuppressWarnings("static-method")
   public final Rational multiplicativeIdentity () {
     return Rational.getOne(); }
 
   //--------------------------------------------------------------
 
   private final Rational reciprocal (final Rational q) {
-    assert contains(q);
+    //assert contains(q);
     // only a partial inverse
     if (q.isZero()) { return null; }
     return q.reciprocal();  }
@@ -246,7 +244,7 @@ public final class Rationals implements Set {
         final BigInteger z1 = (BigInteger) g1.next();
         final Natural u0 = Natural.get(z0.abs());
         final Natural u1 = Natural.get(z1.abs());
-        assert ! u1.isZero();
+        //assert ! u1.isZero();
         return RationalFloat.valueOf(0<=z0.signum(),u0,u1); } }; }
 
   // Is this characteristic of most inputs?

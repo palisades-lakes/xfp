@@ -20,7 +20,7 @@ import xfp.java.prng.Generators;
 /** Utilities for <code>int</code>, <code>int[]</code>.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-26
+ * @version 2019-07-29
  */
 
 public final class Ints implements Set {
@@ -36,7 +36,7 @@ public final class Ints implements Set {
   public static final long divWord (final long n, 
                                     final long d) {
     //assert 0L<=n;
-    assert 0L<d;
+    //assert 0L<d;
     if (d == 1L) { return loWord(n); }
     long q = (n>>>1) / (d>>>1);
     long r = n-(q*d);
@@ -122,8 +122,8 @@ public final class Ints implements Set {
                                          final int[] dst,
                                          final int idst,
                                          final int lShift) {
-    assert 0<lShift;
-    assert lShift<32;
+    //assert 0<lShift;
+    //assert lShift<32;
     final int rShift = 32-lShift;
     int c=src[isrc];
     for (int i0=idst,i1=isrc;i0<idst+n-1; i0++) {
@@ -183,11 +183,11 @@ public final class Ints implements Set {
   public static final int[] bigEndian (final String s,
                                        final int radix) {
     final int len = s.length();
-    assert 0 < len;
-    assert Character.MIN_RADIX <= radix;
-    assert radix <= Character.MAX_RADIX;
-    assert 0 > s.indexOf('-');
-    assert 0 > s.indexOf('+');
+    //assert 0 < len;
+    //assert Character.MIN_RADIX <= radix;
+    //assert radix <= Character.MAX_RADIX;
+    //assert 0 > s.indexOf('-');
+    //assert 0 > s.indexOf('+');
 
     int cursor = 0;
     // skip leading '0' --- not strictly necessary?
@@ -239,7 +239,7 @@ public final class Ints implements Set {
    */
 
   public static final int[] bigEndian (final long u) {
-    assert 0<=u;
+    //assert 0<=u;
     final int hi = (int) (u>>>32);
     final int lo = (int) u;
     if (0==hi) {
@@ -252,7 +252,7 @@ public final class Ints implements Set {
    */
 
   public static final int[] littleEndian (final long u) {
-    assert 0<=u;
+    //assert 0<=u;
     final int hi = (int) (u>>>32);
     final int lo = (int) u;
     if (0==hi) {
@@ -267,7 +267,7 @@ public final class Ints implements Set {
 
   public static final int[] littleEndian (final int u,
                                           final int upShift) {
-    assert 0<=upShift;
+    //assert 0<=upShift;
     if (0==u) { return EMPTY; }
     if (0==upShift) { return new int[] {u}; }
     final int iShift = (upShift>>>5);
@@ -295,8 +295,8 @@ public final class Ints implements Set {
 
   public static final int[] littleEndian (final long u,
                                           final int upShift) {
-    assert 0L<=u;
-    assert 0<=upShift;
+    //assert 0L<=u;
+    //assert 0<=upShift;
     if (0==upShift) { return littleEndian(u); }
     final int hi = (int) (u>>>32);
     final int lo = (int) u;
@@ -333,8 +333,8 @@ public final class Ints implements Set {
   @SuppressWarnings("static-method")
   private final Integer add (final Integer q0,
                              final Integer q1) {
-    assert null != q0;
-    assert null != q1;
+    //assert null != q0;
+    //assert null != q1;
     return Integer.valueOf(q0.intValue() + q1.intValue()); }
 
   public final BinaryOperator<Integer> adder () {
@@ -360,7 +360,7 @@ public final class Ints implements Set {
 
   @SuppressWarnings("static-method")
   private final Integer negate (final Integer q) {
-    assert null != q;
+    //assert null != q;
     return  Integer.valueOf(- q.intValue()); }
 
   public final UnaryOperator<Integer> additiveInverse () {
@@ -376,8 +376,8 @@ public final class Ints implements Set {
   @SuppressWarnings("static-method")
   private final Integer multiply (final Integer q0,
                                   final Integer q1) {
-    assert null != q0;
-    assert null != q1;
+    //assert null != q0;
+    //assert null != q1;
     return Integer.valueOf(q0.intValue() * q1.intValue()); }
 
   public final BinaryOperator<Integer> multiplier () {
@@ -419,8 +419,8 @@ public final class Ints implements Set {
   @SuppressWarnings("static-method")
   public final boolean equals (final Integer q0,
                                final Integer q1) {
-    assert null != q0;
-    assert null != q1;
+    //assert null != q0;
+    //assert null != q1;
     return q0.equals(q1); }
 
   @Override

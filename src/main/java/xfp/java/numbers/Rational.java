@@ -12,7 +12,7 @@ import xfp.java.exceptions.Exceptions;
 /** Ratios of {@link Natural}.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-23
+ * @version 2019-07-29
  */
 
 @SuppressWarnings("unchecked")
@@ -69,7 +69,7 @@ implements Ringlike<Rational> {
     return valueOf(! nonNegative(), numerator(), denominator()); }
 
   public final Rational reciprocal () {
-    assert !numerator().isZero();
+    //assert !numerator().isZero();
     return valueOf(nonNegative(),denominator(),numerator()); }
 
   //--------------------------------------------------------------
@@ -239,12 +239,12 @@ implements Ringlike<Rational> {
   //--------------------------------------------------------------
 
   public final Rational add (final double z) {
-    assert Double.isFinite(z);
+    //assert Double.isFinite(z);
     final long t0 = Doubles.significand(z);
     if (0L==t0) { return this; }
     final int shift = Numbers.loBit(t0);
     final long t = (t0>>>shift);
-    assert 0L<t;
+    //assert 0L<t;
     final int e = Doubles.exponent(z) + shift;
     final boolean nonNegative = Doubles.nonNegative(z);
     if (0==e) { return add(nonNegative,t); }
@@ -290,7 +290,7 @@ implements Ringlike<Rational> {
   //--------------------------------------------------------------
 
   public final Rational add2 (final double z) {
-    assert Double.isFinite(z);
+    //assert Double.isFinite(z);
     final Rational q = valueOf(z);
     //System.out.println(q);
     // infinite loop:
@@ -302,8 +302,8 @@ implements Ringlike<Rational> {
 
   public final Rational addProduct (final double z0,
                                     final double z1) {
-    assert Double.isFinite(z0);
-    assert Double.isFinite(z1);
+    //assert Double.isFinite(z0);
+    //assert Double.isFinite(z1);
     return add(valueOf(z0).multiply(valueOf(z1))); }
 
   //--------------------------------------------------------------
@@ -511,7 +511,7 @@ implements Ringlike<Rational> {
   private Rational (final boolean nonNegative,
                     final Natural numerator,
                     final Natural denominator) {
-    assert ! denominator.isZero();
+    //assert ! denominator.isZero();
     //    super();
     //assert (0 == numerator.loBit()) || (0 == denominator.loBit());
     _nonNegative = nonNegative;
@@ -538,7 +538,7 @@ implements Ringlike<Rational> {
   public static final Rational valueOf (final boolean nonNegative,
                                         final Natural n,
                                         final Natural d) {
-    assert ! d.isZero();
+    //assert ! d.isZero();
     return reduce(nonNegative,n,d); }
 
   public static final Rational valueOf (final boolean nonNegative,
@@ -549,7 +549,7 @@ implements Ringlike<Rational> {
 
   public static final Rational valueOf (final long n,
                                         final long d) {
-    assert 0L != d;
+    //assert 0L != d;
     if (0L > d) { return valueOf(-n,-d); }
     final boolean nonNegative = (0L <= n);
     return valueOf(
@@ -560,7 +560,7 @@ implements Ringlike<Rational> {
   // TODO: compute gcd and reduce ints
   public static final Rational valueOf (final int n,
                                         final int d) {
-    assert 0 != d;
+    //assert 0 != d;
     if (0 > d) { return valueOf(-n,-d); }
     final boolean nonNegative = (0 <= n);
     return valueOf(
@@ -574,7 +574,7 @@ implements Ringlike<Rational> {
                                          final long t,
                                          final int e)  {
     if (0L == t) { return getZero(); }
-    assert 0L < t;
+    //assert 0L < t;
     final Natural n0 = Natural.get(t);
     if (0 == e) {  return valueOf(nonNegative,n0); }
     if (0 < e) {
@@ -597,7 +597,7 @@ implements Ringlike<Rational> {
                                          final int e,
                                          final int t)  {
     if (0 == t) { return getZero(); }
-    assert 0 < t;
+    //assert 0 < t;
     final Natural n0 = Natural.get(t);
     if (0 == e) {  return valueOf(nonNegative,n0); }
     if (0 < e) {
@@ -671,7 +671,7 @@ implements Ringlike<Rational> {
 
   public static final Rational valueOf (final BigInteger n,
                                         final BigInteger d) {
-    assert ! BigInteger.ZERO.equals(d);
+    //assert ! BigInteger.ZERO.equals(d);
     return valueOf(
       0 <= (n.signum()*d.signum()),
       Natural.get(n.abs()),
@@ -684,7 +684,7 @@ implements Ringlike<Rational> {
 
   public static final Rational valueOf (final BigFloat n0,
                                         final BigFloat d0) {
-    assert ! d0.isZero();
+    //assert ! d0.isZero();
     //Debug.println("Rational.valueOf(BigFloat,BigFloat)");
     //Debug.println("n0=" + n0);
     //Debug.println("d0=" + d0);

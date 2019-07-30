@@ -29,9 +29,9 @@ import xfp.java.prng.Generators;
  * <code>ERational</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-05-111
+ * @version 2019-07-29
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked","static-method"})
 public final class ERationals implements Set {
 
   //--------------------------------------------------------------
@@ -236,8 +236,8 @@ public final class ERationals implements Set {
 
   private final ERational add (final ERational q0,
                                final ERational q1) {
-    assert contains(q0);
-    assert contains(q1);
+    //assert contains(q0);
+    //assert contains(q1);
     return q0.Add(q1); }
 
   public final BinaryOperator<ERational> adder () {
@@ -251,7 +251,6 @@ public final class ERationals implements Set {
 
   //--------------------------------------------------------------
 
-  @SuppressWarnings("static-method")
   public final ERational additiveIdentity () {
     return ERational.Zero; }
 
@@ -261,7 +260,7 @@ public final class ERationals implements Set {
   // worth the indirection?
 
   private final ERational negate (final ERational q) {
-    assert contains(q);
+    //assert contains(q);
     return q.Negate(); }
 
   public final UnaryOperator<ERational> additiveInverse () {
@@ -276,8 +275,8 @@ public final class ERationals implements Set {
 
   private final ERational multiply (final ERational q0,
                                     final ERational q1) {
-    assert contains(q0);
-    assert contains(q1);
+    //assert contains(q0);
+    //assert contains(q1);
     return q0.Multiply(q1); }
 
   public final BinaryOperator<ERational> multiplier () {
@@ -291,7 +290,6 @@ public final class ERationals implements Set {
 
   //--------------------------------------------------------------
 
-  @SuppressWarnings("static-method")
   public final ERational multiplicativeIdentity () {
     return ERational.One; }
 
@@ -303,7 +301,6 @@ public final class ERationals implements Set {
     return
       ERational.Create(q.getDenominator(),q.getNumerator());  }
 
-  @SuppressWarnings("static-method")
   public final UnaryOperator<ERational> multiplicativeInverse () {
     return new UnaryOperator<> () {
       @Override
@@ -328,7 +325,6 @@ public final class ERationals implements Set {
   // TODO: use EInteger.bitLength() to decide
   // which method to use?
 
-  @SuppressWarnings("static-method")
   public final boolean equals (final ERational q0,
                                final ERational q1) {
     if (q0 == q1) { return true; }

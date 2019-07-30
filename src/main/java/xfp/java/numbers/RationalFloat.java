@@ -18,7 +18,7 @@ import xfp.java.exceptions.Exceptions;
  * arithmetic on them faster.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-23
+ * @version 2019-07-29
  */
 
 @SuppressWarnings("unchecked")
@@ -66,7 +66,7 @@ implements Ringlike<RationalFloat> {
         !nonNegative(),numerator(),denominator(),exponent()); }
 
   public final RationalFloat reciprocal () {
-    assert !(numerator().isZero());
+    //assert !(numerator().isZero());
     return valueOf(
       nonNegative(),
       denominator(),
@@ -229,7 +229,7 @@ implements Ringlike<RationalFloat> {
                                    final long t11,
                                    final int e11) {
     if (0 == t11) { return this; }
-    assert 0L<t11;
+    //assert 0L<t11;
     if (isZero()) { return valueOf(p1,t11,e11); }
 
     final int shift = Numbers.loBit(t11);
@@ -253,7 +253,7 @@ implements Ringlike<RationalFloat> {
     return add(p0,t0,denominator(),e0,p1,t1,e1); }
 
   public final RationalFloat add (final double z) {
-    assert Double.isFinite(z);
+    //assert Double.isFinite(z);
     return add(
       Doubles.nonNegative(z),
       Doubles.significand(z),
@@ -320,7 +320,7 @@ implements Ringlike<RationalFloat> {
       return valueOf(
         sum.nonNegative(),sum.significand(),sum.exponent()); }
 
-    assert Double.isFinite(z);
+    //assert Double.isFinite(z);
     final Natural n1 =
       Natural.get(Doubles.significand(z));
     // TODO: use optimized square
@@ -339,8 +339,8 @@ implements Ringlike<RationalFloat> {
       return valueOf(
         sum.nonNegative(),sum.significand(),sum.exponent()); }
 
-    assert Double.isFinite(z0);
-    assert Double.isFinite(z1);
+    //assert Double.isFinite(z0);
+    //assert Double.isFinite(z1);
     final boolean p =
       ! (Doubles.nonNegative(z0) ^ Doubles.nonNegative(z1));
     // TODO: optimize long*long -> Natural?
@@ -354,8 +354,8 @@ implements Ringlike<RationalFloat> {
 
   public final RationalFloat addL2 (final double z0,
                                     final double z1) {
-    assert Double.isFinite(z0);
-    assert Double.isFinite(z1);
+    //assert Double.isFinite(z0);
+    //assert Double.isFinite(z1);
     final RationalFloat dz = valueOf(z0).subtract(z1);
     final RationalFloat dz2 = dz.square();
     final RationalFloat after = add(dz2);
@@ -729,7 +729,7 @@ implements Ringlike<RationalFloat> {
                                              final long d,
                                              final int e) {
     if (0L > d) { return valueOf(-n,-d,e); }
-    assert 0L < d;
+    //assert 0L < d;
     final boolean p = (0L<=n);
     return
       valueOf(
@@ -742,7 +742,7 @@ implements Ringlike<RationalFloat> {
                                              final int d,
                                              final int e) {
     if (0 > d) { return valueOf(-n,-d,e); }
-    assert 0 < d;
+    //assert 0 < d;
     final boolean p = (0<=n);
     return
       valueOf(
@@ -757,7 +757,7 @@ implements Ringlike<RationalFloat> {
                                               final long t0,
                                               final int e0)  {
     if (0L==t0) { return valueOf(0L); }
-    assert 0L < t0;
+    //assert 0L < t0;
     final int shift = Numbers.loBit(t0);
     final long t1;
     final int e1;
@@ -777,7 +777,7 @@ implements Ringlike<RationalFloat> {
                                               final int e,
                                               final int t)  {
     if (0 == t) { return valueOf(0L); }
-    assert 0 < t;
+    //assert 0 < t;
     return valueOf(nonNegative,Natural.get(t),e); }
 
   public static final RationalFloat valueOf (final float x)  {

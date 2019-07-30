@@ -2,10 +2,8 @@ package xfp.java.numbers;
 
 import static java.lang.Float.MAX_EXPONENT;
 import static java.lang.Float.MIN_EXPONENT;
-import static java.lang.Float.MIN_VALUE;
 import static java.lang.Float.floatToIntBits;
 import static java.lang.Float.floatToRawIntBits;
-import static java.lang.Float.toHexString;
 
 import java.math.BigInteger;
 import java.util.Map;
@@ -33,7 +31,7 @@ import xfp.java.prng.GeneratorBase;
 /** Utilities for <code>float</code>, <code>float[]</code>.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-23
+ * @version 2019-07-29
  */
 public final class Floats implements Set {
 
@@ -115,10 +113,10 @@ public final class Floats implements Set {
 
   //--------------------------------------------------------------
   //    static {
-  //      assert ((~0L) == (SIGN_MASK | EXPONENT_MASK | SIGNIFICAND_MASK));
-  //      assert (0L == (SIGN_MASK & EXPONENT_MASK));
-  //      assert (0L == (EXPONENT_MASK & SIGNIFICAND_MASK));
-  //      assert (0L == (SIGN_MASK & SIGNIFICAND_MASK));
+  //      //assert ((~0L) == (SIGN_MASK | EXPONENT_MASK | SIGNIFICAND_MASK));
+  //      //assert (0L == (SIGN_MASK & EXPONENT_MASK));
+  //      //assert (0L == (EXPONENT_MASK & SIGNIFICAND_MASK));
+  //      //assert (0L == (SIGN_MASK & SIGNIFICAND_MASK));
   //    }
   //--------------------------------------------------------------
 
@@ -211,51 +209,52 @@ public final class Floats implements Set {
                                        final int exponent,
                                        final int significand) {
 
-    assert ((0 == sign) || (1 ==sign)) : "Invalid sign bit:" + sign;
+    //assert ((0 == sign) || (1 ==sign)) : "Invalid sign bit:" + sign;
 
-    assert (SUBNORMAL_EXPONENT <= exponent)  :
-      "(unbiased) exponent too small: " + exponent;
-    assert (exponent <= MAX_EXPONENT) :
-      "(unbiased) exponent too large: " + exponent;
+    //assert (SUBNORMAL_EXPONENT <= exponent)  :
+    //  "(unbiased) exponent too small: " + exponent;
+    //assert (exponent <= MAX_EXPONENT) :
+    //  "(unbiased) exponent too large: " + exponent;
     final int be = exponent + EXPONENT_BIAS;
-    assert (0 <= be) :
-      "Negative exponent:" + Integer.toHexString(be) + " : " + be
-      + "\n" + SUBNORMAL_EXPONENT + "<=" + exponent + "<=" + MAX_EXPONENT
-      + "\n" + MIN_VALUE + " " + toHexString(MIN_VALUE)
-      + "\n" + EXPONENT_BIAS;
-    assert (be <= MAXIMUM_BIASED_EXPONENT) :
-      "Exponent too large:" + Integer.toHexString(be) +
-      ">" + Integer.toHexString(MAXIMUM_BIASED_EXPONENT);
+    //assert (0 <= be) :
+    //  "Negative exponent:" + Integer.toHexString(be) + " : " + be
+    //  + "\n" + SUBNORMAL_EXPONENT + "<=" + exponent + "<=" + MAX_EXPONENT
+    //  + "\n" + MIN_VALUE + " " + toHexString(MIN_VALUE)
+    //  + "\n" + EXPONENT_BIAS;
+    //assert (be <= MAXIMUM_BIASED_EXPONENT) :
+    //  "Exponent too large:" + Integer.toHexString(be) +
+    //  ">" + Integer.toHexString(MAXIMUM_BIASED_EXPONENT);
 
-    if (SUBNORMAL_EXPONENT == exponent) {
-      assert (0 <= significand) :
-        "subnormal significand too small:" + Integer.toHexString(significand);
-      assert significand <= MAX_SUBNORMAL_SIGNIFICAND :
-        "subnormal significand too large:" + Integer.toHexString(significand); }
-    else if (INFINITE_OR_NAN_EXPONENT == exponent) {
-      // no leading 1 bit for infinity or NaN
-      assert (0 <= significand) :
-        "infinite or NaN significand too small:"
-        + Integer.toHexString(significand);
-      assert significand <= MAX_SUBNORMAL_SIGNIFICAND :
-        "infinite or NaN significand too large:"
-        + Integer.toHexString(significand); }
-    else { // normal numbers
-      assert (MIN_NORMAL_SIGNIFICAND <= significand) :
-        "Normal significand too small:"
-        + Integer.toHexString(significand);
-      assert (significand <= MAX_NORMAL_SIGNIFICAND) :
-        "Normal significand too large:"
-        + Integer.toHexString(significand); }
+//    if (SUBNORMAL_EXPONENT == exponent) {
+//      assert (0 <= significand) :
+//        "subnormal significand too small:" + Integer.toHexString(significand);
+//      assert significand <= MAX_SUBNORMAL_SIGNIFICAND :
+//        "subnormal significand too large:" + Integer.toHexString(significand); }
+//    else if (INFINITE_OR_NAN_EXPONENT == exponent) {
+//      // no leading 1 bit for infinity or NaN
+//      assert (0 <= significand) :
+//        "infinite or NaN significand too small:"
+//        + Integer.toHexString(significand);
+//      assert significand <= MAX_SUBNORMAL_SIGNIFICAND :
+//        "infinite or NaN significand too large:"
+//        + Integer.toHexString(significand); }
+//    else { // normal numbers
+//      assert (MIN_NORMAL_SIGNIFICAND <= significand) :
+//        "Normal significand too small:"
+//        + Integer.toHexString(significand);
+//      assert (significand <= MAX_NORMAL_SIGNIFICAND) :
+//        "Normal significand too large:"
+//        + Integer.toHexString(significand); }
 
     final int s = (sign) << (EXPONENT_BITS + STORED_SIGNIFICAND_BITS);
     final int e = (be) << STORED_SIGNIFICAND_BITS;
     final int t = significand & STORED_SIGNIFICAND_MASK;
-    assert (0 == (s & e & t));
+    //assert (0 == (s & e & t));
     final float x = Float.intBitsToFloat(s | e | t);
     return x; }
 
   //--------------------------------------------------------------
+
   private static final int SIGN_0 = 0x0;
   private static final int SIGN_1 =
     (0x1 << (EXPONENT_BITS + STORED_SIGNIFICAND_BITS));
@@ -319,8 +318,8 @@ public final class Floats implements Set {
   @SuppressWarnings("static-method")
   private final Float add (final Float q0,
                            final Float q1) {
-    assert null != q0;
-    assert null != q1;
+    //assert null != q0;
+    //assert null != q1;
     return Float.valueOf(q0.floatValue() + q1.floatValue()); }
 
   public final BinaryOperator<Float> adder () {
@@ -346,7 +345,7 @@ public final class Floats implements Set {
 
   @SuppressWarnings("static-method")
   private final Float negate (final Float q) {
-    assert null != q;
+    //assert null != q;
     return  Float.valueOf(- q.floatValue()); }
 
   public final UnaryOperator<Float> additiveInverse () {
@@ -362,8 +361,8 @@ public final class Floats implements Set {
   @SuppressWarnings("static-method")
   private final Float multiply (final Float q0,
                                 final Float q1) {
-    assert null != q0;
-    assert null != q1;
+    //assert null != q0;
+    //assert null != q1;
     return Float.valueOf(q0.floatValue() * q1.floatValue()); }
 
   public final BinaryOperator<Float> multiplier () {
@@ -386,7 +385,7 @@ public final class Floats implements Set {
 
   @SuppressWarnings("static-method")
   private final Float reciprocal (final Float q) {
-    assert null != q;
+    //assert null != q;
     final float z = q.floatValue();
     // only a partial inverse
     if (0.0 == z) { return null; }
@@ -423,8 +422,8 @@ public final class Floats implements Set {
   @SuppressWarnings("static-method")
   public final boolean equals (final Float q0,
                                final Float q1) {
-    assert null != q0;
-    assert null != q1;
+    //assert null != q0;
+    //assert null != q1;
     return q0.equals(q1); }
 
   @Override
@@ -801,9 +800,9 @@ public final class Floats implements Set {
              final int eMin,
              // exclusive
              final int eMax) {
-    assert eMin >= SUBNORMAL_EXPONENT;
-    assert eMax <= (INFINITE_OR_NAN_EXPONENT + 1);
-    assert eMin < eMax;
+    //assert eMin >= SUBNORMAL_EXPONENT;
+    //assert eMax <= (INFINITE_OR_NAN_EXPONENT + 1);
+    //assert eMin < eMax;
     return new GeneratorBase (
       "floatGenerator(" + eMin + "," + eMax + ")") {
       final int eRan = eMax-eMin;
@@ -812,7 +811,7 @@ public final class Floats implements Set {
         final int s = urp.nextInt(2);
         final int d = urp.nextInt(eRan);
         final int e = d + eMin; // unbiased exponent
-        assert (eMin <= e) && (e < eMax);
+        //assert (eMin <= e) && (e < eMax);
         final int u = urp.nextInt()
           & STORED_SIGNIFICAND_MASK;
         final int t;

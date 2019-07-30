@@ -7,7 +7,7 @@ import com.upokecenter.numbers.EInteger;
  * accumulator (for testing).
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-23
+ * @version 2019-07-29
  */
 public final class EFloatAccumulator
 extends ExactAccumulator<EFloatAccumulator> {
@@ -53,13 +53,13 @@ extends ExactAccumulator<EFloatAccumulator> {
 
   @Override
   public final EFloatAccumulator add (final double z) {
-    assert Double.isFinite(z);
+    //assert Double.isFinite(z);
     _sum = _sum.Add(EFloat.FromDouble(z));
     return this; }
 
   @Override
   public final EFloatAccumulator add2 (final double z) {
-    assert Double.isFinite(z);
+    //assert Double.isFinite(z);
     final EFloat zz = EFloat.FromDouble(z);
     _sum = _sum.Add(zz.Multiply(zz));
     return this; }
@@ -67,8 +67,8 @@ extends ExactAccumulator<EFloatAccumulator> {
   @Override
   public final EFloatAccumulator addProduct (final double z0,
                                              final double z1) {
-    assert Double.isFinite(z0);
-    assert Double.isFinite(z1);
+    //assert Double.isFinite(z0);
+    //assert Double.isFinite(z1);
     _sum = _sum.Add(
       EFloat.FromDouble(z0)
       .Multiply(

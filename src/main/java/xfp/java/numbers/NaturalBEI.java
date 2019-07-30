@@ -7,7 +7,7 @@ import java.util.Arrays;
  * (natural number) represented by big-endian
  * unsigned <code>int[]</code>
  *
- * @author palisades dot lakes at gmail dot com
+ * @author palisades d9t lakes at gmail dot com
  * @version 2019-07-27
  */
 
@@ -23,7 +23,7 @@ implements Natural {
 
   @Override
   public final int word (final int i) {
-    assert 0<=i : "Negative index: " + i;
+    //assert 0<=i : "Negative index: " + i;
     final int n = words().length;
     final int ii = n-i-1;
     if ((0<=ii) && (ii<n)) { return words()[ii]; }
@@ -32,10 +32,10 @@ implements Natural {
   @Override
   public final Natural setWord (final int i,
                                 final int w) {
-    assert 0<=i;
+    //assert 0<=i;
     final int n0 = words().length;
     final int n1 = Math.max(i+1,n0);
-    assert i<n1;
+    //assert i<n1;
     final int[] ws = new int[n1];
     System.arraycopy(words(),0,ws,n1-n0,n0);
     ws[n1-1-i] = w;
@@ -79,7 +79,7 @@ implements Natural {
 
   @Override
   public final Natural recyclable (final int n) {
-    assert 0<=n;
+    //assert 0<=n;
     return NaturalBEIMutable.make(n); }
 
   @Override
@@ -192,7 +192,7 @@ implements Natural {
   //--------------------------------------------------------------
 
   public static final NaturalBEI valueOf (final long x) {
-    assert 0L<=x;
+    //assert 0L<=x;
     //if (x==0L) { return valueOf(0L); }
     //if (x==1L) { return ONE; }
     //if (x==2L) { return TWO; }

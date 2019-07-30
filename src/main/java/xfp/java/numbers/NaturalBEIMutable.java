@@ -8,7 +8,7 @@ import xfp.java.exceptions.Exceptions;
 
 /**
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-22
+ * @version 2019-07-29
  */
 
 public final class NaturalBEIMutable implements Natural {
@@ -55,7 +55,7 @@ public final class NaturalBEIMutable implements Natural {
   // TODO: useful to oversize array? or as an option?
   private final void setWords (final int[] v,
                                final int length) {
-    assert length<=v.length;
+    //assert length<=v.length;
     words = v; nWords = length; start = 0; }
 
   private final int bei (final int i) {
@@ -95,14 +95,14 @@ public final class NaturalBEIMutable implements Natural {
 
   @Override
   public final int word (final int i) {
-    assert 0<=i;
+    //assert 0<=i;
     if (i>=nWords) { return 0; }
     return words[bei(i)]; }
 
   @Override
   public final Natural setWord (final int i,
                                 final int w) {
-    assert 0<=i;
+    //assert 0<=i;
     expandTo(i);
     words[bei(i)] = w;
     return this; }
@@ -127,8 +127,8 @@ public final class NaturalBEIMutable implements Natural {
   // DANGER!!!
 
   private final Natural smallDownShift (final int rShift) {
-    assert 0<=rShift;
-    assert rShift<32;
+    //assert 0<=rShift;
+    //assert rShift<32;
     if (0<rShift) {
       final int lShift = 32-rShift;
       int c = words[(start+nWords)-1];
@@ -142,7 +142,7 @@ public final class NaturalBEIMutable implements Natural {
   // DANGER!!!
   @Override
   public final Natural shiftDown (final int shift) {
-    assert 0<=shift;
+    //assert 0<=shift;
     if ((shift>>>5) >= nWords) { return clear(); }
     if (nWords==0) { return this; }
     final int iShift = (shift>>>5);
@@ -160,8 +160,8 @@ public final class NaturalBEIMutable implements Natural {
   // DANGER!!!
 
   private final Natural smallUpShift (final int lShift) {
-    assert 0<=lShift;
-    assert lShift<32;
+    //assert 0<=lShift;
+    //assert lShift<32;
     if (0<lShift) {
       final int rShift = 32-lShift;
       final int m=start+nWords-1;
@@ -177,7 +177,7 @@ public final class NaturalBEIMutable implements Natural {
 
   @Override
   public final Natural shiftUp (final int shift) {
-    assert 0<=shift;
+    //assert 0<=shift;
     if (0==shift) { return this; }
     // If there is enough storage space in this NaturalBEIMutable
     // already the available space will be used. Space to the
@@ -227,7 +227,7 @@ public final class NaturalBEIMutable implements Natural {
   //    final NaturalBEIMutable b = (NaturalBEIMutable) u;
   //    int[] result = words;
   //    final int sign = a.compareTo(b);
-  //    assert 0<=sign;
+  //    //assert 0<=sign;
   //    if (sign == 0) { clear(); return this; }
   //    final int resultLen = a.nWords;
   //    if (result.length < resultLen) { result = new int[resultLen]; }
@@ -324,7 +324,7 @@ public final class NaturalBEIMutable implements Natural {
 
   @Override
   public final Natural recyclable (final int n) {
-    assert 0<=n;
+    //assert 0<=n;
     return make(n); }
   //    expandTo(n); return this; }
 
@@ -370,12 +370,12 @@ public final class NaturalBEIMutable implements Natural {
     return new NaturalBEIMutable(u); }
 
   public static final NaturalBEIMutable make (final int n) {
-    assert 0<=n;
+    //assert 0<=n;
     return new NaturalBEIMutable(new int[n]); }
 
   public static final NaturalBEIMutable make (final NaturalBEI init,
                                               final int n) {
-    assert 0<=n;
+    //assert 0<=n;
     final int[] words = new int[n];
     final int start = Math.max(0,n-init.hiInt());
     init.copyWords(words,start);
@@ -383,7 +383,7 @@ public final class NaturalBEIMutable implements Natural {
 
   public static final NaturalBEIMutable make (final NaturalBEIMutable init,
                                               final int n) {
-    assert 0<=n;
+    //assert 0<=n;
     final int[] wrods = new int[n];
     final int start = Math.max(0,n-init.hiInt());
     init.copyWords(wrods,start);
@@ -419,13 +419,13 @@ public final class NaturalBEIMutable implements Natural {
 
   public static final NaturalBEIMutable valueOf (final long u) {
     if (0L==u) { return make(); }
-    assert 0L<u;
+    //assert 0L<u;
     return unsafe(Ints.bigEndian(u)); }
 
   public static final NaturalBEIMutable valueOf (final long u,
                                                  final int upShift) {
-    assert 0L<=u;
-    assert 0<=upShift;
+    //assert 0L<=u;
+    //assert 0<=upShift;
     if (0==upShift) { return valueOf(u); }
     if (0L==u) { return make(); }
     return (NaturalBEIMutable) valueOf(u).shiftUp(upShift); }

@@ -3,7 +3,6 @@ package xfp.java.numbers;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
-//import xfp.java.numbers.BigInteger;
 import java.util.List;
 import java.util.function.BiPredicate;
 
@@ -19,7 +18,7 @@ import xfp.java.prng.Generators;
 /** Utilities for Object and primitive numbers.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-01
+ * @version 2019-07-29
  */
 @SuppressWarnings("unchecked")
 public final class Numbers implements Set {
@@ -245,8 +244,8 @@ public final class Numbers implements Set {
   @SuppressWarnings("static-method")
   public final boolean equals (final Number x0,
                                final Number x1) {
-    assert null != x0;
-    assert null != x1;
+    //assert null != x0;
+    //assert null != x1;
     final Rational q0 = Rational.valueOf(x0);
     final Rational q1 = Rational.valueOf(x1);
     return q0.equals(q1); }

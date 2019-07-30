@@ -39,7 +39,7 @@ import xfp.java.numbers.Doubles;
  * <em>NOT</em> thread safe!
  * <p>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-05
+ * @version 2019-07-29
  */
 
 public final class ZhuHayesAccumulator
@@ -82,13 +82,13 @@ extends ExactAccumulator<ZhuHayesAccumulator> {
                                       final double s2) {
 
     // non-overlapping here means:
-    //    assert Math.abs(s0) > Math.abs(s1);
-    //    assert Math.abs(s1) > Math.abs(s2) :
+    //    //assert Math.abs(s0) > Math.abs(s1);
+    //    //assert Math.abs(s1) > Math.abs(s2) :
     //      Double.toHexString(s1) + " <= " + Double.toHexString(s2);
-    assert s0 == (s0 + s1) :
-      Double.toHexString(s0) + " + " + Double.toHexString(s1) +
-      " -> " + Double.toHexString(s0+s1);
-    assert s1 == (s1 + s2);
+    //assert s0 == (s0 + s1) :
+    //  Double.toHexString(s0) + " + " + Double.toHexString(s1) +
+    //  " -> " + Double.toHexString(s0+s1);
+    //assert s1 == (s1 + s2);
 
     if ((isHalfUlp(s1)) &&
       (Math.signum(s1) == Math.signum(s2))) {
@@ -157,7 +157,7 @@ extends ExactAccumulator<ZhuHayesAccumulator> {
       // Step 3(3)
       // check count exact double
       final double dcount = count;
-      assert count == (int) dcount;
+      //assert count == (int) dcount;
       final double em = dcount * halfUlp(sm);
       // Step 3(4)
       twoSum(s, st);
@@ -318,7 +318,7 @@ extends ExactAccumulator<ZhuHayesAccumulator> {
 
   @Override
   public final ZhuHayesAccumulator add (final double x) {
-    assert Double.isFinite(x);
+    //assert Double.isFinite(x);
     // Step 4(2)
     // Step 4(3)
     // Step 4(4)

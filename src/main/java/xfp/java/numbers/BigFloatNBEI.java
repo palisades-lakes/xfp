@@ -13,7 +13,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-09
+ * @version 2019-07-29
  */
 
 public final class BigFloatNBEI
@@ -128,7 +128,7 @@ implements Ringlike<BigFloatNBEI> {
                    final boolean p1,
                    final long t1,
                    final int e) {
-    assert 0L<=t1;
+    //assert 0L<=t1;
     if (p0 ^ p1) { // different signs
       final int c = t0.compareTo(t1);
       if (0==c) { return valueOf(0L); }
@@ -167,9 +167,9 @@ implements Ringlike<BigFloatNBEI> {
   private static final int compare (final long m0,
                                     final long m1,
                                     final int bitShift) {
-    assert 0L<=m0;
-    assert 0L<=m1;
-    assert 0<=bitShift : "bitShift=" + bitShift;
+    //assert 0L<=m0;
+    //assert 0L<=m1;
+    //assert 0<=bitShift : "bitShift=" + bitShift;
     if (0==bitShift) { return Long.compare(m0,m1); }
     if (0L==m1) {
       if (0L==m0) { return 0; }
@@ -187,8 +187,8 @@ implements Ringlike<BigFloatNBEI> {
 
   private static final Natural add (final long m0,
                                     final long m1) {
-    assert 0L<=m0;
-    assert 0L<=m1;
+    //assert 0L<=m0;
+    //assert 0L<=m1;
     long sum = loWord(m0) + loWord(m1);
     final int lo = (int) sum;
     sum = Numbers.hiWord(m0) + Numbers.hiWord(m1) + Numbers.hiWord(sum);
@@ -204,9 +204,9 @@ implements Ringlike<BigFloatNBEI> {
   private static final Natural add (final long m0,
                                     final long m1,
                                     final int bitShift) {
-    assert 0L<=m0;
-    assert 0L<=m1;
-    assert 0<=bitShift;
+    //assert 0L<=m0;
+    //assert 0L<=m1;
+    //assert 0<=bitShift;
 
     if (0L==m0) { return NaturalBEI.valueOf(m1).shiftUp(bitShift); }
     if (0L==m1) { return NaturalBEI.valueOf(m0); }
@@ -269,11 +269,11 @@ implements Ringlike<BigFloatNBEI> {
   private static final Natural subtract (final long m0,
                                          final long m1,
                                          final int bitShift) {
-    assert 0L<=m0;
-    assert 0L<=m1;
-    assert 0<=bitShift;
+    //assert 0L<=m0;
+    //assert 0L<=m1;
+    //assert 0<=bitShift;
     final long dm = m0 - (m1<<bitShift);
-    assert 0L<=dm;
+    //assert 0L<=dm;
     return NaturalBEI.valueOf(dm); }
 
   // only when (m1 << upShift) <= m0
@@ -358,7 +358,7 @@ implements Ringlike<BigFloatNBEI> {
 
   public final BigFloatNBEI
   add (final double z) {
-    assert Double.isFinite(z);
+    //assert Double.isFinite(z);
     return add(
       nonNegative(),
       significand(),
@@ -417,7 +417,7 @@ implements Ringlike<BigFloatNBEI> {
   multiply (final NaturalBEI x0,
             final boolean p1,
             final long x1) {
-    assert 0L<=x1;
+    //assert 0L<=x1;
     final int e0 = x0.loBit();
     final int e1 = Numbers.loBit(x1);
     final NaturalBEI y0 =
@@ -442,7 +442,7 @@ implements Ringlike<BigFloatNBEI> {
 
   public final BigFloatNBEI
   multiply (final double z) {
-    assert Double.isFinite(z);
+    //assert Double.isFinite(z);
     return
       multiply(
         Doubles.nonNegative(z),
@@ -463,7 +463,7 @@ implements Ringlike<BigFloatNBEI> {
 
   public final BigFloatNBEI
   add2 (final double z) {
-    assert Double.isFinite(z);
+    //assert Double.isFinite(z);
     final long tz = Doubles.significand(z);
     final int ez = Doubles.exponent(z);
     final int s = Numbers.loBit(tz);
@@ -486,8 +486,8 @@ implements Ringlike<BigFloatNBEI> {
   //  public final BigFloat
   //  addL1 (final double z0,
   //         final double z1) {
-  //    assert Double.isFinite(z0);
-  //    assert Double.isFinite(z1);
+  //    //assert Double.isFinite(z0);
+  //    //assert Double.isFinite(z1);
   //    final BigFloat dz = subtract(z0,z1);
   //    return add(
   //      nonNegative(),
@@ -520,8 +520,8 @@ implements Ringlike<BigFloatNBEI> {
   public final BigFloatNBEI
   addL2 (final double z0,
          final double z1) {
-    assert Double.isFinite(z0);
-    assert Double.isFinite(z1);
+    //assert Double.isFinite(z0);
+    //assert Double.isFinite(z1);
     final BigFloatNBEI dz = subtract(z0,z1);
     final Natural t2 = dz.significand().square();
     final int e2 = 2*dz.exponent();
@@ -539,8 +539,8 @@ implements Ringlike<BigFloatNBEI> {
   addProduct (final double z0,
               final double z1) {
     if ((0.0==z0) || (0.0==z1)) { return this; }
-    assert Double.isFinite(z0);
-    assert Double.isFinite(z1);
+    //assert Double.isFinite(z0);
+    //assert Double.isFinite(z1);
     final boolean p0 = Doubles.nonNegative(z0);
     final long t0 = Doubles.significand(z0);
     final int e0 = Doubles.exponent(z0);
@@ -567,7 +567,7 @@ implements Ringlike<BigFloatNBEI> {
   //              final double z1) {
   //    // use twoMul to convert exactly to 2 adds.
   //    final double z01 = z0*z1;
-  //    assert Double.isFinite(z01);
+  //    //assert Double.isFinite(z01);
   //    final double e = Math.fma(z0,z1,-z01);
   //    return add(z01).add(e); }
 
@@ -782,10 +782,10 @@ implements Ringlike<BigFloatNBEI> {
 
   @Override
   public final String toString () {
-    assert (0==significand().loBit())
-    || significand().isZero() :
-      significand().toString()
-      + "\nlo= " + significand().loBit();
+    //assert (0==significand().loBit())
+    //|| significand().isZero() :
+    //  significand().toString()
+    //  + "\nlo= " + significand().loBit();
     return
       (nonNegative() ? "" : "-")
       + "0x" + significand().toString()
@@ -834,7 +834,7 @@ implements Ringlike<BigFloatNBEI> {
                                              final long t0,
                                              final int e0)  {
     if (0L==t0) { return valueOf(0L); }
-    assert 0L<t0;
+    //assert 0L<t0;
     final int shift = Numbers.loBit(t0);
     final long t1;
     final int e1;

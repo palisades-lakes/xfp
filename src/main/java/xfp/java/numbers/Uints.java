@@ -17,7 +17,7 @@ import xfp.java.exceptions.Exceptions;
  * TODO: max valid range limited by int hiBit!
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-24
+ * @version 2019-07-29
  */
 
 @SuppressWarnings("unchecked")
@@ -92,8 +92,8 @@ extends Transience<T> {
 
   default T words (final int i0,
                    final int i1) {
-    assert 0<=i0;
-    assert i0<i1;
+    //assert 0<=i0;
+    //assert i0<i1;
     if ((0==i0) && (hiInt()<=i1)) { return copy(); }
     final int n = Math.max(0,i1-i0);
     if (0>=n) { return empty(); }
@@ -118,7 +118,7 @@ extends Transience<T> {
    */
 
   default T set (final long u) {
-    assert 0<=u;
+    //assert 0<=u;
     // TODO: optimize zeroing internal array?
     clear();
     final long lo = Numbers.loWord(u);
@@ -172,7 +172,7 @@ extends Transience<T> {
   //--------------------------------------------------------------
 
   default boolean testBit (final int n) {
-    assert 0<=n;
+    //assert 0<=n;
     final int w = word(n>>>5);
     final int b = (1 << (n&0x1F));
     return 0!=(w&b); }
@@ -181,7 +181,7 @@ extends Transience<T> {
   /** get the least significant int word of (this >>> shift) */
 
   default int getShiftedInt (final int downShift) {
-    assert 0<=downShift;
+    //assert 0<=downShift;
     final int iShift = (downShift>>>5);
     if (hiInt()<=iShift) { return 0; }
     final int rShift = (downShift & 0x1f);
@@ -197,7 +197,7 @@ extends Transience<T> {
    */
 
   default long getShiftedLong (final int downShift) {
-    assert 0<=downShift;
+    //assert 0<=downShift;
     final int iShift = (downShift>>>5);
     if (hiInt()<=iShift) { return 0L; }
     final int rShift = (downShift & 0x1f);
@@ -224,21 +224,21 @@ extends Transience<T> {
   //--------------------------------------------------------------
 
   default T setBit (final int i) {
-    assert 0<=i;
+    //assert 0<=i;
     final int iw = (i>>>5);
     final int w = word(iw);
     final int ib = (i&0x1F);
     return setWord(iw,(w|(1<<ib))); }
 
   default T clearBit (final int n) {
-    assert 0<=n;
+    //assert 0<=n;
     final int iw = (n>>>5);
     final int w = word(iw);
     final int ib = (n&0x1F);
     return setWord(iw,(w&(~(1<<ib)))); }
 
   default T flipBit (final int n) {
-    assert 0<=n;
+    //assert 0<=n;
     final int iw = (n>>>5);
     final int w = word(iw);
     final int ib = (n&0x1F);
@@ -247,7 +247,7 @@ extends Transience<T> {
   //--------------------------------------------------------------
 
   default T shiftDownWords (final int iShift) {
-    assert 0<=iShift;
+    //assert 0<=iShift;
     if (0==iShift) { return (T) this; }
     final int n0 = hiInt();
     if (0==n0) { return (T) this; }
@@ -260,7 +260,7 @@ extends Transience<T> {
     return u; }
 
   default T shiftDown (final int shift) {
-    assert 0<=shift;
+    //assert 0<=shift;
     if (shift==0) { return (T) this; }
     final int n0 = hiInt();
     if (0==n0) { return (T) this; }
@@ -281,7 +281,7 @@ extends Transience<T> {
     return u; }
 
   //  default T shiftDown (final int shift) {
-//    assert 0<=shift;
+//    //assert 0<=shift;
 //    if (shift==0) { return (T) this; }
 //    final int n0 = hiInt();
 //    if (0==n0) { return (T) this; }
@@ -301,7 +301,7 @@ extends Transience<T> {
   //--------------------------------------------------------------
 
   default T shiftUpWords (final int iShift) {
-    assert 0<=iShift;
+    //assert 0<=iShift;
     if (0==iShift) { return (T) this; }
     final int n = hiInt();
     if (0==n) { return (T) this; }
@@ -311,7 +311,7 @@ extends Transience<T> {
     return u; }
 
   default T shiftUp (final int shift) {
-    assert 0<=shift;
+    //assert 0<=shift;
     if (shift==0) { return (T) this; }
     final int n0 = hiInt();
     if (0==n0) { return (T) this; }

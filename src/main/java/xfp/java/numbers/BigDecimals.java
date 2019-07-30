@@ -23,9 +23,9 @@ import xfp.java.prng.GeneratorBase;
  * <code>BigDecimal</code>.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-18
+ * @version 2019-07-29
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked","static-method"})
 public final class BigDecimals implements Set {
 
   //--------------------------------------------------------------
@@ -37,8 +37,8 @@ public final class BigDecimals implements Set {
 
   private final BigDecimal add (final BigDecimal q0,
                                 final BigDecimal q1) {
-    assert contains(q0);
-    assert contains(q1);
+    //assert contains(q0);
+    //assert contains(q1);
     return q0.add(q1); }
 
   public final BinaryOperator<BigDecimal> adder () {
@@ -52,7 +52,6 @@ public final class BigDecimals implements Set {
 
   //--------------------------------------------------------------
 
-  @SuppressWarnings("static-method")
   public final BigDecimal additiveIdentity () {
     return BigDecimal.valueOf(0L); }
 
@@ -62,7 +61,7 @@ public final class BigDecimals implements Set {
   // worth the indirection?
 
   private final BigDecimal negate (final BigDecimal q) {
-    assert contains(q);
+    //assert contains(q);
     return q.negate(); }
 
   public final UnaryOperator<BigDecimal> additiveInverse () {
@@ -77,8 +76,8 @@ public final class BigDecimals implements Set {
 
   private final BigDecimal multiply (final BigDecimal q0,
                                      final BigDecimal q1) {
-    assert contains(q0);
-    assert contains(q1);
+    //assert contains(q0);
+    //assert contains(q1);
     return q0.multiply(q1); }
 
   public final BinaryOperator<BigDecimal> multiplier () {
@@ -92,14 +91,13 @@ public final class BigDecimals implements Set {
 
   //--------------------------------------------------------------
 
-  @SuppressWarnings("static-method")
   public final BigDecimal multiplicativeIdentity () {
     return BigDecimal.ONE; }
 
   //--------------------------------------------------------------
 
   private final BigDecimal reciprocal (final BigDecimal q) {
-    assert contains(q);
+    //assert contains(q);
     // only a partial inverse
     if (BigDecimal.valueOf(0L).equals(q)) { return null; }
     return BigDecimal.ONE.divide(q);  }
@@ -126,7 +124,6 @@ public final class BigDecimals implements Set {
   /** Note: BigDecimal.equal doesn't test for equality as rational
    * numbers.
    */
-  @SuppressWarnings("static-method")
   public final boolean equals (final BigDecimal q0,
                                final BigDecimal q1) {
     if (q0 == q1) { return true; }

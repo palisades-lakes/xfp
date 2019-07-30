@@ -7,14 +7,12 @@ import static xfp.java.numbers.Numbers.unsigned;
 import java.math.BigInteger;
 import java.util.List;
 
-import xfp.java.Classes;
-
 /** Division, gcd, etc., of natural numbers.
  * 
  * Non-instantiable.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-23
+ * @version 2019-07-29
  */
 
 @SuppressWarnings("unchecked")
@@ -93,16 +91,16 @@ public final class NaturalDivide {
                            final Natural v,
                            final int n1,
                            final int i0) {
-    assert 0L<=x;
-    assert 0<=i0;
+    //assert 0L<=x;
+    //assert 0<=i0;
     Natural w = u;
     long carry = 0;
     int i = n0-1-n1-i0;
-    assert 0<=i :
-      "\nu=" + Classes.className(w) + "\n" + w + 
-      "\nv=" + Classes.className(v) + "\n" + v
-      + "\nx= " + x 
-      + "\nn0= " + n0 + "\nn1= " + n1 + "\ni0= " + i0; 
+    //assert 0<=i :
+//      "\nu=" + Classes.className(w) + "\n" + w + 
+//      "\nv=" + Classes.className(v) + "\n" + v
+//      + "\nx= " + x 
+//      + "\nn0= " + n0 + "\nn1= " + n1 + "\ni0= " + i0; 
     for (int j=0;j<n1;j++,i++) {
       final long prod = (v.uword(j)*x) + carry;
       final long diff = w.uword(i)-prod;
@@ -128,7 +126,7 @@ public final class NaturalDivide {
                                        final Natural v,
                                        final int n1,
                                        final int i0) {
-    assert 0<=i0;
+    //assert 0<=i0;
     Natural w = u;
     final int off = n0 - n1 - 1 - i0;
     long carry = 0;   
@@ -144,24 +142,24 @@ public final class NaturalDivide {
   private static final List<Natural> 
   knuthDivision (final Natural u,
                  final Natural v) {
-    assert u.isValid();
-    assert v.isValid();
-    assert !v.isZero();
+    //assert u.isValid();
+    //assert v.isValid();
+    //assert !v.isZero();
     // D1 compact the divisor
     final int nv = v.hiInt();
     final int lShift = Integer.numberOfLeadingZeros(v.word(nv-1));
     Natural d = v.copy().shiftUp(lShift);
-    assert v.isValid();
+    //assert v.isValid();
     final int nd = d.hiInt();
-    assert nv==nd;
-    final int nu = u.hiInt();
+    //assert nv==nd;
     Natural r = u.copy().shiftUp(lShift);
-    assert u.isValid();
+    //assert u.isValid();
     final int nr0 = r.hiInt();
-    assert (nu==nr0)||(nu+1==nr0) :
-      "\nnu=" + nu + "\nnr=" + nr0;
+//    final int nu = u.hiInt();
+    //assert (nu==nr0)||(nu+1==nr0) :
+//      "\nnu=" + nu + "\nnr=" + nr0;
     r = r.setWord(nr0,0);
-    assert u.isValid();
+    //assert u.isValid();
     final int nr = nr0+1;
     Natural q = u.zero();
     final int nq = nr-nd;
@@ -265,7 +263,7 @@ public final class NaturalDivide {
   public static final List<Natural> 
   divideAndRemainderKnuth (final Natural u,
                            final Natural v) {
-    assert ! v.isZero();
+    //assert ! v.isZero();
     if (v.isOne()) { return List.of(u,u.zero()); }
     if (u.isZero()) { return List.of(u.zero(),u.zero()); }
 
@@ -273,8 +271,8 @@ public final class NaturalDivide {
     if (0==cmp) { return List.of(u.one(),u.zero()); }
     if (0>cmp) { return List.of(u.zero(),u); }
 
-    assert u.isValid();
-    assert v.isValid();
+    //assert u.isValid();
+    //assert v.isValid();
     if (1==v.hiInt()) { return divideAndRemainder(u,v.word(0)); } 
 
     // Cancel common powers of 2 if above KNUTH_POW2_* thresholds
@@ -357,8 +355,8 @@ public final class NaturalDivide {
               final Natural b) {
     final int n = b.hiInt();
 
-    assert a.isValid();
-    assert b.isValid();
+    //assert a.isValid();
+    //assert b.isValid();
     // step 1: base case
     if (((n%2) != 0) || (n < BURNIKEL_ZIEGLER_THRESHOLD)) {
       final List<Natural> qr = divideAndRemainderKnuth(a,b);
@@ -368,15 +366,15 @@ public final class NaturalDivide {
     // where each ai is n/2 ints or less
     // aUpper = [a1,a2,a3]
     final Natural aUpper = a.shiftDown(32*(n/2));
-    assert a.isValid();
-    assert aUpper.isValid();
+    //assert a.isValid();
+    //assert aUpper.isValid();
     Natural aa = a.words(0,n/2); // this = a4
-    assert aa.isValid();
+    //assert aa.isValid();
 
     // step 3: q1=aUpper/b, r1=aUpper%b
     final List<Natural> qr1 = divide3n2n(aUpper,b);
-    assert aa.isValid();
-    assert qr1.get(1).isValid();
+    //assert aa.isValid();
+    //assert qr1.get(1).isValid();
 
     // step 4: quotient=[r1,this]/b, r2=[r1,this]%b
     aa = aa.add(qr1.get(1),32*(n/2));   // this = [r1,this]
@@ -429,7 +427,7 @@ public final class NaturalDivide {
     final int sigma = (int) Math.max(0, n32-v.hiBit());
 
     // step 4a: shift b so its length is a multiple of n
-    assert 0<=sigma;
+    //assert 0<=sigma;
     final Natural bShifted = v.copy().shiftUp(sigma);
     // step 4b: shift a by the same amount
     final Natural aShifted = u.copy().shiftUp(sigma);
@@ -460,8 +458,8 @@ public final class NaturalDivide {
       q = q.add(qri.get(0),(i*n)<<5); }
     // final iteration of step 8: do the loop one more time
     // for i=0 but leave z unchanged
-    assert z.isValid();
-    assert bShifted.isValid();
+    //assert z.isValid();
+    //assert bShifted.isValid();
     final List<Natural> qri = divide2n1n(z,bShifted);
 
     // step 9: a and b were shifted, so shift back
@@ -474,7 +472,7 @@ public final class NaturalDivide {
   public static final List<Natural> 
   divideAndRemainder (final Natural u,
                       final Natural v) {
-    assert (! v.isZero());
+    //assert (! v.isZero());
     if (useKnuthDivision(u,v)) { 
       return NaturalDivide.divideAndRemainderKnuth(u,v); }
     return NaturalDivide.divideAndRemainderBurnikelZiegler(u,v); }
@@ -490,34 +488,34 @@ public final class NaturalDivide {
 //    Natural b = v.copy();
     Natural a = u;
     Natural b = v;
-    assert a.isValid();
-    assert b.isValid();
-    assert u.isValid();
-    assert v.isValid();
+    //assert a.isValid();
+    //assert b.isValid();
+    //assert u.isValid();
+    //assert v.isValid();
     // B1
     final int sa = a.loBit();
     final int s = Math.min(sa,b.loBit());
     if (s!=0) { a = a.shiftDown(s); b = b.shiftDown(s); }
-    assert a.isValid();
-    assert b.isValid();
-    assert u.isValid();
-    assert v.isValid();
+    //assert a.isValid();
+    //assert b.isValid();
+    //assert u.isValid();
+    //assert v.isValid();
     // B2
     int tsign = (s==sa) ? -1 : 1;
     Natural t = (0<tsign) ? a : b;
     for (int lb=t.loBit();lb>=0;lb=t.loBit()) {
-      assert a.isValid();
-      assert b.isValid();
-      assert u.isValid();
-      assert v.isValid();
+      //assert a.isValid();
+      //assert b.isValid();
+      //assert u.isValid();
+      //assert v.isValid();
       // B3 and B4
-      assert t.isValid() : Classes.className(t) + "\n" + t;
+      //assert t.isValid() : Classes.className(t) + "\n" + t;
       t = t.shiftDown(lb);
-      assert t.isValid() : Classes.className(t) + "\n" + t;
-      assert a.isValid();
-      assert b.isValid() : Classes.className(b) + "\n" + b;
-      assert u.isValid();
-      assert v.isValid();
+      //assert t.isValid() : Classes.className(t) + "\n" + t;
+      //assert a.isValid();
+      //assert b.isValid() : Classes.className(b) + "\n" + b;
+      //assert u.isValid();
+      //assert v.isValid();
       // step B5
       if (0<tsign) { a = t; } else { b = t; }
       final int an = a.hiInt();
@@ -527,35 +525,35 @@ public final class NaturalDivide {
         final int y = b.word(bn-1);
         Natural r = u.from(Ints.unsignedGcd(x,y));
         if (s > 0) { r = r.shiftUp(s); }
-        assert a.isValid();
-        assert b.isValid();
-        assert u.isValid();
-        assert v.isValid();
+        //assert a.isValid();
+        //assert b.isValid();
+        //assert u.isValid();
+        //assert v.isValid();
         return r; }
       // B6
       tsign = a.compareTo(b);
       if (0==tsign) { 
-        assert a.isValid();
-        assert b.isValid();
-        assert u.isValid();
-        assert v.isValid();
+        //assert a.isValid();
+        //assert b.isValid();
+        //assert u.isValid();
+        //assert v.isValid();
         break; }
       else if (0<tsign) { a = a.subtract(b); t = a;  }
       else { b = b.subtract(a); t = b; } 
-      assert a.isValid();
-      assert b.isValid();
-      assert u.isValid();
-      assert v.isValid();
+      //assert a.isValid();
+      //assert b.isValid();
+      //assert u.isValid();
+      //assert v.isValid();
     }
-    assert a.isValid();
-    assert b.isValid();
-    assert u.isValid();
-    assert v.isValid();
+    //assert a.isValid();
+    //assert b.isValid();
+    //assert u.isValid();
+    //assert v.isValid();
     if (s > 0) { a = a.shiftUp(s); }
-    assert a.isValid();
-    assert b.isValid();
-    assert u.isValid();
-    assert v.isValid();
+    //assert a.isValid();
+    //assert b.isValid();
+    //assert u.isValid();
+    //assert v.isValid();
     return a; }
 
   //--------------------------------------------------------------
@@ -567,42 +565,42 @@ public final class NaturalDivide {
                                    final Natural v) {
     Natural a = u;
     Natural b = v;
-    assert a.isValid();
-    assert b.isValid();
+    //assert a.isValid();
+    //assert b.isValid();
     while (!b.isZero()) {
       if (Math.abs(a.hiInt()-b.hiInt()) < 2) { 
         final Natural g = gcdKnuth(a,b); 
-        assert a.isValid();
-        assert b.isValid();
+        //assert a.isValid();
+        //assert b.isValid();
         return g; }
       final List<Natural> qr = divideAndRemainder(a,b);
-      assert a.isValid();
-      assert b.isValid();
+      //assert a.isValid();
+      //assert b.isValid();
       a = b;
       b = qr.get(1); }
     return a; }
 
   public static final List<Natural> reduce (final Natural n0,
                                             final Natural d0) {
-    assert n0.isValid();
-    assert d0.isValid();
+    //assert n0.isValid();
+    //assert d0.isValid();
     final int shift = Math.min(n0.loBit(),d0.loBit());
     final Natural n = ((shift != 0) ? n0.shiftDown(shift) : n0);
     final Natural d = ((shift != 0) ? d0.shiftDown(shift) : d0);
-    assert n.isValid();
-    assert d.isValid();
+    //assert n.isValid();
+    //assert d.isValid();
     if (n.equals(d)) { return List.of(n0.one(),n0.one()); }
     if (d.isOne()) { return List.of(n,n0.one()); }
     if (n.isOne()) { return List.of(n0.one(),d); }
     final Natural g = gcd(n,d);
-    assert g.isValid();
-    assert n.isValid();
-    assert d.isValid();
+    //assert g.isValid();
+    //assert n.isValid();
+    //assert d.isValid();
     if (g.compareTo(n.one()) > 0) {
       final Natural ng = n.divide(g);
       final Natural dg = d.divide(g);
-      assert ng.isValid();
-      assert dg.isValid();
+      //assert ng.isValid();
+      //assert dg.isValid();
       return List.of(ng,dg); }
     return List.of(n,d); }
 

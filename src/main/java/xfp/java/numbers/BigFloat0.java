@@ -52,13 +52,12 @@ implements Ringlike<BigFloat0> {
 
   //--------------------------------------------------------------
 
-  private static final BigFloat0
-  add (final boolean p0,
-       final NaturalBEI0 t0,
-       final int e0,
-       final boolean p1,
-       final NaturalBEI0 t1,
-       final int e1) {
+  private static final BigFloat0 add (final boolean p0,
+                                      final NaturalBEI0 t0,
+                                      final int e0,
+                                      final boolean p1,
+                                      final NaturalBEI0 t1,
+                                      final int e1) {
 
     final NaturalBEI0 t02,t12;
     final int e2;
@@ -103,7 +102,7 @@ implements Ringlike<BigFloat0> {
                    final boolean p1,
                    final long t1,
                    final int e) {
-    assert 0L<=t1;
+    //assert 0L<=t1;
     if (p0 ^ p1) { // different signs
       final int c = t0.compareTo(t1);
       if (0==c) { return valueOf(0L); }
@@ -166,7 +165,7 @@ implements Ringlike<BigFloat0> {
        final long t11,
        final int e11) {
 
-    assert 0L<=t11;
+    //assert 0L<=t11;
 
     // minimize long bits
     final int shift = Numbers.loBit(t11);
@@ -190,8 +189,8 @@ implements Ringlike<BigFloat0> {
        final long t11,
        final int e11) {
 
-    assert 0L<=t00;
-    assert 0L<=t11;
+    //assert 0L<=t00;
+    //assert 0L<=t11;
 
     // minimize long bits
     final int shift0 = Numbers.loBit(t00);
@@ -217,7 +216,7 @@ implements Ringlike<BigFloat0> {
 
   public final BigFloat0
   add (final double z) {
-    assert Double.isFinite(z);
+    //assert Double.isFinite(z);
     return add(
       nonNegative(),
       significand(),
@@ -276,7 +275,7 @@ implements Ringlike<BigFloat0> {
   multiply (final NaturalBEI0 x0,
             final boolean p1,
             final long x1) {
-    assert 0L<=x1;
+    //assert 0L<=x1;
     final int e0 = Numbers.loBit(x0);
     final int e1 = Numbers.loBit(x1);
     final NaturalBEI0 y0 = ((0==e0) ? x0 : x0.shiftDown(e0));
@@ -300,7 +299,7 @@ implements Ringlike<BigFloat0> {
 
   public final BigFloat0
   multiply (final double z) {
-    assert Double.isFinite(z);
+    //assert Double.isFinite(z);
     return
       multiply(
         Doubles.nonNegative(z),
@@ -320,7 +319,7 @@ implements Ringlike<BigFloat0> {
 
   public final BigFloat0
   add2 (final double z) {
-    assert Double.isFinite(z);
+    //assert Double.isFinite(z);
     final long tz = Doubles.significand(z);
     final int ez = Doubles.exponent(z);
     final int s = Numbers.loBit(tz);
@@ -343,8 +342,8 @@ implements Ringlike<BigFloat0> {
   public final BigFloat0
   addL1 (final double z0,
          final double z1) {
-    assert Double.isFinite(z0);
-    assert Double.isFinite(z1);
+    //assert Double.isFinite(z0);
+    //assert Double.isFinite(z1);
     final BigFloat0 dz = subtract(z0,z1);
     return add(
       nonNegative(),
@@ -359,8 +358,8 @@ implements Ringlike<BigFloat0> {
   public final BigFloat0
   addL2 (final double z0,
          final double z1) {
-    assert Double.isFinite(z0);
-    assert Double.isFinite(z1);
+    //assert Double.isFinite(z0);
+    //assert Double.isFinite(z1);
     final BigFloat0 dz = subtract(z0,z1);
     final NaturalBEI0 t2 = dz.significand().square();
     final int e2 = 2*dz.exponent();
@@ -406,8 +405,8 @@ implements Ringlike<BigFloat0> {
   public final BigFloat0
   addProduct (final double z0,
               final double z1) {
-    assert Double.isFinite(z0);
-    assert Double.isFinite(z1);
+    //assert Double.isFinite(z0);
+    //assert Double.isFinite(z1);
     return addProduct(
       Doubles.nonNegative(z0),
       Doubles.significand(z0),
@@ -625,10 +624,10 @@ implements Ringlike<BigFloat0> {
 
   @Override
   public final String toString () {
-    assert (0==Numbers.loBit(significand()))
-    || significand().isZero() :
-      significand().toString()
-      + "\nlo= " + Numbers.loBit(significand());
+    //assert (0==Numbers.loBit(significand()))
+    //|| significand().isZero() :
+    //  significand().toString()
+    //  + "\nlo= " + Numbers.loBit(significand());
     return
       (nonNegative() ? "" : "-")
       + "0x" + significand().toString()
@@ -677,7 +676,7 @@ implements Ringlike<BigFloat0> {
                                           final long t0,
                                           final int e0)  {
     if (0L==t0) { return valueOf(0L); }
-    assert 0L<t0;
+    //assert 0L<t0;
     final int shift = Numbers.loBit(t0);
     final long t1;
     final int e1;

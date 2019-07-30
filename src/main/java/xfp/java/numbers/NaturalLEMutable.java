@@ -8,7 +8,7 @@ import java.util.Arrays;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-27
+ * @version 2019-07-29
  */
 
 public final class NaturalLEMutable implements Natural {
@@ -19,16 +19,16 @@ public final class NaturalLEMutable implements Natural {
 
   private int[] _words;
   final int[] words () { 
-    assert isValid();
+    //assert isValid();
     return _words; }
 
   public final int[] copyWords () { 
-    assert isValid();
+    //assert isValid();
     return Arrays.copyOf(words(),words().length); }
 
   // TODO: grow faster?
   private final void expandTo (final int i) {
-    assert isValid();
+    //assert isValid();
     final int n = Math.max(i+1,hiInt());
     if (hiInt()<n) { _words = Arrays.copyOf(words(),n); } }
 
@@ -38,8 +38,8 @@ public final class NaturalLEMutable implements Natural {
 
   @Override
   public final Natural square (final long t) {
-    assert isValid();
-    assert 0L<=t;
+    //assert isValid();
+    //assert 0L<=t;
     final long hi = Numbers.hiWord(t);
     final long lo = Numbers.loWord(t);
     final long lolo = lo*lo;
@@ -61,9 +61,9 @@ public final class NaturalLEMutable implements Natural {
   @Override
   public final Natural product (final long t0,
                                 final long t1) {
-    assert isValid();
-    assert 0L<=t0;
-    assert 0L<=t1;
+    //assert isValid();
+    //assert 0L<=t0;
+    //assert 0L<=t1;
     final long hi0 = Numbers.hiWord(t0);
     final long lo0 = Numbers.loWord(t0);
     final long hi1 = Numbers.hiWord(t1);
@@ -87,9 +87,9 @@ public final class NaturalLEMutable implements Natural {
   @Override
   public final Natural add (final Natural u,
                             final int shift) {
-    assert isValid();
-    assert u.isValid();
-    assert 0<=shift;
+    //assert isValid();
+    //assert u.isValid();
+    //assert 0<=shift;
     if (isZero()) { return u.shiftUp(shift); }
     if (u.isZero()) { return this; }
     if (0==shift) { return add(u); }
@@ -122,9 +122,9 @@ public final class NaturalLEMutable implements Natural {
   @Override
   public final Natural add (final long u,
                             final int upShift) {
-    assert isValid();
-    assert 0<=u;
-    assert 0<=upShift;
+    //assert isValid();
+    //assert 0<=u;
+    //assert 0<=upShift;
     if (isZero()) { return from(u,upShift); }
     if (0L==u) { return this; }
     if (0==upShift) { return add(u); }
@@ -156,9 +156,9 @@ public final class NaturalLEMutable implements Natural {
   @Override
   public final Natural subtract (final long u,
                                  final int upShift) {
-    assert isValid();
-    assert 0L<=u;
-    assert 0<=upShift;
+    //assert isValid();
+    //assert 0L<=u;
+    //assert 0<=upShift;
     if (0L==u) { return this; }
     if (0==upShift) { return subtract(u); }
     final int iShift = (upShift>>>5);
@@ -166,7 +166,7 @@ public final class NaturalLEMutable implements Natural {
     final int[] uu = Ints.littleEndian(u,bShift);
     final int n0 = hiInt();
     final int n1 = iShift+uu.length;
-    assert n1<=n0;
+    //assert n1<=n0;
     final int[] v = new int[n0];
     for (int i=0;i<iShift;i++) { v[i] = word(i); }
     long borrow = 0L;
@@ -179,7 +179,7 @@ public final class NaturalLEMutable implements Natural {
       final long dif = uword(i) + borrow;
       borrow = (dif>>32);
       v[i] = (int) dif; }
-    assert 0L==borrow;
+    //assert 0L==borrow;
     return unsafe(v); }
 
   //--------------------------------------------------------------
@@ -188,20 +188,20 @@ public final class NaturalLEMutable implements Natural {
 
   @Override
   public final Natural zero () { 
-    assert isValid();
+    //assert isValid();
     return unsafe(Ints.EMPTY); }
 
   @Override
   public final Natural one () { 
-    assert isValid();
+    //assert isValid();
     return unsafe(new int[] { 1 }); }
 
   //--------------------------------------------------------------
 
   @Override
   public final Natural add (final Natural u) {
-    assert isValid();
-    assert u.isValid();
+    //assert isValid();
+    //assert u.isValid();
     if (isZero()) { return u; }
     if (u.isZero()) { return this; }
     // TODO: optimize by summing over joint range
@@ -222,13 +222,13 @@ public final class NaturalLEMutable implements Natural {
 
   @Override
   public final Natural subtract (final Natural u) {
-    assert isValid();
-    assert u.isValid();
+    //assert isValid();
+    //assert u.isValid();
     if (u.isZero()) { return this; }
-    assert 0<=compareTo(u);
+    //assert 0<=compareTo(u);
     final int n0 = hiInt();
     final int n1 = u.hiInt();
-    assert n1<=n0;
+    //assert n1<=n0;
     final int[] v = new int[n0];
     long borrow = 0L;
     int i=0;
@@ -236,16 +236,16 @@ public final class NaturalLEMutable implements Natural {
       final long dif = (uword(i)-u.uword(i)) + borrow;
       borrow = (dif>>32);
       v[i] = (int) dif; }
-    assert n1==i;
+    //assert n1==i;
     for (;i<n0;i++) {
       if (0L==borrow) { break; } 
       final long dif = uword(i) + borrow;
       borrow = (dif>>32);
       v[i] = (int) dif; }
-    assert 0L==borrow;
+    //assert 0L==borrow;
     for (;i<n0;i++) { 
       final long dif = uword(i);
-      assert 0L==(dif>>32);
+      //assert 0L==(dif>>32);
       v[i] = (int) dif; }
     return unsafe(v); }
 
@@ -255,26 +255,26 @@ public final class NaturalLEMutable implements Natural {
 
   @Override
   public final int startWord () { 
-    assert isValid();
+    //assert isValid();
     return 0; }
 
   @Override
   public final int endWord () { 
-    assert isValid();
+    //assert isValid();
     return words().length; }
 
   @Override
   public final int word (final int i) {
-    assert isValid();
-    assert 0<=i : "Negative index: " + i;
+    //assert isValid();
+    //assert 0<=i : "Negative index: " + i;
     if (endWord()<=i) { return 0; }
     return words()[i]; }
 
   @Override
   public final Natural setWord (final int i,
                                 final int w) {
-    assert isValid();
-    assert 0<=i;
+    //assert isValid();
+    //assert 0<=i;
     expandTo(i);
     words()[i] = w;
     return recycle(); }
@@ -282,28 +282,28 @@ public final class NaturalLEMutable implements Natural {
 
   @Override
   public final Natural empty () { 
-    assert isValid();
+    //assert isValid();
     // safe because Ints.EMPTY is immutable
     return unsafe(Ints.EMPTY); }
 
   @Override
   public final Natural from (final int u) {
-    assert isValid();
-    assert 0<=u;
+    //assert isValid();
+    //assert 0<=u;
     return valueOf(u);  }
 
   @Override
   public final Natural from (final long u) {
-    assert isValid();
-    assert 0<=u;
+    //assert isValid();
+    //assert 0<=u;
     return valueOf(u);  }
 
   //--------------------------------------------------------------
 
   @Override
   public final Natural shiftDownWords (final int iShift) {
-    assert isValid();
-    assert 0<=iShift;
+    //assert isValid();
+    //assert 0<=iShift;
     if (0==iShift) { return this; }
     if (isZero()) { return this; }
     final int n0 = hiInt();
@@ -316,8 +316,8 @@ public final class NaturalLEMutable implements Natural {
 
   @Override
   public final Natural shiftDown (final int shift) {
-    assert isValid();
-    assert 0<=shift;
+    //assert isValid();
+    //assert 0<=shift;
     if (shift==0) { return this; }
     if (isZero()) { return this; }
     final int iShift = (shift>>>5);
@@ -340,8 +340,8 @@ public final class NaturalLEMutable implements Natural {
 
   @Override
   public final Natural shiftUpWords (final int iShift) {
-    assert isValid();
-    assert 0<=iShift;
+    //assert isValid();
+    //assert 0<=iShift;
     if (0==iShift) { return this; }
     if (isZero()) { return this; }
     final int n = hiInt();
@@ -352,7 +352,7 @@ public final class NaturalLEMutable implements Natural {
 
   @Override
   public final Natural shiftUp (final int shift) {
-    assert 0<=shift;
+    //assert 0<=shift;
     if (shift==0) { return this; }
     if (isZero()) { return this; }
     final int iShift = (shift>>>5);
@@ -378,13 +378,13 @@ public final class NaturalLEMutable implements Natural {
   /** DANGER!!! Mutable!!! */
   @Override
   public final int hashCode () { 
-    assert isValid();
+    //assert isValid();
     return 0; }
 
   /** DANGER!!! Mutable!!! used in testing only!!! */
   @Override
   public final boolean equals (final Object x) {
-    assert isValid();
+    //assert isValid();
     if (x==this) { return true; }
     if (!(x instanceof Natural)) { return false; }
     return uintsEquals((Natural) x); }
@@ -401,19 +401,19 @@ public final class NaturalLEMutable implements Natural {
 
   @Override
   public boolean isImmutable () { 
-    assert isValid();
+    //assert isValid();
     return false; }
 
   @Override
   public final Natural recycle () { 
-    assert isValid();
+    //assert isValid();
     final int[] t = _words;
     _words = null;
     return unsafe(t); }
 
   @Override
   public final Natural immutable () { 
-    assert isValid();
+    //assert isValid();
     //final int[] t = Ints.stripTrailingZeros(_words);
     final int[] t = _words;
     _words = null;
@@ -421,18 +421,18 @@ public final class NaturalLEMutable implements Natural {
 
   @Override
   public final Natural recyclable (final Natural init) { 
-    assert isValid();
+    //assert isValid();
     return copy(init); }
 
   @Override
   public final Natural recyclable (final int init) {
-    assert isValid();
+    //assert isValid();
     return NaturalLEMutable.make(init); }
 
   @Override
   public final Natural recyclable (final Natural init,
                                    final int nWords) {
-    assert isValid();
+    //assert isValid();
     if (null==init) {
       return NaturalLEMutable.make(nWords); }
     if (init instanceof NaturalLEMutable) {
@@ -441,7 +441,7 @@ public final class NaturalLEMutable implements Natural {
 
   @Override
   public final Natural copy () { 
-    assert isValid();
+    //assert isValid();
     return copy(this); }
 
   @Override
@@ -500,7 +500,7 @@ public final class NaturalLEMutable implements Natural {
     return unsafe(result); }
 
   public static final NaturalLEMutable valueOf (final BigInteger u) {
-    assert 0<=u.signum();
+    //assert 0<=u.signum();
     return valueOf(u.toByteArray()); }
 
   //-------------------------------------------------------------
@@ -513,11 +513,11 @@ public final class NaturalLEMutable implements Natural {
     return valueOf(s,0x10); }
 
   public static final NaturalLEMutable valueOf (final long u) {
-    assert 0L<=u;
+    //assert 0L<=u;
     return unsafe(Ints.littleEndian(u)); }
 
   public static final NaturalLEMutable valueOf (final int u) {
-    assert 0L<=u;
+    //assert 0L<=u;
     return unsafe(new int[] {u}); }
 
   //--------------------------------------------------------------

@@ -8,7 +8,7 @@ import java.util.Arrays;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-27
+ * @version 2019-07-29
  */
 
 public final class NaturalLE implements Natural {
@@ -216,6 +216,33 @@ public final class NaturalLE implements Natural {
 
   //--------------------------------------------------------------
 
+//  @Override
+//  public final Natural add (final Natural u) {
+//    if (isZero()) { return u; }
+//    //if (u.isZero()) { return this; }
+//    final int n0 = hiInt();
+//    final int n1 = u.hiInt();
+//    final int n = Math.min(n0,n1);
+//    final int[] t = words();
+//    final int[] v = new int[Math.max(n0,n1)+1];
+//    long sum = 0L;
+//    long carry = 0L;
+//    int i=0;
+//    for (;i<n;i++) {
+//      sum = t[i] + u.uword(i) + carry;
+//      carry = (sum>>>32);
+//      v[i] = (int) sum; }
+//    for (;i<n0;i++) {
+//      sum = t[i] + carry;
+//      carry = (sum>>>32);
+//      v[i] = (int) sum; }
+//    for (;i<n1;i++) {
+//      sum = u.uword(i) + carry;
+//      carry = (sum>>>32);
+//      v[i] = (int) sum; }
+//    if (0L!=carry) { v[i] = (int) carry; }
+//    return unsafe(v); }
+
   @Override
   public final Natural add (final Natural u) {
     if (isZero()) { return u; }
@@ -236,6 +263,31 @@ public final class NaturalLE implements Natural {
 
   //--------------------------------------------------------------
 
+//  @Override
+//  public final Natural subtract (final Natural u) {
+//    //if (u.isZero()) { return this; }
+//    //assert 0<=compareTo(u);
+//    final int n0 = hiInt();
+//    final int n1 = u.hiInt();
+//    //assert n1<=n0;
+//    final int[] t = words();
+//    final int[] v = new int[n0];
+//    long borrow = 0L;
+//    int i=0;
+//    for (;i<n1;i++) {
+//      final long dif = (t[i]-u.uword(i)) + borrow;
+//      borrow = (dif>>32);
+//      v[i] = (int) dif; }
+//    //assert n1==i;
+//    for (;i<n0;i++) {
+//      if(0L==borrow) { break; }
+//      final long dif = t[i] + borrow;
+//      borrow = (dif>>32);
+//      v[i] = (int) dif; }
+//    for (;i<n0;i++) { v[i] = t[i]; }
+//    //assert 0L==borrow;
+//    return unsafe(v); }
+
   @Override
   public final Natural subtract (final Natural u) {
     //if (u.isZero()) { return this; }
@@ -252,9 +304,11 @@ public final class NaturalLE implements Natural {
       v[i] = (int) dif; }
     //assert n1==i;
     for (;i<n0;i++) {
+      if (0L==borrow) { break; }
       final long dif = uword(i) + borrow;
       borrow = (dif>>32);
       v[i] = (int) dif; }
+    for (;i<n0;i++) { v[i] = word(i); }
     //assert 0L==borrow;
     return unsafe(v); }
 

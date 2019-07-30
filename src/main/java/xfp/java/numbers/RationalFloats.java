@@ -24,9 +24,9 @@ import xfp.java.prng.Generators;
  * <code>RationalFloat</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-22
+ * @version 2019-07-29
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked","static-method"})
 public final class RationalFloats implements Set {
 
   //--------------------------------------------------------------
@@ -38,8 +38,8 @@ public final class RationalFloats implements Set {
 
   private final RationalFloat add (final RationalFloat q0,
                                    final RationalFloat q1) {
-    assert contains(q0);
-    assert contains(q1);
+    //assert contains(q0);
+    //assert contains(q1);
     return q0.add(q1); }
 
   public final BinaryOperator<RationalFloat> adder () {
@@ -53,7 +53,6 @@ public final class RationalFloats implements Set {
 
   //--------------------------------------------------------------
 
-  @SuppressWarnings("static-method")
   public final RationalFloat additiveIdentity () {
     return RationalFloat.valueOf(0L); }
 
@@ -63,7 +62,7 @@ public final class RationalFloats implements Set {
   // worth the indirection?
 
   private final RationalFloat negate (final RationalFloat q) {
-    assert contains(q);
+    //assert contains(q);
     return q.negate(); }
 
   public final UnaryOperator<RationalFloat> additiveInverse () {
@@ -78,8 +77,8 @@ public final class RationalFloats implements Set {
 
   private final RationalFloat multiply (final RationalFloat q0,
                                         final RationalFloat q1) {
-    assert contains(q0);
-    assert contains(q1);
+    //assert contains(q0);
+    //assert contains(q1);
     return q0.multiply(q1); }
 
   public final BinaryOperator<RationalFloat> multiplier () {
@@ -93,14 +92,13 @@ public final class RationalFloats implements Set {
 
   //--------------------------------------------------------------
 
-  @SuppressWarnings("static-method")
   public final RationalFloat multiplicativeIdentity () {
     return RationalFloat.ONE; }
 
   //--------------------------------------------------------------
 
   private final RationalFloat reciprocal (final RationalFloat q) {
-    assert contains(q);
+    //assert contains(q);
     // only a partial inverse
     if (q.isZero()) { return null; }
     return q.reciprocal();  }

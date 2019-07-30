@@ -14,7 +14,7 @@ import xfp.java.Debug;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-23
+ * @version 2019-07-29
  */
 
 public final class NaturalBEI0 extends Number
@@ -51,22 +51,22 @@ implements Natural {
 
   @Override
   public final NaturalBEI0 add (final long m) {
-    assert 0L<=m;
+    //assert 0L<=m;
     return unsafe(Bei0.add(_words,m)); }
 
   public static final NaturalBEI0 add (final long t0,
                                        final long t1,
                                        final int bitShift) {
-    assert 0L<=t0;
-    assert 0L<=t1;
-    assert 0<=bitShift;
+    //assert 0L<=t0;
+    //assert 0L<=t1;
+    //assert 0<=bitShift;
     final int[] u = Bei0.add(t0,t1,bitShift);
     return unsafe(u); }
 
   @Override
   public final NaturalBEI0 add (final long m,
                                 final int shift) {
-    assert 0L<=m;
+    //assert 0L<=m;
     final int[] u = Bei0.add(_words,m,shift);
     return unsafe(u); }
 
@@ -75,7 +75,7 @@ implements Natural {
 
   @Override
   public final Natural subtract (final long m) {
-    assert 0L<=m;
+    //assert 0L<=m;
     final int[] u = Bei0.subtract(_words,m);
     return unsafe(u); }
 
@@ -90,7 +90,7 @@ implements Natural {
   @Override
   public final NaturalBEI0 subtract (final long m,
                                      final int upShift) {
-    assert 0L<=m;
+    //assert 0L<=m;
     final int[] u = Bei0.subtract(_words,m,upShift);
     return unsafe(u); }
 
@@ -98,9 +98,9 @@ implements Natural {
   public static final NaturalBEI0 subtract (final long m0,
                                             final long m1,
                                             final int upShift) {
-    assert 0L<=m0;
-    assert 0L<=m1;
-    assert 0<=upShift;
+    //assert 0L<=m0;
+    //assert 0L<=m1;
+    //assert 0<=upShift;
     final int[] u = Bei0.subtract(m0,m1,upShift);
     return unsafe(u); }
 
@@ -108,7 +108,7 @@ implements Natural {
   public static final NaturalBEI0 subtract (final long m0,
                                             final int upShift,
                                             final long m1) {
-    assert 0L<=m0;
+    //assert 0L<=m0;
     final int[] u = Bei0.subtract(Bei0.valueOf(m0,upShift),m1);
     return unsafe(u); }
 
@@ -118,7 +118,7 @@ implements Natural {
   @Override
   public final NaturalBEI0 subtractFrom (final long m,
                                          final int upShift) {
-    assert 0L<=m;
+    //assert 0L<=m;
     final int[] ms = Bei0.shiftUp(m,upShift);
     final int[] u = Bei0.subtract(ms,_words);
     return unsafe(u); }
@@ -126,7 +126,7 @@ implements Natural {
   public static final NaturalBEI0 subtractFrom (final long m0,
                                                 final long m1,
                                                 final int upShift) {
-    assert 0L<=m1;
+    //assert 0L<=m1;
     final int[] ms = Bei0.shiftUp(m1,upShift);
     final int[] u = Bei0.subtract(ms,Bei0.valueOf(m0));
     return unsafe(u); }
@@ -135,7 +135,7 @@ implements Natural {
 
   @Override
   public final NaturalBEI0 subtractFrom (final long m) {
-    assert 0L<=m;
+    //assert 0L<=m;
     final int[] u = Bei0.subtract(m,_words);
     return unsafe(u); }
 
@@ -157,8 +157,8 @@ implements Natural {
 
   public static final NaturalBEI0 multiply (final long t0,
                                             final long t1) {
-    assert 0L<=t0;
-    assert 0L<=t1;
+    //assert 0L<=t0;
+    //assert 0L<=t1;
     final long hi0 = Numbers.hiWord(t0);
     final long lo0 = loWord(t0);
     final long hi1 = Numbers.hiWord(t1);
@@ -181,7 +181,7 @@ implements Natural {
 
   @Override
   public final NaturalBEI0 square (final long t) {
-    assert 0L<=t;
+    //assert 0L<=t;
     final long hi = Numbers.hiWord(t);
     final long lo = loWord(t);
     final long lolo = lo*lo;
@@ -205,14 +205,14 @@ implements Natural {
 
   @Override
   public final NaturalBEI0 multiply (final long that) {
-    assert 1L<=that;
+    //assert 1L<=that;
     return unsafe(Bei0.multiply(_words,that)); }
 
   // TODO: multiply by shifted long
   @Override
   public final Natural multiply (final long that,
                                  final int shift) {
-    assert 1L<=that;
+    //assert 1L<=that;
     return multiply(valueOf(that,shift)); }
 
   @Override
@@ -296,7 +296,7 @@ implements Natural {
   @Override
   public final Natural
   divide (final Natural that) {
-    assert (! that.isZero());
+    //assert (! that.isZero());
     final NaturalBEI0 u = (NaturalBEI0) that;
     if (that.isOne()) { return this; }
     if (useKnuthDivision(this,u)) { return divideKnuth(u); }
@@ -305,7 +305,7 @@ implements Natural {
   @Override
   public List<Natural>
   divideAndRemainder (final Natural that) {
-    assert (! that.isZero());
+    //assert (! that.isZero());
     final NaturalBEI0 u = (NaturalBEI0) that;
     if (useKnuthDivision(this,u)) {
       return divideAndRemainderKnuth(u); }
@@ -313,7 +313,7 @@ implements Natural {
 
   @Override
   public final Natural remainder (final Natural that) {
-    assert (! that.isZero());
+    //assert (! that.isZero());
     final NaturalBEI0 u = (NaturalBEI0) that;
     if (useKnuthDivision(this,u)) {
       return remainderKnuth(u); }
@@ -364,19 +364,19 @@ implements Natural {
 
   @Override
   public final NaturalBEI0 shiftUp (final int n) {
-    assert 0<=n;
+    //assert 0<=n;
     return unsafe(Bei0.shiftUp(_words,n)); }
 
   @Override
   public final NaturalBEI0 shiftDown (final int n) {
-    assert 0<=n;
+    //assert 0<=n;
     return unsafe(Bei0.shiftDown(_words,n)); }
 
   // get the least significant int words of (m >>> shift)
 
   @Override
   public final int getShiftedInt (final int n) {
-    assert 0<=n;
+    //assert 0<=n;
     return Bei0.getShiftedInt(_words,n); }
 
   // get the least significant two int words of (m >>> shift) as a
@@ -384,7 +384,7 @@ implements Natural {
 
   @Override
   public final long getShiftedLong (final int n) {
-    assert 0<=n;
+    //assert 0<=n;
     return Bei0.getShiftedLong(_words,n); }
 
   @Override
@@ -434,13 +434,13 @@ implements Natural {
 
   @Override
   public final int compareTo (final long y) {
-    assert 0L<=y;
+    //assert 0L<=y;
     return Bei0.compare(_words,y); }
 
   @Override
   public final int compareTo (final long that,
                               final int upShift) {
-    assert 0L<=that;
+    //assert 0L<=that;
     return Bei0.compare(_words,that,upShift); }
 
   //--------------------------------------------------------------
@@ -474,7 +474,7 @@ implements Natural {
   //  /** hex string. */
   //  @Override
   //  public String toString (final int radix) {
-  //    assert radix==0x10;
+  //    //assert radix==0x10;
   //    return Debug.toHexString(_words); }
 
   //--------------------------------------------------------------
@@ -582,7 +582,7 @@ implements Natural {
 
   public static final NaturalBEI0 valueOf (final long x) {
     if (x==0) { return ZERO; }
-    assert 0L < x;
+    //assert 0L < x;
     if (x <= MAX_CONSTANT) { return posConst[(int) x]; }
     return unsafe(Bei0.valueOf(x)); }
 
@@ -591,7 +591,7 @@ implements Natural {
   public static final NaturalBEI0 valueOf (final long x,
                                            final int upShift) {
     if (0L==x) { return valueOf(0L); }
-    assert 0L < x;
+    //assert 0L < x;
     return unsafe(Bei0.shiftUp(x,upShift)); }
 
   //--------------------------------------------------------------

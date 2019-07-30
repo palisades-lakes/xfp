@@ -2,10 +2,8 @@ package xfp.java.numbers;
 
 import static java.lang.Double.MAX_EXPONENT;
 import static java.lang.Double.MIN_EXPONENT;
-import static java.lang.Double.MIN_VALUE;
 import static java.lang.Double.doubleToRawLongBits;
 import static java.lang.Double.longBitsToDouble;
-import static java.lang.Double.toHexString;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -34,7 +32,7 @@ import xfp.java.prng.GeneratorBase;
 /** Utilities for <code>double</code>, <code>double[]</code>.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-23
+ * @version 2019-07-29
  */
 public final class Doubles implements Set {
 
@@ -116,10 +114,10 @@ public final class Doubles implements Set {
     (Double.MAX_EXPONENT - STORED_SIGNIFICAND_BITS) + 1;
 
   //    static {
-  //      assert ((~0L) == (SIGN_MASK | EXPONENT_MASK | SIGNIFICAND_MASK));
-  //      assert (0L == (SIGN_MASK & EXPONENT_MASK));
-  //      assert (0L == (EXPONENT_MASK & SIGNIFICAND_MASK));
-  //      assert (0L == (SIGN_MASK & SIGNIFICAND_MASK));
+  //      //assert ((~0L) == (SIGN_MASK | EXPONENT_MASK | SIGNIFICAND_MASK));
+  //      //assert (0L == (SIGN_MASK & EXPONENT_MASK));
+  //      //assert (0L == (EXPONENT_MASK & SIGNIFICAND_MASK));
+  //      //assert (0L == (SIGN_MASK & SIGNIFICAND_MASK));
   //    }
   //--------------------------------------------------------------
 
@@ -218,58 +216,58 @@ public final class Doubles implements Set {
                                         final int exponent,
                                         final long significand) {
 
-    assert ((0 == sign) || (1 ==sign)) :
-      "Invalid sign bit:" + sign;
+    //assert ((0 == sign) || (1 ==sign)) :
+    //  "Invalid sign bit:" + sign;
 
-    assert (SUBNORMAL_EXPONENT <= exponent)  :
-      "(unbiased) exponent too small: " + exponent;
+    //assert (SUBNORMAL_EXPONENT <= exponent)  :
+    //  "(unbiased) exponent too small: " + exponent;
 
-    assert (exponent <= MAX_EXPONENT) :
-      "(unbiased) exponent too large: " + exponent;
+    //assert (exponent <= MAX_EXPONENT) :
+    //  "(unbiased) exponent too large: " + exponent;
 
     final int be = exponent + EXPONENT_BIAS;
 
-    assert (0 <= be) :
-      "Negative exponent:" + Integer.toHexString(be) + " : " + be
-      + "\n" + SUBNORMAL_EXPONENT + "<=" + exponent + "<="
-      + MAX_EXPONENT
-      + "\n" + MIN_VALUE + " " + toHexString(MIN_VALUE)
-      + "\n" + EXPONENT_BIAS;
+    //assert (0 <= be) :
+    //  "Negative exponent:" + Integer.toHexString(be) + " : " + be
+    //  + "\n" + SUBNORMAL_EXPONENT + "<=" + exponent + "<="
+    //  + MAX_EXPONENT
+    //  + "\n" + MIN_VALUE + " " + toHexString(MIN_VALUE)
+    //  + "\n" + EXPONENT_BIAS;
 
-    assert (be <= MAXIMUM_BIASED_EXPONENT) :
-      "Exponent too large:" + Integer.toHexString(be) +
-      ">" + Integer.toHexString(MAXIMUM_BIASED_EXPONENT);
+    //assert (be <= MAXIMUM_BIASED_EXPONENT) :
+    //  "Exponent too large:" + Integer.toHexString(be) +
+    //  ">" + Integer.toHexString(MAXIMUM_BIASED_EXPONENT);
 
-    if (SUBNORMAL_EXPONENT == exponent) {
-      assert (0 <= significand) :
-        "subnormal significand too small:"
-        + Long.toHexString(significand);
-      assert significand <= MAX_SUBNORMAL_SIGNIFICAND :
-        "subnormal significand too large:"
-        + Long.toHexString(significand); }
-    else if (INFINITE_OR_NAN_EXPONENT == exponent) {
+    //if (SUBNORMAL_EXPONENT == exponent) {
+      //assert (0 <= significand) :
+      //  "subnormal significand too small:"
+      //  + Long.toHexString(significand);
+      //assert significand <= MAX_SUBNORMAL_SIGNIFICAND :
+      //  "subnormal significand too large:"
+      //  + Long.toHexString(significand); }
+    //else if (INFINITE_OR_NAN_EXPONENT == exponent) {
       // no leading 1 bit for infinity or NaN
-      assert (0 <= significand) :
-        "infinite or NaN significand too small:"
-        + Long.toHexString(significand);
-      assert significand <= MAX_SUBNORMAL_SIGNIFICAND :
-        "infinite or NaN significand too large:"
-        + Long.toHexString(significand); }
-    else { // normal numbers
-      assert (MIN_NORMAL_SIGNIFICAND <= significand) :
-        "Normal significand too small: 0x"
-        + Long.toHexString(significand)
-        + "p" + exponent;
-      assert (significand <= MAX_NORMAL_SIGNIFICAND) :
-        "Normal significand too large:"
-        + Long.toHexString(significand)
-        + "p" + exponent; }
+      //assert (0 <= significand) :
+      //  "infinite or NaN significand too small:"
+      //  + Long.toHexString(significand);
+      //assert significand <= MAX_SUBNORMAL_SIGNIFICAND :
+      //  "infinite or NaN significand too large:"
+      //  + Long.toHexString(significand); }
+    //else { // normal numbers
+      //assert (MIN_NORMAL_SIGNIFICAND <= significand) :
+      //  "Normal significand too small: 0x"
+      //  + Long.toHexString(significand)
+      //  + "p" + exponent;
+      //assert (significand <= MAX_NORMAL_SIGNIFICAND) :
+      //  "Normal significand too large:"
+      //  + Long.toHexString(significand)
+      //  + "p" + exponent; }
 
     final long s = ((long) sign) <<
       (EXPONENT_BITS + STORED_SIGNIFICAND_BITS);
     final long e = ((long) be) << STORED_SIGNIFICAND_BITS;
     final long t = significand & STORED_SIGNIFICAND_MASK;
-    assert (0L == (s & e & t));
+    //assert (0L == (s & e & t));
     final double x = longBitsToDouble(s | e | t);
     return x; }
 
@@ -369,8 +367,8 @@ public final class Doubles implements Set {
   @SuppressWarnings("static-method")
   private final Double add (final Double q0,
                             final Double q1) {
-    assert null != q0;
-    assert null != q1;
+    //assert null != q0;
+    //assert null != q1;
     return Double.valueOf(q0.doubleValue() + q1.doubleValue()); }
 
   public final BinaryOperator<Double> adder () {
@@ -395,7 +393,7 @@ public final class Doubles implements Set {
 
   @SuppressWarnings("static-method")
   private final Double negate (final Double q) {
-    assert null != q;
+    //assert null != q;
     return  Double.valueOf(- q.doubleValue()); }
 
   public final UnaryOperator<Double> additiveInverse () {
@@ -411,8 +409,8 @@ public final class Doubles implements Set {
   @SuppressWarnings("static-method")
   private final Double multiply (final Double q0,
                                  final Double q1) {
-    assert null != q0;
-    assert null != q1;
+    //assert null != q0;
+    //assert null != q1;
     return Double.valueOf(q0.doubleValue() * q1.doubleValue()); }
 
   public final BinaryOperator<Double> multiplier () {
@@ -435,7 +433,7 @@ public final class Doubles implements Set {
 
   @SuppressWarnings("static-method")
   private final Double reciprocal (final Double q) {
-    assert null != q;
+    //assert null != q;
     final double z = q.doubleValue();
     // only a partial inverse
     if (0.0 == z) { return null; }
@@ -472,8 +470,8 @@ public final class Doubles implements Set {
   @SuppressWarnings("static-method")
   public final boolean equals (final Double q0,
                                final Double q1) {
-    assert null != q0;
-    assert null != q1;
+    //assert null != q0;
+    //assert null != q1;
     return q0.equals(q1); }
 
   @Override
@@ -881,9 +879,9 @@ public final class Doubles implements Set {
              final int eMin,
              // exclusive
              final int eMax) {
-    assert eMin >= SUBNORMAL_EXPONENT;
-    assert eMax <= (INFINITE_OR_NAN_EXPONENT + 1);
-    assert eMin < eMax;
+    //assert eMin >= SUBNORMAL_EXPONENT;
+    //assert eMax <= (INFINITE_OR_NAN_EXPONENT + 1);
+    //assert eMin < eMax;
     return new GeneratorBase (
       "double-" + eMin + "-" + eMax) {
       final int eRan = eMax-eMin;
@@ -892,7 +890,7 @@ public final class Doubles implements Set {
         final int s = urp.nextInt(2);
         final int d = urp.nextInt(eRan);
         final int e = d + eMin; // unbiased exponent
-        assert (eMin <= e) && (e < eMax);
+        //assert (eMin <= e) && (e < eMax);
         final long u = urp.nextLong()
           & STORED_SIGNIFICAND_MASK;
         final long t;

@@ -11,7 +11,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-27
+ * @version 2019-07-29
  */
 
 @SuppressWarnings("unchecked")
@@ -54,46 +54,65 @@ implements Ringlike<BigFloat> {
 
   //--------------------------------------------------------------
 
-  private static final BigFloat
-  add (final boolean p0,
-       final Natural t0,
-       final int e0,
-       final boolean p1,
-       final Natural t1,
-       final int e1) {
+  //  private static final BigFloat add (final boolean p0,
+  //                                     final Natural t0,
+  //                                     final int e0,
+  //                                     final boolean p1,
+  //                                     final Natural t1,
+  //                                     final int e1) {
+  //
+  //    final int de = e1-e0;
+  //    if (p0 ^ p1) { // different signs
+  //      final Natural t02,t12;
+  //      final int e2;
+  //      if (0<de) { 
+  //        t02 = t0; t12 = t1.shiftUp(de); e2 = e0; }
+  //      else if (0>de) {
+  //        t02 = t0.shiftUp(-de); t12 = t1; e2 = e1; }
+  //      else {
+  //        t02 = t0; t12 = t1; e2 = e1; }
+  //
+  //      final int c01 = t02.compareTo(t12);
+  //      // t12 > t02
+  //      if (0>c01) { return valueOf(p1,t12.subtract(t02),e2); }
+  //      // t02 > t12
+  //      if (0<c01) { return valueOf(p0,t02.subtract(t12),e2); }
+  //      return valueOf(0L); }
+  //
+  //    // same signs
+  //    if (0<de) { 
+  //      return valueOf(p0,t0.add(t1,de),e0);}
+  //    if (0>de) { 
+  //      return valueOf(p0,t1.add(t0,-de),e1);}
+  //    
+  //    return valueOf(p0,t0.add(t1),e0);}
+
+  private static final BigFloat add (final boolean p0,
+                                     final Natural t0,
+                                     final int e0,
+                                     final boolean p1,
+                                     final Natural t1,
+                                     final int e1) {
+
+    final Natural t02,t12;
+    final int e2;
+    final int de = e1-e0;
+    if (de > 0) {
+      t02 = t0; t12 = t1.shiftUp(de); e2 = e0; }
+    else if (de < 0) {
+      t02 = t0.shiftUp(-de); t12 = t1; e2 = e1; }
+    else {
+      t02 = t0; t12 = t1; e2 = e1; }
 
     if (p0 ^ p1) { // different signs
-      final Natural t02,t12;
-      final int e2;
-      if (e0<e1) {
-        t02 = t0;
-        t12 = t1.shiftUp(e1-e0);
-        e2 = e0; }
-      else if (e0>e1) {
-        t02 = t0.shiftUp(e0-e1);
-        t12 = t1;
-        e2 = e1; }
-      else {
-        t02 = t0; t12 = t1; e2 = e1; }
       final int c01 = t02.compareTo(t12);
       if (0==c01) { return valueOf(0L); }
       // t12 > t02
-      if (0 > c01) { 
-        final Natural u = t12.subtract(t02);
-        return valueOf(p1,u,e2); }
+      if (0 > c01) { return valueOf(p1,t12.subtract(t02),e2); }
       // t02 > t12
-      final Natural u = t02.subtract(t12);
-      return valueOf(p0,u,e2); }
+      return valueOf(p0,t02.subtract(t12),e2); }
 
-    // same signs
-    if (e0<e1) { 
-      final Natural u = t0.add(t1,e1-e0);
-      return valueOf(p0,u,e0);}
-    if (e0>e1) { 
-      final Natural u = t1.add(t0,e0-e1);
-      return valueOf(p0,u,e1);}
-    final Natural u = t0.add(t1);
-    return valueOf(p0,u,e0);}
+    return valueOf(p0,t02.add(t12),e2); }
 
   //--------------------------------------------------------------
 
@@ -452,81 +471,81 @@ implements Ringlike<BigFloat> {
 
   //--------------------------------------------------------------
 
-    public final BigFloat
-    addL2 (final double z0,
-           final double z1) {
-      //assert Double.isFinite(z0);
-      //assert Double.isFinite(z1);
-      final BigFloat dz = subtract(z0,z1);
-      final Natural t2 = dz.significand().square();
-      final int e2 = 2*dz.exponent();
-      return add(
-        nonNegative(),
-        significand(),
-        exponent(),
-        true,
-        t2,
-        e2); }
+  public final BigFloat
+  addL2 (final double z0,
+         final double z1) {
+    //assert Double.isFinite(z0);
+    //assert Double.isFinite(z1);
+    final BigFloat dz = subtract(z0,z1);
+    final Natural t2 = dz.significand().square();
+    final int e2 = 2*dz.exponent();
+    return add(
+      nonNegative(),
+      significand(),
+      exponent(),
+      true,
+      t2,
+      e2); }
 
-//  public final BigFloat
-//  addL2 (final double x0,
-//         final double x1) {
-//    //assert Double.isFinite(x0);
-//    //assert Double.isFinite(x1);
-//    // twoAdd and twoMul give 8 adds.
-//    // twoAdd (twoSub):
-//    final double s = x0-x1;
-//    final double z = s-x0;
-//    final double e = (x0-(s-z)) + ((-x1)-z);
-//    // twoMul:
-//    final double ss = s*s;
-//    final double ess = Math.fma(s,s,-ss);
-//    // twoMul:
-//    final double es = e*s;
-//    final double ees = Math.fma(e,s,-es);
-//    // twoMul:
-//    final double ee = e*e;
-//    final double eee = Math.fma(e,e,-ee);
-//    return
-//      add(ss).add(ess).add(es).add(es)
-//      .add(ees).add(ees).add(ee).add(eee); }
+  //  public final BigFloat
+  //  addL2 (final double x0,
+  //         final double x1) {
+  //    //assert Double.isFinite(x0);
+  //    //assert Double.isFinite(x1);
+  //    // twoAdd and twoMul give 8 adds.
+  //    // twoAdd (twoSub):
+  //    final double s = x0-x1;
+  //    final double z = s-x0;
+  //    final double e = (x0-(s-z)) + ((-x1)-z);
+  //    // twoMul:
+  //    final double ss = s*s;
+  //    final double ess = Math.fma(s,s,-ss);
+  //    // twoMul:
+  //    final double es = e*s;
+  //    final double ees = Math.fma(e,s,-es);
+  //    // twoMul:
+  //    final double ee = e*e;
+  //    final double eee = Math.fma(e,e,-ee);
+  //    return
+  //      add(ss).add(ess).add(es).add(es)
+  //      .add(ees).add(ees).add(ee).add(eee); }
 
-//  public final BigFloat
-//  addL2 (final double x0,
-//         final double x1) {
-//    //assert Double.isFinite(x0);
-//    //assert Double.isFinite(x1);
-//    // twoAdd (twoSub):
-//    final double s = x0-x1;
-//    final double z = s-x0;
-//    final double e = (x0-(s-z)) + ((-x1)-z);
-//    final BigFloat es = product(e,s);
-//    return add2(s).add(es).add(es).add2(e); }
+  //  public final BigFloat
+  //  addL2 (final double x0,
+  //         final double x1) {
+  //    //assert Double.isFinite(x0);
+  //    //assert Double.isFinite(x1);
+  //    // twoAdd (twoSub):
+  //    final double s = x0-x1;
+  //    final double z = s-x0;
+  //    final double e = (x0-(s-z)) + ((-x1)-z);
+  //    final BigFloat es = product(e,s);
+  //    return add2(s).add(es).add(es).add2(e); }
 
   //--------------------------------------------------------------
-  
-//  private final BigFloat product (final double z0,
-//                                  final double z1) {
-//    if ((0.0==z0) || (0.0==z1)) { return valueOf(0L); }
-//    //assert Double.isFinite(z0);
-//    //assert Double.isFinite(z1);
-//    final boolean p0 = Doubles.nonNegative(z0);
-//    final long t0 = Doubles.significand(z0);
-//    final int e0 = Doubles.exponent(z0);
-//    final boolean p1 = Doubles.nonNegative(z1);
-//    final long t1 = Doubles.significand(z1);
-//    final int e1 = Doubles.exponent(z1);
-//    final int shift0 = Numbers.loBit(t0);
-//    final long t00 = (t0>>>shift0);
-//    final int e00 = e0+shift0;
-//    final int shift1 = Numbers.loBit(t1);
-//    final long t11 = (t1>>>shift1);
-//    final int e11=e1+shift1;
-//    return
-//      valueOf(
-//        ! (p0 ^ p1),
-//        significand().product(t00,t11),
-//        e00+e11); }
+
+  //  private final BigFloat product (final double z0,
+  //                                  final double z1) {
+  //    if ((0.0==z0) || (0.0==z1)) { return valueOf(0L); }
+  //    //assert Double.isFinite(z0);
+  //    //assert Double.isFinite(z1);
+  //    final boolean p0 = Doubles.nonNegative(z0);
+  //    final long t0 = Doubles.significand(z0);
+  //    final int e0 = Doubles.exponent(z0);
+  //    final boolean p1 = Doubles.nonNegative(z1);
+  //    final long t1 = Doubles.significand(z1);
+  //    final int e1 = Doubles.exponent(z1);
+  //    final int shift0 = Numbers.loBit(t0);
+  //    final long t00 = (t0>>>shift0);
+  //    final int e00 = e0+shift0;
+  //    final int shift1 = Numbers.loBit(t1);
+  //    final long t11 = (t1>>>shift1);
+  //    final int e11=e1+shift1;
+  //    return
+  //      valueOf(
+  //        ! (p0 ^ p1),
+  //        significand().product(t00,t11),
+  //        e00+e11); }
 
   //--------------------------------------------------------------
 
