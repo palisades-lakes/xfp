@@ -4,7 +4,6 @@ import org.apache.commons.rng.UniformRandomProvider;
 
 import xfp.java.accumulators.Accumulator;
 import xfp.java.accumulators.BigFloatAccumulator;
-import xfp.java.accumulators.BigFloatAccumulator0;
 import xfp.java.numbers.Doubles;
 import xfp.java.prng.Generator;
 import xfp.java.prng.PRNG;
