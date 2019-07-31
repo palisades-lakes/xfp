@@ -326,7 +326,6 @@ public final class Ints implements Set {
   //--------------------------------------------------------------
   // operations for algebraic structures over
   //--------------------------------------------------------------
-
   // TODO: is consistency with other algebraic structure classes
   // worth the indirection?
 

@@ -99,7 +99,7 @@ extends Uints<Natural>, Ringlike<Natural> {
     if (n0<n1) { return -1; }
     if (n0>n1) { return 1; }
 
-    final int iShift = (upShift>> 5);
+    final int iShift = (upShift>>>5);
     final int rShift = (upShift&0x1f);
 
     // compare non-zero words from u<<upShift

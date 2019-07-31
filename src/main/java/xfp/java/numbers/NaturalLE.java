@@ -4,6 +4,15 @@ import static xfp.java.numbers.Numbers.unsigned;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.List;
+
+import org.apache.commons.rng.UniformRandomProvider;
+import org.apache.commons.rng.sampling.CollectionSampler;
+import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
+import org.apache.commons.rng.sampling.distribution.ContinuousUniformSampler;
+
+import xfp.java.prng.Generator;
+import xfp.java.prng.GeneratorBase;
 
 /** immutable arbitrary-precision non-negative integers
  * (natural numbers) represented by little-endian
@@ -369,7 +378,7 @@ public final class NaturalLE implements Natural {
       final long prod = tti*tti; 
       final int i2 = 2*i;
       vv[i2] = (int) prod;
-      vv[i2+1] = (int) (prod>>>32); }
+      vv[i2+1] = (int) Numbers.hiWord(prod); }
     // off diagonal
     for (int i0=0;i0<n;i0++) {
       long prod = 0L;
@@ -379,28 +388,24 @@ public final class NaturalLE implements Natural {
       for (int i1=0;i1<i0;i1++) {
         i2 = i0+i1;
         prod = unsigned(vv[i2]) + carry; 
-        carry = (prod>>>32); 
-        vv[i2] = (int) prod;
+        carry = Numbers.hiWord(prod); 
+        long vvi2 = Numbers.loWord(prod); 
         if (i0!=i1) {
           final long tt1 = unsigned(tt[i1]);
           final long tt01 = tt0*tt1;
-          if (0L==((1<<63)&tt01)) { // ok to multiply by 2
-            prod = unsigned(vv[i2]) + (tt01<<1); 
-            carry = (prod>>>32) + carry;
-            vv[i2] = (int) prod; }
-          else {
-            prod = unsigned(vv[i2]) + tt01; 
-            carry = (prod>>>32) + carry;
-            vv[i2] = (int) prod;
-            prod = unsigned(vv[i2]) + tt01; 
-            carry = (prod>>>32) + carry; 
-            vv[i2] = (int) prod; } } }
+          prod = vvi2 + tt01; 
+          carry = Numbers.hiWord(prod) + carry;
+          vvi2 = Numbers.loWord(prod);
+          prod = vvi2 + tt01; 
+          carry = Numbers.hiWord(prod) + carry; 
+          vv[i2] = (int) prod; } }
       while ((0L!=carry)&&(i2<2*n)) {
         i2++;
-        prod = Math.addExact(unsigned(vv[i2]),carry);
-        carry = (prod>>>32); 
+        prod = unsigned(vv[i2]) + carry;
+        carry = Numbers.hiWord(prod); 
         vv[i2] = (int) prod;  }
-      assert 0L==carry; }
+      //assert 0L==carry; 
+    }
     return unsafe(vv); }
 
   //  // Slow version, computes off-diagonals twice
@@ -591,6 +596,40 @@ public final class NaturalLE implements Natural {
   /** hex string. */
   @Override
   public final String toString () { return toHexString(); }
+
+  //--------------------------------------------------------------
+  // Is this characteristic of most inputs?
+
+  public static final Generator
+  fromDoubleGenerator (final UniformRandomProvider urp) {
+    final double dp = 0.9;
+    return new GeneratorBase ("fromDoubleGenerator") {
+      private final ContinuousSampler choose =
+        new ContinuousUniformSampler(urp,0.0,1.0);
+      private final Generator g = Doubles.finiteGenerator(urp);
+      private final CollectionSampler edgeCases =
+        new CollectionSampler(
+          urp,
+          List.of(
+            valueOf(0L),
+            valueOf(1L),
+            valueOf(2L),
+            valueOf(10L),
+            valueOf(-1L)));
+      @Override
+      public Object next () {
+        final boolean edge = choose.sample() > dp;
+        if (edge) { return edgeCases.sample(); }
+        return valueOf(Doubles.significand(g.nextDouble())); } }; }
+
+  /** Intended primarily for testing. <b>
+   * Generate enough bytes to at least cover the range of
+   * <code>double</code> values.
+   */
+
+  public static final Generator
+  generator (final UniformRandomProvider urp)  {
+    return fromDoubleGenerator(urp); }
 
   //--------------------------------------------------------------
   // construction
