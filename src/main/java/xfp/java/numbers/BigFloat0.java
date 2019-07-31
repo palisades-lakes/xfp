@@ -117,24 +117,24 @@ implements Ringlike<BigFloat0> {
     return valueOf(p0,t,e); }
 
   private static final BigFloat0
-  addSameExponent (final boolean n0,
+  addSameExponent (final boolean p0,
                    final NaturalBEI0 t0,
-                   final boolean n1,
+                   final boolean p1,
                    final long t1,
                    final int upShift,
                    final int e) {
-    if (n0 ^ n1) { // different signs
+    if (p0^p1) { // different signs
       final int c = t0.compareTo(t1,upShift);
       if (0==c) { return valueOf(0L); }
       // t1 > t0
-      if (0 > c) {
+      if (0>c) {
         final NaturalBEI0 t = t0.subtractFrom(t1,upShift);
-        return valueOf(n1,t,e); }
+        return valueOf(p1,t,e); }
       // t0 > t1
       final NaturalBEI0 t = t0.subtract(t1,upShift);
-      return valueOf(n0,t,e); }
+      return valueOf(p0,t,e); }
     final NaturalBEI0 t = t0.add(t1,upShift);
-    return valueOf(n0,t,e); }
+    return valueOf(p0,t,e); }
 
   private static final BigFloat0
   addSameExponent (final boolean n0,
@@ -164,9 +164,7 @@ implements Ringlike<BigFloat0> {
        final boolean p1,
        final long t11,
        final int e11) {
-
     //assert 0L<=t11;
-
     // minimize long bits
     final int shift = Numbers.loBit(t11);
     final long t1;

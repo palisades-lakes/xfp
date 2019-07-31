@@ -1,5 +1,7 @@
 package xfp.java.numbers;
 
+import static xfp.java.numbers.Numbers.hiWord;
+import static xfp.java.numbers.Numbers.loWord;
 import static xfp.java.numbers.Numbers.unsigned;
 
 import java.math.BigInteger;
@@ -127,13 +129,40 @@ public final class NaturalLE implements Natural {
   //--------------------------------------------------------------
 
   @Override
+  public final Natural add (final long u) {
+    //assert isValid();
+    //assert 0L<=u;
+    if (0L==u) { return this; }
+    if (isZero()) { return from(u); }
+    final int n = hiInt();
+    final int[] tt = words();
+    final int[] vv = new int[n+1];
+    long sum = ((n<=0) ? 0L : unsigned(tt[0])) + loWord(u);
+    vv[0] = (int) sum;
+    long carry = (sum>>>32);
+    sum = ((n<=1) ? 0L : unsigned(tt[1])) + hiWord(u) + carry;
+    vv[1] = (int) sum;
+    carry = (sum>>>32);
+    int i=2;
+    for (;i<n;i++) {
+      if (0L==carry) { break; }
+      sum = unsigned(tt[i]) + carry;
+      vv[i] = (int) sum;
+      carry = (sum>>>32); }
+    for (;i<n;i++) { vv[i] = tt[i]; }
+    if (0L!=carry) { vv[n] = (int) carry; }
+    return unsafe(vv); }
+
+  //--------------------------------------------------------------
+
+  @Override
   public final Natural add (final long u,
                             final int upShift) {
     //assert 0<=u;
     //assert 0<=upShift;
-    //if (isZero()) { return from(u,upShift); }
-    //if (0L==u) { return this; }
-    //if (0==upShift) { return add(u); }
+    if (isZero()) { return from(u,upShift); }
+    if (0L==u) { return this; }
+    if (0==upShift) { return add(u); }
     final int iShift = (upShift>>>5);
     final int bShift = (upShift&0x1f);
     final int hi = (int) (u>>>32);
@@ -147,28 +176,61 @@ public final class NaturalLE implements Natural {
       uu2 =  (hi>>>rShift); }
     final int n0 = hiInt();
     final int n = Math.max(n0,iShift+3);
-    final int[] v = new int[n+1];
+    //final int[] tt = words();
+    final int[] vv = new int[n+1];
     int i=0;
-    for (;i<Math.min(iShift,n0);i++) { v[i] = word(i); }
+    //System.arraycopy
+    for (;i<Math.min(iShift,n0);i++) { 
+      vv[i] = word(i); }
     i=iShift;
     final long sum0 = uword(i) + Numbers.unsigned(uu0);
     long carry = (sum0>>>32);
-    v[i++] = (int) sum0; 
+    vv[i++] = (int) sum0; 
     final long u1 = uword(i) + Numbers.unsigned(uu1);
     final long sum1 = u1 + carry;
     carry = (sum1>>>32);
-    v[i++] = (int) sum1; 
+    vv[i++] = (int) sum1; 
     final long u2 = uword(i) + Numbers.unsigned(uu2);
     final long sum2 = u2 + carry;
     carry = (sum2>>>32);
-    v[i++] = (int) sum2; 
+    vv[i++] = (int) sum2; 
     for (;i<n;i++) {
       if (0L==carry) { break; }
       final long sum = uword(i) + carry;
       carry = (sum>>>32);
-      v[i] = (int) sum; }
-    for (;i<n;i++) { v[i] = word(i); }
-    if (0L!=carry) { v[n] = (int) carry; }
+      vv[i] = (int) sum; }
+    for (;i<n;i++) { vv[i] = word(i); }
+    if (0L!=carry) { vv[n] = (int) carry; }
+    return unsafe(vv); }
+
+  //--------------------------------------------------------------
+
+  @Override
+  public final Natural subtract (final long u) {
+    //assert isValid();
+    //assert 0L<=u;
+    //assert 0<=compareTo(u);
+    if (0L==u) { return this; }
+    final int n = hiInt();
+    final int[] tt = words();
+    final int[] v = new int[n];
+    // at least 1 element in tt or u==0
+    long dif = unsigned(tt[0])-loWord(u);
+    v[0] = (int) dif;
+    long borrow = (dif>>32);
+    if (1<n) {
+      final long tt1 = (1>=n) ? 0L : unsigned(tt[1]);
+      dif = (tt1-hiWord(u))+borrow;
+      v[1] = (int) dif;
+      borrow = (dif>>32);
+      int i=2;
+      for (;i<n;i++) {
+        if (0L==borrow) { break; }
+        dif = unsigned(tt[i])+borrow;
+        v[i] = (int) dif;
+        borrow = (dif>>32); }
+      for (;i<n;i++) { v[i] = tt[i]; } }
+    //assert 0L==borrow : borrow;
     return unsafe(v); }
 
   //--------------------------------------------------------------
@@ -178,43 +240,51 @@ public final class NaturalLE implements Natural {
                                  final int upShift) {
     //assert 0L<=u;
     //assert 0<=upShift;
-    //if (0L==u) { return this; }
-    //if (0==upShift) { return subtract(u); }
+    if (0L==u) { return this; }
+    if (0==upShift) { return subtract(u); }
     final int iShift = (upShift>>>5);
     final int bShift = (upShift&0x1f);
-    final int n0 = hiInt();
     final int hi = (int) (u>>>32);
     final int lo = (int) u;
-    final int uu0,uu1,uu2;
-    if (0==bShift) { uu0=lo; uu1=hi; uu2=0; }
+    final long uu0,uu1,uu2;
+    if (0==bShift) { 
+      uu0=unsigned(lo); 
+      uu1=unsigned(hi); 
+      uu2=0L; }
     else {
       final int rShift = 32-bShift;
-      uu0 = (lo<<bShift);
-      uu1 = ((hi<<bShift)|(lo>>>rShift));
-      uu2 =  (hi>>>rShift); }
+      uu0 = unsigned(lo<<bShift);
+      uu1 = unsigned((hi<<bShift)|(lo>>>rShift));
+      uu2 = unsigned(hi>>>rShift); }
     // extra elements in case uu1,uu2 are 0
-    final int[] v = new int[n0+2];
+    final int n = hiInt();
+    final int[] tt = words();
+    final int[] vv = new int[n+2];
     int i=0;
-    for (;i<iShift;i++) { v[i] = word(i); }
+    // assert iShift<=n || 0L==u
+    for (;i<iShift;i++) { vv[i] = tt[i]; }
     i=iShift;
-    final long dif0 = uword(i)-Numbers.unsigned(uu0);
-    long borrow = (dif0>>32);
-    v[i++] = (int) dif0; 
-    final long u1 = uword(i)-Numbers.unsigned(uu1);
-    final long dif1 = u1 + borrow;
-    borrow = (dif1>>32);
-    v[i++] = (int) dif1; 
-    final long u2 = uword(i)-Numbers.unsigned(uu2);
+    long tti = ((i<n) ? unsigned(tt[i]) : 0L);
+    long dif = tti-uu0;
+    long borrow = (dif>>32);
+    vv[i++] = (int) dif; 
+    tti = ((i<n) ? unsigned(tt[i]) : 0L);
+    final long u1 = tti-uu1;
+    dif = u1 + borrow;
+    borrow = (dif>>32);
+    vv[i++] = (int) dif; 
+    tti = ((i<n) ? unsigned(tt[i]) : 0L);
+    final long u2 = tti-uu2;
     final long dif2 = u2 + borrow;
     borrow = (dif2>>32);
-    v[i++] = (int) dif2; 
-    for (;i<n0;i++) {
+    vv[i++] = (int) dif2; 
+    for (;i<n;i++) {
       if (0L==borrow) { break; }
-      final long dif = uword(i) + borrow;
+      dif = unsigned(tt[i]) + borrow;
       borrow = (dif>>32);
-      v[i] = (int) dif; }
-    for (;i<n0;i++) { v[i] = word(i); }
-    return unsafe(v); }
+      vv[i] = (int) dif; }
+    for (;i<n;i++) { vv[i] = tt[i]; }
+    return unsafe(vv); }
 
   //--------------------------------------------------------------
   // Ringlike

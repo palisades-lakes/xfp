@@ -100,10 +100,10 @@ extends Uints<Natural>, Ringlike<Natural> {
     if (n0>n1) { return 1; }
 
     final int iShift = (upShift>>>5);
-    final int rShift = (upShift&0x1f);
+    final int bShift = (upShift&0x1f);
 
     // compare non-zero words from u<<upShift
-    if (0==rShift) {
+    if (0==bShift) {
       final long hi0 = uword(iShift+1);
       final long hi1 = Numbers.hiWord(u);
       if (hi0<hi1) { return -1; }
@@ -115,11 +115,11 @@ extends Uints<Natural>, Ringlike<Natural> {
     else {
       // most significant word in u<<upShift
       final long hi0 = uword(iShift+2);
-      final long hi1 = (u>>>(64-rShift));
+      final long hi1 = (u>>>(64-bShift));
       if (hi0<hi1) { return -1; }
       if (hi0>hi1) { return 1; }
 
-      final long us = (u << rShift);
+      final long us = (u<<bShift);
       final long mid0 = uword(iShift+1);
       final long mid1 = Numbers.hiWord(us);
       if (mid0<mid1) { return -1; }

@@ -53,7 +53,6 @@ extends ExactAccumulator<BigFloatAccumulator0> {
   @Override
   public final BigFloatAccumulator0 addL1 (final double x0,
                                            final double x1) {
-
     _sum = _sum.addL1(x0,x1);
     return this; }
 

@@ -4,6 +4,7 @@ import org.apache.commons.rng.UniformRandomProvider;
 
 import xfp.java.accumulators.Accumulator;
 import xfp.java.accumulators.BigFloatAccumulator;
+import xfp.java.accumulators.BigFloatAccumulator0;
 import xfp.java.numbers.Doubles;
 import xfp.java.prng.Generator;
 import xfp.java.prng.PRNG;
@@ -15,7 +16,7 @@ import xfp.java.test.Common;
  * jy --source 11 src/scripts/java/xfp/java/scripts/PartialSums.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-27
+ * @version 2019-07-30
  */
 @SuppressWarnings("unchecked")
 public final class PartialSums {

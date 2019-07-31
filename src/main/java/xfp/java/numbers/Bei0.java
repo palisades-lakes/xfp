@@ -212,31 +212,29 @@ public final class Bei0 {
 
   public static final int compare (final int[] m0,
                                    final long m1,
-                                   final int bitShift) {
+                                   final int upShift) {
     // TODO: //assert necessary?
     //assert (! leadingZero(m0));
-    if (0==bitShift) { return compare(m0,m1); }
+    if (0==upShift) { return compare(m0,m1); }
     if (0L==m1) {
       if (isZero(m0)) { return 0; }
       return 1; }
     //assert 0L<=m1;
-    if (0==bitShift) { return compare(m0,m1); }
+    if (0==upShift) { return compare(m0,m1); }
     //assert 0<bitShift : "bitShift=" + bitShift;
 
     final int n0 = m0.length;
 
-    //final int intShift = intShift(bitShift);
-    //final int remShift = remShift(bitShift);
-    //final int nwords = nWords(m1,remShift);
-    final int intShift = bitShift >>> 5;
-    final int remShift = bitShift & 0x1f;
+    final int iShift = upShift >>> 5;
+    final int bShift = upShift & 0x1f;
+
     final int nwords;
-    final int hi = Numbers.hiBit(m1) + remShift;
+    final int hi = Numbers.hiBit(m1) + bShift;
     if (64 < hi) { nwords = 3; }
     else if (32 < hi) { nwords = 2; }
     else { nwords = 1; }
 
-    final int n1 = intShift + nwords;
+    final int n1 = iShift + nwords;
     if (n0<n1) { return -1; }
     if (n0>n1) { return 1; }
 
@@ -245,11 +243,11 @@ public final class Bei0 {
     if (3==nwords) {
       final long m00 = unsigned(m0[i++]);
       //final long m10 = hiPart(m1,remShift);
-      final long m10 = m1 >>> (64-remShift);
+      final long m10 = m1 >>> (64-bShift);
     if (m00<m10) { return -1; }
     if (m00>m10) { return 1; }  }
 
-    final long m1s = (m1 << remShift);
+    final long m1s = (m1 << bShift);
     if (2<=nwords) {
       final long m01 = unsigned(m0[i++]);
       //final long m11 = midPart(m1,remShift);
