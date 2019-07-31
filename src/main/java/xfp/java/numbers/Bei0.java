@@ -892,57 +892,54 @@ public final class Bei0 {
       if (a[offset] != 0) { return 0; } }
     return 1; }
 
+  /** The algorithm used here is adapted from Colin Plumb's C
+   * library.
+   * <p>
+   * Technique: Consider the partial products in the
+   * multiplication of "abcde" by itself:
+   *<pre>
+   * a b c d e
+   * * a b c d e
+   * ==================
+   * ae be ce de ee
+   * ad bd cd dd de
+   * ac bc cc cd ce
+   * ab bb bc bd be
+   * aa ab ac ad ae
+   * </pre>
+   * Note that everything above the main diagonal:
+   * <pre>
+   * ae be ce de = (abcd) * e
+   * ad bd cd = (abc) * d
+   * ac bc = (ab) * c
+   * ab = (a) * b
+   * </pre>
+   * is a copy of everything below the main diagonal:
+   * <pre>
+   * de
+   * cd ce
+   * bc bd be
+   * ab ac ad ae
+   * </pre>
+   * Thus, the sum is 2 * (off the diagonal) + diagonal.
+   * This is accumulated beginning with the diagonal (which
+   * consist of the squares of the digits of the input), which
+   * is then divided by two, the off-diagonal added, and 
+   * multiplied by two again. The low bit is simply a copy of 
+   * the low bit of the input, so it doesn't need special care.
+   */
+
   private static int[] implSquareToLen (final int[] x,
                                         final int len,
                                         final int[] z,
                                         final int zlen) {
-    /*
-     * The algorithm used here is adapted from Colin Plumb's C
-     * library.
-     * Technique: Consider the partial products in the
-     * multiplication
-     * of "abcde" by itself:
-     *
-     * a b c d e
-     * * a b c d e
-     * ==================
-     * ae be ce de ee
-     * ad bd cd dd de
-     * ac bc cc cd ce
-     * ab bb bc bd be
-     * aa ab ac ad ae
-     *
-     * Note that everything above the main diagonal:
-     * ae be ce de = (abcd) * e
-     * ad bd cd = (abc) * d
-     * ac bc = (ab) * c
-     * ab = (a) * b
-     *
-     * is a copy of everything below the main diagonal:
-     * de
-     * cd ce
-     * bc bd be
-     * ab ac ad ae
-     *
-     * Thus, the sum is 2 * (off the diagonal) + diagonal.
-     *
-     * This is accumulated beginning with the diagonal (which
-     * consist of the squares of the digits of the input), which
-     * is then
-     * divided by two, the off-diagonal added, and multiplied by
-     * two
-     * again. The low bit is simply a copy of the low bit of the
-     * input, so it doesn't need special care.
-     */
-
     // Store the squares, right shifted one bit (i.e., divided by
     // 2)
     int lastProductLowWord = 0;
     for (int j = 0, i = 0; j < len; j++) {
       final long piece = unsigned(x[j]);
       final long product = piece * piece;
-      z[i++] =
-        (lastProductLowWord << 31) | (int) (product >>> 33);
+      z[i++] = (lastProductLowWord<<31) | (int) (product>>>33);
       z[i++] = (int) (product >>> 1);
       lastProductLowWord = (int) product;
     }
@@ -1492,7 +1489,6 @@ public final class Bei0 {
                                        final int k) {
     final long kLong = loWord(k);
     long carry = 0;
-
     offset = out.length-offset-1;
     for (int j = len-1; j >= 0; j--) {
       final long product =
@@ -1508,7 +1504,6 @@ public final class Bei0 {
                                    final int len,
                                    final int k) {
     //assert (! leadingZero(in));
-
     implMulAddCheck(out,in,offset,len);
     return implMulAdd(out,in,offset,len,k); }
 

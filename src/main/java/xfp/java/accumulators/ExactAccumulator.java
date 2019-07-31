@@ -6,7 +6,7 @@ package xfp.java.accumulators;
  * adds, so that they are exact if {@link #add(double)} is.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-29
+ * @version 2019-07-30
  */
 @SuppressWarnings("unchecked")
 public abstract class ExactAccumulator<T extends ExactAccumulator>
@@ -63,8 +63,7 @@ implements Accumulator<T> {
                   final double z1) {
     //assert Double.isFinite(z0);
     //assert Double.isFinite(z1);
-    // preserve exactness using twoAdd and twoMul to convert to 8
-    // adds.
+    // twoAdd, twoMul -> 8 adds.
     // twoAdd (twoSub):
     final double zz = z0-z1;
     final double dz = zz-z0;

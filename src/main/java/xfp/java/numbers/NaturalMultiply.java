@@ -7,7 +7,7 @@ import static xfp.java.numbers.Numbers.loWord;
  * Non-instantiable.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-29
+ * @version 2019-07-30
  */
 
 @SuppressWarnings("unchecked")
@@ -21,26 +21,64 @@ public final class NaturalMultiply {
   private static final int TOOM_COOK_SQUARE_THRESHOLD = 216;
 
   //--------------------------------------------------------------
+  /** From {@link java.math.BigInteger}:
+   * <p>
+   * The algorithm used here is adapted from Colin Plumb's C
+   * library.
+   * <p>
+   * Technique: Consider the partial products in the
+   * multiplication of "abcde" by itself:
+   *<pre>
+   * a b c d e
+   * * a b c d e
+   * ==================
+   * ae be ce de ee
+   * ad bd cd dd de
+   * ac bc cc cd ce
+   * ab bb bc bd be
+   * aa ab ac ad ae
+   * </pre>
+   * Note that everything above the main diagonal:
+   * <pre>
+   * ae be ce de = (abcd) * e
+   * ad bd cd = (abc) * d
+   * ac bc = (ab) * c
+   * ab = (a) * b
+   * </pre>
+   * is a copy of everything below the main diagonal:
+   * <pre>
+   * de
+   * cd ce
+   * bc bd be
+   * ab ac ad ae
+   * </pre>
+   * Thus, the sum is 2 * (off the diagonal) + diagonal.
+   * This is accumulated beginning with the diagonal (which
+   * consist of the squares of the digits of the input), which
+   * is then divided by two, the off-diagonal added, and 
+   * multiplied by two again. The low bit is simply a copy of 
+   * the low bit of the input, so it doesn't need special care.
+   */
+
   // TODO: about twice the ops necessary, compared to using
   // symmetry to optimize.
-
   private static final Natural squareSimple (final Natural u) {
+    if (u instanceof NaturalLE) { 
+      return ((NaturalLE) u).squareSimple(); }
     final int n = u.hiInt();
-    Natural v = u.zero();
+    Natural v = u.recyclable(2*n);
     long carry = 0L;
     for (int i0=0;i0<n;i0++) {
       carry = 0L;
       final long u0 = u.uword(i0);
       for (int i1=0;i1<n;i1++) {
         final int i2 = i0+i1;
-        // TODO: can this overflow long? yes! 
-        // why does it seem to work anyway?
         final long prod = (u.uword(i1)*u0) + v.uword(i2) + carry;
         v = v.setWord(i2, (int) prod);
         carry = (prod>>>32); }
       final int i2 = i0+n;
       v = v.setWord(i2, (int) carry); }
-    return v; }
+    return v.immutable(); }
 
   //--------------------------------------------------------------
 

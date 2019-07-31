@@ -15,7 +15,7 @@ import xfp.java.test.Common;
  * jy --source 11 src/scripts/java/xfp/java/scripts/TotalL2Distance.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-28
+ * @version 2019-07-30
  */
 @SuppressWarnings("unchecked")
 public final class TotalL2Distance {

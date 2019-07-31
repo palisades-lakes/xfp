@@ -1,5 +1,7 @@
 package xfp.java.numbers;
 
+import static xfp.java.numbers.Numbers.unsigned;
+
 import java.math.BigInteger;
 import java.util.Arrays;
 
@@ -204,7 +206,7 @@ public final class NaturalLE implements Natural {
       v[i] = (int) dif; }
     for (;i<n0;i++) { v[i] = word(i); }
     return unsafe(v); }
-  
+
   //--------------------------------------------------------------
   // Ringlike
   //--------------------------------------------------------------
@@ -216,101 +218,209 @@ public final class NaturalLE implements Natural {
 
   //--------------------------------------------------------------
 
-//  @Override
-//  public final Natural add (final Natural u) {
-//    if (isZero()) { return u; }
-//    //if (u.isZero()) { return this; }
-//    final int n0 = hiInt();
-//    final int n1 = u.hiInt();
-//    final int n = Math.min(n0,n1);
-//    final int[] t = words();
-//    final int[] v = new int[Math.max(n0,n1)+1];
-//    long sum = 0L;
-//    long carry = 0L;
-//    int i=0;
-//    for (;i<n;i++) {
-//      sum = t[i] + u.uword(i) + carry;
-//      carry = (sum>>>32);
-//      v[i] = (int) sum; }
-//    for (;i<n0;i++) {
-//      sum = t[i] + carry;
-//      carry = (sum>>>32);
-//      v[i] = (int) sum; }
-//    for (;i<n1;i++) {
-//      sum = u.uword(i) + carry;
-//      carry = (sum>>>32);
-//      v[i] = (int) sum; }
-//    if (0L!=carry) { v[i] = (int) carry; }
-//    return unsafe(v); }
+  private final Natural add (final NaturalLE u) {
+    final int nt = hiInt();
+    final int nu = u.hiInt();
+    if (nt<nu) { return u.add(this); }
+    final int[] tt = words();
+    final int[] uu = u.words();
+    final int[] vv = new int[nt+1];
+    long carry = 0L;
+    int i=0;
+    for (;i<nu;i++) {
+      final long sum = unsigned(tt[i]) + unsigned(uu[i]) + carry;
+      carry = (sum>>>32);
+      vv[i] = (int) sum; }
+    for (;i<nt;i++) {
+      if (0L==carry) { break; }
+      final long sum = unsigned(tt[i]) + carry;
+      carry = (sum>>>32);
+      vv[i] = (int) sum; }
+    if (i<nt) { System.arraycopy(tt,i,vv,i,nt-i); }
+    //if (0L!=carry) { vv[nt] = (int) carry; }
+    vv[nt] = (int) carry; 
+    return unsafe(vv); }
 
   @Override
   public final Natural add (final Natural u) {
-    if (isZero()) { return u; }
-    if (u.isZero()) { return this; }
-    // TODO: optimize by summing over joint range
-    // and just carrying after that?
-    final int n = Math.max(hiInt(),u.hiInt());
-    final int[] v = new int[n+1];
-    long sum = 0L;
-    long carry = 0L;
-    int i=0;
-    for (;i<n;i++) {
-      sum = uword(i) + u.uword(i) + carry;
-      carry = (sum>>>32);
-      v[i] = (int) sum; }
-    if (0L!=carry) { v[n] = (int) carry; }
-    return unsafe(v); }
+    if (u instanceof NaturalLE) { return add((NaturalLE) u); }
+    return Natural.super.add(u); }
+
+  //  @Override
+  //  public final Natural add (final Natural u) {
+  //    if (u instanceof NaturalLE) { return add((NaturalLE) u); }
+  //    final int n = Math.max(hiInt(),u.hiInt());
+  //    final int[] v = new int[n+1];
+  //    long carry = 0L;
+  //    int i=0;
+  //    for (;i<n;i++) {
+  //      final long sum = uword(i) + u.uword(i) + carry;
+  //      carry = (sum>>>32);
+  //      v[i] = (int) sum; }
+  //    if (0L!=carry) { v[n] = (int) carry; }
+  //    return unsafe(v); }
 
   //--------------------------------------------------------------
 
-//  @Override
-//  public final Natural subtract (final Natural u) {
-//    //if (u.isZero()) { return this; }
-//    //assert 0<=compareTo(u);
-//    final int n0 = hiInt();
-//    final int n1 = u.hiInt();
-//    //assert n1<=n0;
-//    final int[] t = words();
-//    final int[] v = new int[n0];
-//    long borrow = 0L;
-//    int i=0;
-//    for (;i<n1;i++) {
-//      final long dif = (t[i]-u.uword(i)) + borrow;
-//      borrow = (dif>>32);
-//      v[i] = (int) dif; }
-//    //assert n1==i;
-//    for (;i<n0;i++) {
-//      if(0L==borrow) { break; }
-//      final long dif = t[i] + borrow;
-//      borrow = (dif>>32);
-//      v[i] = (int) dif; }
-//    for (;i<n0;i++) { v[i] = t[i]; }
-//    //assert 0L==borrow;
-//    return unsafe(v); }
+  private final Natural subtract (final NaturalLE u) {
+    //assert 0<=compareTo(u);
+    final int nt = hiInt();
+    final int nu = u.hiInt();
+    //if (0>=nt) { return ZERO; } // u must be zero
+    if (0>=nu) { return this; }
+    final int[] tt = words();
+    final int[] uu = u.words();
+    final int[] vv = new int[nt];
+    long borrow = 0L;
+    int i=0;
+    for (;i<nu;i++) {
+      final long dif = (unsigned(tt[i])-unsigned(uu[i]))+borrow;
+      borrow = (dif>>32);
+      vv[i] = (int) dif; }
+    for (;i<nt;i++) {
+      if (0L==borrow) { break; }
+      final long dif = unsigned(tt[i]) + borrow;
+      borrow = (dif>>32);
+      vv[i] = (int) dif; }
+    if (i<nt) { System.arraycopy(tt,i,vv,i,nt-i); }
+    //assert 0L==borrow;
+    return unsafe(vv); }
 
   @Override
   public final Natural subtract (final Natural u) {
-    //if (u.isZero()) { return this; }
-    //assert 0<=compareTo(u);
-    final int n0 = hiInt();
-    final int n1 = u.hiInt();
-    //assert n1<=n0;
-    final int[] v = new int[n0];
-    long borrow = 0L;
-    int i=0;
-    for (;i<n1;i++) {
-      final long dif = (uword(i)-u.uword(i)) + borrow;
-      borrow = (dif>>32);
-      v[i] = (int) dif; }
-    //assert n1==i;
-    for (;i<n0;i++) {
-      if (0L==borrow) { break; }
-      final long dif = uword(i) + borrow;
-      borrow = (dif>>32);
-      v[i] = (int) dif; }
-    for (;i<n0;i++) { v[i] = word(i); }
-    //assert 0L==borrow;
-    return unsafe(v); }
+    if (u instanceof NaturalLE) { 
+      return subtract((NaturalLE) u); }
+    return Natural.super.subtract(u); }
+
+  //  @Override
+  //  public final Natural subtract (final Natural u) {
+  //    if (u instanceof NaturalLE) { 
+  //      return subtract((NaturalLE) u); }
+  //    //if (u.isZero()) { return this; }
+  //    //assert 0<=compareTo(u);
+  //    final int nt = hiInt();
+  //    final int nu = u.hiInt();
+  //    //assert nu<=nt;
+  //    final int[] tt = words();
+  //    final int[] vv = new int[nt];
+  //    long borrow = 0L;
+  //    int i=0;
+  //    for (;i<nu;i++) {
+  //      final long dif = (unsigned(tt[i])-u.uword(i)) + borrow;
+  //      borrow = (dif>>32);
+  //      vv[i] = (int) dif; }
+  //    //assert n1==i;
+  //    for (;i<nt;i++) {
+  //      if (0L==borrow) { break; }
+  //      final long dif = unsigned(tt[i]) + borrow;
+  //      borrow = (dif>>32);
+  //      vv[i] = (int) dif; }
+  //    for (;i<nt;i++) { vv[i] = tt[i]; }
+  //    //assert 0L==borrow;
+  //    return unsafe(vv); }
+
+  //--------------------------------------------------------------
+  /** From {@link java.math.BigInteger}:
+   * <p>
+   * The algorithm used here is adapted from Colin Plumb's C
+   * library.
+   * <p>
+   * Technique: Consider the partial products in the
+   * multiplication of "abcde" by itself:
+   *<pre>
+   * a b c d e
+   * * a b c d e
+   * ==================
+   * ae be ce de ee
+   * ad bd cd dd de
+   * ac bc cc cd ce
+   * ab bb bc bd be
+   * aa ab ac ad ae
+   * </pre>
+   * Note that everything above the main diagonal:
+   * <pre>
+   * ae be ce de = (abcd) * e
+   * ad bd cd = (abc) * d
+   * ac bc = (ab) * c
+   * ab = (a) * b
+   * </pre>
+   * is a copy of everything below the main diagonal:
+   * <pre>
+   * de
+   * cd ce
+   * bc bd be
+   * ab ac ad ae
+   * </pre>
+   * Thus, the sum is 2 * (off the diagonal) + diagonal.
+   * This is accumulated beginning with the diagonal (which
+   * consist of the squares of the digits of the input), which
+   * is then divided by two, the off-diagonal added, and 
+   * multiplied by two again. The low bit is simply a copy of 
+   * the low bit of the input, so it doesn't need special care.
+   */
+
+  public final Natural squareSimple () {
+    final int n = hiInt();
+    final int[] tt = words();
+    final int[] vv = new int[2*n];
+    // diagonal
+    for (int i=0;i<n;i++) {
+      final long tti = unsigned(tt[i]);
+      final long prod = tti*tti; 
+      final int i2 = 2*i;
+      vv[i2] = (int) prod;
+      vv[i2+1] = (int) (prod>>>32); }
+    // off diagonal
+    for (int i0=0;i0<n;i0++) {
+      long prod = 0L;
+      long carry = 0L;
+      final long tt0 = unsigned(tt[i0]);
+      int i2 = 0;
+      for (int i1=0;i1<i0;i1++) {
+        i2 = i0+i1;
+        prod = unsigned(vv[i2]) + carry; 
+        carry = (prod>>>32); 
+        vv[i2] = (int) prod;
+        if (i0!=i1) {
+          final long tt1 = unsigned(tt[i1]);
+          final long tt01 = tt0*tt1;
+          if (0L==((1<<63)&tt01)) { // ok to multiply by 2
+            prod = unsigned(vv[i2]) + (tt01<<1); 
+            carry = (prod>>>32) + carry;
+            vv[i2] = (int) prod; }
+          else {
+            prod = unsigned(vv[i2]) + tt01; 
+            carry = (prod>>>32) + carry;
+            vv[i2] = (int) prod;
+            prod = unsigned(vv[i2]) + tt01; 
+            carry = (prod>>>32) + carry; 
+            vv[i2] = (int) prod; } } }
+      while ((0L!=carry)&&(i2<2*n)) {
+        i2++;
+        prod = Math.addExact(unsigned(vv[i2]),carry);
+        carry = (prod>>>32); 
+        vv[i2] = (int) prod;  }
+      assert 0L==carry; }
+    return unsafe(vv); }
+
+  //  // Slow version, computes off-diagonals twice
+  //  public final Natural squareSimple () {
+  //    final int n = hiInt();
+  //    final int[] tt = words();
+  //    final int[] vv = new int[2*n];
+  //    long carry = 0L;
+  //    for (int i0=0;i0<n;i0++) {
+  //      carry = 0L;
+  //      final long tt0 = unsigned(tt[i0]);
+  //      for (int i1=0;i1<n;i1++) {
+  //        final int i2 = i0+i1;
+  //        final long tt1 = unsigned(tt[i1]);
+  //        final long prod = (tt0*tt1) + unsigned(vv[i2]) + carry;
+  //        vv[i2] = (int) prod;
+  //        carry = (prod>>>32); }
+  //      final int i2 = i0+n;
+  //      vv[i2] = (int) carry; }
+  //    return unsafe(vv); }
 
   //--------------------------------------------------------------
   // Uints

@@ -36,6 +36,8 @@ implements Ringlike<BigFloat> {
   public final Natural significand () { return _significand; }
 
   //--------------------------------------------------------------
+  // Ringlike
+  //--------------------------------------------------------------
 
   @Override
   public final boolean isZero () {
