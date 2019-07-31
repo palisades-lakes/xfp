@@ -21,9 +21,10 @@ import xfp.java.prng.GeneratorBase;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-29
+ * @version 2019-07-31
  */
 
+@SuppressWarnings("unchecked")
 public final class NaturalLE implements Natural {
 
   //--------------------------------------------------------------
@@ -50,7 +51,7 @@ public final class NaturalLE implements Natural {
   //--------------------------------------------------------------
 
   @Override
-  public final Natural square (final long t) {
+  public final Natural fromSquare (final long t) {
     //assert isValid();
     //assert 0L<=t;
     final long hi = Numbers.hiWord(t);
@@ -529,17 +530,40 @@ public final class NaturalLE implements Natural {
   @Override
   public final Natural empty () { return ZERO; }
 
-  /** Return a {@link NaturalLE} equivalent to the unsigned 
-   * value of <code>u</code>.
-   */
-  @Override
-  public final Natural from (final int u) { return valueOf(u); }
+  //--------------------------------------------------------------
 
-  /** <code>0<=u</code>.*/
   @Override
   public final Natural from (final long u) {
     //assert 0<=u;
     return valueOf(u);  }
+
+  @Override
+  public final Natural from (final long u,
+                             final int upShift) {
+    //assert 0<=u;
+    //assert 0<=upShift;
+    if (0L==u) { return zero(); }
+    if (0==upShift) { return from(u); }
+    final int iShift = (upShift>>>5);
+    final int bShift = (upShift&0x1f);
+    final int hi = (int) (u>>>32);
+    final int lo = (int) u;
+    final int uu0,uu1,uu2;
+    if (0==bShift) { 
+      uu0=lo; 
+      uu1=hi; 
+      uu2=0; }
+    else {
+      final int rShift = 32-bShift;
+      uu0 = (lo<<bShift);
+      uu1 = ((hi<<bShift)|(lo>>>rShift));
+      uu2 =  (hi>>>rShift); }
+    final int n = iShift+3;
+    final int[] vv = new int[n+1];
+    vv[iShift] = uu0; 
+    vv[iShift+1] = uu1; 
+    vv[iShift+2] = uu2; 
+    return unsafe(vv); }
 
   //--------------------------------------------------------------
 

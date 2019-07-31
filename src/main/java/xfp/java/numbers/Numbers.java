@@ -18,7 +18,7 @@ import xfp.java.prng.Generators;
 /** Utilities for Object and primitive numbers.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-29
+ * @version 2019-07-31
  */
 @SuppressWarnings("unchecked")
 public final class Numbers implements Set {
@@ -86,17 +86,31 @@ public final class Numbers implements Set {
   //--------------------------------------------------------------
   // Useful for passing as a Function method reference
 
-  public static final double doubleValue (final Number x) {
-    return x.doubleValue(); }
-
   public static final double doubleValue (final Object x) {
-    return doubleValue((Number) x); }
-
-  public static final float floatValue (final Number x) {
-    return x.floatValue(); }
+    if (x instanceof BigFloat) { 
+      return ((BigFloat) x).doubleValue(); }
+    if (x instanceof RationalFloat) { 
+      return ((RationalFloat) x).doubleValue(); }
+    if (x instanceof Rational) { 
+      return ((Rational) x).doubleValue(); }
+    if (x instanceof Natural) { 
+      return ((Natural) x).doubleValue(); }
+    if (x instanceof Number) { 
+      return ((Number) x).doubleValue(); }
+    throw Exceptions.unsupportedOperation(null,"doubleValue",x); }
 
   public static float floatValue (final Object x) {
-    return floatValue((Number) x); }
+    if (x instanceof BigFloat) { 
+      return ((BigFloat) x).floatValue(); }
+    if (x instanceof RationalFloat) { 
+      return ((RationalFloat) x).floatValue(); }
+    if (x instanceof Rational) { 
+      return ((Rational) x).floatValue(); }
+    if (x instanceof Natural) { 
+      return ((Natural) x).floatValue(); }
+    if (x instanceof Number) { 
+      return ((Number) x).floatValue(); }
+    throw Exceptions.unsupportedOperation(null,"floatValue",x); }
 
   //--------------------------------------------------------------
 
@@ -159,7 +173,6 @@ public final class Numbers implements Set {
     return 0 == BigDecimal.valueOf(0L).compareTo(x); }
 
   public static final boolean isZero (final Number x) {
-    if (x instanceof Rational) { return ((Rational) x).isZero(); }
     if (x instanceof BigInteger) { return isZero((BigInteger) x); }
     if (x instanceof BigDecimal) { return isZero((BigDecimal) x); }
     if (x instanceof Double) {
@@ -176,7 +189,12 @@ public final class Numbers implements Set {
       return isZero(((Short) x).shortValue()); }
     throw Exceptions.unsupportedOperation(null,"valueOf",x); }
 
-  //--------------------------------------------------------------
+  public static final boolean isZero (final Object x) {
+    if (x instanceof Rational) { return ((Rational) x).isZero(); }
+    if (x instanceof Number) { return isZero((Number) x); }
+    throw Exceptions.unsupportedOperation(null,"valueOf",x); }
+
+    //--------------------------------------------------------------
 
   public static final String description (final String name,
                                           final BigInteger i) {

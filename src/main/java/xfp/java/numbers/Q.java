@@ -18,7 +18,7 @@ import xfp.java.prng.Generator;
  * necessary.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-23
+ * @version 2019-07-31
  */
 
 // TODO: change name to 'QQ', imitating tex font?
@@ -77,7 +77,7 @@ public final class Q implements Set {
   private final Rational multiply (final Object x0,
                                    final Object x1) {
     //assert contains(x0) :
-     // "x0 " + Classes.className(x0) + ":" + x0 + " not in " + this;
+    // "x0 " + Classes.className(x0) + ":" + x0 + " not in " + this;
     //assert contains(x1)  :
     //  "x1 " + Classes.className(x1) + ":" + x1 + " not in " + this;
     final Rational q0 = Rational.valueOf(x0);
@@ -104,7 +104,7 @@ public final class Q implements Set {
     //assert contains(x);
     // only a partial inverse
     // TODO: throw exception
-    if (Numbers.isZero((Number) x)) { return null; }
+    if (Numbers.isZero(x)) { return null; }
     final Rational q = Rational.valueOf(x);
     return q.reciprocal();  }
 
@@ -128,10 +128,18 @@ public final class Q implements Set {
   // TODO: collect some stats and order tests by frequency?
 
   public static final boolean knownRational (final Object x) {
+    if (x instanceof BigFloat) { return true; }
+    if (x instanceof RationalFloat) { return true; }
+    if (x instanceof Rational) { return true; }
+    if (x instanceof Natural) { return true; }
     if (x instanceof Number) { return true; }
     return false; }
 
   public static final boolean knownRational (final Class c) {
+    if (BigFloat.class.isAssignableFrom(c)) { return true; }
+    if (RationalFloat.class.isAssignableFrom(c)) { return true; }
+    if (Rational.class.isAssignableFrom(c)) { return true; }
+    if (Natural.class.isAssignableFrom(c)) { return true; }
     if (Number.class.isAssignableFrom(c)) { return true; }
     if (Byte.TYPE.equals(c)) { return true; }
     if (Short.TYPE.equals(c)) { return true; }

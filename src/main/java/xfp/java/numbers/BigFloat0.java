@@ -325,7 +325,7 @@ implements Ringlike<BigFloat0> {
     final int e;
     if ((0==s) || (64==s)) { t=tz; e=ez; }
     else { t=(tz>>>s); e=ez+s; }
-    final NaturalBEI0 t2 = significand().square(t);
+    final NaturalBEI0 t2 = significand().fromSquare(t);
     final int e2 = (e<<1);
     return add(
       nonNegative(),

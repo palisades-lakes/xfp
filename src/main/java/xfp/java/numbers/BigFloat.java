@@ -1,7 +1,5 @@
 package xfp.java.numbers;
 
-import static xfp.java.numbers.Numbers.hiBit;
-
 import java.math.BigDecimal;
 import java.util.Objects;
 
@@ -11,15 +9,11 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-30
+ * @version 2019-07-31
  */
 
 @SuppressWarnings("unchecked")
-public final class BigFloat
-extends Number
-implements Ringlike<BigFloat> {
-
-  private static final long serialVersionUID = 1L;
+public final class BigFloat implements Ringlike<BigFloat> {
 
   //--------------------------------------------------------------
   // instance fields and methods
@@ -171,56 +165,7 @@ implements Ringlike<BigFloat> {
     final Natural t = t0.add(t1,upShift);
     return valueOf(p0,t,e); }
 
-  private static final int compare (final long m0,
-                                    final long m1,
-                                    final int bitShift) {
-    //assert 0L<=m0;
-    //assert 0L<=m1;
-    //assert 0<=bitShift : "bitShift=" + bitShift;
-    if (0==bitShift) { return Long.compare(m0,m1); }
-    if (0L==m1) {
-      if (0L==m0) { return 0; }
-      return 1; }
-    if (0L==m0) { return -1; }
-    final int hiBit0 = hiBit(m0);
-    final int hiBit1 = hiBit(m1) + bitShift;
-    if (hiBit0<hiBit1) { return -1; }
-    if (hiBit0>hiBit1) { return 1; }
-    // shifted m1 must fit in one long, since hiBit0 < 64
-    final long m11 = (m1<<bitShift);
-    return Long.compare(m0,m11); }
-
-  private static final Natural add (final long m0,
-                                    final long m1,
-                                    final int bitShift) {
-    //assert 0L<=m0;
-    //assert 0L<=m1;
-    //assert 0<=bitShift;
-    return
-      Natural.get(m0)
-      .add(Natural.get(m1).shiftUp(bitShift)); }
-
-  private static final Natural subtract (final long m0,
-                                         final int bitShift,
-                                         final long m1) {
-    //assert 0L<=m0;
-    //assert 0L<=m1;
-    //assert 0<=bitShift;
-    return
-      Natural.get(m0).shiftUp(bitShift)
-      .subtract(Natural.get(m1)); }
-
-  private static final Natural subtract (final long m0,
-                                         final long m1,
-                                         final int bitShift) {
-    //assert 0L<=m0;
-    //assert 0L<=m1;
-    //assert 0<=bitShift;
-    final long dm = m0 - (m1<<bitShift);
-    //assert 0L<=dm;
-    return Natural.get(dm); }
-
-  private static final BigFloat
+  private final BigFloat
   addSameExponent (final boolean n0,
                    final long t0,
                    final boolean n1,
@@ -228,15 +173,15 @@ implements Ringlike<BigFloat> {
                    final int lShift,
                    final int e) {
     if (n0 ^ n1) { // different signs
-      final int c = compare(t0,t1,lShift);
+      final int c = Longs.compare(t0,t1,lShift);
       if (0==c) { return valueOf(0L); }
       if (0>c) { // t1 > t0
-        final Natural t = subtract(t1,lShift,t0);
+        final Natural t = significand().difference(t1,lShift,t0);
         return valueOf(n1,t,e); }
       // t0 > t1
-      final Natural t = subtract(t0,t1,lShift);
+      final Natural t = significand().difference(t0,t1,lShift);
       return valueOf(n0,t,e); }
-    final Natural t = add(t0,t1,lShift);
+    final Natural t = significand().sum(t0,t1,lShift);
     return valueOf(n0,t,e); }
 
   //--------------------------------------------------------------
@@ -257,7 +202,7 @@ implements Ringlike<BigFloat> {
 
   //--------------------------------------------------------------
 
-  private static final BigFloat
+  private final BigFloat
   add (final boolean p0,
        final long t00,
        final int e00,
@@ -312,9 +257,9 @@ implements Ringlike<BigFloat> {
       Doubles.significand(z),
       Doubles.exponent(z)); }
 
-  public static final BigFloat
-  subtract (final double z0,
-            final double z1) {
+  public final BigFloat
+  difference (final double z0,
+              final double z1) {
     return
       add(
         Doubles.nonNegative(z0),
@@ -335,9 +280,9 @@ implements Ringlike<BigFloat> {
   // used in Rational.addWithDenom()?
 
   public static final BigFloat
-  multiply (final Natural x0,
-            final boolean p1,
-            final long x1) {
+  fromProduct (final Natural x0,
+               final boolean p1,
+               final long x1) {
     //assert 0L<=x1;
     final int e0 = x0.loBit();
     final int e1 = Numbers.loBit(x1);
@@ -410,12 +355,9 @@ implements Ringlike<BigFloat> {
     final int e;
     if ((0==s) || (64==s)) { t=tz; e=ez; }
     else { t=(tz>>>s); e=ez+s; }
-    final Natural t2 = significand().square(t);
+    final Natural t2 = significand().fromSquare(t);
     final int e2 = (e<<1);
-    return add(
-      true,
-      t2,
-      e2); }
+    return add(true,t2,e2); }
 
   //--------------------------------------------------------------
 
@@ -458,13 +400,10 @@ implements Ringlike<BigFloat> {
          final double z1) {
     //assert Double.isFinite(z0);
     //assert Double.isFinite(z1);
-    final BigFloat dz = subtract(z0,z1);
+    final BigFloat dz = difference(z0,z1);
     final Natural t2 = dz.significand().square();
     final int e2 = 2*dz.exponent();
-    return add(
-      true,
-      t2,
-      e2); }
+    return add(true,t2,e2); }
 
   //  public final BigFloat
   //  addL2 (final double x0,
@@ -503,8 +442,8 @@ implements Ringlike<BigFloat> {
 
   //--------------------------------------------------------------
 
-  //  private final BigFloat product (final double z0,
-  //                                  final double z1) {
+  //  private final BigFloat fromProduct (final double z0,
+  //                                      final double z1) {
   //    if ((0.0==z0) || (0.0==z1)) { return valueOf(0L); }
   //    //assert Double.isFinite(z0);
   //    //assert Double.isFinite(z1);
@@ -571,7 +510,7 @@ implements Ringlike<BigFloat> {
    */
   @Override
   public final int intValue () {
-    throw Exceptions.unsupportedOperation(this,"longValue"); }
+    throw Exceptions.unsupportedOperation(this,"intValue"); }
 
   /** Unsupported.
    *
@@ -900,7 +839,6 @@ implements Ringlike<BigFloat> {
     return valueOf(true,x,0); }
 
   public static final BigFloat valueOf (final Number x)  {
-    if (x instanceof BigFloat) { return (BigFloat) x; }
     if (x instanceof Double) { return valueOf((Double) x); }
     if (x instanceof Float) { return valueOf((Float) x); }
     if (x instanceof Byte) { return valueOf((Byte) x); }
@@ -912,6 +850,7 @@ implements Ringlike<BigFloat> {
     throw Exceptions.unsupportedOperation(null,"valueOf",x); }
 
   public static final BigFloat valueOf (final Object x)  {
+    if (x instanceof BigFloat) { return (BigFloat) x; }
     return valueOf((Number) x); }
 
   //--------------------------------------------------------------

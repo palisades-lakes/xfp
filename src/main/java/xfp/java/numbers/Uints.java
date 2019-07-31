@@ -1,5 +1,7 @@
 package xfp.java.numbers;
 
+import static xfp.java.numbers.Numbers.unsigned;
+
 import java.math.BigInteger;
 
 import xfp.java.exceptions.Exceptions;
@@ -281,22 +283,22 @@ extends Transience<T> {
     return u; }
 
   //  default T shiftDown (final int shift) {
-//    //assert 0<=shift;
-//    if (shift==0) { return (T) this; }
-//    final int n0 = hiInt();
-//    if (0==n0) { return (T) this; }
-//    final int iShift = (shift >>> 5);
-//    final int n1 = n0-iShift;
-//    if (0>=n1) { return empty(); }
-//    final int bShift = (shift & 0x1f);
-//    if (0==bShift) { return shiftDownWords(iShift); }
-//    T u = empty();
-//    final int rShift = 32-bShift;
-//    for (int j=0;j<n1;j++) { 
-//      final int i = j+iShift;
-//      final int w = ((word(i+1)<<rShift) | (word(i)>>>bShift));
-//      u = (T) u.setWord(j,w); }
-//    return u; }
+  //    //assert 0<=shift;
+  //    if (shift==0) { return (T) this; }
+  //    final int n0 = hiInt();
+  //    if (0==n0) { return (T) this; }
+  //    final int iShift = (shift >>> 5);
+  //    final int n1 = n0-iShift;
+  //    if (0>=n1) { return empty(); }
+  //    final int bShift = (shift & 0x1f);
+  //    if (0==bShift) { return shiftDownWords(iShift); }
+  //    T u = empty();
+  //    final int rShift = 32-bShift;
+  //    for (int j=0;j<n1;j++) { 
+  //      final int i = j+iShift;
+  //      final int w = ((word(i+1)<<rShift) | (word(i)>>>bShift));
+  //      u = (T) u.setWord(j,w); }
+  //    return u; }
 
   //--------------------------------------------------------------
 
@@ -338,20 +340,14 @@ extends Transience<T> {
    */
 
   default T from (final long u) {
-    throw Exceptions.unsupportedOperation(
-      this,"from",u); }
+    throw Exceptions.unsupportedOperation(this,"from",u); }
 
   /** Return a new Uints whose value is <code>u</code>,
    * interpreted as unsigned.
    * Does not modify <code>this</code>.
    */
 
-  default T from (final int u) {
-    return from(Numbers.unsigned(u)); }
-
-  default T littleEnd (final long u,
-                  final int shift) {
-    return (T) from(u).shiftUp(shift); }
+  default T from (final int u) { return from(unsigned(u)); }
 
   /** Return a new Uints whose value is
    * <code>u * 2<sup>shift</sup></code>.
@@ -361,8 +357,9 @@ extends Transience<T> {
    */
 
   default T from (final long u,
-                  final int shift) {
-    return (T) from(u).shiftUp(shift); }
+                  final int upShift) {
+    throw Exceptions.unsupportedOperation(this,"from",u,upShift); }
+//    return (T) from(u).shiftUp(shift); }
 
   //--------------------------------------------------------------
   // 'Number' interface

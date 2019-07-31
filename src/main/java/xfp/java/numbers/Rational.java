@@ -12,14 +12,11 @@ import xfp.java.exceptions.Exceptions;
 /** Ratios of {@link Natural}.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-29
+ * @version 2019-07-31
  */
 
 @SuppressWarnings("unchecked")
-public final class Rational extends Number
-implements Ringlike<Rational> {
-
-  private static final long serialVersionUID = 1L;
+public final class Rational implements Ringlike<Rational> {
 
   //--------------------------------------------------------------
   // instance fields and methods
@@ -193,7 +190,7 @@ implements Ringlike<Rational> {
     //Debug.println("n1=" + n1);
     //Debug.println("e1=" + e1);
     final BigFloat n0d1 = BigFloat.valueOf(p0,n0,e1);
-    final BigFloat n1d0 = BigFloat.multiply(d0,p1,n1);
+    final BigFloat n1d0 = BigFloat.fromProduct(d0,p1,n1);
     final BigFloat n = n0d1.add(n1d0);
     final BigFloat d = BigFloat.valueOf(true,d0,e1);
     //Debug.println("n0d1=" + n0d1);
@@ -720,7 +717,6 @@ implements Ringlike<Rational> {
     return valueOf(x.nonNegative(),t,Natural.get(1)); }
 
   public static final Rational valueOf (final Number x)  {
-    if (x instanceof Rational) { return (Rational) x; }
     if (x instanceof Double) { return valueOf((Double) x); }
     if (x instanceof Float) { return valueOf((Float) x); }
     if (x instanceof Byte) { return valueOf((Byte) x); }
@@ -729,12 +725,13 @@ implements Ringlike<Rational> {
     if (x instanceof Long) { return valueOf((Long) x); }
     if (x instanceof Natural) { return valueOf((Natural) x); }
     if (x instanceof BigInteger) { return valueOf((BigInteger) x); }
-    if (x instanceof BigFloat) { return valueOf((BigFloat) x); }
     if (x instanceof BigDecimal) { return valueOf((BigDecimal) x); }
     throw Exceptions.unsupportedOperation(
       Rational.class,"valueOf",x); }
 
   public static final Rational valueOf (final Object x)  {
+    if (x instanceof Rational) { return (Rational) x; }
+    if (x instanceof BigFloat) { return valueOf((BigFloat) x); }
     return valueOf((Number) x); }
 
   //--------------------------------------------------------------

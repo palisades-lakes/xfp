@@ -217,14 +217,34 @@ extends Uints<Natural>, Ringlike<Natural> {
 
 //  Natural add (final long u,
 //               final int upShift);
-    default Natural add (final long u,
-                         final int upShift) {
+
+  default Natural add (final long u,
+                       final int upShift) {
+  //assert isValid();
+  //assert 0L<=u;
+  //assert 0<=upShift;
+  if (0L==u) { return this; }
+  if (0==upShift) { return add(u); }
+  return add(from(u,upShift)); }
+
+  default Natural sum (final long u,
+                       final long v) {
     //assert isValid();
     //assert 0L<=u;
-    //assert 0<=upShift;
-    if (0L==u) { return this; }
-    if (0==upShift) { return add(u); }
-    return add(from(u,upShift)); }
+    if (0L==u) { return from(v); }
+    if (0L==v) { return from(u); }
+    return from(u).add(v); }
+
+  default Natural sum (final long u,
+                       final long v,
+                       final int upShift) {
+  //assert isValid();
+  //assert 0L<=u;
+  //assert 0<=upShift;
+    if (0L==u) { return from(v); }
+    if (0L==v) { return from(u); }
+    if (0==upShift) { return sum(u,v); }
+    return from(u).add(from(v,upShift)); }
 
   //--------------------------------------------------------------
 
@@ -297,6 +317,50 @@ extends Uints<Natural>, Ringlike<Natural> {
 
   //--------------------------------------------------------------
 
+  default Natural difference (final long u,
+                              final long v) {
+    //assert isValid();
+    //assert 0L<=u;
+    //assert 0L<=v;
+    //assert compareTo(u,v)>=0;
+    if (0L==u) { 
+      //assert 0L==v;
+      return zero(); }
+    if (0L==v) { return from(u); }
+    final long duv = u-v;
+    // assert 0L<=duv;
+    return from(duv); }
+
+  default Natural difference (final long u,
+                              final int upShift,
+                              final long v) {
+    //assert isValid();
+    //assert 0L<=u;
+    //assert 0<=upShift;
+    //assert 0L<=v;
+    //assert compareTo(u,upShift,v)>=0;
+    if (0L==u) { 
+      //assert 0L==v;
+      return zero(); }
+    if (0==upShift) { return difference(u,v); }
+    if (0L==v) { return from(u,upShift); }
+    return from(u,upShift).subtract(v); }
+
+  default Natural difference (final long u,
+                              final long v,
+                              final int upShift) {
+    //assert isValid();
+    //assert 0L<=u;
+    //assert 0<=upShift;
+    //assert 0L<=v;
+    //assert compareTo(u,v,upShift)>=0;
+    // TODO: overflow?
+    final long dm = u-(v<<upShift);
+    //assert 0L<=dm;
+    return from(dm); }
+
+  //--------------------------------------------------------------
+
   default Natural subtractFrom (final long u) {
     //assert isValid();
     //assert 0L<=u;
@@ -356,7 +420,7 @@ extends Uints<Natural>, Ringlike<Natural> {
    * @see #multiply(long,long) 
    */
 
-  default Natural square (final long t) {
+  default Natural fromSquare (final long t) {
     //assert isValid();
     //assert 0L<=t;
     final long hi = Numbers.hiWord(t);

@@ -25,7 +25,7 @@ import xfp.java.prng.Generators;
  * <code>Rational</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-29
+ * @version 2019-07-31
  */
 @SuppressWarnings({"unchecked","static-method"})
 public final class Rationals implements Set {

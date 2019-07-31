@@ -37,7 +37,7 @@ public final class NaturalLEMutable implements Natural {
   //--------------------------------------------------------------
 
   @Override
-  public final Natural square (final long t) {
+  public final Natural fromSquare (final long t) {
     //assert isValid();
     //assert 0L<=t;
     final long hi = Numbers.hiWord(t);
