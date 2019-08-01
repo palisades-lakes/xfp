@@ -51,6 +51,57 @@ public final class NaturalLE implements Natural {
   //--------------------------------------------------------------
 
   @Override
+  public final  Natural sum (final long u,
+                             final long v) {
+    //assert isValid();
+    //assert 0L<=u;
+    if (0L==u) { return from(v); }
+    if (0L==v) { return from(u); }
+    final int[] ww = new int[3];
+    long sum = loWord(u) + loWord(v);
+    ww[0] = (int) sum;
+    sum = hiWord(u) + hiWord(v) + (sum>>>32);
+    ww[1] = (int) sum;
+    ww[2] = (int) (sum>>>32);
+    return unsafe(ww); }
+
+  @Override
+  public final  Natural sum (final long u,
+                             final long v,
+                             final int upShift) {
+    //assert isValid();
+    //assert 0L<=u;
+    //assert 0<=upShift;
+    if (0L==u) { return from(v); }
+    if (0L==v) { return from(u); }
+    if (0==upShift) { return sum(u,v); }
+    final int iShift = (upShift>>>5);
+    final int bShift = (upShift&0x1f);
+    final int[] ww = new int[iShift+3];
+    ww[0] = (int) loWord(u);
+    ww[1] = (int) hiWord(u);
+    final long vlo = loWord(v);
+    final long vhi = hiWord(v);
+    final long vv0,vv1,vv2;
+    if (0==bShift) { vv0=vlo; vv1=vhi; vv2=0; }
+    else {
+      final int rShift = 32-bShift;
+      vv0 = unsigned((int) (vlo<<bShift));
+      vv1 = unsigned((int) ((vhi<<bShift)|(vlo>>>rShift)));
+      vv2 = unsigned((int) (vhi>>>rShift)); }
+    int i = iShift;
+    long sum = unsigned(ww[i]) + vv0;
+    ww[i] = (int) sum;
+    i++;
+    sum = unsigned(ww[i]) + vv1 + (sum>>>32);
+    ww[i] = (int) sum;
+    i++;
+    sum = unsigned(ww[i]) + vv2 + (sum>>>32);
+    ww[i] = (int) sum;
+    assert 0L==(sum>>>32);
+    return unsafe(ww); }
+
+  @Override
   public final Natural fromSquare (final long t) {
     //assert isValid();
     //assert 0L<=t;
@@ -286,6 +337,69 @@ public final class NaturalLE implements Natural {
       vv[i] = (int) dif; }
     for (;i<n;i++) { vv[i] = tt[i]; }
     return unsafe(vv); }
+
+  //--------------------------------------------------------------
+
+  @Override
+  public final Natural difference (final long v,
+                                   final int upShift,
+                                   final long u) {
+    //assert isValid();
+    //assert 0L<=u;
+    //assert 0<=upShift;
+    //assert 0L<=v;
+    //assert compareTo(u,upShift,v)>=0;
+    if (0L==v) { 
+      //assert 0L==v;
+      return zero(); }
+    if (0==upShift) { return difference(v,u); }
+    final int iShift = (upShift>>>5);
+    final int bShift = (upShift&0x1f);
+    final int n = iShift+3;
+    final int[] ww = new int[n];
+    final long vlo = loWord(v);
+    final long vhi = hiWord(v);
+    final int vv0,vv1,vv2;
+    if (0==bShift) { 
+      vv0=(int)vlo; 
+      vv1=(int)vhi; 
+      vv2=0; }
+    else {
+      final int rShift = 32-bShift;
+      vv0 = (int) (vlo<<bShift);
+      vv1 = (int) ((vhi<<bShift)|(vlo>>>rShift));
+      vv2 = (int) (vhi>>>rShift); }
+    int i = iShift;
+    ww[i++] = vv0; ww[i++] = vv1; ww[i] = vv2;
+    long dif = (unsigned(ww[0])-loWord(u));
+    long borrow = (dif>>32);
+    ww[0] = (int) dif;
+    dif = (unsigned(ww[1])-hiWord(u)) + borrow;
+    borrow = (dif>>32);
+    ww[1] = (int) dif;
+    i=2;
+    for (;i<n;i++) {
+      if (0L==borrow) { break; }
+      dif = unsigned(ww[i]) + borrow;
+      borrow = (dif>>32);
+      ww[i] = (int) dif; }
+    assert 0L==borrow;
+    return unsafe(ww); }
+
+  @Override
+  public final Natural difference (final long u,
+                                   final long v,
+                                   final int upShift) {
+    //assert isValid();
+    //assert 0L<=u;
+    //assert 0<=upShift;
+    // assert upShift<64L;
+    //assert 0L<=v;
+    //assert compareTo(u,v,upShift)>=0;
+    // TODO: overflow?
+    final long dm = u-(v<<upShift);
+    //assert 0L<=dm;
+    return from(dm); }
 
   //--------------------------------------------------------------
   // Ringlike
