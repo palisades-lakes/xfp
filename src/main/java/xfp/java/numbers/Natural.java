@@ -1,5 +1,7 @@
 package xfp.java.numbers;
 
+import static java.lang.Integer.compareUnsigned;
+
 import java.math.BigInteger;
 import java.util.List;
 
@@ -50,19 +52,39 @@ extends Uints<Natural>, Ringlike<Natural> {
     //assert u.isValid();
     //assert 0<=upShift;
     if (0==upShift) { return compareTo(u); }
+    final int iShift = (upShift>>>5);
     final int bShift = (upShift&0x1F);
     if (0!=bShift) { return compareTo(u.shiftUp(upShift)); }
-    final int iShift = (upShift>>>5);
-    final int n0 = hiInt() - iShift;
-    final int n1 = u.hiInt();
+    final int n0 = hiInt();
+    final int n1 = u.hiInt()+iShift;
     if (n0 < n1) { return -1; }
     if (n0 > n1) { return 1; }
     // TODO: is this faster than unsigned long conversion?
-    for (int i = n0-1; i>=0; i--) {
-      final int c = 
-        Integer.compareUnsigned(word(i+iShift),u.word(i));
+    int i = n0-1;
+    for (; i>iShift; i--) {
+      final int c = compareUnsigned(word(i),u.word(i-iShift));
       if (0!=c) { return c; } }
+    for (;i>=0;i--) { if (0!=word(i)) { return 1; } }
     return 0; }
+
+//  default int compareTo (final Natural u,
+//                         final int upShift) {
+//    //assert isValid();
+//    //assert u.isValid();
+//    //assert 0<=upShift;
+//    if (0==upShift) { return compareTo(u); }
+//    final int bShift = (upShift&0x1F);
+//    if (0!=bShift) { return compareTo(u.shiftUp(upShift)); }
+//    final int iShift = (upShift>>>5);
+//    final int n0 = hiInt() - iShift;
+//    final int n1 = u.hiInt();
+//    if (n0 < n1) { return -1; }
+//    if (n0 > n1) { return 1; }
+//    // TODO: is this faster than unsigned long conversion?
+//    for (int i = n0-1; i>=0; i--) {
+//      final int c = compareUnsigned(word(i+iShift),u.word(i));
+//      if (0!=c) { return c; } }
+//    return 0; }
 
   default int compareTo (final int upShift,
                          final Natural u) {

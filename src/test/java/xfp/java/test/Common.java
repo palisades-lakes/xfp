@@ -34,7 +34,7 @@ import xfp.java.prng.PRNG;
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-31
+ * @version 2019-08-01
  */
 @SuppressWarnings("unchecked")
 public final class Common {
@@ -143,6 +143,56 @@ public final class Common {
     + "\n" + y.toString()
     + "\n" + x1.toString(0x10)
     + "\n"); }
+
+  protected static final <T extends Ringlike<T>> void
+  compare (final Function<BigInteger,T> fromBI,
+           final BigInteger x0,
+           final BigInteger x1) {
+    final int c0 = x0.compareTo(x1);
+    final Natural y0 = (Natural) fromBI.apply(x0);
+    final Natural y1 = (Natural) fromBI.apply(x1);
+    final int c1 = y0.compareTo(y1);
+    Assertions.assertEquals(c0,c1, ()->
+    "\n" + x0.toString(0x10)
+    + "\n compareTo "
+    + "\n" +  x1.toString(0x10) 
+    + "\n -> " + c0
+    + "\n\n" + y0.toString()
+    + "\n compareTo "
+    + "\n" +  y1.toString()
+    + "\n -> " + c1
+    + "\n\n"); 
+    final int shift = 3*32 + 17;
+    final int c2 = x0.compareTo(x1.shiftLeft(shift));
+    final int c3 = y0.compareTo(y1.shiftUp(shift));
+    Assertions.assertEquals(c2,c3, ()->
+    "\n" + x0.toString(0x10)
+    + "\n compareTo "
+    + "\n" +  x1.toString(0x10)  
+    + "\nshiftUp " + shift
+    + "\n -> " + c2
+    + "\n\n" + y0.toString()
+    + "\n compareTo "
+    + "\n" +  y1.toString()
+    + "\nshiftUp " + shift
+    + "\n -> " + c3
+    + "\n\n"); 
+    final int c4 = y0.compareTo(y1,shift);
+    Assertions.assertEquals(c3,c4, ()->
+    "\n\n" + y0.toString()
+    + "\n compareTo "
+    + "\n" +  y1.toString()
+    + "\nshiftUp " + shift
+    + "\n -> " + c3
+    + "\n\n" + y0.toString()
+    + "\n compareTo "
+    + "\n" +  y1.toString() 
+    + "\n, " + shift
+    + "\n -> " + c4
+    + "\n\n"); 
+
+
+  }
 
   public static final <T extends Ringlike<T>> void
   add (final Function<BigInteger,T> fromBI,
@@ -516,6 +566,7 @@ public final class Common {
     hexRoundTrip(fromBI,valueOf,z1);
     biRoundTrip(fromBI,toBI,z0);
     biRoundTrip(fromBI,toBI,z1);
+    compare(fromBI,z0,z1);
     add(fromBI,toBI,z0,z1);
     add(fromBI,toBI,z0,z0);
     absDiff(fromBI,toBI,z0,z1);
@@ -1332,14 +1383,14 @@ public final class Common {
         final double pred = p.doubleValue();
         //Debug.println("truth=" + Double.toString(truth));
         //Debug.println("pred=" + Double.toString(pred));
-          Assertions.assertEquals(truth,pred,
-            "\nbase: " + Classes.className(base)
-            + "\n= " + Double.toHexString(truth)
-            + "\n= " + base.value()
-            + "\npred: " + Classes.className(a)
-            + "\n= " + Double.toHexString(pred)
-            + "\n= " + a.value()
-            + "\n"); } } 
+        Assertions.assertEquals(truth,pred,
+          "\nbase: " + Classes.className(base)
+          + "\n= " + Double.toHexString(truth)
+          + "\n= " + base.value()
+          + "\npred: " + Classes.className(a)
+          + "\n= " + Double.toHexString(pred)
+          + "\n= " + a.value()
+          + "\n"); } } 
     //Debug.DEBUG=false;
   }
 
@@ -1407,17 +1458,17 @@ public final class Common {
         final double truth = e.doubleValue();
         a = a.add2(xi);
         final double pred = a.doubleValue();
-          Assertions.assertEquals(truth,pred,()->
-          Classes.className(aa)
-          + "\ni=" + ii + "\n" + Double.toHexString(truth)
-          + "\n" +  Double.toHexString(pred) + "\n"); } }
+        Assertions.assertEquals(truth,pred,()->
+        Classes.className(aa)
+        + "\ni=" + ii + "\n" + Double.toHexString(truth)
+        + "\n" +  Double.toHexString(pred) + "\n"); } }
     final double truth = base.clear().add2All(x).doubleValue();
     for (final Accumulator a : accumulators) {
       final double pred = a.clear().add2All(x).doubleValue();
-        Assertions.assertEquals(truth,pred,
-          () ->
-        "\n" + Double.toHexString(truth)
-        + "\n" +  Double.toHexString(pred) + "\n"); } } 
+      Assertions.assertEquals(truth,pred,
+        () ->
+      "\n" + Double.toHexString(truth)
+      + "\n" +  Double.toHexString(pred) + "\n"); } } 
 
   public static final void l2Tests (final List<Generator> generators,
                                     final List<Accumulator> accumulators,
@@ -1446,10 +1497,10 @@ public final class Common {
         a.clear().addL2Distance(x0,x1).doubleValue();
       Assertions.assertTrue(0.0<=pred,
         "\n" + Classes.className(a) + "\n");
-        Assertions.assertEquals(truth,pred,
-          () ->
-        "\n" + Double.toHexString(truth)
-        + "\n" +  Double.toHexString(pred) + "\n"); } } 
+      Assertions.assertEquals(truth,pred,
+        () ->
+      "\n" + Double.toHexString(truth)
+      + "\n" +  Double.toHexString(pred) + "\n"); } } 
 
   private static final void
   l2DistanceTest (final Generator g,
@@ -1467,10 +1518,10 @@ public final class Common {
         a.clear().addL2Distance(x0,x1).doubleValue();
       Assertions.assertTrue(0.0<=pred,
         "\n" + Classes.className(a) + "\n");
-        Assertions.assertEquals(truth,pred,
-          () ->
-        "\n" + Double.toHexString(truth)
-        + "\n" +  Double.toHexString(pred) + "\n"); } } 
+      Assertions.assertEquals(truth,pred,
+        () ->
+      "\n" + Double.toHexString(truth)
+      + "\n" +  Double.toHexString(pred) + "\n"); } } 
 
   public static final void
   l2DistanceTests (final List<Generator> generators,
@@ -1495,16 +1546,16 @@ public final class Common {
       //final long t0 = System.nanoTime();
       final double pred = a.clear().addL1Distance(x0,x1).doubleValue();
       //final long t1 = (System.nanoTime()-t0);
-        Assertions.assertEquals(truth,pred,Classes.className(a)); }
-      //final double l1d = Math.abs(truth - pred);
-      //final double l1n = Math.max(1.0,Math.abs(truth));
-      //Debug.println(
-      //  String.format("%32s %8.2fms ",
-      //    Classes.className(a),Double.valueOf(t1*1.0e-6))
-      //  + toString(l1d)
-      //  + " / " + toString(l1n) + " = "
-      //  + String.format("%8.2e",Double.valueOf(l1d/l1n)));
-    }
+      Assertions.assertEquals(truth,pred,Classes.className(a)); }
+    //final double l1d = Math.abs(truth - pred);
+    //final double l1n = Math.max(1.0,Math.abs(truth));
+    //Debug.println(
+    //  String.format("%32s %8.2fms ",
+    //    Classes.className(a),Double.valueOf(t1*1.0e-6))
+    //  + toString(l1d)
+    //  + " / " + toString(l1n) + " = "
+    //  + String.format("%8.2e",Double.valueOf(l1d/l1n)));
+  }
 
   public static final void
   l1DistanceTests (final List<Generator> generators,

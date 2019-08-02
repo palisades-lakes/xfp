@@ -21,7 +21,7 @@ import xfp.java.prng.GeneratorBase;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-31
+ * @version 2019-08-01
  */
 
 @SuppressWarnings("unchecked")
@@ -147,36 +147,97 @@ public final class NaturalLE implements Natural {
 
   //--------------------------------------------------------------
 
-  @Override
-  public final Natural add (final Natural u,
-                            final int shift) {
-    //assert 0<=shift;
-    //if (isZero()) { return u.shiftUp(shift); }
-    //if (u.isZero()) { return this; }
-    //if (0==shift) { return add(u); }
-    final int iShift = (shift>>>5);
-    final int bShift = (shift&0x1f);
+  private final Natural add (final NaturalLE u,
+                             final int upShift) {
+    //assert 0<=upShift;
+    if (isZero()) { return u.shiftUp(upShift); }
+    if (u.isZero()) { return this; }
+    if (0==upShift) { return add(u); }
+    final int iShift = (upShift>>>5);
+    final int bShift = (upShift&0x1f);
     // TODO: special case whole word shift?
     final int rShift = 32-bShift;
-    final int n0 = hiInt();
-    final int n1 = u.hiInt()+iShift+1;
-    final int n = Math.max(n0,n1);
-    final int[] v = new int[n];
+    final int nt = hiInt();
+    final int n0 = u.hiInt()+iShift;
+    final int n1 = n0+1;
+    final int n = Math.max(nt,n1);
+    final int[] tt = words();
+    final int[] uu = u.words();
+    final int[] vv = new int[n];
     int i=0;
-    for (;i<iShift;i++) { v[i] = word(i); }
+    for (;i<iShift;i++) { vv[i] = word(i); }
     long carry = 0L;
     int u0 = 0;
-    // TODO: separate cases where one term's words are known zero
-    for (;i<n;i++) {
-      final int u1 = u.word(i-iShift);
+    for (;i<Math.min(nt,n1);i++) {
+      final int u1 = ((i<n0) ? uu[i-iShift] : 0);
       final int ui = 
         ((bShift==0) ? u1 : ((u1<<bShift)|(u0>>>rShift)));
       u0 = u1;
-      final long sum = uword(i) + Numbers.unsigned(ui) + carry;
+      final long sum = unsigned(tt[i]) + unsigned(ui) + carry;
       carry = (sum>>>32);
-      v[i] = (int) sum; }
-    if (0L!=carry) { v[i] = (int) carry; }
-    return unsafe(v); }
+      vv[i] = (int) sum; }
+    for (;i<n1;i++) {
+      if (0L==carry) { break; }
+      final int u1 = ((i<n0) ? uu[i-iShift] : 0);
+      final int ui = 
+        ((bShift==0) ? u1 : ((u1<<bShift)|(u0>>>rShift)));
+      u0 = u1;
+      final long sum = unsigned(ui) + carry;
+      carry = (sum>>>32);
+      vv[i] = (int) sum; }
+    for (;i<n1;i++) {
+      final int u1 = ((i<n0) ? uu[i-iShift] : 0);
+      final int ui = 
+        ((bShift==0) ? u1 : ((u1<<bShift)|(u0>>>rShift)));
+      u0 = u1;
+      vv[i] = ui; }
+    for (;i<nt;i++) {
+      if (0L==carry) { break; }
+      final long sum = unsigned(tt[i]) + carry;
+      carry = (sum>>>32);
+      vv[i] = (int) sum; }
+    if (i<nt) { System.arraycopy(tt,i,vv,i,nt-i); }
+    //for (;i<nt;i++) { vv[i] = tt[i]; }
+    if (0L!=carry) { vv[n-1] = (int) carry; }
+    return unsafe(vv); }
+
+  @Override
+  public final Natural add (final Natural u,
+                            final int upShift) {
+    if (u instanceof NaturalLE) { 
+      return add((NaturalLE) u,upShift); }
+    return Natural.super.add(u,upShift); }
+
+  //  @Override
+  //  public final Natural add (final Natural u,
+  //                            final int upShift) {
+  //    //assert 0<=upShift;
+  //    //if (isZero()) { return u.shiftUp(upShift); }
+  //    //if (u.isZero()) { return this; }
+  //    //if (0==upShift) { return add(u); }
+  //    final int iShift = (upShift>>>5);
+  //    final int bShift = (upShift&0x1f);
+  //    // TODO: special case whole word shift?
+  //    final int rShift = 32-bShift;
+  //    final int n0 = hiInt();
+  //    final int n1 = u.hiInt()+iShift+1;
+  //    final int n = Math.max(n0,n1);
+  //    final int[] v = new int[n];
+  //    int i=0;
+  //    for (;i<iShift;i++) { v[i] = word(i); }
+  //    long carry = 0L;
+  //    int u0 = 0;
+  //    // TODO: separate cases where one term's words are known zero
+  //    for (;i<n;i++) {
+  //      final int u1 = u.word(i-iShift);
+  //      final int ui = 
+  //        ((bShift==0) ? u1 : ((u1<<bShift)|(u0>>>rShift)));
+  //      u0 = u1;
+  //      final long sum = uword(i) + Numbers.unsigned(ui) + carry;
+  //      carry = (sum>>>32);
+  //      v[i] = (int) sum; }
+  //    if (0L!=carry) { v[i] = (int) carry; }
+  //    return unsafe(v); }
 
   //--------------------------------------------------------------
 
@@ -206,7 +267,9 @@ public final class NaturalLE implements Natural {
     return unsafe(vv); }
 
   //--------------------------------------------------------------
-
+  // TODO: compare performance to: copy shifted u to vv, and then 
+  // add tt.
+  
   @Override
   public final Natural add (final long u,
                             final int upShift) {
@@ -226,32 +289,28 @@ public final class NaturalLE implements Natural {
       uu0 = (lo<<bShift);
       uu1 = ((hi<<bShift)|(lo>>>rShift));
       uu2 =  (hi>>>rShift); }
-    final int n0 = hiInt();
-    final int n = Math.max(n0,iShift+3);
-    //final int[] tt = words();
+    final int nt = hiInt();
+    final int nu = iShift+2;
+    final int n = Math.max(nt,nu);
+    final int[] tt = words();
     final int[] vv = new int[n+1];
-    int i=0;
-    //System.arraycopy
-    for (;i<Math.min(iShift,n0);i++) { 
-      vv[i] = word(i); }
-    i=iShift;
-    final long sum0 = uword(i) + Numbers.unsigned(uu0);
-    long carry = (sum0>>>32);
-    vv[i++] = (int) sum0; 
-    final long u1 = uword(i) + Numbers.unsigned(uu1);
-    final long sum1 = u1 + carry;
-    carry = (sum1>>>32);
-    vv[i++] = (int) sum1; 
-    final long u2 = uword(i) + Numbers.unsigned(uu2);
-    final long sum2 = u2 + carry;
-    carry = (sum2>>>32);
-    vv[i++] = (int) sum2; 
-    for (;i<n;i++) {
+    System.arraycopy(tt,0,vv,0,Math.min(iShift,nt));
+    int i=iShift;
+    long sum = ((i<nt)?unsigned(tt[i]):0L) + unsigned(uu0);
+    long carry = (sum>>>32);
+    vv[i++] = (int) sum; 
+    sum = ((i<nt)?unsigned(tt[i]):0L) + unsigned(uu1) + carry;
+    carry = (sum>>>32);
+    vv[i++] = (int) sum; 
+    sum = ((i<nt)?unsigned(tt[i]):0L) + unsigned(uu2) + carry;
+    carry = (sum>>>32);
+    vv[i++] = (int) sum; 
+    for (;i<nt;i++) {
       if (0L==carry) { break; }
-      final long sum = uword(i) + carry;
+      sum = unsigned(tt[i]) + carry;
       carry = (sum>>>32);
       vv[i] = (int) sum; }
-    for (;i<n;i++) { vv[i] = word(i); }
+    if (i<nt) { System.arraycopy(tt,i,vv,i,nt-i); }
     if (0L!=carry) { vv[n] = (int) carry; }
     return unsafe(vv); }
 
@@ -335,7 +394,8 @@ public final class NaturalLE implements Natural {
       dif = unsigned(tt[i]) + borrow;
       borrow = (dif>>32);
       vv[i] = (int) dif; }
-    for (;i<n;i++) { vv[i] = tt[i]; }
+    if (i<n) { System.arraycopy(tt,i,vv,i,n-i); }
+    //for (;i<n;i++) { vv[i] = tt[i]; }
     return unsafe(vv); }
 
   //--------------------------------------------------------------

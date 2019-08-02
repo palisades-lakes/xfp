@@ -15,7 +15,7 @@ import xfp.java.test.Common;
  * jy --source 11 src/scripts/java/xfp/java/scripts/TotalSum.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-26
+ * @version 2019-08-01
  */
 @SuppressWarnings("unchecked")
 public final class TotalSum {
@@ -30,9 +30,13 @@ public final class TotalSum {
     final Accumulator a = BigFloatAccumulator.make();
     assert a.isExact();
     for (int i=0;i<trys;i++) {
-      final double[] x = (double[]) g.next();
-      final double z = a.addAll(x).doubleValue();
-      assert Double.isFinite(z); } }
+      final double[] x0 = (double[]) g.next();
+      final double[] x1 = (double[]) g.next();
+      final double s = a.addAll(x0).addAll(x1).doubleValue();
+      assert Double.isFinite(s);
+      final double d = a.addProducts(x0,x1).doubleValue();
+      assert Double.isFinite(d);
+      } }
 
   //--------------------------------------------------------------
 }
