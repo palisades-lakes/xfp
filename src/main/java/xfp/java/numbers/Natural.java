@@ -206,15 +206,15 @@ extends Uints<Natural>, Ringlike<Natural> {
     return t; }
 
   default Natural add (final Natural u,
-                       final int shift) {
+                       final int upShift) {
     //assert isValid();
     //assert u.isValid();
     //assert 0<=shift;
-    if (isZero()) { return u.shiftUp(shift); }
+    if (isZero()) { return u.shiftUp(upShift); }
     if (u.isZero()) { return this; }
-    if (0==shift) { return add(u); }
+    if (0==upShift) { return add(u); }
     // TODO: reduce to single op?
-    return add(u.shiftUp(shift)); }
+    return add(u.shiftUp(upShift)); }
 
   default Natural add (final long u) {
     //assert isValid();
@@ -297,6 +297,45 @@ extends Uints<Natural>, Ringlike<Natural> {
     if (isImmutable()) { return v.immutable(); }
     return v; }
 
+  //--------------------------------------------------------------
+  /** Return <code>this - (u << upShift)</code>. 
+   * Assume difference is positive.
+   */
+  
+  default Natural subtract (final Natural u,
+                            final int upShift) {
+    //assert isValid();
+    //assert u.isValid();
+    //assert 0<=shift;
+    if (isZero()) { 
+      assert u.isZero();
+      return zero(); }
+    if (u.isZero()) { return this; }
+    if (0==upShift) { return subtract(u); }
+    // TODO: reduce to single op?
+    return subtract(u.shiftUp(upShift)); }
+
+  //--------------------------------------------------------------
+  /** Return <code>(this << upShift) - u</code>. 
+   * Assume difference is positive.
+   */
+  
+
+  default Natural subtract (final int upShift,
+                            final Natural u) {
+    //assert isValid();
+    //assert u.isValid();
+    //assert 0<=shift;
+    if (isZero()) { 
+      assert u.isZero();
+      return zero(); }
+    if (u.isZero()) { return shiftUp(upShift); }
+    if (0==upShift) { return subtract(u); }
+    // TODO: reduce to single op?
+    return shiftUp(upShift).subtract(u); }
+
+  //--------------------------------------------------------------
+
   default Natural subtract (final long u) {
     //assert isValid();
     //assert 0L<=u;
@@ -327,6 +366,7 @@ extends Uints<Natural>, Ringlike<Natural> {
 
 //  Natural subtract (final long u,
 //                    final int upShift);
+
   default Natural subtract (final long u,
                             final int upShift) {
     //assert isValid();

@@ -62,9 +62,9 @@ public final class BigFloat implements Ringlike<BigFloat> {
     if (p0^p1) { // different signs
       final int c01 = t0.compareTo(de,t1);
       // t12 > t02
-      if (0>c01) { return valueOf(p1,t1.subtract(t0.shiftUp(de)),e1); }
+      if (0>c01) { return valueOf(p1,t1.subtract(t0,de),e1); }
       // t02 > t12
-      if (0<c01) { return valueOf(p0,t0.shiftUp(de).subtract(t1),e1); }
+      if (0<c01) { return valueOf(p0,t0.subtract(de,t1),e1); }
       return valueOf(0L); }
     // same signs
     return valueOf(p0,t1.add(t0,de),e1);}

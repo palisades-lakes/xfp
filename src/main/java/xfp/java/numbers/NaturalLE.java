@@ -165,7 +165,8 @@ public final class NaturalLE implements Natural {
     final int[] uu = u.words();
     final int[] vv = new int[n];
     int i=0;
-    for (;i<iShift;i++) { vv[i] = word(i); }
+    System.arraycopy(tt,0,vv,0,Math.min(nt,iShift));
+    i=iShift;
     long carry = 0L;
     int u0 = 0;
     for (;i<Math.min(nt,n1);i++) {
@@ -197,7 +198,6 @@ public final class NaturalLE implements Natural {
       carry = (sum>>>32);
       vv[i] = (int) sum; }
     if (i<nt) { System.arraycopy(tt,i,vv,i,nt-i); }
-    //for (;i<nt;i++) { vv[i] = tt[i]; }
     if (0L!=carry) { vv[n-1] = (int) carry; }
     return unsafe(vv); }
 
@@ -269,7 +269,7 @@ public final class NaturalLE implements Natural {
   //--------------------------------------------------------------
   // TODO: compare performance to: copy shifted u to vv, and then 
   // add tt.
-  
+
   @Override
   public final Natural add (final long u,
                             final int upShift) {
@@ -316,6 +316,125 @@ public final class NaturalLE implements Natural {
 
   //--------------------------------------------------------------
 
+  private final Natural subtract (final NaturalLE u,
+                                  final int upShift) {
+    //assert 0<=upShift;
+    if (isZero()) { 
+      assert u.isZero();
+      return zero(); }
+    if (u.isZero()) { return this; }
+    if (0==upShift) { return subtract(u); }
+    final int iShift = (upShift>>>5);
+    final int bShift = (upShift&0x1f);
+    final int rShift = 32-bShift;
+    final int nt = hiInt();
+    final int nu = u.hiInt()+iShift;
+    assert nu<=nt : nu + " <= " + nt;
+    final int[] tt = words();
+    final int[] uu = u.words();
+    final int[] vv = new int[nt];
+    System.arraycopy(tt,0,vv,0,iShift);
+    int i=iShift;
+    long borrow = 0L;
+    int u0 = 0;
+    for (;i<nu;i++) {
+      final int u1 = ((i<nu) ? uu[i-iShift] : 0);
+      final int ui = 
+        ((bShift==0) ? u1 : ((u1<<bShift)|(u0>>>rShift)));
+      u0 = u1;
+      if (i>=nt) { assert 0L==borrow; break; }
+      final long tti = ((i<nt)?unsigned(tt[i]):0);
+      final long dif = (tti-unsigned(ui))+borrow;
+      borrow = (dif>>32);
+      vv[i] = (int) dif; }
+    assert i==nu;
+    if (nu<nt) {
+      final int ui = ((bShift==0) ? 0 : (u0>>>rShift));
+      final long tti = unsigned(tt[nu]);
+      final long dif = (tti-unsigned(ui))+borrow;
+      borrow = (dif>>32);
+      vv[nu] = (int) dif; }
+    i=nu+1;
+    for (;i<nt;i++) {
+      if (0L==borrow) { break; }
+      final long dif = unsigned(tt[i]) + borrow;
+      borrow = (dif>>32);
+      vv[i] = (int) dif; }
+    if (i<nt) { System.arraycopy(tt,i,vv,i,nt-i); }
+    assert (0L==borrow);
+    return unsafe(vv); }
+
+  @Override
+  public final Natural subtract (final Natural u,
+                                 final int upShift) {
+    if (u instanceof NaturalLE) { 
+      return subtract((NaturalLE) u,upShift); }
+    return Natural.super.subtract(u,upShift); }
+
+  //--------------------------------------------------------------
+
+//  private final Natural subtract (final int upShift,
+//                                  final NaturalLE u) {
+//    //assert 0<=upShift;
+//    if (isZero()) { assert u.isZero(); return zero(); }
+//    if (u.isZero()) { return shiftUp(upShift); }
+//    if (0==upShift) { return subtract(u); }
+//    final int iShift = (upShift>>>5);
+//    final int bShift = (upShift&0x1f);
+//    final int rShift = 32-bShift;
+//    final int nt = hiInt()+iShift;
+//    final int nu = u.hiInt();
+//    assert nu<=nt+1 : nu + " <= " + nt+1;
+//    final int[] tt = words();
+//    final int[] uu = u.words();
+//    final int[] vv = new int[nt+1];
+//    long borrow = 0L;
+//    int i=0;
+//    for (;i<Math.min(nu,iShift);i++) {
+//      final long dif = -unsigned(uu[i])+borrow;
+//      borrow = (dif>>32);
+//      vv[i] = (int) dif; }
+//    int tt0 = 0;
+//    for (;i<Math.max(nu,iShift);i++) {
+//      final int tt1 = ((i<iShift)?0:tt[i-iShift]);
+//      final int tti = 
+//        ((bShift==0) ? tt1 : ((tt1<<bShift)|(tt0>>>rShift)));
+//      tt0 = tt1;
+//      final long uui = ((i<nu)?unsigned(uu[i]):0L);
+//      final long dif = (unsigned(tti)-uui)+borrow;
+//      borrow = (dif>>32);
+//      vv[i] = (int) dif; }
+//    for (;i<nt;i++) {
+//      if (0L==borrow) { break; }
+//      final int tt1 = tt[i-iShift];
+//      final int tti = 
+//        ((bShift==0) ? tt1 : ((tt1<<bShift)|(tt0>>>rShift)));
+//      tt0 = tt1;
+//      final long dif = unsigned(tti)+borrow;
+//      borrow = (dif>>32);
+//      vv[i] = (int) dif; }
+//    for (;i<nt;i++) {
+//      final int tt1 = tt[i-iShift];
+//      final int tti = 
+//        ((bShift==0) ? tt1 : ((tt1<<bShift)|(tt0>>>rShift)));
+//      tt0 = tt1;
+//      vv[i] = tti; }
+//    final int tti = ((bShift==0) ? 0 : (tt0>>>rShift));
+//    final long dif = unsigned(tti)+borrow;
+//    borrow = (dif>>32);
+//    vv[nt] = (int) dif; 
+//    assert (0L==borrow);
+//    return unsafe(vv); }
+//
+//  @Override
+//  public final Natural subtract (final int upShift,
+//                                 final Natural u) {
+//    if (u instanceof NaturalLE) { 
+//      return subtract(upShift,(NaturalLE) u); }
+//    return Natural.super.subtract(upShift,u); }
+
+  //--------------------------------------------------------------
+
   @Override
   public final Natural subtract (final long u) {
     //assert isValid();
@@ -351,6 +470,7 @@ public final class NaturalLE implements Natural {
                                  final int upShift) {
     //assert 0L<=u;
     //assert 0<=upShift;
+    if (isZero()) { assert 0L==u; return this; }
     if (0L==u) { return this; }
     if (0==upShift) { return subtract(u); }
     final int iShift = (upShift>>>5);
@@ -367,35 +487,32 @@ public final class NaturalLE implements Natural {
       uu0 = unsigned(lo<<bShift);
       uu1 = unsigned((hi<<bShift)|(lo>>>rShift));
       uu2 = unsigned(hi>>>rShift); }
-    // extra elements in case uu1,uu2 are 0
     final int n = hiInt();
     final int[] tt = words();
-    final int[] vv = new int[n+2];
-    int i=0;
+    final int[] vv = new int[n];
     // assert iShift<=n || 0L==u
-    for (;i<iShift;i++) { vv[i] = tt[i]; }
-    i=iShift;
-    long tti = ((i<n) ? unsigned(tt[i]) : 0L);
+    System.arraycopy(tt,0,vv,0,iShift);
+    int i=iShift;
+    long tti = ((i<n)?unsigned(tt[i]) : 0L);
     long dif = tti-uu0;
     long borrow = (dif>>32);
     vv[i++] = (int) dif; 
-    tti = ((i<n) ? unsigned(tt[i]) : 0L);
-    final long u1 = tti-uu1;
-    dif = u1 + borrow;
-    borrow = (dif>>32);
-    vv[i++] = (int) dif; 
-    tti = ((i<n) ? unsigned(tt[i]) : 0L);
-    final long u2 = tti-uu2;
-    final long dif2 = u2 + borrow;
-    borrow = (dif2>>32);
-    vv[i++] = (int) dif2; 
+    if (i<n) { // or 0L=uu1
+      final long u1 = unsigned(tt[i])-uu1;
+      dif = u1 + borrow;
+      borrow = (dif>>32);
+      vv[i++] = (int) dif; }
+    if (i<n) { // or 0L=uu1
+      final long u2 = unsigned(tt[i])-uu2;
+      final long dif2 = u2 + borrow;
+      borrow = (dif2>>32);
+      vv[i++] = (int) dif2; }
     for (;i<n;i++) {
       if (0L==borrow) { break; }
       dif = unsigned(tt[i]) + borrow;
       borrow = (dif>>32);
       vv[i] = (int) dif; }
     if (i<n) { System.arraycopy(tt,i,vv,i,n-i); }
-    //for (;i<n;i++) { vv[i] = tt[i]; }
     return unsafe(vv); }
 
   //--------------------------------------------------------------
