@@ -30,13 +30,9 @@ public final class TotalL2Norm {
     final Accumulator a = BigFloatAccumulator.make();
     assert a.isExact();
     for (int i=0;i<trys;i++) {
-      final double[] x0 = (double[]) g.next();
-      final double[] x1 = (double[]) g.next();
-      final double s = a.add2All(x0).add2All(x1).doubleValue();
-      assert Double.isFinite(s);
-//      final double d = a.addProducts(x0,x1).doubleValue();
-//      assert Double.isFinite(d);
-      } }
+      final double[] x = (double[]) g.next();
+      final double z = a.add2All(x).doubleValue();
+      assert Double.isFinite(z); } }
 
   //--------------------------------------------------------------
 }
