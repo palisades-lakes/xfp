@@ -50,24 +50,32 @@ public final class BigFloat implements Ringlike<BigFloat> {
 
   //--------------------------------------------------------------
 
-  private static final BigFloat add (final boolean p0,
-                                     final Natural t0,
-                                     final int e0,
-                                     final boolean p1,
-                                     final Natural t1,
-                                     final int e1) {
-    if (e0<e1) { return add(p1,t1,e1,p0,t0,e0); }
-    final int de = e0-e1;
-    assert 0<=de;
-    if (p0^p1) { // different signs
-      final int c01 = t0.compareTo(de,t1);
-      // t12 > t02
-      if (0>c01) { return valueOf(p1,t1.subtract(t0,de),e1); }
-      // t02 > t12
-      if (0<c01) { return valueOf(p0,t0.subtract(de,t1),e1); }
-      return valueOf(0L); }
-    // same signs
-    return valueOf(p0,t1.add(t0,de),e1);}
+//  private static final BigFloat add (final boolean p0,
+//                                     final Natural t0,
+//                                     final int e0,
+//                                     final boolean p1,
+//                                     final Natural t1,
+//                                     final int e1) {
+//    if (e0<e1) { return add(p1,t1,e1,p0,t0,e0); }
+//    final int de = e0-e1;
+//    assert 0<=de;
+//    if (p0^p1) { // different signs
+//      final int c01 = t0.compareTo(de,t1);
+//      // t12 > t02
+//      if (0>c01) { return valueOf(p1,t1.subtract(t0,de),e1); }
+//      // t02 > t12
+//      if (0<c01) { return valueOf(p0,t0.subtract(de,t1),e1); }
+//      return valueOf(0L); }
+//    // same signs
+//    return valueOf(p0,t1.add(t0,de),e1);}
+//
+//  private final BigFloat add (final boolean p1,
+//                              final Natural t1,
+//                              final int e1) {
+//    final boolean p0 = nonNegative();
+//    final Natural t0 = significand();
+//    final int e0 = exponent();
+//    return add(p0,t0,e0,p1,t1,e1); }
 
   private final BigFloat add (final boolean p1,
                               final Natural t1,
@@ -75,39 +83,31 @@ public final class BigFloat implements Ringlike<BigFloat> {
     final boolean p0 = nonNegative();
     final Natural t0 = significand();
     final int e0 = exponent();
-    return add(p0,t0,e0,p1,t1,e1); }
+    final int de = e1-e0;
+    if (p0 ^ p1) { // different signs
+      final Natural t02,t12;
+      final int e2;
+      if (0<de) { 
+        t02 = t0; t12 = t1.shiftUp(de); e2 = e0; }
+      else if (0>de) {
+        t02 = t0.shiftUp(-de); t12 = t1; e2 = e1; }
+      else {
+        t02 = t0; t12 = t1; e2 = e1; }
 
-  //  private final BigFloat add (final boolean p1,
-  //                              final Natural t1,
-  //                              final int e1) {
-  //    final boolean p0 = nonNegative();
-  //    final Natural t0 = significand();
-  //    final int e0 = exponent();
-  //    final int de = e1-e0;
-  //    if (p0 ^ p1) { // different signs
-  //      final Natural t02,t12;
-  //      final int e2;
-  //      if (0<de) { 
-  //        t02 = t0; t12 = t1.shiftUp(de); e2 = e0; }
-  //      else if (0>de) {
-  //        t02 = t0.shiftUp(-de); t12 = t1; e2 = e1; }
-  //      else {
-  //        t02 = t0; t12 = t1; e2 = e1; }
-  //
-  //      final int c01 = t02.compareTo(t12);
-  //      // t12 > t02
-  //      if (0>c01) { return valueOf(p1,t12.subtract(t02),e2); }
-  //      // t02 > t12
-  //      if (0<c01) { return valueOf(p0,t02.subtract(t12),e2); }
-  //      return valueOf(0L); }
-  //
-  //    // same signs
-  //    if (0<de) { 
-  //      return valueOf(p0,t0.add(t1,de),e0);}
-  //    if (0>de) { 
-  //      return valueOf(p0,t1.add(t0,-de),e1);}
-  //
-  //    return valueOf(p0,t0.add(t1),e0);}
+      final int c01 = t02.compareTo(t12);
+      // t12 > t02
+      if (0>c01) { return valueOf(p1,t12.subtract(t02),e2); }
+      // t02 > t12
+      if (0<c01) { return valueOf(p0,t02.subtract(t12),e2); }
+      return valueOf(0L); }
+
+    // same signs
+    if (0<de) { 
+      return valueOf(p0,t0.add(t1,de),e0);}
+    if (0>de) { 
+      return valueOf(p0,t1.add(t0,-de),e1);}
+
+    return valueOf(p0,t0.add(t1),e0);}
 
   //  private final BigFloat add (final boolean p1,
   //                              final Natural t1,
