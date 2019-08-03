@@ -21,7 +21,7 @@ import xfp.java.prng.GeneratorBase;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-02
+ * @version 2019-08-03
  */
 
 @SuppressWarnings("unchecked")
@@ -200,44 +200,82 @@ public final class NaturalLE implements Natural {
   //    if (i<nt) { System.arraycopy(tt,i,vv,i,nt-i); }
   //    if (0L!=carry) { vv[n-1] = (int) carry; }
   //    return unsafe(vv); }
-  //
-  //  @Override
-  //  public final Natural add (final Natural u,
-  //                            final int upShift) {
-  //    if (u instanceof NaturalLE) { 
-  //      return add((NaturalLE) u,upShift); }
-  //    return Natural.super.add(u,upShift); }
 
-  @Override
-  public final Natural add (final Natural u,
-                            final int upShift) {
-    //assert 0<=upShift;
-    //if (isZero()) { return u.shiftUp(upShift); }
-    //if (u.isZero()) { return this; }
-    //if (0==upShift) { return add(u); }
-    final int iShift = (upShift>>>5);
-    final int bShift = (upShift&0x1f);
-    // TODO: special case whole word shift?
-    final int rShift = 32-bShift;
-    final int n0 = hiInt();
-    final int n1 = u.hiInt()+iShift+1;
-    final int n = Math.max(n0,n1);
-    final int[] v = new int[n];
-    int i=0;
-    for (;i<iShift;i++) { v[i] = word(i); }
-    long carry = 0L;
-    int u0 = 0;
-    // TODO: separate cases where one term's words are known zero
-    for (;i<n;i++) {
-      final int u1 = u.word(i-iShift);
-      final int ui = 
-        ((bShift==0) ? u1 : ((u1<<bShift)|(u0>>>rShift)));
-      u0 = u1;
-      final long sum = uword(i) + Numbers.unsigned(ui) + carry;
-      carry = (sum>>>32);
-      v[i] = (int) sum; }
-    if (0L!=carry) { v[i] = (int) carry; }
-    return unsafe(v); }
+//  private final Natural add (final NaturalLE u,
+//                             final int upShift) {
+//    //assert 0<=upShift;
+//    //if (isZero()) { return u.shiftUp(upShift); }
+//    //if (u.isZero()) { return this; }
+//    //if (0==upShift) { return add(u); }
+//    final int iShift = (upShift>>>5);
+//    final int bShift = (upShift&0x1f);
+//    // TODO: special case whole word shift?
+//    final int rShift = 32-bShift;
+//    final int n0 = hiInt();
+//    final int n1 = u.hiInt()+iShift+1;
+//    final int n = Math.max(n0,n1);
+//    final int[] tt = words();
+//    final int[] vv = new int[n];
+//    System.arraycopy(tt,0,vv,0,Math.min(iShift,n0));
+//    int i=iShift;
+//    long carry = 0L;
+//    int u0 = 0;
+//    // TODO: separate cases where one term's words are known zero
+//    for (;i<n;i++) {
+//      final int u1 = u.word(i-iShift);
+//      final int ui = 
+//        ((bShift==0) ? u1 : ((u1<<bShift)|(u0>>>rShift)));
+//      u0 = u1;
+//      final long sum = uword(i) + Numbers.unsigned(ui) + carry;
+//      carry = (sum>>>32);
+//      vv[i] = (int) sum; }
+//    if (0L!=carry) { vv[i] = (int) carry; }
+//    return unsafe(vv); }
+//
+//  @Override
+//  public final Natural add (final Natural u,
+//                            final int upShift) {
+//    if (u instanceof NaturalLE) { 
+//      return add((NaturalLE) u,upShift); }
+//    return Natural.super.add(u,upShift); }
+
+    @Override
+    public final Natural add (final Natural u,
+                              final int upShift) {
+      //assert 0<=upShift;
+      //if (isZero()) { return u.shiftUp(upShift); }
+      //if (u.isZero()) { return this; }
+      //if (0==upShift) { return add(u); }
+      final int iShift = (upShift>>>5);
+      final int bShift = (upShift&0x1f);
+      // TODO: special case whole word shift?
+      final int rShift = 32-bShift;
+      final int n0 = hiInt();
+      final int n1 = u.hiInt()+iShift+1;
+      final int n = Math.max(n0,n1);
+      final int[] v = new int[n];
+      int i=0;
+      for (;i<Math.min(n0,iShift);i++) { v[i] = word(i); }
+      i=iShift;
+      long carry = 0L;
+      int u0 = 0;
+      for (;i<n1;i++) {
+        final int u1 = u.word(i-iShift);
+        final int ui = 
+          ((bShift==0) ? u1 : ((u1<<bShift)|(u0>>>rShift)));
+        u0 = u1;
+        final long sum = uword(i) + unsigned(ui) + carry;
+        carry = (sum>>>32);
+        v[i] = (int) sum; }
+      for (;i<n0;i++) { 
+        if(0L==carry) { break; }
+        final long sum = uword(i) + carry;
+        carry = (sum>>>32);
+        v[i] = (int) sum;  }
+      for (;i<n0;i++) { v[i] = word(i); }
+      //assert 0L==carry;
+      //if (i<n) { v[i] = (int) carry; }
+      return unsafe(v); }
 
   //--------------------------------------------------------------
 
@@ -663,32 +701,30 @@ public final class NaturalLE implements Natural {
       return subtract((NaturalLE) u); }
     return Natural.super.subtract(u); }
 
-  //  @Override
-  //  public final Natural subtract (final Natural u) {
-  //    if (u instanceof NaturalLE) { 
-  //      return subtract((NaturalLE) u); }
-  //    //if (u.isZero()) { return this; }
-  //    //assert 0<=compareTo(u);
-  //    final int nt = hiInt();
-  //    final int nu = u.hiInt();
-  //    //assert nu<=nt;
-  //    final int[] tt = words();
-  //    final int[] vv = new int[nt];
-  //    long borrow = 0L;
-  //    int i=0;
-  //    for (;i<nu;i++) {
-  //      final long dif = (unsigned(tt[i])-u.uword(i)) + borrow;
-  //      borrow = (dif>>32);
-  //      vv[i] = (int) dif; }
-  //    //assert n1==i;
-  //    for (;i<nt;i++) {
-  //      if (0L==borrow) { break; }
-  //      final long dif = unsigned(tt[i]) + borrow;
-  //      borrow = (dif>>32);
-  //      vv[i] = (int) dif; }
-  //    for (;i<nt;i++) { vv[i] = tt[i]; }
-  //    //assert 0L==borrow;
-  //    return unsafe(vv); }
+//    @Override
+//    public final Natural subtract (final Natural u) {
+//      //if (u.isZero()) { return this; }
+//      //assert 0<=compareTo(u);
+//      final int nt = hiInt();
+//      final int nu = u.hiInt();
+//      //assert nu<=nt;
+//      final int[] tt = words();
+//            final int[] vv = new int[nt];
+//      long borrow = 0L;
+//      int i=0;
+//      for (;i<nu;i++) {
+//        final long dif = (unsigned(tt[i])-u.uword(i)) + borrow;
+//        borrow = (dif>>32);
+//        vv[i] = (int) dif; }
+//      //assert n1==i;
+//      for (;i<nt;i++) {
+//        if (0L==borrow) { break; }
+//        final long dif = unsigned(tt[i]) + borrow;
+//        borrow = (dif>>32);
+//        vv[i] = (int) dif; }
+//      if (i<nt) { System.arraycopy(tt,i,vv,i,nt-i); }
+//      //assert 0L==borrow;
+//      return unsafe(vv); }
 
   //--------------------------------------------------------------
   /** From {@link java.math.BigInteger}:
