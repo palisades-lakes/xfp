@@ -38,7 +38,7 @@ implements Accumulator<DoubleAccumulator> {
 
   @Override
   public final DoubleAccumulator addAbsAll (final double[] z) {
-    for (final double zi : z) { addAbs(zi); }
+    for (final double zi : z) { _sum += Math.abs(zi); }
     return this; }
 
   @Override

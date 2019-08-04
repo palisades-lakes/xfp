@@ -268,6 +268,16 @@ public final class BigFloat implements Ringlike<BigFloat> {
 
   //--------------------------------------------------------------
 
+  public final BigFloat
+  addAbs (final double z) {
+    //assert Double.isFinite(z);
+    return add(
+      true,
+      Doubles.significand(z),
+      Doubles.exponent(z)); }
+
+  //--------------------------------------------------------------
+
   @Override
   public final BigFloat
   subtract (final BigFloat q) {

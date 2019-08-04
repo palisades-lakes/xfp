@@ -40,6 +40,16 @@ extends ExactAccumulator<BigFloatAccumulator> {
     return this; }
 
   @Override
+  public final BigFloatAccumulator addAbsAll (final double[] z) {
+    for (final double zi : z) { _sum = _sum.addAbs(zi); }
+    return this; }
+
+  @Override
+  public final BigFloatAccumulator addAbs (final double z) {
+    _sum = _sum.addAbs(z);
+    return this; }
+
+  @Override
   public final BigFloatAccumulator add2 (final double z) {
     _sum = _sum.add2(z);
     return this; }
