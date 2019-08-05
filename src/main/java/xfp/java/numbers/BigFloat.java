@@ -287,7 +287,7 @@ public final class BigFloat implements Ringlike<BigFloat> {
   addAbsAll (final double[] z) {
     //assert Double.isFinite(z);
     BigFloat s = this;
-    for (final double zi : z) {s = s.addAbs(zi); }
+    for (final double zi : z) { s = s.addAbs(zi); }
     return s; }
 
   //--------------------------------------------------------------

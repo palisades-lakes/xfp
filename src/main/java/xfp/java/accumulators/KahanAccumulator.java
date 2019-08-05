@@ -18,15 +18,15 @@ package xfp.java.accumulators;
  *      Graillat, Langlois, and Louvet, Accurate dot products with FMA"</a>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-29
+ * @version 2019-08-05
  */
 
 public final class KahanAccumulator
 
 implements Accumulator<KahanAccumulator> {
 
-  private double s = 0.0;
-  private double c = 0.0;
+  private double value = 0.0;
+  private double correction = 0.0;
 
   //--------------------------------------------------------------
 
@@ -41,20 +41,55 @@ implements Accumulator<KahanAccumulator> {
     return Double.valueOf(doubleValue()); }
 
   @Override
-  public final double doubleValue () { return s; }
+  public final double doubleValue () { return value; }
 
   @Override
   public final KahanAccumulator clear () {
-    s = 0.0; c = 0.0; return this; }
+    value = 0.0; correction = 0.0; return this; }
+
+  //--------------------------------------------------------------
 
   @Override
   public final KahanAccumulator add (final double z) {
     //assert Double.isFinite(z);
-    final double zc = z - c;
-    final double szc = s + zc;
-    c = (szc - s) - zc;
-    s = szc;
+    final double zc = z - correction;
+    final double szc = value + zc;
+    correction = (szc - value) - zc;
+    value = szc;
     return this; }
+
+  @Override
+  public final KahanAccumulator addAll (final double[] z) {
+    for (final double zi : z) { 
+      //assert Double.isFinite(z);
+      final double zc = zi - correction;
+      final double szc = value + zc;
+      correction = (szc - value) - zc;
+      value = szc; }
+    return this; }
+
+  //--------------------------------------------------------------
+
+  @Override
+  public final KahanAccumulator addAbs (final double z) {
+    //assert Double.isFinite(z);
+    final double zc = Math.abs(z) - correction;
+    final double szc = value + zc;
+    correction = (szc - value) - zc;
+    value = szc;
+    return this; }
+
+  @Override
+  public final KahanAccumulator addAbsAll (final double[] z) {
+    for (final double zi : z) { 
+      //assert Double.isFinite(z);
+      final double zc = Math.abs(zi) - correction;
+      final double szc = value + zc;
+      correction = (szc - value) - zc;
+      value = szc; }
+    return this; }
+
+  //--------------------------------------------------------------
 
   @Override
   public final KahanAccumulator add2 (final double z) {
@@ -67,6 +102,18 @@ implements Accumulator<KahanAccumulator> {
     return this; }
 
   @Override
+  public final KahanAccumulator add2All (final double[] z) {
+    for (final double zi : z) { 
+      //assert Double.isFinite(zi);
+      final double zz = zi*zi;
+      add(zz);
+      final double e = Math.fma(zi,zi,-zz);
+      add(e); }
+    return this; }
+
+  //--------------------------------------------------------------
+
+  @Override
   public final KahanAccumulator addProduct (final double z0,
                                             final double z1) {
     //assert Double.isFinite(z0);
@@ -77,6 +124,24 @@ implements Accumulator<KahanAccumulator> {
     final double e = Math.fma(z0,z1,-zz);
     add(e);
     return this; }
+
+  @Override
+  public final KahanAccumulator addProducts (final double[] z0,
+                                             final double[] z1) {
+    final int n= z0.length;
+    //assert n==z1.length;
+    for (int i=0;i<n;i++) { 
+      final double z0i = z0[i];
+      //assert Double.isFinite(z0i);
+      final double z1i = z1[i];
+      //assert Double.isFinite(z1i);
+      final double zz = z0i*z1i;
+      add(zz);
+      final double e = Math.fma(z0i,z1i,-zz);
+      add(e); }
+    return this; }
+
+  //--------------------------------------------------------------
 
   @Override
   public KahanAccumulator addL1 (final double z0,
@@ -96,6 +161,21 @@ implements Accumulator<KahanAccumulator> {
       else if (Math.abs(e)<=Math.abs(zz)) { add(-zz); add(-e); }
       else { add(zz); add(e); } }
     return this; }
+
+  @Override
+  public final KahanAccumulator addL1Distance (final double[] z0,
+                                               final double[] z1) {
+    final int n= z0.length;
+    //assert n==z1.length;
+    for (int i=0;i<n;i++) { 
+      final double z0i = z0[i];
+      //assert Double.isFinite(z0i);
+      final double z1i = z1[i];
+      //assert Double.isFinite(z1i);
+      addL1(z0i,z1i); }
+    return this; }
+
+  //--------------------------------------------------------------
 
   @Override
   public KahanAccumulator addL2 (final double z0,
@@ -123,6 +203,83 @@ implements Accumulator<KahanAccumulator> {
     add(ee);
     add(eee);
     return this; }
+
+  @Override
+  public final KahanAccumulator addL2Distance (final double[] z0,
+                                               final double[] z1) {
+    final int n= z0.length;
+    //assert n==z1.length;
+    for (int i=0;i<n;i++) { 
+      final double z0i = z0[i];
+      //assert Double.isFinite(z0i);
+      final double z1i = z1[i];
+      //assert Double.isFinite(z1i);
+      addL2(z0i,z1i); }
+    return this; }
+
+  //--------------------------------------------------------------
+
+  @Override
+  public final void partialSums (final double[] x,
+                                 final double[] s) {
+    final int n = x.length;
+    //assert value.length==n;
+    clear();
+    for (int i=0;i<n;i++) { s[i] = add(x[i]).doubleValue(); } }
+
+  @Override
+  public final  double[] partialSums (final double[] x) {
+    final int n = x.length;
+    final double[] s = new double[n];
+    clear();
+    for (int i=0;i<n;i++) { s[i] = add(x[i]).doubleValue(); }
+    return s; }
+
+  @Override
+  public final  double[] partialL1s (final double[] x) {
+    final int n = x.length;
+    final double[] s = new double[n];
+    clear();
+    for (int i=0;i<n;i++) { s[i] = addAbs(x[i]).doubleValue(); }
+    return s; }
+
+  @Override
+  public final  double[] partialL2s (final double[] x) {
+    final int n = x.length;
+    final double[] s = new double[n];
+    clear();
+    for (int i=0;i<n;i++) { s[i] = add2(x[i]).doubleValue(); }
+    return s; }
+
+  @Override
+  public final  double[] partialDots (final double[] x0,
+                                      final double[] x1) {
+    final int n = x0.length;
+    final double[] s = new double[n];
+    clear();
+    for (int i=0;i<n;i++) {
+      s[i] = addProduct(x0[i],x1[i]).doubleValue(); }
+    return s; }
+
+  @Override
+  public final  double[] partialL1Distances (final double[] x0,
+                                             final double[] x1) {
+    final int n = x0.length;
+    final double[] s = new double[n];
+    clear();
+    for (int i=0;i<n;i++) {
+      s[i] = addL1(x0[i],x1[i]).doubleValue(); }
+    return s; }
+
+  @Override
+  public final  double[] partialL2Distances (final double[] x0,
+                                             final double[] x1) {
+    final int n = x0.length;
+    final double[] s = new double[n];
+    clear();
+    for (int i=0;i<n;i++) {
+      s[i] = addL2(x0[i],x1[i]).doubleValue(); }
+    return s; }
 
   //--------------------------------------------------------------
   // construction

@@ -10,7 +10,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-23
+ * @version 2019-08-05
  */
 
 public final class BigFloat0
@@ -223,6 +223,33 @@ implements Ringlike<BigFloat0> {
       Doubles.significand(z),
       Doubles.exponent(z)); }
 
+  public final BigFloat0
+  addAll (final double[] z) {
+    //assert Double.isFinite(z);
+    BigFloat0 s = this;
+    for (final double zi : z) { s = s.add(zi); }
+    return s; }
+
+  //--------------------------------------------------------------
+
+  public final BigFloat0
+  addAbs (final double z) {
+    //assert Double.isFinite(z);
+    return add(
+      nonNegative(),
+      significand(),
+      exponent(),
+      true,
+      Doubles.significand(z),
+      Doubles.exponent(z)); }
+
+  public final BigFloat0
+  addAbsAll (final double[] z) {
+    //assert Double.isFinite(z);
+    BigFloat0 s = this;
+    for (final double zi : z) { s = s.addAbs(zi); }
+    return s; }
+
   //--------------------------------------------------------------
 
   @Override
@@ -335,6 +362,12 @@ implements Ringlike<BigFloat0> {
       t2,
       e2); }
 
+  public final BigFloat0
+  add2All (final double[] z) {
+    BigFloat0 s = this;
+    for (final double zi : z) { s = s.add2(zi); }
+    return s; }
+
   //--------------------------------------------------------------
 
   public final BigFloat0
@@ -350,6 +383,15 @@ implements Ringlike<BigFloat0> {
       true,
       dz.significand(),
       dz.exponent()); }
+
+  public final BigFloat0
+  addL1Distance (final double[] z0,
+                 final double[] z1) {
+    final int n = z0.length;
+    //assert n==z1.length;
+    BigFloat0 s = this;
+    for (int i=0;i<n;i++) { s = s.addL1(z0[i],z1[i]); }
+    return s; }
 
   //--------------------------------------------------------------
 
@@ -368,6 +410,15 @@ implements Ringlike<BigFloat0> {
       true,
       t2,
       e2); }
+
+  public final BigFloat0
+  addL2Distance (final double[] z0,
+                 final double[] z1) {
+    final int n = z0.length;
+    //assert n==z1.length;
+    BigFloat0 s = this;
+    for (int i=0;i<n;i++) { s = s.addL2(z0[i],z1[i]); }
+    return s; }
 
   //--------------------------------------------------------------
 
@@ -412,6 +463,14 @@ implements Ringlike<BigFloat0> {
       Doubles.nonNegative(z1),
       Doubles.significand(z1),
       Doubles.exponent(z1)); }
+
+  public final BigFloat0 addProducts (final double[] z0,
+                                     final double[] z1)  {
+    final int n = z0.length;
+    //assert n==z1.length;
+    BigFloat0 s = this;
+    for (int i=0;i<n;i++) { s = s.addProduct(z0[i],z1[i]); }
+    return s; }
 
   //--------------------------------------------------------------
   // Number methods
