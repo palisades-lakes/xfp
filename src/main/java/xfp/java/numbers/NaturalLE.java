@@ -21,7 +21,7 @@ import xfp.java.prng.GeneratorBase;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-03
+ * @version 2019-08-05
  */
 
 @SuppressWarnings("unchecked")
@@ -243,9 +243,9 @@ public final class NaturalLE implements Natural {
     public final Natural add (final Natural u,
                               final int upShift) {
       //assert 0<=upShift;
+      if (0==upShift) { return add(u); }
       //if (isZero()) { return u.shiftUp(upShift); }
       //if (u.isZero()) { return this; }
-      //if (0==upShift) { return add(u); }
       final int iShift = (upShift>>>5);
       final int bShift = (upShift&0x1f);
       // TODO: special case whole word shift?

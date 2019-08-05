@@ -4,6 +4,7 @@ import org.apache.commons.rng.UniformRandomProvider;
 
 import xfp.java.accumulators.Accumulator;
 import xfp.java.accumulators.BigFloatAccumulator;
+import xfp.java.accumulators.BigFloatAccumulator0;
 import xfp.java.numbers.Doubles;
 import xfp.java.prng.Generator;
 import xfp.java.prng.PRNG;
@@ -15,7 +16,7 @@ import xfp.java.test.Common;
  * jy --source 11 src/scripts/java/xfp/java/scripts/TotalDot.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-26
+ * @version 2019-08-05
  */
 @SuppressWarnings("unchecked")
 public final class TotalDot {
@@ -27,7 +28,7 @@ public final class TotalDot {
       PRNG.well44497b("seeds/Well44497b-2019-01-09.txt");
     final int emax = Common.deMax(n)/2;
     final Generator g = Doubles.finiteGenerator(n,urp,emax);
-    final Accumulator a = BigFloatAccumulator.make();
+    final Accumulator a = BigFloatAccumulator0.make();
     assert a.isExact();
     for (int i=0;i<trys;i++) {
       final double[] x0 = (double[]) g.next();
