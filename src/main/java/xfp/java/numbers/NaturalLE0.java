@@ -25,7 +25,7 @@ import xfp.java.prng.GeneratorBase;
  */
 
 @SuppressWarnings("unchecked")
-public final class NaturalLE implements Natural {
+public final class NaturalLE0 implements Natural {
 
   //--------------------------------------------------------------
   // fields
@@ -287,7 +287,7 @@ public final class NaturalLE implements Natural {
 
   //--------------------------------------------------------------
 
-  private final Natural subtract (final NaturalLE u,
+  private final Natural subtract (final NaturalLE0 u,
                                   final int upShift) {
     //assert 0<=upShift;
     if (isZero()) { 
@@ -338,8 +338,8 @@ public final class NaturalLE implements Natural {
   @Override
   public final Natural subtract (final Natural u,
                                  final int upShift) {
-    if (u instanceof NaturalLE) { 
-      return subtract((NaturalLE) u,upShift); }
+    if (u instanceof NaturalLE0) { 
+      return subtract((NaturalLE0) u,upShift); }
     return Natural.super.subtract(u,upShift); }
 
   //--------------------------------------------------------------
@@ -491,14 +491,14 @@ public final class NaturalLE implements Natural {
   // Ringlike
   //--------------------------------------------------------------
 
-  private static final NaturalLE ONE = unsafe(new int[] { 1 });
+  private static final NaturalLE0 ONE = unsafe(new int[] { 1 });
 
   @Override
   public final Natural one () { return ONE; }
 
   //--------------------------------------------------------------
 
-  private final Natural add (final NaturalLE u) {
+  private final Natural add (final NaturalLE0 u) {
     final int nt = hiInt();
     final int nu = u.hiInt();
     if (nt<nu) { return u.add(this); }
@@ -522,12 +522,12 @@ public final class NaturalLE implements Natural {
 
   @Override
   public final Natural add (final Natural u) {
-    if (u instanceof NaturalLE) { return add((NaturalLE) u); }
+    if (u instanceof NaturalLE0) { return add((NaturalLE0) u); }
     return Natural.super.add(u); }
 
   //--------------------------------------------------------------
 
-  private final Natural subtract (final NaturalLE u) {
+  private final Natural subtract (final NaturalLE0 u) {
     //assert 0<=compareTo(u);
     final int nt = hiInt();
     final int nu = u.hiInt();
@@ -553,8 +553,8 @@ public final class NaturalLE implements Natural {
 
   @Override
   public final Natural subtract (final Natural u) {
-    if (u instanceof NaturalLE) { 
-      return subtract((NaturalLE) u); }
+    if (u instanceof NaturalLE0) { 
+      return subtract((NaturalLE0) u); }
     return Natural.super.subtract(u); }
 
   //--------------------------------------------------------------
@@ -663,8 +663,8 @@ public final class NaturalLE implements Natural {
 
   /** Singleton.<br>
    */
-  public static final NaturalLE ZERO = 
-    new NaturalLE(new int[0],0); 
+  public static final NaturalLE0 ZERO = 
+    new NaturalLE0(new int[0],0); 
 
   @Override
   public final Natural empty () { return ZERO; }
@@ -796,7 +796,7 @@ public final class NaturalLE implements Natural {
                                    final int nWords) {
     if (null==init) {
       return NaturalLEMutable.make(nWords); }
-    if (init instanceof NaturalLE) {
+    if (init instanceof NaturalLE0) {
       return NaturalLEMutable.make(words(),nWords); }
     return init.recyclable(init,nWords); }
 
@@ -868,7 +868,7 @@ public final class NaturalLE implements Natural {
   //-------------------------------------------------------------
 
   /** UNSAFE: doesn't copy <code>words</code>. */
-  private NaturalLE (final int[] words,
+  private NaturalLE0 (final int[] words,
                      final int hiInt) { 
     _words = words; 
     _hiInt = hiInt; }
@@ -876,12 +876,12 @@ public final class NaturalLE implements Natural {
   /** Doesn't copy <code>words</code>. 
    */
 
-  static final NaturalLE unsafe (final int[] words) {
-    return new NaturalLE(words,Ints.hiInt(words)); }
+  static final NaturalLE0 unsafe (final int[] words) {
+    return new NaturalLE0(words,Ints.hiInt(words)); }
 
   /** Copy <code>words</code>. 
    *  */
-  public static final NaturalLE make (final int[] words) {
+  public static final NaturalLE0 make (final int[] words) {
     final int end = Ints.hiInt(words);
     return unsafe(Arrays.copyOf(words,end)); }
 
@@ -890,7 +890,7 @@ public final class NaturalLE implements Natural {
    * {@link BigInteger#toByteArray()}.
    */
 
-  private static final NaturalLE valueOf (final byte[] a) {
+  private static final NaturalLE0 valueOf (final byte[] a) {
     final int nBytes = a.length;
     int keep = 0;
     while ((keep<nBytes) && (a[keep]==0)) { keep++; }
@@ -906,48 +906,48 @@ public final class NaturalLE implements Natural {
     Ints.reverse(result);
     return make(result); }
 
-  public static final NaturalLE valueOf (final BigInteger u) {
+  public static final NaturalLE0 valueOf (final BigInteger u) {
     //assert 0<=u.signum();
     return valueOf(u.toByteArray()); }
 
   //-------------------------------------------------------------
 
-  public static final NaturalLE valueOf (final String s,
+  public static final NaturalLE0 valueOf (final String s,
                                          final int radix) {
     return make(Ints.littleEndian(s,radix)); }
 
-  public static final NaturalLE valueOf (final String s) {
+  public static final NaturalLE0 valueOf (final String s) {
     return valueOf(s,0x10); }
 
   /** <code>0L<=u</code>. */
-  public static final NaturalLE valueOf (final long u) {
+  public static final NaturalLE0 valueOf (final long u) {
     //assert 0L<=u;
     if (u==0L) { return ZERO; }
     return make(Ints.littleEndian(u)); }
 
 
-  /** Return a {@link NaturalLE} equivalent to the unsigned 
+  /** Return a {@link NaturalLE0} equivalent to the unsigned 
    * value of <code>u</code>.
    */
-  public static final NaturalLE valueOf (final int u) {
+  public static final NaturalLE0 valueOf (final int u) {
     if (u==0) { return ZERO; }
     return unsafe(new int[] {u}); }
 
   //--------------------------------------------------------------
 
-  public static final NaturalLE 
-  copy (final NaturalLE u) { return make(u.words()); }
+  public static final NaturalLE0 
+  copy (final NaturalLE0 u) { return make(u.words()); }
 
-  public static final NaturalLE 
+  public static final NaturalLE0 
   copy (final NaturalLEMutable u) { 
     return make(u.copyWords()); }
 
-  public static final NaturalLE
+  public static final NaturalLE0
   copy (final Natural u) { 
     if (u instanceof NaturalLEMutable) {
       return copy((NaturalLEMutable) u); }
-    if (u instanceof NaturalLE) {
-      return copy((NaturalLE) u); }
+    if (u instanceof NaturalLE0) {
+      return copy((NaturalLE0) u); }
     final int n = u.hiInt();
     final int[] w = new int[n];
     for (int i=0;i<n;i++) { w[i] = u.word(i); }
