@@ -40,8 +40,10 @@ public final class NaturalLE implements Natural {
   public final int[] copyWords () { 
     return Arrays.copyOf(words(),words().length); }
 
-  // ought to be _words.length, but safer to compute and cache
-  // in case we want to allow over-large arrays in the future
+  private final int _loInt;
+  @Override
+  public final int loInt () { return _loInt; }
+
   private final int _hiInt;
   @Override
   public final int hiInt () { return _hiInt; }
@@ -697,7 +699,7 @@ public final class NaturalLE implements Natural {
   /** Singleton.<br>
    */
   public static final NaturalLE ZERO = 
-    new NaturalLE(new int[0],0); 
+    new NaturalLE(new int[0],0,0); 
 
   @Override
   public final Natural empty () { return ZERO; }
@@ -809,6 +811,7 @@ public final class NaturalLE implements Natural {
       u[i+iShift] = w; }
     u[n1] = (w0>>>rShift);
     return unsafe(u); }
+  
   //--------------------------------------------------------------
   // Transience
   //--------------------------------------------------------------
@@ -904,15 +907,18 @@ public final class NaturalLE implements Natural {
    * <code>hiInt</code.
    */
   private NaturalLE (final int[] words,
+                     final int loInt,
                      final int hiInt) { 
     _words = words; 
+    _loInt = loInt; 
     _hiInt = hiInt; }
 
   /** Doesn't copy <code>words</code>. 
    */
 
   static final NaturalLE unsafe (final int[] words) {
-    return new NaturalLE(words,Ints.hiInt(words)); }
+    return new NaturalLE(
+      words,Ints.loInt(words),Ints.hiInt(words)); }
 
   /** Copy <code>words</code>. 
    *  */

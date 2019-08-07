@@ -20,7 +20,7 @@ import xfp.java.prng.Generators;
 /** Utilities for <code>int</code>, <code>int[]</code>.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-29
+ * @version 2019-08-07
  */
 
 public final class Ints implements Set {
@@ -83,6 +83,12 @@ public final class Ints implements Set {
     for (final int element : z) {
       if (0!=element) { return false; } }
     return true; }
+
+  public static final int loInt (final int[] x) {
+    final int n = x.length;
+    if (0==n) { return -1; }
+    for (int i=0;i<n;i++) { if (0!=x[i]) { return i; } }
+    return n; }
 
   public static final int hiInt (final int[] x) {
     final int n = x.length;

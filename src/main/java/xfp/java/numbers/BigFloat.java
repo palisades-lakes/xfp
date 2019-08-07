@@ -9,7 +9,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-06
+ * @version 2019-08-07
  */
 
 @SuppressWarnings("unchecked")
@@ -123,7 +123,7 @@ public final class BigFloat implements Ringlike<BigFloat> {
       // t0 > t1
       final Natural t = t0.subtract(t1,upShift); // 22%
       return valueOf(p0,t,e); }
-    final Natural t = t0.add(t1,upShift); // 27%
+    final Natural t = t0.add(t1,upShift); // 27%, 57%
     return valueOf(p0,t,e); }
 
   private final BigFloat
@@ -161,12 +161,7 @@ public final class BigFloat implements Ringlike<BigFloat> {
     final long t1 = (t11>>>shift);
     final int e1 = e11+shift;
     if (e0<=e1) { return addSameExponent(p0,t0,p1,t1,e1-e0,e0); }
-    return addSameExponent(
-      p0,
-      t0.shiftUp(e0-e1),
-      p1,
-      t1,
-      e1); }
+    return addSameExponent(p0,t0.shiftUp(e0-e1),p1,t1,e1); }
 
   //--------------------------------------------------------------
 
@@ -204,7 +199,9 @@ public final class BigFloat implements Ringlike<BigFloat> {
   add (final double z) {
     //assert Double.isFinite(z);
     return add(
-      nonNegative(),significand(),exponent(),
+      nonNegative(),
+      significand(),
+      exponent(),
       Doubles.nonNegative(z),
       Doubles.significand(z),
       Doubles.exponent(z)); }
@@ -222,8 +219,12 @@ public final class BigFloat implements Ringlike<BigFloat> {
   addAbs (final double z) {
     //assert Double.isFinite(z);
     return add(
-      nonNegative(),significand(),exponent(),
-      true,Doubles.significand(z),Doubles.exponent(z)); }
+      nonNegative(),
+      significand(),
+      exponent(),
+      true,
+      Doubles.significand(z),
+      Doubles.exponent(z)); }
 
   public final BigFloat
   addAbsAll (final double[] z) {
@@ -248,7 +249,9 @@ public final class BigFloat implements Ringlike<BigFloat> {
   public final BigFloat
   subtract (final double z) {
     return add(
-      nonNegative(),significand(),exponent(),
+      nonNegative(),
+      significand(),
+      exponent(),
       ! Doubles.nonNegative(z),
       Doubles.significand(z), 
       Doubles.exponent(z)); }
@@ -793,6 +796,7 @@ public final class BigFloat implements Ringlike<BigFloat> {
   public static final BigFloat valueOf (final boolean nonNegative,
                                         final Natural t,
                                         final int e) {
+    if (t.isZero()) { return new BigFloat(true,t.zero(),0); }
     return new BigFloat(nonNegative,t,e); }
 
   public static final BigFloat valueOf (final long t,
