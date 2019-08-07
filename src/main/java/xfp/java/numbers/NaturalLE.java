@@ -246,24 +246,23 @@ public final class NaturalLE implements Natural {
     final int nt = hiInt();
     final int nu = iShift+2;
     final int n = Math.max(nt,nu);
-    final int[] tt = words();
     final int[] vv = new int[n+1];
-    System.arraycopy(tt,0,vv,0,Math.min(iShift,nt));
+    for (int i=0;i<Math.min(iShift,nt);i++) { vv[i] = word(i); }
     int i=iShift;
     long sum = uu0;
-    if (i<nt) { sum += unsigned(tt[i]); }
+    if (i<nt) { sum += uword(i); }
     long carry = (sum>>>32);
     vv[i++] = (int) sum; 
     sum = uu1 + carry;
-    if (i<nt) { sum += unsigned(tt[i]); }
+    if (i<nt) { sum += uword(i); }
     carry = (sum>>>32);
     vv[i++] = (int) sum; 
     for (;i<nt;i++) {
       if (0L==carry) { break; }
-      sum = unsigned(tt[i]) + carry;
+      sum = uword(i) + carry;
       carry = (sum>>>32);
       vv[i] = (int) sum; }
-    if (i<nt) { System.arraycopy(tt,i,vv,i,nt-i); }
+    for (int j=i;j<nt;j++) { vv[j] = word(j); }
     if (0L!=carry) { vv[n] = (int) carry; }
     return unsafe(vv); }
 
@@ -287,39 +286,37 @@ public final class NaturalLE implements Natural {
     final int nt = hiInt();
     final int nu = iShift+2;
     final int n = Math.max(nt,nu);
-    final int[] tt = words();
     final int[] vv = new int[n+1];
-    System.arraycopy(tt,0,vv,0,Math.min(iShift,nt));
+    for (int i=0;i<Math.min(iShift,nt);i++) { vv[i] = word(i); }
     int i=iShift;
     long sum = uu0;
-    if (i<nt) { sum += unsigned(tt[i]); }
+    if (i<nt) { sum += uword(i); }
     long carry = (sum>>>32);
     vv[i++] = (int) sum; 
     sum = uu1 + carry;
-    if (i<nt) { sum += unsigned(tt[i]); }
+    if (i<nt) { sum += uword(i); }
     carry = (sum>>>32);
     vv[i++] = (int) sum; 
     sum = uu2 + carry;
-    if (i<nt) { sum += unsigned(tt[i]); }
+    if (i<nt) { sum += uword(i); }
     carry = (sum>>>32);
     vv[i++] = (int) sum; 
     for (;i<nt;i++) {
       if (0L==carry) { break; }
-      sum = unsigned(tt[i]) + carry;
+      sum = uword(i) + carry;
       carry = (sum>>>32);
       vv[i] = (int) sum; }
-    if (i<nt) { System.arraycopy(tt,i,vv,i,nt-i); }
+    for (int j=i;j<nt;j++) { vv[j] = word(j); }
     if (0L!=carry) { vv[n] = (int) carry; }
     return unsafe(vv); }
 
   //--------------------------------------------------------------
 
-  private final Natural subtract (final NaturalLE u,
-                                  final int upShift) {
+  @Override
+  public final Natural subtract (final Natural u,
+                                 final int upShift) {
     //assert 0<=upShift;
-    if (isZero()) { 
-      assert u.isZero();
-      return zero(); }
+    if (isZero()) { assert u.isZero(); return zero(); }
     if (u.isZero()) { return this; }
     if (0==upShift) { return subtract(u); }
     final int iShift = (upShift>>>5);
@@ -328,46 +325,37 @@ public final class NaturalLE implements Natural {
     final int nt = hiInt();
     final int nu = u.hiInt()+iShift;
     assert nu<=nt : nu + " <= " + nt;
-    final int[] tt = words();
-    final int[] uu = u.words();
     final int[] vv = new int[nt];
-    System.arraycopy(tt,0,vv,0,iShift);
+    for (int i=0;i<iShift;i++) { vv[i] = word(i); }
     int i=iShift;
     long borrow = 0L;
     int u0 = 0;
     for (;i<nu;i++) {
-      final int u1 = ((i<nu) ? uu[i-iShift] : 0);
+      final int u1 = ((i<nu) ? u.word(i-iShift) : 0);
       final int ui = 
         ((bShift==0) ? u1 : ((u1<<bShift)|(u0>>>rShift)));
       u0 = u1;
       if (i>=nt) { assert 0L==borrow; break; }
-      final long tti = ((i<nt)?unsigned(tt[i]):0);
+      final long tti = uword(i);
       final long dif = (tti-unsigned(ui))+borrow;
       borrow = (dif>>32);
       vv[i] = (int) dif; }
     assert i==nu;
     if (nu<nt) {
       final int ui = ((bShift==0) ? 0 : (u0>>>rShift));
-      final long tti = unsigned(tt[nu]);
+      final long tti = uword(nu);
       final long dif = (tti-unsigned(ui))+borrow;
       borrow = (dif>>32);
       vv[nu] = (int) dif; }
     i=nu+1;
     for (;i<nt;i++) {
       if (0L==borrow) { break; }
-      final long dif = unsigned(tt[i]) + borrow;
+      final long dif = uword(i) + borrow;
       borrow = (dif>>32);
       vv[i] = (int) dif; }
-    if (i<nt) { System.arraycopy(tt,i,vv,i,nt-i); }
+    for (int j=i;j<nt;j++) { vv[j] = word(j); }
     assert (0L==borrow);
     return unsafe(vv); }
-
-  @Override
-  public final Natural subtract (final Natural u,
-                                 final int upShift) {
-    if (u instanceof NaturalLE) { 
-      return subtract((NaturalLE) u,upShift); }
-    return Natural.super.subtract(u,upShift); }
 
   //--------------------------------------------------------------
 
@@ -378,57 +366,59 @@ public final class NaturalLE implements Natural {
     //assert 0<=compareTo(u);
     if (0L==u) { return this; }
     final int n = hiInt();
-    final int[] tt = words();
     final int[] v = new int[n];
     // at least 1 element in tt or u==0
-    long dif = unsigned(tt[0])-loWord(u);
+    long dif = uword(0)-loWord(u);
     v[0] = (int) dif;
     long borrow = (dif>>32);
     if (1<n) {
-      final long tt1 = (1>=n) ? 0L : unsigned(tt[1]);
+      final long tt1 = uword(1);
       dif = (tt1-hiWord(u))+borrow;
       v[1] = (int) dif;
       borrow = (dif>>32);
       int i=2;
       for (;i<n;i++) {
         if (0L==borrow) { break; }
-        dif = unsigned(tt[i])+borrow;
+        dif = uword(i)+borrow;
         v[i] = (int) dif;
         borrow = (dif>>32); }
-      for (;i<n;i++) { v[i] = tt[i]; } }
+      for (;i<n;i++) { v[i] = word(i); } }
     //assert 0L==borrow : borrow;
     return unsafe(v); }
 
   //--------------------------------------------------------------
-
+  // TODO: extract bodies as 2 middle routines that return i,
+  // share outer code in main method.
+  
   private final Natural subtractWithWordShift (final long u,
                                                final int iShift) {
     //assert 0L<=u;
     //assert 0<=iShift;
 
-    final long uu0 = loWord(u);
-    final long uu1 = hiWord(u);
     final int nt = hiInt();
-    final int[] tt = words();
     final int[] vv = new int[nt];
     // assert iShift<=n || 0L==u
-    System.arraycopy(tt,0,vv,0,iShift);
+    for (int i=0;i<iShift;i++) { vv[i] = word(i); }
+
+    final long uu0 = loWord(u);
+    final long uu1 = hiWord(u);
     int i=iShift;
     long dif = -uu0;
-    if (i<nt) { dif += unsigned(tt[i]); }
+    if (i<nt) { dif += uword(i); }
     long borrow = (dif>>32);
     vv[i++] = (int) dif; 
     if (i<nt) { // or 0L=uu1
-      final long u1 = unsigned(tt[i])-uu1;
+      final long u1 = uword(i)-uu1;
       dif = u1 + borrow;
       borrow = (dif>>32);
       vv[i++] = (int) dif; }
     for (;i<nt;i++) {
       if (0L==borrow) { break; }
-      dif = unsigned(tt[i]) + borrow;
+      dif = uword(i) + borrow;
       borrow = (dif>>32);
       vv[i] = (int) dif; }
-    if (i<nt) { System.arraycopy(tt,i,vv,i,nt-i); }
+    
+    for (int j=i;j<nt;j++) { vv[j] = word(j); }
     return unsafe(vv); }
 
   @Override
@@ -443,37 +433,38 @@ public final class NaturalLE implements Natural {
     final int bShift = (upShift&0x1f);
     if (0==bShift) { return subtractWithWordShift(u,iShift); }
 
+    final int nt = hiInt();
+    final int[] vv = new int[nt];
+    // assert iShift<=n || 0L==u
+    for (int i=0;i<iShift;i++) { vv[i] = word(i); }
+
     final int uhi = (int) (u>>>32);
     final int ulo = (int) u;
     final int rShift = 32-bShift;
     final long uu0 = unsigned(ulo<<bShift);
     final long uu1 = unsigned((uhi<<bShift)|(ulo>>>rShift));
     final long uu2 = unsigned(uhi>>>rShift); 
-    final int nt = hiInt();
-    final int[] tt = words();
-    final int[] vv = new int[nt];
-    // assert iShift<=n || 0L==u
-    System.arraycopy(tt,0,vv,0,iShift);
     int i=iShift;
     long dif = -uu0;
-    if (i<nt) { dif += unsigned(tt[i]); }
+    if (i<nt) { dif += uword(i); }
     long borrow = (dif>>32);
     vv[i++] = (int) dif; 
     if (i<nt) { // or 0L=uu1
-      dif = unsigned(tt[i])-uu1 + borrow;
+      dif = uword(i)-uu1 + borrow;
       borrow = (dif>>32);
       vv[i++] = (int) dif; }
     if (i<nt) { // or 0L=uu2
-      final long u2 = unsigned(tt[i])-uu2;
+      final long u2 = uword(i)-uu2;
       final long dif2 = u2 + borrow;
       borrow = (dif2>>32);
       vv[i++] = (int) dif2; }
     for (;i<nt;i++) {
       if (0L==borrow) { break; }
-      dif = unsigned(tt[i]) + borrow;
+      dif = uword(i) + borrow;
       borrow = (dif>>32);
       vv[i] = (int) dif; }
-    if (i<nt) { System.arraycopy(tt,i,vv,i,nt-i); }
+
+    for (int j=i;j<nt;j++) { vv[j] = word(j); }
     return unsafe(vv); }
 
   //--------------------------------------------------------------
@@ -554,21 +545,19 @@ public final class NaturalLE implements Natural {
     final int nt = hiInt();
     final int nu = u.hiInt();
     if (nt<nu) { return u.add(this); }
-    final int[] tt = words();
-    final int[] uu = u.words();
     final int[] vv = new int[nt+1];
     long carry = 0L;
     int i=0;
     for (;i<nu;i++) {
-      final long sum = unsigned(tt[i]) + unsigned(uu[i]) + carry;
+      final long sum = uword(i) + u.uword(i) + carry;
       carry = (sum>>>32);
       vv[i] = (int) sum; }
     for (;i<nt;i++) {
       if (0L==carry) { break; }
-      final long sum = unsigned(tt[i]) + carry;
+      final long sum = uword(i) + carry;
       carry = (sum>>>32);
       vv[i] = (int) sum; }
-    if (i<nt) { System.arraycopy(tt,i,vv,i,nt-i); }
+    for (int j=i;j<nt;j++) { vv[j] = word(j); }
     vv[nt] = (int) carry; 
     return unsafe(vv); }
 
@@ -579,35 +568,28 @@ public final class NaturalLE implements Natural {
 
   //--------------------------------------------------------------
 
-  private final Natural subtract (final NaturalLE u) {
+  @Override
+  public final Natural subtract (final Natural u) {
     //assert 0<=compareTo(u);
     final int nt = hiInt();
     final int nu = u.hiInt();
     //if (0>=nt) { return ZERO; } // u must be zero
     if (0>=nu) { return this; }
-    final int[] tt = words();
-    final int[] uu = u.words();
     final int[] vv = new int[nt];
     long borrow = 0L;
     int i=0;
     for (;i<nu;i++) {
-      final long dif = (unsigned(tt[i])-unsigned(uu[i]))+borrow;
+      final long dif = (uword(i)-u.uword(i))+borrow;
       borrow = (dif>>32);
       vv[i] = (int) dif; }
     for (;i<nt;i++) {
       if (0L==borrow) { break; }
-      final long dif = unsigned(tt[i]) + borrow;
+      final long dif = uword(i) + borrow;
       borrow = (dif>>32);
       vv[i] = (int) dif; }
-    if (i<nt) { System.arraycopy(tt,i,vv,i,nt-i); }
+    for (int j=i;j<nt;j++) { vv[j] = word(j); }
     //assert 0L==borrow;
     return unsafe(vv); }
-
-  @Override
-  public final Natural subtract (final Natural u) {
-    if (u instanceof NaturalLE) { 
-      return subtract((NaturalLE) u); }
-    return Natural.super.subtract(u); }
 
   //--------------------------------------------------------------
   /** From {@link java.math.BigInteger}:
@@ -651,11 +633,10 @@ public final class NaturalLE implements Natural {
 
   public final Natural squareSimple () {
     final int n = hiInt();
-    final int[] tt = words();
     final int[] vv = new int[2*n];
     // diagonal
     for (int i=0;i<n;i++) {
-      final long tti = unsigned(tt[i]);
+      final long tti = uword(i);
       final long prod = tti*tti; 
       final int i2 = 2*i;
       vv[i2] = (int) prod;
@@ -664,7 +645,7 @@ public final class NaturalLE implements Natural {
     for (int i0=0;i0<n;i0++) {
       long prod = 0L;
       long carry = 0L;
-      final long tt0 = unsigned(tt[i0]);
+      final long tt0 = uword(i0);
       int i2 = 0;
       for (int i1=0;i1<i0;i1++) {
         i2 = i0+i1;
@@ -672,7 +653,7 @@ public final class NaturalLE implements Natural {
         carry = Numbers.hiWord(prod); 
         long vvi2 = Numbers.loWord(prod); 
         if (i0!=i1) {
-          final long tt1 = unsigned(tt[i1]);
+          final long tt1 = uword(i1);
           final long tt01 = tt0*tt1;
           prod = vvi2 + tt01; 
           carry = Numbers.hiWord(prod) + carry;
@@ -696,12 +677,12 @@ public final class NaturalLE implements Natural {
   @Override
   public final int startWord () { return 0; }
   @Override
-  public final int endWord () { return words().length; }
+  public final int endWord () { return hiInt(); }
 
   @Override
   public final int word (final int i) {
     //assert 0<=i : "Negative index: " + i;
-    if (endWord()<=i) { return 0; }
+    if (hiInt()<=i) { return 0; }
     return words()[i]; }
 
   @Override
@@ -919,7 +900,9 @@ public final class NaturalLE implements Natural {
   // construction
   //-------------------------------------------------------------
 
-  /** UNSAFE: doesn't copy <code>words</code>. */
+  /** UNSAFE: doesn't copy <code>words</code> or check 
+   * <code>hiInt</code.
+   */
   private NaturalLE (final int[] words,
                      final int hiInt) { 
     _words = words; 
