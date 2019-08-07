@@ -63,7 +63,7 @@ implements Ringlike<BigFloatNBEI> {
        final NaturalBEI t1,
        final int e1) {
 
-    if (p0 ^ p1) { // different signs
+    if (p0^p1) { // different signs
       final NaturalBEI t02,t12;
       final int e2;
       if (e0<e1) {
@@ -129,7 +129,7 @@ implements Ringlike<BigFloatNBEI> {
                    final long t1,
                    final int e) {
     //assert 0L<=t1;
-    if (p0 ^ p1) { // different signs
+    if (p0^p1) { // different signs
       final int c = t0.compareTo(t1);
       if (0==c) { return valueOf(0L); }
       // t1 > t0
@@ -558,7 +558,7 @@ implements Ringlike<BigFloatNBEI> {
         nonNegative(),
         significand(),
         exponent(),
-        ! (p0 ^ p1),
+        ! (p0^p1),
         (NaturalBEI) significand().product(t00,t11),
         e00+e11); }
 

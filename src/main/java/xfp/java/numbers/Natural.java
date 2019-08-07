@@ -95,13 +95,16 @@ extends Uints<Natural>, Ringlike<Natural> {
   default int compareTo (final long u) {
     //assert isValid();
     //assert 0L<=u;
-    if (2<hiInt()) { return 1; }
-    final long hi0 = uword(1);
+    final int n0 = hiInt();
+    final long lo1 = Numbers.loWord(u);
     final long hi1 = Numbers.hiWord(u);
+    final int n1 = ((0L!=hi1) ? 2 : (0L!=lo1) ? 1 : 0);
+    if (n0<n1) { return -1; }
+    if (n0>n1) { return 1; }
+    final long hi0 = uword(1);
     if (hi0<hi1) { return -1; }
     if (hi0>hi1) { return 1; }
     final long lo0 = uword(0);
-    final long lo1 = Numbers.loWord(u);
     if (lo0<lo1) { return -1; }
     if (lo0>lo1) { return 1; }
     return 0; }
@@ -111,15 +114,14 @@ extends Uints<Natural>, Ringlike<Natural> {
     //assert isValid();
     //assert 0L<=u;
     //assert 0<=upShift : "upShift=" + upShift;
-    if (0==upShift) { return compareTo(u); }
-    if (0L==u) {
-      if (isZero()) { return 0; }
-      return 1; }
 
-    final int n0 = hiBit();
-    final int n1 = Numbers.hiBit(u) + upShift;
-    if (n0<n1) { return -1; }
-    if (n0>n1) { return 1; }
+    if (0==upShift) { return compareTo(u); }
+    if (0L==u) { return (isZero() ? 0 : 1); }
+
+    final int m0 = hiBit();
+    final int m1 = Numbers.hiBit(u) + upShift;
+    if (m0<m1) { return -1; }
+    if (m0>m1) { return 1; }
 
     final int iShift = (upShift>>>5);
     final int bShift = (upShift&0x1f);

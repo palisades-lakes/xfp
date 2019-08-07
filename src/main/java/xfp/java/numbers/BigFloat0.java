@@ -10,7 +10,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-05
+ * @version 2019-08-06
  */
 
 public final class BigFloat0
@@ -69,7 +69,7 @@ implements Ringlike<BigFloat0> {
     else {
       t02 = t0; t12 = t1; e2 = e1; }
 
-    if (p0 ^ p1) { // different signs
+    if (p0^p1) { // different signs
       final int c01 = t02.compareTo(t12);
       if (0==c01) { return valueOf(0L); }
       // t12 > t02
@@ -102,8 +102,9 @@ implements Ringlike<BigFloat0> {
                    final boolean p1,
                    final long t1,
                    final int e) {
+    
     //assert 0L<=t1;
-    if (p0 ^ p1) { // different signs
+    if (p0^p1) { // different signs
       final int c = t0.compareTo(t1);
       if (0==c) { return valueOf(0L); }
       // t1 > t0
@@ -124,40 +125,40 @@ implements Ringlike<BigFloat0> {
                    final int upShift,
                    final int e) {
     if (p0^p1) { // different signs
-      final int c = t0.compareTo(t1,upShift);
+      final int c = t0.compareTo(t1,upShift); // 5%
       if (0==c) { return valueOf(0L); }
       // t1 > t0
       if (0>c) {
         final NaturalBEI0 t = t0.subtractFrom(t1,upShift);
         return valueOf(p1,t,e); }
       // t0 > t1
-      final NaturalBEI0 t = t0.subtract(t1,upShift);
+      final NaturalBEI0 t = t0.subtract(t1,upShift); // 22%
       return valueOf(p0,t,e); }
-    final NaturalBEI0 t = t0.add(t1,upShift);
+    final NaturalBEI0 t = t0.add(t1,upShift); // 32%
     return valueOf(p0,t,e); }
 
   private static final BigFloat0
-  addSameExponent (final boolean n0,
+  addSameExponent (final boolean p0,
                    final long t0,
-                   final boolean n1,
+                   final boolean p1,
                    final long t1,
                    final int upShift,
                    final int e) {
-    if (n0 ^ n1) { // different signs
-      final int c = Bei0.compare(t0,t1,upShift);
+    if (p0^p1) { // different signs
+      final int c = Longs.compare(t0,t1,upShift);
       if (0==c) { return valueOf(0L); }
       if (0>c) { // t1 > t0
         final NaturalBEI0 t = NaturalBEI0.subtractFrom(t0,t1,upShift);
-        return valueOf(n1,t,e); }
+        return valueOf(p1,t,e); }
       // t0 > t1
       final NaturalBEI0 t = NaturalBEI0.subtract(t0,t1,upShift);
-      return valueOf(n0,t,e); }
+      return valueOf(p0,t,e); }
     final NaturalBEI0 t = NaturalBEI0.add(t0,t1,upShift);
-    return valueOf(n0,t,e); }
+    return valueOf(p0,t,e); }
 
   //--------------------------------------------------------------
 
-  private static final BigFloat0
+  private final BigFloat0
   add (final boolean p0,
        final NaturalBEI0 t0,
        final int e0,
@@ -166,14 +167,10 @@ implements Ringlike<BigFloat0> {
        final int e11) {
     //assert 0L<=t11;
     // minimize long bits
+    if (0L==t11) { return this; }
     final int shift = Numbers.loBit(t11);
-    final long t1;
-    final int e1;
-    // 64==shift if t11 is zero
-    if (0==shift) { t1=t11; e1=e11; }
-    else if (64==shift) { t1=0L; e1=e0; }
-    else { t1=(t11>>>shift); e1=e11+shift; }
-
+    final long t1 = (t11>>>shift);
+    final int e1 = e11+shift;
     if (e0<=e1) { return addSameExponent(p0,t0,p1,t1,e1-e0,e0); }
     return addSameExponent(p0,t0.shiftUp(e0-e1),p1,t1,e1); }
 
@@ -447,7 +444,7 @@ implements Ringlike<BigFloat0> {
         nonNegative(),
         significand(),
         exponent(),
-        ! (p0 ^ p1),
+        ! (p0^p1),
         NaturalBEI0.multiply(t00,t11),
         e00+e11); }
 

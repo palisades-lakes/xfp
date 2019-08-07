@@ -4,6 +4,7 @@ import org.apache.commons.rng.UniformRandomProvider;
 
 import xfp.java.accumulators.Accumulator;
 import xfp.java.accumulators.BigFloatAccumulator;
+import xfp.java.accumulators.BigFloatAccumulator0;
 import xfp.java.numbers.Doubles;
 import xfp.java.prng.Generator;
 import xfp.java.prng.PRNG;
@@ -15,7 +16,7 @@ import xfp.java.test.Common;
  * jy --source 11 src/scripts/java/xfp/java/scripts/TotalSum.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-01
+ * @version 2019-08-06
  */
 @SuppressWarnings("unchecked")
 public final class TotalSum {
@@ -34,8 +35,8 @@ public final class TotalSum {
       final double[] x1 = (double[]) g.next();
       final double s = a.addAll(x0).addAll(x1).doubleValue();
       assert Double.isFinite(s);
-      final double d = a.addProducts(x0,x1).doubleValue();
-      assert Double.isFinite(d);
+//      final double d = a.addProducts(x0,x1).doubleValue();
+//      assert Double.isFinite(d);
       } }
 
   //--------------------------------------------------------------
