@@ -54,14 +54,18 @@ extends Transience<T> {
   default long uword (final int i) {
     return Numbers.unsigned(word(i)); }
 
+  //--------------------------------------------------------------
   /** Inclusive lower bound on non-zero words:
    * <code>0L==uword(i)</code> for
    * <code>startWord()>i</code>.
    * Doesn't guarantee that <code>0L!=uword(i)</code> for
-   * <code>startWord()<=i</code>.
-   * Zero may have no words, in which case this may be -1.
+   * <code>startWord()&lt;=i</code>.
+   * Zero may have no words, in which case,
+   * {@link #startWord()} <code>==</code> {@link #endWord()}
+   * <code>==0</code>.
    * <p>
-   * TODO: should this guarantee the maximal lower bound?
+   * This is intended to be a fast to return, looser bound than
+   * @{link {@link #loInt()}.
    */
 
   int startWord ();
@@ -70,12 +74,47 @@ extends Transience<T> {
    * <code>0L==uword(i)</code> for
    * <code>endWord()<=i</code>.
    * Doesn't guarantee that <code>0L!=uword(i)</code> for
-   * <code>endWord()>i</code>.
+   * <code>endWord()&gt;i</code>.
    * <p>
-   * TODO: should this guarantee the minimal upper bound?
+   * This is intended to be a fast to return, looser bound than
+   * @{link {@link #hiInt()}.
    */
 
   int endWord ();
+
+  //--------------------------------------------------------------
+  /** Return the index of the lowest non-zero word,
+   * unless all words are zero, in which case,
+   * {@link #loInt()} <code>==</code> {@link #hiInt()}
+   * <code>==0</code>.
+   * Guarantees <code>0!=word(loInt())</code> unless
+   * {@link #loInt()} <code>==</code> {@link #hiInt()}
+   * <code>==0</code>.
+   */
+  
+  default int loInt () {
+    // Search for lowest order nonzero int
+    final int n = endWord(); // might be 0
+    for (int i=startWord();i<n;i++) {
+      if (0!=word(i)) { return i; } }
+    assert 0==n;
+    return 0; }
+
+  /** Return the index of the highest non-zero word.
+   * unless all words are zero, in which case,
+   * {@link #loInt()} <code>==</code> {@link #hiInt()}
+   * <code>==0</code>.
+   * Guarantees <code>0!=word(hiInt()-1)</code> unless
+   * {@link #loInt()} <code>==</code> {@link #hiInt()}
+   * <code>==0</code>.
+   */
+
+  default int hiInt () {
+    final int start = startWord();
+    for (int i = endWord()-1;i>=start;i--) {
+      if (0!=word(i) ) { return i+1; } }
+    assert 0==start;
+    return 0; }
 
   //--------------------------------------------------------------
 
@@ -112,7 +151,7 @@ extends Transience<T> {
 
   default T set (final Uints u) {
     Uints x = clear();
-    for (int i=u.startWord();i<u.hiInt();i++) {
+    for (int i=u.startWord();i<u.endWord();i++) {
       x = x.setWord(i,u.word(i)); }
     return (T) this; }
 
@@ -130,46 +169,32 @@ extends Transience<T> {
     return (T) this; }
 
   //--------------------------------------------------------------
-  // wouldn't need these if startWord()/endWord()
-  // promised maximal/minimal bounds
-
-  default int loInt () {
-    // Search for lowest order nonzero int
-    // TODO: not necessary if startWord promises
-    // maximal lower bound
-    int i=startWord(); // might be -1
-    if (i<0) { return -1; } // no set ints
-    final int n = endWord(); // might be 0
-    while (i<n) {
-      final int w = word(i);
-      if (0!=w) { return i; }
-      i++; }
-    // all words are zero
-    return -1; }
-
-  default int hiInt () {
-    final int end = endWord();
-    if (0==end) { return 0; }
-    int n = end-1;
-    final int start = startWord();
-    while ((start<n)&&(0==word(n))) { n--; }
-    return n+1; }
-
-  //--------------------------------------------------------------
   // bit ops
   //--------------------------------------------------------------
 
+  /** Return the index of the lowest non-zero bit,
+   * unless all bits are zero, in which case,
+   * {@link #loBit()} <code>==</code> {@link #hiBit()}
+   * <code>==0</code>.
+   */
+  
   default int loBit () {
     // Search for lowest order nonzero int
-    final int i=loInt(); // might be -1
-    if (i<0) { return -1; } // no set bits
-    return (i << 5) + Integer.numberOfTrailingZeros(word(i)); }
+    final int i=loInt(); 
+    if (i==hiInt()) { return 0; } // all bits zero
+    return (i<<5) + Integer.numberOfTrailingZeros(word(i)); }
 
+  /** Return <code>1 +</code> index of the highest non-zero bit.
+   * If all bits are zero, 
+   * {@link #loBit()} <code>==</code> {@link #hiBit()}
+   * <code>==0</code>.
+   */
   default int hiBit () {
     //Debug.println("hiBit this=" + this);
-    final int n = hiInt()-1;
-    if (0>n) { return 0; }
-    return (n<<5) + Numbers.hiBit(word(n)); }
+    final int i = hiInt()-1;
+    if (0>i) { return 0; }
+    final int wi = word(i);
+    return (i<<5)+Integer.SIZE-Integer.numberOfLeadingZeros(wi); }
 
   //--------------------------------------------------------------
 
