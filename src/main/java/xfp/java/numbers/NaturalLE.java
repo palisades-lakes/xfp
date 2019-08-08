@@ -220,7 +220,7 @@ public final class NaturalLE implements Natural {
     return unsafe(ww); }
 
   //--------------------------------------------------------------
- // TODO: fix lurking overflow issue
+  // TODO: fix lurking overflow issue
   // probably only works as long as t0,t1 double significands
 
   @Override
@@ -249,11 +249,11 @@ public final class NaturalLE implements Natural {
     if (0!=w1) { return unsafe(new int[] { w0,w1, }); }
     if (0!=w0) { return unsafe(new int[] { w0, }); }
     return ZERO; }
-    //return unsafe(new int[] {m0,m1,m2,m3,}); }
+  //return unsafe(new int[] {m0,m1,m2,m3,}); }
 
   // TODO: fix lurking overflow issue
   // probably only works as long as t is double significand
-  
+
   @Override
   public final NaturalLE fromSquare (final long t) {
     //assert isValid();
@@ -276,7 +276,7 @@ public final class NaturalLE implements Natural {
     if (0!=w1) { return unsafe(new int[] { w0,w1, }); }
     if (0!=w0) { return unsafe(new int[] { w0, }); }
     return ZERO; }
-    //return unsafe(new int[] {m0,m1,m2,m3,}); }
+  //return unsafe(new int[] {m0,m1,m2,m3,}); }
 
   //--------------------------------------------------------------
   // add longs
@@ -451,8 +451,7 @@ public final class NaturalLE implements Natural {
     vv[0] = (int) dif;
     long borrow = (dif>>32);
     if (1<n) {
-      final long tt1 = uword(1);
-      dif = (tt1-hiWord(u))+borrow;
+      dif = (uword(1)-hiWord(u))+borrow;
       vv[1] = (int) dif;
       borrow = (dif>>32);
       int i=2;
@@ -544,6 +543,105 @@ public final class NaturalLE implements Natural {
       vv[i] = (int) dif; }
 
     for (int j=i;j<nt;j++) { vv[j] = word(j); }
+    return unsafe(vv); }
+
+  //--------------------------------------------------------------
+
+  @Override
+  public final NaturalLE subtractFrom (final long u) {
+    //assert 0L<=u;
+    //assert 0>=compareTo(u);
+    //if (0L==u) { return this; }
+    // at least 1 element in tt or u==0
+    long dif = loWord(u)-uword(0);
+    final int vv0 = (int) dif;
+    long borrow = (dif>>32);
+    dif = (hiWord(u)-uword(1))+borrow;
+    final int vv1 = (int) dif;
+    //assert 0L== (dif>>32) :  (dif>>32);
+    if (0==vv1) { return unsafe(new int[] {vv0}); }
+    return unsafe(new int[] {vv0,vv1}); }
+
+
+  //--------------------------------------------------------------
+  // TODO: extract bodies as 2 middle routines that return i,
+  // share outer code in main method.
+
+  private final NaturalLE subtractFromWithWordShift (final long u,
+                                                     final int iShift) {
+    //assert 0L<=u;
+    //assert 0<=iShift;
+
+    final int nt = hiInt();
+    final int[] vv = new int[iShift+2];
+    // assert iShift<=n || 0L==u
+    long borrow = 0;
+    long dif = 0;
+    int i = loInt();
+    for (;i<Math.min(nt,iShift);i++) { 
+      dif = borrow - uword(i);
+      vv[i] = (int) dif;
+      borrow = (dif>>32); }
+    for (;i<iShift;i++) { 
+      dif = borrow;
+      vv[i] = (int) dif;
+      borrow = (dif>>32); }
+
+    final long lo = loWord(u);
+    final long hi = hiWord(u);
+    dif = lo + borrow;
+    if (i<nt) { dif -= uword(i); }
+    borrow = (dif>>32);
+    vv[i++] = (int) dif; 
+    dif = hi + borrow;
+    if (i<nt) { dif -= uword(i); }
+    borrow = (dif>>32);
+    vv[i++] = (int) dif; 
+    return unsafe(vv); }
+
+  @Override
+  public final NaturalLE subtractFrom (final long u,
+                                       final int upShift) {
+    //assert 0L<=u;
+    //assert 0<=upShift;
+    //if (0L==u) { return this; }
+    if (0==upShift) { return subtractFrom(u); }
+    if (isZero()) { return from(u,upShift); }
+    final int iShift = (upShift>>>5);
+    final int bShift = (upShift&0x1f);
+    if (0==bShift) { return subtractFromWithWordShift(u,iShift); }
+
+    final int nt = hiInt();
+    final int[] vv = new int[iShift+3];
+    // assert iShift<=n || 0L==u
+    long borrow = 0;
+    long dif = 0;
+    int i=loInt();
+    for (;i<Math.min(nt,iShift);i++) { 
+      dif = borrow - uword(i);
+      vv[i] = (int) dif;
+      borrow = (dif>>32); }
+    for (;i<iShift;i++) { 
+      if(0L==borrow) { break; }
+      dif = borrow;
+      vv[i] = (int) dif;
+      borrow = (dif>>32); }
+    i=iShift;
+    final int hi = (int) (u>>>32);
+    final int lo = (int) u;
+    final int rShift = 32-bShift;
+    dif = unsigned(lo<<bShift) + borrow;
+    if (i<nt) { dif -= uword(i); }
+    borrow = (dif>>32);
+    vv[i++] = (int) dif; 
+    dif = unsigned((hi<<bShift)|(lo>>>rShift)) + borrow;
+    if (i<nt) { dif -= uword(i); }
+    borrow = (dif>>32);
+    vv[i++] = (int) dif; 
+    dif = unsigned(hi>>>rShift) + borrow;
+    if (i<nt) { dif -= uword(i); }
+    borrow = (dif>>32);
+    vv[i++] = (int) dif; 
     return unsafe(vv); }
 
   //--------------------------------------------------------------
@@ -766,23 +864,18 @@ public final class NaturalLE implements Natural {
     if (0==upShift) { return from(u); }
     final int iShift = (upShift>>>5);
     final int bShift = (upShift&0x1f);
-    final int hi = (int) (u>>>32);
-    final int lo = (int) u;
-    final int uu0,uu1,uu2;
     if (0==bShift) { 
-      uu0=lo; 
-      uu1=hi; 
-      uu2=0; }
-    else {
-      final int rShift = 32-bShift;
-      uu0 = (lo<<bShift);
-      uu1 = ((hi<<bShift)|(lo>>>rShift));
-      uu2 =  (hi>>>rShift); }
-    final int n = iShift+3;
-    final int[] vv = new int[n+1];
-    vv[iShift] = uu0; 
-    vv[iShift+1] = uu1; 
-    vv[iShift+2] = uu2; 
+      final int[] vv = new int[iShift+2];
+      vv[iShift] = (int) u;
+      vv[iShift+1] = (int) (u>>>32);
+      return unsafe(vv); }
+    final int rShift = 32-bShift;
+    final int lo = (int) u;
+    final int hi = (int) (u>>>32);
+    final int[] vv = new int[iShift+3];
+    vv[iShift] = (lo<<bShift);
+    vv[iShift+1] = ((hi<<bShift)|(lo>>>rShift));
+    vv[iShift+2] =  (hi>>>rShift); 
     return unsafe(vv); }
 
   //--------------------------------------------------------------
@@ -1016,7 +1109,6 @@ public final class NaturalLE implements Natural {
     //assert 0L<=u;
     if (u==0L) { return ZERO; }
     return make(Ints.littleEndian(u)); }
-
 
   /** Return a {@link NaturalLE} equivalent to the unsigned 
    * value of <code>u</code>.

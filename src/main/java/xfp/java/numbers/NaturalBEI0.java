@@ -48,19 +48,19 @@ public final class NaturalBEI0 implements Natural {
   public final int[] copyWords () {
     return Arrays.copyOf(words(),words().length); }
 
-//  @Override
-//  public final NaturalLE setWord (final int i,
-//                                  final int w) {
-//    //assert 0<=i;
-//    if (0==w) {
-//      if (i>=hiInt()) { return this; }
-//      final int[] u = Arrays.copyOf(words(),words().length);
-//      u[i] = 0;
-//      return unsafe(u); }
-//    final int n = Math.max(i+1,hiInt());
-//    final  int[] u = Arrays.copyOf(words(),n);
-//    u[i] = w;
-//    return unsafe(u); }
+  //  @Override
+  //  public final NaturalLE setWord (final int i,
+  //                                  final int w) {
+  //    //assert 0<=i;
+  //    if (0==w) {
+  //      if (i>=hiInt()) { return this; }
+  //      final int[] u = Arrays.copyOf(words(),words().length);
+  //      u[i] = 0;
+  //      return unsafe(u); }
+  //    final int n = Math.max(i+1,hiInt());
+  //    final  int[] u = Arrays.copyOf(words(),n);
+  //    u[i] = w;
+  //    return unsafe(u); }
 
   public static final NaturalBEI0 ZERO = new NaturalBEI0(Bei0.ZERO);
 
@@ -158,8 +158,8 @@ public final class NaturalBEI0 implements Natural {
     if (0!=w1) { return unsafe(new int[] { w1,w0, }); }
     if (0!=w0) { return unsafe(new int[] { w0, }); }
     return ZERO; }
-    //return unsafe(Bei0.stripLeadingZeros(m)); }
-  
+  //return unsafe(Bei0.stripLeadingZeros(m)); }
+
   //--------------------------------------------------------------
   // add longs
   //--------------------------------------------------------------
@@ -197,7 +197,16 @@ public final class NaturalBEI0 implements Natural {
     final int[] u = Bei0.subtract(words(),m,upShift);
     return unsafe(u); }
 
-   // only when this <= (m << upShift)
+  //--------------------------------------------------------------
+  // only when this <= m
+
+  @Override
+  public final NaturalBEI0 subtractFrom (final long m) {
+    //assert 0L<=m;
+    final int[] u = Bei0.subtract(m,words());
+    return unsafe(u); }
+
+  // only when this <= (m << upShift)
 
   @Override
   public final NaturalBEI0 subtractFrom (final long m,
@@ -205,14 +214,6 @@ public final class NaturalBEI0 implements Natural {
     //assert 0L<=m;
     final int[] ms = Bei0.shiftUp(m,upShift);
     final int[] u = Bei0.subtract(ms,words());
-    return unsafe(u); }
-
-  // only when this <= m
-
-  @Override
-  public final NaturalBEI0 subtractFrom (final long m) {
-    //assert 0L<=m;
-    final int[] u = Bei0.subtract(m,words());
     return unsafe(u); }
 
   //--------------------------------------------------------------
@@ -463,6 +464,40 @@ public final class NaturalBEI0 implements Natural {
   public final int hiBit () { return Bei0.hiBit(words()); }
 
   //--------------------------------------------------------------
+  // Uints
+  //--------------------------------------------------------------
+
+  @Override
+  public final NaturalBEI0 from (final long u) {
+    //assert 0<=u;
+    return valueOf(u);  }
+
+  @Override
+  public final NaturalBEI0 from (final long u,
+                                 final int upShift) {
+    //assert 0<=u;
+    //assert 0<=upShift;
+    //assert 0<=u;
+    //assert 0<=upShift;
+    if (0L==u) { return zero(); }
+    if (0==upShift) { return from(u); }
+    final int iShift = (upShift>>>5);
+    final int bShift = (upShift&0x1f);
+    if (0==bShift) { 
+      final int[] vv = new int[iShift+2];
+      vv[1] = (int) u;
+      vv[0] = (int) (u>>>32);
+      return unsafe(vv); }
+    final int rShift = 32-bShift;
+    final int lo = (int) u;
+    final int hi = (int) (u>>>32);
+    final int[] vv = new int[iShift+3];
+    vv[2] = (lo<<bShift);
+    vv[1] = ((hi<<bShift)|(lo>>>rShift));
+    vv[0] =  (hi>>>rShift); 
+    return unsafe(vv); }
+
+  //--------------------------------------------------------------
   // Transience
   //--------------------------------------------------------------
 
@@ -575,6 +610,13 @@ public final class NaturalBEI0 implements Natural {
                                            final int off,
                                            final int len) {
     return unsafe(Bei0.stripLeadingZeros(b,off,len)); }
+
+  /** Return a {@link NaturalLE} equivalent to the unsigned 
+   * value of <code>u</code>.
+   */
+  public static final NaturalBEI0 valueOf (final int u) {
+    if (u==0) { return ZERO; }
+    return unsafe(new int[] {u}); }
 
   public static final NaturalBEI0 valueOf (final byte[] b) {
     return valueOf(b,0,b.length); }
