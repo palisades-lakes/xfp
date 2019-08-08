@@ -37,19 +37,16 @@ public final class NaturalLE implements Natural {
   private final int[] words () { return _words; }
 
   private final int _loInt;
-
   @Override
   public final int loInt () { return _loInt; }
-
   private final int _hiInt;
-
   @Override
   public final int hiInt () { return _hiInt; }
 
   //--------------------------------------------------------------
+
   @Override
   public final int startWord () { return _loInt; }
-
   @Override
   public final int endWord () { return _hiInt; }
 
@@ -58,7 +55,11 @@ public final class NaturalLE implements Natural {
     //assert 0<=i : "Negative index: " + i;
     if (i<loInt()) { return 0; }
     if (hiInt()<=i) { return 0; }
-    return _words[i]; }
+    return words()[i]; }
+
+  /** Don't drop trailing zeros. */
+  public final int[] copyWords () { 
+    return Arrays.copyOf(words(),words().length); }
 
   @Override
   public final NaturalLE setWord (final int i,
@@ -74,17 +75,18 @@ public final class NaturalLE implements Natural {
     u[i] = w;
     return unsafe(u); }
 
-  /** Don't drop trailing zeros. */
-  public final int[] copyWords () { 
-    return Arrays.copyOf(words(),words().length); }
-
   /** Singleton.<br>
    */
-  public static final NaturalLE ZERO = 
-    new NaturalLE(new int[0],0,0); 
+  public static final NaturalLE ZERO = new NaturalLE(new int[0],0,0); 
+
+  @Override
+  public final boolean isZero () { return _loInt==_hiInt; }
 
   @Override
   public final NaturalLE empty () { return ZERO; }
+
+  @Override
+  public final NaturalLE zero () { return ZERO; }
 
   //--------------------------------------------------------------
   // NaturalLE
@@ -362,7 +364,7 @@ public final class NaturalLE implements Natural {
   public final NaturalLE subtract (final Natural u,
                                    final int upShift) {
     //assert 0<=upShift;
-    if (isZero()) { assert u.isZero(); return (NaturalLE) zero(); }
+    if (isZero()) { assert u.isZero(); return zero(); }
     if (u.isZero()) { return this; }
     if (0==upShift) { return subtract(u); }
     final int iShift = (upShift>>>5);
@@ -524,7 +526,7 @@ public final class NaturalLE implements Natural {
     //assert compareTo(u,v)>=0;
     if (0L==u) { 
       //assert 0L==v;
-      return (NaturalLE) zero(); }
+      return zero(); }
     if (0L==v) { return from(u); }
     final long duv = u-v;
     // assert 0L<=duv;
@@ -541,7 +543,7 @@ public final class NaturalLE implements Natural {
     //assert compareTo(u,upShift,v)>=0;
     if (0L==v) { 
       //assert 0L==v;
-      return (NaturalLE) zero(); }
+      return zero(); }
     if (0==upShift) { return difference(v,u); }
     final int iShift = (upShift>>>5);
     final int bShift = (upShift&0x1f);
@@ -741,7 +743,7 @@ public final class NaturalLE implements Natural {
                                final int upShift) {
     //assert 0<=u;
     //assert 0<=upShift;
-    if (0L==u) { return (NaturalLE) zero(); }
+    if (0L==u) { return zero(); }
     if (0==upShift) { return from(u); }
     final int iShift = (upShift>>>5);
     final int bShift = (upShift&0x1f);
