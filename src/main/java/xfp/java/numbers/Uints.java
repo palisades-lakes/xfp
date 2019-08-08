@@ -438,7 +438,7 @@ extends Transience<T> {
 
   default int uintsHashCode () {
     int hashCode = 0;
-    for (int i=0; i<hiInt(); i++) {
+    for (int i=loInt(); i<hiInt(); i++) {
       hashCode = (int) ((31 * hashCode) + uword(i)); }
     return hashCode; }
 
@@ -446,8 +446,11 @@ extends Transience<T> {
   default boolean uintsEquals (final Uints x) {
     if (x==this) { return true; }
     final Uints u = x;
-    final int n = Math.max(hiInt(),u.hiInt());
-    for (int i=0; i<n; i++) {
+    final int n0 = loInt();
+    if (n0!=u.loInt()) { return false; }
+    final int n1 = hiInt();
+    if (n1!=u.hiInt()) { return false; }
+    for (int i=n0; i<n1; i++) {
       if (word(i)!=u.word(i)) { return false; } }
     return true; }
 

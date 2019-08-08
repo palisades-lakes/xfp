@@ -86,12 +86,13 @@ public final class Ints implements Set {
 
   public static final int loInt (final int[] x) {
     final int n = x.length;
-    if (0==n) { return -1; }
+    if (0==n) { return 0; }
     for (int i=0;i<n;i++) { if (0!=x[i]) { return i; } }
-    return n; }
+    return 0; }
 
   public static final int hiInt (final int[] x) {
     final int n = x.length;
+    if (0==n) { return 0; }
     int i = n-1;
     while ((0<=i) && (0==x[i])) { i--; }
     return i+1; }

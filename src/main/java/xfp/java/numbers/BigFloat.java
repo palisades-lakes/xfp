@@ -60,7 +60,7 @@ public final class BigFloat implements Ringlike<BigFloat> {
     final int de = e0-e1;
     if (p0^p1) { 
       // different signs
-      final Natural t0s = (de>0) ? (Natural) t0.shiftUp(de) : t0; 
+      final Natural t0s = (de>0) ? t0.shiftUp(de) : t0; 
       final int c01 = t0s.compareTo(t1);
       // t1 > t0s
       if (0>c01) { return valueOf(p1,t1.subtract(t0s),e1); }

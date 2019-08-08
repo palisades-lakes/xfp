@@ -10,14 +10,10 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-06
+ * @version 2019-08-07
  */
 
-public final class BigFloat0
-extends Number
-implements Ringlike<BigFloat0> {
-
-  private static final long serialVersionUID = 1L;
+public final class BigFloat0 implements Ringlike<BigFloat0> {
 
   //--------------------------------------------------------------
   // instance fields and methods
@@ -33,6 +29,8 @@ implements Ringlike<BigFloat0> {
   private final NaturalBEI0 _significand;
   public final NaturalBEI0 significand () { return _significand; }
 
+  //--------------------------------------------------------------
+  // Ringlike
   //--------------------------------------------------------------
 
   @Override
@@ -803,18 +801,18 @@ implements Ringlike<BigFloat0> {
     return valueOf(true,x,0); }
 
   public static final BigFloat0 valueOf (final Number x)  {
-    if (x instanceof BigFloat0) { return (BigFloat0) x; }
     if (x instanceof Double) { return valueOf((Double) x); }
     if (x instanceof Float) { return valueOf((Float) x); }
     if (x instanceof Byte) { return valueOf((Byte) x); }
     if (x instanceof Short) { return valueOf((Short) x); }
     if (x instanceof Integer) { return valueOf((Integer) x); }
     if (x instanceof Long) { return valueOf((Long) x); }
-    if (x instanceof NaturalBEI0) { return valueOf((NaturalBEI0) x); }
     if (x instanceof BigDecimal) { return valueOf((BigDecimal) x); }
     throw Exceptions.unsupportedOperation(null,"valueOf",x); }
 
   public static final BigFloat0 valueOf (final Object x)  {
+    if (x instanceof BigFloat0) { return (BigFloat0) x; }
+    if (x instanceof NaturalBEI0) { return valueOf((NaturalBEI0) x); }
     return valueOf((Number) x); }
 
   //--------------------------------------------------------------

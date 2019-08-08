@@ -14,13 +14,10 @@ import xfp.java.Debug;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-06
+ * @version 2019-08-07
  */
 
-public final class NaturalBEI0 extends Number
-implements Natural {
-
-  private static final long serialVersionUID = 1L;
+public final class NaturalBEI0 implements Natural {
 
   private final int[] _words;
   public final int[] copyWords () {
