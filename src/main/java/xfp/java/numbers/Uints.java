@@ -197,14 +197,6 @@ extends Transience<T> {
     return (i<<5)+Integer.SIZE-Integer.numberOfLeadingZeros(wi); }
 
   //--------------------------------------------------------------
-
-  default boolean testBit (final int n) {
-    //assert 0<=n;
-    final int w = word(n>>>5);
-    final int b = (1 << (n&0x1F));
-    return 0!=(w&b); }
-
-  //--------------------------------------------------------------
   /** get the least significant int word of (this >>> shift) */
 
   default int getShiftedInt (final int downShift) {
@@ -241,14 +233,13 @@ extends Transience<T> {
     final long hi = hi1 | hi0;
     return (hi << 32) | lo; }
 
-  /** get the least significant two int words of thios as
-   * a long.
-   */
-
-  default long getLong () {
-    return (uword(1)<<32) | uword(0); }
-
   //--------------------------------------------------------------
+
+  default boolean testBit (final int n) {
+    //assert 0<=n;
+    final int w = word(n>>>5);
+    final int b = (1 << (n&0x1F));
+    return 0!=(w&b); }
 
   default T setBit (final int i) {
     //assert 0<=i;
@@ -257,19 +248,19 @@ extends Transience<T> {
     final int ib = (i&0x1F);
     return setWord(iw,(w|(1<<ib))); }
 
-  default T clearBit (final int n) {
-    //assert 0<=n;
-    final int iw = (n>>>5);
-    final int w = word(iw);
-    final int ib = (n&0x1F);
-    return setWord(iw,(w&(~(1<<ib)))); }
+//  default T clearBit (final int n) {
+//    //assert 0<=n;
+//    final int iw = (n>>>5);
+//    final int w = word(iw);
+//    final int ib = (n&0x1F);
+//    return setWord(iw,(w&(~(1<<ib)))); }
 
-  default T flipBit (final int n) {
-    //assert 0<=n;
-    final int iw = (n>>>5);
-    final int w = word(iw);
-    final int ib = (n&0x1F);
-    return setWord(iw,(w^(1<<ib))); }
+//  default T flipBit (final int n) {
+//    //assert 0<=n;
+//    final int iw = (n>>>5);
+//    final int w = word(iw);
+//    final int ib = (n&0x1F);
+//    return setWord(iw,(w^(1<<ib))); }
 
   //--------------------------------------------------------------
 

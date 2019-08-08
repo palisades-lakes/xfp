@@ -274,8 +274,6 @@ extends Uints<Natural>, Ringlike<Natural> {
 
   @Override
   default Natural subtract (final Natural u) {
-    //assert isValid();
-    //assert u.isValid();
     // TODO: fast correct check of u<=this?
     //assert 0<=compareTo(u);
     if (u.isZero()) { return this; }
@@ -306,11 +304,10 @@ extends Uints<Natural>, Ringlike<Natural> {
   
   default Natural subtract (final Natural u,
                             final int upShift) {
-    //assert isValid();
-    //assert u.isValid();
-    //assert 0<=shift;
+    //assert 0<=upShift;
+    //assert 0<=compareTo(u,upShift);
     if (isZero()) { 
-      assert u.isZero();
+      //assert u.isZero();
       return zero(); }
     if (u.isZero()) { return this; }
     if (0==upShift) { return subtract(u); }
@@ -325,11 +322,10 @@ extends Uints<Natural>, Ringlike<Natural> {
 
   default Natural subtract (final int upShift,
                             final Natural u) {
-    //assert isValid();
-    //assert u.isValid();
-    //assert 0<=shift;
+    //assert 0<=upShift;
+    //assert 0<=compareTo(upShift,u);
     if (isZero()) { 
-      assert u.isZero();
+      //assert u.isZero();
       return zero(); }
     if (u.isZero()) { return shiftUp(upShift); }
     if (0==upShift) { return subtract(u); }
@@ -466,7 +462,7 @@ extends Uints<Natural>, Ringlike<Natural> {
   default boolean isOne () {
     //assert isValid();
     if (1!=word(0)) { return false; }
-    for (int i=Math.max(1,startWord());i<hiInt();i++) {
+    for (int i=Math.max(1,startWord());i<endWord();i++) {
       if (0!=word(i)) { return false; } }
     return true; }
 
@@ -480,8 +476,8 @@ extends Uints<Natural>, Ringlike<Natural> {
     return NaturalMultiply.square(this); }
 
   //--------------------------------------------------------------
-  /** Return a {@link Natural} whose value is <code>t</code>.
-   * @see #multiply(long,long) 
+  /** Return a {@link Natural} whose value is <code>t<sup>2</sup></code>.
+   * @see #product(long,long) 
    */
 
   default Natural fromSquare (final long t) {

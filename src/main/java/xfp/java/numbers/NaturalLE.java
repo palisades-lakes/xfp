@@ -1,5 +1,6 @@
 package xfp.java.numbers;
 
+import static java.lang.Integer.compareUnsigned;
 import static xfp.java.numbers.Numbers.hiWord;
 import static xfp.java.numbers.Numbers.loWord;
 import static xfp.java.numbers.Numbers.unsigned;
@@ -13,6 +14,7 @@ import org.apache.commons.rng.sampling.CollectionSampler;
 import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
 import org.apache.commons.rng.sampling.distribution.ContinuousUniformSampler;
 
+import xfp.java.exceptions.Exceptions;
 import xfp.java.prng.Generator;
 import xfp.java.prng.GeneratorBase;
 
@@ -90,6 +92,48 @@ public final class NaturalLE implements Natural {
 
   //--------------------------------------------------------------
   // Natural
+  //--------------------------------------------------------------
+  // ordering
+  //--------------------------------------------------------------
+
+  @Override
+  public final int compareTo (final Natural u) {
+    final int b0 = hiBit();
+    final int b1 = u.hiBit();
+    if (b0<b1) { return -1; }
+    if (b0>b1) { return 1; }
+    final int start = Math.max(loInt(),u.loInt());
+    int i = hiInt()-1;
+    for (;i>=start;i--) {
+      final long u0i = uword(i);
+      final long u1i = u.uword(i);
+      if (u0i<u1i) { return -1; }
+      if (u0i>u1i) { return 1; } }
+    for (;i>=loInt();i--) { if (0!=word(i)) { return 1; } }
+    for (;i>=u.loInt();i--) { if (0!=u.word(i)) { return -1; } }
+    return 0; }
+
+  @Override
+  public final int compareTo (final Natural u,
+                              final int upShift) {
+    //assert 0<=upShift;
+    if (0==upShift) { return compareTo(u); }
+    final int iShift = (upShift>>>5);
+    final int bShift = (upShift&0x1F);
+    if (0!=bShift) { return compareTo(u.shiftUp(upShift)); }
+    final int n0 = hiInt();
+    final int n1 = u.hiInt()+iShift;
+    if (n0 < n1) { return -1; }
+    if (n0 > n1) { return 1; }
+    // TODO: is this faster than unsigned long conversion?
+    int i = n0-1;
+    final int m = Math.min(loInt(),u.loInt()+iShift);
+    for (; i>m; i--) {
+      final int c = compareUnsigned(word(i),u.word(i-iShift));
+      if (0!=c) { return c; } }
+    for (;i>=0;i--) { if (0!=word(i)) { return 1; } }
+    return 0; }
+
   //--------------------------------------------------------------
   // long based factories
   //--------------------------------------------------------------
@@ -392,53 +436,6 @@ public final class NaturalLE implements Natural {
   //--------------------------------------------------------------
 
   @Override
-  public final NaturalLE subtract (final Natural u,
-                                   final int upShift) {
-    //assert 0<=upShift;
-    if (isZero()) { assert u.isZero(); return zero(); }
-    if (u.isZero()) { return this; }
-    if (0==upShift) { return subtract(u); }
-    final int iShift = (upShift>>>5);
-    final int bShift = (upShift&0x1f);
-    final int rShift = 32-bShift;
-    final int nt = hiInt();
-    final int nu = u.hiInt()+iShift;
-    assert nu<=nt : nu + " <= " + nt;
-    final int[] vv = new int[nt];
-    for (int i=loInt();i<iShift;i++) { vv[i] = word(i); }
-    int i=iShift;
-    long borrow = 0L;
-    int u0 = 0;
-    for (;i<nu;i++) {
-      final int u1 = ((i<nu) ? u.word(i-iShift) : 0);
-      final int ui = 
-        ((bShift==0) ? u1 : ((u1<<bShift)|(u0>>>rShift)));
-      u0 = u1;
-      if (i>=nt) { assert 0L==borrow; break; }
-      final long tti = uword(i);
-      final long dif = (tti-unsigned(ui))+borrow;
-      borrow = (dif>>32);
-      vv[i] = (int) dif; }
-    assert i==nu;
-    if (nu<nt) {
-      final int ui = ((bShift==0) ? 0 : (u0>>>rShift));
-      final long tti = uword(nu);
-      final long dif = (tti-unsigned(ui))+borrow;
-      borrow = (dif>>32);
-      vv[nu] = (int) dif; }
-    i=nu+1;
-    for (;i<nt;i++) {
-      if (0L==borrow) { break; }
-      final long dif = uword(i) + borrow;
-      borrow = (dif>>32);
-      vv[i] = (int) dif; }
-    for (int j=i;j<nt;j++) { vv[j] = word(j); }
-    assert (0L==borrow);
-    return unsafe(vv); }
-
-  //--------------------------------------------------------------
-
-  @Override
   public final NaturalLE subtract (final long u) {
     //assert isValid();
     //assert 0L<=u;
@@ -648,77 +645,117 @@ public final class NaturalLE implements Natural {
   // arithmetic with shifted Naturals
   //--------------------------------------------------------------
 
-  /** <code>add(u<<(32*iShift))</code> */
-  private final NaturalLE addWords (final Natural u,
-                                    final int iShift) {
-    //assert 0<=iShift;
-    final int n0 = hiInt();
-    final int n1 = u.hiInt()+iShift+1;
-    final int n = Math.max(n0,n1);
-    final int[] vv = new int[n];
-    int i=loInt();
-    for (;i<Math.min(n0,iShift);i++) { vv[i] = word(i); }
-    i=iShift;
-    long carry = 0L;
-    for (;i<n1;i++) {
-      final long ui = u.uword(i-iShift);
-      final long sum = uword(i) + ui + carry;
-      carry = (sum>>>32);
-      vv[i] = (int) sum; }
-    for (;i<n0;i++) { 
-      if(0L==carry) { break; }
-      final long sum = uword(i) + carry;
-      carry = (sum>>>32);
-      vv[i] = (int) sum;  }
-    for (;i<n0;i++) { vv[i] = word(i); }
-    //assert 0L==carry;
-    return unsafe(vv); }
+  //  /** <code>add(u<<(32*iShift))</code> */
+  //  private final NaturalLE addWords (final Natural u,
+  //                                    final int iShift) {
+  //    //assert 0<=iShift;
+  //    final int n0 = hiInt();
+  //    final int n1 = u.hiInt()+iShift+1;
+  //    final int n = Math.max(n0,n1);
+  //    final int[] vv = new int[n];
+  //    int i=loInt();
+  //    for (;i<Math.min(n0,iShift);i++) { vv[i] = word(i); }
+  //    i=iShift;
+  //    long carry = 0L;
+  //    for (;i<n1;i++) {
+  //      final long ui = u.uword(i-iShift);
+  //      final long sum = uword(i) + ui + carry;
+  //      carry = (sum>>>32);
+  //      vv[i] = (int) sum; }
+  //    for (;i<n0;i++) { 
+  //      if(0L==carry) { break; }
+  //      final long sum = uword(i) + carry;
+  //      carry = (sum>>>32);
+  //      vv[i] = (int) sum;  }
+  //    for (;i<n0;i++) { vv[i] = word(i); }
+  //    //assert 0L==carry;
+  //    return unsafe(vv); }
+  //
+  //  @Override
+  //  public final NaturalLE add (final Natural u,
+  //                              final int upShift) {
+  //    //assert 0<=upShift;
+  //    if (0==upShift) { return add(u); }
+  //    //if (isZero()) { return u.shiftUp(upShift); }
+  //    //if (u.isZero()) { return this; }
+  //    final int iShift = (upShift>>>5);
+  //    final int bShift = (upShift&0x1f);
+  //    if (0==bShift) { return addWords(u,iShift); }
+  //    final int rShift = 32-bShift;
+  //    final int n0 = hiInt();
+  //    final int n1 = u.hiInt()+iShift+1;
+  //    final int n = Math.max(n0,n1);
+  //    final int[] vv = new int[n];
+  //    int i=loInt();
+  //    for (;i<Math.min(n0,iShift);i++) { vv[i] = word(i); }
+  //    i=iShift;
+  //    long carry = 0L;
+  //    int u0 = 0;
+  //    for (;i<n1;i++) {
+  //      final int u1 = u.word(i-iShift);
+  //      final int ui = ((u1<<bShift)|(u0>>>rShift));
+  //      u0 = u1;
+  //      final long sum = uword(i) + unsigned(ui) + carry;
+  //      carry = (sum>>>32);
+  //      vv[i] = (int) sum; }
+  //    for (;i<n0;i++) { 
+  //      if(0L==carry) { break; }
+  //      final long sum = uword(i) + carry;
+  //      carry = (sum>>>32);
+  //      vv[i] = (int) sum;  }
+  //    for (;i<n0;i++) { vv[i] = word(i); }
+  //    //assert 0L==carry;
+  //    return unsafe(vv); }
+  //
+  //--------------------------------------------------------------
 
-  @Override
-  public final NaturalLE add (final Natural u,
-                              final int upShift) {
-    //assert 0<=upShift;
-    if (0==upShift) { return add(u); }
-    //if (isZero()) { return u.shiftUp(upShift); }
-    //if (u.isZero()) { return this; }
-    final int iShift = (upShift>>>5);
-    final int bShift = (upShift&0x1f);
-    if (0==bShift) { return addWords(u,iShift); }
-    final int rShift = 32-bShift;
-    final int n0 = hiInt();
-    final int n1 = u.hiInt()+iShift+1;
-    final int n = Math.max(n0,n1);
-    final int[] vv = new int[n];
-    int i=loInt();
-    for (;i<Math.min(n0,iShift);i++) { vv[i] = word(i); }
-    i=iShift;
-    long carry = 0L;
-    int u0 = 0;
-    for (;i<n1;i++) {
-      final int u1 = u.word(i-iShift);
-      final int ui = ((u1<<bShift)|(u0>>>rShift));
-      u0 = u1;
-      final long sum = uword(i) + unsigned(ui) + carry;
-      carry = (sum>>>32);
-      vv[i] = (int) sum; }
-    for (;i<n0;i++) { 
-      if(0L==carry) { break; }
-      final long sum = uword(i) + carry;
-      carry = (sum>>>32);
-      vv[i] = (int) sum;  }
-    for (;i<n0;i++) { vv[i] = word(i); }
-    //assert 0L==carry;
-    return unsafe(vv); }
+  //  @Override
+  //  public final NaturalLE subtract (final Natural u,
+  //                                   final int upShift) {
+  //    //assert 0<=upShift;
+  //    if (isZero()) { assert u.isZero(); return zero(); }
+  //    if (u.isZero()) { return this; }
+  //    if (0==upShift) { return subtract(u); }
+  //    final int iShift = (upShift>>>5);
+  //    final int bShift = (upShift&0x1f);
+  //    final int rShift = 32-bShift;
+  //    final int nt = hiInt();
+  //    final int nu = u.hiInt()+iShift;
+  //    assert nu<=nt : nu + " <= " + nt;
+  //    final int[] vv = new int[nt];
+  //    for (int i=loInt();i<iShift;i++) { vv[i] = word(i); }
+  //    int i=iShift;
+  //    long borrow = 0L;
+  //    int u0 = 0;
+  //    for (;i<nu;i++) {
+  //      final int u1 = ((i<nu) ? u.word(i-iShift) : 0);
+  //      final int ui = 
+  //        ((bShift==0) ? u1 : ((u1<<bShift)|(u0>>>rShift)));
+  //      u0 = u1;
+  //      if (i>=nt) { assert 0L==borrow; break; }
+  //      final long tti = uword(i);
+  //      final long dif = (tti-unsigned(ui))+borrow;
+  //      borrow = (dif>>32);
+  //      vv[i] = (int) dif; }
+  //    assert i==nu;
+  //    if (nu<nt) {
+  //      final int ui = ((bShift==0) ? 0 : (u0>>>rShift));
+  //      final long tti = uword(nu);
+  //      final long dif = (tti-unsigned(ui))+borrow;
+  //      borrow = (dif>>32);
+  //      vv[nu] = (int) dif; }
+  //    i=nu+1;
+  //    for (;i<nt;i++) {
+  //      if (0L==borrow) { break; }
+  //      final long dif = uword(i) + borrow;
+  //      borrow = (dif>>32);
+  //      vv[i] = (int) dif; }
+  //    for (int j=i;j<nt;j++) { vv[j] = word(j); }
+  //    assert (0L==borrow);
+  //    return unsafe(vv); }
 
   //--------------------------------------------------------------
   // Ringlike
-  //--------------------------------------------------------------
-
-  private static final NaturalLE ONE = unsafe(new int[] { 1 });
-
-  @Override
-  public final NaturalLE one () { return ONE; }
-
   //--------------------------------------------------------------
 
   @Override
@@ -767,6 +804,30 @@ public final class NaturalLE implements Natural {
     //assert 0L==borrow;
     return unsafe(vv); }
 
+  //--------------------------------------------------------------
+  // multiplicative monoid
+  //--------------------------------------------------------------
+  // TODO: singleton class for one() and zero()?
+
+  private static final NaturalLE ONE = unsafe(new int[] { 1 });
+
+  @Override
+  public final NaturalLE one () { return ONE; }
+
+  @Override
+  public final NaturalLE ones (final int n) {
+    throw Exceptions.unsupportedOperation(this,"ones",n); }
+
+  @Override
+  public final boolean isOne () {
+    //assert isValid();
+    if (0!=loInt()) { return false; }
+    if (1!=hiInt()) { return false; }
+    if (1!=words()[0]) { return false; }
+    return true; }
+
+  //--------------------------------------------------------------
+  // square
   //--------------------------------------------------------------
   /** From {@link java.math.BigInteger}:
    * <p>
@@ -845,6 +906,18 @@ public final class NaturalLE implements Natural {
       //assert 0L==carry; 
     }
     return unsafe(vv); }
+
+  //--------------------------------------------------------------
+  // multiply
+  //--------------------------------------------------------------
+
+  //--------------------------------------------------------------
+  // divide
+  //--------------------------------------------------------------
+
+  //--------------------------------------------------------------
+  // gcd
+  //--------------------------------------------------------------
 
   //--------------------------------------------------------------
   // Uints

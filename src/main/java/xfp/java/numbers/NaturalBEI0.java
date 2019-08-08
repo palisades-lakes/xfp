@@ -242,7 +242,7 @@ public final class NaturalBEI0 implements Natural {
     final int c01 = compareTo(u);
     if (0<c01) { return subtract(u); }
     if (0>c01) { return u.subtract(this); }
-    return valueOf(0L); }
+    return ZERO; }
 
   //--------------------------------------------------------------
 
@@ -250,12 +250,18 @@ public final class NaturalBEI0 implements Natural {
   public final boolean isOne () { return equals(ONE); }
 
   //--------------------------------------------------------------
+  // square
+  //--------------------------------------------------------------
 
   @Override
   public final NaturalBEI0 square () {
     if (isZero()) { return valueOf(0L); }
     if (isOne()) { return ONE; }
     return unsafe(Bei0.square(words(),false)); }
+
+  //--------------------------------------------------------------
+  // multiply
+  //--------------------------------------------------------------
 
   @Override
   public final NaturalBEI0 multiply (final long that) {
@@ -417,54 +423,11 @@ public final class NaturalBEI0 implements Natural {
   //--------------------------------------------------------------
 
   @Override
-  public final NaturalBEI0 shiftUp (final int n) {
-    //assert 0<=n;
-    return unsafe(Bei0.shiftUp(words(),n)); }
-
-  @Override
-  public final NaturalBEI0 shiftDown (final int n) {
-    //assert 0<=n;
-    return unsafe(Bei0.shiftDown(words(),n)); }
-
-  // get the least significant int words of (m >>> shift)
-
-  @Override
-  public final int getShiftedInt (final int n) {
-    //assert 0<=n;
-    return Bei0.getShiftedInt(words(),n); }
-
-  // get the least significant two int words of (m >>> shift) as a
-  // long
-
-  @Override
-  public final long getShiftedLong (final int n) {
-    //assert 0<=n;
-    return Bei0.getShiftedLong(words(),n); }
-
-  @Override
-  public final boolean testBit (final int n) {
-    return Bei0.testBit(words(),n); }
-
-  @Override
-  public final NaturalBEI0 setBit (final int n) {
-    return unsafe(Bei0.setBit(words(),n)); }
-
-  @Override
-  public final NaturalBEI0 clearBit (final int n) {
-    return unsafe(Bei0.clearBit(words(),n)); }
-
-  @Override
-  public final NaturalBEI0 flipBit (final int n) {
-    return unsafe(Bei0.flipBit(words(),n)); }
-
-  @Override
   public final int loBit () { return Bei0.loBit(words()); }
 
   @Override
   public final int hiBit () { return Bei0.hiBit(words()); }
 
-  //--------------------------------------------------------------
-  // Uints
   //--------------------------------------------------------------
 
   @Override
@@ -496,6 +459,55 @@ public final class NaturalBEI0 implements Natural {
     vv[1] = ((hi<<bShift)|(lo>>>rShift));
     vv[0] =  (hi>>>rShift); 
     return unsafe(vv); }
+
+  //--------------------------------------------------------------
+
+  @Override
+  public final NaturalBEI0 shiftDown (final int n) {
+    //assert 0<=n;
+    return unsafe(Bei0.shiftDown(words(),n)); }
+
+  //--------------------------------------------------------------
+
+  @Override
+  public final NaturalBEI0 shiftUp (final int n) {
+    //assert 0<=n;
+    return unsafe(Bei0.shiftUp(words(),n)); }
+
+  // get the least significant int words of (m >>> shift)
+
+  //--------------------------------------------------------------
+
+  @Override
+  public final int getShiftedInt (final int n) {
+    //assert 0<=n;
+    return Bei0.getShiftedInt(words(),n); }
+
+  // get the least significant two int words of (m >>> shift) as a
+  // long
+
+  @Override
+  public final long getShiftedLong (final int n) {
+    //assert 0<=n;
+    return Bei0.getShiftedLong(words(),n); }
+
+  //--------------------------------------------------------------
+
+  @Override
+  public final boolean testBit (final int n) {
+    return Bei0.testBit(words(),n); }
+
+  @Override
+  public final NaturalBEI0 setBit (final int n) {
+    return unsafe(Bei0.setBit(words(),n)); }
+
+//  @Override
+//  public final NaturalBEI0 clearBit (final int n) {
+//    return unsafe(Bei0.clearBit(words(),n)); }
+
+//  @Override
+//  public final NaturalBEI0 flipBit (final int n) {
+//    return unsafe(Bei0.flipBit(words(),n)); }
 
   //--------------------------------------------------------------
   // Transience
