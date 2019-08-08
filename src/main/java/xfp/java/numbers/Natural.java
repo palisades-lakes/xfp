@@ -788,7 +788,7 @@ extends Uints<Natural>, Ringlike<Natural> {
     //assert 0<=u.signum();
     return NaturalLE.valueOf(u); }
 
-  static Natural get (final long u) {
+  static Natural valueOf (final long u) {
     //assert 0L<=u;
     return NaturalLE.valueOf(u); }
 
@@ -808,8 +808,8 @@ extends Uints<Natural>, Ringlike<Natural> {
 
   //--------------------------------------------------------------
 
-  static Natural get (final int u) {
-    return get(Numbers.unsigned(u)); }
+  static Natural valueOf (final int u) {
+    return valueOf(Numbers.unsigned(u)); }
 
   //--------------------------------------------------------------
 }

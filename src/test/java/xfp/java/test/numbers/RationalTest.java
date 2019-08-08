@@ -35,31 +35,31 @@ public final class RationalTest {
      Rational.valueOf(
        false,
        Natural.get("2366052b8b801d",0x10),
-       Natural.get(1L).shiftUp(22)),
+       Natural.valueOf(1L).shiftUp(22)),
      Rational.valueOf(
        true,
        Natural.get("2366052b8b801d",0x10),
-       Natural.get(1L).shiftUp(22)),
+       Natural.valueOf(1L).shiftUp(22)),
      Rational.valueOf(
        true,
        Natural.get("232330747ceeab",0x10),
-       Natural.get(1L).shiftUp(23)),
+       Natural.valueOf(1L).shiftUp(23)),
      Rational.valueOf(
        false,
        Natural.get("232330747ceeab",0x10),
-       Natural.get(1L).shiftUp(23)),
+       Natural.valueOf(1L).shiftUp(23)),
      Rational.valueOf(
        false,
        Natural.get("21ab528c4dbc181",0x10),
-       Natural.get(1L).shiftUp(26)),
+       Natural.valueOf(1L).shiftUp(26)),
      Rational.valueOf(
        true,
        Natural.get("8d9814ae2e0074",0x10),
-       Natural.get(1L).shiftUp(25)),
+       Natural.valueOf(1L).shiftUp(25)),
      Rational.valueOf(
        true,
        Natural.get("2c94d1dcb123a56b9c1",0x10),
-       Natural.get(1L).shiftUp(43)), };
+       Natural.valueOf(1L).shiftUp(43)), };
     for (final Rational fi : f) {
       Common.doubleRoundingTest(
         Rational::valueOf,

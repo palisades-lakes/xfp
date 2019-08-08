@@ -18,7 +18,7 @@ import xfp.java.exceptions.Exceptions;
  * arithmetic on them faster.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-29
+ * @version 2019-08-07
  */
 
 @SuppressWarnings("unchecked")
@@ -322,17 +322,17 @@ implements Ringlike<RationalFloat> {
 
     //assert Double.isFinite(z);
     final Natural n1 =
-      Natural.get(Doubles.significand(z));
+      Natural.valueOf(Doubles.significand(z));
     // TODO: use optimized square
     final Natural n2 = n1.multiply(n1);
     final int e2 = 2*Doubles.exponent(z);
-    return add(true,n2,Natural.get(1L),e2); }
+    return add(true,n2,Natural.valueOf(1L),e2); }
 
   //--------------------------------------------------------------
 
   public final RationalFloat addProduct (final double z0,
                                          final double z1) {
-    if (Natural.get(1L).equals(denominator())) {
+    if (Natural.valueOf(1L).equals(denominator())) {
       final BigFloat sum =
         BigFloat.valueOf(nonNegative(),numerator(),exponent())
         .addProduct(z0,z1);
@@ -345,10 +345,10 @@ implements Ringlike<RationalFloat> {
       ! (Doubles.nonNegative(z0) ^ Doubles.nonNegative(z1));
     // TODO: optimize long*long -> Natural?
     final Natural n =
-      Natural.get(Doubles.significand(z0))
-      .multiply(Natural.get(Doubles.significand(z1)));
+      Natural.valueOf(Doubles.significand(z0))
+      .multiply(Natural.valueOf(Doubles.significand(z1)));
     final int e = Doubles.exponent(z0) + Doubles.exponent(z1);
-    return add(p,n,Natural.get(1L),e); }
+    return add(p,n,Natural.valueOf(1L),e); }
 
   //--------------------------------------------------------------
 
@@ -643,15 +643,15 @@ implements Ringlike<RationalFloat> {
 
     if (n.isZero()) {       
       return new RationalFloat(
-        nonNegative,Natural.get(0L),Natural.get(1L),0); }
+        nonNegative,Natural.valueOf(0L),Natural.valueOf(1L),0); }
     if (n.isOne()) {
       return new RationalFloat(
-        nonNegative,Natural.get(1L),Natural.get(1L),e); }
+        nonNegative,Natural.valueOf(1L),Natural.valueOf(1L),e); }
     final int en = n.loBit();
     final Natural n0 =
       (en != 0) ? n.shiftDown(en) : n;
       final int e0 = (e + en);
-      return new RationalFloat(nonNegative,n0,Natural.get(1L),e0); }
+      return new RationalFloat(nonNegative,n0,Natural.valueOf(1L),e0); }
 
 
   private static final RationalFloat
@@ -671,7 +671,7 @@ implements Ringlike<RationalFloat> {
       final Natural d0 =
         (ed != 0) ? d.shiftDown(ed) : d;
         final int e0 = e - ed;
-        return new RationalFloat(nonNegative,Natural.get(1L),d0,e0); }
+        return new RationalFloat(nonNegative,Natural.valueOf(1L),d0,e0); }
 
     final int en = n.loBit();
     final int ed = d.loBit();
@@ -685,10 +685,10 @@ implements Ringlike<RationalFloat> {
         if (d0.isOne()) {
           if (n0.isOne()) {
             return new RationalFloat(
-              nonNegative,Natural.get(1L),Natural.get(1L),e0); }
-          return new RationalFloat(nonNegative,n0,Natural.get(1L),e0); }
+              nonNegative,Natural.valueOf(1L),Natural.valueOf(1L),e0); }
+          return new RationalFloat(nonNegative,n0,Natural.valueOf(1L),e0); }
         if (n0.isOne()) {
-          return new RationalFloat(nonNegative,Natural.get(1L),d0,e0); }
+          return new RationalFloat(nonNegative,Natural.valueOf(1L),d0,e0); }
 
         final Natural gcd = n0.gcd(d0);
         final Natural n1 = n0.divide(gcd);
@@ -734,8 +734,8 @@ implements Ringlike<RationalFloat> {
     return
       valueOf(
         p,
-        Natural.get(p ? n : -n),
-        Natural.get(d),
+        Natural.valueOf(p ? n : -n),
+        Natural.valueOf(d),
         e); }
 
   public static final RationalFloat valueOf (final int n,
@@ -747,8 +747,8 @@ implements Ringlike<RationalFloat> {
     return
       valueOf(
         p,
-        Natural.get(p ? n : -n),
-        Natural.get(d),
+        Natural.valueOf(p ? n : -n),
+        Natural.valueOf(d),
         e); }
 
   //--------------------------------------------------------------
@@ -763,7 +763,7 @@ implements Ringlike<RationalFloat> {
     final int e1;
     if ((0==shift)||(64==shift)) { t1=t0; e1=e0; }
     else { t1 = (t0 >>> shift); e1 = e0 + shift; }
-    return valueOf(p0,Natural.get(t1),e1); }
+    return valueOf(p0,Natural.valueOf(t1),e1); }
 
   public static final RationalFloat valueOf (final double x)  {
     return valueOf(
@@ -778,7 +778,7 @@ implements Ringlike<RationalFloat> {
                                               final int t)  {
     if (0 == t) { return valueOf(0L); }
     //assert 0 < t;
-    return valueOf(nonNegative,Natural.get(t),e); }
+    return valueOf(nonNegative,Natural.valueOf(t),e); }
 
   public static final RationalFloat valueOf (final float x)  {
     return valueOf(
@@ -792,24 +792,24 @@ implements Ringlike<RationalFloat> {
     final boolean nonNegative = (0 <= x);
     return valueOf(
       nonNegative,
-      Natural.get(nonNegative ? x : -x)); }
+      Natural.valueOf(nonNegative ? x : -x)); }
 
   public static final RationalFloat valueOf (final short x)  {
     final boolean nonNegative = (0 <= x);
     return valueOf(
       nonNegative,
-      Natural.get(nonNegative ? x : -x)); }
+      Natural.valueOf(nonNegative ? x : -x)); }
 
   public static final RationalFloat valueOf (final int x)  {
     final boolean nonNegative = (0 <= x);
     return valueOf(
       nonNegative,
-      Natural.get(nonNegative ? x : -x)); }
+      Natural.valueOf(nonNegative ? x : -x)); }
 
   public static final RationalFloat valueOf (final long x)  {
     final boolean nonNegative = (0L <= x);
     return 
-      valueOf(nonNegative,Natural.get(nonNegative ? x : -x)); }
+      valueOf(nonNegative,Natural.valueOf(nonNegative ? x : -x)); }
 
   //--------------------------------------------------------------
 
@@ -851,16 +851,16 @@ implements Ringlike<RationalFloat> {
   // Note: these need to be reduced.
 
   public static final RationalFloat ZERO =
-    new RationalFloat(true,Natural.get(0L),Natural.get(1L),0);
+    new RationalFloat(true,Natural.valueOf(0L),Natural.valueOf(1L),0);
 
   public static final RationalFloat ONE =
-    new RationalFloat(true,Natural.get(1L),Natural.get(1L),0);
+    new RationalFloat(true,Natural.valueOf(1L),Natural.valueOf(1L),0);
 
   public static final RationalFloat TWO =
-    new RationalFloat(true,Natural.get(1L),Natural.get(1L),1);
+    new RationalFloat(true,Natural.valueOf(1L),Natural.valueOf(1L),1);
 
   public static final RationalFloat TEN =
-    new RationalFloat(true,Natural.get(5),Natural.get(1L),1);
+    new RationalFloat(true,Natural.valueOf(5),Natural.valueOf(1L),1);
 
   public static final RationalFloat MINUS_ONE =
     ONE.negate();

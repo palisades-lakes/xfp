@@ -51,9 +51,10 @@ public final class NaturalBEI0 implements Natural {
     //assert 0L<=m;
     return unsafe(Bei0.add(_words,m)); }
 
-  public static final NaturalBEI0 add (final long t0,
-                                       final long t1,
-                                       final int bitShift) {
+  @Override
+  public final NaturalBEI0 sum (final long t0,
+                                final long t1,
+                                final int bitShift) {
     //assert 0L<=t0;
     //assert 0L<=t1;
     //assert 0<=bitShift;
@@ -92,9 +93,10 @@ public final class NaturalBEI0 implements Natural {
     return unsafe(u); }
 
   // only when (m1 << upShift) <= m0
-  public static final NaturalBEI0 subtract (final long m0,
-                                            final long m1,
-                                            final int upShift) {
+  @Override
+  public final NaturalBEI0 difference (final long m0,
+                                       final long m1,
+                                       final int upShift) {
     //assert 0L<=m0;
     //assert 0L<=m1;
     //assert 0<=upShift;
@@ -102,9 +104,10 @@ public final class NaturalBEI0 implements Natural {
     return unsafe(u); }
 
   // only when (m1 << upShift) <= m0
-  public static final NaturalBEI0 subtract (final long m0,
-                                            final int upShift,
-                                            final long m1) {
+  @Override
+  public final NaturalBEI0 difference (final long m0,
+                                       final int upShift,
+                                       final long m1) {
     //assert 0L<=m0;
     final int[] u = Bei0.subtract(Bei0.valueOf(m0,upShift),m1);
     return unsafe(u); }
@@ -118,14 +121,6 @@ public final class NaturalBEI0 implements Natural {
     //assert 0L<=m;
     final int[] ms = Bei0.shiftUp(m,upShift);
     final int[] u = Bei0.subtract(ms,_words);
-    return unsafe(u); }
-
-  public static final NaturalBEI0 subtractFrom (final long m0,
-                                                final long m1,
-                                                final int upShift) {
-    //assert 0L<=m1;
-    final int[] ms = Bei0.shiftUp(m1,upShift);
-    final int[] u = Bei0.subtract(ms,Bei0.valueOf(m0));
     return unsafe(u); }
 
   // only when this <= m
@@ -152,8 +147,9 @@ public final class NaturalBEI0 implements Natural {
 
   //--------------------------------------------------------------
 
-  public static final NaturalBEI0 multiply (final long t0,
-                                            final long t1) {
+  @Override
+  public final NaturalBEI0 product (final long t0,
+                                    final long t1) {
     //assert 0L<=t0;
     //assert 0L<=t1;
     final long hi0 = Numbers.hiWord(t0);
@@ -240,7 +236,7 @@ public final class NaturalBEI0 implements Natural {
 
   @Override
   public final List<Natural>
-    divideAndRemainderKnuth (final Natural u) {
+  divideAndRemainderKnuth (final Natural u) {
     final NaturalBEI0 that = (NaturalBEI0) u;
     final MutableNaturalBEI0 q = MutableNaturalBEI0.make();
     final MutableNaturalBEI0 num = MutableNaturalBEI0.valueOf(this._words);
@@ -261,7 +257,7 @@ public final class NaturalBEI0 implements Natural {
 
   @Override
   public final List<Natural>
-    divideAndRemainderBurnikelZiegler (final Natural u) {
+  divideAndRemainderBurnikelZiegler (final Natural u) {
     final NaturalBEI0 that = (NaturalBEI0) u;
     final MutableNaturalBEI0 q = MutableNaturalBEI0.make();
     final MutableNaturalBEI0 num = MutableNaturalBEI0.valueOf(this._words);
@@ -270,9 +266,9 @@ public final class NaturalBEI0 implements Natural {
       num.divideAndRemainderBurnikelZiegler(den,q);
     final NaturalBEI0 qq =
       q.isZero() ? valueOf(0L) : valueOf(q.getValue());
-    final NaturalBEI0 rr =
-      r.isZero() ? valueOf(0L) : valueOf(r.getValue());
-    return List.of(qq,rr); }
+      final NaturalBEI0 rr =
+        r.isZero() ? valueOf(0L) : valueOf(r.getValue());
+        return List.of(qq,rr); }
 
   private final NaturalBEI0
   divideBurnikelZiegler (final NaturalBEI0 that) {
@@ -412,9 +408,9 @@ public final class NaturalBEI0 implements Natural {
   // Transience
   //--------------------------------------------------------------
 
-    @Override
-    public final Natural immutable () { return this; }
-    
+  @Override
+  public final Natural immutable () { return this; }
+
   //--------------------------------------------------------------
   // Comparable interface+
   //--------------------------------------------------------------
@@ -574,7 +570,7 @@ public final class NaturalBEI0 implements Natural {
 
   @Override
   public final Natural empty () { return valueOf(0L); }
-  
+
   //--------------------------------------------------------------
 
   public static final NaturalBEI0 valueOf (final long x) {
