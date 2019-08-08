@@ -780,11 +780,11 @@ extends Uints<Natural>, Ringlike<Natural> {
 
   //--------------------------------------------------------------
 
-  static Natural get (final String u,
+  static Natural valueOf (final String u,
                       final int radix) {
     return NaturalLE.valueOf(u,radix); }
 
-  static Natural get (final BigInteger u) {
+  static Natural valueOf (final BigInteger u) {
     //assert 0<=u.signum();
     return NaturalLE.valueOf(u); }
 

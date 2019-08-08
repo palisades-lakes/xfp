@@ -1,5 +1,6 @@
 package xfp.java.numbers;
 
+import static xfp.java.numbers.Numbers.hiWord;
 import static xfp.java.numbers.Numbers.loWord;
 import static xfp.java.numbers.Numbers.unsigned;
 
@@ -73,57 +74,19 @@ public final class NaturalBEI0 implements Natural {
   public final NaturalBEI0 zero () { return ZERO; }
 
   //--------------------------------------------------------------
-  // arithmetic
+  // Natural
   //--------------------------------------------------------------
-
-  @Override
-  public final Natural add (final Natural m) {
-    return unsafe(Bei0.add(words(),((NaturalBEI0) m).words())); }
-
-  @Override
-  public final NaturalBEI0 add (final long m) {
-    //assert 0L<=m;
-    return unsafe(Bei0.add(words(),m)); }
+  // long based factories
+  //--------------------------------------------------------------
 
   @Override
   public final NaturalBEI0 sum (final long t0,
                                 final long t1,
-                                final int bitShift) {
+                                final int upShift) {
     //assert 0L<=t0;
     //assert 0L<=t1;
     //assert 0<=bitShift;
-    final int[] u = Bei0.add(t0,t1,bitShift);
-    return unsafe(u); }
-
-  @Override
-  public final NaturalBEI0 add (final long m,
-                                final int shift) {
-    //assert 0L<=m;
-    final int[] u = Bei0.add(words(),m,shift);
-    return unsafe(u); }
-
-  //--------------------------------------------------------------
-  // only when val <= this
-
-  @Override
-  public final Natural subtract (final long m) {
-    //assert 0L<=m;
-    final int[] u = Bei0.subtract(words(),m);
-    return unsafe(u); }
-
-  // only when val <= this
-
-  @Override
-  public final Natural subtract (final Natural m) {
-    return unsafe(
-      Bei0.subtract(words(),((NaturalBEI0) m).words())); }
-
-  // only when (m << upShift) <= this
-  @Override
-  public final NaturalBEI0 subtract (final long m,
-                                     final int upShift) {
-    //assert 0L<=m;
-    final int[] u = Bei0.subtract(words(),m,upShift);
+    final int[] u = Bei0.sum(t0,t1,upShift);
     return unsafe(u); }
 
   // only when (m1 << upShift) <= m0
@@ -134,7 +97,7 @@ public final class NaturalBEI0 implements Natural {
     //assert 0L<=m0;
     //assert 0L<=m1;
     //assert 0<=upShift;
-    final int[] u = Bei0.subtract(m0,m1,upShift);
+    final int[] u = Bei0.difference(m0,m1,upShift);
     return unsafe(u); }
 
   // only when (m1 << upShift) <= m0
@@ -143,11 +106,98 @@ public final class NaturalBEI0 implements Natural {
                                        final int upShift,
                                        final long m1) {
     //assert 0L<=m0;
-    final int[] u = Bei0.subtract(Bei0.valueOf(m0,upShift),m1);
+    final int[] u = Bei0.difference(Bei0.valueOf(m0,upShift),m1);
     return unsafe(u); }
 
   //--------------------------------------------------------------
-  // only when this <= (m << upShift)
+
+  @Override
+  public final NaturalBEI0 product (final long t0,
+                                    final long t1) {
+    //assert 0L<=t0;
+    //assert 0L<=t1;
+    final long hi0 = hiWord(t0);
+    final long lo0 = loWord(t0);
+    final long hi1 = hiWord(t1);
+    final long lo1 = loWord(t1);
+    final long lolo = lo0*lo1;
+    final long hilo2 = (hi0*lo1) + (hi1*lo0);
+    //final long hilo2 = Math.addExact(hi0*lo1,hi1*lo0);
+    final long hihi = hi0*hi1;
+    long sum = lolo;
+    final int w0 = (int) sum;
+    sum = (sum >>> 32) + hilo2;
+    final int w1 = (int) sum;
+    sum = (sum >>> 32) + hihi ;
+    final int w2 = (int) sum;
+    final int w3 = (int) (sum >>> 32);
+    if (0!=w3) { return unsafe(new int[] { w3,w2,w1,w0, }); }
+    if (0!=w2) { return unsafe(new int[] { w2,w1,w0, }); }
+    if (0!=w1) { return unsafe(new int[] { w1,w0, }); }
+    if (0!=w0) { return unsafe(new int[] { w0, }); }
+    return ZERO; }
+
+  @Override
+  public final NaturalBEI0 fromSquare (final long t) {
+    //assert 0L<=t;
+    final long hi = hiWord(t);
+    final long lo = loWord(t);
+    final long lolo = lo*lo;
+    final long hilo2 = (hi*lo) << 1;
+    //final long hilo2 = Math.multiplyExact(2,hi*lo);
+    final long hihi = hi*hi;
+    long sum = lolo;
+    final int w0 = (int) sum;
+    sum = (sum >>> 32) + hilo2;
+    final int w1 = (int) sum;
+    sum = (sum >>> 32) + hihi ;
+    final int w2 = (int) sum;
+    final int w3 = (int) (sum >>> 32);
+    if (0!=w3) { return unsafe(new int[] { w3,w2,w1,w0, }); }
+    if (0!=w2) { return unsafe(new int[] { w2,w1,w0, }); }
+    if (0!=w1) { return unsafe(new int[] { w1,w0, }); }
+    if (0!=w0) { return unsafe(new int[] { w0, }); }
+    return ZERO; }
+    //return unsafe(Bei0.stripLeadingZeros(m)); }
+  
+  //--------------------------------------------------------------
+  // add longs
+  //--------------------------------------------------------------
+
+  @Override
+  public final NaturalBEI0 add (final long m) {
+    //assert 0L<=m;
+    return unsafe(Bei0.add(words(),m)); }
+
+  //--------------------------------------------------------------
+
+  @Override
+  public final NaturalBEI0 add (final long m,
+                                final int shift) {
+    //assert 0L<=m;
+    final int[] u = Bei0.add(words(),m,shift);
+    return unsafe(u); }
+
+  //--------------------------------------------------------------
+  // subtract longs
+  //--------------------------------------------------------------
+  // only when val <= this
+
+  @Override
+  public final Natural subtract (final long m) {
+    //assert 0L<=m;
+    final int[] u = Bei0.difference(words(),m);
+    return unsafe(u); }
+
+  // only when (m << upShift) <= this
+  @Override
+  public final NaturalBEI0 subtract (final long m,
+                                     final int upShift) {
+    //assert 0L<=m;
+    final int[] u = Bei0.subtract(words(),m,upShift);
+    return unsafe(u); }
+
+   // only when this <= (m << upShift)
 
   @Override
   public final NaturalBEI0 subtractFrom (final long m,
@@ -166,6 +216,25 @@ public final class NaturalBEI0 implements Natural {
     return unsafe(u); }
 
   //--------------------------------------------------------------
+  // arithmetic with (shifted) Naturals
+  //--------------------------------------------------------------
+
+  //--------------------------------------------------------------
+  // Ringlike
+  //--------------------------------------------------------------
+
+  @Override
+  public final Natural add (final Natural m) {
+    return unsafe(Bei0.add(words(),((NaturalBEI0) m).words())); }
+
+  // only when val <= this
+
+  @Override
+  public final Natural subtract (final Natural m) {
+    return unsafe(
+      Bei0.subtract(words(),((NaturalBEI0) m).words())); }
+
+  //--------------------------------------------------------------
 
   @Override
   public final Natural absDiff (final Natural u) {
@@ -180,49 +249,6 @@ public final class NaturalBEI0 implements Natural {
   public final boolean isOne () { return equals(ONE); }
 
   //--------------------------------------------------------------
-
-  @Override
-  public final NaturalBEI0 product (final long t0,
-                                    final long t1) {
-    //assert 0L<=t0;
-    //assert 0L<=t1;
-    final long hi0 = Numbers.hiWord(t0);
-    final long lo0 = loWord(t0);
-    final long hi1 = Numbers.hiWord(t1);
-    final long lo1 = loWord(t1);
-    final long lolo = lo0*lo1;
-    final long hilo2 = (hi0*lo1) + (hi1*lo0);
-    final long hihi = hi0*hi1;
-    long sum = lolo;
-    final int m3 = (int) sum;
-    sum = (sum >>> 32) + hilo2;
-    final int m2 = (int) sum;
-    sum = (sum >>> 32) + hihi ;
-    final int m1 = (int) sum;
-    final int m0 = (int) (sum >>> 32);
-    if (0!=m0) { return unsafe(new int[] { m0,m1,m2,m3, }); }
-    if (0!=m1) { return unsafe(new int[] { m1,m2,m3, }); }
-    if (0!=m2) { return unsafe(new int[] { m2,m3, }); }
-    if (0!=m3) { return unsafe(new int[] { m3, }); }
-    return valueOf(0L); }
-
-  @Override
-  public final NaturalBEI0 fromSquare (final long t) {
-    //assert 0L<=t;
-    final long hi = Numbers.hiWord(t);
-    final long lo = loWord(t);
-    final long lolo = lo*lo;
-    final long hilo2 = (hi*lo) << 1;
-    final long hihi = hi*hi;
-    final int[] m = new int[4];
-    long sum = lolo;
-    m[3] = (int) sum;
-    sum = (sum >>> 32) + hilo2;
-    m[2] = (int) sum;
-    sum = (sum >>> 32) + hihi ;
-    m[1] = (int) sum;
-    m[0] = (int) (sum >>> 32);
-    return unsafe(Bei0.stripLeadingZeros(m)); }
 
   @Override
   public final NaturalBEI0 square () {
@@ -386,7 +412,7 @@ public final class NaturalBEI0 implements Natural {
     return new Natural[] { n, d, }; }
 
   //--------------------------------------------------------------
-  // Bit Operations
+  // Uints
   //--------------------------------------------------------------
 
   @Override
@@ -435,8 +461,6 @@ public final class NaturalBEI0 implements Natural {
 
   @Override
   public final int hiBit () { return Bei0.hiBit(words()); }
-
-  public final int bitCount () { return Bei0.bitCount(words()); }
 
   //--------------------------------------------------------------
   // Transience

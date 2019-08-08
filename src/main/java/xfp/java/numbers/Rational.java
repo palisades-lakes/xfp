@@ -671,13 +671,13 @@ public final class Rational implements Ringlike<Rational> {
     //assert ! BigInteger.ZERO.equals(d);
     return valueOf(
       0 <= (n.signum()*d.signum()),
-      Natural.get(n.abs()),
-      Natural.get(d.abs())); }
+      Natural.valueOf(n.abs()),
+      Natural.valueOf(d.abs())); }
 
   public static final Rational valueOf (final BigInteger n) {
     return valueOf(
       0 <= (n.signum()),
-      Natural.get(n.abs())); }
+      Natural.valueOf(n.abs())); }
 
   public static final Rational valueOf (final BigFloat n0,
                                         final BigFloat d0) {

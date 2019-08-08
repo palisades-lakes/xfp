@@ -169,8 +169,8 @@ public final class RationalFloats implements Set {
         final BigInteger z1 = (BigInteger) g1.next();
         return RationalFloat.valueOf(
           0<=z0.signum(),
-          Natural.get(z0.abs()),
-          Natural.get(z1),
+          Natural.valueOf(z0.abs()),
+          Natural.valueOf(z1),
           g2.nextInt()); } }; }
 
   // Is this characteristic of most inputs?

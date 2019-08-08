@@ -415,7 +415,7 @@ public final class Bei0 {
 
   //--------------------------------------------------------------
 
-  public static final int[] add (final long m0,
+  public static final int[] sum (final long m0,
                                  final long m1) {
     //assert 0L<=m0;
     //assert 0L<=m1;
@@ -505,7 +505,7 @@ public final class Bei0 {
 
   //--------------------------------------------------------------
 
-  public static final int[] add (final long m0,
+  public static final int[] sum (final long m0,
                                  final long m1,
                                  final int upShift)  {
     //assert 0L<=m0;
@@ -514,7 +514,7 @@ public final class Bei0 {
 
     if (0L==m0) { return shiftUp(m1,upShift); }
     if (0L==m1) { return valueOf(m0); }
-    if (0==upShift) { return add(m0,m1); }
+    if (0==upShift) { return sum(m0,m1); }
 
     final int hi0 = (int) hiWord(m0);
     final int lo0 = (int) loWord(m0);
@@ -665,7 +665,7 @@ public final class Bei0 {
   //--------------------------------------------------------------
   // only when m1 <= m0
 
-  public static final int[] subtract (final int[] m0,
+  public static final int[] difference (final int[] m0,
                                       final long m1) {
     // TODO: //assert necessary?
     //assert (! leadingZero(m0));
@@ -755,7 +755,7 @@ public final class Bei0 {
     //assert (! leadingZero(m0));
     //assert 0L<=m1;
     if (0L==u1) { return u0; }
-    if (0==upShift) { return subtract(u0,u1); }
+    if (0==upShift) { return difference(u0,u1); }
     //assert 0<upShift;
 
     final int n0 = u0.length;
@@ -816,7 +816,7 @@ public final class Bei0 {
     return valueOf(m0-m1); }
 
   // only when m0 >= (m1<<upShift)
-  public static final int[] subtract (final long m0,
+  public static final int[] difference (final long m0,
                                       final long m1,
                                       final int upShift) {
     //assert 0L<=m0;

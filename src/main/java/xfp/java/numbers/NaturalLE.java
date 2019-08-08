@@ -89,7 +89,9 @@ public final class NaturalLE implements Natural {
   public final NaturalLE zero () { return ZERO; }
 
   //--------------------------------------------------------------
-  // NaturalLE
+  // Natural
+  //--------------------------------------------------------------
+  // long based factories
   //--------------------------------------------------------------
 
   @Override
@@ -144,24 +146,82 @@ public final class NaturalLE implements Natural {
     return unsafe(ww); }
 
   @Override
-  public final NaturalLE fromSquare (final long t) {
+  public final NaturalLE difference (final long u,
+                                     final long v) {
     //assert isValid();
-    //assert 0L<=t;
-    final long hi = Numbers.hiWord(t);
-    final long lo = Numbers.loWord(t);
-    final long lolo = lo*lo;
+    //assert 0L<=u;
+    //assert 0L<=v;
+    //assert compareTo(u,v)>=0;
+    if (0L==u) { 
+      //assert 0L==v;
+      return zero(); }
+    if (0L==v) { return from(u); }
+    final long duv = u-v;
+    // assert 0L<=duv;
+    return from(duv); }
+
+  @Override
+  public final NaturalLE difference (final long u,
+                                     final long v,
+                                     final int upShift) {
+    //assert isValid();
+    //assert 0L<=u;
+    //assert 0<=upShift;
+    // assert upShift<64L;
+    //assert 0L<=v;
+    //assert compareTo(u,v,upShift)>=0;
     // TODO: overflow?
-    //final long hilo2 = ((hi*lo)<<1);
-    final long hilo2 = Math.multiplyExact(2,hi*lo);
-    final long hihi = hi*hi;
-    long sum = lolo;
-    final int m0 = (int) sum;
-    sum = (sum>>>32) + hilo2;
-    final int m1 = (int) sum;
-    sum = (sum>>>32) + hihi ;
-    final int m2 = (int) sum;
-    final int m3 = (int) (sum>>>32);
-    return unsafe(new int[] {m0,m1,m2,m3,}); }
+    final long dm = u-(v<<upShift);
+    //assert 0L<=dm;
+    return from(dm); }
+
+  @Override
+  public final NaturalLE difference (final long v,
+                                     final int upShift,
+                                     final long u) {
+    //assert isValid();
+    //assert 0L<=u;
+    //assert 0<=upShift;
+    //assert 0L<=v;
+    //assert compareTo(u,upShift,v)>=0;
+    if (0L==v) { 
+      //assert 0L==v;
+      return zero(); }
+    if (0==upShift) { return difference(v,u); }
+    final int iShift = (upShift>>>5);
+    final int bShift = (upShift&0x1f);
+    final int n = iShift+3;
+    // TODO: should these be int?
+    final long vlo = loWord(v);
+    final long vhi = hiWord(v);
+    final int vv0,vv1,vv2;
+    if (0==bShift) { vv0=(int)vlo; vv1=(int)vhi; vv2=0; }
+    else {
+      final int rShift = 32-bShift;
+      vv0 = (int) (vlo<<bShift);
+      vv1 = (int) ((vhi<<bShift)|(vlo>>>rShift));
+      vv2 = (int) (vhi>>>rShift); }
+    int i = iShift;
+    final int[] ww = new int[n];
+    ww[i++] = vv0; ww[i++] = vv1; ww[i] = vv2;
+    long dif = (unsigned(ww[0])-loWord(u));
+    long borrow = (dif>>32);
+    ww[0] = (int) dif;
+    dif = (unsigned(ww[1])-hiWord(u)) + borrow;
+    borrow = (dif>>32);
+    ww[1] = (int) dif;
+    i=2;
+    for (;i<n;i++) {
+      if (0L==borrow) { break; }
+      dif = unsigned(ww[i]) + borrow;
+      borrow = (dif>>32);
+      ww[i] = (int) dif; }
+    assert 0L==borrow;
+    return unsafe(ww); }
+
+  //--------------------------------------------------------------
+ // TODO: fix lurking overflow issue
+  // probably only works as long as t0,t1 double significands
 
   @Override
   public final NaturalLE product (final long t0,
@@ -169,88 +229,57 @@ public final class NaturalLE implements Natural {
     //assert isValid();
     //assert 0L<=t0;
     //assert 0L<=t1;
-    final long hi0 = Numbers.hiWord(t0);
-    final long lo0 = Numbers.loWord(t0);
-    final long hi1 = Numbers.hiWord(t1);
-    final long lo1 = Numbers.loWord(t1);
+    final long hi0 = hiWord(t0);
+    final long lo0 = loWord(t0);
+    final long hi1 = hiWord(t1);
+    final long lo1 = loWord(t1);
     final long lolo = lo0*lo1;
-    // TODO: overflow?
-    //final long hilo2 = (hi0*lo1) + (hi1*lo0);
-    final long hilo2 = Math.addExact(hi0*lo1,hi1*lo0);
+    final long hilo2 = (hi0*lo1) + (hi1*lo0);
+    //final long hilo2 = Math.addExact(hi0*lo1,hi1*lo0);
     final long hihi = hi0*hi1;
     long sum = lolo;
-    final int m0 = (int) sum;
+    final int w0 = (int) sum;
     sum = (sum>>>32) + hilo2;
-    final int m1 = (int) sum;
+    final int w1 = (int) sum;
     sum = (sum>>>32) + hihi ;
-    final int m2 = (int) sum;
-    final int m3 = (int) (sum>>>32);
-    return unsafe(new int[] {m0,m1,m2,m3,}); }
+    final int w2 = (int) sum;
+    final int w3 = (int) (sum>>>32);
+    if (0!=w3) { return unsafe(new int[] { w0,w1,w2,w3, }); }
+    if (0!=w2) { return unsafe(new int[] { w0,w1,w2, }); }
+    if (0!=w1) { return unsafe(new int[] { w0,w1, }); }
+    if (0!=w0) { return unsafe(new int[] { w0, }); }
+    return ZERO; }
+    //return unsafe(new int[] {m0,m1,m2,m3,}); }
+
+  // TODO: fix lurking overflow issue
+  // probably only works as long as t is double significand
+  
+  @Override
+  public final NaturalLE fromSquare (final long t) {
+    //assert isValid();
+    //assert 0L<=t;
+    final long hi = hiWord(t);
+    final long lo = loWord(t);
+    final long lolo = lo*lo;
+    final long hilo2 = ((hi*lo)<<1);
+    //final long hilo2 = Math.multiplyExact(2,hi*lo);
+    final long hihi = hi*hi;
+    long sum = lolo;
+    final int w0 = (int) sum;
+    sum = (sum>>>32) + hilo2;
+    final int w1 = (int) sum;
+    sum = (sum>>>32) + hihi ;
+    final int w2 = (int) sum;
+    final int w3 = (int) (sum>>>32);
+    if (0!=w3) { return unsafe(new int[] { w0,w1,w2,w3, }); }
+    if (0!=w2) { return unsafe(new int[] { w0,w1,w2, }); }
+    if (0!=w1) { return unsafe(new int[] { w0,w1, }); }
+    if (0!=w0) { return unsafe(new int[] { w0, }); }
+    return ZERO; }
+    //return unsafe(new int[] {m0,m1,m2,m3,}); }
 
   //--------------------------------------------------------------
-
-  /** <code>add(u<<(32*iShift))</code> */
-  private final NaturalLE addWords (final Natural u,
-                                    final int iShift) {
-    //assert 0<=iShift;
-    final int n0 = hiInt();
-    final int n1 = u.hiInt()+iShift+1;
-    final int n = Math.max(n0,n1);
-    final int[] vv = new int[n];
-    int i=loInt();
-    for (;i<Math.min(n0,iShift);i++) { vv[i] = word(i); }
-    i=iShift;
-    long carry = 0L;
-    for (;i<n1;i++) {
-      final long ui = u.uword(i-iShift);
-      final long sum = uword(i) + ui + carry;
-      carry = (sum>>>32);
-      vv[i] = (int) sum; }
-    for (;i<n0;i++) { 
-      if(0L==carry) { break; }
-      final long sum = uword(i) + carry;
-      carry = (sum>>>32);
-      vv[i] = (int) sum;  }
-    for (;i<n0;i++) { vv[i] = word(i); }
-    //assert 0L==carry;
-    return unsafe(vv); }
-
-  @Override
-  public final NaturalLE add (final Natural u,
-                              final int upShift) {
-    //assert 0<=upShift;
-    if (0==upShift) { return add(u); }
-    //if (isZero()) { return u.shiftUp(upShift); }
-    //if (u.isZero()) { return this; }
-    final int iShift = (upShift>>>5);
-    final int bShift = (upShift&0x1f);
-    if (0==bShift) { return addWords(u,iShift); }
-    final int rShift = 32-bShift;
-    final int n0 = hiInt();
-    final int n1 = u.hiInt()+iShift+1;
-    final int n = Math.max(n0,n1);
-    final int[] vv = new int[n];
-    int i=loInt();
-    for (;i<Math.min(n0,iShift);i++) { vv[i] = word(i); }
-    i=iShift;
-    long carry = 0L;
-    int u0 = 0;
-    for (;i<n1;i++) {
-      final int u1 = u.word(i-iShift);
-      final int ui = ((u1<<bShift)|(u0>>>rShift));
-      u0 = u1;
-      final long sum = uword(i) + unsigned(ui) + carry;
-      carry = (sum>>>32);
-      vv[i] = (int) sum; }
-    for (;i<n0;i++) { 
-      if(0L==carry) { break; }
-      final long sum = uword(i) + carry;
-      carry = (sum>>>32);
-      vv[i] = (int) sum;  }
-    for (;i<n0;i++) { vv[i] = word(i); }
-    //assert 0L==carry;
-    return unsafe(vv); }
-
+  // add longs
   //--------------------------------------------------------------
 
   @Override
@@ -358,6 +387,8 @@ public final class NaturalLE implements Natural {
     if (0L!=carry) { vv[n] = (int) carry; }
     return unsafe(vv); }
 
+  //--------------------------------------------------------------
+  // subtract longs
   //--------------------------------------------------------------
 
   @Override
@@ -516,82 +547,70 @@ public final class NaturalLE implements Natural {
     return unsafe(vv); }
 
   //--------------------------------------------------------------
+  // arithmetic with shifted Naturals
+  //--------------------------------------------------------------
+
+  /** <code>add(u<<(32*iShift))</code> */
+  private final NaturalLE addWords (final Natural u,
+                                    final int iShift) {
+    //assert 0<=iShift;
+    final int n0 = hiInt();
+    final int n1 = u.hiInt()+iShift+1;
+    final int n = Math.max(n0,n1);
+    final int[] vv = new int[n];
+    int i=loInt();
+    for (;i<Math.min(n0,iShift);i++) { vv[i] = word(i); }
+    i=iShift;
+    long carry = 0L;
+    for (;i<n1;i++) {
+      final long ui = u.uword(i-iShift);
+      final long sum = uword(i) + ui + carry;
+      carry = (sum>>>32);
+      vv[i] = (int) sum; }
+    for (;i<n0;i++) { 
+      if(0L==carry) { break; }
+      final long sum = uword(i) + carry;
+      carry = (sum>>>32);
+      vv[i] = (int) sum;  }
+    for (;i<n0;i++) { vv[i] = word(i); }
+    //assert 0L==carry;
+    return unsafe(vv); }
 
   @Override
-  public final NaturalLE difference (final long u,
-                                     final long v) {
-    //assert isValid();
-    //assert 0L<=u;
-    //assert 0L<=v;
-    //assert compareTo(u,v)>=0;
-    if (0L==u) { 
-      //assert 0L==v;
-      return zero(); }
-    if (0L==v) { return from(u); }
-    final long duv = u-v;
-    // assert 0L<=duv;
-    return from(duv); }
-
-  @Override
-  public final NaturalLE difference (final long v,
-                                     final int upShift,
-                                     final long u) {
-    //assert isValid();
-    //assert 0L<=u;
+  public final NaturalLE add (final Natural u,
+                              final int upShift) {
     //assert 0<=upShift;
-    //assert 0L<=v;
-    //assert compareTo(u,upShift,v)>=0;
-    if (0L==v) { 
-      //assert 0L==v;
-      return zero(); }
-    if (0==upShift) { return difference(v,u); }
+    if (0==upShift) { return add(u); }
+    //if (isZero()) { return u.shiftUp(upShift); }
+    //if (u.isZero()) { return this; }
     final int iShift = (upShift>>>5);
     final int bShift = (upShift&0x1f);
-    final int n = iShift+3;
-    final int[] ww = new int[n];
-    final long vlo = loWord(v);
-    final long vhi = hiWord(v);
-    final int vv0,vv1,vv2;
-    if (0==bShift) { 
-      vv0=(int)vlo; 
-      vv1=(int)vhi; 
-      vv2=0; }
-    else {
-      final int rShift = 32-bShift;
-      vv0 = (int) (vlo<<bShift);
-      vv1 = (int) ((vhi<<bShift)|(vlo>>>rShift));
-      vv2 = (int) (vhi>>>rShift); }
-    int i = iShift;
-    ww[i++] = vv0; ww[i++] = vv1; ww[i] = vv2;
-    long dif = (unsigned(ww[0])-loWord(u));
-    long borrow = (dif>>32);
-    ww[0] = (int) dif;
-    dif = (unsigned(ww[1])-hiWord(u)) + borrow;
-    borrow = (dif>>32);
-    ww[1] = (int) dif;
-    i=2;
-    for (;i<n;i++) {
-      if (0L==borrow) { break; }
-      dif = unsigned(ww[i]) + borrow;
-      borrow = (dif>>32);
-      ww[i] = (int) dif; }
-    assert 0L==borrow;
-    return unsafe(ww); }
-
-  @Override
-  public final NaturalLE difference (final long u,
-                                     final long v,
-                                     final int upShift) {
-    //assert isValid();
-    //assert 0L<=u;
-    //assert 0<=upShift;
-    // assert upShift<64L;
-    //assert 0L<=v;
-    //assert compareTo(u,v,upShift)>=0;
-    // TODO: overflow?
-    final long dm = u-(v<<upShift);
-    //assert 0L<=dm;
-    return from(dm); }
+    if (0==bShift) { return addWords(u,iShift); }
+    final int rShift = 32-bShift;
+    final int n0 = hiInt();
+    final int n1 = u.hiInt()+iShift+1;
+    final int n = Math.max(n0,n1);
+    final int[] vv = new int[n];
+    int i=loInt();
+    for (;i<Math.min(n0,iShift);i++) { vv[i] = word(i); }
+    i=iShift;
+    long carry = 0L;
+    int u0 = 0;
+    for (;i<n1;i++) {
+      final int u1 = u.word(i-iShift);
+      final int ui = ((u1<<bShift)|(u0>>>rShift));
+      u0 = u1;
+      final long sum = uword(i) + unsigned(ui) + carry;
+      carry = (sum>>>32);
+      vv[i] = (int) sum; }
+    for (;i<n0;i++) { 
+      if(0L==carry) { break; }
+      final long sum = uword(i) + carry;
+      carry = (sum>>>32);
+      vv[i] = (int) sum;  }
+    for (;i<n0;i++) { vv[i] = word(i); }
+    //assert 0L==carry;
+    return unsafe(vv); }
 
   //--------------------------------------------------------------
   // Ringlike
@@ -699,7 +718,7 @@ public final class NaturalLE implements Natural {
       final long prod = tti*tti; 
       final int i2 = 2*i;
       vv[i2] = (int) prod;
-      vv[i2+1] = (int) Numbers.hiWord(prod); }
+      vv[i2+1] = (int) hiWord(prod); }
     // off diagonal
     for (int i0=0;i0<n;i0++) {
       long prod = 0L;
@@ -709,16 +728,16 @@ public final class NaturalLE implements Natural {
       for (int i1=0;i1<i0;i1++) {
         i2 = i0+i1;
         prod = unsigned(vv[i2]) + carry; 
-        carry = Numbers.hiWord(prod); 
-        long vvi2 = Numbers.loWord(prod); 
+        carry = hiWord(prod); 
+        long vvi2 = loWord(prod); 
         if (i0!=i1) {
           final long tt1 = uword(i1);
           final long tt01 = tt0*tt1;
           prod = vvi2 + tt01; 
-          carry = Numbers.hiWord(prod) + carry;
-          vvi2 = Numbers.loWord(prod);
+          carry = hiWord(prod) + carry;
+          vvi2 = loWord(prod);
           prod = vvi2 + tt01; 
-          carry = Numbers.hiWord(prod) + carry; 
+          carry = hiWord(prod) + carry; 
           vv[i2] = (int) prod; } }
       while ((0L!=carry)&&(i2<2*n)) {
         i2++;

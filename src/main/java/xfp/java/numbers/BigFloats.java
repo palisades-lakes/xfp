@@ -156,7 +156,7 @@ public final class BigFloats implements Set {
         final BigInteger bi = (BigInteger) g0.next();
         final boolean nonNegative = (0 <= bi.signum());
         final Natural significand =
-          Natural.get(nonNegative ? bi : bi.negate());
+          Natural.valueOf(nonNegative ? bi : bi.negate());
         final int exponent = urp.nextInt(eRan) + eMin;
         return
           BigFloat.valueOf(nonNegative,significand,exponent); } }; }

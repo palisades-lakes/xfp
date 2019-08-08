@@ -13,24 +13,33 @@ import xfp.java.test.Common;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-24
+ * @version 2019-08-08
  */
 
 public final class SumTest {
 
   private static final int DIM = 517;//1024;
 
+  @SuppressWarnings("static-method")
+  @Test
+  public final void zeroSum () {
+    //Debug.DEBUG=true;
+    Common.zeroSumTests(
+      Common.zeroSumGenerators(DIM),
+      Common.makeAccumulators(Common.accumulators()));
+    //Debug.DEBUG=false;
+  }
 
-@SuppressWarnings("static-method")
-@Test
-public final void overflowSum () {
-  //Debug.DEBUG=false;
-  //Debug.println();
-  //Debug.println("overflow");
-  Common.overflowTests(
-    Common.makeAccumulators(Common.accumulators()));
-  //Debug.DEBUG=false;
-}
+  @SuppressWarnings("static-method")
+  @Test
+  public final void overflowSum () {
+    //Debug.DEBUG=false;
+    //Debug.println();
+    //Debug.println("overflow");
+    Common.overflowTests(
+      Common.makeAccumulators(Common.accumulators()));
+    //Debug.DEBUG=false;
+  }
 
   @SuppressWarnings("static-method")
   @Test
@@ -42,16 +51,6 @@ public final void overflowSum () {
       Common.generators(DIM),
       Common.makeAccumulators(Common.accumulators()),
       BigFloatAccumulator0.make());
-    //Debug.DEBUG=false;
-  }
-
-  @SuppressWarnings("static-method")
-  @Test
-  public final void zeroSum () {
-    //Debug.DEBUG=true;
-    Common.zeroSumTests(
-      Common.zeroSumGenerators(DIM),
-      Common.makeAccumulators(Common.accumulators()));
     //Debug.DEBUG=false;
   }
 

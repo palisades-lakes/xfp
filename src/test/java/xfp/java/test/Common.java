@@ -1580,7 +1580,9 @@ public final class Common {
       final double pred =
         a.clear().addProducts(x0,x1).doubleValue();
       //final long t1 = (System.nanoTime()-t0);
-      Assertions.assertEquals(truth,pred); 
+      Assertions.assertEquals(truth,pred,
+        "\ntrue=" + Double.toHexString(truth)
+        + "\npred" + Double.toHexString(pred)); 
       //final double l1d = Math.abs(truth - pred);
       //final double l1n = Math.max(1.0,Math.abs(truth));
       //Debug.println(

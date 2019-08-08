@@ -13,11 +13,11 @@ import xfp.java.test.Common;
 /** Test desired properties of RationalFloat.
  * <p>
  * <pre>
- * mvn -Dtest=xfp/java/test/numbers/RationalFloatTest test > RationalFloatTest.txt
+ * mvn -q -Dtest=xfp/java/test/numbers/RationalFloatTest test > RationalFloatTest.txt
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-22
+ * @version 2019-08-08
  */
 
 public final class RationalFloatTest {
@@ -32,19 +32,19 @@ public final class RationalFloatTest {
     final RationalFloat[] f =
     {
      RationalFloat.valueOf(
-       false,Natural.get("2366052b8b801d",0x10),-22),
+       false,Natural.valueOf("2366052b8b801d",0x10),-22),
      RationalFloat.valueOf(
-       true,Natural.get("2366052b8b801d",0x10),-22),
+       true,Natural.valueOf("2366052b8b801d",0x10),-22),
      RationalFloat.valueOf(
-       true,Natural.get("232330747ceeab",0x10),-23),
+       true,Natural.valueOf("232330747ceeab",0x10),-23),
      RationalFloat.valueOf(
-       false,Natural.get("232330747ceeab",0x10),-23),
+       false,Natural.valueOf("232330747ceeab",0x10),-23),
      RationalFloat.valueOf(
-       false,Natural.get("21ab528c4dbc181",0x10),-26),
+       false,Natural.valueOf("21ab528c4dbc181",0x10),-26),
      RationalFloat.valueOf(
-       true,Natural.get("8d9814ae2e0074",0x10),-25),
+       true,Natural.valueOf("8d9814ae2e0074",0x10),-25),
      RationalFloat.valueOf(
-       true,Natural.get("2c94d1dcb123a56b9c1",0x10),-43), };
+       true,Natural.valueOf("2c94d1dcb123a56b9c1",0x10),-43), };
     for (final RationalFloat fi : f) {
       //Debug.println(fi.toString());
       Common.doubleRoundingTest(

@@ -721,8 +721,8 @@ implements Ringlike<RationalFloat> {
                                              final BigInteger d) {
     return valueOf(
       0 <= (n.signum()*d.signum()),
-      Natural.get(n.abs()),
-      Natural.get(d.abs()),
+      Natural.valueOf(n.abs()),
+      Natural.valueOf(d.abs()),
       0); }
 
   public static final RationalFloat valueOf (final long n,
