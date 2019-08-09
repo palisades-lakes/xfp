@@ -28,7 +28,7 @@ public final class TotalSum {
       PRNG.well44497b("seeds/Well44497b-2019-01-09.txt");
     final int emax = Common.deMax(n)/2;
     final Generator g = Doubles.finiteGenerator(n,urp,emax);
-    final Accumulator a = BigFloatAccumulator.make();
+    final Accumulator a = BigFloatAccumulator0.make();
     assert a.isExact();
     for (int i=0;i<trys;i++) {
       final double[] x0 = (double[]) g.next();
