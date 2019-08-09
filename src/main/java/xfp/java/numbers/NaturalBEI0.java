@@ -15,7 +15,7 @@ import xfp.java.Debug;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-07
+ * @version 2019-08-08
  */
 
 @SuppressWarnings("unchecked")

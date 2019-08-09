@@ -11,7 +11,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-07
+ * @version 2019-08-08
  */
 
 @SuppressWarnings("unchecked")
