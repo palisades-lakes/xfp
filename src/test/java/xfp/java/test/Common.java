@@ -1214,7 +1214,7 @@ public final class Common {
       + "\n1.0e0!= " + s0
       + "\n"); }
 
-    Debug.DEBUG=true;
+    //Debug.DEBUG=true;
     Accumulator a1 = aa.clear();
     a1 = a1.addAll(new double[]
       { 1.0e-1, 1.0e-1, 1.0, -1.0e-1, -1.0e-1});

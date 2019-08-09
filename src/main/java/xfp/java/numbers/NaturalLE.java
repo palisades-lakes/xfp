@@ -14,6 +14,7 @@ import org.apache.commons.rng.sampling.CollectionSampler;
 import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
 import org.apache.commons.rng.sampling.distribution.ContinuousUniformSampler;
 
+import xfp.java.Debug;
 import xfp.java.exceptions.Exceptions;
 import xfp.java.prng.Generator;
 import xfp.java.prng.GeneratorBase;
@@ -23,7 +24,7 @@ import xfp.java.prng.GeneratorBase;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-08
+ * @version 2019-08-09
  */
 
 @SuppressWarnings("unchecked")
@@ -132,6 +133,76 @@ public final class NaturalLE implements Natural {
       final int c = compareUnsigned(word(i),u.word(i-iShift));
       if (0!=c) { return c; } }
     for (;i>=0;i--) { if (0!=word(i)) { return 1; } }
+    return 0; }
+
+  @Override
+  public final  int compareTo (final long u) {
+    //assert isValid();
+    //assert 0L<=u;
+    final int n0 = hiInt();
+    final int lo1 = (int) u;
+    final int hi1 = (int) (u>>>32);
+    final int n1 = ((0!=hi1) ? 2 : (0L!=lo1) ? 1 : 0);
+    if (n0<n1) { return -1; }
+    if (n0>n1) { return 1; }
+    final int hi0 = word(1);
+    final int chi = compareUnsigned(hi0,hi1);
+    if (0!=chi) { return chi; }
+    final int lo0 = word(0);
+    final int clo = compareUnsigned(lo0,lo1);
+    if (0!=clo) { return clo; }
+    return 0; }
+
+  @Override
+  public final int compareTo (final long u,
+                              final int upShift) {
+    //assert isValid();
+    //assert 0L<=u;
+    //assert 0<=upShift : "upShift=" + upShift;
+
+    if (0L==u) { return (isZero() ? 0 : 1); }
+    if (0==upShift) { return compareTo(u); }
+
+    final int m0 = hiBit();
+    final int m1 = Numbers.hiBit(u) + upShift;
+    if (m0<m1) { return -1; }
+    if (m0>m1) { return 1; }
+
+    final int iShift = (upShift>>>5);
+    final int bShift = (upShift&0x1f);
+
+    // compare non-zero words from u<<upShift
+    if (0==bShift) {
+      final int hi0 = word(iShift+1);
+      final int hi1 = (int) (u>>>32);
+      final int chi = compareUnsigned(hi0,hi1);
+      if (0!=chi) { return chi; }
+      final int lo0 = word(iShift);
+      final int lo1 = (int) u;
+      final int clo = compareUnsigned(lo0,lo1);
+      if (0!=clo) { return clo; } }
+    else {
+      // most significant word in u<<upShift
+      final int hi0 = word(iShift+2);
+      final int hi1 = (int) (u>>>(64-bShift));
+      final int chi = compareUnsigned(hi0,hi1);
+      if (0!=chi) { return chi; }
+
+      final long us = (u<<bShift);
+      final int mid0 = word(iShift+1);
+      final int mid1 = (int) (us>>>32);
+      final int cmid = compareUnsigned(mid0,mid1);
+      if (0!=cmid) { return cmid; }
+
+      final int lo0 = word(iShift);
+      final int lo1 = (int) us;
+      final int clo = compareUnsigned(lo0,lo1);
+      if (0!=clo) { return clo; } }
+
+    // check this for any non-zero words in zeros of u<<upShift
+    for (int i=iShift-1;i>=startWord();i--) {
+      if (0!=word(i)) { return 1; } }
+
     return 0; }
 
   //--------------------------------------------------------------
@@ -500,6 +571,11 @@ public final class NaturalLE implements Natural {
   @Override
   public final NaturalLE subtract (final long u,
                                    final int upShift) {
+//    Debug.println("subtract: " + 
+//      words().length + ", " + loInt() + ", " + hiInt() 
+//      + ", " + (upShift>>>5));
+    //Debug.println(toString());
+    //Debug.println(Long.toHexString(u));
     //assert 0L<=u;
     //assert 0<=upShift;
     if (0L==u) { return this; }
@@ -528,20 +604,20 @@ public final class NaturalLE implements Natural {
     if (i<nt) { // or must have 0L=uu1
       dif = uword(i)-uu1 + dif;
       vv[i++] = (int) dif; 
-      dif = (dif>>32); 
-      if (i<nt) { // or 0L=uu2
-        final long u2 = uword(i)-uu2;
-        final long dif2 = u2 + dif;
-        vv[i++] = (int) dif2; 
-        dif = (dif2>>32); 
-        for (;i<nt;i++) {
-          if (0L==dif) { break; }
-          dif = uword(i) + dif;
-          vv[i] = (int) dif; 
-          dif = (dif>>32); } 
-        //assert 0L==dif;
+      dif = (dif>>32); }
+    if (i<nt) { // or 0L=uu2
+      final long u2 = uword(i)-uu2;
+      final long dif2 = u2 + dif;
+      vv[i++] = (int) dif2; 
+      dif = (dif2>>32); }
+    for (;i<nt;i++) {
+      if (0L==dif) { break; }
+      dif = uword(i) + dif;
+      vv[i] = (int) dif; 
+      dif = (dif>>32); } 
+    //assert 0L==dif;
 
-        for (int j=i;j<nt;j++) { vv[j] = word(j); } } }
+    for (int j=i;j<nt;j++) { vv[j] = word(j); } 
     return unsafe(vv); }
 
   //--------------------------------------------------------------
@@ -1111,19 +1187,24 @@ public final class NaturalLE implements Natural {
   //--------------------------------------------------------------
   // construction
   //-------------------------------------------------------------
-
   /** UNSAFE: doesn't copy <code>words</code> or check 
    * <code>loInt</code> or <code>hiInt</code.
    */
+
+  public static int instances = 0;
+  public static int zeroLo = 0;
+  
   private NaturalLE (final int[] words,
                      final int loInt,
                      final int hiInt) { 
+    instances++;
+    if (0==loInt) { zeroLo++; }
     //assert 0<=loInt;
     //assert loInt<=hiInt : 
     //  "\n" + loInt + "<=" + hiInt 
     //  + "\n" + Arrays.toString(words);
     //assert hiInt<=words.length;
-    //System.out.println(words.length + ", " + loInt + ", " + hiInt);
+    //Debug.println("init:" + words.length + ", " + loInt + ", " + hiInt);
     _words = words; 
     _loInt = loInt; 
     _hiInt = hiInt; }
