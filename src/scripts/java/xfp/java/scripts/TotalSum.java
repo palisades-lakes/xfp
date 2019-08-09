@@ -46,6 +46,10 @@ public final class TotalSum {
       NaturalLE.zeroLo + "/" + NaturalLE.instances
       + " = " 
         + ((NaturalLE.zeroLo*100)/NaturalLE.instances) + "%");
+    System.out.println(
+      NaturalLE.maxHi + "/" + NaturalLE.instances
+      + " = " 
+        + ((NaturalLE.maxHi*100)/NaturalLE.instances) + "%");
    }
 
   //--------------------------------------------------------------

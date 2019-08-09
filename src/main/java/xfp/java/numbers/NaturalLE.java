@@ -571,11 +571,6 @@ public final class NaturalLE implements Natural {
   @Override
   public final NaturalLE subtract (final long u,
                                    final int upShift) {
-//    Debug.println("subtract: " + 
-//      words().length + ", " + loInt() + ", " + hiInt() 
-//      + ", " + (upShift>>>5));
-    //Debug.println(toString());
-    //Debug.println(Long.toHexString(u));
     //assert 0L<=u;
     //assert 0<=upShift;
     if (0L==u) { return this; }
@@ -1193,12 +1188,14 @@ public final class NaturalLE implements Natural {
 
   public static int instances = 0;
   public static int zeroLo = 0;
+  public static int maxHi = 0;
   
   private NaturalLE (final int[] words,
                      final int loInt,
                      final int hiInt) { 
     instances++;
     if (0==loInt) { zeroLo++; }
+    if (words.length==hiInt) { maxHi++; }
     //assert 0<=loInt;
     //assert loInt<=hiInt : 
     //  "\n" + loInt + "<=" + hiInt 
