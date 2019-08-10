@@ -14,7 +14,6 @@ import org.apache.commons.rng.sampling.CollectionSampler;
 import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
 import org.apache.commons.rng.sampling.distribution.ContinuousUniformSampler;
 
-import xfp.java.Debug;
 import xfp.java.exceptions.Exceptions;
 import xfp.java.prng.Generator;
 import xfp.java.prng.GeneratorBase;
@@ -39,9 +38,10 @@ public final class NaturalLE implements Natural {
   private final int[] _words;
   private final int[] words () { return _words; }
 
-  private final int _loInt;
-  @Override
-  public final int loInt () { return _loInt; }
+//  private final int _loInt;
+//  @Override
+//  public final int loInt () { return _loInt; }
+
   private final int _hiInt;
   @Override
   public final int hiInt () { return _hiInt; }
@@ -49,20 +49,19 @@ public final class NaturalLE implements Natural {
   //--------------------------------------------------------------
 
   @Override
-  public final int startWord () { return _loInt; }
+  public final int startWord () { return 0; }
   @Override
   public final int endWord () { return _hiInt; }
 
   @Override
   public final int word (final int i) {
     //assert 0<=i : "Negative index: " + i;
-    if (i<loInt()) { return 0; }
     if (hiInt()<=i) { return 0; }
     return words()[i]; }
 
   /** Don't drop trailing zeros. */
   public final int[] copyWords () { 
-    return Arrays.copyOf(words(),words().length); }
+    return Arrays.copyOf(words(),_hiInt); }
 
   @Override
   public final NaturalLE setWord (final int i,
@@ -70,7 +69,7 @@ public final class NaturalLE implements Natural {
     //assert 0<=i;
     if (0==w) {
       if (i>=hiInt()) { return this; }
-      final int[] u = Arrays.copyOf(words(),words().length);
+      final int[] u = Arrays.copyOf(words(),hiInt());
       u[i] = 0;
       return unsafe(u); }
     final int n = Math.max(i+1,hiInt());
@@ -80,10 +79,10 @@ public final class NaturalLE implements Natural {
 
   /** Singleton.<br>
    */
-  public static final NaturalLE ZERO = new NaturalLE(new int[0],0,0); 
+  public static final NaturalLE ZERO = new NaturalLE(new int[0],0); 
 
-  @Override
-  public final boolean isZero () { return _loInt==_hiInt; }
+//  @Override
+//  public final boolean isZero () { return _loInt==_hiInt; }
 
   @Override
   public final NaturalLE empty () { return ZERO; }
@@ -103,15 +102,15 @@ public final class NaturalLE implements Natural {
     final int b1 = u.hiBit();
     if (b0<b1) { return -1; }
     if (b0>b1) { return 1; }
-    final int start = Math.max(loInt(),u.loInt());
+    final int start = Math.max(0,u.startWord());
     int i = hiInt()-1;
     for (;i>=start;i--) {
       final long u0i = uword(i);
       final long u1i = u.uword(i);
       if (u0i<u1i) { return -1; }
       if (u0i>u1i) { return 1; } }
-    for (;i>=loInt();i--) { if (0!=word(i)) { return 1; } }
-    for (;i>=u.loInt();i--) { if (0!=u.word(i)) { return -1; } }
+    for (;i>=0;i--) { if (0!=word(i)) { return 1; } }
+    for (;i>=u.startWord();i--) { if (0!=u.word(i)) { return -1; } }
     return 0; }
 
   @Override
@@ -128,8 +127,7 @@ public final class NaturalLE implements Natural {
     if (n0 > n1) { return 1; }
     // TODO: is this faster than unsigned long conversion?
     int i = n0-1;
-    final int m = Math.min(loInt(),u.loInt()+iShift);
-    for (; i>m; i--) {
+    for (; i>0; i--) {
       final int c = compareUnsigned(word(i),u.word(i-iShift));
       if (0!=c) { return c; } }
     for (;i>=0;i--) { if (0!=word(i)) { return 1; } }
@@ -200,7 +198,7 @@ public final class NaturalLE implements Natural {
       if (0!=clo) { return clo; } }
 
     // check this for any non-zero words in zeros of u<<upShift
-    for (int i=iShift-1;i>=startWord();i--) {
+    for (int i=iShift-1;i>=0;i--) {
       if (0!=word(i)) { return 1; } }
 
     return 0; }
@@ -223,7 +221,7 @@ public final class NaturalLE implements Natural {
     final int w2 = (int) (sum>>>32);
     if (0L!=w2) { return unsafe(new int[] {w0,w1,w2}); }
     if (0L!=w1) { return unsafe(new int[] {w0,w1}); }
-    return unsafe(new int[] {w0},0,1); }
+    return unsafe(new int[] {w0},1); }
 
   @Override
   public final  NaturalLE sum (final long u,
@@ -364,8 +362,8 @@ public final class NaturalLE implements Natural {
     if (0!=w3) { return unsafe(new int[] { w0,w1,w2,w3, }); }
     if (0!=w2) { return unsafe(new int[] { w0,w1,w2, }); }
     if (0!=w1) { 
-      return unsafe(new int[] { w0,w1, }, (0==w0)?1:0,2); }
-    return unsafe(new int[] { w0, },0,1); }
+      return unsafe(new int[] { w0,w1, }, 2); }
+    return unsafe(new int[] { w0, },1); }
 
   // TODO: fix lurking overflow issue
   // probably only works as long as t is double significand
@@ -392,8 +390,8 @@ public final class NaturalLE implements Natural {
     if (0!=w3) { return unsafe(new int[] { w0,w1,w2,w3, }); }
     if (0!=w2) { return unsafe(new int[] { w0,w1,w2, }); }
     if (0!=w1) { 
-      return unsafe(new int[] {w0,w1}, (0==w0)?1:0,2); }
-    return unsafe(new int[] {w0},0,1); }
+      return unsafe(new int[] {w0,w1},2); }
+    return unsafe(new int[] {w0},1); }
 
   //--------------------------------------------------------------
   // add longs
@@ -472,7 +470,7 @@ public final class NaturalLE implements Natural {
     final int nu = iShift+2;
     final int n = Math.max(nt,nu);
     final int[] vv = new int[n+1];
-    for (int i=loInt();i<Math.min(iShift,nt);i++) { vv[i] = word(i); }
+    for (int i=0;i<Math.min(iShift,nt);i++) { vv[i] = word(i); }
 
     final int uhi = (int) (u>>>32);
     final int ulo = (int) u;
@@ -545,7 +543,7 @@ public final class NaturalLE implements Natural {
     final int nt = hiInt();
     final int[] vv = new int[nt];
     // assert iShift<=n || 0L==u
-    for (int i=loInt();i<iShift;i++) { vv[i] = word(i); }
+    for (int i=0;i<iShift;i++) { vv[i] = word(i); }
 
     final long uu0 = loWord(u);
     final long uu1 = hiWord(u);
@@ -583,7 +581,7 @@ public final class NaturalLE implements Natural {
     final int nt = hiInt();
     final int[] vv = new int[nt];
     // assert iShift<=n || 0L==u
-    for (int i=loInt();i<iShift;i++) { vv[i] = word(i); }
+    for (int i=0;i<iShift;i++) { vv[i] = word(i); }
 
     final int uhi = (int) (u>>>32);
     final int ulo = (int) u;
@@ -645,7 +643,7 @@ public final class NaturalLE implements Natural {
     final int[] vv = new int[iShift+2];
     // assert iShift<=n || 0L==u
     long dif = 0;
-    int i = loInt();
+    int i = 0;
     for (;i<Math.min(nt,iShift);i++) { 
       dif -= uword(i);
       vv[i] = (int) dif;
@@ -682,7 +680,7 @@ public final class NaturalLE implements Natural {
     final int[] vv = new int[iShift+3];
     // assert iShift<=n || 0L==u
     long dif = 0;
-    int i=loInt();
+    int i=0;
     for (;i<Math.min(nt,iShift);i++) { 
       dif -= uword(i);
       vv[i] = (int) dif;
@@ -721,7 +719,7 @@ public final class NaturalLE implements Natural {
     final int n1 = u.hiInt()+iShift+1;
     final int n = Math.max(n0,n1);
     final int[] vv = new int[n];
-    int i=loInt();
+    int i=0;
     for (;i<Math.min(n0,iShift);i++) { vv[i] = word(i); }
     i=iShift;
     long sum = 0L;
@@ -754,7 +752,7 @@ public final class NaturalLE implements Natural {
     final int n1 = u.hiInt()+iShift+1;
     final int n = Math.max(n0,n1);
     final int[] vv = new int[n];
-    int i=loInt();
+    int i=0;
     for (;i<Math.min(n0,iShift);i++) { vv[i] = word(i); }
     i=iShift;
     long sum = 0L;
@@ -791,7 +789,7 @@ public final class NaturalLE implements Natural {
     final int nu = u.hiInt()+iShift;
     //assert nu<=nt : nu + " <= " + nt;
     final int[] vv = new int[nt];
-    for (int i=loInt();i<iShift;i++) { vv[i] = word(i); }
+    for (int i=0;i<iShift;i++) { vv[i] = word(i); }
     int i=iShift;
     long dif = 0L;
     int u0 = 0;
@@ -878,7 +876,7 @@ public final class NaturalLE implements Natural {
   //--------------------------------------------------------------
   // TODO: singleton class for one() and zero()?
 
-  private static final NaturalLE ONE = unsafe(new int[] {1},0,1);
+  private static final NaturalLE ONE = unsafe(new int[] {1},1);
 
   @Override
   public final NaturalLE one () { return ONE; }
@@ -890,7 +888,6 @@ public final class NaturalLE implements Natural {
   @Override
   public final boolean isOne () {
     //assert isValid();
-    if (0!=loInt()) { return false; }
     if (1!=hiInt()) { return false; }
     if (1!=words()[0]) { return false; }
     return true; }
@@ -1068,7 +1065,7 @@ public final class NaturalLE implements Natural {
     final int n = hiInt();
     if (0==n) { return this; }
     final int[] u = new int[n+iShift];
-    for (int i=loInt();i<n;i++) { u[i+iShift] = word(i); }
+    for (int i=0;i<n;i++) { u[i+iShift] = word(i); }
     return unsafe(u); }
 
   @Override
@@ -1084,7 +1081,7 @@ public final class NaturalLE implements Natural {
     final int n1 = n0+iShift;
     final int[] u = new int[n1+1];
     int w0 = 0;
-    for (int i=loInt();i<n0;i++) { 
+    for (int i=0;i<n0;i++) { 
       final int w1 = word(i);
       final int w = ((w1<<bShift) | (w0>>>rShift));
       w0 = w1;
@@ -1187,14 +1184,11 @@ public final class NaturalLE implements Natural {
    */
 
   public static int instances = 0;
-  public static int zeroLo = 0;
   public static int maxHi = 0;
   
   private NaturalLE (final int[] words,
-                     final int loInt,
                      final int hiInt) { 
     instances++;
-    if (0==loInt) { zeroLo++; }
     if (words.length==hiInt) { maxHi++; }
     //assert 0<=loInt;
     //assert loInt<=hiInt : 
@@ -1203,7 +1197,6 @@ public final class NaturalLE implements Natural {
     //assert hiInt<=words.length;
     //Debug.println("init:" + words.length + ", " + loInt + ", " + hiInt);
     _words = words; 
-    _loInt = loInt; 
     _hiInt = hiInt; }
 
   /** Doesn't copy <code>words</code> or check <code>loInt</code>
@@ -1211,23 +1204,20 @@ public final class NaturalLE implements Natural {
    */
 
   private static final NaturalLE unsafe (final int[] words,
-                                         final int loInt,
                                          final int hiInt){
-    return new NaturalLE(words,loInt,hiInt); }
+    return new NaturalLE(words,hiInt); }
   /** Doesn't copy <code>words</code>. 
    */
 
   static final NaturalLE unsafe (final int[] words) {
-    final int lo = Ints.loInt(words);
     final int hi = Ints.hiInt(words);
-    return unsafe(words,lo,hi); }
+    return unsafe(words,hi); }
 
   /** Copy <code>words</code>. 
    *  */
   public static final NaturalLE make (final int[] words) {
     final int end = Ints.hiInt(words);
-    final int start = Ints.loInt(words);
-    return unsafe(Arrays.copyOf(words,end),start,end); }
+    return unsafe(Arrays.copyOf(words,end),end); }
 
   //--------------------------------------------------------------
   /** From a big endian {@code byte[]}, as produced by
@@ -1270,16 +1260,16 @@ public final class NaturalLE implements Natural {
     if (u==0L) { return ZERO; }
     final int lo = (int) u;
     final int hi = (int) (u>>>32);
-    if (0==hi) { return unsafe(new int[] {lo},0,1); }
-    if (0==lo) { return unsafe(new int[] { lo,hi },1,2); }
-    return unsafe(new int[] { lo,hi },0,2); }
+    if (0==hi) { return unsafe(new int[] {lo},1); }
+    if (0==lo) { return unsafe(new int[] { lo,hi },2); }
+    return unsafe(new int[] { lo,hi },2); }
 
   /** Return a {@link NaturalLE} equivalent to the unsigned 
    * value of <code>u</code>.
    */
   public static final NaturalLE valueOf (final int u) {
     if (u==0) { return ZERO; }
-    return unsafe(new int[] {u},0,1); }
+    return unsafe(new int[] {u},1); }
 
   //--------------------------------------------------------------
 
@@ -1298,8 +1288,8 @@ public final class NaturalLE implements Natural {
       return copy((NaturalLE) u); }
     final int n = u.hiInt();
     final int[] w = new int[n];
-    for (int i=u.loInt();i<n;i++) { w[i] = u.word(i); }
-    return unsafe(w,u.loInt(),n); }
+    for (int i=u.startWord();i<n;i++) { w[i] = u.word(i); }
+    return unsafe(w,n); }
 
   //--------------------------------------------------------------
 }

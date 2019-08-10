@@ -19,7 +19,7 @@ import xfp.java.exceptions.Exceptions;
  * TODO: max valid range limited by int hiBit!
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-29
+ * @version 2019-08-09
  */
 
 @SuppressWarnings("unchecked")
@@ -429,7 +429,7 @@ extends Transience<T> {
 
   default int uintsHashCode () {
     int hashCode = 0;
-    for (int i=loInt(); i<hiInt(); i++) {
+    for (int i=startWord(); i<hiInt(); i++) {
       hashCode = (int) ((31 * hashCode) + uword(i)); }
     return hashCode; }
 
@@ -437,8 +437,8 @@ extends Transience<T> {
   default boolean uintsEquals (final Uints x) {
     if (x==this) { return true; }
     final Uints u = x;
-    final int n0 = loInt();
-    if (n0!=u.loInt()) { return false; }
+    final int n0 = startWord();
+    if (n0!=u.startWord()) { return false; }
     final int n1 = hiInt();
     if (n1!=u.hiInt()) { return false; }
     for (int i=n0; i<n1; i++) {

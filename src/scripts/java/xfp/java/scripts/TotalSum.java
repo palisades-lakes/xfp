@@ -25,7 +25,7 @@ public final class TotalSum {
 
   public static final void main (final String[] args) {
     final int n = (8*1024*1024) - 1;
-    final int trys = 1;// * 8;//1024;
+    final int trys = 1* 1024;
     final UniformRandomProvider urp =
       PRNG.well44497b("seeds/Well44497b-2019-01-09.txt");
     final int emax = Common.deMax(n)/2;
@@ -42,14 +42,14 @@ public final class TotalSum {
 //      final double d = a.addProducts(x0,x1).doubleValue();
 //      assert Double.isFinite(d);
       }
-    System.out.println(
-      NaturalLE.zeroLo + "/" + NaturalLE.instances
-      + " = " 
-        + ((NaturalLE.zeroLo*100)/NaturalLE.instances) + "%");
-    System.out.println(
-      NaturalLE.maxHi + "/" + NaturalLE.instances
-      + " = " 
-        + ((NaturalLE.maxHi*100)/NaturalLE.instances) + "%");
+//    System.out.println(
+//      NaturalLE.zeroLo + "/" + NaturalLE.instances
+//      + " = " 
+//        + ((NaturalLE.zeroLo*100)/NaturalLE.instances) + "%");
+//    System.out.println(
+//      NaturalLE.maxHi + "/" + NaturalLE.instances
+//      + " = " 
+//        + ((NaturalLE.maxHi*100)/NaturalLE.instances) + "%");
    }
 
   //--------------------------------------------------------------
