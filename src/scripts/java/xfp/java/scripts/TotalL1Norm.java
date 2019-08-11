@@ -16,7 +16,7 @@ import xfp.java.test.Common;
  * jy --source 11 src/scripts/java/xfp/java/scripts/TotalL1Norm.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-07
+ * @version 2019-08-10
  * 7
  */
 @SuppressWarnings("unchecked")

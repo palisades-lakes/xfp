@@ -38,9 +38,9 @@ public final class NaturalLE implements Natural {
   private final int[] _words;
   private final int[] words () { return _words; }
 
-//  private final int _loInt;
-//  @Override
-//  public final int loInt () { return _loInt; }
+  //  private final int _loInt;
+  //  @Override
+  //  public final int loInt () { return _loInt; }
 
   private final int _hiInt;
   @Override
@@ -81,8 +81,8 @@ public final class NaturalLE implements Natural {
    */
   public static final NaturalLE ZERO = new NaturalLE(new int[0],0); 
 
-//  @Override
-//  public final boolean isZero () { return _loInt==_hiInt; }
+  @Override
+  public final boolean isZero () { return 0==_hiInt; }
 
   @Override
   public final NaturalLE empty () { return ZERO; }
@@ -425,33 +425,40 @@ public final class NaturalLE implements Natural {
 
   //--------------------------------------------------------------
 
-  private final NaturalLE addWithWordShift (final long u,
-                                            final int iShift) {
-    final int nt = hiInt();
-    final int nu = iShift+2;
-    final int n = Math.max(nt,nu);
-    final int[] vv = new int[n+1];
-    for (int i=0;i<Math.min(iShift,nt);i++) { vv[i] = word(i); }
-
-    int i=iShift;
-    final long uu0 = loWord(u);
-    final long uu1 = hiWord(u);
-    long sum = uu0;
+  private final long addByWords (final long u,
+                                 final int iShift,
+                                 final int nt,
+                                 final int[] vv) {
+    long sum = loWord(u);
+    int i = iShift;
     if (i<nt) { sum += uword(i); }
     vv[i++] = (int) sum; 
-    sum = uu1 + (sum>>>32);
+    sum = hiWord(u) + (sum>>>32);
+    if (i<nt) { sum += uword(i); }
+    vv[i++] = (int) sum; 
+    return (sum>>>32); }
+
+  private final long addByBits (final long u,
+                                final int iShift,
+                                final int bShift,
+                                final int nt,
+                                final int[] vv) {
+    final int uhi = (int) (u>>>32);
+    final int ulo = (int) u;
+    final int rShift = 32-bShift;
+    int i=iShift;
+    long sum = unsigned(ulo<<bShift);
     if (i<nt) { sum += uword(i); }
     vv[i++] = (int) sum; 
     sum = (sum>>>32);
-
-    for (;i<nt;i++) {
-      if (0L==sum) { break; }
-      sum = uword(i) + sum;
-      vv[i] = (int) sum; 
-      sum = (sum>>>32); }
-    for (int j=i;j<nt;j++) { vv[j] = word(j); }
-    if (0L!=sum) { vv[n] = (int) sum; }
-    return unsafe(vv); }
+    sum += unsigned((uhi<<bShift)|(ulo>>>rShift));
+    if (i<nt) { sum += uword(i); }
+    vv[i++] = (int) sum; 
+    sum = (sum>>>32);
+    sum += unsigned(uhi>>>rShift);
+    if (i<nt) { sum += uword(i); }
+    vv[i++] = (int) sum; 
+    return (sum>>>32); }
 
   @Override
   public final NaturalLE add (final long u,
@@ -464,33 +471,20 @@ public final class NaturalLE implements Natural {
 
     final int iShift = (upShift>>>5);
     final int bShift = (upShift&0x1f);
-    if (0==bShift) { return addWithWordShift(u,iShift); }
-
     final int nt = hiInt();
     final int nu = iShift+2;
     final int n = Math.max(nt,nu);
     final int[] vv = new int[n+1];
     for (int i=0;i<Math.min(iShift,nt);i++) { vv[i] = word(i); }
 
-    final int uhi = (int) (u>>>32);
-    final int ulo = (int) u;
-    final int rShift = 32-bShift;
-    final long uu0 = unsigned(ulo<<bShift);
-    final long uu1 = unsigned((uhi<<bShift)|(ulo>>>rShift));
-    final long uu2 = unsigned(uhi>>>rShift); 
-    int i=iShift;
-    long sum = uu0;
-    if (i<nt) { sum += uword(i); }
-    vv[i++] = (int) sum; 
-    sum = (sum>>>32);
-    sum = uu1 + sum;
-    if (i<nt) { sum += uword(i); }
-    vv[i++] = (int) sum; 
-    sum = (sum>>>32);
-    sum = uu2 + sum;
-    if (i<nt) { sum += uword(i); }
-    vv[i++] = (int) sum; 
-    sum = (sum>>>32);
+    long sum = 0L;
+    int i;
+    if (0==bShift) { 
+      sum = addByWords(u,iShift,nt,vv); 
+      i=iShift+2; }
+    else { 
+      sum = addByBits(u,iShift,bShift,nt,vv); 
+      i=iShift+3; }
 
     for (;i<nt;i++) {
       if (0L==sum) { break; }
@@ -1056,29 +1050,53 @@ public final class NaturalLE implements Natural {
 
   //--------------------------------------------------------------
 
-  @Override
-  public final NaturalLE shiftUpWords (final int iShift) {
-    //assert isValid();
-    //assert 0<=iShift;
-    if (0==iShift) { return this; }
-    if (isZero()) { return this; }
-    final int n = hiInt();
-    if (0==n) { return this; }
-    final int[] u = new int[n+iShift];
-    for (int i=0;i<n;i++) { u[i+iShift] = word(i); }
-    return unsafe(u); }
+//  private final NaturalLE shiftUpWords (final int iShift) {
+//    //assert isValid();
+//    //assert 0<=iShift;
+//    if (0==iShift) { return this; }
+//    if (isZero()) { return this; }
+//    final int n = hiInt();
+//    if (0==n) { return this; }
+//    final int[] u = new int[n+iShift];
+//    for (int i=0;i<n;i++) { u[i+iShift] = word(i); }
+//    return unsafe(u); }
+//
+//  @Override
+//  public final NaturalLE shiftUp (final int shift) {
+//    //assert 0<=shift;
+//    if (shift==0) { return this; }
+//    if (isZero()) { return this; }
+//    final int iShift = (shift>>>5);
+//    final int bShift = (shift&0x1f);
+//    if (0==bShift) { return shiftUpWords(iShift); }
+//    final int rShift = 32-bShift;
+//    final int n0 = hiInt();
+//    final int n1 = n0+iShift;
+//    final int[] u = new int[n1+1];
+//    int w0 = 0;
+//    for (int i=0;i<n0;i++) { 
+//      final int w1 = word(i);
+//      final int w = ((w1<<bShift) | (w0>>>rShift));
+//      w0 = w1;
+//      u[i+iShift] = w; }
+//    u[n1] = (w0>>>rShift);
+//    return unsafe(u); }
 
-  @Override
-  public final NaturalLE shiftUp (final int shift) {
+ @Override
+  public final NaturalLE shiftUp (final int upShift) {
     //assert 0<=shift;
-    if (shift==0) { return this; }
+    if (upShift==0) { return this; }
     if (isZero()) { return this; }
-    final int iShift = (shift>>>5);
-    final int bShift = (shift&0x1f);
-    if (0==bShift) { return shiftUpWords(iShift); }
-    final int rShift = 32-bShift;
+    final int iShift = (upShift>>>5);
+    final int bShift = (upShift&0x1f);
     final int n0 = hiInt();
     final int n1 = n0+iShift;
+    if (0==bShift) { 
+      final int[] u = new int[n1];
+      for (int i=0;i<n0;i++) { u[i+iShift] = word(i); }
+      //System.arraycopy(words(),0,u,iShift,n0);
+      return unsafe(u); }
+    final int rShift = 32-bShift;
     final int[] u = new int[n1+1];
     int w0 = 0;
     for (int i=0;i<n0;i++) { 
@@ -1185,7 +1203,7 @@ public final class NaturalLE implements Natural {
 
   public static int instances = 0;
   public static int maxHi = 0;
-  
+
   private NaturalLE (final int[] words,
                      final int hiInt) { 
     instances++;

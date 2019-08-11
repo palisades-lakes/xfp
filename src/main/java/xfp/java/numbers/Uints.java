@@ -318,36 +318,39 @@ extends Transience<T> {
 
   //--------------------------------------------------------------
 
-  default T shiftUpWords (final int iShift) {
-    //assert 0<=iShift;
-    if (0==iShift) { return (T) this; }
-    final int n = hiInt();
-    if (0==n) { return (T) this; }
-    T u = empty();
-    for (int i=0;i<iShift;i++) { u = (T) u.setWord(i,0); }
-    for (int i=0;i<n;i++) { u = (T) u.setWord(i+iShift,word(i)); }
-    return u; }
+//  default T shiftUpWords (final int iShift) {
+//    //assert 0<=iShift;
+//    if (0==iShift) { return (T) this; }
+//    final int n = hiInt();
+//    if (0==n) { return (T) this; }
+//    T u = empty();
+//    for (int i=0;i<iShift;i++) { u = (T) u.setWord(i,0); }
+//    for (int i=0;i<n;i++) { u = (T) u.setWord(i+iShift,word(i)); }
+//    return u; }
+
+//  default T shiftUp (final int shift) {
+//    //assert 0<=shift;
+//    if (shift==0) { return (T) this; }
+//    final int n0 = hiInt();
+//    if (0==n0) { return (T) this; }
+//    //if (isZero()) { return valueOf(0L); }
+//    final int iShift = (shift >>> 5);
+//    final int bShift = (shift & 0x1f);
+//    if (0==bShift) { return shiftUpWords(iShift); }
+//    final int rShift = 32-bShift;
+//    final int n1 = n0+iShift;
+//    T u = empty();
+//    for (int i=0;i<iShift;i++) { u = (T) u.setWord(i,0); }
+//    u = (T) u.setWord(iShift,(word(0)<<bShift));
+//    for (int i=1;i<n0;i++) { 
+//      final int w = ((word(i)<<bShift) | (word(i-1)>>>rShift));
+//      u = (T) u.setWord(i+iShift,w); }
+//    u = (T) u.setWord(n1,(word(n0-1)>>>rShift));
+//    return u; }
 
   default T shiftUp (final int shift) {
-    //assert 0<=shift;
-    if (shift==0) { return (T) this; }
-    final int n0 = hiInt();
-    if (0==n0) { return (T) this; }
-    //if (isZero()) { return valueOf(0L); }
-    final int iShift = (shift >>> 5);
-    final int bShift = (shift & 0x1f);
-    if (0==bShift) { return shiftUpWords(iShift); }
-    final int rShift = 32-bShift;
-    final int n1 = n0+iShift;
-    T u = empty();
-    for (int i=0;i<iShift;i++) { u = (T) u.setWord(i,0); }
-    u = (T) u.setWord(iShift,(word(0)<<bShift));
-    for (int i=1;i<n0;i++) { 
-      final int w = ((word(i)<<bShift) | (word(i-1)>>>rShift));
-      u = (T) u.setWord(i+iShift,w); }
-    u = (T) u.setWord(n1,(word(n0-1)>>>rShift));
-    return u; }
-
+    throw Exceptions.unsupportedOperation(this,"shiftUp",shift); }
+  
   //--------------------------------------------------------------
   // construction
   //--------------------------------------------------------------

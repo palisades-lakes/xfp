@@ -69,27 +69,26 @@ public final class Bei0 {
     //assert (! leadingZero(m));
     if (isZero(m)) { return m; }
     if (upShift==0) { return m; }
-    //if (upShift<0) { return shiftDown0(m,-upShift); }
-    final int intShift = (upShift >>> 5);
-    final int remShift = (upShift & 0x1f);
+    final int iShift = (upShift >>> 5);
+    final int bShift = (upShift & 0x1f);
     final int n = m.length;
-    if (remShift==0) {
-      final int[] m1 = new int[n+intShift];
+    if (bShift==0) {
+      final int[] m1 = new int[n+iShift];
       System.arraycopy(m,0,m1,0,n);
       return m1; }
     //return Arrays.copyOfRange(m,0,n+intShift); }
     int m1[] = null;
     int i = 0;
-    final int downShift = 32-remShift;
+    final int downShift = 32-bShift;
     final int highBits = (m[0] >>> downShift);
     if (highBits != 0) {
-      m1 = new int[n + intShift + 1];
+      m1 = new int[n + iShift + 1];
       m1[i++] = highBits; }
-    else { m1 = new int[n + intShift]; }
+    else { m1 = new int[n + iShift]; }
     int j = 0;
     while (j < (n-1)) {
-      m1[i++] = (m[j++] << remShift) | (m[j] >>> downShift); }
-    m1[i] = m[j] << remShift;
+      m1[i++] = (m[j++] << bShift) | (m[j] >>> downShift); }
+    m1[i] = m[j] << bShift;
     return m1; }
 
   public static final int[] shiftUp (final long m,

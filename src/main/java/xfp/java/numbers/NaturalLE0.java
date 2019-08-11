@@ -744,8 +744,7 @@ public final class NaturalLE0 implements Natural {
 
   //--------------------------------------------------------------
 
-  @Override
-  public final Natural shiftUpWords (final int iShift) {
+  private final Natural shiftUpWords (final int iShift) {
     //assert isValid();
     //assert 0<=iShift;
     if (0==iShift) { return this; }
