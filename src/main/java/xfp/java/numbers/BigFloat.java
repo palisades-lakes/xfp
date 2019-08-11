@@ -2,7 +2,6 @@ package xfp.java.numbers;
 
 import static xfp.java.numbers.Numbers.loBit;
 
-import java.math.BigDecimal;
 import java.util.Objects;
 
 import xfp.java.exceptions.Exceptions;
@@ -735,49 +734,59 @@ public final class BigFloat implements Ringlike<BigFloat> {
   // construction
   //--------------------------------------------------------------
 
-  private BigFloat (final boolean nonNegative,
+  private BigFloat (final boolean p0,
                     final Natural t0,
                     final int e0) {
-    final int e1 = Math.max(0,t0.loBit());
-    _nonNegative = nonNegative;
-    final Natural significand;
-    final int exponent;
-    if (e1==0) {
-      significand = t0;
-      exponent = e0; }
-    else {
-      significand = t0.shiftDown(e1);
-      exponent = Math.addExact(e0,e1); }
-    _significand = significand;
-    _exponent = exponent; }
+    _nonNegative = p0;
+    _significand = t0;
+    _exponent = e0; } 
 
   //--------------------------------------------------------------
 
-  public static final BigFloat valueOf (final boolean nonNegative,
-                                        final Natural t,
-                                        final int e) {
-    if (t.isZero()) { return new BigFloat(true,t.zero(),0); }
-    return new BigFloat(nonNegative,t,e); }
+  private static final BigFloat ZERO =
+    new BigFloat(true,NaturalLE.ZERO,0);
 
-  public static final BigFloat valueOf (final long t,
-                                        final int e) {
-    if (0L==t) { return ZERO; }
-    if (0L<t) {
-      return valueOf(true,Natural.valueOf(t),e); }
-    return valueOf(false,Natural.valueOf(-t),e); }
+//  private static final BigFloat ONE =
+//    new BigFloat(true,Natural.valueOf(1),0);
+//
+//  private static final BigFloat TWO =
+//    new BigFloat(true,Natural.valueOf(1),1);
+//
+//  private static final BigFloat TEN =
+//    new BigFloat(true,Natural.valueOf(5),1);
+//
+//  private static final BigFloat MINUS_ONE =
+//    new BigFloat(false,Natural.valueOf(1),0);
 
-  public static final BigFloat valueOf (final int t,
-                                        final int e) {
-    if (0==t) { return ZERO; }
-    if (0<t) { return valueOf(true,Natural.valueOf(t),e); }
-    return valueOf(false,Natural.valueOf(-t),e); }
+  //--------------------------------------------------------------
+
+  public static final BigFloat valueOf (final boolean p0,
+                                        final Natural t0,
+                                        final int e0) {
+    if (t0.isZero()) { return ZERO; }
+    final int shift = Math.max(0,t0.loBit());
+    if (shift==0) { return new BigFloat(p0,t0,e0); }
+    return new BigFloat(p0, t0.shiftDown(shift),e0+shift); }
+
+//  public static final BigFloat valueOf (final long t,
+//                                        final int e) {
+//    if (0L==t) { return ZERO; }
+//    if (0L<t) {
+//      return valueOf(true,Natural.valueOf(t),e); }
+//    return valueOf(false,Natural.valueOf(-t),e); }
+
+//  public static final BigFloat valueOf (final int t,
+//                                        final int e) {
+//    if (0==t) { return ZERO; }
+//    if (0<t) { return valueOf(true,Natural.valueOf(t),e); }
+//    return valueOf(false,Natural.valueOf(-t),e); }
 
   //--------------------------------------------------------------
 
   private static final BigFloat valueOf (final boolean nonNegative,
                                          final long t0,
                                          final int e0)  {
-    if (0L==t0) { return ZERO; }
+    //if (0L==t0) { return ZERO; }
     //assert 0L<t0;
     final int shift = Numbers.loBit(t0);
     final long t1;
@@ -797,7 +806,7 @@ public final class BigFloat implements Ringlike<BigFloat> {
   private static final BigFloat valueOf (final boolean nonNegative,
                                          final int t0,
                                          final int e0)  {
-    if (0==t0) { return ZERO; }
+    //if (0==t0) { return ZERO; }
     return valueOf(nonNegative,Natural.valueOf(t0),e0); }
 
   public static final BigFloat valueOf (final float x)  {
@@ -808,80 +817,63 @@ public final class BigFloat implements Ringlike<BigFloat> {
 
   //--------------------------------------------------------------
 
-  public static final BigFloat valueOf (final byte t)  {
-    if (0<=t) { return valueOf(true,Natural.valueOf(t),0); }
-    return valueOf(false,Natural.valueOf(-t),0); }
+//  public static final BigFloat valueOf (final byte t)  {
+//    if (0<=t) { return valueOf(true,Natural.valueOf(t),0); }
+//    return valueOf(false,Natural.valueOf(-t),0); }
+//
+//  public static final BigFloat valueOf (final short t)  {
+//    if (0<=t) { return valueOf(true,Natural.valueOf(t),0); }
+//    return valueOf(false,Natural.valueOf(-t),0); }
+//
+//  public static final BigFloat valueOf (final int t)  {
+//    if (0<=t) { return valueOf(true,Natural.valueOf(t),0); }
+//    return valueOf(false,Natural.valueOf(-t),0); }
 
-  public static final BigFloat valueOf (final short t)  {
-    if (0<=t) { return valueOf(true,Natural.valueOf(t),0); }
-    return valueOf(false,Natural.valueOf(-t),0); }
-
-  public static final BigFloat valueOf (final int t)  {
-    if (0<=t) { return valueOf(true,Natural.valueOf(t),0); }
-    return valueOf(false,Natural.valueOf(-t),0); }
-
-  public static final BigFloat valueOf (final long t)  {
-    if (0<=t) { return valueOf(true,Natural.valueOf(t),0); }
-    return valueOf(false,Natural.valueOf(-t),0); }
-
-  //--------------------------------------------------------------
-
-  public static final BigFloat valueOf (final Double x)  {
-    return valueOf(x.doubleValue()); }
-
-  public static final BigFloat valueOf (final Float x)  {
-    return valueOf(x.floatValue()); }
-
-  public static final BigFloat valueOf (final Byte x)  {
-    return valueOf(x.byteValue()); }
-
-  public static final BigFloat valueOf (final Short x)  {
-    return valueOf(x.shortValue()); }
-
-  public static final BigFloat valueOf (final Integer x)  {
-    return valueOf(x.intValue()); }
-
-  public static final BigFloat valueOf (final Long x)  {
-    return valueOf(x.longValue()); }
-
-  public static final BigFloat valueOf (final BigDecimal x)  {
-    throw Exceptions.unsupportedOperation(null,"valueOf",x); }
-
-  public static final BigFloat valueOf (final Natural x)  {
-    return valueOf(true,x,0); }
-
-  public static final BigFloat valueOf (final Number x)  {
-    if (x instanceof Double) { return valueOf((Double) x); }
-    if (x instanceof Float) { return valueOf((Float) x); }
-    if (x instanceof Byte) { return valueOf((Byte) x); }
-    if (x instanceof Short) { return valueOf((Short) x); }
-    if (x instanceof Integer) { return valueOf((Integer) x); }
-    if (x instanceof Long) { return valueOf((Long) x); }
-    if (x instanceof BigDecimal) { return valueOf((BigDecimal) x); }
-    throw Exceptions.unsupportedOperation(null,"valueOf",x); }
-
-  public static final BigFloat valueOf (final Object x)  {
-    if (x instanceof BigFloat) { return (BigFloat) x; }
-    if (x instanceof Natural) { return valueOf((Natural) x); }
-    return valueOf((Number) x); }
+//  public static final BigFloat valueOf (final long t)  {
+//    if (0<=t) { return valueOf(true,Natural.valueOf(t),0); }
+//    return valueOf(false,Natural.valueOf(-t),0); }
 
   //--------------------------------------------------------------
 
-    public static final BigFloat ZERO =
-      new BigFloat(true,Natural.valueOf(0),0);
-  
-    public static final BigFloat ONE =
-      new BigFloat(true,Natural.valueOf(1),0);
-  
-    public static final BigFloat TWO =
-      new BigFloat(true,Natural.valueOf(1),1);
-  
-    public static final BigFloat TEN =
-      new BigFloat(true,Natural.valueOf(5),1);
-  
-    public static final BigFloat MINUS_ONE =
-      new BigFloat(false,Natural.valueOf(1),0);
-
+//  public static final BigFloat valueOf (final Double x)  {
+//    return valueOf(x.doubleValue()); }
+//
+//  public static final BigFloat valueOf (final Float x)  {
+//    return valueOf(x.floatValue()); }
+//
+//  public static final BigFloat valueOf (final Byte x)  {
+//    return valueOf(x.byteValue()); }
+//
+//  public static final BigFloat valueOf (final Short x)  {
+//    return valueOf(x.shortValue()); }
+//
+//  public static final BigFloat valueOf (final Integer x)  {
+//    return valueOf(x.intValue()); }
+//
+//  public static final BigFloat valueOf (final Long x)  {
+//    return valueOf(x.longValue()); }
+//
+//  public static final BigFloat valueOf (final BigDecimal x)  {
+//    throw Exceptions.unsupportedOperation(null,"valueOf",x); }
+//
+//  public static final BigFloat valueOf (final Natural x)  {
+//    return valueOf(true,x,0); }
+//
+//  public static final BigFloat valueOf (final Number x)  {
+//    if (x instanceof Double) { return valueOf((Double) x); }
+//    if (x instanceof Float) { return valueOf((Float) x); }
+//    if (x instanceof Byte) { return valueOf((Byte) x); }
+//    if (x instanceof Short) { return valueOf((Short) x); }
+//    if (x instanceof Integer) { return valueOf((Integer) x); }
+//    if (x instanceof Long) { return valueOf((Long) x); }
+//    if (x instanceof BigDecimal) { return valueOf((BigDecimal) x); }
+//    throw Exceptions.unsupportedOperation(null,"valueOf",x); }
+//
+//  public static final BigFloat valueOf (final Object x)  {
+//    if (x instanceof BigFloat) { return (BigFloat) x; }
+//    if (x instanceof Natural) { return valueOf((Natural) x); }
+//    return valueOf((Number) x); }
+//
   //--------------------------------------------------------------
 }
 //--------------------------------------------------------------

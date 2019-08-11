@@ -2,7 +2,6 @@ package xfp.java.numbers;
 
 import static xfp.java.numbers.Numbers.loBit;
 
-import java.math.BigDecimal;
 import java.util.Objects;
 
 import xfp.java.exceptions.Exceptions;
@@ -757,25 +756,25 @@ public final class BigFloat0 implements Ringlike<BigFloat0> {
     if (t.isZero()) { return ZERO; }
     return new BigFloat0(nonNegative,(NaturalBEI0) t,e); }
 
-  public static final BigFloat0 valueOf (final long t,
-                                         final int e) {
-    if (0L==t) { return valueOf(0L); }
-    if (0L < t) {
-      return valueOf(true,NaturalBEI0.valueOf(t),e); }
-    return valueOf(false,NaturalBEI0.valueOf(-t),e); }
-
-  public static final BigFloat0 valueOf (final int t,
-                                         final int e) {
-    if (0==t) { return valueOf(0L); }
-    if (0<t) { return valueOf(true,NaturalBEI0.valueOf(t),e); }
-    return valueOf(false,NaturalBEI0.valueOf(-t),e); }
+//  public static final BigFloat0 valueOf (final long t,
+//                                         final int e) {
+//    if (0L==t) { return valueOf(0L); }
+//    if (0L < t) {
+//      return valueOf(true,NaturalBEI0.valueOf(t),e); }
+//    return valueOf(false,NaturalBEI0.valueOf(-t),e); }
+//
+//  public static final BigFloat0 valueOf (final int t,
+//                                         final int e) {
+//    if (0==t) { return valueOf(0L); }
+//    if (0<t) { return valueOf(true,NaturalBEI0.valueOf(t),e); }
+//    return valueOf(false,NaturalBEI0.valueOf(-t),e); }
 
   //--------------------------------------------------------------
 
   private static final BigFloat0 valueOf (final boolean nonNegative,
                                           final long t0,
                                           final int e0)  {
-    if (0L==t0) { return valueOf(0L); }
+    //if (0L==t0) { return ZERO; }
     //assert 0L<t0;
     final int shift = Numbers.loBit(t0);
     final long t1;
@@ -795,7 +794,7 @@ public final class BigFloat0 implements Ringlike<BigFloat0> {
   private static final BigFloat0 valueOf (final boolean nonNegative,
                                           final int t0,
                                           final int e0)  {
-    if (0==t0) { return valueOf(0L); }
+    //if (0==t0) { return ZERO; }
     return valueOf(nonNegative,NaturalBEI0.valueOf(t0),e0); }
 
   public static final BigFloat0 valueOf (final float x)  {
@@ -806,79 +805,79 @@ public final class BigFloat0 implements Ringlike<BigFloat0> {
 
   //--------------------------------------------------------------
 
-  public static final BigFloat0 valueOf (final byte t)  {
-    if (0<=t) { return valueOf(true,NaturalBEI0.valueOf(t),0); }
-    return valueOf(false,NaturalBEI0.valueOf(-t),0); }
-
-  public static final BigFloat0 valueOf (final short t)  {
-    if (0<=t) { return valueOf(true,NaturalBEI0.valueOf(t),0); }
-    return valueOf(false,NaturalBEI0.valueOf(-t),0); }
-
-  public static final BigFloat0 valueOf (final int t)  {
-    if (0<=t) { return valueOf(true,NaturalBEI0.valueOf(t),0); }
-    return valueOf(false,NaturalBEI0.valueOf(-t),0); }
-
-  public static final BigFloat0 valueOf (final long t)  {
-    if (0<=t) { return valueOf(true,NaturalBEI0.valueOf(t),0); }
-    return valueOf(false,NaturalBEI0.valueOf(-t),0); }
-
-  //--------------------------------------------------------------
-
-  public static final BigFloat0 valueOf (final Double x)  {
-    return valueOf(x.doubleValue()); }
-
-  public static final BigFloat0 valueOf (final Float x)  {
-    return valueOf(x.floatValue()); }
-
-  public static final BigFloat0 valueOf (final Byte x)  {
-    return valueOf(x.byteValue()); }
-
-  public static final BigFloat0 valueOf (final Short x)  {
-    return valueOf(x.shortValue()); }
-
-  public static final BigFloat0 valueOf (final Integer x)  {
-    return valueOf(x.intValue()); }
-
-  public static final BigFloat0 valueOf (final Long x)  {
-    return valueOf(x.longValue()); }
-
-  public static final BigFloat0 valueOf (final BigDecimal x)  {
-    throw Exceptions.unsupportedOperation(null,"valueOf",x); }
-
-  public static final BigFloat0 valueOf (final NaturalBEI0 x)  {
-    return valueOf(true,x,0); }
-
-  public static final BigFloat0 valueOf (final Number x)  {
-    if (x instanceof Double) { return valueOf((Double) x); }
-    if (x instanceof Float) { return valueOf((Float) x); }
-    if (x instanceof Byte) { return valueOf((Byte) x); }
-    if (x instanceof Short) { return valueOf((Short) x); }
-    if (x instanceof Integer) { return valueOf((Integer) x); }
-    if (x instanceof Long) { return valueOf((Long) x); }
-    if (x instanceof BigDecimal) { return valueOf((BigDecimal) x); }
-    throw Exceptions.unsupportedOperation(null,"valueOf",x); }
-
-  public static final BigFloat0 valueOf (final Object x)  {
-    if (x instanceof BigFloat0) { return (BigFloat0) x; }
-    if (x instanceof NaturalBEI0) { return valueOf((NaturalBEI0) x); }
-    return valueOf((Number) x); }
+//  public static final BigFloat0 valueOf (final byte t)  {
+//    if (0<=t) { return valueOf(true,NaturalBEI0.valueOf(t),0); }
+//    return valueOf(false,NaturalBEI0.valueOf(-t),0); }
+//
+//  public static final BigFloat0 valueOf (final short t)  {
+//    if (0<=t) { return valueOf(true,NaturalBEI0.valueOf(t),0); }
+//    return valueOf(false,NaturalBEI0.valueOf(-t),0); }
+//
+//  public static final BigFloat0 valueOf (final int t)  {
+//    if (0<=t) { return valueOf(true,NaturalBEI0.valueOf(t),0); }
+//    return valueOf(false,NaturalBEI0.valueOf(-t),0); }
+//
+//  public static final BigFloat0 valueOf (final long t)  {
+//    if (0<=t) { return valueOf(true,NaturalBEI0.valueOf(t),0); }
+//    return valueOf(false,NaturalBEI0.valueOf(-t),0); }
 
   //--------------------------------------------------------------
 
-  public static final BigFloat0 ZERO =
+//  public static final BigFloat0 valueOf (final Double x)  {
+//    return valueOf(x.doubleValue()); }
+//
+//  public static final BigFloat0 valueOf (final Float x)  {
+//    return valueOf(x.floatValue()); }
+//
+//  public static final BigFloat0 valueOf (final Byte x)  {
+//    return valueOf(x.byteValue()); }
+//
+//  public static final BigFloat0 valueOf (final Short x)  {
+//    return valueOf(x.shortValue()); }
+//
+//  public static final BigFloat0 valueOf (final Integer x)  {
+//    return valueOf(x.intValue()); }
+//
+//  public static final BigFloat0 valueOf (final Long x)  {
+//    return valueOf(x.longValue()); }
+//
+//  public static final BigFloat0 valueOf (final BigDecimal x)  {
+//    throw Exceptions.unsupportedOperation(null,"valueOf",x); }
+//
+//  public static final BigFloat0 valueOf (final NaturalBEI0 x)  {
+//    return valueOf(true,x,0); }
+//
+//  public static final BigFloat0 valueOf (final Number x)  {
+//    if (x instanceof Double) { return valueOf((Double) x); }
+//    if (x instanceof Float) { return valueOf((Float) x); }
+//    if (x instanceof Byte) { return valueOf((Byte) x); }
+//    if (x instanceof Short) { return valueOf((Short) x); }
+//    if (x instanceof Integer) { return valueOf((Integer) x); }
+//    if (x instanceof Long) { return valueOf((Long) x); }
+//    if (x instanceof BigDecimal) { return valueOf((BigDecimal) x); }
+//    throw Exceptions.unsupportedOperation(null,"valueOf",x); }
+//
+//  public static final BigFloat0 valueOf (final Object x)  {
+//    if (x instanceof BigFloat0) { return (BigFloat0) x; }
+//    if (x instanceof NaturalBEI0) { return valueOf((NaturalBEI0) x); }
+//    return valueOf((Number) x); }
+
+  //--------------------------------------------------------------
+
+  private static final BigFloat0 ZERO =
     new BigFloat0(true,NaturalBEI0.valueOf(0L),0);
 
-  public static final BigFloat0 ONE =
-    new BigFloat0(true,NaturalBEI0.ONE,0);
-
-  public static final BigFloat0 TWO =
-    new BigFloat0(true,NaturalBEI0.ONE,1);
-
-  public static final BigFloat0 TEN =
-    new BigFloat0(true,NaturalBEI0.valueOf(5),1);
-
-  public static final BigFloat0 MINUS_ONE =
-    new BigFloat0(false,NaturalBEI0.ONE,0);
+//  public static final BigFloat0 ONE =
+//    new BigFloat0(true,NaturalBEI0.ONE,0);
+//
+//  public static final BigFloat0 TWO =
+//    new BigFloat0(true,NaturalBEI0.ONE,1);
+//
+//  public static final BigFloat0 TEN =
+//    new BigFloat0(true,NaturalBEI0.valueOf(5),1);
+//
+//  public static final BigFloat0 MINUS_ONE =
+//    new BigFloat0(false,NaturalBEI0.ONE,0);
 
   //--------------------------------------------------------------
 }

@@ -300,8 +300,7 @@ public final class NaturalLEMutable implements Natural {
 
   //--------------------------------------------------------------
 
-  @Override
-  public final Natural shiftDownWords (final int iShift) {
+  private final Natural shiftDownWords (final int iShift) {
     //assert isValid();
     //assert 0<=iShift;
     if (0==iShift) { return this; }
