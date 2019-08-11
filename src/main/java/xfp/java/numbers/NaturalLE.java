@@ -1027,8 +1027,8 @@ public final class NaturalLE implements Natural {
 
     if (0==bShift) {
       final int[] u = new int[n1];
-      for (int i=0;i<n1;i++) { u[i] = word(i+iShift); }
-      //System.arraycopy(words(),iShift,u,0,n1);
+      //for (int i=0;i<n1;i++) { u[i] = word(i+iShift); }
+      System.arraycopy(words(),iShift,u,0,n1);
       return unsafe(u); }
 
     final int[] u = new int[n1];
@@ -1054,8 +1054,8 @@ public final class NaturalLE implements Natural {
     final int n1 = n0+iShift;
     if (0==bShift) {
       final int[] u = new int[n1];
-      for (int i=0;i<n0;i++) { u[i+iShift] = word(i); }
-      //System.arraycopy(words(),0,u,iShift,n0);
+      //for (int i=0;i<n0;i++) { u[i+iShift] = word(i); }
+      System.arraycopy(words(),0,u,iShift,n0);
       return unsafe(u); }
     final int rShift = 32-bShift;
     final int[] u = new int[n1+1];
