@@ -119,10 +119,10 @@ public final class BigFloat implements Ringlike<BigFloat> {
       if (0==c) { return ZERO; }
       // t1 > t0
       if (0>c) {
-        return valueOf(p1,t0.subtractFrom(t1,upShift),e); }
+        return valueOf(p1,((NaturalLE) t0).subtractFrom(t1,upShift),e); }
       // t0 > t1
-      return valueOf(p0,t0.subtract(t1,upShift),e); }
-    return valueOf(p0,t0.add(t1,upShift),e); }
+      return valueOf(p0,((NaturalLE) t0).subtract(t1,upShift),e); }
+    return valueOf(p0,((NaturalLE) t0).add(t1,upShift),e); }
 
   private final BigFloat
   addSameExponent (final boolean p0,
@@ -133,7 +133,7 @@ public final class BigFloat implements Ringlike<BigFloat> {
                    final int e) {
     if (p0^p1) { // different signs
       final int c = Longs.compare(t0,t1,upShift);
-      if (0==c) { return zero(); }
+      if (0==c) { return ZERO; }
       if (0>c) { // t1 > t0
         return valueOf(
           p1,
@@ -148,16 +148,15 @@ public final class BigFloat implements Ringlike<BigFloat> {
 
   //--------------------------------------------------------------
 
-  private final BigFloat
+  private static final BigFloat
   add (final boolean p0,
        final Natural t0,
        final int e0,
        final boolean p1,
        final long t11,
        final int e11) {
-    //assert 0L<=t11;
+    //assert 0L<t11;
     // minimize long bits
-    if (0L==t11) { return this; }
     final int shift = Numbers.loBit(t11);
     final long t1 = (t11>>>shift);
     final int e1 = e11+shift;
@@ -199,6 +198,7 @@ public final class BigFloat implements Ringlike<BigFloat> {
   public final BigFloat
   add (final double z) {
     //assert Double.isFinite(z);
+ //   if (0.0==z) { return this; }
     return add(
       nonNegative(),
       significand(),
@@ -219,6 +219,7 @@ public final class BigFloat implements Ringlike<BigFloat> {
   public final BigFloat
   addAbs (final double z) {
     //assert Double.isFinite(z);
+//    if (0.0==z) { return this; }
     return add(
       nonNegative(),
       significand(),
@@ -249,6 +250,7 @@ public final class BigFloat implements Ringlike<BigFloat> {
 
   public final BigFloat
   subtract (final double z) {
+//    if (0.0==z) { return this; }
     return add(
       nonNegative(),
       significand(),

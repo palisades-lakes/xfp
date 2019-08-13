@@ -1201,7 +1201,7 @@ public final class MutableNaturalBEI0 {
 
   @Override
   public final String toString () {
-    return NaturalBEI.valueOf(getValue()).toString(); }
+    return NaturalBEI0.valueOf(getValue()).toString(); }
 
   //--------------------------------------------------------------
   // construction

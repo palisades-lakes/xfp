@@ -18,7 +18,7 @@ import xfp.java.prng.Generators;
 /** Utilities for Object and primitive numbers.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-31
+ * @version 2019-08-13
  */
 @SuppressWarnings("unchecked")
 public final class Numbers implements Set {
@@ -132,19 +132,19 @@ public final class Numbers implements Set {
 
   /** inclusive */
   public static final int loBit (final int i) {
-    return Integer.numberOfTrailingZeros(i); }
+    return Integer.numberOfTrailingZeros(i) % 32; }
 
   /** exclusive */
   public static final int hiBit (final int i) {
     return Integer.SIZE -  Integer.numberOfLeadingZeros(i); }
 
-  /** inclusive */
+  /** inclusive. Returns 0 for 0. */
   public static final int loBit (final long i) {
-    return Long.numberOfTrailingZeros(i); }
+    return Long.numberOfTrailingZeros(i) % 64; }
 
   /** exclusive */
   public static final int hiBit (final long i) {
-    return Long.SIZE -  Long.numberOfLeadingZeros(i); }
+    return Long.SIZE - Long.numberOfLeadingZeros(i); }
 
    //--------------------------------------------------------------
 
