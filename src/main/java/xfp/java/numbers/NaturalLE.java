@@ -23,7 +23,7 @@ import xfp.java.prng.GeneratorBase;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-12
+ * @version 2019-08-13
  */
 
 @SuppressWarnings("unchecked")
@@ -475,8 +475,8 @@ public final class NaturalLE implements Natural {
     final int nu = iShift+2;
     final int n = Math.max(nt,nu);
     final int[] vv = new int[n+1];
-    //for (int i=0;i<Math.min(iShift,nt);i++) { vv[i] = word(i); }
-    System.arraycopy(words(),0,vv,0,Math.min(nt,iShift));
+    for (int i=0;i<Math.min(iShift,nt);i++) { vv[i] = word(i); }
+    //System.arraycopy(words(),0,vv,0,Math.min(nt,iShift));
 
     long sum = 0L;
     int i;
@@ -492,8 +492,8 @@ public final class NaturalLE implements Natural {
       sum = uword(i) + sum;
       vv[i] = (int) sum; 
       sum = (sum>>>32); }
-    //for (int j=i;j<nt;j++) { vv[j] = word(j); }
-    if (i<nt) { System.arraycopy(words(),i,vv,i,nt-i); }
+    for (int j=i;j<nt;j++) { vv[j] = word(j); }
+    //if (i<nt) { System.arraycopy(words(),i,vv,i,nt-i); }
     if (0L!=sum) { vv[n] = (int) sum; }
     return unsafe(vv); }
 
@@ -507,23 +507,24 @@ public final class NaturalLE implements Natural {
     //assert 0L<=u;
     //assert 0<=compareTo(u);
     if (0L==u) { return this; }
-    final int n = hiInt();
-    final int[] vv = new int[n];
+    final int nt = hiInt();
+    final int[] vv = new int[nt];
     // at least 1 element in tt or u==0
     long dif = uword(0)-loWord(u);
     vv[0] = (int) dif;
     dif = (dif>>32);
-    if (1<n) {
+    if (1<nt) {
       dif = (uword(1)-hiWord(u))+dif;
       vv[1] = (int) dif;
-      dif = (dif>>32);
+      dif = (dif>>32); }
       int i=2;
-      for (;i<n;i++) {
+      for (;i<nt;i++) {
         if (0L==dif) { break; }
         dif = uword(i)+dif;
         vv[i] = (int) dif;
         dif = (dif>>32); }
-      for (;i<n;i++) { vv[i] = word(i); } }
+      for (;i<nt;i++) { vv[i] = word(i); } 
+      //if (i<nt) { System.arraycopy(words(),i,vv,i,nt-i); }
     //assert 0L==dif : dif;
     return unsafe(vv); }
 
@@ -585,8 +586,8 @@ public final class NaturalLE implements Natural {
     final int nt = hiInt();
     final int[] vv = new int[nt];
     // assert iShift<=n || 0L==u
-    //for (int i=0;i<iShift;i++) { vv[i] = word(i); }
-    System.arraycopy(words(),0,vv,0,iShift);
+    for (int i=0;i<iShift;i++) { vv[i] = word(i); }
+    //System.arraycopy(words(),0,vv,0,iShift);
 
     long dif;
     int i;
@@ -604,8 +605,8 @@ public final class NaturalLE implements Natural {
       dif = (dif>>32); } 
     //assert 0L==dif;
 
-    //for (int j=i;j<nt;j++) { vv[j] = word(j); } 
-    if (i<nt) { System.arraycopy(words(),i,vv,i,nt-i); }
+    for (int j=i;j<nt;j++) { vv[j] = word(j); } 
+    //if (i<nt) { System.arraycopy(words(),i,vv,i,nt-i); }
     return unsafe(vv); }
 
   //--------------------------------------------------------------
@@ -741,8 +742,8 @@ public final class NaturalLE implements Natural {
     final int nu = u.hiInt()+iShift+1;
     final int n = Math.max(nt,nu);
     final int[] vv = new int[n];
-    //for (int i=0;i<Math.min(n0,iShift);i++) { vv[i] = word(i); }
-    System.arraycopy(words(),0,vv,0,Math.min(nt,iShift));
+    for (int i=0;i<Math.min(nt,iShift);i++) { vv[i] = word(i); }
+    //System.arraycopy(words(),0,vv,0,Math.min(nt,iShift));
     final int bShift = (upShift&0x1f);
 
     long sum;
@@ -756,8 +757,8 @@ public final class NaturalLE implements Natural {
       vv[i] = (int) sum; 
       sum = (sum>>>32); }
     //assert 0L==sum;
-    //for (;i<nt;i++) { vv[i] = word(i); }
-    if (i<nt) { System.arraycopy(words(),i,vv,i,nt-i); }
+    for (;i<nt;i++) { vv[i] = word(i); }
+    //if (i<nt) { System.arraycopy(words(),i,vv,i,nt-i); }
     return unsafe(vv); }
 
   //--------------------------------------------------------------
@@ -807,8 +808,8 @@ public final class NaturalLE implements Natural {
     final int bShift = (upShift&0x1f);
     final int nt = hiInt();
     final int[] vv = new int[nt];
-    //for (int i=0;i<iShift;i++) { vv[i] = word(i); }
-    System.arraycopy(words(),0,vv,0,iShift);
+    for (int i=0;i<iShift;i++) { vv[i] = word(i); }
+    //System.arraycopy(words(),0,vv,0,iShift);
     long dif;
     int i;
     if (0==bShift) { 
@@ -823,8 +824,8 @@ public final class NaturalLE implements Natural {
       dif += uword(i);
       vv[i] = (int) dif; 
       dif = (dif>>32); }
-    //for (int j=i;j<nt;j++) { vv[j] = word(j); }
-    if (i<nt) { System.arraycopy(words(),i,vv,i,nt-i); }
+    for (int j=i;j<nt;j++) { vv[j] = word(j); }
+    //if (i<nt) { System.arraycopy(words(),i,vv,i,nt-i); }
     return unsafe(vv); }
 
   //--------------------------------------------------------------
@@ -848,8 +849,8 @@ public final class NaturalLE implements Natural {
       sum += uword(i);
       vv[i] = (int) sum; 
       sum = (sum>>>32);}
-    //for (int j=i;j<nt;j++) { vv[j] = word(j); }
-    if (i<nt) { System.arraycopy(words(),i,vv,i,nt-i); }
+    for (int j=i;j<nt;j++) { vv[j] = word(j); }
+    //if (i<nt) { System.arraycopy(words(),i,vv,i,nt-i); }
     vv[nt] = (int) sum; 
     return unsafe(vv); }
 
@@ -875,8 +876,8 @@ public final class NaturalLE implements Natural {
       vv[i] = (int) dif;
       dif = (dif>>32); }
     //assert 0L==dif;
-    //for (int j=i;j<nt;j++) { vv[j] = word(j); }
-    if (i<nt) { System.arraycopy(words(),i,vv,i,nt-i); }
+    for (int j=i;j<nt;j++) { vv[j] = word(j); }
+    //if (i<nt) { System.arraycopy(words(),i,vv,i,nt-i); }
     return unsafe(vv); }
 
   //--------------------------------------------------------------
@@ -1041,8 +1042,8 @@ public final class NaturalLE implements Natural {
 
     if (0==bShift) {
       final int[] u = new int[n1];
-      //for (int i=0;i<n1;i++) { u[i] = word(i+iShift); }
-      System.arraycopy(words(),iShift,u,0,n1);
+      for (int i=0;i<n1;i++) { u[i] = word(i+iShift); }
+      //System.arraycopy(words(),iShift,u,0,n1);
       return unsafe(u); }
 
     final int[] u = new int[n1];
@@ -1068,8 +1069,8 @@ public final class NaturalLE implements Natural {
     final int n1 = n0+iShift;
     if (0==bShift) {
       final int[] u = new int[n1];
-      //for (int i=0;i<n0;i++) { u[i+iShift] = word(i); }
-      System.arraycopy(words(),0,u,iShift,n0);
+      for (int i=0;i<n0;i++) { u[i+iShift] = word(i); }
+      //System.arraycopy(words(),0,u,iShift,n0);
       return unsafe(u); }
     final int rShift = 32-bShift;
     final int[] u = new int[n1+1];
