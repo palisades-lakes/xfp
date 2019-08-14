@@ -124,7 +124,7 @@ public final class BigFloat0 implements Ringlike<BigFloat0> {
       return valueOf(p0,t0.subtract(t1,upShift),e); }
     return valueOf(p0,t0.add(t1,upShift),e); }
 
-  private final BigFloat0
+  private static final BigFloat0
   addSameExponent (final boolean p0,
                    final long t0,
                    final boolean p1,
@@ -137,16 +137,27 @@ public final class BigFloat0 implements Ringlike<BigFloat0> {
       if (0>c) { // t1 > t0
         return valueOf(
           p1,
-          significand().difference(t1,upShift,t0),
+          NaturalBEI0.difference(t1,upShift,t0),
           e); }
       // t0 > t1
       return valueOf(
         p0,
-        significand().difference(t0,t1,upShift),
+        NaturalBEI0.difference(t0,t1,upShift),
         e); }
-    return valueOf(p0,significand().sum(t0,t1,upShift),e); }
+    return valueOf(p0,NaturalBEI0.sum(t0,t1,upShift),e); }
 
   //--------------------------------------------------------------
+
+//  private static final BigFloat0
+//  add (final boolean p0,
+//       final NaturalBEI0 t0,
+//       final int e0,
+//       final boolean p1,
+//       final long t1,
+//       final int e1) {
+//    //assert 0L<=t1;
+//    if (e0<=e1) { return addSameExponent(p0,t0,p1,t1,e1-e0,e0); }
+//    return addSameExponent(p0,t0.shiftUp(e0-e1),p1,t1,e1); }
 
   private static final BigFloat0
   add (final boolean p0,
@@ -157,7 +168,7 @@ public final class BigFloat0 implements Ringlike<BigFloat0> {
        final int e11) {
     //assert 0L<=t11;
     // minimize long bits
-    if (0L==t11) { return valueOf(p0,t0,e0); }
+    //if (0L==t11) { return valueOf(p0,t0,e0); }
     final int shift = Numbers.loBit(t11);
     final long t1 = (t11>>>shift);
     final int e1 = e11+shift;

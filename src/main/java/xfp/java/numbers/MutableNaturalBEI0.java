@@ -9,7 +9,7 @@ import java.util.Arrays;
 
 /**
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-29
+ * @version 2019-08-13
  */
 public final class MutableNaturalBEI0 {
 
@@ -1201,7 +1201,7 @@ public final class MutableNaturalBEI0 {
 
   @Override
   public final String toString () {
-    return NaturalBEI.valueOf(getValue()).toString(); }
+    return NaturalBEI0.valueOf(getValue()).toString(); }
 
   //--------------------------------------------------------------
   // construction

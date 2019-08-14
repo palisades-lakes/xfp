@@ -57,9 +57,14 @@ public final class NaturalLE implements Natural {
   public final int word (final int i) {
     //assert 0<=i : "Negative index: " + i;
     if (hiInt()<=i) { return 0; }
-    return words()[i]; }
+    return _words[i]; }
 
-  /** Don't drop trailing zeros. */
+  @Override
+  public final long uword (final int i) {
+    //assert 0<=i : "Negative index: " + i;
+    if (hiInt()<=i) { return 0L; }
+    return unsigned(_words[i]); }
+
   public final int[] copyWords () { 
     return Arrays.copyOf(words(),_hiInt); }
 
@@ -207,13 +212,12 @@ public final class NaturalLE implements Natural {
   // long based factories
   //--------------------------------------------------------------
 
-  @Override
-  public final  NaturalLE sum (final long u,
-                               final long v) {
+  private static final NaturalLE sum (final long u,
+                                      final long v) {
     //assert isValid();
     //assert 0L<=u;
-    if (0L==u) { return from(v); }
-    if (0L==v) { return from(u); }
+    if (0L==u) { return valueOf(v); }
+    if (0L==v) { return valueOf(u); }
     long sum = loWord(u) + loWord(v);
     final int w0 = (int) sum;
     sum = hiWord(u) + hiWord(v) + (sum>>>32);
@@ -223,15 +227,14 @@ public final class NaturalLE implements Natural {
     if (0L!=w1) { return unsafe(new int[] {w0,w1}); }
     return unsafe(new int[] {w0},1); }
 
-  @Override
-  public final  NaturalLE sum (final long u,
-                               final long v,
-                               final int upShift) {
+  static final NaturalLE sum (final long u,
+                              final long v,
+                              final int upShift) {
     //assert isValid();
     //assert 0L<=u;
     //assert 0<=upShift;
-    if (0L==u) { return from(v); }
-    if (0L==v) { return from(u); }
+    if (0L==u) { return valueOf(v); }
+    if (0L==v) { return valueOf(u); }
     if (0==upShift) { return sum(u,v); }
     final int iShift = (upShift>>>5);
     final int bShift = (upShift&0x1f);
@@ -259,23 +262,21 @@ public final class NaturalLE implements Natural {
     assert 0L==(sum>>>32);
     return unsafe(ww); }
 
-  @Override
-  public final NaturalLE difference (final long u,
-                                     final long v) {
+  private static final NaturalLE difference (final long u,
+                                             final long v) {
     //assert isValid();
     //assert 0L<=u;
     //assert 0L<=v;
     //assert compareTo(u,v)>=0;
     if (0L==u) { 
       //assert 0L==v;
-      return zero(); }
-    if (0L==v) { return from(u); }
+      return ZERO; }
+    if (0L==v) { return valueOf(u); }
     final long duv = u-v;
     // assert 0L<=duv;
-    return from(duv); }
+    return valueOf(duv); }
 
-  @Override
-  public final NaturalLE difference (final long u,
+  static final NaturalLE difference (final long u,
                                      final long v,
                                      final int upShift) {
     //assert isValid();
@@ -287,10 +288,9 @@ public final class NaturalLE implements Natural {
     // TODO: overflow?
     final long dm = u-(v<<upShift);
     //assert 0L<=dm;
-    return from(dm); }
+    return valueOf(dm); }
 
-  @Override
-  public final NaturalLE difference (final long v,
+  static final NaturalLE difference (final long v,
                                      final int upShift,
                                      final long u) {
     //assert isValid();
@@ -300,7 +300,7 @@ public final class NaturalLE implements Natural {
     //assert compareTo(u,upShift,v)>=0;
     if (0L==v) { 
       //assert 0L==v;
-      return zero(); }
+      return ZERO; }
     if (0==upShift) { return difference(v,u); }
     final int iShift = (upShift>>>5);
     final int bShift = (upShift&0x1f);
@@ -403,24 +403,24 @@ public final class NaturalLE implements Natural {
     //assert 0L<=u;
     if (0L==u) { return this; }
     if (isZero()) { return from(u); }
-    final int n = hiInt();
-    final int[] vv = new int[Math.max(2,n+1)];
+    final int nt = hiInt();
+    final int[] vv = new int[Math.max(2,nt+1)];
     long sum = loWord(u);
-    if (0<n) { sum += uword(0); }
+    if (0<nt) { sum += uword(0); }
     vv[0] = (int) sum;
     sum = (sum>>>32);
     sum += hiWord(u);
-    if (1<n) { sum += uword(1); }
+    if (1<nt) { sum += uword(1); }
     vv[1] = (int) sum;
     sum = (sum>>>32);
     int i=2;
-    for (;i<n;i++) {
+    for (;i<nt;i++) {
       if (0L==sum) { break; }
       sum += uword(i);
       vv[i] = (int) sum;
       sum = (sum>>>32); }
-    for (;i<n;i++) { vv[i] = word(i); }
-    if (0L!=sum) { vv[n] = (int) sum; }
+    for (;i<nt;i++) { vv[i] = word(i); }
+    if (0L!=sum) { vv[nt] = (int) sum; }
     return unsafe(vv); }
 
   //--------------------------------------------------------------
@@ -489,13 +489,25 @@ public final class NaturalLE implements Natural {
 
     for (;i<nt;i++) {
       if (0L==sum) { break; }
-      sum = uword(i) + sum;
+      sum += uword(i);
       vv[i] = (int) sum; 
       sum = (sum>>>32); }
+    
     for (int j=i;j<nt;j++) { vv[j] = word(j); }
     //if (i<nt) { System.arraycopy(words(),i,vv,i,nt-i); }
     if (0L!=sum) { vv[n] = (int) sum; }
+    
     return unsafe(vv); }
+
+//  @Override
+//  public final NaturalLE add (final long u,
+//                              final int upShift) {
+//    //assert 0<=u;
+//    //assert 0<=upShift;
+//    if (isZero()) { return from(u,upShift); }
+//    if (0L==u) { return this; }
+//    if (0==upShift) { return add(u); }
+//    return unsafe(NaturalAdd.add(words(),hiInt(),u,upShift)); }
 
   //--------------------------------------------------------------
   // subtract longs
@@ -517,14 +529,14 @@ public final class NaturalLE implements Natural {
       dif = (uword(1)-hiWord(u))+dif;
       vv[1] = (int) dif;
       dif = (dif>>32); }
-      int i=2;
-      for (;i<nt;i++) {
-        if (0L==dif) { break; }
-        dif = uword(i)+dif;
-        vv[i] = (int) dif;
-        dif = (dif>>32); }
-      for (;i<nt;i++) { vv[i] = word(i); } 
-      //if (i<nt) { System.arraycopy(words(),i,vv,i,nt-i); }
+    int i=2;
+    for (;i<nt;i++) {
+      if (0L==dif) { break; }
+      dif = uword(i)+dif;
+      vv[i] = (int) dif;
+      dif = (dif>>32); }
+    for (;i<nt;i++) { vv[i] = word(i); } 
+    //if (i<nt) { System.arraycopy(words(),i,vv,i,nt-i); }
     //assert 0L==dif : dif;
     return unsafe(vv); }
 

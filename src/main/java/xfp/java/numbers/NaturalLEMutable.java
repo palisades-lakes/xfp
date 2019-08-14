@@ -1,5 +1,7 @@
 package xfp.java.numbers;
 
+import static xfp.java.numbers.Numbers.unsigned;
+
 import java.math.BigInteger;
 import java.util.Arrays;
 
@@ -8,7 +10,7 @@ import java.util.Arrays;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-29
+ * @version 2019-08-13
  */
 
 public final class NaturalLEMutable implements Natural {
@@ -269,6 +271,13 @@ public final class NaturalLEMutable implements Natural {
     //assert 0<=i : "Negative index: " + i;
     if (endWord()<=i) { return 0; }
     return words()[i]; }
+
+  @Override
+  public final long uword (final int i) {
+    //assert isValid();
+    //assert 0<=i : "Negative index: " + i;
+    if (endWord()<=i) { return 0L; }
+    return unsigned(_words[i]); }
 
   @Override
   public final Natural setWord (final int i,

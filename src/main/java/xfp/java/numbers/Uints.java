@@ -19,7 +19,7 @@ import xfp.java.exceptions.Exceptions;
  * TODO: max valid range limited by int hiBit!
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-09
+ * @version 2019-08-13
  */
 
 @SuppressWarnings("unchecked")
@@ -51,8 +51,10 @@ extends Transience<T> {
    * word as a <code>long</code>.
    */
 
-  default long uword (final int i) {
-    return Numbers.unsigned(word(i)); }
+  long uword (final int i);
+  
+//  default long uword (final int i) {
+//    return unsigned(word(i)); }
 
   //--------------------------------------------------------------
   /** Inclusive lower bound on non-zero words:

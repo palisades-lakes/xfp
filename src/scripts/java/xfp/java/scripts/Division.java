@@ -4,7 +4,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 import xfp.java.numbers.Natural;
-import xfp.java.numbers.NaturalBEI;
+import xfp.java.numbers.NaturalBEI0;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
 import xfp.java.prng.PRNG;
@@ -16,7 +16,7 @@ import xfp.java.prng.PRNG;
  * j --source 11 -ea src/scripts/java/xfp/java/scripts/Division.java > division.txt
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-15
+ * @version 2019-08-13
  */
 @SuppressWarnings("unchecked")
 public final class Division {
@@ -25,8 +25,8 @@ public final class Division {
   divideAndRemainder (final BigInteger x0,
                       final BigInteger x1) {
     if (0 != x1.signum()) {
-      final NaturalBEI y0 = NaturalBEI.valueOf(x0);
-      final NaturalBEI y1 = NaturalBEI.valueOf(x1);
+      final NaturalBEI0 y0 = NaturalBEI0.valueOf(x0);
+      final NaturalBEI0 y1 = NaturalBEI0.valueOf(x1);
       final BigInteger[] xqr = x0.divideAndRemainder(x1);
       final BigInteger xq = xqr[0];
       final BigInteger xr = xqr[1];

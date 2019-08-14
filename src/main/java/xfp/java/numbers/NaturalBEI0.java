@@ -15,7 +15,7 @@ import xfp.java.Debug;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-08
+ * @version 2019-08-13
  */
 
 @SuppressWarnings("unchecked")
@@ -43,6 +43,13 @@ public final class NaturalBEI0 implements Natural {
     final int ii = n-i-1;
     if ((0<=ii) && (ii<n)) { return words()[ii]; }
     return 0; }
+
+  @Override
+  public final long uword (final int i) {
+    final int n = words().length;
+    final int ii = n-i-1;
+    if ((0<=ii) && (ii<n)) { return unsigned(_words[ii]); }
+    return 0L; }
 
   /** Don't drop leading zeros. */
   public final int[] copyWords () {
@@ -79,8 +86,7 @@ public final class NaturalBEI0 implements Natural {
   // long based factories
   //--------------------------------------------------------------
 
-  @Override
-  public final NaturalBEI0 sum (final long t0,
+  static final NaturalBEI0 sum (final long t0,
                                 final long t1,
                                 final int upShift) {
     //assert 0L<=t0;
@@ -90,8 +96,7 @@ public final class NaturalBEI0 implements Natural {
     return unsafe(u); }
 
   // only when (m1 << upShift) <= m0
-  @Override
-  public final NaturalBEI0 difference (final long m0,
+  static final NaturalBEI0 difference (final long m0,
                                        final long m1,
                                        final int upShift) {
     //assert 0L<=m0;
@@ -101,8 +106,7 @@ public final class NaturalBEI0 implements Natural {
     return unsafe(u); }
 
   // only when (m1 << upShift) <= m0
-  @Override
-  public final NaturalBEI0 difference (final long m0,
+  static final NaturalBEI0 difference (final long m0,
                                        final int upShift,
                                        final long m1) {
     //assert 0L<=m0;
