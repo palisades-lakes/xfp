@@ -4,7 +4,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 import xfp.java.numbers.Natural;
-import xfp.java.numbers.NaturalLE;
+import xfp.java.numbers.NaturalBEI;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
 import xfp.java.prng.PRNG;
@@ -25,8 +25,8 @@ public final class Division {
   divideAndRemainder (final BigInteger x0,
                       final BigInteger x1) {
     if (0 != x1.signum()) {
-      final NaturalLE y0 = NaturalLE.valueOf(x0);
-      final NaturalLE y1 = NaturalLE.valueOf(x1);
+      final NaturalBEI y0 = NaturalBEI.valueOf(x0);
+      final NaturalBEI y1 = NaturalBEI.valueOf(x1);
       final BigInteger[] xqr = x0.divideAndRemainder(x1);
       final BigInteger xq = xqr[0];
       final BigInteger xr = xqr[1];

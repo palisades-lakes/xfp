@@ -220,10 +220,10 @@ implements Ringlike<RationalFloat> {
       if (0 == c01) { return valueOf(0L); }
       // t1 > t0
       if (0 > c01) {
-        return valueOf(n1, ((NaturalLE) t0).subtractFrom(t1,upShift), e); }
+        return valueOf(n1, t0.subtractFrom(t1,upShift), e); }
       // t0 > t1
-      return valueOf(n0,((NaturalLE) t0).subtract(t1,upShift),e); }
-    return valueOf(n0,((NaturalLE) t0).add(t1,upShift),e); }
+      return valueOf(n0,t0.subtract(t1,upShift),e); }
+    return valueOf(n0,t0.add(t1,upShift),e); }
 
   private final RationalFloat add (final boolean p1,
                                    final long t11,

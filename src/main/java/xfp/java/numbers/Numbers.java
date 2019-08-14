@@ -132,19 +132,19 @@ public final class Numbers implements Set {
 
   /** inclusive */
   public static final int loBit (final int i) {
-    return Integer.numberOfTrailingZeros(i) % 32; }
+    return Integer.numberOfTrailingZeros(i)&0x1F; }
 
   /** exclusive */
   public static final int hiBit (final int i) {
     return Integer.SIZE -  Integer.numberOfLeadingZeros(i); }
 
-  /** inclusive. Returns 0 for 0. */
+  /** inclusive */
   public static final int loBit (final long i) {
-    return Long.numberOfTrailingZeros(i) % 64; }
+    return Long.numberOfTrailingZeros(i)&0x3F; }
 
   /** exclusive */
   public static final int hiBit (final long i) {
-    return Long.SIZE - Long.numberOfLeadingZeros(i); }
+    return Long.SIZE -  Long.numberOfLeadingZeros(i); }
 
    //--------------------------------------------------------------
 

@@ -155,9 +155,9 @@ public final class BigFloat0 implements Ringlike<BigFloat0> {
        final boolean p1,
        final long t11,
        final int e11) {
-    //assert 0L<t11;
+    //assert 0L<=t11;
     // minimize long bits
-    //if (0L==t11) { return valueOf(p0,t0,e0); }
+    if (0L==t11) { return valueOf(p0,t0,e0); }
     final int shift = Numbers.loBit(t11);
     final long t1 = (t11>>>shift);
     final int e1 = e11+shift;
@@ -199,7 +199,6 @@ public final class BigFloat0 implements Ringlike<BigFloat0> {
   public final BigFloat0
   add (final double z) {
     //assert Double.isFinite(z);
-//    if (0.0==z) { return this; }
     return add(
       nonNegative(),
       significand(),
@@ -220,7 +219,6 @@ public final class BigFloat0 implements Ringlike<BigFloat0> {
   public final BigFloat0
   addAbs (final double z) {
     //assert Double.isFinite(z);
-//    if (0.0==z) { return this; }
     return add(
       nonNegative(),
       significand(),
@@ -251,7 +249,6 @@ public final class BigFloat0 implements Ringlike<BigFloat0> {
 
   public final BigFloat0
   subtract (final double z) {
-//    if (0.0==z) { return this; }
     return add(
       nonNegative(),
       significand(),
