@@ -715,21 +715,8 @@ public final class BigFloat implements Ringlike<BigFloat> {
                                         final int e0) {
     //if (t0.isZero()) { return ZERO; }
     final int shift = Math.max(0,t0.loBit());
-    //if (0==shift) { return new BigFloat(p0,t0,e0); }
+    if (0==shift) { return new BigFloat(p0,t0,e0); }
     return new BigFloat(p0, t0.shiftDown(shift),e0+shift); }
-
-  //  public static final BigFloat valueOf (final long t,
-  //                                        final int e) {
-  //    if (0L==t) { return ZERO; }
-  //    if (0L<t) {
-  //      return valueOf(true,Natural.valueOf(t),e); }
-  //    return valueOf(false,Natural.valueOf(-t),e); }
-
-  //  public static final BigFloat valueOf (final int t,
-  //                                        final int e) {
-  //    if (0==t) { return ZERO; }
-  //    if (0<t) { return valueOf(true,Natural.valueOf(t),e); }
-  //    return valueOf(false,Natural.valueOf(-t),e); }
 
   //--------------------------------------------------------------
 
