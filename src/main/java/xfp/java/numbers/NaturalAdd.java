@@ -129,35 +129,15 @@ public final class NaturalAdd {
   // for BigFloat
   //--------------------------------------------------------------
   
-  static final BigFloat
+  private static final BigFloat
   addSameExponent (final boolean p0,
-                   final long t0,
+                   final NaturalLE t0,
                    final boolean p1,
                    final long t1,
                    final int upShift,
                    final int e) {
-    if (p0^p1) { // different signs
-      final int c = Longs.compare(t0,t1,upShift);
-      if (0==c) { return BigFloat.ZERO; }
-      if (0>c) { // t1 > t0
-        return BigFloat.valueOf(
-          p1,
-          NaturalLE.difference(t1,upShift,t0),
-          e); }
-      // t0 > t1
-      return BigFloat.valueOf(
-        p0,
-        NaturalLE.difference(t0,t1,upShift),
-        e); }
-    return BigFloat.valueOf(p0,NaturalLE.sum(t0,t1,upShift),e); }
-
-  static final BigFloat
-  addSameExponent (final boolean p0,
-                   final Natural t0,
-                   final boolean p1,
-                   final long t1,
-                   final int upShift,
-                   final int e) {
+    //assert 0L<=t1;
+    //assert 0<=upShift
     if (p0^p1) { // different signs
       final int c = t0.compareTo(t1,upShift);
       if (0==c) { return BigFloat.ZERO; }
@@ -167,6 +147,67 @@ public final class NaturalAdd {
       // t0 > t1
       return BigFloat.valueOf(p0,t0.subtract(t1,upShift),e); }
     return BigFloat.valueOf(p0,t0.add(t1,upShift),e); }
+
+//  private static final BigFloat
+//  addSameExponent (final boolean p0,
+//                   final NaturalLE t0,
+//                   final boolean p1,
+//                   final long t1,
+//                   final int upShift,
+//                   final int e) {
+//    //assert 0L<=t1;
+//    //assert 0<=upShift
+//    if (p0^p1) { // different signs
+//      final int c = t0.compareTo(t1,upShift);
+//      if (0==c) { return BigFloat.ZERO; }
+//      // t1 > t0
+//      if (0>c) {
+//        return BigFloat.valueOf(p1,t0.subtractFrom(t1,upShift),e); }
+//      // t0 > t1
+//      return BigFloat.valueOf(p0,t0.subtract(t1,upShift),e); }
+//    return BigFloat.valueOf(p0,t0.add(t1,upShift),e); }
+
+  //--------------------------------------------------------------
+
+  private static final BigFloat
+  addSameExponent (final boolean p0,
+                   final NaturalLE t0,
+                   final int upShift,
+                   final boolean p1,
+                   final long t1,
+                   final int e) {
+    //assert 0L<=t1;
+    //assert 0<=upShift
+    if (p0^p1) { // different signs
+      final int c = t0.compareTo(upShift,t1);
+      if (0==c) { return BigFloat.ZERO; }
+      // t1 > t0
+      if (0 > c) {
+        return BigFloat.valueOf(p1,t0.subtractFrom(upShift,t1),e); }
+      // t0 > t1
+      return BigFloat.valueOf(p0,t0.subtract(upShift,t1),e); }
+    //assert t.isImmutable();
+    return BigFloat.valueOf(p0,t0.add(upShift,t1),e); }
+
+  //--------------------------------------------------------------
+
+  static final BigFloat
+  add (final boolean p0,
+       final Natural t0,
+       final int e0,
+       final boolean p1,
+       final long t11,
+       final int e11) {
+    //assert 0L<=t11;
+    //if (0L==t11) { return this; }
+    // minimize long bits
+    final int shift = Numbers.loBit(t11);
+    final long t1 = (t11>>>shift);
+    final int e1 = e11+shift;
+    //Debug.println("e0=" + e0 + ", e11=" + e11 + ",shift=" + shift);
+    if (e0<=e1) { 
+      return addSameExponent(p0,((NaturalLE) t0),p1,t1,e1-e0,e0); }
+    return addSameExponent(p0,((NaturalLE) t0),e0-e1,p1,t1,e1); }
 
   //--------------------------------------------------------------
   // disable constructor
