@@ -4,14 +4,12 @@ import static xfp.java.numbers.Numbers.hiWord;
 import static xfp.java.numbers.Numbers.loWord;
 import static xfp.java.numbers.Numbers.unsigned;
 
-import java.util.Arrays;
-
 /** Division, gcd, etc., of natural numbers.
  * 
  * Non-instantiable.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-29
+ * @version 2019-08-15
  */
 
 @SuppressWarnings("unchecked")
@@ -126,6 +124,49 @@ public final class NaturalAdd {
     if (0L!=sum) { vv[n] = (int) sum; }
 
     return vv; }
+
+  //--------------------------------------------------------------
+  // for BigFloat
+  //--------------------------------------------------------------
+  
+  static final BigFloat
+  addSameExponent (final boolean p0,
+                   final long t0,
+                   final boolean p1,
+                   final long t1,
+                   final int upShift,
+                   final int e) {
+    if (p0^p1) { // different signs
+      final int c = Longs.compare(t0,t1,upShift);
+      if (0==c) { return BigFloat.ZERO; }
+      if (0>c) { // t1 > t0
+        return BigFloat.valueOf(
+          p1,
+          NaturalLE.difference(t1,upShift,t0),
+          e); }
+      // t0 > t1
+      return BigFloat.valueOf(
+        p0,
+        NaturalLE.difference(t0,t1,upShift),
+        e); }
+    return BigFloat.valueOf(p0,NaturalLE.sum(t0,t1,upShift),e); }
+
+  static final BigFloat
+  addSameExponent (final boolean p0,
+                   final Natural t0,
+                   final boolean p1,
+                   final long t1,
+                   final int upShift,
+                   final int e) {
+    if (p0^p1) { // different signs
+      final int c = t0.compareTo(t1,upShift);
+      if (0==c) { return BigFloat.ZERO; }
+      // t1 > t0
+      if (0>c) {
+        return BigFloat.valueOf(p1,t0.subtractFrom(t1,upShift),e); }
+      // t0 > t1
+      return BigFloat.valueOf(p0,t0.subtract(t1,upShift),e); }
+    return BigFloat.valueOf(p0,t0.add(t1,upShift),e); }
 
   //--------------------------------------------------------------
   // disable constructor

@@ -30,10 +30,12 @@ public final class TotalSum {
     final UniformRandomProvider urp =
       PRNG.well44497b("seeds/Well44497b-2019-01-09.txt");
     final int emax = Common.deMax(n)/2;
+    final int dmax = (1<<emax);
     //final Generator g = Doubles.finiteGenerator(n,urp,emax);
-    final Generator g = Doubles.exponentialGenerator(n,urp,1.0,(1<<emax));
-    //final Generator g = Doubles.gaussianGenerator(n,urp,1.0,(1<<emax));
-    //final Generator g = Doubles.laplaceGenerator(n,urp,0.0,(1<<emax));
+    final Generator g = Doubles.exponentialGenerator(n,urp,1.0,dmax);
+    //final Generator g = Doubles.gaussianGenerator(n,urp,1.0,dmax);
+    //final Generator g = Doubles.uniformGenerator(n,urp,-dmax,dmax);
+    //final Generator g = Doubles.laplaceGenerator(n,urp,0.0,dmax);
     final Accumulator a = BigFloatAccumulator.make();
     assert a.isExact();
     Debug.DEBUG=true;

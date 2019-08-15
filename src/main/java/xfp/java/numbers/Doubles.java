@@ -32,7 +32,7 @@ import xfp.java.prng.GeneratorBase;
 /** Utilities for <code>double</code>, <code>double[]</code>.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-29
+ * @version 2019-08-15
  */
 public final class Doubles implements Set {
 
@@ -618,7 +618,7 @@ public final class Doubles implements Set {
       private final ContinuousSampler s =
         new ContinuousUniformSampler(urp,zmin,zmax);
       @Override
-      public final double nextDouble () {
+      public final double nextDouble () { 
         return s.sample(); } }; }
 
   /** Conventional 'uniform' distribution sampler, as 'uniform'
@@ -672,8 +672,7 @@ public final class Doubles implements Set {
     return gaussianGenerator(
       //new BoxMullerNormalizedGaussianSampler(urp),
       //new MarsagliaNormalizedGaussianSampler(urp),​
-      new ZigguratNormalizedGaussianSampler(urp),
-      mu,sigma); }
+      new ZigguratNormalizedGaussianSampler(urp),mu,sigma); }
 
   public static final Generator
   gaussianGenerator (final int n,
