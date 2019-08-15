@@ -16,9 +16,10 @@ import xfp.java.test.Common;
  *
  * <pre>
  * jy --source 11 src/scripts/java/xfp/java/scripts/TotalSum.java
+ * j --source 11 src/scripts/java/xfp/java/scripts/TotalSum.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-09
+ * @version 2019-08-14
  */
 @SuppressWarnings("unchecked")
 public final class TotalSum {
@@ -29,10 +30,13 @@ public final class TotalSum {
     final UniformRandomProvider urp =
       PRNG.well44497b("seeds/Well44497b-2019-01-09.txt");
     final int emax = Common.deMax(n)/2;
-    final Generator g = Doubles.finiteGenerator(n,urp,emax);
+    //final Generator g = Doubles.finiteGenerator(n,urp,emax);
+    final Generator g = Doubles.exponentialGenerator(n,urp,1.0,(1<<emax));
+    //final Generator g = Doubles.gaussianGenerator(n,urp,1.0,(1<<emax));
+    //final Generator g = Doubles.laplaceGenerator(n,urp,0.0,(1<<emax));
     final Accumulator a = BigFloatAccumulator.make();
     assert a.isExact();
-    Debug.DEBUG=false;
+    Debug.DEBUG=true;
     for (int i=0;i<trys;i++) {
       final double[] x0 = (double[]) g.next();
       //final double[] x1 = (double[]) g.next();

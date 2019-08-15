@@ -10,7 +10,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-13
+ * @version 2019-08-14
  */
 
 @SuppressWarnings("unchecked")
@@ -85,7 +85,35 @@ public final class BigFloat implements Ringlike<BigFloat> {
       q.exponent()); }
 
   //--------------------------------------------------------------
-  // 0 upShift on t1
+
+  private static final BigFloat
+  addSameExponent (final boolean p0,
+                   final Natural t0,
+                   final int upShift,
+                   final boolean p1,
+                   final long t1,
+                   final int e) {
+    //assert t0.isImmutable();
+    //assert 0L<=t1;
+    //assert 0<=upShift
+    if (p0^p1) { // different signs
+    //final Natural t0s = t0.shiftUp(upShift);
+    //final int cs = t0s.compareTo(t1);
+    final int c = t0.compareTo(upShift,t1);
+//    assert cs==c :
+//      "\nt0=" + t0
+//      + "\nupShift=" + upShift
+//      + "\nt0.hiBit=" + t0.hiBit()
+//      + "\nt0s=" + t0s
+//      + "\nt1=" + Long.toHexString(t1);
+      if (0==c) { return ZERO; }
+      // t1 > t0
+      if (0 > c) {
+        return valueOf(p1,t0.subtractFrom(upShift,t1),e); }
+      // t0 > t1
+      return valueOf(p0,t0.subtract(upShift,t1),e); }
+    //assert t.isImmutable();
+    return valueOf(p0,t0.add(upShift,t1),e); }
 
 //  private static final BigFloat
 //  addSameExponent (final boolean p0,
@@ -99,35 +127,36 @@ public final class BigFloat implements Ringlike<BigFloat> {
 //    //assert 0L<=t1;
 //    //assert 0<=upShift
 //    if (p0^p1) { // different signs
-//      final int c = t0.compareTo(upShift,t1);
+//      final Natural t0s = t0.shiftUp(upShift);
+//      final int c = t0s.compareTo(t1);
 //      if (0==c) { return ZERO; }
 //      // t1 > t0
 //      if (0 > c) {
-//        return valueOf(p1,t0.subtractFrom(upShift,t1),e); }
+//        return valueOf(p1,t0s.subtractFrom(t1),e); }
 //      // t0 > t1
-//      return valueOf(p0,t0.subtract(upShift,t1),e); }
+//      return valueOf(p0,t0s.subtract(t1),e); }
 //    //assert t.isImmutable();
 //    return valueOf(p0,t0.add(upShift,t1),e); }
 
-  private static final BigFloat
-  addSameExponent (final boolean p0,
-                   final Natural t0,
-                   final boolean p1,
-                   final long t1,
-                   final int e) {
-
-    //assert t0.isImmutable();
-    //assert 0L<=t1;
-    if (p0^p1) { // different signs
-      final int c = t0.compareTo(t1);
-      if (0==c) { return ZERO; }
-      // t1 > t0
-      if (0 > c) {
-        return valueOf(p1,t0.subtractFrom(t1),e); }
-      // t0 > t1
-      return valueOf(p0,t0.subtract(t1),e); }
-    //assert t.isImmutable();
-    return valueOf(p0,t0.add(t1),e); }
+//  private static final BigFloat
+//  addSameExponent (final boolean p0,
+//                   final Natural t0,
+//                   final boolean p1,
+//                   final long t1,
+//                   final int e) {
+//
+//    //assert t0.isImmutable();
+//    //assert 0L<=t1;
+//    if (p0^p1) { // different signs
+//      final int c = t0.compareTo(t1);
+//      if (0==c) { return ZERO; }
+//      // t1 > t0
+//      if (0 > c) {
+//        return valueOf(p1,t0.subtractFrom(t1),e); }
+//      // t0 > t1
+//      return valueOf(p0,t0.subtract(t1),e); }
+//    //assert t.isImmutable();
+//    return valueOf(p0,t0.add(t1),e); }
 
   private static final BigFloat
   addSameExponent (final boolean p0,
@@ -146,7 +175,7 @@ public final class BigFloat implements Ringlike<BigFloat> {
       return valueOf(p0,t0.subtract(t1,upShift),e); }
     return valueOf(p0,t0.add(t1,upShift),e); }
 
-  private final BigFloat
+  private static final BigFloat
   addSameExponent (final boolean p0,
                    final long t0,
                    final boolean p1,
@@ -155,7 +184,7 @@ public final class BigFloat implements Ringlike<BigFloat> {
                    final int e) {
     if (p0^p1) { // different signs
       final int c = Longs.compare(t0,t1,upShift);
-      if (0==c) { return zero(); }
+      if (0==c) { return ZERO; }
       if (0>c) { // t1 > t0
         return valueOf(
           p1,
@@ -170,36 +199,38 @@ public final class BigFloat implements Ringlike<BigFloat> {
 
   //--------------------------------------------------------------
 
-//  private static final BigFloat
-//  add (final boolean p0,
-//       final Natural t0,
-//       final int e0,
-//       final boolean p1,
-//       final long t1,
-//       final int e1) {
-//    //assert 0L<=t1;
-//    if (e0<=e1) { return addSameExponent(p0,t0,p1,t1,e1-e0,e0); }
-//    return addSameExponent(p0,t0.shiftUp(e0-e1),p1,t1,e1); }
-
   private static final BigFloat
   add (final boolean p0,
        final Natural t0,
        final int e0,
        final boolean p1,
-       final long t11,
-       final int e11) {
-    //assert 0L<=t11;
-    // minimize long bits
-    //if (0L==t11) { return this; }
-    final int shift = Numbers.loBit(t11);
-    final long t1 = (t11>>>shift);
-    final int e1 = e11+shift;
+       final long t1,
+       final int e1) {
+    //assert 0L<=t1;
     if (e0<=e1) { return addSameExponent(p0,t0,p1,t1,e1-e0,e0); }
-    return addSameExponent(p0,t0.shiftUp(e0-e1),p1,t1,e1); }
+    return addSameExponent(p0,t0,e0-e1,p1,t1,e1); }
+//  return addSameExponent(p0,t0.shiftUp(e0-e1),p1,t1,e1); }
+
+//  private static final BigFloat
+//  add (final boolean p0,
+//       final Natural t0,
+//       final int e0,
+//       final boolean p1,
+//       final long t11,
+//       final int e11) {
+//    //assert 0L<=t11;
+//    // minimize long bits
+//    //if (0L==t11) { return this; }
+//    final int shift = Numbers.loBit(t11);
+//    final long t1 = (t11>>>shift);
+//    final int e1 = e11+shift;
+//    //Debug.println("e0=" + e0 + ", e11=" + e11 + ",shift=" + shift);
+//    if (e0<=e1) { return addSameExponent(p0,t0,p1,t1,e1-e0,e0); }
+//    return addSameExponent(p0,t0.shiftUp(e0-e1),p1,t1,e1); }
 
   //--------------------------------------------------------------
 
-  private final BigFloat
+  private static final BigFloat
   add (final boolean p0,
        final long t00,
        final int e00,
@@ -232,6 +263,7 @@ public final class BigFloat implements Ringlike<BigFloat> {
   public final BigFloat
   add (final double z) {
     //assert Double.isFinite(z);
+    //Debug.println(Double.toString(z));
     return add(
       nonNegative(),
       significand(),
@@ -290,7 +322,7 @@ public final class BigFloat implements Ringlike<BigFloat> {
       Doubles.significand(z),
       Doubles.exponent(z)); }
 
-  public final BigFloat
+  public static final BigFloat
   difference (final double z0,
               final double z1) {
     return

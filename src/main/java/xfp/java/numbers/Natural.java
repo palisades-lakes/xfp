@@ -1,7 +1,5 @@
 package xfp.java.numbers;
 
-import static java.lang.Integer.compareUnsigned;
-
 import java.math.BigInteger;
 import java.util.List;
 
@@ -17,7 +15,7 @@ import xfp.java.exceptions.Exceptions;
  * TODO: utilities class to hide private stuff?
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-08
+ * @version 2019-08-14
  */
 
 @SuppressWarnings("unchecked")
@@ -47,50 +45,18 @@ extends Uints<Natural>, Ringlike<Natural> {
     return 0; }
 
   default int compareTo (final Natural u,
-                         final int upShift) {
-    //assert isValid();
-    //assert u.isValid();
-    //assert 0<=upShift;
-    if (0==upShift) { return compareTo(u); }
-    final int iShift = (upShift>>>5);
-    final int bShift = (upShift&0x1F);
-    if (0!=bShift) { return compareTo(u.shiftUp(upShift)); }
-    final int n0 = hiInt();
-    final int n1 = u.hiInt()+iShift;
-    if (n0 < n1) { return -1; }
-    if (n0 > n1) { return 1; }
-    // TODO: is this faster than unsigned long conversion?
-    int i = n0-1;
-    for (; i>iShift; i--) {
-      final int c = compareUnsigned(word(i),u.word(i-iShift));
-      if (0!=c) { return c; } }
-    for (;i>=0;i--) { if (0!=word(i)) { return 1; } }
-    return 0; }
+                 final int upShift) {
+    return compareTo(u.shiftUp(upShift)); }
 
-//  default int compareTo (final Natural u,
-//                         final int upShift) {
-//    //assert isValid();
-//    //assert u.isValid();
-//    //assert 0<=upShift;
-//    if (0==upShift) { return compareTo(u); }
-//    final int bShift = (upShift&0x1F);
-//    if (0!=bShift) { return compareTo(u.shiftUp(upShift)); }
-//    final int iShift = (upShift>>>5);
-//    final int n0 = hiInt() - iShift;
-//    final int n1 = u.hiInt();
-//    if (n0 < n1) { return -1; }
-//    if (n0 > n1) { return 1; }
-//    // TODO: is this faster than unsigned long conversion?
-//    for (int i = n0-1; i>=0; i--) {
-//      final int c = compareUnsigned(word(i+iShift),u.word(i));
-//      if (0!=c) { return c; } }
-//    return 0; }
+  default int compareTo (final int upShift,
+                 final long u) {
+    return shiftUp(upShift).compareTo(u); }
 
   default int compareTo (final int upShift,
                          final Natural u) {
     //assert isValid();
     //assert u.isValid();
-    return - u.compareTo(this,upShift); }
+    return -u.compareTo(this,upShift); }
 
   default int compareTo (final long u) {
     //assert isValid();
@@ -251,6 +217,10 @@ extends Uints<Natural>, Ringlike<Natural> {
 //  if (0==upShift) { return add(u); }
 //  return add(from(u,upShift)); }
 
+  default Natural add (final int upShift,
+                       final long u) {
+    return shiftUp(upShift).add(u); }
+
   //--------------------------------------------------------------
 
   //  default Natural sum (final long u,
@@ -377,6 +347,14 @@ extends Uints<Natural>, Ringlike<Natural> {
     if (0==upShift) { return subtract(u); }
     return subtract(from(u,upShift)); }
 
+  default Natural subtract (final int upShift,
+                            final long u) {
+    //assert isValid();
+    //assert 0L<=u;
+    //assert 0<=upShift;
+    //assert compareTo(u,upShift)>=0;
+    return shiftUp(upShift).subtract(u); }
+
   //--------------------------------------------------------------
 
 //  default Natural difference (final long u,
@@ -436,6 +414,10 @@ extends Uints<Natural>, Ringlike<Natural> {
     //assert 0<=upShift;
     //assert compareTo(u,upShift)<=0;
     return from(u,upShift).subtract(this); }
+
+  default Natural subtractFrom (final int upShift,
+                                final long u) {
+    return shiftUp(upShift).subtractFrom(u); }
 
   //--------------------------------------------------------------
 
