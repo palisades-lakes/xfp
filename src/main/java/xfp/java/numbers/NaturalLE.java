@@ -512,16 +512,15 @@ public final class NaturalLE implements Natural {
                                 final long u,
                                 final int[] vv) {
     final int rShift = 32-bShift;
-    int t0 = 0;
     int t1 = 0;
     long sum = loWord(u);
     if (0==iShift) { 
       t1 = word(0);
       final int ti = (t1<<bShift);
-      t0 = t1;
       sum += unsigned(ti); } 
     vv[0] = (int) sum;
     sum = (sum>>>32);  
+    int t0 = t1;
     sum += hiWord(u);
     if (1>=iShift) { 
       t1 = word(1-iShift);
