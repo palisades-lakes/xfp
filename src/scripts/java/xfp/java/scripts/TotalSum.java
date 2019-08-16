@@ -3,6 +3,7 @@ package xfp.java.scripts;
 import xfp.java.Debug;
 import xfp.java.accumulators.Accumulator;
 import xfp.java.accumulators.BigFloatAccumulator;
+import xfp.java.accumulators.BigFloatAccumulator0;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
 
@@ -19,7 +20,7 @@ import xfp.java.prng.Generators;
 public final class TotalSum {
 
   public static final void main (final String[] args) {
-    final int dim = 524289;//(8*1024*1024) - 1;
+    final int dim = 2*1024*1024;
     final int trys = 1* 1024;
     final Generator g = Generators.make("exponential",dim);
     //final Generator g = Generators.make("finite",dim);

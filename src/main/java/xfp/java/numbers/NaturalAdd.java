@@ -169,7 +169,7 @@ public final class NaturalAdd {
 
   //--------------------------------------------------------------
 
-  private static final BigFloat
+  static final BigFloat
   add1 (final boolean p0,
         final NaturalLE t0,
         final int upShift,
@@ -191,6 +191,26 @@ public final class NaturalAdd {
   //--------------------------------------------------------------
 
   static final BigFloat
+  add2 (final boolean p0,
+        final NaturalLE t0,
+        final boolean p1,
+        final long t1,
+        final int e) {
+    //assert 0L<=t1;
+    //assert 0<=upShift
+    if (p0^p1) { // different signs
+      final int c = t0.compareTo(t1);
+      if (0==c) { return BigFloat.ZERO; }
+      // t1 > t0
+      if (0 > c) {
+        return BigFloat.valueOf(p1,t0.subtractFrom(t1),e); }
+      // t0 > t1
+      return BigFloat.valueOf(p0,t0.subtract(t1),e); }
+    return BigFloat.valueOf(p0,t0.add(t1),e); }
+
+  //--------------------------------------------------------------
+
+  static final BigFloat
   add (final boolean p0,
        final Natural t0,
        final int e0,
@@ -207,6 +227,8 @@ public final class NaturalAdd {
     if (e0<=e1) { 
       return add0(p0,((NaturalLE) t0),p1,t1,e1-e0,e0); }
     return add1(p0,((NaturalLE) t0),e0-e1,p1,t1,e1); }
+  // 1-2% slower
+  //return add2(p0,((NaturalLE) t0).shiftUp(e0-e1),p1,t1,e1); }
 
   //--------------------------------------------------------------
   // disable constructor

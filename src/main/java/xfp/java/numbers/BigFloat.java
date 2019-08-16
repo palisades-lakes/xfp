@@ -10,7 +10,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-15
+ * @version 2019-08-16
  */
 
 @SuppressWarnings("unchecked")
@@ -693,7 +693,7 @@ public final class BigFloat implements Ringlike<BigFloat> {
 
   //--------------------------------------------------------------
 
-  static final BigFloat ZERO =
+  public static final BigFloat ZERO =
     new BigFloat(true,NaturalLE.ZERO,0);
 
   //  private static final BigFloat ONE =

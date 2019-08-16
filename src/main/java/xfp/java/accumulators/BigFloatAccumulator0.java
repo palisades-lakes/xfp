@@ -31,7 +31,7 @@ extends ExactAccumulator<BigFloatAccumulator0> {
 
   @Override
   public final BigFloatAccumulator0 clear () {
-    _sum = BigFloat0.valueOf(0L);
+    _sum = BigFloat0.ZERO;
     return this; }
 
   @Override

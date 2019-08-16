@@ -10,7 +10,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-08
+ * @version 2019-08-16
  */
 
 @SuppressWarnings("unchecked")
@@ -85,14 +85,33 @@ public final class BigFloat0 implements Ringlike<BigFloat0> {
       q.exponent()); }
 
   //--------------------------------------------------------------
+
+  private static final BigFloat0
+  add0 (final boolean p0,
+        final NaturalBEI0 t0,
+        final boolean p1,
+        final long t1,
+        final int upShift,
+        final int e) {
+    if (p0^p1) { // different signs
+      final int c = t0.compareTo(t1,upShift);
+      if (0==c) { return ZERO; }
+      // t1 > t0
+      if (0>c) {
+        return valueOf(p1,t0.subtractFrom(t1,upShift),e); }
+      // t0 > t1
+      return valueOf(p0,t0.subtract(t1,upShift),e); }
+    return valueOf(p0,t0.add(t1,upShift),e); }
+
+  //--------------------------------------------------------------
   // 0 upShift on t1
 
   private static final BigFloat0
-  addSameExponent (final boolean p0,
-                   final NaturalBEI0 t0,
-                   final boolean p1,
-                   final long t1,
-                   final int e) {
+  add2 (final boolean p0,
+        final NaturalBEI0 t0,
+        final boolean p1,
+        final long t1,
+        final int e) {
 
     //assert t0.isImmutable();
     //assert 0L<=t1;
@@ -107,22 +126,7 @@ public final class BigFloat0 implements Ringlike<BigFloat0> {
     //assert t.isImmutable();
     return valueOf(p0,t0.add(t1),e); }
 
-  private static final BigFloat0
-  addSameExponent (final boolean p0,
-                   final NaturalBEI0 t0,
-                   final boolean p1,
-                   final long t1,
-                   final int upShift,
-                   final int e) {
-    if (p0^p1) { // different signs
-      final int c = t0.compareTo(t1,upShift);
-      if (0==c) { return ZERO; }
-      // t1 > t0
-      if (0>c) {
-        return valueOf(p1,t0.subtractFrom(t1,upShift),e); }
-      // t0 > t1
-      return valueOf(p0,t0.subtract(t1,upShift),e); }
-    return valueOf(p0,t0.add(t1,upShift),e); }
+  //--------------------------------------------------------------
 
   private static final BigFloat0
   addSameExponent (final boolean p0,
@@ -148,16 +152,16 @@ public final class BigFloat0 implements Ringlike<BigFloat0> {
 
   //--------------------------------------------------------------
 
-//  private static final BigFloat0
-//  add (final boolean p0,
-//       final NaturalBEI0 t0,
-//       final int e0,
-//       final boolean p1,
-//       final long t1,
-//       final int e1) {
-//    //assert 0L<=t1;
-//    if (e0<=e1) { return addSameExponent(p0,t0,p1,t1,e1-e0,e0); }
-//    return addSameExponent(p0,t0.shiftUp(e0-e1),p1,t1,e1); }
+  //  private static final BigFloat0
+  //  add (final boolean p0,
+  //       final NaturalBEI0 t0,
+  //       final int e0,
+  //       final boolean p1,
+  //       final long t1,
+  //       final int e1) {
+  //    //assert 0L<=t1;
+  //    if (e0<=e1) { return addSameExponent(p0,t0,p1,t1,e1-e0,e0); }
+  //    return addSameExponent(p0,t0.shiftUp(e0-e1),p1,t1,e1); }
 
   private static final BigFloat0
   add (final boolean p0,
@@ -172,12 +176,12 @@ public final class BigFloat0 implements Ringlike<BigFloat0> {
     final int shift = Numbers.loBit(t11);
     final long t1 = (t11>>>shift);
     final int e1 = e11+shift;
-    if (e0<=e1) { return addSameExponent(p0,t0,p1,t1,e1-e0,e0); }
-    return addSameExponent(p0,t0.shiftUp(e0-e1),p1,t1,e1); }
+    if (e0<=e1) { return add0(p0,t0,p1,t1,e1-e0,e0); }
+    return add2(p0,t0.shiftUp(e0-e1),p1,t1,e1); }
 
   //--------------------------------------------------------------
 
-  private final BigFloat0
+  private final static BigFloat0
   add (final boolean p0,
        final long t00,
        final int e00,
@@ -268,7 +272,7 @@ public final class BigFloat0 implements Ringlike<BigFloat0> {
       Doubles.significand(z),
       Doubles.exponent(z)); }
 
-  public final BigFloat0
+  public final static BigFloat0
   difference (final double z0,
               final double z1) {
     return
@@ -767,18 +771,18 @@ public final class BigFloat0 implements Ringlike<BigFloat0> {
     if (t.isZero()) { return ZERO; }
     return new BigFloat0(nonNegative,(NaturalBEI0) t,e); }
 
-//  public static final BigFloat0 valueOf (final long t,
-//                                         final int e) {
-//    if (0L==t) { return valueOf(0L); }
-//    if (0L < t) {
-//      return valueOf(true,NaturalBEI0.valueOf(t),e); }
-//    return valueOf(false,NaturalBEI0.valueOf(-t),e); }
-//
-//  public static final BigFloat0 valueOf (final int t,
-//                                         final int e) {
-//    if (0==t) { return valueOf(0L); }
-//    if (0<t) { return valueOf(true,NaturalBEI0.valueOf(t),e); }
-//    return valueOf(false,NaturalBEI0.valueOf(-t),e); }
+  //  public static final BigFloat0 valueOf (final long t,
+  //                                         final int e) {
+  //    if (0L==t) { return valueOf(0L); }
+  //    if (0L < t) {
+  //      return valueOf(true,NaturalBEI0.valueOf(t),e); }
+  //    return valueOf(false,NaturalBEI0.valueOf(-t),e); }
+  //
+  //  public static final BigFloat0 valueOf (final int t,
+  //                                         final int e) {
+  //    if (0==t) { return valueOf(0L); }
+  //    if (0<t) { return valueOf(true,NaturalBEI0.valueOf(t),e); }
+  //    return valueOf(false,NaturalBEI0.valueOf(-t),e); }
 
   //--------------------------------------------------------------
 
@@ -816,79 +820,79 @@ public final class BigFloat0 implements Ringlike<BigFloat0> {
 
   //--------------------------------------------------------------
 
-//  public static final BigFloat0 valueOf (final byte t)  {
-//    if (0<=t) { return valueOf(true,NaturalBEI0.valueOf(t),0); }
-//    return valueOf(false,NaturalBEI0.valueOf(-t),0); }
-//
-//  public static final BigFloat0 valueOf (final short t)  {
-//    if (0<=t) { return valueOf(true,NaturalBEI0.valueOf(t),0); }
-//    return valueOf(false,NaturalBEI0.valueOf(-t),0); }
-//
-//  public static final BigFloat0 valueOf (final int t)  {
-//    if (0<=t) { return valueOf(true,NaturalBEI0.valueOf(t),0); }
-//    return valueOf(false,NaturalBEI0.valueOf(-t),0); }
-//
-//  public static final BigFloat0 valueOf (final long t)  {
-//    if (0<=t) { return valueOf(true,NaturalBEI0.valueOf(t),0); }
-//    return valueOf(false,NaturalBEI0.valueOf(-t),0); }
+  //  public static final BigFloat0 valueOf (final byte t)  {
+  //    if (0<=t) { return valueOf(true,NaturalBEI0.valueOf(t),0); }
+  //    return valueOf(false,NaturalBEI0.valueOf(-t),0); }
+  //
+  //  public static final BigFloat0 valueOf (final short t)  {
+  //    if (0<=t) { return valueOf(true,NaturalBEI0.valueOf(t),0); }
+  //    return valueOf(false,NaturalBEI0.valueOf(-t),0); }
+  //
+  //  public static final BigFloat0 valueOf (final int t)  {
+  //    if (0<=t) { return valueOf(true,NaturalBEI0.valueOf(t),0); }
+  //    return valueOf(false,NaturalBEI0.valueOf(-t),0); }
+  //
+  //  public static final BigFloat0 valueOf (final long t)  {
+  //    if (0<=t) { return valueOf(true,NaturalBEI0.valueOf(t),0); }
+  //    return valueOf(false,NaturalBEI0.valueOf(-t),0); }
 
   //--------------------------------------------------------------
 
-//  public static final BigFloat0 valueOf (final Double x)  {
-//    return valueOf(x.doubleValue()); }
-//
-//  public static final BigFloat0 valueOf (final Float x)  {
-//    return valueOf(x.floatValue()); }
-//
-//  public static final BigFloat0 valueOf (final Byte x)  {
-//    return valueOf(x.byteValue()); }
-//
-//  public static final BigFloat0 valueOf (final Short x)  {
-//    return valueOf(x.shortValue()); }
-//
-//  public static final BigFloat0 valueOf (final Integer x)  {
-//    return valueOf(x.intValue()); }
-//
-//  public static final BigFloat0 valueOf (final Long x)  {
-//    return valueOf(x.longValue()); }
-//
-//  public static final BigFloat0 valueOf (final BigDecimal x)  {
-//    throw Exceptions.unsupportedOperation(null,"valueOf",x); }
-//
-//  public static final BigFloat0 valueOf (final NaturalBEI0 x)  {
-//    return valueOf(true,x,0); }
-//
-//  public static final BigFloat0 valueOf (final Number x)  {
-//    if (x instanceof Double) { return valueOf((Double) x); }
-//    if (x instanceof Float) { return valueOf((Float) x); }
-//    if (x instanceof Byte) { return valueOf((Byte) x); }
-//    if (x instanceof Short) { return valueOf((Short) x); }
-//    if (x instanceof Integer) { return valueOf((Integer) x); }
-//    if (x instanceof Long) { return valueOf((Long) x); }
-//    if (x instanceof BigDecimal) { return valueOf((BigDecimal) x); }
-//    throw Exceptions.unsupportedOperation(null,"valueOf",x); }
-//
-//  public static final BigFloat0 valueOf (final Object x)  {
-//    if (x instanceof BigFloat0) { return (BigFloat0) x; }
-//    if (x instanceof NaturalBEI0) { return valueOf((NaturalBEI0) x); }
-//    return valueOf((Number) x); }
+  //  public static final BigFloat0 valueOf (final Double x)  {
+  //    return valueOf(x.doubleValue()); }
+  //
+  //  public static final BigFloat0 valueOf (final Float x)  {
+  //    return valueOf(x.floatValue()); }
+  //
+  //  public static final BigFloat0 valueOf (final Byte x)  {
+  //    return valueOf(x.byteValue()); }
+  //
+  //  public static final BigFloat0 valueOf (final Short x)  {
+  //    return valueOf(x.shortValue()); }
+  //
+  //  public static final BigFloat0 valueOf (final Integer x)  {
+  //    return valueOf(x.intValue()); }
+  //
+  //  public static final BigFloat0 valueOf (final Long x)  {
+  //    return valueOf(x.longValue()); }
+  //
+  //  public static final BigFloat0 valueOf (final BigDecimal x)  {
+  //    throw Exceptions.unsupportedOperation(null,"valueOf",x); }
+  //
+  //  public static final BigFloat0 valueOf (final NaturalBEI0 x)  {
+  //    return valueOf(true,x,0); }
+  //
+  //  public static final BigFloat0 valueOf (final Number x)  {
+  //    if (x instanceof Double) { return valueOf((Double) x); }
+  //    if (x instanceof Float) { return valueOf((Float) x); }
+  //    if (x instanceof Byte) { return valueOf((Byte) x); }
+  //    if (x instanceof Short) { return valueOf((Short) x); }
+  //    if (x instanceof Integer) { return valueOf((Integer) x); }
+  //    if (x instanceof Long) { return valueOf((Long) x); }
+  //    if (x instanceof BigDecimal) { return valueOf((BigDecimal) x); }
+  //    throw Exceptions.unsupportedOperation(null,"valueOf",x); }
+  //
+  //  public static final BigFloat0 valueOf (final Object x)  {
+  //    if (x instanceof BigFloat0) { return (BigFloat0) x; }
+  //    if (x instanceof NaturalBEI0) { return valueOf((NaturalBEI0) x); }
+  //    return valueOf((Number) x); }
 
   //--------------------------------------------------------------
 
-  private static final BigFloat0 ZERO =
+  public static final BigFloat0 ZERO =
     new BigFloat0(true,NaturalBEI0.valueOf(0L),0);
 
-//  public static final BigFloat0 ONE =
-//    new BigFloat0(true,NaturalBEI0.ONE,0);
-//
-//  public static final BigFloat0 TWO =
-//    new BigFloat0(true,NaturalBEI0.ONE,1);
-//
-//  public static final BigFloat0 TEN =
-//    new BigFloat0(true,NaturalBEI0.valueOf(5),1);
-//
-//  public static final BigFloat0 MINUS_ONE =
-//    new BigFloat0(false,NaturalBEI0.ONE,0);
+  //  public static final BigFloat0 ONE =
+  //    new BigFloat0(true,NaturalBEI0.ONE,0);
+  //
+  //  public static final BigFloat0 TWO =
+  //    new BigFloat0(true,NaturalBEI0.ONE,1);
+  //
+  //  public static final BigFloat0 TEN =
+  //    new BigFloat0(true,NaturalBEI0.valueOf(5),1);
+  //
+  //  public static final BigFloat0 MINUS_ONE =
+  //    new BigFloat0(false,NaturalBEI0.ONE,0);
 
   //--------------------------------------------------------------
 }
