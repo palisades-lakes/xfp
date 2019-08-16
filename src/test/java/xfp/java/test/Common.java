@@ -34,7 +34,7 @@ import xfp.java.prng.PRNG;
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-01
+ * @version 2019-08-16
  */
 @SuppressWarnings("unchecked")
 public final class Common {
@@ -1068,32 +1068,6 @@ public final class Common {
   }
 
   //--------------------------------------------------------------
-  /** See {@link Integer#numberOfLeadingZeros(int)}. */
-  public static final int ceilLog2 (final int k) {
-    return Integer.SIZE - Integer.numberOfLeadingZeros(k-1); }
-
-  // TODO: more efficient via bits?
-  public static final boolean isEven (final int k) {
-    return k == (2*(k/2)); }
-
-  //--------------------------------------------------------------
-  /** Maximum exponent for double generation such that a float
-   * sum of <code>dim</code> <code>double</code>s will be finite
-   * (with high enough probability).
-   */
-  //  public static final int feMax (final int dim) {
-  //    final int d = Float.MAX_EXPONENT - ceilLog2(dim);
-  //    return d; }
-
-  /** Maximum exponent for double generation such that a double
-   * sum of <code>dim</code> <code>double</code>s will be finite
-   * (with high enough probability).
-   */
-  public static final int deMax (final int dim) {
-    final int d = Double.MAX_EXPONENT - ceilLog2(dim);
-    return d; }
-
-  //--------------------------------------------------------------
 
   private static final List<Generator> baseGenerators (final int dim) {
     final UniformRandomProvider urp0 =
@@ -1108,7 +1082,7 @@ public final class Common {
       PRNG.well44497b("seeds/Well44497b-2019-04-01.txt");
 
     // as large as will still have finite float l2 norm squared
-    final int emax = deMax(dim)/2;
+    final int emax = Doubles.deMax(dim)/2;
     final double dmax = (1<<emax);
     return Arrays.asList(
       new Generator[]

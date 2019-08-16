@@ -514,6 +514,14 @@ public final class Doubles implements Set {
 
   // TODO: extend generators using function composition!!!
 
+  /** Maximum exponent for double generation such that a double
+   * sum of <code>dim</code> <code>double</code>s will be finite
+   * (with high enough probability).
+   */
+  public static final int deMax (final int dim) {
+    final int d = Double.MAX_EXPONENT - Ints.ceilLog2(dim);
+    return d; }
+
   private static final Generator
   arrayGenerator (final int n,
                   final Generator g) {

@@ -12,7 +12,6 @@ import xfp.java.accumulators.EFloatAccumulator;
 import xfp.java.numbers.Doubles;
 import xfp.java.prng.Generator;
 import xfp.java.prng.PRNG;
-import xfp.java.test.Common;
 
 /** Distillation experiments.
  *
@@ -43,7 +42,7 @@ public final class Distill {
       @Override
       public final Generator apply (final int dim) {
         final UniformRandomProvider urp0 = PRNG.well44497b(SEED0);
-        final int emax = Common.deMax(dim)/2;
+        final int emax = Doubles.deMax(dim)/2;
         final double dmax = (1<<emax);
         return Doubles.uniformGenerator(dim,urp0,-dmax,dmax); }
     },
@@ -52,7 +51,7 @@ public final class Distill {
       @Override
       public final Generator apply (final int dim) {
         final UniformRandomProvider urp0 = PRNG.well44497b(SEED0);
-        final int emax = Common.deMax(dim)/2;
+        final int emax = Doubles.deMax(dim)/2;
         //Debug.println("emax=" + emax);
         return Doubles.finiteGenerator(dim,urp0,emax); }
     },
@@ -61,7 +60,7 @@ public final class Distill {
       @Override
       public final Generator apply (final int dim) {
         final UniformRandomProvider urp0 = PRNG.well44497b(SEED0);
-        final int emax = Common.deMax(dim)/2;
+        final int emax = Doubles.deMax(dim)/2;
         final double dmax = (1<<emax);
         return Doubles.exponentialGenerator(dim,urp0,0.0,dmax); }
     },
@@ -70,7 +69,7 @@ public final class Distill {
       @Override
       public final Generator apply (final int dim) {
         final UniformRandomProvider urp0 = PRNG.well44497b(SEED0);
-        final int emax = Common.deMax(dim)/2;
+        final int emax = Doubles.deMax(dim)/2;
         final double dmax = (1<<emax);
         return Doubles.gaussianGenerator(dim,urp0,0.0,dmax); }
     },
@@ -79,7 +78,7 @@ public final class Distill {
       @Override
       public final Generator apply (final int dim) {
         final UniformRandomProvider urp0 = PRNG.well44497b(SEED0);
-        final int emax = Common.deMax(dim)/2;
+        final int emax = Doubles.deMax(dim)/2;
         final double dmax = (1<<emax);
         return Doubles.laplaceGenerator(dim,urp0,0.0,dmax); }
     });

@@ -1,6 +1,6 @@
 package xfp.java.accumulators;
 
-/** Base class for some exact accumulators.
+/** Basre class for some exact accumulators.
  * <p>
  * Use twoAdd and twoMul to convert operations to sequence of 
  * adds, so that they are exact if {@link #add(double)} is.

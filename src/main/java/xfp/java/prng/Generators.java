@@ -2,11 +2,15 @@ package xfp.java.prng;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Map;
+import java.util.function.IntFunction;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.CollectionSampler;
 import org.apache.commons.rng.sampling.distribution.ContinuousSampler;
 import org.apache.commons.rng.sampling.distribution.ContinuousUniformSampler;
+
+import xfp.java.numbers.Doubles;
 
 /** Generators of primitives or Objects as zero-arity 'functions'
  * that return different values on each call.
@@ -282,7 +286,102 @@ public final class Generators {
         for (int i=0;i<n;i++) { z[i] = (BigInteger) g.next(); }
         return z; } }; }
 
-   //--------------------------------------------------------------
+  //--------------------------------------------------------------
+
+  private static final String SEED0 =
+    "seeds/Well44497b-2019-01-05.txt";
+
+  //  private static final String SEED1 =
+  //    "seeds/Well44497b-2019-01-07.txt";
+
+  public static final Map<String,IntFunction<Generator>>
+  factories =
+  Map.of(
+    "exponential",
+    new IntFunction<Generator>() {
+      @Override
+      public final Generator apply (final int dim) {
+        final UniformRandomProvider urp0 = PRNG.well44497b(SEED0);
+        //final UniformRandomProvider urp1 = PRNG.well44497b(SEED1);
+        final int emax = Doubles.deMax(dim)/2;
+        final double dmax = (1<<emax);
+        return
+          //Doubles.shuffledGenerator(
+          //Doubles.zeroSumGenerator(
+          Doubles.exponentialGenerator(dim,urp0,0.0,dmax)
+          //),
+          //urp1)
+          ; }
+    },
+    "finite",
+    new IntFunction<Generator>() {
+      @Override
+      public final Generator apply (final int dim) {
+        final UniformRandomProvider urp0 = PRNG.well44497b(SEED0);
+        //final UniformRandomProvider urp1 = PRNG.well44497b(SEED1);
+        final int emax = Doubles.deMax(dim)/2;
+        return
+          //Doubles.shuffledGenerator(
+          //Doubles.zeroSumGenerator(
+          Doubles.finiteGenerator(dim,urp0,emax)
+          //),
+          //urp1)
+          ; }
+    },
+    "gaussian",
+    new IntFunction<Generator>() {
+      @Override
+      public final Generator apply (final int dim) {
+        final UniformRandomProvider urp0 = PRNG.well44497b(SEED0);
+        //final UniformRandomProvider urp1 = PRNG.well44497b(SEED1);
+        final int emax = Doubles.deMax(dim)/2;
+        final double dmax = (1<<emax);
+        return
+          //Doubles.shuffledGenerator(
+          //Doubles.zeroSumGenerator(
+          Doubles.gaussianGenerator(dim,urp0,0.0,dmax)
+          //),
+          //urp1)
+          ; }
+    },
+    "laplace",
+    new IntFunction<Generator>() {
+      @Override
+      public final Generator apply (final int dim) {
+        final UniformRandomProvider urp0 = PRNG.well44497b(SEED0);
+        //final UniformRandomProvider urp1 = PRNG.well44497b(SEED1);
+        final int emax = Doubles.deMax(dim)/2;
+        final double dmax = (1<<emax);
+        return
+          //Doubles.shuffledGenerator(
+          //Doubles.zeroSumGenerator(
+          Doubles.laplaceGenerator(dim,urp0,0.0,dmax)
+          //),urp1)
+          ; }
+    },
+    "uniform",
+    new IntFunction<Generator>() {
+      @Override
+      public final Generator apply (final int dim) {
+        final UniformRandomProvider urp0 = PRNG.well44497b(SEED0);
+        //final UniformRandomProvider urp1 = PRNG.well44497b(SEED1);
+        final int emax = Doubles.deMax(dim)/2;
+        final double dmax = (1<<emax);
+        return
+          //Doubles.shuffledGenerator(
+          //Doubles.zeroSumGenerator(
+          Doubles.uniformGenerator(dim,urp0,-dmax,dmax)
+          //),
+          //urp1)
+          ; }
+    }
+    );
+
+  public static final Generator make (final String name,
+                                      final int dim) {
+    return factories.get(name).apply(dim); }
+  
+  //--------------------------------------------------------------
   // disable constructor
   //--------------------------------------------------------------
 

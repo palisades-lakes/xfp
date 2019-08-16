@@ -465,6 +465,17 @@ public final class Ints implements Set {
 
   //--------------------------------------------------------------
 
+  /** TODO: more efficient via bits? */
+  
+  public static final boolean isEven (final int k) {
+    return k == (2*(k/2)); }
+
+  //--------------------------------------------------------------
+  /** See {@link Integer#numberOfLeadingZeros(int)}. */
+  
+  public static final int ceilLog2 (final int k) {
+    return Integer.SIZE - Integer.numberOfLeadingZeros(k-1); }
+
   public static final Generator
   generator (final UniformRandomProvider urp) {
     return Generators.intGenerator(urp); }

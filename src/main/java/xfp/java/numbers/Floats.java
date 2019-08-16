@@ -461,6 +461,15 @@ public final class Floats implements Set {
   public final String toString () { return "D"; }
 
   //--------------------------------------------------------------
+  /** Maximum exponent for double generation such that a float
+   * sum of <code>dim</code> <code>double</code>s will be finite
+   * (with high enough probability).
+   */
+    public static final int feMax (final int dim) {
+      final int d = Float.MAX_EXPONENT - Ints.ceilLog2(dim);
+      return d; }
+
+  //--------------------------------------------------------------
   /** From apache commons math4 BigFraction.
    * <p>
    * Create a fraction given the float value.

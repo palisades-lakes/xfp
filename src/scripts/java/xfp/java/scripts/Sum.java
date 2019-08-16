@@ -11,7 +11,6 @@ import xfp.java.linear.Dn;
 import xfp.java.numbers.Doubles;
 import xfp.java.prng.Generator;
 import xfp.java.prng.PRNG;
-import xfp.java.test.Common;
 
 // java -ea --illegal-access=warn -jar target/benchmarks.jar
 
@@ -49,7 +48,7 @@ public final class Sum {
     final UniformRandomProvider urp =
       PRNG.well44497b("seeds/Well44497b-2019-01-05.txt");
     final Generator g =
-      Doubles.finiteGenerator(dim/2,urp,Common.deMax(dim));
+      Doubles.finiteGenerator(dim/2,urp,Doubles.deMax(dim));
 
     final double[][] x = new double[n][];
     for (int i=0;i<n;i++) { x[i] = sampleDoubles(g,urp); }
