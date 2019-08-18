@@ -50,6 +50,8 @@ public final class BigFloat implements Ringlike<BigFloat> {
     return valueOf(! nonNegative(),significand(),exponent()); }
 
   //--------------------------------------------------------------
+//  public static int CALLS=0;
+//  public static int SWAPS=0;
 
   private static final BigFloat add (final boolean p0,
                                      final Natural t0,
@@ -57,7 +59,10 @@ public final class BigFloat implements Ringlike<BigFloat> {
                                      final boolean p1,
                                      final Natural t1,
                                      final int e1) {
-    if (e0<e1) { return add(p1,t1,e1,p0,t0,e0); }
+    if (e0<e1) { 
+//      SWAPS++;
+      return add(p1,t1,e1,p0,t0,e0); }
+//    CALLS++;
     final int de = e0-e1;
     if (p0^p1) { 
       // different signs
@@ -291,7 +296,7 @@ public final class BigFloat implements Ringlike<BigFloat> {
     final int e;
     if ((0==s) || (64==s)) { t=tz; e=ez; }
     else { t=(tz>>>s); e=ez+s; }
-    final Natural t2 = significand().fromSquare(t);
+    final Natural t2 = NaturalLE.fromSquare(t);
     final int e2 = (e<<1);
     return add( 
       nonNegative(),
@@ -445,13 +450,13 @@ public final class BigFloat implements Ringlike<BigFloat> {
     final int e11=e1+shift1;
 
     return
-      add(
+      add(! (p0^p1),
+        NaturalLE.product(t00,t11),
+        e00+e11,
         nonNegative(),
         significand(),
-        exponent(),
-        ! (p0^p1),
-        significand().product(t00,t11),
-        e00+e11); }
+        exponent()
+        ); }
 
   public final BigFloat 
   addProducts (final double[] z0,

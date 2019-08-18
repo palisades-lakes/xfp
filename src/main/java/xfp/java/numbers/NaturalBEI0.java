@@ -115,8 +115,7 @@ public final class NaturalBEI0 implements Natural {
 
   //--------------------------------------------------------------
 
-  @Override
-  public final NaturalBEI0 product (final long t0,
+  static final NaturalBEI0 product (final long t0,
                                     final long t1) {
     //assert 0L<=t0;
     //assert 0L<=t1;
@@ -141,8 +140,7 @@ public final class NaturalBEI0 implements Natural {
     if (0!=w0) { return unsafe(new int[] { w0, }); }
     return ZERO; }
 
-  @Override
-  public final NaturalBEI0 fromSquare (final long t) {
+  static final NaturalBEI0 fromSquare (final long t) {
     //assert 0L<=t;
     final long hi = hiWord(t);
     final long lo = loWord(t);

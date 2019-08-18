@@ -295,9 +295,9 @@ public final class NaturalLE implements Natural {
     //assert 0<=upShift;
     //assert 0L<=v;
     //assert compareTo(u,upShift,v)>=0;
-//    if (0L==v) { 
-//      //assert 0L==v;
-//      return ZERO; }
+    //    if (0L==v) { 
+    //      //assert 0L==v;
+    //      return ZERO; }
     //if (0==upShift) { return difference(v,u); }
     final int iShift = (upShift>>>5);
     final int bShift = (upShift&0x1f);
@@ -334,16 +334,15 @@ public final class NaturalLE implements Natural {
   // TODO: fix lurking overflow issue
   // probably only works as long as t0,t1 double significands
 
-  @Override
-  public final NaturalLE product (final long t0,
+  static final NaturalLE product (final long t0,
                                   final long t1) {
     //assert 0L<=t0;
     //assert 0L<=t1;
     //if ((0L==t0||(0L==t1))) { return zero(); }
-    final long hi0 = hiWord(t0);
     final long lo0 = loWord(t0);
-    final long hi1 = hiWord(t1);
+    final long hi0 = hiWord(t0);
     final long lo1 = loWord(t1);
+    final long hi1 = hiWord(t1);
     final long lolo = lo0*lo1;
     final long hilo2 = (hi0*lo1) + (hi1*lo0);
     //final long hilo2 = Math.addExact(hi0*lo1,hi1*lo0);
@@ -355,17 +354,16 @@ public final class NaturalLE implements Natural {
     sum = (sum>>>32) + hihi ;
     final int w2 = (int) sum;
     final int w3 = (int) (sum>>>32);
-    if (0!=w3) { return unsafe(new int[] { w0,w1,w2,w3, }); }
-    if (0!=w2) { return unsafe(new int[] { w0,w1,w2, }); }
-    if (0!=w1) { 
-      return unsafe(new int[] { w0,w1, }, 2); }
-    return unsafe(new int[] { w0, },1); }
+    if (0!=w3) { return unsafe(new int[] {w0,w1,w2,w3,},4); }
+    if (0!=w2) { return unsafe(new int[] {w0,w1,w2,},3); }
+    if (0!=w1) { return unsafe(new int[] {w0,w1,},2); }
+    if (0!=w0) { return unsafe(new int[] {w0,},1); }
+    return ZERO; }
 
   // TODO: fix lurking overflow issue
   // probably only works as long as t is double significand
 
-  @Override
-  public final NaturalLE fromSquare (final long t) {
+  static final NaturalLE fromSquare (final long t) {
     //assert 0L<=t;
     //if (0L==t) { return zero(); }
     final long hi = hiWord(t);

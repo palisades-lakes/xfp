@@ -15,7 +15,7 @@ import xfp.java.exceptions.Exceptions;
  * TODO: utilities class to hide private stuff?
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-14
+ * @version 2019-08-17
  */
 
 @SuppressWarnings("unchecked")
@@ -460,28 +460,28 @@ extends Uints<Natural>, Ringlike<Natural> {
     return NaturalMultiply.square(this); }
 
   //--------------------------------------------------------------
-  /** Return a {@link Natural} whose value is <code>t<sup>2</sup></code>.
-   * @see #product(long,long) 
-   */
-
-  default Natural fromSquare (final long t) {
-    //assert isValid();
-    //assert 0L<=t;
-    final long hi = Numbers.hiWord(t);
-    final long lo = Numbers.loWord(t);
-    long sum = lo*lo;
-    final int m0 = (int) sum;
-    sum = (sum>>>32) + ((hi*lo)<<1);
-    final int m1 = (int) sum;
-    sum = (sum>>>32) +  hi*hi ;
-    final int m2 = (int) sum;
-    final int m3 = (int) (sum>>>32);
-    Natural u = zero();
-    if (0!=m0) { u = u.setWord(0,m0); }
-    if (0!=m1) { u = u.setWord(1,m1); }
-    if (0!=m2) { u = u.setWord(2,m2); }
-    if (0!=m3) { u = u.setWord(3,m3); }
-    return u; }
+//  /** Return a {@link Natural} whose value is <code>t<sup>2</sup></code>.
+//   * @see #product(long,long) 
+//   */
+//
+//  default Natural fromSquare (final long t) {
+//    //assert isValid();
+//    //assert 0L<=t;
+//    final long hi = Numbers.hiWord(t);
+//    final long lo = Numbers.loWord(t);
+//    long sum = lo*lo;
+//    final int m0 = (int) sum;
+//    sum = (sum>>>32) + ((hi*lo)<<1);
+//    final int m1 = (int) sum;
+//    sum = (sum>>>32) +  hi*hi ;
+//    final int m2 = (int) sum;
+//    final int m3 = (int) (sum>>>32);
+//    Natural u = zero();
+//    if (0!=m0) { u = u.setWord(0,m0); }
+//    if (0!=m1) { u = u.setWord(1,m1); }
+//    if (0!=m2) { u = u.setWord(2,m2); }
+//    if (0!=m3) { u = u.setWord(3,m3); }
+//    return u; }
 
   //--------------------------------------------------------------
   // multiply
@@ -509,31 +509,31 @@ extends Uints<Natural>, Ringlike<Natural> {
     if (isZero()) { return this; }
     return multiply(from(u,upShift)); }
 
-  default Natural product (final long t0,
-                           final long t1) {
-    //assert isValid();
-    //assert 0L<=t0;
-    //assert 0L<=t1;
-    final long hi0 = Numbers.hiWord(t0);
-    final long lo0 = Numbers.loWord(t0);
-    final long hi1 = Numbers.hiWord(t1);
-    final long lo1 = Numbers.loWord(t1);
-    final long lolo = lo0*lo1;
-    final long hilo2 = (hi0*lo1) + (hi1*lo0);
-    final long hihi = hi0*hi1;
-    long sum = lolo;
-    final int m0 = (int) sum;
-    sum = (sum>>>32) + hilo2;
-    final int m1 = (int) sum;
-    sum = (sum>>>32) + hihi ;
-    final int m2 = (int) sum;
-    final int m3 = (int) (sum>>>32);
-    Natural u = recyclable(4);
-    if (0!=m0) { u = u.setWord(0,m0); }
-    if (0!=m1) { u = u.setWord(1,m1); }
-    if (0!=m2) { u = u.setWord(2,m2); }
-    if (0!=m3) { u = u.setWord(3,m3); }
-    return u.immutable(); }
+//  default Natural product (final long t0,
+//                           final long t1) {
+//    //assert isValid();
+//    //assert 0L<=t0;
+//    //assert 0L<=t1;
+//    final long hi0 = Numbers.hiWord(t0);
+//    final long lo0 = Numbers.loWord(t0);
+//    final long hi1 = Numbers.hiWord(t1);
+//    final long lo1 = Numbers.loWord(t1);
+//    final long lolo = lo0*lo1;
+//    final long hilo2 = (hi0*lo1) + (hi1*lo0);
+//    final long hihi = hi0*hi1;
+//    long sum = lolo;
+//    final int m0 = (int) sum;
+//    sum = (sum>>>32) + hilo2;
+//    final int m1 = (int) sum;
+//    sum = (sum>>>32) + hihi ;
+//    final int m2 = (int) sum;
+//    final int m3 = (int) (sum>>>32);
+//    Natural u = recyclable(4);
+//    if (0!=m0) { u = u.setWord(0,m0); }
+//    if (0!=m1) { u = u.setWord(1,m1); }
+//    if (0!=m2) { u = u.setWord(2,m2); }
+//    if (0!=m3) { u = u.setWord(3,m3); }
+//    return u.immutable(); }
 
   //--------------------------------------------------------------
   // division
