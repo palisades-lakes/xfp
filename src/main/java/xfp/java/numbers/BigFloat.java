@@ -40,7 +40,7 @@ public final class BigFloat implements Ringlike<BigFloat> {
 
   @Override
   public final boolean isOne () {
-    return BigFloat.this.isOne(); }
+    return this.isOne(); }
 
   //--------------------------------------------------------------
 
@@ -50,8 +50,8 @@ public final class BigFloat implements Ringlike<BigFloat> {
     return valueOf(! nonNegative(),significand(),exponent()); }
 
   //--------------------------------------------------------------
-//  public static int CALLS=0;
-//  public static int SWAPS=0;
+  //  public static int CALLS=0;
+  //  public static int SWAPS=0;
 
   private static final BigFloat add (final boolean p0,
                                      final Natural t0,
@@ -60,9 +60,9 @@ public final class BigFloat implements Ringlike<BigFloat> {
                                      final Natural t1,
                                      final int e1) {
     if (e0<e1) { 
-//      SWAPS++;
+      //      SWAPS++;
       return add(p1,t1,e1,p0,t0,e0); }
-//    CALLS++;
+    //    CALLS++;
     final int de = e0-e1;
     if (p0^p1) { 
       // different signs
@@ -88,30 +88,30 @@ public final class BigFloat implements Ringlike<BigFloat> {
       q.nonNegative(),
       q.significand(),
       q.exponent()); }
- 
+
   //--------------------------------------------------------------
 
   private static final BigFloat
   add0 (final boolean p0,
-                   final long t0,
-                   final boolean p1,
-                   final long t1,
-                   final int upShift,
-                   final int e) {
+        final long t0,
+        final boolean p1,
+        final long t1,
+        final int upShift,
+        final int e) {
     if (p0^p1) { // different signs
       final int c = Longs.compare(t0,t1,upShift);
-      if (0==c) { return BigFloat.ZERO; }
+      if (0==c) { return ZERO; }
       if (0>c) { // t1 > t0
-        return BigFloat.valueOf(
+        return valueOf(
           p1,
           NaturalLE.difference(t1,upShift,t0),
           e); }
       // t0 > t1
-      return BigFloat.valueOf(
+      return valueOf(
         p0,
         NaturalLE.difference(t0,t1,upShift),
         e); }
-    return BigFloat.valueOf(p0,NaturalLE.sum(t0,t1,upShift),e); }
+    return valueOf(p0,NaturalLE.sum(t0,t1,upShift),e); }
 
   private static final BigFloat
   add (final boolean p0,
@@ -155,13 +155,13 @@ public final class BigFloat implements Ringlike<BigFloat> {
   //    if (p0^p1) { // different signs
   //      final NaturalLE t1s = NaturalLE.valueOf(t1,upShift);
   //      final int c = t0.compareTo(t1s);
-  //      if (0==c) { return BigFloat.ZERO; }
+  //      if (0==c) { return ZERO; }
   //      // t1 > t0
   //      if (0>c) {
-  //        return BigFloat.valueOf(p1,t1s.subtract(t0),e); }
+  //        return valueOf(p1,t1s.subtract(t0),e); }
   //      // t0 > t1
-  //      return BigFloat.valueOf(p0,t0.subtract(t1s),e); }
-  //    return BigFloat.valueOf(p0,t0.add(t1,upShift),e); }
+  //      return valueOf(p0,t0.subtract(t1s),e); }
+  //    return valueOf(p0,t0.add(t1,upShift),e); }
 
   private static final BigFloat
   add0 (final boolean p0,
@@ -174,13 +174,13 @@ public final class BigFloat implements Ringlike<BigFloat> {
     //assert 0<=upShift
     if (p0^p1) { // different signs
       final int c = t0.compareTo(t1,upShift);
-      if (0==c) { return BigFloat.ZERO; }
+      if (0==c) { return ZERO; }
       // t1 > t0
       if (0>c) {
-        return BigFloat.valueOf(p1,t0.subtractFrom(t1,upShift),e); }
+        return valueOf(p1,t0.subtractFrom(t1,upShift),e); }
       // t0 > t1
-      return BigFloat.valueOf(p0,t0.subtract(t1,upShift),e); }
-    return BigFloat.valueOf(p0,t0.add(t1,upShift),e); }
+      return valueOf(p0,t0.subtract(t1,upShift),e); }
+    return valueOf(p0,t0.add(t1,upShift),e); }
 
   //--------------------------------------------------------------
 
@@ -195,33 +195,33 @@ public final class BigFloat implements Ringlike<BigFloat> {
     //assert 0<=upShift
     if (p0^p1) { // different signs
       final int c = t0.compareTo(upShift,t1);
-      if (0==c) { return BigFloat.ZERO; }
+      if (0==c) { return ZERO; }
       // t1 > t0
       if (0 > c) {
-        return BigFloat.valueOf(p1,t0.subtractFrom(upShift,t1),e); }
+        return valueOf(p1,t0.subtractFrom(upShift,t1),e); }
       // t0 > t1
-      return BigFloat.valueOf(p0,t0.subtract(upShift,t1),e); }
-    return BigFloat.valueOf(p0,t0.add(upShift,t1),e); }
+      return valueOf(p0,t0.subtract(upShift,t1),e); }
+    return valueOf(p0,t0.add(upShift,t1),e); }
 
   //--------------------------------------------------------------
 
-//  private static final BigFloat
-//  add2 (final boolean p0,
-//        final NaturalLE t0,
-//        final boolean p1,
-//        final long t1,
-//        final int e) {
-//    //assert 0L<=t1;
-//    //assert 0<=upShift
-//    if (p0^p1) { // different signs
-//      final int c = t0.compareTo(t1);
-//      if (0==c) { return BigFloat.ZERO; }
-//      // t1 > t0
-//      if (0 > c) {
-//        return BigFloat.valueOf(p1,t0.subtractFrom(t1),e); }
-//      // t0 > t1
-//      return BigFloat.valueOf(p0,t0.subtract(t1),e); }
-//    return BigFloat.valueOf(p0,t0.add(t1),e); }
+  //  private static final BigFloat
+  //  add2 (final boolean p0,
+  //        final NaturalLE t0,
+  //        final boolean p1,
+  //        final long t1,
+  //        final int e) {
+  //    //assert 0L<=t1;
+  //    //assert 0<=upShift
+  //    if (p0^p1) { // different signs
+  //      final int c = t0.compareTo(t1);
+  //      if (0==c) { return ZERO; }
+  //      // t1 > t0
+  //      if (0 > c) {
+  //        return valueOf(p1,t0.subtractFrom(t1),e); }
+  //      // t0 > t1
+  //      return valueOf(p0,t0.subtract(t1),e); }
+  //    return valueOf(p0,t0.add(t1),e); }
 
   //--------------------------------------------------------------
 
@@ -444,7 +444,6 @@ public final class BigFloat implements Ringlike<BigFloat> {
       true,
       dz.significand(),
       dz.exponent()); }
-
 
   public final BigFloat
   addL1Distance (final double[] z0,
