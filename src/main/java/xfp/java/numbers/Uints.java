@@ -19,7 +19,7 @@ import xfp.java.exceptions.Exceptions;
  * TODO: max valid range limited by int hiBit!
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-13
+ * @version 2019-08-18
  */
 
 @SuppressWarnings("unchecked")
@@ -96,10 +96,10 @@ extends Transience<T> {
   
   default int loInt () {
     // Search for lowest order nonzero int
-    final int n = endWord(); // might be 0
+    final int n = hiInt(); // might be 0
     for (int i=startWord();i<n;i++) {
       if (0!=word(i)) { return i; } }
-    assert 0==n;
+    //assert 0==n;
     return 0; }
 
   /** Return the index of the highest non-zero word.
@@ -115,7 +115,7 @@ extends Transience<T> {
     final int start = startWord();
     for (int i = endWord()-1;i>=start;i--) {
       if (0!=word(i) ) { return i+1; } }
-    assert 0==start;
+    //assert 0==start;
     return 0; }
 
   //--------------------------------------------------------------
@@ -191,6 +191,7 @@ extends Transience<T> {
    * {@link #loBit()} <code>==</code> {@link #hiBit()}
    * <code>==0</code>.
    */
+  
   default int hiBit () {
     //Debug.println("hiBit this=" + this);
     final int i = hiInt()-1;

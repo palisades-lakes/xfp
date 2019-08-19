@@ -32,7 +32,7 @@ import xfp.java.prng.GeneratorBase;
 /** Utilities for <code>double</code>, <code>double[]</code>.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-15
+ * @version 2019-08-18
  */
 public final class Doubles implements Set {
 
@@ -123,15 +123,15 @@ public final class Doubles implements Set {
 
   public static final int signBit (final double x) {
     return  (int)
-      ((SIGN_MASK & doubleToRawLongBits(x))
+      ((SIGN_MASK&doubleToRawLongBits(x))
         >> (EXPONENT_BITS + STORED_SIGNIFICAND_BITS)); }
 
   /** Remember 0.0 can be negative. */
   public static final boolean nonNegative (final double x) {
-    return  0 == signBit(x); }
+    return 0==(SIGN_MASK&doubleToRawLongBits(x)); }
+    //return  0==signBit(x); }
 
   //--------------------------------------------------------------
-
   /** Actual STORED_SIGNIFICAND_BITS stored bits, without the
    * implied leading 1 bit for normal numbers.
    */
@@ -145,10 +145,12 @@ public final class Doubles implements Set {
    */
 
   public static final long significand (final double x) {
-    final long t = significandLowBits(x);
+    final long bits = doubleToRawLongBits(x);
+    final long t = (bits&STORED_SIGNIFICAND_MASK);
+    final long e = (bits&EXPONENT_MASK);
     // signed zero or subnormal
-    if (biasedExponent(x) == 0) { return t; }
-    return t + STORED_SIGNIFICAND_MASK + 1; }
+    if (0L==e) { return t; }
+    return t+STORED_SIGNIFICAND_MASK+1; }
 
   //--------------------------------------------------------------
 
@@ -161,7 +163,7 @@ public final class Doubles implements Set {
   //--------------------------------------------------------------
 
   public static final int unbiasedExponent (final double x) {
-    return biasedExponent(x) - EXPONENT_BIAS; }
+    return biasedExponent(x)-EXPONENT_BIAS; }
 
   //--------------------------------------------------------------
   /** Exponent if significand is treated as an integer, not a
@@ -174,7 +176,7 @@ public final class Doubles implements Set {
     // in the significand
     return
       Math.max(
-        unbiasedExponent(x) - STORED_SIGNIFICAND_BITS,
+        biasedExponent(x)-EXPONENT_BIAS-STORED_SIGNIFICAND_BITS,
         MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND); }
 
   //--------------------------------------------------------------

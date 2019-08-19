@@ -144,7 +144,7 @@ public final class Numbers implements Set {
 
   /** exclusive */
   public static final int hiBit (final long i) {
-    return Long.SIZE -  Long.numberOfLeadingZeros(i); }
+    return Long.SIZE-Long.numberOfLeadingZeros(i); }
 
    //--------------------------------------------------------------
 

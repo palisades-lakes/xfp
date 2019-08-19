@@ -14,17 +14,17 @@ import xfp.java.prng.Generators;
  * j --source 11 src/scripts/java/xfp/java/scripts/TotalSum.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-16
+ * @version 2019-08-18
  */
 @SuppressWarnings("unchecked")
 public final class TotalSum {
 
   public static final void main (final String[] args) {
     final int dim = 2*1024*1024;
-    final int trys = 1* 1024;
-    final Generator g = Generators.make("exponential",dim);
+    final int trys = 8 * 1024;
+    //final Generator g = Generators.make("exponential",dim);
     //final Generator g = Generators.make("finite",dim);
-    //final Generator g = Generators.make("gaussian",dim);
+    final Generator g = Generators.make("gaussian",dim);
     //final Generator g = Generators.make("laplace",dim);
     //final Generator g = Generators.make("uniform",dim);
     final Accumulator a = BigFloatAccumulator.make();
