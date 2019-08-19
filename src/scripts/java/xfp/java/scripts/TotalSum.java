@@ -2,8 +2,6 @@ package xfp.java.scripts;
 
 import xfp.java.Debug;
 import xfp.java.accumulators.Accumulator;
-import xfp.java.accumulators.BigFloatAccumulator;
-import xfp.java.accumulators.BigFloatAccumulator0;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
 
@@ -14,7 +12,7 @@ import xfp.java.prng.Generators;
  * j --source 11 src/scripts/java/xfp/java/scripts/TotalSum.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-18
+ * @version 2019-08-19
  */
 @SuppressWarnings("unchecked")
 public final class TotalSum {
@@ -27,7 +25,8 @@ public final class TotalSum {
     final Generator g = Generators.make("gaussian",dim);
     //final Generator g = Generators.make("laplace",dim);
     //final Generator g = Generators.make("uniform",dim);
-    final Accumulator a = BigFloatAccumulator.make();
+    final Accumulator a = 
+      xfp.java.accumulators.BigFloatAccumulator.make();
     assert a.isExact();
     Debug.DEBUG=true;
     for (int i=0;i<trys;i++) {
