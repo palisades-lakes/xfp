@@ -20,7 +20,7 @@ set PROF=-agentpath:"C:\Program Files\YourKit Java Profiler 2019.8-b109\bin\win6
 set OPENS=--add-opens java.base/java.lang=ALL-UNNAMED
 set CP=-cp lib/*
 
-set JAVA_HOME=%JAVA11%
+set JAVA_HOME=%JAVA12%
 set JAVA="%JAVA_HOME%\bin\java"
 
 set CMD=%JAVA% %THRUPUT% -ea -dsa %GC% %XMX% %TRACE% %PROF% %OPENS% %CP% %*

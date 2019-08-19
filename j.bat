@@ -18,7 +18,7 @@ set XMX=
 set OPENS=--add-opens java.base/java.lang=ALL-UNNAMED
 set CP=-cp lib/*
 
-set JAVA_HOME=%JAVA11%
+set JAVA_HOME=%JAVA12%
 set JAVA="%JAVA_HOME%\bin\java"
 
 set CMD=%JAVA% %THRUPUT% -ea -dsa %GC% %XMX% %TRACE% %OPENS% %CP% %*
