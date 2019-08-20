@@ -174,6 +174,7 @@ public final class Doubles implements Set {
     // subnormal numbers have an exponent one less that what it
     // should really be, as a way of coding the initial zero bit
     // in the significand
+    if (0.0==x) { return 0; }
     return
       Math.max(
         biasedExponent(x)-EXPONENT_BIAS-STORED_SIGNIFICAND_BITS,

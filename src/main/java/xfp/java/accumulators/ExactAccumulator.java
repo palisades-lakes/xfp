@@ -45,9 +45,9 @@ implements Accumulator<T> {
     //assert Double.isFinite(z0);
     //assert Double.isFinite(z1);
     // twoAdd -> 2 adds.
-    final double zz = z0 - z1;
-    final double dz = zz - z0;
-    final double e = (z0 - (zz - dz)) + ((-z1) - dz);
+    final double zz = z0-z1;
+    final double dz = zz-z0;
+    final double e = (z0-(zz-dz)) + ((-z1)-dz);
     if (0<=zz) {
       if (0<=e) { add(zz); add(e); }
       else if (Math.abs(e)<=Math.abs(zz)) { add(zz); add(e); }

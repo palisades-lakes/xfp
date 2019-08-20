@@ -170,7 +170,7 @@ public final class BigFloat implements Ringlike<BigFloat> {
         final long t1,
         final int upShift,
         final int e) {
-    //assert 0L<=t1;
+    //assert 0L<t1;
     //assert 0<=upShift
     if (p0^p1) { // different signs
       final int c = t0.compareTo(t1,upShift);
@@ -191,7 +191,7 @@ public final class BigFloat implements Ringlike<BigFloat> {
         final boolean p1,
         final long t1,
         final int e) {
-    //assert 0L<=t1;
+    //assert 0L<t1;
     //assert 0<=upShift
     if (p0^p1) { // different signs
       final int c = t0.compareTo(upShift,t1);
@@ -211,7 +211,7 @@ public final class BigFloat implements Ringlike<BigFloat> {
   //        final boolean p1,
   //        final long t1,
   //        final int e) {
-  //    //assert 0L<=t1;
+  //    //assert 0L<t1;
   //    //assert 0<=upShift
   //    if (p0^p1) { // different signs
   //      final int c = t0.compareTo(t1);
@@ -232,13 +232,17 @@ public final class BigFloat implements Ringlike<BigFloat> {
        final boolean p1,
        final long t11,
        final int e11) {
+    // zero check is currently is callers
+    // subsequent code is not correct 
+    // without special zero handling
     //assert 0L<=t11;
     //if (0L==t11) { return this; }
+    //if (0L==t11) { return valueOf(p0,t0,e0); }
+    //assert 0L<t11;
     // minimize long bits
     final int shift = Numbers.loBit(t11);
     final long t1 = (t11>>>shift);
     final int e1 = e11+shift;
-    //Debug.println("e0=" + e0 + ", e11=" + e11 + ",shift=" + shift);
     if (e0<=e1) { 
       return add0(p0,((NaturalLE) t0),p1,t1,e1-e0,e0); }
     return add1(p0,((NaturalLE) t0),e0-e1,p1,t1,e1); }
@@ -250,15 +254,15 @@ public final class BigFloat implements Ringlike<BigFloat> {
   public final BigFloat
   add (final double z) {
     //assert Double.isFinite(z);
-    //Debug.println(Double.toString(z));
-    return 
-      add(
-        nonNegative(),
-        significand(),
-        exponent(),
-        Doubles.nonNegative(z),
-        Doubles.significand(z),
-        Doubles.exponent(z)); }
+    // escape on zero needed for add() 
+    if (0.0==z) { return this; }
+    return add(
+      nonNegative(),
+      significand(),
+      exponent(),
+      Doubles.nonNegative(z),
+      Doubles.significand(z),
+      Doubles.exponent(z)); }
 
   public final BigFloat
   addAll (final double[] z) {
@@ -272,6 +276,8 @@ public final class BigFloat implements Ringlike<BigFloat> {
   public final BigFloat
   addAbs (final double z) {
     //assert Double.isFinite(z);
+    // escape on zero needed for add() 
+    if (0.0==z) { return this; }
     return add(
       nonNegative(),
       significand(),
@@ -302,6 +308,8 @@ public final class BigFloat implements Ringlike<BigFloat> {
 
   public final BigFloat
   subtract (final double z) {
+    // escape on zero needed for add() 
+    if (0.0==z) { return this; }
     return add(
       nonNegative(),
       significand(),
@@ -413,37 +421,37 @@ public final class BigFloat implements Ringlike<BigFloat> {
     return s; }
 
   //--------------------------------------------------------------
-  //public BigFloat addL1 (final double z0,
-  //final double z1) {
-  //// later adds should catch non-finite inputs
-  ////assert Double.isFinite(z0);
-  ////assert Double.isFinite(z1);
-  //// preserve exactness using twoAdd to convert to 2 adds.
-  //final double dz = z0 - z1;
-  //final double ddz = dz - z0;
-  //final double e = (z0 - (dz - ddz)) + ((-z1) - ddz);
-  //if (0<=dz) {
-  //if (0<=e) { return add(dz).add(e); }
-  //if (Math.abs(e)<=Math.abs(dz)) { return add(dz).add(e); }
-  //return add(-dz).add(-e); }
-  //// 0>dz
-  //if (0>e) { return add(-dz).add(-e); }
-  //if (Math.abs(e)<=Math.abs(dz)) { return add(-dz).add(-e); }
-  //return add(dz).add(e); }
-
-  public final BigFloat
-  addL1 (final double z0,
-         final double z1) {
+  public BigFloat addL1 (final double z0,
+                         final double z1) {
+    // later adds should catch non-finite inputs
     //assert Double.isFinite(z0);
     //assert Double.isFinite(z1);
-    final BigFloat dz = difference(z0,z1);
-    return add(
-      nonNegative(),
-      significand(),
-      exponent(),
-      true,
-      dz.significand(),
-      dz.exponent()); }
+    // preserve exactness using twoAdd to convert to 2 adds.
+    final double dz = z0 - z1;
+    final double ddz = dz - z0;
+    final double e = (z0 - (dz - ddz)) + ((-z1) - ddz);
+    if (0<=dz) {
+      if (0<=e) { return add(dz).add(e); }
+      if (Math.abs(e)<=Math.abs(dz)) { return add(dz).add(e); }
+      return add(-dz).add(-e); }
+    // 0>dz
+    if (0>e) { return add(-dz).add(-e); }
+    if (Math.abs(e)<=Math.abs(dz)) { return add(-dz).add(-e); }
+    return add(dz).add(e); }
+
+  //    public final BigFloat
+  //    addL1 (final double z0,
+  //           final double z1) {
+  //      //assert Double.isFinite(z0);
+  //      //assert Double.isFinite(z1);
+  //      final BigFloat dz = difference(z0,z1);
+  //      return add(
+  //        nonNegative(),
+  //        significand(),
+  //        exponent(),
+  //        true,
+  //        dz.significand(),
+  //        dz.exponent()); }
 
   public final BigFloat
   addL1Distance (final double[] z0,
