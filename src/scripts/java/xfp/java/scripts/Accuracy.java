@@ -9,7 +9,7 @@ import xfp.java.test.Common;
 /** evaluate inexact accumulators for accuracy against
  * exact accumulator.
  * <pre>
- * jy --source 11 src/scripts/java/xfp/java/scripts/BFProfile.java
+ * jy --source 12 src/scripts/java/xfp/java/scripts/BFProfile.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
  * @version 2019-07-29

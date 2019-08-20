@@ -16,7 +16,7 @@ import xfp.java.prng.PRNG;
 /** Distillation experiments.
  *
  * <pre>
- * j --source 11 -ea src/scripts/java/xfp/java/scripts/Distill.java > distilled.txt
+ * j --source 12 -ea src/scripts/java/xfp/java/scripts/Distill.java > distilled.txt
  * </pre>
  * @author palisades dot lakes at gmail dot com
  * @version 2019-07-23

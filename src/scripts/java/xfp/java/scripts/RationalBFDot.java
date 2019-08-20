@@ -18,7 +18,7 @@ import xfp.java.prng.PRNG;
 /** Benchmark rational binary float dot products.
  *
  * <pre>
- * jy --source 11 src/scripts/java/xfp/java/scripts/RationalBFDot.java
+ * jy --source 12 src/scripts/java/xfp/java/scripts/RationalBFDot.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
  * @version 2019-03-28

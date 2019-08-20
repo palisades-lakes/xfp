@@ -79,15 +79,15 @@ public final class Bei0 {
     //return Arrays.copyOfRange(m,0,n+intShift); }
     int m1[] = null;
     int i = 0;
-    final int downShift = 32-bShift;
-    final int highBits = (m[0] >>> downShift);
-    if (highBits != 0) {
+    final int rShift = 32-bShift;
+    final int hi = (m[0] >>> rShift);
+    if (hi != 0) {
       m1 = new int[n + iShift + 1];
-      m1[i++] = highBits; }
+      m1[i++] = hi; }
     else { m1 = new int[n + iShift]; }
     int j = 0;
     while (j < (n-1)) {
-      m1[i++] = (m[j++] << bShift) | (m[j] >>> downShift); }
+      m1[i++] = (m[j++] << bShift) | (m[j] >>> rShift); }
     m1[i] = m[j] << bShift;
     return m1; }
 
@@ -123,24 +123,23 @@ public final class Bei0 {
     return 0; }
 
   // assuming m0 has no leading zeros
-  public static final int compare (final int[] u0,
-                                   final long u1) {
+  public static final int compare (final int[] tt,
+                                   final long u) {
     // TODO: //assert necessary?
     //assert (! leadingZero(m0));
     //assert 0L<=u1l
-
-    final int n0 = u0.length;
-    final long m10 = hiWord(u1);
-    final long m11 = loWord(u1);
-    final int n1 = (0L!=m10) ? 2 : ((0L!=m11) ? 1 : 0);
-    if (n0<n1) { return -1; }
-    if (n0>n1) { return 1; }
-    final long m00 = unsigned(u0[0]);
-    if (m00<m10) { return -1; }
-    if (m00>m10) { return 1; }
-    final long m01 = unsigned(u0[1]);
-    if (m01<m11) { return -1; }
-    if (m01>m11) { return 1; }
+    final int nt = tt.length;
+    final long ulo = loWord(u);
+    final long uhi = hiWord(u);
+    final int nu = (0L!=uhi) ? 2 : ((0L!=ulo) ? 1 : 0);
+    if (nt<nu) { return -1; }
+    if (nt>nu) { return 1; }
+    final long thi = unsigned(tt[0]);
+    if (thi<uhi) { return -1; }
+    if (thi>uhi) { return 1; }
+    final long tlo = unsigned(tt[1]);
+    if (tlo<ulo) { return -1; }
+    if (tlo>ulo) { return 1; }
     return 0; }
 
   public static final int compare (final long m0,
@@ -380,31 +379,31 @@ public final class Bei0 {
 
   //--------------------------------------------------------------
 
-  public static final int[] add (final int[] m0,
-                                 final long m1) {
+  public static final int[] add (final int[] tt,
+                                 final long u) {
     // TODO: //assert necessary?
     //assert (! leadingZero(m0));
-    //assert 0L <= m1;
-    if (0L == m1) { return m0; }
-    if (isZero(m0)) { return valueOf(m1); }
+    //assert 0L <= u;
+    if (0L == u) { return tt; }
+    if (isZero(tt)) { return valueOf(u); }
     long sum = 0;
-    int n0 = m0.length;
-    final int hi = (int) hiWord(m1);
-    if (n0 == 1) { return valueOf(m1 + unsigned(m0[0])); }
-    final int[] r0 = new int[n0];
+    int nt = tt.length;
+    final int hi = (int) hiWord(u);
+    if (nt == 1) { return valueOf(u + unsigned(tt[0])); }
+    final int[] r0 = new int[nt];
     if (hi == 0) {
-      sum = unsigned(m0[--n0]) + m1;
-      r0[n0] = (int) sum; }
+      sum = unsigned(tt[--nt]) + u;
+      r0[nt] = (int) sum; }
     else {
-      sum = unsigned(m0[--n0]) + loWord(m1);
-      r0[n0] = (int) sum;
-      sum = unsigned(m0[--n0]) + unsigned(hi) + (sum >>> 32);
-      r0[n0] = (int) sum; }
+      sum = unsigned(tt[--nt]) + loWord(u);
+      r0[nt] = (int) sum;
+      sum = unsigned(tt[--nt]) + unsigned(hi) + (sum >>> 32);
+      r0[nt] = (int) sum; }
 
     boolean carry = (hiWord(sum) != 0L);
-    while ((n0 > 0) && carry) {
-      carry = ((r0[--n0] = m0[n0] + 1) == 0); }
-    while (n0 > 0) { r0[--n0] = m0[n0]; }
+    while ((nt > 0) && carry) {
+      carry = ((r0[--nt] = tt[nt] + 1) == 0); }
+    while (nt > 0) { r0[--nt] = tt[nt]; }
     if (carry) {
       final int[] r1 = new int[r0.length+1];
       System.arraycopy(r0,0,r1,1,r0.length);
@@ -445,26 +444,23 @@ public final class Bei0 {
 
     final int n0 = u0.length;
 
-    //final int intShift = intShift(upShift);
-    //final int remShift = remShift(upShift);
-    //final int nwords = nWords(m1,remShift);
-    final int intShift = upShift >>> 5;
-    final int remShift = upShift & 0x1f;
+    final int iShift = (upShift >>> 5);
+    final int bShift = (upShift & 0x1f);
     final int nwords;
-    final int hi = Numbers.hiBit(u1) + remShift;
+    final int hi = Numbers.hiBit(u1) + bShift;
     if (64 < hi) { nwords = 3; }
     else if (32 < hi) { nwords = 2; }
     else { nwords = 1; }
     //assert (1<=nwords) && (nwords<=3);
 
-    final int n1 = intShift + nwords;
+    final int n1 = iShift + nwords;
 
     final int nr = Math.max(n0,n1);
     final int[] r0 = new int[nr];
 
     int ir=nr-1;
     int i0=n0-1;
-    final int i1=nr-intShift-1;
+    final int i1=nr-iShift-1;
 
     // copy unaffected low order m0 to result
     for (;(i1<ir) && (0<=i0);ir--,i0--) { r0[ir] = u0[i0]; }
@@ -472,7 +468,7 @@ public final class Bei0 {
 
     long sum;
 
-    final long m1s = (u1 << remShift);
+    final long m1s = (u1<<bShift);
     sum = loWord(m1s);
     if (0<=i0) { sum += unsigned(u0[i0--]); }
     r0[ir--] = (int) sum;
@@ -481,7 +477,7 @@ public final class Bei0 {
       if (0<=i0) { sum += unsigned(u0[i0--]); }
       r0[ir--] = (int) sum; }
     if (3==nwords) {
-      sum = (u1 >>> (64-remShift)) + (sum >>> 32);
+      sum = (u1 >>> (64-bShift)) + (sum >>> 32);
       if (0<=i0) { sum += unsigned(u0[i0--]); }
       r0[ir--] = (int) sum; }
 

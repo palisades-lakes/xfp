@@ -7,7 +7,7 @@ import xfp.java.prng.Seeds;
 
 //----------------------------------------------------------------
 /** <pre>
- * j --source 11 src/scripts/java/xfp/java/scripts/SaveSeeds.java
+ * j --source 12 src/scripts/java/xfp/java/scripts/SaveSeeds.java
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com

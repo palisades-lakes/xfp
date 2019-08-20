@@ -11,7 +11,7 @@ import xfp.java.prng.PRNG;
 /** Benchmark partial dot products.
  *
  * <pre>
- * jy --source 11 src/scripts/java/xfp/java/scripts/PartialDots.java
+ * jy --source 12 src/scripts/java/xfp/java/scripts/PartialDots.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
  * @version 2019-07-25

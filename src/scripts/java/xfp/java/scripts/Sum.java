@@ -17,7 +17,7 @@ import xfp.java.prng.PRNG;
 /** Benchmark algebraic structure tests.
  *
  * <pre>
- * jy --source 11 src/scripts/java/xfp/java/scripts/Sum.java
+ * jy --source 12 src/scripts/java/xfp/java/scripts/Sum.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
  * @version 2019-04-14

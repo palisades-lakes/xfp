@@ -13,7 +13,7 @@ import xfp.java.prng.PRNG;
  * At least 4*2<sup>32</sup> tests to get calls to Natural.divadd.
  *
  * <pre>
- * j --source 11 -ea src/scripts/java/xfp/java/scripts/Division.java > division.txt
+ * j --source 12 -ea src/scripts/java/xfp/java/scripts/Division.java > division.txt
  * </pre>
  * @author palisades dot lakes at gmail dot com
  * @version 2019-08-13

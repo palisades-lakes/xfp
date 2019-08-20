@@ -8,7 +8,7 @@ import xfp.java.test.Common;
 /** Profile accumulators.
  *
  * <pre>
- * jy --source 11 src/scripts/java/xfp/java/scripts/ZhuHayesProfile.java
+ * jy --source 12 src/scripts/java/xfp/java/scripts/ZhuHayesProfile.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
  * @version 2019-04-16

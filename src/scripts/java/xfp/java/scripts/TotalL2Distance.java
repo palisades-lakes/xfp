@@ -7,7 +7,7 @@ import xfp.java.prng.Generators;
 /** Benchmark dot products.
  *
  * <pre>
- * jy --source 11 src/scripts/java/xfp/java/scripts/TotalL2Distance.java
+ * jy --source 12 src/scripts/java/xfp/java/scripts/TotalL2Distance.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
  * @version 2019-08-19

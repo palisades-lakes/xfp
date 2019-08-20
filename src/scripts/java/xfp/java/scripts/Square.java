@@ -9,7 +9,7 @@ import xfp.java.prng.PRNG;
 /** Benchmark squares.
  *
  * <pre>
- * jy --source 11 src/scripts/java/xfp/java/scripts/Square.java
+ * jy --source 12 src/scripts/java/xfp/java/scripts/Square.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
  * @version 2019-07-30

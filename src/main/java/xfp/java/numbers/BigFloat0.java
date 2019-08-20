@@ -10,7 +10,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-17
+ * @version 2019-08-20
  */
 
 @SuppressWarnings("unchecked")
@@ -101,10 +101,12 @@ public final class BigFloat0 implements Ringlike<BigFloat0> {
         return valueOf(p1,t0.subtractFrom(t1,upShift),e); }
       // t0 > t1
       return valueOf(p0,t0.subtract(t1,upShift),e); }
-    return valueOf(p0,t0.add(t1,upShift),e); }
+    return valueOf(
+      p0,
+      t0.add(t1,upShift),
+      e); }
 
   //--------------------------------------------------------------
-  // 0 upShift on t1
 
   private static final BigFloat0
   add2 (final boolean p0,
@@ -112,18 +114,14 @@ public final class BigFloat0 implements Ringlike<BigFloat0> {
         final boolean p1,
         final long t1,
         final int e) {
-
-    //assert t0.isImmutable();
     //assert 0L<=t1;
     if (p0^p1) { // different signs
       final int c = t0.compareTo(t1);
       if (0==c) { return ZERO; }
-      // t1 > t0
-      if (0 > c) {
-        return valueOf(p1,t0.subtractFrom(t1),e); }
-      // t0 > t1
+      // t1>t0
+      if (0>c) { return valueOf(p1,t0.subtractFrom(t1),e); }
+      // t0>t1
       return valueOf(p0,t0.subtract(t1),e); }
-    //assert t.isImmutable();
     return valueOf(p0,t0.add(t1),e); }
 
   //--------------------------------------------------------------

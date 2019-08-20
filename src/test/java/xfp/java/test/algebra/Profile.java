@@ -14,7 +14,7 @@ import xfp.java.prng.PRNG;
 //----------------------------------------------------------------
 /** Profiling rational vector spaces.
  *
- * jy --source 11 src/scripts/java/xfp/java/scripts/QnProfile.java
+ * jy --source 12 src/scripts/java/xfp/java/scripts/QnProfile.java
  *
  * @author palisades dot lakes at gmail dot com
  * @version 2019-07-21

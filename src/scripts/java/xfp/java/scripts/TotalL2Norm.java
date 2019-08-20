@@ -8,7 +8,7 @@ import xfp.java.prng.Generators;
 /** Benchmark sums.
  *
  * <pre>
- * jy --source 11 src/scripts/java/xfp/java/scripts/TotalL2Norm.java
+ * jy --source 12 src/scripts/java/xfp/java/scripts/TotalL2Norm.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
  * @version 2019-08-16
