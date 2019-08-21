@@ -1603,33 +1603,33 @@ public final class Bei0 {
 
   //--------------------------------------------------------------
 
-  private static final int[] shiftDown0 (final int[] m0,
-                                         final int n) {
-    final int intShift = n >>> 5;
-    final int remShift = n & 0x1f;
-    final int n0 = m0.length;
-    int m1[] = null;
+  private static final int[] shiftDown0 (final int[] tt,
+                                         final int downShift) {
+    final int iShift = (downShift>>>5);
+    final int bShift = (downShift&0x1F);
+    final int nt = tt.length;
+    int vv[] = null;
 
     // Special case: entire contents shifted off the end
-    if (intShift >= n0) { return valueOf(0L); }
+    if (iShift>=nt) { return new int[0]; }
 
-    if (remShift == 0) {
-      final int newMagLen = n0-intShift;
-      m1 = Arrays.copyOf(m0,newMagLen); }
+    if (bShift == 0) {
+      final int nv = nt-iShift;
+      vv = Arrays.copyOf(tt,nv); }
     else {
       int i = 0;
-      final int highBits = m0[0] >>> remShift;
-    if (highBits != 0) {
-      m1 = new int[n0-intShift];
-      m1[i++] = highBits; }
+      final int hi = (tt[0] >>> bShift);
+    if (hi != 0) {
+      vv = new int[nt-iShift];
+      vv[i++] = hi; }
     else {
-      m1 = new int[n0-intShift-1]; }
+      vv = new int[nt-iShift-1]; }
 
-    final int nBits2 = 32-remShift;
+    final int nBits2 = 32-bShift;
     int j = 0;
-    while (j < (n0-intShift-1)) {
-      m1[i++] = (m0[j++] << nBits2) | (m0[j] >>> remShift); } }
-    return m1; }
+    while (j < (nt-iShift-1)) {
+      vv[i++] = (tt[j++] << nBits2) | (tt[j] >>> bShift); } }
+    return vv; }
 
   public static final int[] shiftDown (final int[] m,
                                        final int n) {
