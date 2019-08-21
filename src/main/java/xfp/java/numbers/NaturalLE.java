@@ -546,10 +546,11 @@ public final class NaturalLE implements Natural {
 
   //--------------------------------------------------------------
 
-  private final void addByWords (final int nt,
-                                 final int iShift,
-                                 final long u,
-                                 final int[] vv) {
+  private final NaturalLE addByWords (final int iShift,
+                                      final long u) {
+    final int nt = hiInt();
+    final int n = Math.max(nt+iShift,2);
+    final int[] vv = new int[n+1];
     long sum = loWord(u);
     if (0==iShift) { sum += uword(0); } 
     vv[0] = (int) sum;
@@ -564,13 +565,15 @@ public final class NaturalLE implements Natural {
       if (i>=iShift) { sum += uword(i-iShift); }
       vv[i] = (int) sum;
       sum = (sum>>>32); } 
-    vv[i] = (int) sum; }
+    vv[i] = (int) sum; 
+    return unsafe(vv); }
 
-  private final void addByBits (final int nt,
-                                final int iShift,
-                                final int bShift,
-                                final long u,
-                                final int[] vv) {
+  private final NaturalLE addByBits (final int iShift,
+                                     final int bShift,
+                                     final long u) {
+    final int nt = hiInt();
+    final int n = Math.max(nt+iShift,2);
+    final int[] vv = new int[n+1];
     final int rShift = 32-bShift;
     int t1 = 0;
     long sum = loWord(u);
@@ -606,7 +609,7 @@ public final class NaturalLE implements Natural {
       t0 = t1;
       vv[i] = ti; } 
     //assert 0L==sum; 
-  }
+    return unsafe(vv); }
 
   @Override
   public final NaturalLE add (final int upShift,
@@ -619,12 +622,8 @@ public final class NaturalLE implements Natural {
 
     final int iShift = (upShift>>>5);
     final int bShift = (upShift&0x1F);
-    final int nt = hiInt();
-    final int n = Math.max(nt+iShift,2);
-    final int[] vv = new int[n+1];
-    if (0==bShift) { addByWords(nt,iShift,u,vv); }
-    else { addByBits(nt,iShift,bShift,u,vv); }
-    return unsafe(vv); }
+    if (0==bShift) { return addByWords(iShift,u); }
+    return addByBits(iShift,bShift,u); }
 
   //  @Override
   //  public final NaturalLE add (final int upShift,
@@ -743,10 +742,10 @@ public final class NaturalLE implements Natural {
   //--------------------------------------------------------------
 
 
-  private final void subtractByWords (final int nt,
-                                      final int iShift,
-                                      final long u,
-                                      final int[] vv) {
+  private final NaturalLE subtractByWords (final int iShift,
+                                           final long u) {
+    final int nt = hiInt();
+    final int[] vv = new int[nt+iShift+1];
     long dif = -loWord(u);
     if (0==iShift) { dif += uword(0); } 
     vv[0] = (int) dif;
@@ -760,13 +759,14 @@ public final class NaturalLE implements Natural {
       if (i>=iShift) { dif += uword(i-iShift); }
       vv[i] = (int) dif;
       dif = (dif>>>32); } 
-    vv[i] = (int) dif; }
+    vv[i] = (int) dif; 
+    return unsafe(vv); }
 
-  private final void subtractByBits (final int nt,
-                                     final int iShift,
-                                     final int bShift,
-                                     final long u,
-                                     final int[] vv) {
+  private final NaturalLE subtractByBits (final int iShift,
+                                          final int bShift,
+                                          final long u) {
+    final int nt = hiInt();
+    final int[] vv = new int[nt+iShift+1];
     final int rShift = 32-bShift;
     int t0 = 0;
     int t1 = 0;
@@ -803,7 +803,7 @@ public final class NaturalLE implements Natural {
       t0 = t1;
       vv[i] = ti; } 
     //assert 0L==dif; 
-  }
+    return unsafe(vv); }
 
   @Override
   public final NaturalLE subtract (final int upShift,
@@ -816,11 +816,8 @@ public final class NaturalLE implements Natural {
 
     final int iShift = (upShift>>>5);
     final int bShift = (upShift&0x1F);
-    final int nt = hiInt();
-    final int[] vv = new int[nt+iShift+1];
-    if (0==bShift) { subtractByWords(nt,iShift,u,vv); }
-    else { subtractByBits(nt,iShift,bShift,u,vv); }
-    return unsafe(vv); }
+    if (0==bShift) { return subtractByWords(iShift,u); }
+    return subtractByBits(iShift,bShift,u); }
 
   //--------------------------------------------------------------
 
@@ -1252,63 +1249,71 @@ public final class NaturalLE implements Natural {
 
   //--------------------------------------------------------------
 
-  @Override
-  public final NaturalLE shiftDown (final int downShift) {
-    //assert 0<=downShift;
-    //if (0==downShift) { return this; }
-    final int iShift = (downShift>>>5);
+  private final NaturalLE shiftDownByWords (final int iShift) {
     final int nt = hiInt();
     final int nv = nt-iShift;
-    // shifting all bit off the end, covers zero input case
     if (0>=nv) { return zero(); }
-    final int bShift = (downShift & 0x1f);
+    final int[] vv = new int[nv];
+    for (int i=0;i<nv;i++) { vv[i] = word(i+iShift); }
+    //System.arraycopy(words(),iShift,vv,0,nv);
+    return unsafe(vv,nv); }
 
-    if (0==bShift) {
-      final int[] vv = new int[nv];
-      for (int i=0;i<nv;i++) { vv[i] = word(i+iShift); }
-      //System.arraycopy(words(),iShift,vv,0,nv);
-      return unsafe(vv,nv); }
+  private final NaturalLE shiftDownByBits (final int iShift,
+                                           final int bShift) {
+    final int nt = hiInt();
+    final int nv = nt-iShift;
+    // shifting all bits off the end, covers zero input case
+    if (0>=nv) { return zero(); }
 
     final int[] vv = new int[nv];
     final int rShift = 32-bShift;
     int w0 = word(iShift);
-    for (int i=0;i<nv;i++) { 
-      final int w1 = word(i+iShift+1);
+    for (int i=0,j=iShift+1;i<nv;i++,j++) { 
+      final int w1 = word(j);
       final int w = ((w1<<rShift) | (w0>>>bShift));
       w0 = w1;
       vv[i] = w; }
     return unsafe(vv); }
 
-//  @Override
-//  public final NaturalLE shiftDown (final int downShift) {
-//    //assert 0<=downShift;
-//    //if (0==downShift) { return this; }
-//    final int iShift = (downShift>>>5);
-//    final int nt = hiInt();
-//    if (iShift>=nt) { return zero(); }
-//
-//    final int bShift = (downShift & 0x1F);
-//
-//    if (0==bShift) {
-//      final int nv = nt-iShift;
-//      final int[] vv = new int[nv];
-//      for (int i=0;i<nv;i++) { vv[i] = word(i+iShift); }
-//      //System.arraycopy(words(),iShift,u,0,n1);
-//      return unsafe(vv,nv); }
-//
-//    final int rShift = 32-bShift;
-//    final int hi = (word(nt-1)>>>bShift);
-//    final int nv = nt-iShift-1;
-//    final int[] vv;
-//    if (0==hi) { vv = new int[nv]; }
-//    else { vv = new int[nv+1]; vv[nv] = hi; }
-//    int w0 = word(iShift);
-//    for (int i=0;i<nv;i++) { 
-//      final int w1 = word(i+iShift+1);
-//      final int w = ((w1<<rShift) | (w0>>>bShift));
-//      w0 = w1;
-//      vv[i] = w; }
-//    return unsafe(vv,nv+((0==hi)?0:1)); }
+  @Override
+  public final NaturalLE shiftDown (final int downShift) {
+    //assert 0<=downShift;
+    //if (0==downShift) { return this; }
+    final int iShift = (downShift>>>5);
+    final int bShift = (downShift&0x1F);
+    if (0==bShift) { return shiftDownByWords(iShift); }
+    return shiftDownByBits(iShift,bShift); }
+
+  //  @Override
+  //  public final NaturalLE shiftDown (final int downShift) {
+  //    //assert 0<=downShift;
+  //    //if (0==downShift) { return this; }
+  //    final int iShift = (downShift>>>5);
+  //    final int nt = hiInt();
+  //    if (iShift>=nt) { return zero(); }
+  //
+  //    final int bShift = (downShift & 0x1F);
+  //
+  //    if (0==bShift) {
+  //      final int nv = nt-iShift;
+  //      final int[] vv = new int[nv];
+  //      for (int i=0;i<nv;i++) { vv[i] = word(i+iShift); }
+  //      //System.arraycopy(words(),iShift,u,0,n1);
+  //      return unsafe(vv,nv); }
+  //
+  //    final int rShift = 32-bShift;
+  //    final int hi = (word(nt-1)>>>bShift);
+  //    final int nv = nt-iShift-1;
+  //    final int[] vv;
+  //    if (0==hi) { vv = new int[nv]; }
+  //    else { vv = new int[nv+1]; vv[nv] = hi; }
+  //    int w0 = word(iShift);
+  //    for (int i=0;i<nv;i++) { 
+  //      final int w1 = word(i+iShift+1);
+  //      final int w = ((w1<<rShift) | (w0>>>bShift));
+  //      w0 = w1;
+  //      vv[i] = w; }
+  //    return unsafe(vv,nv+((0==hi)?0:1)); }
 
 
   //--------------------------------------------------------------

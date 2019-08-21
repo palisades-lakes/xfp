@@ -1,5 +1,6 @@
 package xfp.java.numbers;
 
+import static java.lang.Double.doubleToRawLongBits;
 import static xfp.java.numbers.Numbers.loBit;
 
 import java.util.Objects;
@@ -10,7 +11,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-20
+ * @version 2019-08-21
  */
 
 @SuppressWarnings("unchecked")
@@ -208,21 +209,21 @@ public final class BigFloat implements Ringlike<BigFloat> {
 
   //--------------------------------------------------------------
 
-  private static final BigFloat
-  add2 (final boolean p0,
-        final NaturalLE t0,
-        final boolean p1,
-        final long t1,
-        final int e) {
-    //assert 0L<=t1;
-    if (p0^p1) { // different signs
-      final int c = t0.compareTo(t1);
-      if (0==c) { return ZERO; }
-      // t1>t0
-      if (0>c) { return valueOf(p1,t0.subtractFrom(t1),e); }
-      // t0>t1
-      return valueOf(p0,t0.subtract(t1),e); }
-    return valueOf(p0,t0.add(t1),e); }
+  //  private static final BigFloat
+  //  add2 (final boolean p0,
+  //        final NaturalLE t0,
+  //        final boolean p1,
+  //        final long t1,
+  //        final int e) {
+  //    //assert 0L<=t1;
+  //    if (p0^p1) { // different signs
+  //      final int c = t0.compareTo(t1);
+  //      if (0==c) { return ZERO; }
+  //      // t1>t0
+  //      if (0>c) { return valueOf(p1,t0.subtractFrom(t1),e); }
+  //      // t0>t1
+  //      return valueOf(p0,t0.subtract(t1),e); }
+  //    return valueOf(p0,t0.add(t1),e); }
 
   //--------------------------------------------------------------
 
@@ -242,22 +243,48 @@ public final class BigFloat implements Ringlike<BigFloat> {
     final int e1 = e11+shift;
     if (e0<=e1) { return add0(p0,t0,p1,t1,e1-e0,e0); }
     return add1(p0,t0,e0-e1,p1,t1,e1); }
-    //return add2(p0,t0.shiftUp(e0-e1),p1,t1,e1); }
+  //return add2(p0,t0.shiftUp(e0-e1),p1,t1,e1); }
 
   //--------------------------------------------------------------
+
+  //    public final BigFloat
+  //    add (final double z) {
+  //      //assert Double.isFinite(z);
+  //      // escape on zero needed for add() 
+  //      if (0.0==z) { return this; }
+  //      return add(
+  //        nonNegative(),
+  //        (NaturalLE) significand(),
+  //        exponent(),
+  //        Doubles.nonNegative(z),
+  //        Doubles.significand(z),
+  //        Doubles.exponent(z)); }
 
   public final BigFloat
   add (final double z) {
     //assert Double.isFinite(z);
     // escape on zero needed for add() 
     if (0.0==z) { return this; }
+    final long bits = doubleToRawLongBits(z);
+    final long t0 = (bits&Doubles.STORED_SIGNIFICAND_MASK);
+    final long e0 = (bits&Doubles.EXPONENT_MASK);
+    final long t;
+    final int e;
+    if (0L==e0) { t = t0; e = 0; }
+    else {
+      t = t0+Doubles.STORED_SIGNIFICAND_MASK+1;
+      e = Math.max(
+        Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND,
+        ((int) (e0>>>Doubles.STORED_SIGNIFICAND_BITS))
+        -Doubles.EXPONENT_BIAS
+        -Doubles.STORED_SIGNIFICAND_BITS); }
     return add(
       nonNegative(),
       (NaturalLE) significand(),
       exponent(),
-      Doubles.nonNegative(z),
-      Doubles.significand(z),
-      Doubles.exponent(z)); }
+      (0L==(Doubles.SIGN_MASK&bits)),
+      t,
+      e); }
 
   public final BigFloat
   addAll (final double[] z) {
