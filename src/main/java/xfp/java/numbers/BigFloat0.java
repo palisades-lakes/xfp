@@ -716,28 +716,35 @@ public final class BigFloat0 implements Ringlike<BigFloat0> {
   // Object methods
   //--------------------------------------------------------------
 
-  public final boolean equals (final BigFloat0 q) {
-    if (this==q) { return true; }
-    if (null==q) { return false; }
+
+  private static final boolean reducedEquals (final BigFloat0 a,
+                                              final BigFloat0 b) {
+    // assuming a and b have minimum significand and maximum 
+    // exponent
+    if (a==b) { return true; }
+    if (null==a) { return false; }
     // assuming reduced
-    return
-      (nonNegative()==q.nonNegative())
-      &&
-      (exponent()==q.exponent())
-      &&
-      significand().equals(q._significand); }
+    if (! a.significand().equals(b.significand())) { return false; }
+    if (a.significand().isZero()) { return true; }
+    if (a.nonNegative()!=b.nonNegative()) { return false; }
+    if (a.exponent()!=b.exponent()) { return false; }
+    return true; }
+
+  public final boolean equals (final BigFloat0 q) {
+    return reducedEquals(reduce(),q.reduce()); }
 
   @Override
   public boolean equals (final Object o) {
-    if (!(o instanceof BigFloat0)) { return false; }
-    return equals((BigFloat0) o); }
+    if (!(o instanceof BigFloat)) { return false; }
+    return equals(o); }
 
   @Override
   public int hashCode () {
+    final BigFloat0 a = reduce();
     int h = 17;
-    h = (31*h) + (nonNegative() ? 0 : 1);
-    h = (31*h) + exponent();
-    h = (31*h) + Objects.hash(significand());
+    h = (31*h) + (a.nonNegative() ? 0 : 1);
+    h = (31*h) + a.exponent();
+    h = (31*h) + Objects.hash(a.significand());
     return h; }
 
   @Override
@@ -751,42 +758,37 @@ public final class BigFloat0 implements Ringlike<BigFloat0> {
   // construction
   //--------------------------------------------------------------
 
-  private BigFloat0 (final boolean nonNegative,
-                     final NaturalBEI0 t0,
-                     final int e0) {
-    final int e1 = Math.max(0,Numbers.loBit(t0));
-    _nonNegative = nonNegative;
-    final NaturalBEI0 significand;
-    final int exponent;
-    if (e1==0) {
-      significand = t0;
-      exponent = e0; }
-    else {
-      significand = t0.shiftDown(e1);
-      exponent = Math.addExact(e0,e1); }
-    _significand = significand;
-    _exponent = exponent; }
+  private BigFloat0 (final boolean p0,
+                    final NaturalBEI0 t0,
+                    final int e0) {
+    _nonNegative = p0;
+    _significand = t0;
+    _exponent = e0; } 
 
   //--------------------------------------------------------------
 
-  public static final BigFloat0 valueOf (final boolean nonNegative,
-                                         final Natural t,
-                                         final int e) {
-    if (t.isZero()) { return ZERO; }
-    return new BigFloat0(nonNegative,(NaturalBEI0) t,e); }
+  private static final BigFloat0 reduce (final boolean p0,
+                                        final NaturalBEI0 t0,
+                                        final int e0) {
+    //if (t0.isZero()) { return ZERO; }
+    final int shift = t0.loBit();
+    if (0>=shift) { return new BigFloat0(p0,t0,e0); }
+    return new BigFloat0(p0, t0.shiftDown(shift),e0+shift); }
 
-  //  public static final BigFloat0 valueOf (final long t,
-  //                                         final int e) {
-  //    if (0L==t) { return valueOf(0L); }
-  //    if (0L < t) {
-  //      return valueOf(true,NaturalBEI0.valueOf(t),e); }
-  //    return valueOf(false,NaturalBEI0.valueOf(-t),e); }
-  //
-  //  public static final BigFloat0 valueOf (final int t,
-  //                                         final int e) {
-  //    if (0==t) { return valueOf(0L); }
-  //    if (0<t) { return valueOf(true,NaturalBEI0.valueOf(t),e); }
-  //    return valueOf(false,NaturalBEI0.valueOf(-t),e); }
+  private final BigFloat0 reduce () {
+    final boolean p0 = nonNegative();
+    final NaturalBEI0 t0 = significand();
+    final int e0 = exponent();
+    final int shift = t0.loBit();
+    if (0>=shift) { return this; }
+    return new BigFloat0(p0, t0.shiftDown(shift),e0+shift); }
+
+  public static final BigFloat0 valueOf (final boolean p0,
+                                        final Natural t0,
+                                        final int e0) {
+    if (t0.isZero()) { return ZERO; }
+    //return reduce(p0,t0,e0); }
+  return new BigFloat0(p0,(NaturalBEI0) t0,e0); }
 
   //--------------------------------------------------------------
 
