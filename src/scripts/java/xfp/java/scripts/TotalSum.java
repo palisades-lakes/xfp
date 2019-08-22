@@ -11,7 +11,7 @@ import xfp.java.prng.Generators;
  * j --source 12 src/scripts/java/xfp/java/scripts/TotalSum.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-20
+ * @version 2019-08-21
  */
 @SuppressWarnings("unchecked")
 public final class TotalSum {
