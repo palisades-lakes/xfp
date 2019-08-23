@@ -11,7 +11,7 @@ import xfp.java.prng.Generators;
  * j --source 12 src/scripts/java/xfp/java/scripts/TotalSum.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-21
+ * @version 2019-08-23
  */
 @SuppressWarnings("unchecked")
 public final class TotalSum {
@@ -20,10 +20,10 @@ public final class TotalSum {
     final int dim = 2*1024*1024;
     final int trys = 8 * 1024;
     //final Generator g = Generators.make("exponential",dim);
-    //final Generator g = Generators.make("finite",dim);
+    final Generator g = Generators.make("finite",dim);
     //final Generator g = Generators.make("gaussian",dim);
     //final Generator g = Generators.make("laplace",dim);
-    final Generator g = Generators.make("uniform",dim);
+    //final Generator g = Generators.make("uniform",dim);
     final Accumulator a = 
       xfp.java.accumulators.BigFloatAccumulator.make();
     assert a.isExact();
