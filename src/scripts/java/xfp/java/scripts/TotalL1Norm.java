@@ -1,27 +1,27 @@
 package xfp.java.scripts;
 
 import xfp.java.accumulators.Accumulator;
-import xfp.java.accumulators.BigFloatAccumulator0;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
 
-/** Benchmark sums.
+/** Benchmark l1 norm.
  *
  * <pre>
  * jy --source 12 src/scripts/java/xfp/java/scripts/TotalL1Norm.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-16
+ * @version 2019-08-22
  * 7
  */
 @SuppressWarnings("unchecked")
 public final class TotalL1Norm {
 
   public static final void main (final String[] args) {
-    final int dim = (8*1024*1024) - 1;
-    final int trys = 1 * 1024;
+    final int dim = (2*1024*1024);
+    final int trys = 8 * 1024;
     final Generator g = Generators.make("finite",dim);
-    final Accumulator a = BigFloatAccumulator0.make();
+    final Accumulator a = 
+      xfp.java.accumulators.BigFloatAccumulator.make();
     assert a.isExact();
     for (int i=0;i<trys;i++) {
       final double[] x = (double[]) g.next();

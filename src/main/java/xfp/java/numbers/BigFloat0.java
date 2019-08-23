@@ -87,7 +87,7 @@ public final class BigFloat0 implements Ringlike<BigFloat0> {
   //--------------------------------------------------------------
 
   private static final BigFloat0
-  add0 (final boolean p0,
+  add6 (final boolean p0,
         final NaturalBEI0 t0,
         final boolean p1,
         final long t1,
@@ -109,7 +109,7 @@ public final class BigFloat0 implements Ringlike<BigFloat0> {
   //--------------------------------------------------------------
 
   private static final BigFloat0
-  add2 (final boolean p0,
+  add5a (final boolean p0,
         final NaturalBEI0 t0,
         final boolean p1,
         final long t1,
@@ -174,8 +174,8 @@ public final class BigFloat0 implements Ringlike<BigFloat0> {
     final int shift = Numbers.loBit(t11);
     final long t1 = (t11>>>shift);
     final int e1 = e11+shift;
-    if (e0<=e1) { return add0(p0,t0,p1,t1,e1-e0,e0); }
-    return add2(p0,t0.shiftUp(e0-e1),p1,t1,e1); }
+    if (e0<=e1) { return add6(p0,t0,p1,t1,e1-e0,e0); }
+    return add5a(p0,t0.shiftUp(e0-e1),p1,t1,e1); }
 
   //--------------------------------------------------------------
 
@@ -767,13 +767,13 @@ public final class BigFloat0 implements Ringlike<BigFloat0> {
 
   //--------------------------------------------------------------
 
-  private static final BigFloat0 reduce (final boolean p0,
-                                        final NaturalBEI0 t0,
-                                        final int e0) {
-    //if (t0.isZero()) { return ZERO; }
-    final int shift = t0.loBit();
-    if (0>=shift) { return new BigFloat0(p0,t0,e0); }
-    return new BigFloat0(p0, t0.shiftDown(shift),e0+shift); }
+//  private static final BigFloat0 reduce (final boolean p0,
+//                                        final NaturalBEI0 t0,
+//                                        final int e0) {
+//    //if (t0.isZero()) { return ZERO; }
+//    final int shift = t0.loBit();
+//    if (0>=shift) { return new BigFloat0(p0,t0,e0); }
+//    return new BigFloat0(p0, t0.shiftDown(shift),e0+shift); }
 
   private final BigFloat0 reduce () {
     final boolean p0 = nonNegative();

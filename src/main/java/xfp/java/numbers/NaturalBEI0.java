@@ -174,11 +174,11 @@ public final class NaturalBEI0 implements Natural {
   //--------------------------------------------------------------
 
   @Override
-  public final NaturalBEI0 add (final long m,
-                                final int shift) {
+  public final NaturalBEI0 add (final long u,
+                                final int upShift) {
     //assert 0L<=m;
-    final int[] u = Bei0.add(words(),m,shift);
-    return unsafe(u); }
+    final int[] vv = Bei0.add(words(),u,upShift);
+    return unsafe(vv); }
 
   //--------------------------------------------------------------
   // subtract longs
