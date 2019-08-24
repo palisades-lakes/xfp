@@ -380,23 +380,30 @@ public final class BigFloat0 implements Ringlike<BigFloat0> {
     return s; }
 
   //--------------------------------------------------------------
+
   public BigFloat0 addL1 (final double z0,
-                          final double z1) {
-    // later adds should catch non-finite inputs
-    //assert Double.isFinite(z0);
-    //assert Double.isFinite(z1);
-    // preserve exactness using twoAdd to convert to 2 adds.
-    final double dz = z0 - z1;
-    final double ddz = dz - z0;
-    final double e = (z0 - (dz - ddz)) + ((-z1) - ddz);
-    if (0<=dz) {
-      if (0<=e) { return add(dz).add(e); }
-      if (Math.abs(e)<=Math.abs(dz)) { return add(dz).add(e); }
-      return add(-dz).add(-e); }
-    // 0>dz
-    if (0>e) { return add(-dz).add(-e); }
-    if (Math.abs(e)<=Math.abs(dz)) { return add(-dz).add(-e); }
-    return add(dz).add(e); }
+                         final double z1) {
+    if (z0>z1) { return add(z0).add(-z1); }
+    if (z0<z1) { return add(-z0).add(z1); }
+    return this; }
+
+//  public BigFloat0 addL1 (final double z0,
+//                          final double z1) {
+//    // later adds should catch non-finite inputs
+//    //assert Double.isFinite(z0);
+//    //assert Double.isFinite(z1);
+//    // preserve exactness using twoAdd to convert to 2 adds.
+//    final double dz = z0 - z1;
+//    final double ddz = dz - z0;
+//    final double e = (z0 - (dz - ddz)) + ((-z1) - ddz);
+//    if (0<=dz) {
+//      if (0<=e) { return add(dz).add(e); }
+//      if (Math.abs(e)<=Math.abs(dz)) { return add(dz).add(e); }
+//      return add(-dz).add(-e); }
+//    // 0>dz
+//    if (0>e) { return add(-dz).add(-e); }
+//    if (Math.abs(e)<=Math.abs(dz)) { return add(-dz).add(-e); }
+//    return add(dz).add(e); }
 
   //  public final BigFloat0
   //  addL1 (final double z0,
@@ -457,21 +464,28 @@ public final class BigFloat0 implements Ringlike<BigFloat0> {
   //    final BigFloat0 es = product(e,s);
   //    return add2(s).add(es).add(es).add2(e); }
 
+//  public final BigFloat0
+//  addL2 (final double z0,
+//         final double z1) {
+//    //assert Double.isFinite(z0);
+//    //assert Double.isFinite(z1);
+//    final BigFloat0 dz = difference(z0,z1);
+//    final NaturalBEI0 t2 = dz.significand().square();
+//    final int e2 = 2*dz.exponent();
+//    return add(
+//      nonNegative(),
+//      significand(),
+//      exponent(),
+//      true,
+//      t2,
+//      e2); }
+
   public final BigFloat0
   addL2 (final double z0,
          final double z1) {
-    //assert Double.isFinite(z0);
-    //assert Double.isFinite(z1);
-    final BigFloat0 dz = difference(z0,z1);
-    final NaturalBEI0 t2 = dz.significand().square();
-    final int e2 = 2*dz.exponent();
-    return add(
-      nonNegative(),
-      significand(),
-      exponent(),
-      true,
-      t2,
-      e2); }
+    final double mz1 = -z1;
+    return
+      add2(z0).add2(z1).addProduct(z0,mz1).addProduct(z0,mz1); }
 
   public final BigFloat0
   addL2Distance (final double[] z0,
