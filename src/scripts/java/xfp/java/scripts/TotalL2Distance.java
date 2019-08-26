@@ -10,7 +10,7 @@ import xfp.java.prng.Generators;
  * jy --source 12 src/scripts/java/xfp/java/scripts/TotalL2Distance.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-24
+ * @version 2019-08-25
  */
 @SuppressWarnings("unchecked")
 public final class TotalL2Distance {
@@ -18,9 +18,10 @@ public final class TotalL2Distance {
   public static final void main (final String[] args) {
     final int dim = (2*1024*1024);
     final int trys = 8 * 1024;
-    final Generator g = Generators.make("finite",dim);
+    //final Generator g = Generators.make("finite",dim);
+    final Generator g = Generators.make("uniform",dim);
     final Accumulator a = 
-      xfp.java.accumulators.BigFloatAccumulator0.make();
+      xfp.java.accumulators.BigFloatAccumulator.make();
     assert a.isExact();
     for (int i=0;i<trys;i++) {
       final double[] x0 = (double[]) g.next();

@@ -334,7 +334,10 @@ implements Ringlike<RationalFloat> {
                                          final double z1) {
     if (Natural.valueOf(1L).equals(denominator())) {
       final BigFloat sum =
-        BigFloat.valueOf(nonNegative(),numerator(),exponent())
+        BigFloat.valueOf(
+          nonNegative(),
+          numerator(),
+          exponent())
         .addProduct(z0,z1);
       return valueOf(
         sum.nonNegative(),sum.significand(),sum.exponent()); }
@@ -491,7 +494,10 @@ implements Ringlike<RationalFloat> {
     final Natural d0 = denominator();
     if (d0.isOne()) {
       return
-        BigFloat.valueOf(nonNegative(),numerator(),exponent())
+        BigFloat.valueOf(
+          nonNegative(),
+          numerator(),
+          exponent())
         .doubleValue(); }
 
     final boolean neg = !nonNegative();

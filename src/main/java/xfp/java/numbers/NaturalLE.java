@@ -961,6 +961,15 @@ public final class NaturalLE implements Natural {
     if (0==bShift) { return addByWords(u,iShift); }
     return addByBits(u,iShift,bShift); }
 
+//  @Override
+//  public final NaturalLE add (final Natural u,
+//                              final int upShift) {
+//    //assert 0<=upShift;
+//    if (0==upShift) { return add(u); }
+//    if (isZero()) { return (NaturalLE) u.shiftUp(upShift); }
+//    if (u.isZero()) { return this; }
+//    return add(u.shiftUp(upShift)); }
+
   //--------------------------------------------------------------
 
   private final NaturalLE subtractByWords (final Natural u,

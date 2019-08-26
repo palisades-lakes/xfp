@@ -12,7 +12,7 @@ import xfp.java.exceptions.Exceptions;
 /** Ratios of {@link Natural}.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-07
+ * @version 2019-08-25
  */
 
 @SuppressWarnings("unchecked")
@@ -190,7 +190,7 @@ public final class Rational implements Ringlike<Rational> {
     //Debug.println("n1=" + n1);
     //Debug.println("e1=" + e1);
     final BigFloat n0d1 = BigFloat.valueOf(p0,n0,e1);
-    final BigFloat n1d0 = BigFloat.product(d0,p1,n1);
+    final BigFloat n1d0 = BigFloat.product((NaturalLE)d0,p1,n1);
     final BigFloat n = n0d1.add(n1d0);
     final BigFloat d = BigFloat.valueOf(true,d0,e1);
     //Debug.println("n0d1=" + n0d1);

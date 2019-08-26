@@ -25,7 +25,7 @@ import xfp.java.prng.Generators;
  * represented by <code>BigFloat</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-29
+ * @version 2019-08-25
  */
 @SuppressWarnings({"unchecked","static-method"})
 public final class BigFloats implements Set {
@@ -155,8 +155,8 @@ public final class BigFloats implements Set {
         if (edge) { return edgeCases.sample(); }
         final BigInteger bi = (BigInteger) g0.next();
         final boolean nonNegative = (0 <= bi.signum());
-        final Natural significand =
-          Natural.valueOf(nonNegative ? bi : bi.negate());
+        final NaturalLE significand =
+          NaturalLE.valueOf(nonNegative ? bi : bi.negate());
         final int exponent = urp.nextInt(eRan) + eMin;
         return
           BigFloat.valueOf(nonNegative,significand,exponent); } }; }
