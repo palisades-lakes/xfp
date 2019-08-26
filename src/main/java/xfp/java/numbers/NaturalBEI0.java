@@ -1,5 +1,6 @@
 package xfp.java.numbers;
 
+import static xfp.java.numbers.Numbers.UNSIGNED_MASK;
 import static xfp.java.numbers.Numbers.hiWord;
 import static xfp.java.numbers.Numbers.loWord;
 import static xfp.java.numbers.Numbers.unsigned;
@@ -119,12 +120,17 @@ public final class NaturalBEI0 implements Natural {
                                     final long t1) {
     //assert 0L<=t0;
     //assert 0L<=t1;
+    //if ((0L==t0||(0L==t1))) { return zero(); }
+
     final long hi0 = hiWord(t0);
     final long lo0 = loWord(t0);
     final long hi1 = hiWord(t1);
     final long lo1 = loWord(t1);
+
     final long lolo = lo0*lo1;
     final long hilo2 = (hi0*lo1) + (hi1*lo0);
+    // TODO: fix lurking overflow issue
+    // works here because t0,t1 53 bit double significands
     //final long hilo2 = Math.addExact(hi0*lo1,hi1*lo0);
     final long hihi = hi0*hi1;
     long sum = lolo;

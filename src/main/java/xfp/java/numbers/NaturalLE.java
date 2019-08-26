@@ -340,20 +340,19 @@ public final class NaturalLE implements Natural {
     //assert 0L<=t0;
     //assert 0L<=t1;
     //if ((0L==t0||(0L==t1))) { return zero(); }
-
+    
     final long lo0 = (t0&UNSIGNED_MASK);
     final long lo1 = (t1&UNSIGNED_MASK);
-    long sum = lo0*lo1;
-    final int w0 = (int) sum;
-
     final long hi0 = (t0>>>32);
     final long hi1 = (t1>>>32);
+
+    long sum = lo0*lo1;
+    final int w0 = (int) sum;
     // TODO: fix lurking overflow issue
-    // probably only works as long as t0,t1 double significands
-    //final long hilo2 = Math.addExact(hi0*lo1,hi1*lo0);
+    // works here because t0,t1 53 bit double significands
+        //final long hilo2 = Math.addExact(hi0*lo1,hi1*lo0);
     sum = (sum>>>32) + (hi0*lo1) + (hi1*lo0);
     final int w1 = (int) sum;
-
     sum = (sum>>>32) + hi0*hi1;
     final int w2 = (int) sum;
     final int w3 = (int) (sum>>>32);
@@ -369,8 +368,8 @@ public final class NaturalLE implements Natural {
   static final NaturalLE fromSquare (final long t) {
     //assert 0L<=t;
     //if (0L==t) { return zero(); }
-    final long hi = hiWord(t);
-    final long lo = loWord(t);
+    final long hi = (t>>>32);
+    final long lo = (t&UNSIGNED_MASK);
     final long lolo = lo*lo;
     final long hilo2 = ((hi*lo)<<1);
     //final long hilo2 = Math.multiplyExact(2,hi*lo);
@@ -1304,31 +1303,42 @@ public final class NaturalLE implements Natural {
 
   //--------------------------------------------------------------
 
+  private final NaturalLE shiftUpBywords (final int iShift) {
+    final int nt = hiInt();
+    final int nv = nt+iShift;
+    final int[] tt = words();
+    final int[] vv = new int[nv];
+    for (int i=0;i<nt;i++) { vv[i+iShift] = tt[i]; }
+    //System.arraycopy(words(),0,u,iShift,n0);
+    return unsafe(vv,nv); }
+
+  private final NaturalLE shiftUpByBits (final int iShift,
+                                         final int bShift) {
+    final int nt = hiInt();
+    final int nv = nt+iShift;
+    final int rShift = 32-bShift;
+    final int[] tt = words();
+    final int[] vv = new int[nv+1];
+    int w0 = tt[0];
+    vv[iShift] = (w0<<bShift);
+    for (int i=1;i<nt;i++) { 
+      final int w1 = tt[i];
+      final int w = ((w1<<bShift)|(w0>>>rShift));
+      w0 = w1;
+      vv[i+iShift] = w; }
+    final int vvn = (w0>>>rShift);
+    if (0!=vvn) { vv[nv] = vvn; return unsafe(vv,nv+1); }
+    return unsafe(vv,nv); }
+
   @Override
   public final NaturalLE shiftUp (final int upShift) {
     //assert 0<=shift;
     //if (0==upShift) { return this; }
-    //if (isZero()) { return this; }
+    if (isZero()) { return this; }
     final int iShift = (upShift>>>5);
     final int bShift = (upShift&0x1f);
-    final int nt = hiInt();
-    final int nv = nt+iShift;
-    if (0==bShift) {
-      final int[] vv = new int[nv];
-      for (int i=0;i<nt;i++) { vv[i+iShift] = word(i); }
-      //System.arraycopy(words(),0,u,iShift,n0);
-      return unsafe(vv); }
-    final int rShift = 32-bShift;
-    final int[] vv = new int[nv+1];
-    int w0 = word(0);
-    vv[iShift] = (w0<<bShift);
-    for (int i=1;i<nt;i++) { 
-      final int w1 = word(i);
-      final int w = ((w1<<bShift) | (w0>>>rShift));
-      w0 = w1;
-      vv[i+iShift] = w; }
-    vv[nv] = (w0>>>rShift);
-    return unsafe(vv); }
+    if (0==bShift) { return shiftUpBywords(iShift); }
+    return shiftUpByBits(iShift,bShift); }
 
   //--------------------------------------------------------------
   // Transience
