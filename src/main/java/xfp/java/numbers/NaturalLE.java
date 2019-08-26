@@ -914,9 +914,9 @@ public final class NaturalLE implements Natural {
       sum += unsigned(tt[i]);
       vv[i] = (int) sum; 
       sum = (sum>>>32); }
+    if (0L!=sum) { vv[i] = (int) sum; return unsafe(vv,i+1); }
     for (;i<nt;i++) { vv[i] = tt[i]; }
-    if (0L!=sum) { vv[n] = (int) sum; return unsafe(vv,n+1); }
-    return unsafe(vv,n); }
+    return unsafe(vv,i); }
 
   private final NaturalLE addByBits (final NaturalLE u,
                                      final int iShift,
@@ -940,18 +940,22 @@ public final class NaturalLE implements Natural {
       if (i<nt) { sum += unsigned(tt[i]); }
       vv[i] = (int) sum; 
       sum = (sum>>>32); }
-    sum += unsigned((u0>>>rShift));
-    if (i<nt) { sum += unsigned(tt[i]); }
-    vv[i++] = (int) sum; 
-    sum = (sum>>>32); 
+    final long ui = unsigned(u0>>>rShift);
+    if (0L!=ui) {
+      sum += ui;
+      if (i<nt) { sum += unsigned(tt[i]); }
+      vv[i++] = (int) sum; 
+      sum = (sum>>>32); }
     for (;i<nt;i++) { 
       if (0L==sum) { break; }
       sum += unsigned(tt[i]);
       vv[i] = (int) sum; 
       sum = (sum>>>32); }
+    if (0L!=sum) { vv[i] = (int) sum; return unsafe(vv,i+1); }
     for (;i<nt;i++) { vv[i] = tt[i]; }
-    if (0L!=sum) { vv[n] = (int) sum; }
-    return unsafe(vv); }
+//    assert Ints.hiInt(vv)==i :
+//      "i=" + i + ",hiInt=" + Ints.hiInt(vv);
+    return unsafe(vv,i); }
 
   @Override
   public final NaturalLE add (final Natural u,
@@ -1067,6 +1071,7 @@ public final class NaturalLE implements Natural {
     //assert 0<=compareTo(u);
     final int nt = hiInt();
     final int nu = u.hiInt();
+    //assert nu<=nt;
     final int[] tt = words();
     final int[] uu = ((NaturalLE) u).words();
     if (0>=nu) { return this; }
@@ -1083,8 +1088,9 @@ public final class NaturalLE implements Natural {
       vv[i] = (int) dif;
       dif = (dif>>32); }
     //assert 0L==dif;
+    if (nt<=i) { return unsafe(vv,Ints.hiInt(vv)); }
     for (;i<nt;i++) { vv[i] = tt[i]; }
-    return unsafe(vv); }
+    return unsafe(vv,nt); }
 
   //--------------------------------------------------------------
   // multiplicative monoid
