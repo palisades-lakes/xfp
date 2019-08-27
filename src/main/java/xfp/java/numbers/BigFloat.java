@@ -191,14 +191,14 @@ public final class BigFloat implements Ringlike<BigFloat> {
          final long t1,
          final int e) {
     //assert 0L<=t1;
-    if (p0^p1) { // different signs
-      final int c = t0.compareTo(t1);
-      if (0==c) { return ZERO; }
-      // t1>t0
-      if (0>c) { return valueOf(p1,t0.subtractFrom(t1),e); }
-      // t0>t1
-      return valueOf(p0,t0.subtract(t1),e); }
-    return valueOf(p0,t0.add(t1),e); }
+    if (p0==p1) { return valueOf(p0,t0.add(t1),e); }
+    // different signs
+    final int c = t0.compareTo(t1);
+    // t0>t1
+    if (0<c) { return valueOf(p0,t0.subtract(t1),e); }
+    // t1>t0
+    if (0>c) { return valueOf(p1,t0.subtractFrom(t1),e); }
+    return ZERO; }
 
   //--------------------------------------------------------------
 
@@ -280,13 +280,24 @@ public final class BigFloat implements Ringlike<BigFloat> {
     //assert Double.isFinite(z);
     // escape on zero needed for add() 
     if (0.0==z) { return this; }
+    final long bits = doubleToRawLongBits(z);
+    final long t0 = (bits&Doubles.STORED_SIGNIFICAND_MASK);
+    final long e0 = (bits&Doubles.EXPONENT_MASK);
+    final long t;
+    final int e;
+    if (0L==e0) { t = t0; e = 0; }
+    else {
+      t = t0+Doubles.STORED_SIGNIFICAND_MASK+1;
+      e = Math.max(
+        Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND,
+        ((int) (e0>>>Doubles.STORED_SIGNIFICAND_BITS))
+        -Doubles.EXPONENT_BIAS
+        -Doubles.STORED_SIGNIFICAND_BITS); }
     return add(
       nonNegative(),
       significand(),
       exponent(),
-      true,
-      Doubles.significand(z),
-      Doubles.exponent(z)); }
+      true,t,e); }
 
   public final BigFloat
   addAbsAll (final double[] z) {
