@@ -11,7 +11,7 @@ import xfp.java.prng.Generators;
  * j --source 12 src/scripts/java/xfp/java/scripts/TotalSum.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-26
+ * @version 2019-08-27
  */
 @SuppressWarnings("unchecked")
 public final class TotalSum {
@@ -24,23 +24,20 @@ public final class TotalSum {
     //final Generator g = Generators.make("gaussian",dim);
     //final Generator g = Generators.make("laplace",dim);
     //final Generator g = Generators.make("uniform",dim);
-    final Accumulator a = 
+    final Accumulator a0 = 
+      xfp.java.accumulators.BigFloatAccumulator0.make();
+    final Accumulator a1 = 
       xfp.java.accumulators.BigFloatAccumulator.make();
-    assert a.isExact();
+    assert a0.isExact();
+    assert a1.isExact();
     //Debug.DEBUG=true;
     for (int i=0;i<trys;i++) {
       final double[] x0 = (double[]) g.next();
-      final double s = a.clear().addAll(x0).doubleValue();
-      assert Double.isFinite(s);
+      final double s0 = a0.clear().addAll(x0).doubleValue();
+      assert Double.isFinite(s0);
+      final double s1 = a1.clear().addAll(x0).doubleValue();
+      assert Double.isFinite(s1);
       }
-//    System.out.println(
-//      NaturalLE.zeroLo + "/" + NaturalLE.instances
-//      + " = " 
-//        + ((NaturalLE.zeroLo*100)/NaturalLE.instances) + "%");
-//    System.out.println(
-//      NaturalLE.maxHi + "/" + NaturalLE.instances
-//      + " = " 
-//        + ((NaturalLE.maxHi*100)/NaturalLE.instances) + "%");
    }
 
   //--------------------------------------------------------------

@@ -1,7 +1,6 @@
 package xfp.java.numbers;
 
 import static java.lang.Integer.compareUnsigned;
-import static xfp.java.numbers.Numbers.UNSIGNED_MASK;
 import static xfp.java.numbers.Numbers.hiWord;
 import static xfp.java.numbers.Numbers.loWord;
 import static xfp.java.numbers.Numbers.unsigned;
@@ -24,7 +23,7 @@ import xfp.java.prng.GeneratorBase;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-22
+ * @version 2019-08-27
  */
 
 @SuppressWarnings("unchecked")
@@ -137,12 +136,15 @@ public final class NaturalLE implements Natural {
     final int nu = ((0L!=uhi) ? 2 : (0L!=ulo) ? 1 : 0);
     if (nt<nu) { return -1; }
     if (nt>nu) { return 1; }
-    final long thi = uword(1);
-    if (thi<uhi) { return -1; }
-    if (thi>uhi) { return 1; }
-    final long tlo = uword(0);
-    if (tlo<ulo) { return -1; }
-    if (tlo>ulo) { return 1; }
+    final int[] tt = words();
+    if (2==nu) { 
+      final long tti = unsigned(tt[1]);
+      if (tti<uhi) { return -1; }
+      if (tti>uhi) { return 1; } }
+    if (1<=nu) { 
+      final long tti = unsigned(tt[0]);
+      if (tti<ulo) { return -1; }
+      if (tti>ulo) { return 1; } }
     return 0; }
 
   //--------------------------------------------------------------
@@ -161,43 +163,107 @@ public final class NaturalLE implements Natural {
     if (m0<m1) { return -1; }
     if (m0>m1) { return 1; }
 
-    final int iShift = (upShift>>>5);
+    //final int iShift = (upShift>>>5);
     final int bShift = (upShift&0x1F);
-
-    // compare non-zero words from u<<upShift
+    final int nt = hiInt();
+    final int[] tt = words();
+    int i = nt-1;
+    long tti = unsigned(tt[i--]);
     if (0==bShift) {
-      final long hi0 = uword(iShift+1);
-      final long hi1 = (u>>>32);
-      final int chi = Long.compare(hi0,hi1);
-      if (0!=chi) { return chi; }
-      final long lo0 = uword(iShift);
-      final long lo1 = (u&UNSIGNED_MASK);
-      final int clo = Long.compare(lo0,lo1);
-      if (0!=clo) { return clo; } }
+      final long uhi = hiWord(u);
+      final long ulo = loWord(u);
+      if (0L!=uhi) {
+        if (tti<uhi) { return -1; }
+        if (tti>uhi) { return 1; }
+        tti = unsigned(tt[i--]);
+        if (tti<ulo) { return -1; }
+        if (tti>ulo) { return 1; } }
+      else {
+        if (tti<ulo) { return -1; }
+        if (tti>ulo) { return 1; } } }
     else {
-      // most significant word in u<<upShift
-      final int rShift = 64-bShift;
-      final long hi0 = uword(iShift+2);
-      final long hi1 = (u>>>rShift);
-      final int chi = Long.compare(hi0,hi1);
-      if (0!=chi) { return chi; }
+      final long uhi = (u>>>(64-bShift));
+      if (0L!=uhi) {
+        if (tti<uhi) { return -1; }
+        if (tti>uhi) { return 1; }
+        tti = unsigned(tt[i--]);
+        final long us = (u<<bShift);
+        final long umid = hiWord(us);
+        if (tti<umid) { return -1; }
+        if (tti>umid) { return 1; }
+        tti = unsigned(tt[i--]);
+               final long ulo = loWord(us);
+        if (tti<ulo) { return -1; }
+        if (tti>ulo) { return 1; } }
+      else {
+        final long us = (u<<bShift);
+        final long umid = hiWord(us);
+        if (0L!=umid) {
+          if (tti<umid) { return -1; }
+          if (tti>umid) { return 1; }
+          tti = unsigned(tt[i--]);
+          final long ulo = loWord(us);
+          if (tti<ulo) { return -1; }
+          if (tti>ulo) { return 1; } }
+        else {
+          final long ulo = loWord(us);
+          if (tti<ulo) { return -1; }
+          if (tti>ulo) { return 1; } } } }
 
-      final long us = (u<<bShift);
-      final long mid0 = uword(iShift+1);
-      final long mid1 = (us>>>32);
-      final int cmid = Long.compare(mid0,mid1);
-      if (0!=cmid) { return cmid; }
-
-      final long lo0 = uword(iShift);
-      final long lo1 = (us&UNSIGNED_MASK);
-      final int clo = Long.compare(lo0,lo1);
-      if (0!=clo) { return clo; } }
-
-    // check this for any non-zero words in zeros of u<<upShift
-    for (int i=0;i<iShift;i++) {
-      if (0!=word(i)) { return 1; } }
-
+    while (i>=0) { if (0!=tt[i--]) { return 1; } }
     return 0; }
+
+//  @Override
+//  public final int compareTo (final long u,
+//                              final int upShift) {
+//    //assert 0L<=u;
+//    //assert 0<=upShift : "upShift=" + upShift;
+//
+//    if (0L==u) { return (isZero() ? 0 : 1); }
+//    if (0==upShift) { return compareTo(u); }
+//
+//    final int m0 = hiBit();
+//    final int m1 = Numbers.hiBit(u) + upShift;
+//    if (m0<m1) { return -1; }
+//    if (m0>m1) { return 1; }
+//
+//    final int iShift = (upShift>>>5);
+//    final int bShift = (upShift&0x1F);
+//
+//    // compare non-zero words from u<<upShift
+//    if (0==bShift) {
+//      final long hi0 = uword(iShift+1);
+//      final long hi1 = hiWord(u);
+//      final int chi = Long.compare(hi0,hi1);
+//      if (0!=chi) { return chi; }
+//      final long lo0 = uword(iShift);
+//      final long lo1 = loWord(u);
+//      final int clo = Long.compare(lo0,lo1);
+//      if (0!=clo) { return clo; } }
+//    else {
+//      // most significant word in u<<upShift
+//      final int rShift = 64-bShift;
+//      final long hi0 = uword(iShift+2);
+//      final long hi1 = (u>>>rShift);
+//      final int chi = Long.compare(hi0,hi1);
+//      if (0!=chi) { return chi; }
+//
+//      final long us = (u<<bShift);
+//      final long mid0 = uword(iShift+1);
+//      final long mid1 = hiWord(us);
+//      final int cmid = Long.compare(mid0,mid1);
+//      if (0!=cmid) { return cmid; }
+//
+//      final long lo0 = uword(iShift);
+//      final long lo1 = loWord(us);
+//      final int clo = Long.compare(lo0,lo1);
+//      if (0!=clo) { return clo; } }
+//
+//    // check this for any non-zero words in zeros of u<<upShift
+//    for (int i=0;i<iShift;i++) {
+//      if (0!=word(i)) { return 1; } }
+//
+//    return 0; }
 
   //--------------------------------------------------------------
   
@@ -224,7 +290,7 @@ public final class NaturalLE implements Natural {
     // from hiBit comparison
     if (0==bShift) { 
       final int hi0 = ((1>=iShift) ? word(1-iShift) : 0);
-      final int hi1 = (int) (u>>>32);
+      final int hi1 = (int) hiWord(u);
       final int chi = compareUnsigned(hi0,hi1);
       if (0!=chi) { return chi; }
       final int lo0 = ((0>=iShift) ? word(0) : 0);
@@ -238,7 +304,7 @@ public final class NaturalLE implements Natural {
     final long lo = ((0>=iShift) ? uword(0) : 0L);
     assert (0L==(hi>>>rShift));
     final int mid0 = (int) ((hi<<bShift)|(lo>>>rShift));
-    final int mid1 = (int) (u>>>32);
+    final int mid1 = (int) hiWord(u);
     final int cmid = compareUnsigned(mid0,mid1);
     if (0!=cmid) { return cmid; }
     final int lo0 = (int) (lo<<bShift);
@@ -276,12 +342,12 @@ public final class NaturalLE implements Natural {
     long sum = unsigned(ww[i]) + vv0;
     ww[i] = (int) sum;
     i++;
-    sum = unsigned(ww[i]) + vv1 + (sum>>>32);
+    sum = unsigned(ww[i]) + vv1 + hiWord(sum);
     ww[i] = (int) sum;
     i++;
-    sum = unsigned(ww[i]) + vv2 + (sum>>>32);
+    sum = unsigned(ww[i]) + vv2 + hiWord(sum);
     ww[i] = (int) sum;
-    assert 0L==(sum>>>32);
+    assert 0L==hiWord(sum);
     return unsafe(ww); }
 
   static final NaturalLE difference (final long u,
@@ -347,21 +413,21 @@ public final class NaturalLE implements Natural {
     //assert 0L<=t1;
     //if ((0L==t0||(0L==t1))) { return zero(); }
     
-    final long lo0 = (t0&UNSIGNED_MASK);
-    final long lo1 = (t1&UNSIGNED_MASK);
-    final long hi0 = (t0>>>32);
-    final long hi1 = (t1>>>32);
+    final long lo0 = loWord(t0);
+    final long lo1 = loWord(t1);
+    final long hi0 = hiWord(t0);
+    final long hi1 = hiWord(t1);
 
     long sum = lo0*lo1;
     final int w0 = (int) sum;
     // TODO: fix lurking overflow issue
     // works here because t0,t1 53 bit double significands
         //final long hilo2 = Math.addExact(hi0*lo1,hi1*lo0);
-    sum = (sum>>>32) + (hi0*lo1) + (hi1*lo0);
+    sum = hiWord(sum) + (hi0*lo1) + (hi1*lo0);
     final int w1 = (int) sum;
-    sum = (sum>>>32) + hi0*hi1;
+    sum = hiWord(sum) + hi0*hi1;
     final int w2 = (int) sum;
-    final int w3 = (int) (sum>>>32);
+    final int w3 = (int) hiWord(sum);
     if (0!=w3) { return unsafe(new int[] {w0,w1,w2,w3,},4); }
     if (0!=w2) { return unsafe(new int[] {w0,w1,w2,},3); }
     if (0!=w1) { return unsafe(new int[] {w0,w1,},2); }
@@ -374,19 +440,19 @@ public final class NaturalLE implements Natural {
   static final NaturalLE fromSquare (final long t) {
     //assert 0L<=t;
     //if (0L==t) { return zero(); }
-    final long hi = (t>>>32);
-    final long lo = (t&UNSIGNED_MASK);
+    final long hi = hiWord(t);
+    final long lo = loWord(t);
     final long lolo = lo*lo;
     final long hilo2 = ((hi*lo)<<1);
     //final long hilo2 = Math.multiplyExact(2,hi*lo);
     final long hihi = hi*hi;
     long sum = lolo;
     final int w0 = (int) sum;
-    sum = (sum>>>32) + hilo2;
+    sum = hiWord(sum) + hilo2;
     final int w1 = (int) sum;
-    sum = (sum>>>32) + hihi ;
+    sum = hiWord(sum) + hihi ;
     final int w2 = (int) sum;
-    final int w3 = (int) (sum>>>32);
+    final int w3 = (int) hiWord(sum);
 
     if (0!=w3) { return unsafe(new int[] { w0,w1,w2,w3,},4); }
     if (0!=w2) { return unsafe(new int[] { w0,w1,w2, },3); }
@@ -413,17 +479,17 @@ public final class NaturalLE implements Natural {
     long sum = ulo;
     if (0<nt) { sum += unsigned(tt[0]); }
     vv[0] = (int) sum;
-    sum = (sum>>>32);
+    sum = hiWord(sum);
     sum += uhi;
     if (1<nt) { sum += unsigned(tt[1]); }
     vv[1] = (int) sum;
-    sum = (sum>>>32);
+    sum = hiWord(sum);
     int i=2;
     for (;i<nt;i++) {
       if (0L==sum) { break; }
       sum += unsigned(tt[i]);
       vv[i] = (int) sum;
-      sum = (sum>>>32); }
+      sum = hiWord(sum); }
     for (;i<nt;i++) { vv[i] = tt[i]; }
     if (0L!=sum) { 
       vv[nv] = (int) sum; 
@@ -445,17 +511,17 @@ public final class NaturalLE implements Natural {
     int i = iShift;
     if (i<nt) { sum += unsigned(tt[i]); }
     vv[i++] = (int) sum;
-    sum = (sum>>>32);
+    sum = hiWord(sum);
     if (i<nu) { 
       sum += hi;
       if (i<nt) { sum += unsigned(tt[i]); }
       vv[i++] = (int) sum; 
-      sum = (sum>>>32); }
+      sum = hiWord(sum); }
     for (;i<nt;i++) {
       if (0L==sum) { break; }
       sum += unsigned(tt[i]);
       vv[i] = (int) sum; 
-      sum = (sum>>>32); }
+      sum = hiWord(sum); }
     for (;i<nt;i++) { vv[i] = tt[i]; }
     if (0L!=sum) { vv[i] = (int) sum; return unsafe(vv,i+1); }
     return unsafe(vv,i); }
@@ -476,22 +542,22 @@ public final class NaturalLE implements Natural {
     int i=iShift;
     if (i<nt) { sum += unsigned(tt[i]); }
     vv[i++] = (int) sum; 
-    sum = (sum>>>32);
+    sum = hiWord(sum);
     if (i<nu) {
       sum += mid;
       if (i<nt) { sum += unsigned(tt[i]); }
       vv[i++] = (int) sum; 
-      sum = (sum>>>32); }
+      sum = hiWord(sum); }
     if (i<nu) {
       sum += hi;
       if (i<nt) { sum += unsigned(tt[i]); }
       vv[i++] = (int) sum; 
-      sum = (sum>>>32); }
+      sum = hiWord(sum); }
     for (;i<nt;i++) {
       if (0L==sum) { break; }
       sum += unsigned(tt[i]);
       vv[i] = (int) sum; 
-      sum = (sum>>>32); }
+      sum = hiWord(sum); }
     for (;i<nt;i++) { vv[i] = tt[i]; }
     if (0L!=sum) { vv[i] = (int) sum; return unsafe(vv,i+1); }
     return unsafe(vv,i); }
@@ -517,17 +583,17 @@ public final class NaturalLE implements Natural {
     long sum = loWord(u);
     if (0==iShift) { sum += uword(0); } 
     vv[0] = (int) sum;
-    sum = (sum>>>32);  
+    sum = hiWord(sum);  
     sum += hiWord(u);
     if (1>=iShift) { sum += uword(1-iShift); } 
     vv[1] = (int) sum;
-    sum = (sum>>>32);  
+    sum = hiWord(sum);  
     int i=2;
     for (;i<nt+iShift;i++) {
       if (0L==sum) { break; }
       if (i>=iShift) { sum += unsigned(tt[i-iShift]); }
       vv[i] = (int) sum;
-      sum = (sum>>>32); } 
+      sum = hiWord(sum); } 
     vv[i] = (int) sum; 
     return unsafe(vv); }
 
@@ -546,7 +612,7 @@ public final class NaturalLE implements Natural {
       final int ti = (t1<<bShift);
       sum += unsigned(ti); } 
     vv[0] = (int) sum;
-    sum = (sum>>>32);  
+    sum = hiWord(sum);  
     int t0 = t1;
     sum += hiWord(u);
     if (1>=iShift) { 
@@ -555,7 +621,7 @@ public final class NaturalLE implements Natural {
       t0 = t1;
       sum += unsigned(ti) ; } 
     vv[1] = (int) sum;
-    sum = (sum>>>32);  
+    sum = hiWord(sum);  
     int i=2;
     for (;i<=nt+iShift;i++) {
       if (0L==sum) { break; }
@@ -565,7 +631,7 @@ public final class NaturalLE implements Natural {
         t0 = t1;
         sum += unsigned(ti) ; } 
       vv[i] = (int) sum;
-      sum = (sum>>>32); } 
+      sum = hiWord(sum); } 
     i=Math.max(i,iShift);
     for (;i<=nt+iShift;i++) {
       t1 = tt[(i-iShift)];
@@ -713,7 +779,7 @@ public final class NaturalLE implements Natural {
     for (;i<nt+iShift;i++) {
       if (i>=iShift) { dif += uword(i-iShift); }
       vv[i] = (int) dif;
-      dif = (dif>>>32); } 
+      dif = hiWord(dif); } 
     vv[i] = (int) dif; 
     return unsafe(vv); }
 
@@ -835,7 +901,7 @@ public final class NaturalLE implements Natural {
       vv[i] = (int) dif;
       dif = (dif>>32); }
     i=iShift;
-    final int hi = (int) (u>>>32);
+    final int hi = (int) hiWord(u);
     final int lo = (int) u;
     final int rShift = 32-bShift;
     dif += unsigned(lo<<bShift);
@@ -897,12 +963,12 @@ public final class NaturalLE implements Natural {
       sum += unsigned(uu[i-iShift]);
       if (i<nt) { sum += unsigned(tt[i]); }
       vv[i] = (int) sum; 
-      sum = (sum>>>32); }
+      sum = hiWord(sum); }
     for (;i<nt;i++) { 
       if (0L==sum) { break; }
       sum += unsigned(tt[i]);
       vv[i] = (int) sum; 
-      sum = (sum>>>32); }
+      sum = hiWord(sum); }
     if (0L!=sum) { vv[i] = (int) sum; return unsafe(vv,i+1); }
     for (;i<nt;i++) { vv[i] = tt[i]; }
     return unsafe(vv,i); }
@@ -928,18 +994,18 @@ public final class NaturalLE implements Natural {
       u0 = u1;
       if (i<nt) { sum += unsigned(tt[i]); }
       vv[i] = (int) sum; 
-      sum = (sum>>>32); }
+      sum = hiWord(sum); }
     final long ui = unsigned(u0>>>rShift);
     if (0L!=ui) {
       sum += ui;
       if (i<nt) { sum += unsigned(tt[i]); }
       vv[i++] = (int) sum; 
-      sum = (sum>>>32); }
+      sum = hiWord(sum); }
     for (;i<nt;i++) { 
       if (0L==sum) { break; }
       sum += unsigned(tt[i]);
       vv[i] = (int) sum; 
-      sum = (sum>>>32); }
+      sum = hiWord(sum); }
     if (0L!=sum) { vv[i] = (int) sum; return unsafe(vv,i+1); }
     for (;i<nt;i++) { vv[i] = tt[i]; }
 //    assert Ints.hiInt(vv)==i :
@@ -1043,12 +1109,12 @@ public final class NaturalLE implements Natural {
     for (;i<nu;i++) {
       sum += unsigned(tt[i]) + unsigned(uu[i]);
       vv[i] = (int) sum; 
-      sum = (sum>>>32);}
+      sum = hiWord(sum);}
     for (;i<nt;i++) {
       if (0L==sum) { break; }
       sum += unsigned(tt[i]);
       vv[i] = (int) sum; 
-      sum = (sum>>>32);}
+      sum = hiWord(sum);}
     for (;i<nt;i++) { vv[i] = tt[i]; }
     if (0L!=sum) { vv[nt] = (int) sum; return unsafe(vv,nt+1); }
     return unsafe(vv,nt); }
@@ -1176,7 +1242,7 @@ public final class NaturalLE implements Natural {
       while ((0L!=carry)&&(i2<2*n)) {
         i2++;
         prod = unsigned(vv[i2]) + carry;
-        carry = Numbers.hiWord(prod); 
+        carry = hiWord(prod); 
         vv[i2] = (int) prod;  }
       //assert 0L==carry; 
     }
@@ -1216,11 +1282,11 @@ public final class NaturalLE implements Natural {
   //    if (0==bShift) { 
   //      final int[] vv = new int[iShift+2];
   //      vv[iShift] = (int) u;
-  //      vv[iShift+1] = (int) (u>>>32);
+  //      vv[iShift+1] = (int) hiWord(u);
   //      return unsafe(vv); }
   //    final int rShift = 32-bShift;
   //    final int lo = (int) u;
-  //    final int hi = (int) (u>>>32);
+  //    final int hi = (int) hiWord(u);
   //    final int[] vv = new int[iShift+3];
   //    vv[iShift] = (lo<<bShift);
   //    vv[iShift+1] = ((hi<<bShift)|(lo>>>rShift));
@@ -1505,7 +1571,7 @@ public final class NaturalLE implements Natural {
     //assert 0L<=u;
     //if (0L==u) { return zero(); }
     final int lo = (int) u;
-    final int hi = (int) (u>>>32);
+    final int hi = (int) hiWord(u);
     if (0==hi) { 
       if (0==lo) { return unsafe(new int[0],0); }
       return unsafe(new int[] {lo},1); }
@@ -1523,11 +1589,11 @@ public final class NaturalLE implements Natural {
     if (0==bShift) { 
       final int[] vv = new int[iShift+2];
       vv[iShift] = (int) u;
-      vv[iShift+1] = (int) (u>>>32);
+      vv[iShift+1] = (int) hiWord(u);
       return unsafe(vv); }
     final long us = (u<<bShift);
     final int vv0 = (int) us;
-    final int vv1 = (int) (us>>>32);
+    final int vv1 = (int) hiWord(us);
     final int vv2 = (int) (u>>>(64-bShift)); 
     if (0!=vv2) {
       final int[] vv = new int[iShift+3];

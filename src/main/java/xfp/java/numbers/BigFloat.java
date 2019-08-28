@@ -148,39 +148,11 @@ public final class BigFloat implements Ringlike<BigFloat> {
         final int e) {
     //assert 0L<t1;
     //assert 0<=upShift
-    if (p0==p1) { 
-      return valueOf(
-        p0,
-        t0.add(t1,upShift),
-        e); }
-    // different signs
+    if (p0==p1) { return valueOf(p0,t0.add(t1,upShift),e); }
     final int c = t0.compareTo(t1,upShift);
-    if (0<c) { // t0 > t1
-      return valueOf(p0,t0.subtract(t1,upShift),e); }
-    if (0>c) { // t1 > t0
-      return valueOf(p1,t0.subtractFrom(t1,upShift),e); }
+    if (0<c) { return valueOf(p0,t0.subtract(t1,upShift),e); }
+    if (0>c) { return valueOf(p1,t0.subtractFrom(t1,upShift),e); }
     return ZERO; }
-
-  //--------------------------------------------------------------
-
-  //  private static final BigFloat
-  //  add1 (final boolean p0,
-  //        final NaturalLE t0,
-  //        final int upShift,
-  //        final boolean p1,
-  //        final long t1,
-  //        final int e) {
-  //    //assert 0L<t1;
-  //    //assert 0<=upShift
-  //    if (p0^p1) { // different signs
-  //      final int c = t0.compareTo(upShift,t1);
-  //      if (0==c) { return ZERO; }
-  //      // t1 > t0
-  //      if (0 > c) {
-  //        return valueOf(p1,t0.subtractFrom(upShift,t1),e); }
-  //      // t0 > t1
-  //      return valueOf(p0,t0.subtract(upShift,t1),e); }
-  //    return valueOf(p0,t0.add(upShift,t1),e); }
 
   //--------------------------------------------------------------
 
@@ -199,24 +171,6 @@ public final class BigFloat implements Ringlike<BigFloat> {
     // t1>t0
     if (0>c) { return valueOf(p1,t0.subtractFrom(t1),e); }
     return ZERO; }
-
-  //--------------------------------------------------------------
-
-  //  private static final BigFloat
-  //  add5b (final boolean p0,
-  //        final NaturalLE t0,
-  //        final boolean p1,
-  //        final NaturalLE t1,
-  //        final int e) {
-  //    //assert 0L<=t1;
-  //    if (p0^p1) { // different signs
-  //      final int c = t0.compareTo(t1);
-  //      if (0==c) { return ZERO; }
-  //      // t1>t0
-  //      if (0>c) { return valueOf(p1,t1.subtract(t0),e); }
-  //      // t0>t1
-  //      return valueOf(p0,t0.subtract(t1),e); }
-  //    return valueOf(p0,t0.add(t1),e); }
 
   //--------------------------------------------------------------
 
