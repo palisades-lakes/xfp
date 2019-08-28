@@ -769,7 +769,7 @@ public final class Bei0 {
     //assert 0<=i1;
 
     // copy unaffected low order u0 to result
-    while ((i1<i0)) { r0[i0] = u0[i0]; i0--; }
+    while (i1<i0) { r0[i0] = u0[i0]; i0--; }
     i0 = i1;
 
     long dif = 0;
@@ -788,7 +788,7 @@ public final class Bei0 {
       r0[i0] = (int) dif; i0--;
       dif = (dif >> 32); }
 
-    if (3==nwords) { dif -= (u1 >>> (64-bShift)) ; }
+    if (3==nwords) { dif -= (u1>>>(64-bShift)) ; }
     if (0<=i0) {
       dif += unsigned(u0[i0]);
       r0[i0] = (int) dif;

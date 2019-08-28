@@ -182,9 +182,8 @@ public final class BigFloat implements Ringlike<BigFloat> {
        final long t11,
        final int e11) {
     //assert 0L<=t11;
-    //assert 0L<t11;
-    // minimize long bits
     //if (0L==t11) { return valueOf(p0,t0,e0); }
+    // minimize long bits
     final int shift = Numbers.loBit(t11);
     final long t1 = (t11>>>shift);
     final int e1 = e11+shift;

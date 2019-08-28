@@ -694,6 +694,7 @@ public final class NaturalLE implements Natural {
     final int[] vv = new int[nt];
     // assert iShift<=n || 0L==u
     for (int i=0;i<iShift;i++) { vv[i] = tt[i]; }
+
     int i=iShift;
     long dif = unsigned(tt[i])-loWord(u);
     vv[i++] = (int) dif; 
@@ -702,6 +703,7 @@ public final class NaturalLE implements Natural {
       dif += unsigned(tt[i])-hiWord(u);
       vv[i] = (int) dif; 
       dif = (dif>>32); }
+    
     i = iShift+2;
     for (;i<nt;i++) {
       if (0L==dif) { break; }
@@ -711,15 +713,16 @@ public final class NaturalLE implements Natural {
     //assert 0L==dif;
 
     for (;i<nt;i++) { vv[i] = tt[i]; } 
-    return unsafe(vv); }
+    final int[] vvv = Ints.stripTrailingZeros(vv);
+    return unsafe(vvv,vvv.length); }
 
   private final NaturalLE subtractByBits (final long u,
                                           final int iShift,
                                           final int bShift)  {
     final int nt = hiInt();
+    // assert iShift<=nt || 0L==u
     final int[] tt = words();
     final int[] vv = new int[nt];
-    // assert iShift<=n || 0L==u
     for (int i=0;i<iShift;i++) { vv[i] = tt[i]; }
 
     final long us = (u<<bShift);
@@ -745,7 +748,8 @@ public final class NaturalLE implements Natural {
     //assert 0L==dif;
 
     for (;i<nt;i++) { vv[i] = tt[i]; } 
-    return unsafe(vv); }
+    final int[] vvv = Ints.stripTrailingZeros(vv);
+    return unsafe(vvv,vvv.length); }
 
   @Override
   public final NaturalLE subtract (final long u,
@@ -1324,7 +1328,7 @@ public final class NaturalLE implements Natural {
   @Override
   public final NaturalLE shiftDown (final int downShift) {
     //assert 0<=downShift;
-    //if (0==downShift) { return this; }
+    if (0==downShift) { return this; }
     final int iShift = (downShift>>>5);
     final int bShift = (downShift&0x1F);
     if (0==bShift) { return shiftDownByWords(iShift); }

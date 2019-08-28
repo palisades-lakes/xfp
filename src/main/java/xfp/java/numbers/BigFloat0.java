@@ -146,17 +146,6 @@ public final class BigFloat0 implements Ringlike<BigFloat0> {
 
   //--------------------------------------------------------------
 
-  //  private static final BigFloat0
-  //  add (final boolean p0,
-  //       final NaturalBEI0 t0,
-  //       final int e0,
-  //       final boolean p1,
-  //       final long t1,
-  //       final int e1) {
-  //    //assert 0L<=t1;
-  //    if (e0<=e1) { return addSameExponent(p0,t0,p1,t1,e1-e0,e0); }
-  //    return addSameExponent(p0,t0.shiftUp(e0-e1),p1,t1,e1); }
-
   private static final BigFloat0
   add (final boolean p0,
        final NaturalBEI0 t0,
@@ -165,13 +154,14 @@ public final class BigFloat0 implements Ringlike<BigFloat0> {
        final long t11,
        final int e11) {
     //assert 0L<=t11;
-    // minimize long bits
     //if (0L==t11) { return valueOf(p0,t0,e0); }
+    // minimize long bits
     final int shift = Numbers.loBit(t11);
     final long t1 = (t11>>>shift);
     final int e1 = e11+shift;
-    if (e0<=e1) { return add6(p0,t0,p1,t1,e1-e0,e0); }
-    return add5a(p0,t0.shiftUp(e0-e1),p1,t1,e1); }
+    if (e0<e1) { return add6(p0,t0,p1,t1,e1-e0,e0); }
+    if (e0>e1) { return add5a(p0,t0.shiftUp(e0-e1),p1,t1,e1); }
+    return add5a(p0,t0,p1,t1,e0); }
 
   //--------------------------------------------------------------
 
@@ -230,19 +220,6 @@ public final class BigFloat0 implements Ringlike<BigFloat0> {
       (0L==(Doubles.SIGN_MASK&bits)),
       t,
       e); }
-
-//  public final BigFloat0
-//  add (final double z) {
-//    //assert Double.isFinite(z);
-//    // escape on zero needed for add() 
-//    if (0.0==z) { return this; }
-//    return add(
-//      nonNegative(),
-//      significand(),
-//      exponent(),
-//      Doubles.nonNegative(z),
-//      Doubles.significand(z),
-//      Doubles.exponent(z)); }
 
   public final BigFloat0
   addAll (final double[] z) {
