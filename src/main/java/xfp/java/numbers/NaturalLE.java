@@ -410,7 +410,7 @@ public final class NaturalLE implements Natural {
     return ZERO; }
 
   //--------------------------------------------------------------
-  // add longs
+  // add (non-negative) longs
   //--------------------------------------------------------------
 
   @Override
@@ -419,32 +419,37 @@ public final class NaturalLE implements Natural {
     //if (0L==u) { return this; }
     final int nt = hiInt();
     //if (0==nt) { return valueOf(u); }
-    final long ulo = loWord(u);
     final long uhi = hiWord(u);
-    final int nu = ((0L!=uhi)?2:1);
+    final long ulo = loWord(u);
+    final int nu = ((0L!=uhi)?2:(0L!=ulo)?1:0);
     final int nv = Math.max(nu,nt);
+    if (0==nv) { return ZERO; }
     final int[] tt = words();
-    final int[] vv = new int[nv+1];
+    final int[] vv = new int[nv];
     long sum = ulo;
-    if (0<nt) { sum += unsigned(tt[0]); }
+    if (0<nt) { sum += unsigned(tt[0]); } 
     vv[0] = (int) sum;
     sum = hiWord(sum);
-    sum += uhi;
-    if (1<nt) { sum += unsigned(tt[1]); }
-    vv[1] = (int) sum;
-    sum = hiWord(sum);
+    if (1<nv) { 
+      sum += uhi;
+      if (1<nt) { sum += unsigned(tt[1]); }
+      vv[1] = (int) sum; 
+      sum = hiWord(sum); }
     int i=2;
     for (;i<nt;i++) {
       if (0L==sum) { break; }
       sum += unsigned(tt[i]);
       vv[i] = (int) sum;
       sum = hiWord(sum); }
-    for (;i<nt;i++) { vv[i] = tt[i]; }
     if (0L!=sum) { 
-      vv[nv] = (int) sum; 
-      return unsafe(vv,nv+1); }
+      //vv[nv] = (int) sum; 
+      final int[] vvv = new int[nv+1];
+      for (int j=0;j<nv;j++) { vvv[j]=vv[j]; } 
+      vvv[nv] = 1; 
+      return unsafe(vvv,nv+1); }
+    for (;i<nt;i++) { vv[i] = tt[i]; }
     return unsafe(vv,nv); }
-
+    
   //--------------------------------------------------------------
 
   private final NaturalLE addByWords (final long u,
@@ -615,7 +620,7 @@ public final class NaturalLE implements Natural {
     return addByBits(iShift,bShift,u); }
 
   //--------------------------------------------------------------
-  // subtract longs
+  // subtract (non-negative) longs
   //--------------------------------------------------------------
 
   @Override
@@ -642,7 +647,12 @@ public final class NaturalLE implements Natural {
       dif = (dif>>32); }
     for (;i<nt;i++) { vv[i] = tt[i]; } 
     //assert 0L==dif : dif;
-    return unsafe(vv); }
+//    return unsafe(vv); }
+    final int nv = Ints.hiInt(vv);
+    if (nv==nt) { return unsafe(vv,nv); } 
+    final int[] vvv = new int[nv];
+    for (int j=0;j<nv;j++) { vvv[j]=vv[j]; }
+    return unsafe(vvv,nv); }
 
   //--------------------------------------------------------------
 

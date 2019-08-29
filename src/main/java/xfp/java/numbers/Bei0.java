@@ -381,7 +381,6 @@ public final class Bei0 {
 
   public static final int[] add (final int[] tt,
                                  final long u) {
-    // TODO: //assert necessary?
     //assert (! leadingZero(m0));
     //assert 0L <= u;
     if (0L == u) { return tt; }
@@ -389,6 +388,7 @@ public final class Bei0 {
     long sum = 0;
     int nt = tt.length;
     final int hi = (int) hiWord(u);
+    // TODO: overflow?
     if (nt == 1) { return valueOf(u + unsigned(tt[0])); }
     final int[] r0 = new int[nt];
     if (hi == 0) {

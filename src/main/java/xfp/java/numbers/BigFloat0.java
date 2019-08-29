@@ -11,7 +11,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-20
+ * @version 2019-08-29
  */
 
 @SuppressWarnings("unchecked")
@@ -111,14 +111,15 @@ public final class BigFloat0 implements Ringlike<BigFloat0> {
         final long t1,
         final int e) {
     //assert 0L<=t1;
-    if (p0^p1) { // different signs
-      final int c = t0.compareTo(t1);
-      if (0==c) { return ZERO; }
-      // t1>t0
-      if (0>c) { return valueOf(p1,t0.subtractFrom(t1),e); }
-      // t0>t1
-      return valueOf(p0,t0.subtract(t1),e); }
-    return valueOf(p0,t0.add(t1),e); }
+    //assert 0L<=t1;
+    if (p0==p1) { return valueOf(p0,t0.add(t1),e); }
+    // different signs
+    final int c = t0.compareTo(t1);
+    // t0>t1
+    if (0<c) { return valueOf(p0,t0.subtract(t1),e); }
+    // t1>t0
+    if (0>c) { return valueOf(p1,t0.subtractFrom(t1),e); }
+    return ZERO; }
 
   //--------------------------------------------------------------
 
@@ -160,8 +161,8 @@ public final class BigFloat0 implements Ringlike<BigFloat0> {
     final long t1 = (t11>>>shift);
     final int e1 = e11+shift;
     if (e0<e1) { return add6(p0,t0,p1,t1,e1-e0,e0); }
-    if (e0>e1) { return add5a(p0,t0.shiftUp(e0-e1),p1,t1,e1); }
-    return add5a(p0,t0,p1,t1,e0); }
+    if (e0==e1) { return add5a(p0,t0,p1,t1,e0); } 
+    return add5a(p0,t0.shiftUp(e0-e1),p1,t1,e1); }
 
   //--------------------------------------------------------------
 
