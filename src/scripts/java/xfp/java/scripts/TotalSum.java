@@ -33,10 +33,10 @@ public final class TotalSum {
     //Debug.DEBUG=true;
     for (int i=0;i<trys;i++) {
       final double[] x0 = (double[]) g.next();
-      final double s0 = a0.clear().addAll(x0).doubleValue();
-      assert Double.isFinite(s0);
       final double s1 = a1.clear().addAll(x0).doubleValue();
       assert Double.isFinite(s1);
+      final double s0 = a0.clear().addAll(x0).doubleValue();
+      assert Double.isFinite(s0);
       }
    }
 

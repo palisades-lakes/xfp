@@ -126,7 +126,7 @@ public final class NaturalLE implements Natural {
     return compareTo(u.shiftUp(upShift)); }
 
   //--------------------------------------------------------------
-  
+
   @Override
   public final  int compareTo (final long u) {
     //assert 0L<=u;
@@ -148,7 +148,7 @@ public final class NaturalLE implements Natural {
     return 0; }
 
   //--------------------------------------------------------------
-  
+
   @Override
   public final int compareTo (final long u,
                               final int upShift) {
@@ -192,7 +192,7 @@ public final class NaturalLE implements Natural {
         if (tti<umid) { return -1; }
         if (tti>umid) { return 1; }
         tti = unsigned(tt[i--]);
-               final long ulo = loWord(us);
+        final long ulo = loWord(us);
         if (tti<ulo) { return -1; }
         if (tti>ulo) { return 1; } }
       else {
@@ -213,60 +213,9 @@ public final class NaturalLE implements Natural {
     while (i>=0) { if (0!=tt[i--]) { return 1; } }
     return 0; }
 
-//  @Override
-//  public final int compareTo (final long u,
-//                              final int upShift) {
-//    //assert 0L<=u;
-//    //assert 0<=upShift : "upShift=" + upShift;
-//
-//    if (0L==u) { return (isZero() ? 0 : 1); }
-//    if (0==upShift) { return compareTo(u); }
-//
-//    final int m0 = hiBit();
-//    final int m1 = Numbers.hiBit(u) + upShift;
-//    if (m0<m1) { return -1; }
-//    if (m0>m1) { return 1; }
-//
-//    final int iShift = (upShift>>>5);
-//    final int bShift = (upShift&0x1F);
-//
-//    // compare non-zero words from u<<upShift
-//    if (0==bShift) {
-//      final long hi0 = uword(iShift+1);
-//      final long hi1 = hiWord(u);
-//      final int chi = Long.compare(hi0,hi1);
-//      if (0!=chi) { return chi; }
-//      final long lo0 = uword(iShift);
-//      final long lo1 = loWord(u);
-//      final int clo = Long.compare(lo0,lo1);
-//      if (0!=clo) { return clo; } }
-//    else {
-//      // most significant word in u<<upShift
-//      final int rShift = 64-bShift;
-//      final long hi0 = uword(iShift+2);
-//      final long hi1 = (u>>>rShift);
-//      final int chi = Long.compare(hi0,hi1);
-//      if (0!=chi) { return chi; }
-//
-//      final long us = (u<<bShift);
-//      final long mid0 = uword(iShift+1);
-//      final long mid1 = hiWord(us);
-//      final int cmid = Long.compare(mid0,mid1);
-//      if (0!=cmid) { return cmid; }
-//
-//      final long lo0 = uword(iShift);
-//      final long lo1 = loWord(us);
-//      final int clo = Long.compare(lo0,lo1);
-//      if (0!=clo) { return clo; } }
-//
-//    // check this for any non-zero words in zeros of u<<upShift
-//    for (int i=0;i<iShift;i++) {
-//      if (0!=word(i)) { return 1; } }
-//
-//    return 0; }
 
   //--------------------------------------------------------------
-  
+
   @Override
   public final int compareTo (final int upShift,
                               final long u) {
@@ -412,7 +361,7 @@ public final class NaturalLE implements Natural {
     //assert 0L<=t0;
     //assert 0L<=t1;
     //if ((0L==t0||(0L==t1))) { return zero(); }
-    
+
     final long lo0 = loWord(t0);
     final long lo1 = loWord(t1);
     final long hi0 = hiWord(t0);
@@ -422,7 +371,7 @@ public final class NaturalLE implements Natural {
     final int w0 = (int) sum;
     // TODO: fix lurking overflow issue
     // works here because t0,t1 53 bit double significands
-        //final long hilo2 = Math.addExact(hi0*lo1,hi1*lo0);
+    //final long hilo2 = Math.addExact(hi0*lo1,hi1*lo0);
     sum = hiWord(sum) + (hi0*lo1) + (hi1*lo0);
     final int w1 = (int) sum;
     sum = hiWord(sum) + hi0*hi1;
@@ -542,24 +491,34 @@ public final class NaturalLE implements Natural {
     int i=iShift;
     if (i<nt) { sum += unsigned(tt[i]); }
     vv[i++] = (int) sum; 
-    sum = hiWord(sum);
     if (i<nu) {
-      sum += mid;
+      sum = hiWord(sum) + mid;
       if (i<nt) { sum += unsigned(tt[i]); }
       vv[i++] = (int) sum; 
-      sum = hiWord(sum); }
-    if (i<nu) {
-      sum += hi;
-      if (i<nt) { sum += unsigned(tt[i]); }
-      vv[i++] = (int) sum; 
-      sum = hiWord(sum); }
+      if (i<nu) {
+        sum = hiWord(sum) + hi;
+        if (i<nt) { sum += unsigned(tt[i]); }
+        vv[i++] = (int) sum; } }
+
+    //    boolean carry = (0L!=hiWord(sum));
+    //    while ((i<nt) && carry) {
+    //      sum = 0x01L + unsigned(tt[i]); 
+    //      final int vvi = (int) sum;
+    //      vv[i++] = vvi;
+    //      carry = (0==vvi); }
+    //
+    //    if (carry) { vv[i] = 0x01; return unsafe(vv,i+1); }
+
     for (;i<nt;i++) {
+      sum = hiWord(sum);
       if (0L==sum) { break; }
       sum += unsigned(tt[i]);
-      vv[i] = (int) sum; 
-      sum = hiWord(sum); }
+      vv[i] = (int) sum;  }
     for (;i<nt;i++) { vv[i] = tt[i]; }
-    if (0L!=sum) { vv[i] = (int) sum; return unsafe(vv,i+1); }
+    final int vvi = (int) hiWord(sum);
+    if (0L!=vvi) { vv[i] = vvi; return unsafe(vv,i+1); }
+
+    for (;i<nt;i++) { vv[i] = tt[i]; }
     return unsafe(vv,i); }
 
   @Override
@@ -703,7 +662,7 @@ public final class NaturalLE implements Natural {
       dif += unsigned(tt[i])-hiWord(u);
       vv[i] = (int) dif; 
       dif = (dif>>32); }
-    
+
     i = iShift+2;
     for (;i<nt;i++) {
       if (0L==dif) { break; }
@@ -1012,8 +971,6 @@ public final class NaturalLE implements Natural {
       sum = hiWord(sum); }
     if (0L!=sum) { vv[i] = (int) sum; return unsafe(vv,i+1); }
     for (;i<nt;i++) { vv[i] = tt[i]; }
-//    assert Ints.hiInt(vv)==i :
-//      "i=" + i + ",hiInt=" + Ints.hiInt(vv);
     return unsafe(vv,i); }
 
   @Override
