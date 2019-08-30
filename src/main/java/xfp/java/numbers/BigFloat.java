@@ -11,7 +11,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-29
+ * @version 2019-08-30
  */
 
 @SuppressWarnings("unchecked")
@@ -174,15 +174,15 @@ public final class BigFloat implements Ringlike<BigFloat> {
 
   //--------------------------------------------------------------
 
-  private static final BigFloat
-  add (final boolean p0,
-       final NaturalLE t0,
-       final int e0,
-       final boolean p1,
+  private final BigFloat
+  add (final boolean p1,
        final long t11,
        final int e11) {
     //assert 0L<=t11;
-    //if (0L==t11) { return valueOf(p0,t0,e0); }
+    //if (0L==t11) { return this; }
+    final boolean p0 = nonNegative();
+    final NaturalLE t0 = significand();
+    final int e0 = exponent();
     // minimize long bits
     final int shift = Numbers.loBit(t11);
     final long t1 = (t11>>>shift);
@@ -212,9 +212,6 @@ public final class BigFloat implements Ringlike<BigFloat> {
         -Doubles.EXPONENT_BIAS
         -Doubles.STORED_SIGNIFICAND_BITS); }
     return add(
-      nonNegative(),
-      significand(),
-      exponent(),
       (0L==(Doubles.SIGN_MASK&bits)),
       t,
       e); }
@@ -247,10 +244,9 @@ public final class BigFloat implements Ringlike<BigFloat> {
         -Doubles.EXPONENT_BIAS
         -Doubles.STORED_SIGNIFICAND_BITS); }
     return add(
-      nonNegative(),
-      significand(),
-      exponent(),
-      true,t,e); }
+      true,
+      t,
+      e); }
 
   public final BigFloat
   addAbsAll (final double[] z) {
@@ -277,9 +273,6 @@ public final class BigFloat implements Ringlike<BigFloat> {
     // escape on zero needed for add() 
     if (0.0==z) { return this; }
     return add(
-      nonNegative(),
-      significand(),
-      exponent(),
       ! Doubles.nonNegative(z),
       Doubles.significand(z),
       Doubles.exponent(z)); }
@@ -719,6 +712,7 @@ public final class BigFloat implements Ringlike<BigFloat> {
   private BigFloat (final boolean p0,
                     final NaturalLE t0,
                     final int e0) {
+    //assert null!=t0;
     _nonNegative = p0;
     _significand = t0;
     _exponent = e0; } 

@@ -23,7 +23,7 @@ import xfp.java.prng.GeneratorBase;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-27
+ * @version 2019-08-30
  */
 
 @SuppressWarnings("unchecked")
@@ -215,7 +215,6 @@ public final class NaturalLE implements Natural {
 
     while (i>=0) { if (0!=tt[i--]) { return 1; } }
     return 0; }
-
 
   //--------------------------------------------------------------
 
@@ -446,6 +445,10 @@ public final class NaturalLE implements Natural {
       sum += unsigned(tt[i]);
       vv[i] = (int) sum;
       sum = hiWord(sum); }
+//    if (0L!=sum) { 
+//      final int[] vvv = Arrays.copyOf(vv,nv+1);
+//      vvv[nv] = 1; 
+//      return unsafe(vvv,nv+1); }
     if (0L!=sum) { 
       //vv[nv] = (int) sum; 
       final int[] vvv = new int[nv+1];
@@ -531,7 +534,7 @@ public final class NaturalLE implements Natural {
       return unsafe(vvv,nv+1); }
     
     for (;i<nt;i++) { vv[i] = tt[i]; }
-    return unsafe(vv,i); }
+    return unsafe(vv,nv); }
 
   @Override
   public final NaturalLE add (final long u,
@@ -1483,6 +1486,8 @@ public final class NaturalLE implements Natural {
 
   private NaturalLE (final int[] words,
                      final int hiInt) { 
+    //assert null!=words;
+    //assert 0<=hiInt;
     _words = words; 
     _hiInt = hiInt; 
     }
