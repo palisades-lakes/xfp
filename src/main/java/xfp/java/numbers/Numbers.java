@@ -123,11 +123,11 @@ public final class Numbers implements Set {
     return i.bitLength(); }
 
   /** inclusive */
-  public static final int loBit (final Uints i) {
+  public static final int loBit (final Natural i) {
     return i.loBit(); }
 
   /** exclusive */
-  public static final int hiBit (final Uints i) {
+  public static final int hiBit (final Natural i) {
      return i.hiBit(); }
 
   /** inclusive */

@@ -26,7 +26,6 @@ import xfp.java.numbers.Floats;
 import xfp.java.numbers.Natural;
 import xfp.java.numbers.NaturalDivide;
 import xfp.java.numbers.Ringlike;
-import xfp.java.numbers.Uints;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
 import xfp.java.prng.PRNG;
@@ -102,7 +101,7 @@ public final class Common {
   hiBit (final Function<BigInteger,T> fromBI,
          final BigInteger z0) {
     final int bl = z0.bitLength();
-    final Uints r0 = (Uints) fromBI.apply(z0);
+    final Natural r0 = (Natural) fromBI.apply(z0);
     final int hi = r0.hiBit();
     Assertions.assertEquals(bl,hi,() ->
     "\nbitLength=" + bl + "\nhiBit=" + hi); }

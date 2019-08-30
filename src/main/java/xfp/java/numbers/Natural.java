@@ -1,5 +1,7 @@
 package xfp.java.numbers;
 
+import static xfp.java.numbers.Numbers.unsigned;
+
 import java.math.BigInteger;
 import java.util.List;
 
@@ -15,12 +17,440 @@ import xfp.java.exceptions.Exceptions;
  * TODO: utilities class to hide private stuff?
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-17
+ * @version 2019-08-30
  */
 
 @SuppressWarnings("unchecked")
 public interface Natural
-extends Uints<Natural>, Ringlike<Natural> {
+extends Ringlike<Natural>, Transience<Natural> {
+
+  //--------------------------------------------------------------
+  // word ops
+  //--------------------------------------------------------------
+  /** The <code>i</code>th (little endian) word as an 
+   * <code>int</code>. <br>
+   * <em>WARNING:</em> content used as unsigned.
+   */
+
+  int word (final int i);
+
+  /** Return a sequence where the <code>i</code>th 
+   * (little endian) word is <code>w</code>.
+   * May return a new sequence, or may modify <code>this</code>.
+   * Existing references to <code>this</code> may no longer be
+   * valid.
+   */
+
+  default Natural setWord (final int i,
+                     final int w) {
+    throw Exceptions.unsupportedOperation(this,"setWord",i,w); }
+
+  /** The value of the unsigned <code>i</code>th (little endian) 
+   * word as a <code>long</code>.
+   */
+
+  long uword (final int i);
+  
+//  default long uword (final int i) {
+//    return unsigned(word(i)); }
+
+  //--------------------------------------------------------------
+  /** Inclusive lower bound on non-zero words:
+   * <code>0L==uword(i)</code> for
+   * <code>startWord()>i</code>.
+   * Doesn't guarantee that <code>0L!=uword(i)</code> for
+   * <code>startWord()&lt;=i</code>.
+   * Zero may have no words, in which case,
+   * {@link #startWord()} <code>==</code> {@link #endWord()}
+   * <code>==0</code>.
+   * <p>
+   * This is intended to be a fast to return, looser bound than
+   * @{link {@link #loInt()}.
+   */
+
+  int startWord ();
+
+  /** Exclusive upper bound for non-zero words:
+   * <code>0L==uword(i)</code> for
+   * <code>endWord()<=i</code>.
+   * Doesn't guarantee that <code>0L!=uword(i)</code> for
+   * <code>endWord()&gt;i</code>.
+   * <p>
+   * This is intended to be a fast to return, looser bound than
+   * @{link {@link #hiInt()}.
+   */
+
+  int endWord ();
+
+  //--------------------------------------------------------------
+  /** Return the index of the lowest non-zero word,
+   * unless all words are zero, in which case,
+   * {@link #loInt()} <code>==</code> {@link #hiInt()}
+   * <code>==0</code>.
+   * Guarantees <code>0!=word(loInt())</code> unless
+   * {@link #loInt()} <code>==</code> {@link #hiInt()}
+   * <code>==0</code>.
+   */
+  
+  default int loInt () {
+    // Search for lowest order nonzero int
+    final int n = hiInt(); // might be 0
+    for (int i=startWord();i<n;i++) {
+      if (0!=word(i)) { return i; } }
+    //assert 0==n;
+    return 0; }
+
+  /** Return the index of the highest non-zero word.
+   * unless all words are zero, in which case,
+   * {@link #loInt()} <code>==</code> {@link #hiInt()}
+   * <code>==0</code>.
+   * Guarantees <code>0!=word(hiInt()-1)</code> unless
+   * {@link #loInt()} <code>==</code> {@link #hiInt()}
+   * <code>==0</code>.
+   */
+
+  default int hiInt () {
+    final int start = startWord();
+    for (int i = endWord()-1;i>=start;i--) {
+      if (0!=word(i) ) { return i+1; } }
+    //assert 0==start;
+    return 0; }
+
+  //--------------------------------------------------------------
+
+  default Natural clear () {
+    throw Exceptions.unsupportedOperation(this,"clear"); }
+
+  //--------------------------------------------------------------
+
+  default Natural empty () {
+    throw Exceptions.unsupportedOperation(this,"empty"); }
+
+  //--------------------------------------------------------------
+  /** Return the <code>[i0,i1)</code> words as a new 
+   * <code>Natural</code> with <code>[0,i1-i0)</code> words.
+   */
+
+  default Natural words (final int i0,
+                   final int i1) {
+    //assert 0<=i0;
+    //assert i0<i1;
+    if ((0==i0) && (hiInt()<=i1)) { return copy(); }
+    final int n = Math.max(0,i1-i0);
+    if (0>=n) { return empty(); }
+    Natural u = empty();
+    for (int i=0;i<n;i++) { u =  u.setWord(i,word(i+i0)); }
+    return u; }
+
+  //--------------------------------------------------------------
+  /** Return a sequence whose value is the same as <code>u</code>.
+   * May be the same object as <code>this</code>, if mutable.
+   * May be <code>u</code>, if immutable.
+   * May be a copy of <code>u</code>.
+   */
+
+  default Natural set (final Natural u) {
+    Natural x = clear();
+    for (int i=u.startWord();i<u.endWord();i++) {
+      x = x.setWord(i,u.word(i)); }
+    return this; }
+
+  /** Return a Natural whose value is the same as <code>u</code>.
+   */
+
+  default Natural set (final long u) {
+    //assert 0<=u;
+    // TODO: optimize zeroing internal array?
+    clear();
+    final long lo = Numbers.loWord(u);
+    if (0!=lo) { setWord(0,(int) lo); }
+    final long hi = Numbers.hiWord(u);
+    if (0!=hi) { setWord(1,(int) hi); }
+    return this; }
+
+  //--------------------------------------------------------------
+  // bit ops
+  //--------------------------------------------------------------
+
+  /** Return the index of the lowest non-zero bit,
+   * unless all bits are zero, in which case,
+   * {@link #loBit()} <code>==</code> {@link #hiBit()}
+   * <code>==0</code>.
+   */
+  
+  default int loBit () {
+    // Search for lowest order nonzero int
+    final int i=loInt(); 
+    if (i==hiInt()) { return 0; } // all bits zero
+    return (i<<5) + Integer.numberOfTrailingZeros(word(i)); }
+
+  /** Return <code>1 +</code> index of the highest non-zero bit.
+   * If all bits are zero, 
+   * {@link #loBit()} <code>==</code> {@link #hiBit()}
+   * <code>==0</code>.
+   */
+  
+  default int hiBit () {
+    //Debug.println("hiBit this=" + this);
+    final int i = hiInt()-1;
+    if (0>i) { return 0; }
+    final int wi = word(i);
+    return (i<<5)+Integer.SIZE-Integer.numberOfLeadingZeros(wi); }
+
+  //--------------------------------------------------------------
+  /** get the least significant int word of (this >>> shift) */
+
+  default int getShiftedInt (final int downShift) {
+    //assert 0<=downShift;
+    final int iShift = (downShift>>>5);
+    if (hiInt()<=iShift) { return 0; }
+    final int rShift = (downShift & 0x1f);
+    if (0==rShift) { return word(iShift); }
+    final int r2 = 32-rShift;
+    // TODO: optimize using startWord and endWord.
+    final long lo = (uword(iShift) >>> rShift);
+    final long hi = (uword(iShift+1) << r2);
+    return (int) (hi | lo); }
+
+  /** get the least significant two int words of (this >>> shift)
+   * as a long.
+   */
+
+  default long getShiftedLong (final int downShift) {
+    //assert 0<=downShift;
+    final int iShift = (downShift>>>5);
+    if (hiInt()<=iShift) { return 0L; }
+    final int rShift = (downShift & 0x1f);
+    if (0==rShift) {
+      return ((uword(iShift+1)<<32) | uword(iShift)); }
+    // TODO: optimize using startWord and endWord.
+    final int r2 = 32-rShift;
+    final long lo0 = (uword(iShift)>>>rShift);
+    final long u1 = uword(iShift+1);
+    final long lo1 = (u1<<r2);
+    final long lo = lo1 | lo0;
+    final long hi0 = (u1>>>rShift);
+    final long hi1 = (uword(iShift+2)<<r2);
+    final long hi = hi1 | hi0;
+    return (hi << 32) | lo; }
+
+  //--------------------------------------------------------------
+
+  default boolean testBit (final int n) {
+    //assert 0<=n;
+    final int w = word(n>>>5);
+    final int b = (1 << (n&0x1F));
+    return 0!=(w&b); }
+
+  default Natural setBit (final int i) {
+    //assert 0<=i;
+    final int iw = (i>>>5);
+    final int w = word(iw);
+    final int ib = (i&0x1F);
+    return setWord(iw,(w|(1<<ib))); }
+
+//  default Natural clearBit (final int n) {
+//    //assert 0<=n;
+//    final int iw = (n>>>5);
+//    final int w = word(iw);
+//    final int ib = (n&0x1F);
+//    return setWord(iw,(w&(~(1<<ib)))); }
+
+//  default Natural flipBit (final int n) {
+//    //assert 0<=n;
+//    final int iw = (n>>>5);
+//    final int w = word(iw);
+//    final int ib = (n&0x1F);
+//    return setWord(iw,(w^(1<<ib))); }
+
+  //--------------------------------------------------------------
+
+//  default Natural shiftDownWords (final int iShift) {
+//    //assert 0<=iShift;
+//    if (0==iShift) { return (T) this; }
+//    final int n0 = hiInt();
+//    if (0==n0) { return (T) this; }
+//    final int n1 = n0-iShift;
+//    if (0>=n1) { return empty(); }
+//    Natural u = recyclable(n1);
+//    for (int i=0;i<n1;i++) { 
+//      u = (T) u.setWord(i,word(i+iShift)); }
+//    if (isImmutable()) { return (T) u.immutable(); }
+//    return u; }
+//
+//  default Natural shiftDown (final int shift) {
+//    //assert 0<=shift;
+//    if (shift==0) { return (T) this; }
+//    final int n0 = hiInt();
+//    if (0==n0) { return (T) this; }
+//    final int iShift = (shift>>>5);
+//    final int n1 = n0-iShift;
+//    if (0>=n1) { return empty(); }
+//    final int bShift = (shift & 0x1f);
+//    if (0==bShift) { return shiftDownWords(iShift); }
+//    Natural u = recyclable(n1);
+//    final int rShift = 32-bShift;
+//    int w0 = word(iShift);
+//    for (int j=0;j<n1;j++) { 
+//      final int w1 = word(j+iShift+1);
+//      final int w = ((w1<<rShift) | (w0>>>bShift));
+//      w0 = w1;
+//      u = (T) u.setWord(j,w); }
+//    if (isImmutable()) { return (T) u.immutable(); }
+//    return u; }
+
+  //  default Natural shiftDown (final int shift) {
+  //    //assert 0<=shift;
+  //    if (shift==0) { return (T) this; }
+  //    final int n0 = hiInt();
+  //    if (0==n0) { return (T) this; }
+  //    final int iShift = (shift >>> 5);
+  //    final int n1 = n0-iShift;
+  //    if (0>=n1) { return empty(); }
+  //    final int bShift = (shift & 0x1f);
+  //    if (0==bShift) { return shiftDownWords(iShift); }
+  //    Natural u = empty();
+  //    final int rShift = 32-bShift;
+  //    for (int j=0;j<n1;j++) { 
+  //      final int i = j+iShift;
+  //      final int w = ((word(i+1)<<rShift) | (word(i)>>>bShift));
+  //      u = (T) u.setWord(j,w); }
+  //    return u; }
+
+  default Natural shiftDown (final int shift) {
+    throw Exceptions.unsupportedOperation(this,"shiftUp",shift); }
+  
+  //--------------------------------------------------------------
+
+//  default Natural shiftUpWords (final int iShift) {
+//    //assert 0<=iShift;
+//    if (0==iShift) { return (T) this; }
+//    final int n = hiInt();
+//    if (0==n) { return (T) this; }
+//    Natural u = empty();
+//    for (int i=0;i<iShift;i++) { u = (T) u.setWord(i,0); }
+//    for (int i=0;i<n;i++) { u = (T) u.setWord(i+iShift,word(i)); }
+//    return u; }
+
+//  default Natural shiftUp (final int shift) {
+//    //assert 0<=shift;
+//    if (shift==0) { return (T) this; }
+//    final int n0 = hiInt();
+//    if (0==n0) { return (T) this; }
+//    //if (isZero()) { return valueOf(0L); }
+//    final int iShift = (shift >>> 5);
+//    final int bShift = (shift & 0x1f);
+//    if (0==bShift) { return shiftUpWords(iShift); }
+//    final int rShift = 32-bShift;
+//    final int n1 = n0+iShift;
+//    Natural u = empty();
+//    for (int i=0;i<iShift;i++) { u = (T) u.setWord(i,0); }
+//    u = (T) u.setWord(iShift,(word(0)<<bShift));
+//    for (int i=1;i<n0;i++) { 
+//      final int w = ((word(i)<<bShift) | (word(i-1)>>>rShift));
+//      u = (T) u.setWord(i+iShift,w); }
+//    u = (T) u.setWord(n1,(word(n0-1)>>>rShift));
+//    return u; }
+
+  default Natural shiftUp (final int shift) {
+    throw Exceptions.unsupportedOperation(this,"shiftUp",shift); }
+  
+  //--------------------------------------------------------------
+  // construction
+  //--------------------------------------------------------------
+  /** Return a new Natural whose value is <code>u</code>.
+   * Does not modify <code>this</code>.
+   */
+
+  default Natural from (final long u) {
+    throw Exceptions.unsupportedOperation(this,"from",u); }
+
+  /** Return a new Natural whose value is <code>u</code>,
+   * interpreted as unsigned.
+   * Does not modify <code>this</code>.
+   */
+
+  default Natural from (final int u) { return from(unsigned(u)); }
+
+  /** Return a new Natural whose value is
+   * <code>u * 2<sup>shift</sup></code>.
+   * Does not modify <code>this</code>.
+   *
+   * <code>0&lt;=shift</code>
+   */
+
+  default Natural from (final long u,
+                  final int upShift) {
+    throw Exceptions.unsupportedOperation(this,"from",u,upShift); }
+//    return (T) from(u).shiftUp(shift); }
+
+  //--------------------------------------------------------------
+  // 'Number' interface
+  //--------------------------------------------------------------
+
+  default byte[] littleEndianBytes () {
+    final int hi = hiBit();
+    // an extra zero byte to avoid getting a negative
+    // two's complement input to new BigInteger(b).
+    final int n = 1 + ((hi)/8);
+    final byte[] b = new byte[n];
+    int j = 0;
+    int w = 0;
+    for (int i=0;i<n;i++) {
+      if (0==(i%4)) { w = word(j++); }
+      else { w = (w>>>8); }
+      b[i] = (byte) w; }
+    return b; }
+
+  default byte[] bigEndianBytes () {
+    final int hi = hiBit();
+    // an extra zero byte to avoid getting a negative
+    // two's complement input to new BigInteger(b).
+    final int n = 1 + ((hi)/8);
+    final byte[] b = new byte[n];
+    int j = 0;
+    int w = 0;
+    for (int i=0;i<n;i++) {
+      if (0==(i%4)) { w = word(j++); }
+      else { w = (w>>>8); }
+      b[n-1-i] = (byte) w; }
+    return b; }
+
+  default BigInteger bigIntegerValue () {
+    return new BigInteger(bigEndianBytes()); }
+
+  default String toHexString () {
+    final StringBuilder b = new StringBuilder("");
+    final int n = hiInt()-1;
+    if (0>n) { b.append('0'); }
+    else {
+      b.append(String.format("%x",Long.valueOf(uword(n))));
+      for (int i=n-1;i>=0;i--) {
+        //b.append(" ");
+        b.append(String.format("%08x",Long.valueOf(uword(i)))); } }
+    return b.toString(); }
+
+  //--------------------------------------------------------------
+  // 'Object' interface
+  //--------------------------------------------------------------
+
+  default int uintsHashCode () {
+    int hashCode = 0;
+    for (int i=startWord(); i<hiInt(); i++) {
+      hashCode = (int) ((31 * hashCode) + uword(i)); }
+    return hashCode; }
+
+  // DANGER: equality across classes
+  default boolean uintsEquals (final Natural x) {
+    if (x==this) { return true; }
+    final Natural u = x;
+    final int n0 = startWord();
+    if (n0!=u.startWord()) { return false; }
+    final int n1 = hiInt();
+    if (n1!=u.hiInt()) { return false; }
+    for (int i=n0; i<n1; i++) {
+      if (word(i)!=u.word(i)) { return false; } }
+    return true; }
 
   //--------------------------------------------------------------
   // ordering
