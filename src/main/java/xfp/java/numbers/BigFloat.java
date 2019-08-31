@@ -537,13 +537,15 @@ public final class BigFloat implements Ringlike<BigFloat> {
 
     return Floats.unsafeBits(nonNegative,e,significand); }
 
+  //--------------------------------------------------------------
+
   /** @return closest half-even rounded <code>float</code>
    */
 
   @Override
   public final float floatValue () {
     final boolean nn = nonNegative();
-    final Natural s0 = significand();
+    final NaturalLE s0 = significand();
     final int e0 = exponent();
     if (s0.isZero()) { return (nn ? 0.0F : -0.0F); }
 
@@ -612,7 +614,7 @@ public final class BigFloat implements Ringlike<BigFloat> {
   @Override
   public final double doubleValue () {
     final boolean nn = nonNegative();
-    final Natural s0 = significand();
+    final NaturalLE s0 = significand();
     final int e0 = exponent();
     if (s0.isZero()) { return (nn ? 0.0 : -0.0); }
     final int eh = s0.hiBit();

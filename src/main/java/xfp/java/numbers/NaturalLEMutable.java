@@ -10,7 +10,7 @@ import java.util.Arrays;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-13
+ * @version 2019-08-30
  */
 
 public final class NaturalLEMutable implements Natural {
@@ -36,52 +36,6 @@ public final class NaturalLEMutable implements Natural {
 
   //--------------------------------------------------------------
   // Natural
-  //--------------------------------------------------------------
-
-//  static final Natural fromSquare (final long t) {
-//    //assert isValid();
-//    //assert 0L<=t;
-//    final long hi = Numbers.hiWord(t);
-//    final long lo = Numbers.loWord(t);
-//    final long lolo = lo*lo;
-//    // TODO: overflow?
-//    //final long hilo2 = ((hi*lo)<<1);
-//    final long hilo2 = Math.multiplyExact(2,hi*lo);
-//    final long hihi = hi*hi;
-//    long sum = lolo;
-//    final int m0 = (int) sum;
-//    sum = (sum>>>32) + hilo2;
-//    final int m1 = (int) sum;
-//    sum = (sum>>>32) + hihi ;
-//    final int m2 = (int) sum;
-//    final int m3 = (int) (sum>>>32);
-//    return unsafe(new int[] {m0,m1,m2,m3,}); }
-
-  //--------------------------------------------------------------
-
-//  static final Natural product (final long t0,
-//                                final long t1) {
-//    //assert isValid();
-//    //assert 0L<=t0;
-//    //assert 0L<=t1;
-//    final long hi0 = Numbers.hiWord(t0);
-//    final long lo0 = Numbers.loWord(t0);
-//    final long hi1 = Numbers.hiWord(t1);
-//    final long lo1 = Numbers.loWord(t1);
-//    final long lolo = lo0*lo1;
-//    // TODO: overflow?
-//    //final long hilo2 = (hi0*lo1) + (hi1*lo0);
-//    final long hilo2 = Math.addExact(hi0*lo1,hi1*lo0);
-//    final long hihi = hi0*hi1;
-//    long sum = lolo;
-//    final int m0 = (int) sum;
-//    sum = (sum>>>32) + hilo2;
-//    final int m1 = (int) sum;
-//    sum = (sum>>>32) + hihi ;
-//    final int m2 = (int) sum;
-//    final int m3 = (int) (sum>>>32);
-//    return unsafe(new int[] {m0,m1,m2,m3,}); }
-
   //--------------------------------------------------------------
 
   @Override
@@ -119,7 +73,27 @@ public final class NaturalLEMutable implements Natural {
 
   //--------------------------------------------------------------
 
-  @Override
+  private final NaturalLEMutable add (final long u) {
+    //assert isValid();
+    //assert 0L<=u;
+    if (0L==u) { return this; }
+    if (isZero()) { return valueOf(u); }
+    Natural v = copy();
+    long sum = uword(0) + Numbers.loWord(u);
+    v = v.setWord(0,(int) sum);
+    long carry = (sum>>>32);
+    sum = uword(1) + Numbers.hiWord(u) + carry;
+    v = v.setWord(1,(int) sum);
+    carry = (sum>>>32);
+    int i=2;
+    final int n = hiInt();
+    for (;(0L!=carry)&&(i<n);i++) {
+      sum = uword(i) + carry;
+      v = v.setWord(i,(int) sum);
+      carry = (sum>>>32); }
+    if (0L!=carry) { v = v.setWord(i,(int) carry); }
+    return (NaturalLEMutable) v; }
+ 
   public final Natural add (final long u,
                             final int upShift) {
     //assert isValid();
@@ -153,7 +127,34 @@ public final class NaturalLEMutable implements Natural {
 
   //--------------------------------------------------------------
 
-  @Override
+  private final Natural subtract (final long u) {
+    //assert isValid();
+    //assert 0L<=u;
+    //assert 0<=compareTo(u);
+    if (0L==u) { return this; }
+    //assert 0L<=u;
+    if (0L==u) { return this; }
+    //assert ! isZero();
+    final long lo = Numbers.loWord(u);
+    final long hi = Numbers.hiWord(u);
+    //if (0L!=hi) { //assert 2<=hiInt(); }
+    //if (0L!=lo) { //assert 1<=hiInt(); }
+    Natural v = copy();
+    long dif = uword(0)-lo;
+    v = v.setWord(0,(int) dif);
+    long borrow = (dif>>32);
+    dif = (uword(1)-hi)+borrow;
+    v = v.setWord(1,(int) dif);
+    borrow = (dif>>32);
+    int i=2;
+    final int n = hiInt();
+    for (;(0L!=borrow)&&(i<n);i++) {
+      dif = uword(i)+borrow;
+      v = v.setWord(i,(int) dif);
+      borrow = (dif>>32); }
+    //assert 0L==borrow : borrow;
+    return v; }
+
   public final Natural subtract (final long u,
                                  final int upShift) {
     //assert isValid();
@@ -287,17 +288,11 @@ public final class NaturalLEMutable implements Natural {
     return recycle(); }
   //return this; }
 
-  @Override
-  public final Natural empty () { 
-    //assert isValid();
-    // safe because Ints.EMPTY is immutable
-    return unsafe(Ints.EMPTY); }
-
-  @Override
-  public final Natural from (final int u) {
-    //assert isValid();
-    //assert 0<=u;
-    return valueOf(u);  }
+//  @Override
+//  public final Natural from (final int u) {
+//    //assert isValid();
+//    //assert 0<=u;
+//    return valueOf(u);  }
 
   @Override
   public final Natural from (final long u) {
@@ -314,7 +309,7 @@ public final class NaturalLEMutable implements Natural {
     if (isZero()) { return this; }
     final int n0 = hiInt();
     final int n1 = n0-iShift;
-    if (0>=n1) { return empty(); }
+    if (0>=n1) { return zero(); }
     final int[] u = new int[n1];
     for (int i=0;i<n1;i++) { 
       u[i] = word(i+iShift); }
@@ -329,7 +324,7 @@ public final class NaturalLEMutable implements Natural {
     final int iShift = (shift>>>5);
     final int n0 = hiInt();
     final int n1 = n0-iShift;
-    if (0>=n1) { return empty(); }
+    if (0>=n1) { return zero(); }
     final int bShift = (shift & 0x1f);
     if (0==bShift) { return shiftDownWords(iShift); }
     final int[] u = new int[n1];

@@ -16,7 +16,7 @@ import java.util.Arrays;
  * compression/optimization step?
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-06
+ * @version 2019-08-30
  */
 
 public final class Bei0 {

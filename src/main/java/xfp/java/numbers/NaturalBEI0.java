@@ -15,7 +15,7 @@ import xfp.java.Debug;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-27
+ * @version 2019-08-30
  */
 
 @SuppressWarnings("unchecked")
@@ -73,9 +73,6 @@ public final class NaturalBEI0 implements Natural {
 
   @Override
   public final boolean isZero () { return 0==words().length; }
-
-  @Override
-  public final NaturalBEI0 empty () { return ZERO; }
 
   @Override
   public final NaturalBEI0 zero () { return ZERO; }
@@ -171,14 +168,12 @@ public final class NaturalBEI0 implements Natural {
   // add longs
   //--------------------------------------------------------------
 
-  @Override
   public final NaturalBEI0 add (final long m) {
     //assert 0L<=m;
     return unsafe(Bei0.add(words(),m)); }
 
   //--------------------------------------------------------------
 
-  @Override
   public final NaturalBEI0 add (final long u,
                                 final int upShift) {
     //assert 0L<=m;
@@ -190,14 +185,12 @@ public final class NaturalBEI0 implements Natural {
   //--------------------------------------------------------------
   // only when val <= this
 
-  @Override
   public final Natural subtract (final long m) {
     //assert 0L<=m;
     final int[] u = Bei0.difference(words(),m);
     return unsafe(u); }
 
   // only when (m << upShift) <= this
-  @Override
   public final NaturalBEI0 subtract (final long m,
                                      final int upShift) {
     //assert 0L<=m;
@@ -207,7 +200,6 @@ public final class NaturalBEI0 implements Natural {
   //--------------------------------------------------------------
   // only when this <= m
 
-  @Override
   public final NaturalBEI0 subtractFrom (final long m) {
     //assert 0L<=m;
     final int[] u = Bei0.subtract(m,words());
@@ -215,7 +207,6 @@ public final class NaturalBEI0 implements Natural {
 
   // only when this <= (m << upShift)
 
-  @Override
   public final NaturalBEI0 subtractFrom (final long m,
                                          final int upShift) {
     //assert 0L<=m;
@@ -234,6 +225,11 @@ public final class NaturalBEI0 implements Natural {
   @Override
   public final Natural add (final Natural m) {
     return unsafe(Bei0.add(words(),((NaturalBEI0) m).words())); }
+
+  @Override
+  public final Natural add (final Natural m,
+                            final int upShift) {
+    return add(m.shiftUp(upShift)); }
 
   // only when val <= this
 
@@ -275,7 +271,6 @@ public final class NaturalBEI0 implements Natural {
     //assert 1L<=that;
     return unsafe(Bei0.multiply(words(),that)); }
 
-  // TODO: multiply by shifted long
   @Override
   public final Natural multiply (final long that,
                                  final int shift) {
@@ -485,7 +480,6 @@ public final class NaturalBEI0 implements Natural {
 
   //--------------------------------------------------------------
 
-  @Override
   public final int getShiftedInt (final int n) {
     //assert 0<=n;
     return Bei0.getShiftedInt(words(),n); }
@@ -493,7 +487,6 @@ public final class NaturalBEI0 implements Natural {
   // get the least significant two int words of (m >>> shift) as a
   // long
 
-  @Override
   public final long getShiftedLong (final int n) {
     //assert 0<=n;
     return Bei0.getShiftedLong(words(),n); }
@@ -508,13 +501,13 @@ public final class NaturalBEI0 implements Natural {
   public final NaturalBEI0 setBit (final int n) {
     return unsafe(Bei0.setBit(words(),n)); }
 
-//  @Override
-//  public final NaturalBEI0 clearBit (final int n) {
-//    return unsafe(Bei0.clearBit(words(),n)); }
+  //  @Override
+  //  public final NaturalBEI0 clearBit (final int n) {
+  //    return unsafe(Bei0.clearBit(words(),n)); }
 
-//  @Override
-//  public final NaturalBEI0 flipBit (final int n) {
-//    return unsafe(Bei0.flipBit(words(),n)); }
+  //  @Override
+  //  public final NaturalBEI0 flipBit (final int n) {
+  //    return unsafe(Bei0.flipBit(words(),n)); }
 
   //--------------------------------------------------------------
   // Transience

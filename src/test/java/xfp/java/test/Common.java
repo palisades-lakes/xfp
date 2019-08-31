@@ -33,7 +33,7 @@ import xfp.java.prng.PRNG;
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-19
+ * @version 2019-08-30
  */
 @SuppressWarnings("unchecked")
 public final class Common {

@@ -11,7 +11,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-29
+ * @version 2019-08-30
  */
 
 @SuppressWarnings("unchecked")
@@ -70,7 +70,7 @@ public final class BigFloat0 implements Ringlike<BigFloat0> {
       if (0<c01) { return valueOf(p0,t0s.subtract(t1),e1); }
       return ZERO; }
     // same signs
-    if (0<de) { return valueOf(p0,t1.add(t0,de),e1);}
+    if (0<de) { return valueOf(p0,t1.add(t0.shiftUp(de)),e1);}
     return valueOf(p0,t0.add(t1),e1); }
 
   //--------------------------------------------------------------

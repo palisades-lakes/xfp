@@ -18,7 +18,7 @@ import xfp.java.prng.Generators;
 /** Utilities for Object and primitive numbers.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-13
+ * @version 2019-08-30
  */
 @SuppressWarnings("unchecked")
 public final class Numbers implements Set {

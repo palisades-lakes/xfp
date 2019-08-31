@@ -70,6 +70,24 @@ public final class NaturalLE implements Natural {
   public final int[] copyWords () { 
     return Arrays.copyOf(words(),hiInt()); }
 
+  //--------------------------------------------------------------
+  /** Return the <code>[i0,i1)</code> words as a new 
+   * <code>NaturalLE</code> with <code>[0,i1-i0)</code> words.
+   */
+
+  @Override
+  public final NaturalLE words (final int i0,
+                         final int i1) {
+    //assert 0<=i0;
+    //assert i0<i1;
+    if ((0==i0) && (hiInt()<=i1)) { return copy(); }
+    final int n = Math.max(0,i1-i0);
+    if (0>=n) { return zero(); }
+    final int[] tt = words();
+    final int[] vv = new int[n];
+    for (int i=0;i<n;i++) { vv[i] =  tt[i+i0]; }
+    return unsafe(vv,n); }
+
   @Override
   public final NaturalLE setWord (final int i,
                                   final int w) {
@@ -91,9 +109,6 @@ public final class NaturalLE implements Natural {
 
   @Override
   public final boolean isZero () { return 0==hiInt(); }
-
-  @Override
-  public final NaturalLE empty () { return ZERO; }
 
   @Override
   public final NaturalLE zero () { return ZERO; }
@@ -415,7 +430,6 @@ public final class NaturalLE implements Natural {
   // add (non-negative) longs
   //--------------------------------------------------------------
 
-  @Override
   public final NaturalLE add (final long u) {
     //assert 0L<u;
     //if (0L==u) { return this; }
@@ -536,7 +550,6 @@ public final class NaturalLE implements Natural {
     for (;i<nt;i++) { vv[i] = tt[i]; }
     return unsafe(vv,nv); }
 
-  @Override
   public final NaturalLE add (final long u,
                               final int upShift) {
     //assert 0<u;
@@ -615,7 +628,6 @@ public final class NaturalLE implements Natural {
     //assert 0L==sum; 
     return unsafe(vv); }
 
-  @Override
   public final NaturalLE add (final int upShift,
                               final long u) {
     //assert 0<=upShift;
@@ -633,7 +645,6 @@ public final class NaturalLE implements Natural {
   // subtract (non-negative) longs
   //--------------------------------------------------------------
 
-  @Override
   public final NaturalLE subtract (final long u) {
     //assert 0L<=u;
     //assert 0<=compareTo(u);
@@ -738,7 +749,6 @@ public final class NaturalLE implements Natural {
     for (int j=0;j<nv;j++) { vvv[j]=vv[j]; }
     return unsafe(vvv,nv); }
 
-  @Override
   public final NaturalLE subtract (final long u,
                                    final int upShift) {
     //assert 0L<=u;
@@ -817,7 +827,6 @@ public final class NaturalLE implements Natural {
     //assert 0L==dif; 
     return unsafe(vv); }
 
-  @Override
   public final NaturalLE subtract (final int upShift,
                                    final long u) {
     //assert 0<=upShift;
@@ -833,7 +842,6 @@ public final class NaturalLE implements Natural {
 
   //--------------------------------------------------------------
 
-  @Override
   public final NaturalLE subtractFrom (final long u) {
     //assert 0L<=u;
     //assert 0>=compareTo(u);
@@ -909,7 +917,6 @@ public final class NaturalLE implements Natural {
     assert 0L==(dif>>32); 
     return unsafe(vv); }
 
-  @Override
   public final NaturalLE subtractFrom (final long u,
                                        final int upShift) {
     //assert 0L<=u;
@@ -925,7 +932,6 @@ public final class NaturalLE implements Natural {
 
   //--------------------------------------------------------------
 
-  @Override
   public final NaturalLE  subtractFrom (final int upShift,
                                         final long u) {
     //assert 0<=upShift;
@@ -1069,7 +1075,6 @@ public final class NaturalLE implements Natural {
     //if (i<nt) { System.arraycopy(words(),i,vv,i,nt-i); }
     return unsafe(vv); }
 
-  @Override
   public final NaturalLE subtract (final Natural u,
                                    final int upShift) {
     //assert 0<=upShift;
@@ -1281,6 +1286,42 @@ public final class NaturalLE implements Natural {
   //    vv[iShift+1] = ((hi<<bShift)|(lo>>>rShift));
   //    vv[iShift+2] =  (hi>>>rShift); 
   //    return unsafe(vv); }
+
+  /** get the least significant int word of (this >>> shift) */
+
+  public final int getShiftedInt (final int downShift) {
+    //assert 0<=downShift;
+    final int iShift = (downShift>>>5);
+    if (hiInt()<=iShift) { return 0; }
+    final int rShift = (downShift & 0x1f);
+    if (0==rShift) { return word(iShift); }
+    final int r2 = 32-rShift;
+    // TODO: optimize using startWord and endWord.
+    final long lo = (uword(iShift) >>> rShift);
+    final long hi = (uword(iShift+1) << r2);
+    return (int) (hi | lo); }
+
+  /** get the least significant two int words of (this >>> shift)
+   * as a long.
+   */
+
+  public final long getShiftedLong (final int downShift) {
+    //assert 0<=downShift;
+    final int iShift = (downShift>>>5);
+    if (hiInt()<=iShift) { return 0L; }
+    final int rShift = (downShift & 0x1f);
+    if (0==rShift) {
+      return ((uword(iShift+1)<<32) | uword(iShift)); }
+    // TODO: optimize using startWord and endWord.
+    final int r2 = 32-rShift;
+    final long lo0 = (uword(iShift)>>>rShift);
+    final long u1 = uword(iShift+1);
+    final long lo1 = (u1<<r2);
+    final long lo = lo1 | lo0;
+    final long hi0 = (u1>>>rShift);
+    final long hi1 = (uword(iShift+2)<<r2);
+    final long hi = hi1 | hi0;
+    return (hi << 32) | lo; }
 
   //--------------------------------------------------------------
 
