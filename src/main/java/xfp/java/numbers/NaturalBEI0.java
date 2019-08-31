@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import xfp.java.Debug;
+import xfp.java.exceptions.Exceptions;
 
 /** immutable arbitrary-precision non-negative integers
  * (natural number) represented by big-endian
@@ -514,7 +515,8 @@ public final class NaturalBEI0 implements Natural {
   //--------------------------------------------------------------
 
   @Override
-  public final Natural immutable () { return this; }
+  public final NaturalBEI0 copy () {
+    throw Exceptions.unsupportedOperation(this,"copy"); }
 
   //--------------------------------------------------------------
   // Comparable interface+

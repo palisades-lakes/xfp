@@ -39,6 +39,20 @@ public final class NaturalLEMutable implements Natural {
   //--------------------------------------------------------------
 
   @Override
+  public final boolean isZero () {
+    //assert isValid();
+    for (int i=0;i<hiInt();i++) {
+      if (0!=word(i)) { return false; } }
+    return true; }
+  
+  //--------------------------------------------------------------
+
+  @Override
+  public final NaturalLEMutable abs () { return this; }
+  
+  //--------------------------------------------------------------
+
+  @Override
   public final Natural add (final Natural u,
                             final int shift) {
     //assert isValid();
@@ -250,6 +264,14 @@ public final class NaturalLEMutable implements Natural {
       v[i] = (int) dif; }
     return unsafe(v); }
 
+  @Override
+  public final boolean isOne () {
+    //assert isValid();
+    if (1!=word(0)) { return false; }
+    for (int i=Math.max(1,startWord());i<endWord();i++) {
+      if (0!=word(i)) { return false; } }
+    return true; }
+
   //--------------------------------------------------------------
   // Uints
   //--------------------------------------------------------------
@@ -392,26 +414,19 @@ public final class NaturalLEMutable implements Natural {
   /** hex string. */
   @Override
   public final String toString () { 
-    if (! isValid()) { return "invalid NaturalLEMutable"; }
+    //if (! isValid()) { return "invalid NaturalLEMutable"; }
     return toHexString(); }
 
   //--------------------------------------------------------------
   // Transience
   //--------------------------------------------------------------
 
-  @Override
-  public boolean isImmutable () { 
-    //assert isValid();
-    return false; }
-
-  @Override
   public final Natural recycle () { 
     //assert isValid();
     final int[] t = _words;
     _words = null;
     return unsafe(t); }
 
-  @Override
   public final Natural immutable () { 
     //assert isValid();
     //final int[] t = Ints.stripTrailingZeros(_words);
@@ -420,32 +435,12 @@ public final class NaturalLEMutable implements Natural {
     return NaturalLE.unsafe(t); }
 
   @Override
-  public final Natural recyclable (final Natural init) { 
-    //assert isValid();
-    return copy(init); }
-
-  @Override
-  public final Natural recyclable (final int init) {
-    //assert isValid();
-    return NaturalLEMutable.make(init); }
-
-  @Override
-  public final Natural recyclable (final Natural init,
-                                   final int nWords) {
-    //assert isValid();
-    if (null==init) {
-      return NaturalLEMutable.make(nWords); }
-    if (init instanceof NaturalLEMutable) {
-      return NaturalLEMutable.make(words(),nWords); }
-    return init.recyclable(init,nWords); }
-
-  @Override
   public final Natural copy () { 
     //assert isValid();
     return copy(this); }
 
-  @Override
-  public final boolean isValid () { return null!=_words; }
+//  @Override
+//  public final boolean isValid () { return null!=_words; }
 
   //--------------------------------------------------------------
   // construction

@@ -66,7 +66,7 @@ public final class NaturalMultiply {
     if (u instanceof NaturalLE) { 
       return ((NaturalLE) u).squareSimple(); }
     final int n = u.hiInt();
-    Natural v = u.recyclable(2*n);
+    Natural v = NaturalLEMutable.make(new int[2*n]);
     long carry = 0L;
     for (int i0=0;i0<n;i0++) {
       carry = 0L;
@@ -78,7 +78,7 @@ public final class NaturalMultiply {
         carry = (prod>>>32); }
       final int i2 = i0+n;
       v = v.setWord(i2, (int) carry); }
-    return v.immutable(); }
+    return ((NaturalLEMutable) v).immutable(); }
 
   //--------------------------------------------------------------
 

@@ -19,8 +19,7 @@ import xfp.java.exceptions.Exceptions;
  */
 
 @SuppressWarnings("unchecked")
-public interface Natural
-extends Ringlike<Natural>, Transience<Natural> {
+public interface Natural extends Ringlike<Natural> {
 
   //--------------------------------------------------------------
   // word ops
@@ -116,13 +115,7 @@ extends Ringlike<Natural>, Transience<Natural> {
 
   //--------------------------------------------------------------
 
-  //  default Natural clear () {
-  //    throw Exceptions.unsupportedOperation(this,"clear"); }
-
-  //--------------------------------------------------------------
-
-  //  default Natural empty () {
-  //    throw Exceptions.unsupportedOperation(this,"empty"); }
+  Natural copy ();
 
   //--------------------------------------------------------------
   /** Return the <code>[i0,i1)</code> words as a new 
@@ -438,29 +431,6 @@ extends Ringlike<Natural>, Transience<Natural> {
   //--------------------------------------------------------------
   // arithmetic
   //--------------------------------------------------------------
-  // additive group
-  //--------------------------------------------------------------
-  // implementations usually return a pre-allocated constant
-
-  @Override
-  default Natural zero () { 
-    throw Exceptions.unsupportedOperation(this,"zero"); }
-
-  @Override
-  default boolean isZero () {
-    //assert isValid();
-    for (int i=0;i<hiInt();i++) {
-      if (0!=word(i)) { return false; } }
-    return true; }
-
-  // Natural numbers are nonnegative
-
-  @Override
-  default Natural abs () {
-    //assert isValid();
-    return this; }
-
-  //--------------------------------------------------------------
 
   Natural add (final Natural u,
                final int upShift);
@@ -475,22 +445,6 @@ extends Ringlike<Natural>, Transience<Natural> {
     if (c==0) { return zero(); }
     if (c<0) { return u.subtract(this); }
     return subtract(u); }
-
-  //--------------------------------------------------------------
-  // multiplicative monoid
-  //--------------------------------------------------------------
-  // TODO: singleton class for one() and zero()?
-
-  default Natural ones (final int n) {
-    throw Exceptions.unsupportedOperation(this,"ones",n); }
-
-  @Override
-  default boolean isOne () {
-    //assert isValid();
-    if (1!=word(0)) { return false; }
-    for (int i=Math.max(1,startWord());i<endWord();i++) {
-      if (0!=word(i)) { return false; } }
-    return true; }
 
   //--------------------------------------------------------------
   // square
@@ -582,12 +536,6 @@ extends Ringlike<Natural>, Transience<Natural> {
     return NaturalDivide.reduce(this,d); }
 
   //--------------------------------------------------------------
-
-  @Override
-  default Natural invert () { 
-    throw Exceptions.unsupportedOperation(this,"invert"); }
-
-  //--------------------------------------------------------------
   // 'Number' interface
   //--------------------------------------------------------------
   // TODO: exceptions on truncation?
@@ -601,187 +549,6 @@ extends Ringlike<Natural>, Transience<Natural> {
   default long longValue () {
     //assert isValid();
     return (uword(1)<<32) | uword(0); }
-
-  //--------------------------------------------------------------
-
-//  @Override
-//  default float floatValue () {
-//    //assert isValid();
-//    if (isZero()) { return 0.0F; }
-//    final int n = hiInt()-1;
-//    final int exponent = hiBit()-1;
-//    // exponent == floor(log2(abs(this)))
-//    if (exponent < (Long.SIZE - 1)) { return longValue(); }
-//    else if (exponent > Float.MAX_EXPONENT) {
-//      return Float.POSITIVE_INFINITY; }
-//
-//    // We need the top SIGNIFICAND_WIDTH bits, including the
-//    // "implicit" one bit. To make rounding easier, we pick out
-//    // the top SIGNIFICAND_WIDTH + 1 bits, so we have one to help
-//    //us round up or down. twiceSignifFloor will contain the top
-//    // SIGNIFICAND_WIDTH + 1 bits, and signifFloor the top
-//    // SIGNIFICAND_WIDTH.
-//    // It helps to consider the real number signif = abs(this) *
-//    // 2^(SIGNIFICAND_WIDTH - 1 - exponent).
-//    final int shift = exponent - Floats.SIGNIFICAND_BITS;
-//    final int nBits = shift & 0x1f;
-//    final int nBits2 = 32 - nBits;
-//    final int w0 = word(n);
-//    final int w1 = word(n-1);
-//    // twiceSignifFloor == abs().shiftDown(shift).intValue()
-//    // shift into an int directly 
-//    int twiceSignifFloor;
-//    if (nBits == 0) { twiceSignifFloor = w0; }
-//    else {
-//      twiceSignifFloor = (w0 >>> nBits);
-//      if (twiceSignifFloor == 0) {
-//        twiceSignifFloor = (w0 << nBits2) | (w1 >>> nBits); } }
-//
-//    int signifFloor = (twiceSignifFloor >> 1);
-//    signifFloor &= Floats.STORED_SIGNIFICAND_MASK;
-//    // We round up if either the fractional part of signif is
-//    // strictly greater than 0.5 (which is true if the 0.5 bit is
-//    // set and any lower bit is set), or if the fractional part of
-//    // signif is >= 0.5 and signifFloor is odd (which is true if
-//    // both the 0.5 bit and the 1 bit are set). This is equivalent
-//    // to the desired HALF_EVEN rounding.
-//    final boolean increment =
-//      ((twiceSignifFloor & 1) != 0) 
-//      && 
-//      (((signifFloor & 1) != 0) || (loBit() < shift));
-//    final int signifRounded = signifFloor+(increment ? 1 : 0);
-//    int bits = ((exponent+Floats.EXPONENT_BIAS)) << 
-//      (Floats.SIGNIFICAND_BITS-1);
-//    bits += signifRounded;
-//    // If signifRounded == 2^24, we'd need to set all of the
-//    // significand bits to zero and add 1 to the exponent. This is 
-//    // exactly the behavior we get from just adding signifRounded 
-//    // to bits directly. If the exponent is Float.MAX_EXPONENT, we 
-//    // round up (correctly) to Float.POSITIVE_INFINITY.
-//    bits |= 1 & Floats.SIGN_MASK;
-//    return Float.intBitsToFloat(bits); }
-
-  //--------------------------------------------------------------
-
-  @Override
-  default double doubleValue () {
-    //assert isValid();
-    if (isZero()) { return 0.0; }
-    final int n = hiInt()-1;
-    final int exponent = hiBit()-1;
-    // exponent == floor(log2(abs(this))Double)
-    if (exponent < (Long.SIZE - 1)) { return longValue(); }
-    else if (exponent > Double.MAX_EXPONENT) {
-      return Double.POSITIVE_INFINITY; }
-
-    // We need the top SIGNIFICAND_WIDTH bits, including the
-    // "implicit" one bit. To make rounding easier, we pick out
-    // the top SIGNIFICAND_WIDTH + 1 bits, so we have one to help
-    // us round up or down. twiceSignifFloor will contain the top
-    // SIGNIFICAND_WIDTH + 1 bits, and signifFloor the top
-    // SIGNIFICAND_WIDTH.
-    // It helps to consider the real number signif = abs(this) *
-    // 2^(SIGNIFICAND_WIDTH - 1 - exponent).
-    final int shift = exponent - Doubles.SIGNIFICAND_BITS;
-    final int nBits = shift & 0x1f;
-    final int nBits2 = 32 - nBits;
-    final int w0 = word(n);
-    final int w1 = word(n-1);
-    int highBits;
-    int lowBits;
-    // twiceSignifFloor == abs().shiftDown(shift).intValue()
-    // shift into an int directly 
-    long twiceSignifFloor;
-    if (nBits == 0) {
-      highBits = w0;
-      lowBits = w1; }
-    else {
-      highBits = (w0 >>> nBits);
-      lowBits = (w0 << nBits2) | (w1 >>> nBits);
-      if (highBits == 0) {
-        final int w2 = word(n-2);
-        highBits = lowBits;
-        lowBits = (w1 << nBits2) | (w2 >>> nBits); } }
-
-    twiceSignifFloor =
-      (Numbers.unsigned(highBits)<<32)|Numbers.unsigned(lowBits);
-
-    // remove the implied bit
-    final long signifFloor =
-      (twiceSignifFloor >> 1) & Doubles.STORED_SIGNIFICAND_MASK;
-    // We round up if either the fractional part of signif is
-    // strictly greater than 0.5 (which is true if the 0.5 bit
-    // is set and any lower bit is set), or if the fractional
-    // part of signif is >= 0.5 and signifFloor is odd (which is
-    // true if both the 0.5 bit and the 1 bit are set). This is
-    // equivalent to the desired HALF_EVEN rounding.
-
-    final boolean increment =
-      ((twiceSignifFloor
-        & 1) != 0) && (((signifFloor & 1) != 0)
-          || (loBit() < shift));
-    final long signifRounded =
-      increment ? signifFloor + 1 : signifFloor;
-    long bits =
-      (long) ((exponent
-        + Doubles.EXPONENT_BIAS)) << Doubles.STORED_SIGNIFICAND_BITS;
-    bits += signifRounded;
-    // If signifRounded == 2^53, we'd need to set all of the
-    // significand bits to zero and add 1 to the exponent. This is
-    // exactly the behavior we get from just adding signifRounded
-    // to bits directly. If the exponent is Double.MAX_EXPONENT,
-    // we round up (correctly) to Double.POSITIVE_INFINITY.
-    bits |= 1 & Doubles.SIGN_MASK;
-    return Double.longBitsToDouble(bits); }
-
-  //--------------------------------------------------------------
-  // factories for default implementation
-  //--------------------------------------------------------------
-
-  //  static Natural get (final long u) {
-  //    //assert 0L<=u;
-  //    return NaturalBEI.valueOf(u); }
-  //
-  //  static Natural get (final BigInteger u) {
-  //    //assert 0<=u.signum();
-  //    return NaturalBEI.valueOf(u); }
-  //
-  //  static Natural get (final String u,
-  //                      final int radix) {
-  //    return NaturalBEI.valueOf(u,radix); }
-
-  //--------------------------------------------------------------
-
-  static Natural valueOf (final String u,
-                          final int radix) {
-    return NaturalLE.valueOf(u,radix); }
-
-  static Natural valueOf (final BigInteger u) {
-    //assert 0<=u.signum();
-    return NaturalLE.valueOf(u); }
-
-  static Natural valueOf (final long u) {
-    //assert 0L<=u;
-    return NaturalLE.valueOf(u); }
-
-  //--------------------------------------------------------------
-
-  //  static Natural get (final String u,
-  //                      final int radix) {
-  //    return NaturalLEMutable.valueOf(u,radix); }
-  //
-  //  static Natural get (final BigInteger u) {
-  //    //assert 0<=u.signum();
-  //    return NaturalLEMutable.valueOf(u); }
-  //
-  //  static Natural get (final long u) {
-  //    //assert 0L<=u;
-  //    return NaturalLEMutable.valueOf(u); }
-
-  //--------------------------------------------------------------
-
-  static Natural valueOf (final int u) {
-    return valueOf(Numbers.unsigned(u)); }
 
   //--------------------------------------------------------------
 }

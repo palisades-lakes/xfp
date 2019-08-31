@@ -1091,6 +1091,11 @@ public final class NaturalLE implements Natural {
   //--------------------------------------------------------------
 
   @Override
+  public final NaturalLE abs () { return this; }
+  
+  //--------------------------------------------------------------
+
+  @Override
   public final NaturalLE add (final Natural u) {
     final int nt = hiInt();
     final int nu = u.hiInt();
@@ -1151,7 +1156,6 @@ public final class NaturalLE implements Natural {
   @Override
   public final NaturalLE one () { return ONE; }
 
-  @Override
   public final NaturalLE ones (final int n) {
     throw Exceptions.unsupportedOperation(this,"ones",n); }
 
@@ -1432,37 +1436,6 @@ public final class NaturalLE implements Natural {
     return shiftUpByBits(iShift,bShift); }
 
   //--------------------------------------------------------------
-  // Transience
-  //--------------------------------------------------------------
-
-  @Override
-  public final boolean isValid () { return true; }
-
-  @Override
-  public final NaturalLEMutable recyclable (final Natural init) {
-    return NaturalLEMutable.copy(init); }
-
-  @Override
-  public final NaturalLEMutable recyclable (final int init) {
-    return NaturalLEMutable.make(init); }
-
-  @Override
-  public final NaturalLEMutable recyclable (final Natural init,
-                                            final int nWords) {
-    if (null==init) {
-      return NaturalLEMutable.make(nWords); }
-    if (init instanceof NaturalLE) {
-      return NaturalLEMutable.make(words(),nWords); }
-    return (NaturalLEMutable) init.recyclable(init,nWords); }
-
-  @Override
-  public boolean isImmutable () { return true; }
-
-  @Override
-  public final NaturalLE recycle () { return this; }
-
-  @Override
-  public final NaturalLE immutable () { return this; }
 
   @Override
   public final NaturalLE copy () {  return this; }

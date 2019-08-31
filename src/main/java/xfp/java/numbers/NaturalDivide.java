@@ -323,7 +323,7 @@ public final class NaturalDivide {
     else {
       // step 3b: if a1>=b1, let quotient=beta^n-1
       //and r=a12-b1*2^n+b1
-      q = a.ones(n);
+      q = ((NaturalLE) a).ones(n);
       a12 = a12.add(b1);
       b1 = b1.shiftUp(32*n);
       r = a12.subtract(b1);
