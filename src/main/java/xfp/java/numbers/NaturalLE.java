@@ -1,6 +1,5 @@
 package xfp.java.numbers;
 
-import static java.lang.Integer.compareUnsigned;
 import static xfp.java.numbers.Numbers.hiWord;
 import static xfp.java.numbers.Numbers.loWord;
 import static xfp.java.numbers.Numbers.unsigned;
@@ -23,7 +22,7 @@ import xfp.java.prng.GeneratorBase;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-30
+ * @version 2019-08-31
  */
 
 @SuppressWarnings("unchecked")
@@ -43,10 +42,35 @@ public final class NaturalLE implements Natural {
   //  public final int loInt () { return _loInt; }
 
   private final int _hiInt;
+
   @Override
   public final int hiInt () { return _hiInt; }
-//  @Override
-//  public final int hiInt () { return _words.length; }
+  //  @Override
+  //  public final int hiInt () { return _words.length; }
+
+  @Override
+  public final int loInt () {
+    // Search for lowest order nonzero int
+    final int nt = hiInt(); // might be 0
+    final int[] tt = words();
+    for (int i=0;i<nt;i++) {
+      if (0!=tt[i]) { return i; } }
+    //assert 0==n;
+    return 0; }
+
+  @Override
+  public final int hiBit () {
+    final int i = hiInt()-1;
+    if (0>i) { return 0; }
+    final int wi = _words[i];
+    return (i<<5)+Integer.SIZE-Integer.numberOfLeadingZeros(wi); }
+
+  @Override
+  public final int loBit () {
+    // Search for lowest order nonzero int
+    final int i=loInt(); 
+    if (i==hiInt()) { return 0; } // all bits zero
+    return (i<<5) + Integer.numberOfTrailingZeros(_words[i]); }
 
   //--------------------------------------------------------------
 
@@ -77,7 +101,7 @@ public final class NaturalLE implements Natural {
 
   @Override
   public final NaturalLE words (final int i0,
-                         final int i1) {
+                                final int i1) {
     //assert 0<=i0;
     //assert i0<i1;
     if ((0==i0) && (hiInt()<=i1)) { return copy(); }
@@ -145,7 +169,6 @@ public final class NaturalLE implements Natural {
 
   //--------------------------------------------------------------
 
-  @Override
   public final  int compareTo (final long u) {
     //assert 0L<=u;
     final int nt = hiInt();
@@ -167,7 +190,6 @@ public final class NaturalLE implements Natural {
 
   //--------------------------------------------------------------
 
-  @Override
   public final int compareTo (final long u,
                               final int upShift) {
     //assert 0L<=u;
@@ -233,50 +255,49 @@ public final class NaturalLE implements Natural {
 
   //--------------------------------------------------------------
 
-  @Override
-  public final int compareTo (final int upShift,
-                              final long u) {
-    //assert 0<=upShift : "upShift=" + upShift;
-    //assert 0L<=u;
-
-    if (0L==u) { return (isZero() ? 0 : 1); }
-    if (0==upShift) { return compareTo(u); }
-    if (isZero()) { return Long.compareUnsigned(0,u); }
-
-    // wrong if we don't exclude this==0
-    final int m0 = hiBit() + upShift;
-    final int m1 = Numbers.hiBit(u);
-    if (m0<m1) { return -1; }
-    if (m0>m1) { return 1; }
-
-    final int iShift = (upShift>>>5);
-    final int bShift = (upShift&0x1f);
-
-    // at most 2 non-zero words in this<<upShift, 
-    // from hiBit comparison
-    if (0==bShift) { 
-      final int hi0 = ((1>=iShift) ? word(1-iShift) : 0);
-      final int hi1 = (int) hiWord(u);
-      final int chi = compareUnsigned(hi0,hi1);
-      if (0!=chi) { return chi; }
-      final int lo0 = ((0>=iShift) ? word(0) : 0);
-      final int lo1 = (int) u;
-      final int clo = compareUnsigned(lo0,lo1);
-      return clo; } 
-
-    final int rShift = 32-bShift;
-    // hiBit comparison should take care of this
-    final long hi = ((1>=iShift) ? uword(1-iShift) : 0L);
-    final long lo = ((0>=iShift) ? uword(0) : 0L);
-    assert (0L==(hi>>>rShift));
-    final int mid0 = (int) ((hi<<bShift)|(lo>>>rShift));
-    final int mid1 = (int) hiWord(u);
-    final int cmid = compareUnsigned(mid0,mid1);
-    if (0!=cmid) { return cmid; }
-    final int lo0 = (int) (lo<<bShift);
-    final int lo1 = (int) u;
-    final int clo = compareUnsigned(lo0,lo1);
-    return clo; } 
+//  private final int compareTo (final int upShift,
+//                              final long u) {
+//    //assert 0<=upShift : "upShift=" + upShift;
+//    //assert 0L<=u;
+//
+//    if (0L==u) { return (isZero() ? 0 : 1); }
+//    if (0==upShift) { return compareTo(u); }
+//    if (isZero()) { return Long.compareUnsigned(0,u); }
+//
+//    // wrong if we don't exclude this==0
+//    final int m0 = hiBit() + upShift;
+//    final int m1 = Numbers.hiBit(u);
+//    if (m0<m1) { return -1; }
+//    if (m0>m1) { return 1; }
+//
+//    final int iShift = (upShift>>>5);
+//    final int bShift = (upShift&0x1f);
+//
+//    // at most 2 non-zero words in this<<upShift, 
+//    // from hiBit comparison
+//    if (0==bShift) { 
+//      final int hi0 = ((1>=iShift) ? word(1-iShift) : 0);
+//      final int hi1 = (int) hiWord(u);
+//      final int chi = compareUnsigned(hi0,hi1);
+//      if (0!=chi) { return chi; }
+//      final int lo0 = ((0>=iShift) ? word(0) : 0);
+//      final int lo1 = (int) u;
+//      final int clo = compareUnsigned(lo0,lo1);
+//      return clo; } 
+//
+//    final int rShift = 32-bShift;
+//    // hiBit comparison should take care of this
+//    final long hi = ((1>=iShift) ? uword(1-iShift) : 0L);
+//    final long lo = ((0>=iShift) ? uword(0) : 0L);
+//    assert (0L==(hi>>>rShift));
+//    final int mid0 = (int) ((hi<<bShift)|(lo>>>rShift));
+//    final int mid1 = (int) hiWord(u);
+//    final int cmid = compareUnsigned(mid0,mid1);
+//    if (0!=cmid) { return cmid; }
+//    final int lo0 = (int) (lo<<bShift);
+//    final int lo1 = (int) u;
+//    final int clo = compareUnsigned(lo0,lo1);
+//    return clo; } 
 
   //--------------------------------------------------------------
   // long based factories
@@ -459,20 +480,20 @@ public final class NaturalLE implements Natural {
       sum += unsigned(tt[i]);
       vv[i] = (int) sum;
       sum = hiWord(sum); }
-//    if (0L!=sum) { 
-//      final int[] vvv = Arrays.copyOf(vv,nv+1);
-//      vvv[nv] = 1; 
-//      return unsafe(vvv,nv+1); }
+    //    if (0L!=sum) { 
+    //      final int[] vvv = Arrays.copyOf(vv,nv+1);
+    //      vvv[nv] = 1; 
+    //      return unsafe(vvv,nv+1); }
     if (0L!=sum) { 
       //vv[nv] = (int) sum; 
       final int[] vvv = new int[nv+1];
       for (int j=0;j<nv;j++) { vvv[j]=vv[j]; } 
       vvv[nv] = 1; 
       return unsafe(vvv,nv+1); }
-    
+
     for (;i<nt;i++) { vv[i] = tt[i]; }
     return unsafe(vv,nv); }
-    
+
   //--------------------------------------------------------------
 
   private final NaturalLE addByWords (final long u,
@@ -540,13 +561,13 @@ public final class NaturalLE implements Natural {
       sum += unsigned(tt[i]);
       vv[i] = (int) sum; 
       sum = hiWord(sum); }
- 
+
     if (0L!=sum) { 
       final int[] vvv = new int[nv+1];
       for (int j=0;j<nv;j++) { vvv[j]=vv[j]; } 
       vvv[nv] = 1; 
       return unsafe(vvv,nv+1); }
-    
+
     for (;i<nt;i++) { vv[i] = tt[i]; }
     return unsafe(vv,nv); }
 
@@ -742,7 +763,7 @@ public final class NaturalLE implements Natural {
     //assert 0L==dif;
 
     for (;i<nt;i++) { vv[i] = tt[i]; } 
-    
+
     final int nv = Ints.hiInt(vv);
     if (nv==nt) { return unsafe(vv,nv); } 
     final int[] vvv = new int[nv];
@@ -1092,7 +1113,7 @@ public final class NaturalLE implements Natural {
 
   @Override
   public final NaturalLE abs () { return this; }
-  
+
   //--------------------------------------------------------------
 
   @Override
@@ -1262,15 +1283,10 @@ public final class NaturalLE implements Natural {
   // Uints
   //--------------------------------------------------------------
 
-  @Override
-  public final NaturalLE from (final long u) {
-    //assert 0<=u;
-    return valueOf(u);  }
-
-  @Override
-  public final NaturalLE from (final long u,
-                               final int upShift) {
-    return valueOf(u,upShift); }
+//  @Override
+//  public final NaturalLE from (final long u,
+//                               final int upShift) {
+//    return valueOf(u,upShift); }
   //    //assert 0<=u;
   //    //assert 0<=upShift;
   //    //if (0L==u) { return zero(); }
@@ -1504,30 +1520,30 @@ public final class NaturalLE implements Natural {
     //assert 0<=hiInt;
     _words = words; 
     _hiInt = hiInt; 
-    }
+  }
   private static final NaturalLE unsafe (final int[] words,
                                          final int hiInt){
-//    if (hiInt<words.length) {
-//      final int[] ww = new int[hiInt];
-//      for (int i=0;i<hiInt;i++) { ww[i] = words[i]; }
-//      return new NaturalLE(ww,hiInt); }
+    //    if (hiInt<words.length) {
+    //      final int[] ww = new int[hiInt];
+    //      for (int i=0;i<hiInt;i++) { ww[i] = words[i]; }
+    //      return new NaturalLE(ww,hiInt); }
     return new NaturalLE(words,hiInt); }
 
-//  private NaturalLE (final int[] words) { 
-//    _words = words; 
-//    }
-//
-//  /** Doesn't copy <code>words</code> or check <code>loInt</code>
-//   * or <code>hiInt</code>. 
-//   */
-//
-//  private static final NaturalLE unsafe (final int[] words,
-//                                         final int hiInt){
-//    if (hiInt<words.length) {
-//      final int[] ww = new int[hiInt];
-//      for (int i=0;i<hiInt;i++) { ww[i] = words[i]; }
-//      return new NaturalLE(ww); }
-//    return new NaturalLE(words); }
+  //  private NaturalLE (final int[] words) { 
+  //    _words = words; 
+  //    }
+  //
+  //  /** Doesn't copy <code>words</code> or check <code>loInt</code>
+  //   * or <code>hiInt</code>. 
+  //   */
+  //
+  //  private static final NaturalLE unsafe (final int[] words,
+  //                                         final int hiInt){
+  //    if (hiInt<words.length) {
+  //      final int[] ww = new int[hiInt];
+  //      for (int i=0;i<hiInt;i++) { ww[i] = words[i]; }
+  //      return new NaturalLE(ww); }
+  //    return new NaturalLE(words); }
 
 
   /** Doesn't copy <code>words</code>. 

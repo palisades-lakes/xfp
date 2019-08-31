@@ -10,7 +10,7 @@ import java.util.Arrays;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-30
+ * @version 2019-08-31
  */
 
 public final class NaturalLEMutable implements Natural {
@@ -87,57 +87,57 @@ public final class NaturalLEMutable implements Natural {
 
   //--------------------------------------------------------------
 
-  private final NaturalLEMutable add (final long u) {
-    //assert isValid();
-    //assert 0L<=u;
-    if (0L==u) { return this; }
-    if (isZero()) { return valueOf(u); }
-    Natural v = copy();
-    long sum = uword(0) + Numbers.loWord(u);
-    v = v.setWord(0,(int) sum);
-    long carry = (sum>>>32);
-    sum = uword(1) + Numbers.hiWord(u) + carry;
-    v = v.setWord(1,(int) sum);
-    carry = (sum>>>32);
-    int i=2;
-    final int n = hiInt();
-    for (;(0L!=carry)&&(i<n);i++) {
-      sum = uword(i) + carry;
-      v = v.setWord(i,(int) sum);
-      carry = (sum>>>32); }
-    if (0L!=carry) { v = v.setWord(i,(int) carry); }
-    return (NaturalLEMutable) v; }
+//  private final NaturalLEMutable add (final long u) {
+//    //assert isValid();
+//    //assert 0L<=u;
+//    if (0L==u) { return this; }
+//    if (isZero()) { return valueOf(u); }
+//    Natural v = copy();
+//    long sum = uword(0) + Numbers.loWord(u);
+//    v = v.setWord(0,(int) sum);
+//    long carry = (sum>>>32);
+//    sum = uword(1) + Numbers.hiWord(u) + carry;
+//    v = v.setWord(1,(int) sum);
+//    carry = (sum>>>32);
+//    int i=2;
+//    final int n = hiInt();
+//    for (;(0L!=carry)&&(i<n);i++) {
+//      sum = uword(i) + carry;
+//      v = v.setWord(i,(int) sum);
+//      carry = (sum>>>32); }
+//    if (0L!=carry) { v = v.setWord(i,(int) carry); }
+//    return (NaturalLEMutable) v; }
  
-  public final Natural add (final long u,
-                            final int upShift) {
-    //assert isValid();
-    //assert 0<=u;
-    //assert 0<=upShift;
-    if (isZero()) { return from(u,upShift); }
-    if (0L==u) { return this; }
-    if (0==upShift) { return add(u); }
-    final int iShift = (upShift>>>5);
-    final int bShift = (upShift&0x1f);
-    final int[] uu = Ints.littleEndian(u,bShift);
-    final int n0 = hiInt();
-    final int n1 = iShift+uu.length;
-    final int n = Math.max(n0,n1)+1;
-    //final Natural us = u.shiftUp(shift);
-    final int[] t = new int[n];
-    int i=0;
-    for (;i<iShift;i++) { t[i] = word(i); }
-    long carry = 0L;
-    for (;i<n1;i++) {
-      final long ui = Numbers.unsigned(uu[i-iShift]);
-      final long sum = (uword(i) + ui) + carry;
-      carry = (sum>>>32);
-      t[i] = (int) sum; }
-    for (;i<n;i++) {
-      final long sum = uword(i) + carry;
-      carry = (sum>>>32);
-      t[i] = (int) sum; }
-    if (0L!=carry) { t[i] = (int) carry; }
-    return unsafe(t); }
+//  public final Natural add (final long u,
+//                            final int upShift) {
+//    //assert isValid();
+//    //assert 0<=u;
+//    //assert 0<=upShift;
+//    if (isZero()) { return valueOf(u,upShift); }
+//    if (0L==u) { return this; }
+//    if (0==upShift) { return add(u); }
+//    final int iShift = (upShift>>>5);
+//    final int bShift = (upShift&0x1f);
+//    final int[] uu = Ints.littleEndian(u,bShift);
+//    final int n0 = hiInt();
+//    final int n1 = iShift+uu.length;
+//    final int n = Math.max(n0,n1)+1;
+//    //final Natural us = u.shiftUp(shift);
+//    final int[] t = new int[n];
+//    int i=0;
+//    for (;i<iShift;i++) { t[i] = word(i); }
+//    long carry = 0L;
+//    for (;i<n1;i++) {
+//      final long ui = Numbers.unsigned(uu[i-iShift]);
+//      final long sum = (uword(i) + ui) + carry;
+//      carry = (sum>>>32);
+//      t[i] = (int) sum; }
+//    for (;i<n;i++) {
+//      final long sum = uword(i) + carry;
+//      carry = (sum>>>32);
+//      t[i] = (int) sum; }
+//    if (0L!=carry) { t[i] = (int) carry; }
+//    return unsafe(t); }
 
   //--------------------------------------------------------------
 
@@ -310,17 +310,36 @@ public final class NaturalLEMutable implements Natural {
     return recycle(); }
   //return this; }
 
-//  @Override
-//  public final Natural from (final int u) {
-//    //assert isValid();
-//    //assert 0<=u;
-//    return valueOf(u);  }
+  @Override
+  public final int loInt () {
+    // Search for lowest order nonzero int
+    final int n = hiInt(); // might be 0
+    for (int i=startWord();i<n;i++) {
+      if (0!=word(i)) { return i; } }
+    //assert 0==n;
+    return 0; }
 
   @Override
-  public final Natural from (final long u) {
-    //assert isValid();
-    //assert 0<=u;
-    return valueOf(u);  }
+  public final int hiInt () {
+    final int start = startWord();
+    for (int i = endWord()-1;i>=start;i--) {
+      if (0!=word(i) ) { return i+1; } }
+    //assert 0==start;
+    return 0; }
+  
+  @Override
+  public final int loBit () {
+    // Search for lowest order nonzero int
+    final int i=loInt(); 
+    if (i==hiInt()) { return 0; } // all bits zero
+    return (i<<5) + Integer.numberOfTrailingZeros(_words[i]); }
+
+  @Override
+  public final int hiBit () {
+    final int i = hiInt()-1;
+    if (0>i) { return 0; }
+    final int wi = _words[i];
+    return (i<<5)+Integer.SIZE-Integer.numberOfLeadingZeros(wi); }
 
   //--------------------------------------------------------------
 
@@ -393,6 +412,25 @@ public final class NaturalLEMutable implements Natural {
     u[n1] = (w0>>>rShift);
     return unsafe(u); }
 
+  //--------------------------------------------------------------
+
+  public final int compareTo (final long u) {
+    //assert isValid();
+    //assert 0L<=u;
+    final int n0 = hiInt();
+    final long lo1 = Numbers.loWord(u);
+    final long hi1 = Numbers.hiWord(u);
+    final int n1 = ((0L!=hi1) ? 2 : (0L!=lo1) ? 1 : 0);
+    if (n0<n1) { return -1; }
+    if (n0>n1) { return 1; }
+    final long hi0 = uword(1);
+    if (hi0<hi1) { return -1; }
+    if (hi0>hi1) { return 1; }
+    final long lo0 = uword(0);
+    if (lo0<lo1) { return -1; }
+    if (lo0>lo1) { return 1; }
+    return 0; }
+  
   //--------------------------------------------------------------
   // Object methods
   //--------------------------------------------------------------

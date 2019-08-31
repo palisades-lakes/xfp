@@ -12,7 +12,7 @@ import java.util.List;
  * Non-instantiable.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-29
+ * @version 2019-08-31
  */
 
 @SuppressWarnings("unchecked")
@@ -50,7 +50,7 @@ public final class NaturalDivide {
       final long nn = u.uword(0);
       final int q = (int) (nn/dd);
       final int r = (int) (nn-(q*dd));
-      return List.of(u.from(q),u.from(r)); }
+      return List.of(NaturalLE.valueOf(q),NaturalLE.valueOf(r)); }
 
     Natural qq = u.copy();
 
@@ -78,8 +78,8 @@ public final class NaturalDivide {
         r = (int) Numbers.hiWord(tmp); }
       qq = qq.setWord(xlen-1,q);
       rr = unsigned(r); }
-    if (shift > 0) { return List.of(qq,u.from(r%d)); }
-    return List.of(qq,u.from(r)); }
+    if (shift > 0) { return List.of(qq,NaturalLE.valueOf(r%d)); }
+    return List.of(qq,NaturalLE.valueOf(r)); }
 
   //--------------------------------------------------------------
   /** Special shifted fused multiply-subtract 
@@ -523,7 +523,7 @@ public final class NaturalDivide {
       if ((an<2) && (bn<2)) {
         final int x = a.word(an-1);
         final int y = b.word(bn-1);
-        Natural r = u.from(Ints.unsignedGcd(x,y));
+        Natural r = NaturalLE.valueOf(Ints.unsignedGcd(x,y));
         if (s > 0) { r = r.shiftUp(s); }
         //assert a.isValid();
         //assert b.isValid();

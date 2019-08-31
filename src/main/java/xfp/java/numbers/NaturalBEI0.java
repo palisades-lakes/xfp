@@ -16,7 +16,7 @@ import xfp.java.exceptions.Exceptions;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-30
+ * @version 2019-08-31
  */
 
 @SuppressWarnings("unchecked")
@@ -55,6 +55,31 @@ public final class NaturalBEI0 implements Natural {
   /** Don't drop leading zeros. */
   public final int[] copyWords () {
     return Arrays.copyOf(words(),words().length); }
+
+  @Override
+  public final Natural setWord (final int i,
+                                final int w) {
+    throw Exceptions.unsupportedOperation(this,"setWord",i,w); }
+
+  //--------------------------------------------------------------
+
+
+  @Override
+  public final int loInt () {
+    // Search for lowest order nonzero int
+    final int n = hiInt(); // might be 0
+    for (int i=startWord();i<n;i++) {
+      if (0!=word(i)) { return i; } }
+    //assert 0==n;
+    return 0; }
+
+  @Override
+  public final int hiInt () {
+    final int start = startWord();
+    for (int i = endWord()-1;i>=start;i--) {
+      if (0!=word(i) ) { return i+1; } }
+    //assert 0==start;
+    return 0; }
 
   //  @Override
   //  public final NaturalLE setWord (final int i,
@@ -434,38 +459,6 @@ public final class NaturalBEI0 implements Natural {
   //--------------------------------------------------------------
 
   @Override
-  public final NaturalBEI0 from (final long u) {
-    //assert 0<=u;
-    return valueOf(u);  }
-
-  @Override
-  public final NaturalBEI0 from (final long u,
-                                 final int upShift) {
-    //assert 0<=u;
-    //assert 0<=upShift;
-    //assert 0<=u;
-    //assert 0<=upShift;
-    if (0L==u) { return zero(); }
-    if (0==upShift) { return from(u); }
-    final int iShift = (upShift>>>5);
-    final int bShift = (upShift&0x1f);
-    if (0==bShift) { 
-      final int[] vv = new int[iShift+2];
-      vv[1] = (int) u;
-      vv[0] = (int) (u>>>32);
-      return unsafe(vv); }
-    final int rShift = 32-bShift;
-    final int lo = (int) u;
-    final int hi = (int) (u>>>32);
-    final int[] vv = new int[iShift+3];
-    vv[2] = (lo<<bShift);
-    vv[1] = ((hi<<bShift)|(lo>>>rShift));
-    vv[0] =  (hi>>>rShift); 
-    return unsafe(vv); }
-
-  //--------------------------------------------------------------
-
-  @Override
   public final NaturalBEI0 shiftDown (final int n) {
     //assert 0<=n;
     return unsafe(Bei0.shiftDown(words(),n)); }
@@ -502,14 +495,6 @@ public final class NaturalBEI0 implements Natural {
   public final NaturalBEI0 setBit (final int n) {
     return unsafe(Bei0.setBit(words(),n)); }
 
-  //  @Override
-  //  public final NaturalBEI0 clearBit (final int n) {
-  //    return unsafe(Bei0.clearBit(words(),n)); }
-
-  //  @Override
-  //  public final NaturalBEI0 flipBit (final int n) {
-  //    return unsafe(Bei0.flipBit(words(),n)); }
-
   //--------------------------------------------------------------
   // Transience
   //--------------------------------------------------------------
@@ -532,12 +517,10 @@ public final class NaturalBEI0 implements Natural {
                               final Natural that) {
     return shiftUp(upShift).compareTo(that); }
 
-  @Override
   public final int compareTo (final long u) {
     //assert 0L<=y;
     return Bei0.compare(words(),u); }
 
-  @Override
   public final int compareTo (final long that,
                               final int upShift) {
     //assert 0L<=that;

@@ -15,7 +15,7 @@ import xfp.java.exceptions.Exceptions;
  * TODO: utilities class to hide private stuff?
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-30
+ * @version 2019-08-31
  */
 
 @SuppressWarnings("unchecked")
@@ -89,13 +89,7 @@ public interface Natural extends Ringlike<Natural> {
    * <code>==0</code>.
    */
 
-  default int loInt () {
-    // Search for lowest order nonzero int
-    final int n = hiInt(); // might be 0
-    for (int i=startWord();i<n;i++) {
-      if (0!=word(i)) { return i; } }
-    //assert 0==n;
-    return 0; }
+  int loInt ();
 
   /** Return the index of the highest non-zero word.
    * unless all words are zero, in which case,
@@ -106,12 +100,7 @@ public interface Natural extends Ringlike<Natural> {
    * <code>==0</code>.
    */
 
-  default int hiInt () {
-    final int start = startWord();
-    for (int i = endWord()-1;i>=start;i--) {
-      if (0!=word(i) ) { return i+1; } }
-    //assert 0==start;
-    return 0; }
+  int hiInt ();
 
   //--------------------------------------------------------------
 
@@ -134,32 +123,6 @@ public interface Natural extends Ringlike<Natural> {
     return u; }
 
   //--------------------------------------------------------------
-  /** Return a sequence whose value is the same as <code>u</code>.
-   * May be the same object as <code>this</code>, if mutable.
-   * May be <code>u</code>, if immutable.
-   * May be a copy of <code>u</code>.
-   */
-
-  //  default Natural set (final Natural u) {
-  //    Natural x = clear();
-  //    for (int i=u.startWord();i<u.endWord();i++) {
-  //      x = x.setWord(i,u.word(i)); }
-  //    return this; }
-
-  /** Return a Natural whose value is the same as <code>u</code>.
-   */
-
-  //  default Natural set (final long u) {
-  //    //assert 0<=u;
-  //    // TODO: optimize zeroing internal array?
-  //    clear();
-  //    final long lo = Numbers.loWord(u);
-  //    if (0!=lo) { setWord(0,(int) lo); }
-  //    final long hi = Numbers.hiWord(u);
-  //    if (0!=hi) { setWord(1,(int) hi); }
-  //    return this; }
-
-  //--------------------------------------------------------------
   // bit ops
   //--------------------------------------------------------------
 
@@ -169,11 +132,7 @@ public interface Natural extends Ringlike<Natural> {
    * <code>==0</code>.
    */
 
-  default int loBit () {
-    // Search for lowest order nonzero int
-    final int i=loInt(); 
-    if (i==hiInt()) { return 0; } // all bits zero
-    return (i<<5) + Integer.numberOfTrailingZeros(word(i)); }
+  int loBit ();
 
   /** Return <code>1 +</code> index of the highest non-zero bit.
    * If all bits are zero, 
@@ -181,12 +140,7 @@ public interface Natural extends Ringlike<Natural> {
    * <code>==0</code>.
    */
 
-  default int hiBit () {
-    //Debug.println("hiBit this=" + this);
-    final int i = hiInt()-1;
-    if (0>i) { return 0; }
-    final int wi = word(i);
-    return (i<<5)+Integer.SIZE-Integer.numberOfLeadingZeros(wi); }
+  int hiBit ();
 
   //--------------------------------------------------------------
 
@@ -230,20 +184,6 @@ public interface Natural extends Ringlike<Natural> {
   //--------------------------------------------------------------
   // construction
   //--------------------------------------------------------------
-  /** Return a new Natural whose value is <code>u</code>.
-   * Does not modify <code>this</code>.
-   */
-
-  default Natural from (final long u) {
-    throw Exceptions.unsupportedOperation(this,"from",u); }
-
-  /** Return a new Natural whose value is <code>u</code>,
-   * interpreted as unsigned.
-   * Does not modify <code>this</code>.
-   */
-
-  //  default Natural from (final int u) { return from(unsigned(u)); }
-
   /** Return a new Natural whose value is
    * <code>u * 2<sup>shift</sup></code>.
    * Does not modify <code>this</code>.
@@ -251,9 +191,9 @@ public interface Natural extends Ringlike<Natural> {
    * <code>0&lt;=shift</code>
    */
 
-  default Natural from (final long u,
-                        final int upShift) {
-    throw Exceptions.unsupportedOperation(this,"from",u,upShift); }
+//  default Natural from (final long u,
+//                        final int upShift) {
+//    throw Exceptions.unsupportedOperation(this,"from",u,upShift); }
   //    return (T) from(u).shiftUp(shift); }
 
   //--------------------------------------------------------------
@@ -351,82 +291,63 @@ public interface Natural extends Ringlike<Natural> {
     return compareTo(u.shiftUp(upShift)); }
 
   default int compareTo (final int upShift,
-                         final long u) {
-    return shiftUp(upShift).compareTo(u); }
-
-  default int compareTo (final int upShift,
                          final Natural u) {
     //assert isValid();
     //assert u.isValid();
     return -u.compareTo(this,upShift); }
 
-  default int compareTo (final long u) {
-    //assert isValid();
-    //assert 0L<=u;
-    final int n0 = hiInt();
-    final long lo1 = Numbers.loWord(u);
-    final long hi1 = Numbers.hiWord(u);
-    final int n1 = ((0L!=hi1) ? 2 : (0L!=lo1) ? 1 : 0);
-    if (n0<n1) { return -1; }
-    if (n0>n1) { return 1; }
-    final long hi0 = uword(1);
-    if (hi0<hi1) { return -1; }
-    if (hi0>hi1) { return 1; }
-    final long lo0 = uword(0);
-    if (lo0<lo1) { return -1; }
-    if (lo0>lo1) { return 1; }
-    return 0; }
+//  int compareTo (final long u);
 
-  default int compareTo (final long u,
-                         final int upShift) {
-    //assert isValid();
-    //assert 0L<=u;
-    //assert 0<=upShift : "upShift=" + upShift;
-
-    if (0==upShift) { return compareTo(u); }
-    if (0L==u) { return (isZero() ? 0 : 1); }
-
-    final int m0 = hiBit();
-    final int m1 = Numbers.hiBit(u) + upShift;
-    if (m0<m1) { return -1; }
-    if (m0>m1) { return 1; }
-
-    final int iShift = (upShift>>>5);
-    final int bShift = (upShift&0x1f);
-
-    // compare non-zero words from u<<upShift
-    if (0==bShift) {
-      final long hi0 = uword(iShift+1);
-      final long hi1 = Numbers.hiWord(u);
-      if (hi0<hi1) { return -1; }
-      if (hi0>hi1) { return 1; }
-      final long lo0 = uword(iShift);
-      final long lo1 = Numbers.loWord(u);
-      if (lo0<lo1) { return -1; }
-      if (lo0>lo1) { return 1; } }
-    else {
-      // most significant word in u<<upShift
-      final long hi0 = uword(iShift+2);
-      final long hi1 = (u>>>(64-bShift));
-      if (hi0<hi1) { return -1; }
-      if (hi0>hi1) { return 1; }
-
-      final long us = (u<<bShift);
-      final long mid0 = uword(iShift+1);
-      final long mid1 = Numbers.hiWord(us);
-      if (mid0<mid1) { return -1; }
-      if (mid0>mid1) { return 1; }
-
-      final long lo0 = uword(iShift);
-      final long lo1 = Numbers.loWord(us);
-      if (lo0<lo1) { return -1; }
-      if (lo0>lo1) { return 1; } }
-
-    // check this for any non-zero words in zeros of u<<upShift
-    for (int i=iShift-1;i>=startWord();i--) {
-      if (0!=uword(i)) { return 1; } }
-
-    return 0; }
+//  default int compareTo (final long u,
+//                         final int upShift) {
+//    //assert isValid();
+//    //assert 0L<=u;
+//    //assert 0<=upShift : "upShift=" + upShift;
+//
+//    if (0==upShift) { return compareTo(u); }
+//    if (0L==u) { return (isZero() ? 0 : 1); }
+//
+//    final int m0 = hiBit();
+//    final int m1 = Numbers.hiBit(u) + upShift;
+//    if (m0<m1) { return -1; }
+//    if (m0>m1) { return 1; }
+//
+//    final int iShift = (upShift>>>5);
+//    final int bShift = (upShift&0x1f);
+//
+//    // compare non-zero words from u<<upShift
+//    if (0==bShift) {
+//      final long hi0 = uword(iShift+1);
+//      final long hi1 = Numbers.hiWord(u);
+//      if (hi0<hi1) { return -1; }
+//      if (hi0>hi1) { return 1; }
+//      final long lo0 = uword(iShift);
+//      final long lo1 = Numbers.loWord(u);
+//      if (lo0<lo1) { return -1; }
+//      if (lo0>lo1) { return 1; } }
+//    else {
+//      // most significant word in u<<upShift
+//      final long hi0 = uword(iShift+2);
+//      final long hi1 = (u>>>(64-bShift));
+//      if (hi0<hi1) { return -1; }
+//      if (hi0>hi1) { return 1; }
+//
+//      final long us = (u<<bShift);
+//      final long mid0 = uword(iShift+1);
+//      final long mid1 = Numbers.hiWord(us);
+//      if (mid0<mid1) { return -1; }
+//      if (mid0>mid1) { return 1; }
+//
+//      final long lo0 = uword(iShift);
+//      final long lo1 = Numbers.loWord(us);
+//      if (lo0<lo1) { return -1; }
+//      if (lo0>lo1) { return 1; } }
+//
+//    // check this for any non-zero words in zeros of u<<upShift
+//    for (int i=iShift-1;i>=startWord();i--) {
+//      if (0!=uword(i)) { return 1; } }
+//
+//    return 0; }
 
   //--------------------------------------------------------------
   // arithmetic
@@ -471,15 +392,17 @@ public interface Natural extends Ringlike<Natural> {
     //assert isValid();
     return NaturalMultiply.multiply(this,u); }
 
-  default Natural multiply (final long u,
-                            final int upShift) {
+//  Natural multiply (final long u,
+//                    final int upShift);
+    default Natural multiply (final long u,
+                              final int upShift) {
     //assert isValid();
     //assert 0L<=u;
     //assert 0<=upShift;
     if (0L==u) { return zero(); }
     if (0==upShift) { return multiply(u); }
     if (isZero()) { return this; }
-    return multiply(from(u,upShift)); }
+    return multiply(NaturalLE.valueOf(u,upShift)); }
 
   //--------------------------------------------------------------
   // division

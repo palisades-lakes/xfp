@@ -18,11 +18,11 @@ public final class TotalSum {
   public static final void main (final String[] args) {
     final int dim = 8*1024*1024;
     final int trys = 8 * 1024;
-    final Generator g = Generators.make("exponential",dim);
+    //final Generator g = Generators.make("exponential",dim);
     //final Generator g = Generators.make("finite",dim);
     //final Generator g = Generators.make("gaussian",dim);
     //final Generator g = Generators.make("laplace",dim);
-    //final Generator g = Generators.make("uniform",dim);
+    final Generator g = Generators.make("uniform",dim);
     for (int i=0;i<trys;i++) {
       final double[] x = (double[]) g.next();
       xfp.java.numbers.BigFloat b = xfp.java.numbers.BigFloat.ZERO;

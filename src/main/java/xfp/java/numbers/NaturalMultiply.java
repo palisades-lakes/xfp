@@ -7,7 +7,7 @@ import static xfp.java.numbers.Numbers.loWord;
  * Non-instantiable.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-30
+ * @version 2019-08-31
  */
 
 @SuppressWarnings("unchecked")
@@ -102,8 +102,6 @@ public final class NaturalMultiply {
   //--------------------------------------------------------------
 
   private static final Natural squareToomCook3 (final Natural u) {
-    // TODO: problems if u NaturalNEIMutable
-    //assert u.isImmutable();
     final int n = u.hiInt();
     // k is the size (in ints) of the lower-order slices.
     final int k = (n+2)/3;   // Equal to ceil(largest/3)
