@@ -87,60 +87,6 @@ public final class NaturalLEMutable implements Natural {
 
   //--------------------------------------------------------------
 
-//  private final NaturalLEMutable add (final long u) {
-//    //assert isValid();
-//    //assert 0L<=u;
-//    if (0L==u) { return this; }
-//    if (isZero()) { return valueOf(u); }
-//    Natural v = copy();
-//    long sum = uword(0) + Numbers.loWord(u);
-//    v = v.setWord(0,(int) sum);
-//    long carry = (sum>>>32);
-//    sum = uword(1) + Numbers.hiWord(u) + carry;
-//    v = v.setWord(1,(int) sum);
-//    carry = (sum>>>32);
-//    int i=2;
-//    final int n = hiInt();
-//    for (;(0L!=carry)&&(i<n);i++) {
-//      sum = uword(i) + carry;
-//      v = v.setWord(i,(int) sum);
-//      carry = (sum>>>32); }
-//    if (0L!=carry) { v = v.setWord(i,(int) carry); }
-//    return (NaturalLEMutable) v; }
- 
-//  public final Natural add (final long u,
-//                            final int upShift) {
-//    //assert isValid();
-//    //assert 0<=u;
-//    //assert 0<=upShift;
-//    if (isZero()) { return valueOf(u,upShift); }
-//    if (0L==u) { return this; }
-//    if (0==upShift) { return add(u); }
-//    final int iShift = (upShift>>>5);
-//    final int bShift = (upShift&0x1f);
-//    final int[] uu = Ints.littleEndian(u,bShift);
-//    final int n0 = hiInt();
-//    final int n1 = iShift+uu.length;
-//    final int n = Math.max(n0,n1)+1;
-//    //final Natural us = u.shiftUp(shift);
-//    final int[] t = new int[n];
-//    int i=0;
-//    for (;i<iShift;i++) { t[i] = word(i); }
-//    long carry = 0L;
-//    for (;i<n1;i++) {
-//      final long ui = Numbers.unsigned(uu[i-iShift]);
-//      final long sum = (uword(i) + ui) + carry;
-//      carry = (sum>>>32);
-//      t[i] = (int) sum; }
-//    for (;i<n;i++) {
-//      final long sum = uword(i) + carry;
-//      carry = (sum>>>32);
-//      t[i] = (int) sum; }
-//    if (0L!=carry) { t[i] = (int) carry; }
-//    return unsafe(t); }
-
-  //--------------------------------------------------------------
-
   private final Natural subtract (final long u) {
     //assert isValid();
     //assert 0L<=u;
@@ -411,6 +357,26 @@ public final class NaturalLEMutable implements Natural {
       u[i+iShift] = w; }
     u[n1] = (w0>>>rShift);
     return unsafe(u); }
+
+  //--------------------------------------------------------------
+
+  @Override
+  public final int compareTo (final Natural u) {
+    //assert isValid();
+    //assert u.isValid();
+    // TODO: should really compare hiBits
+    final int b0 = hiBit();
+    final int b1 = u.hiBit();
+    if (b0<b1) { return -1; }
+    if (b0>b1) { return 1; }
+    final int end = Math.max(hiInt(),u.hiInt()) - 1;
+    final int start = Math.min(startWord(),u.startWord());
+    for (int i=end;i>=start;i--) {
+      final long u0i = uword(i);
+      final long u1i = u.uword(i);
+      if (u0i<u1i) { return -1; }
+      if (u0i>u1i) { return 1; } }
+    return 0; }
 
   //--------------------------------------------------------------
 
