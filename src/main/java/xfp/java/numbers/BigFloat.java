@@ -662,7 +662,7 @@ public final class BigFloat implements Ringlike<BigFloat> {
     final int e1 = q.exponent();
     final int c;
     //if (e0 <= e1) { c = t0.compareTo(t1.shiftUp(e1-e0)); }
-    if (e0 <= e1) { c = t0.compareTo(t1,e1-e0); }
+    if (e0 <= e1) { c = t0.compareTo(t1.shiftUp(e1-e0)); }
     else { c = t0.shiftUp(e0-e1).compareTo(t1); }
     return (nonNegative() ? c : -c); }
 

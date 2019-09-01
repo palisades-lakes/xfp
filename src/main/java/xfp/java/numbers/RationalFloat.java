@@ -18,7 +18,7 @@ import xfp.java.exceptions.Exceptions;
  * arithmetic on them faster.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-30
+ * @version 2019-08-31
  */
 
 @SuppressWarnings("unchecked")
@@ -549,7 +549,7 @@ implements Ringlike<RationalFloat> {
       // want to know if remainder/denominator is more or less than 1/2
       // comparing 2*remainder to denominator
       // TODO: faster way to do this?
-      final int c = qr1.compareTo(1,d3);
+      final int c = - d3.compareTo(qr1.shiftUp(1));
       final long q4 = qr0.longValue();
       final boolean even = (0x0L == (q4 & 0x1L));
       final boolean down = (c < 0) || ((c == 0) && even);

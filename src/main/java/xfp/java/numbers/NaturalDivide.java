@@ -312,7 +312,8 @@ public final class NaturalDivide {
     Natural r;
     Natural d;
     Natural q;
-    if (a.compareTo(b, 32*n) < 0) {
+    // TODO: word shift or shifted comparison
+    if (a.compareTo(b.shiftUp(32*n)) < 0) {
       // step 3a: if a1<b1, let quotient=a12/b1 and r=a12%b1
       // Doesn't need modified a12
       final List<Natural> qr = divide2n1n(a12,b1);

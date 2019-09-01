@@ -33,7 +33,7 @@ import xfp.java.prng.PRNG;
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-30
+ * @version 2019-08-31
  */
 @SuppressWarnings("unchecked")
 public final class Common {
@@ -143,13 +143,13 @@ public final class Common {
     + "\n" + x1.toString(0x10)
     + "\n"); }
 
-  protected static final <T extends Ringlike<T>> void
-  compare (final Function<BigInteger,T> fromBI,
+  protected static final void
+  compare (final Function<BigInteger,Natural> fromBI,
            final BigInteger x0,
            final BigInteger x1) {
     final int c0 = x0.compareTo(x1);
-    final Natural y0 = (Natural) fromBI.apply(x0);
-    final Natural y1 = (Natural) fromBI.apply(x1);
+    final Natural y0 = fromBI.apply(x0);
+    final Natural y1 = fromBI.apply(x1);
     final int c1 = y0.compareTo(y1);
     Assertions.assertEquals(c0,c1, ()->
     "\n" + x0.toString(0x10)
@@ -176,7 +176,7 @@ public final class Common {
     + "\nshiftUp " + shift
     + "\n -> " + c3
     + "\n\n"); 
-    final int c4 = y0.compareTo(y1,shift);
+    final int c4 = y0.compareTo(y1.shiftUp(shift));
     Assertions.assertEquals(c3,c4, ()->
     "\n\n" + y0.toString()
     + "\n compareTo "
@@ -189,8 +189,6 @@ public final class Common {
     + "\n, " + shift
     + "\n -> " + c4
     + "\n\n"); 
-
-
   }
 
   public static final <T extends Ringlike<T>> void

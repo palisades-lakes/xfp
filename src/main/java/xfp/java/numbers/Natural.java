@@ -227,7 +227,7 @@ public interface Natural extends Ringlike<Natural> {
   default int uintsHashCode () {
     int hashCode = 0;
     for (int i=startWord(); i<hiInt(); i++) {
-      hashCode = (int) ((31 * hashCode) + uword(i)); }
+      hashCode = ((31 * hashCode) + word(i)); }
     return hashCode; }
 
   // DANGER: equality across classes
@@ -243,38 +243,6 @@ public interface Natural extends Ringlike<Natural> {
     return true; }
 
   //--------------------------------------------------------------
-  // ordering
-  //--------------------------------------------------------------
-
-  @Override
-  default int compareTo (final Natural u) {
-    //assert isValid();
-    //assert u.isValid();
-    // TODO: should really compare hiBits
-    final int b0 = hiBit();
-    final int b1 = u.hiBit();
-    if (b0<b1) { return -1; }
-    if (b0>b1) { return 1; }
-    final int end = Math.max(hiInt(),u.hiInt()) - 1;
-    final int start = Math.min(startWord(),u.startWord());
-    for (int i=end;i>=start;i--) {
-      final long u0i = uword(i);
-      final long u1i = u.uword(i);
-      if (u0i<u1i) { return -1; }
-      if (u0i>u1i) { return 1; } }
-    return 0; }
-
-  default int compareTo (final Natural u,
-                         final int upShift) {
-    return compareTo(u.shiftUp(upShift)); }
-
-  default int compareTo (final int upShift,
-                         final Natural u) {
-    //assert isValid();
-    //assert u.isValid();
-    return -u.compareTo(this,upShift); }
-
-  //--------------------------------------------------------------
   // arithmetic
   //--------------------------------------------------------------
 
@@ -282,35 +250,7 @@ public interface Natural extends Ringlike<Natural> {
                final int upShift);
 
   //--------------------------------------------------------------
-
-  @Override
-  default Natural absDiff (final Natural u) {
-    //assert isValid();
-    //assert u.isValid();
-    final int c = compareTo(u);
-    if (c==0) { return zero(); }
-    if (c<0) { return u.subtract(this); }
-    return subtract(u); }
-
-  //--------------------------------------------------------------
-  // square
-  //--------------------------------------------------------------
-
-  @Override
-  default Natural square () {
-    //assert isValid();
-    return NaturalMultiply.square(this); }
-
-  //--------------------------------------------------------------
   // multiply
-  //--------------------------------------------------------------
-
-  @Override
-  default Natural multiply (final Natural u) {
-    //assert isValid();
-    //assert u.isValid();
-    return NaturalMultiply.multiply(this,u); }
-
   //--------------------------------------------------------------
 
   default Natural multiply (final long u) {
@@ -319,8 +259,9 @@ public interface Natural extends Ringlike<Natural> {
 
 //  Natural multiply (final long u,
 //                    final int upShift);
-    default Natural multiply (final long u,
-                              final int upShift) {
+
+  default Natural multiply (final long u,
+                            final int upShift) {
     //assert isValid();
     //assert 0L<=u;
     //assert 0<=upShift;
@@ -345,59 +286,6 @@ public interface Natural extends Ringlike<Natural> {
     //assert u.isValid();
     return NaturalDivide.divideAndRemainderBurnikelZiegler(this,u); }
 
-  @Override
-  default List<Natural> divideAndRemainder (final Natural u) {
-    //assert isValid();
-    //assert u.isValid();
-    return NaturalDivide.divideAndRemainder(this,u); }
-
-  @Override
-  default Natural divide (final Natural u) {
-    //assert isValid();
-    //assert u.isValid();
-    return divideAndRemainder(u).get(0); }
-
-  @Override
-  default Natural remainder (final Natural u) {
-    //assert isValid();
-    //assert u.isValid();
-    return divideAndRemainder(u).get(1); }
-
-  //--------------------------------------------------------------
-  // gcd
-  //--------------------------------------------------------------
-  /** Use Euclid until the numbers are approximately the
-   * same length, then use the Knuth algorithm.
-   */
-
-  @Override
-  default Natural gcd (final Natural u) { 
-    //assert isValid();
-    //assert u.isValid();
-    return NaturalDivide.gcd(this,u); }
-
-  //--------------------------------------------------------------
-
-  @Override
-  default List<Natural> reduce (final Natural d) {
-    //assert isValid();
-    return NaturalDivide.reduce(this,d); }
-
-  //--------------------------------------------------------------
-  // 'Number' interface
-  //--------------------------------------------------------------
-  // TODO: exceptions on truncation?
-
-  @Override
-  default int intValue () { 
-    //assert isValid();
-    return word(0); }
-
-  @Override
-  default long longValue () {
-    //assert isValid();
-    return (uword(1)<<32) | uword(0); }
-
-  //--------------------------------------------------------------
+   //--------------------------------------------------------------
 }
 //--------------------------------------------------------------

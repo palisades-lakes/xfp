@@ -4,6 +4,7 @@ import static xfp.java.numbers.Numbers.unsigned;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.List;
 
 /** mutable arbitrary-precision non-negative integers
  * (natural numbers) represented by little-endian
@@ -210,6 +211,19 @@ public final class NaturalLEMutable implements Natural {
       v[i] = (int) dif; }
     return unsafe(v); }
 
+  //--------------------------------------------------------------
+
+  @Override
+  public final Natural absDiff (final Natural u) {
+    //assert isValid();
+    //assert u.isValid();
+    final int c = compareTo(u);
+    if (c==0) { return zero(); }
+    if (c<0) { return u.subtract(this); }
+    return subtract(u); }
+
+  //--------------------------------------------------------------
+
   @Override
   public final boolean isOne () {
     //assert isValid();
@@ -219,6 +233,54 @@ public final class NaturalLEMutable implements Natural {
     return true; }
 
   //--------------------------------------------------------------
+
+  @Override
+  public final Natural square () {
+    //assert isValid();
+    return NaturalMultiply.square(this); }
+
+  @Override
+  public final Natural multiply (final Natural u) {
+    //assert isValid();
+    //assert u.isValid();
+    return NaturalMultiply.multiply(this,u); }
+
+  //--------------------------------------------------------------
+
+  @Override
+  public final List<Natural> divideAndRemainder (final Natural u) {
+    //assert isValid();
+    //assert u.isValid();
+    return NaturalDivide.divideAndRemainder(this,u); }
+
+  @Override
+  public final  Natural divide (final Natural u) {
+    //assert isValid();
+    //assert u.isValid();
+    return divideAndRemainder(u).get(0); }
+
+  @Override
+  public final  Natural remainder (final Natural u) {
+    //assert isValid();
+    //assert u.isValid();
+    return divideAndRemainder(u).get(1); }
+
+  //--------------------------------------------------------------
+
+  @Override
+  public final Natural gcd (final Natural u) { 
+    //assert isValid();
+    //assert u.isValid();
+    return NaturalDivide.gcd(this,u); }
+
+  //--------------------------------------------------------------
+
+  @Override
+  public final List<Natural> reduce (final Natural d) {
+    //assert isValid();
+    return NaturalDivide.reduce(this,d); }
+
+ //--------------------------------------------------------------
   // Uints
   //--------------------------------------------------------------
 
@@ -397,6 +459,20 @@ public final class NaturalLEMutable implements Natural {
     if (lo0>lo1) { return 1; }
     return 0; }
   
+  //--------------------------------------------------------------
+  // 'Number' methods
+  //--------------------------------------------------------------
+
+  @Override
+  public final int intValue () { 
+    //assert isValid();
+    return word(0); }
+
+  @Override
+  public final long longValue () {
+    //assert isValid();
+    return (uword(1)<<32) | uword(0); }
+
   //--------------------------------------------------------------
   // Object methods
   //--------------------------------------------------------------

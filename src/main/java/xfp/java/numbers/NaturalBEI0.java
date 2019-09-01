@@ -512,11 +512,6 @@ public final class NaturalBEI0 implements Natural {
     final NaturalBEI0 u = (NaturalBEI0) that;
     return Bei0.compare(words(),u.words()); }
 
-  @Override
-  public final int compareTo (final int upShift,
-                              final Natural that) {
-    return shiftUp(upShift).compareTo(that); }
-
   public final int compareTo (final long u) {
     //assert 0L<=y;
     return Bei0.compare(words(),u); }
