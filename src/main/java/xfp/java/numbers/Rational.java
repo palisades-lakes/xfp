@@ -12,7 +12,7 @@ import xfp.java.exceptions.Exceptions;
 /** Ratios of {@link Natural}.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-25
+ * @version 2019-09-03
  */
 
 @SuppressWarnings("unchecked")
@@ -24,10 +24,10 @@ public final class Rational implements Ringlike<Rational> {
 
   private final boolean _nonNegative;
   public final boolean nonNegative () { return _nonNegative; }
-  private final Natural _numerator;
-  public final Natural numerator () { return _numerator; }
-  private final Natural _denominator;
-  public final Natural denominator () { return _denominator; }
+  private final NaturalLE _numerator;
+  public final NaturalLE numerator () { return _numerator; }
+  private final NaturalLE _denominator;
+  public final NaturalLE denominator () { return _denominator; }
 
   //--------------------------------------------------------------
 
@@ -112,8 +112,8 @@ public final class Rational implements Ringlike<Rational> {
   //--------------------------------------------------------------
 
   private static final Rational add (final boolean p0,
-                                     final Natural n0,
-                                     final Natural d0,
+                                     final NaturalLE n0,
+                                     final NaturalLE d0,
                                      final boolean p1,
                                      final long n1) {
     final Natural n1d0 = d0.multiply(n1);
@@ -143,15 +143,15 @@ public final class Rational implements Ringlike<Rational> {
   //--------------------------------------------------------------
 
   private static final Rational add (final boolean p0,
-                                     final Natural n0,
-                                     final Natural d0,
+                                     final NaturalLE n0,
+                                     final NaturalLE d0,
                                      final boolean p1,
                                      final long n1,
                                      final int e1) {
-    final Natural n0d1 = n0;
-    final Natural n1d0 = d0.multiply(n1,e1);
+    final NaturalLE n0d1 = n0;
+    final NaturalLE n1d0 = d0.multiply(n1,e1);
     final boolean p;
-    final Natural n;
+    final NaturalLE n;
     if (p0) {
       if (p1) { n = n0d1.add(n1d0); p = true; }
       else {
@@ -166,7 +166,7 @@ public final class Rational implements Ringlike<Rational> {
         if (0 < c) { n = n1d0.subtract(n0d1); p = true; }
         else { n = n0d1.subtract(n1d0); p = false; } }
       else { n = n0d1.add(n1d0); p = false; } }
-    final Natural d = d0;
+    final NaturalLE d = d0;
     return valueOf(p,n,d); }
 
   private final Rational add (final boolean p,
@@ -326,8 +326,8 @@ public final class Rational implements Ringlike<Rational> {
    * should there be more explicit round, floor, ceil, etc.?
    */
   public final BigInteger bigIntegerValue () {
-    final BigInteger x =
-      numerator().divide(denominator()).bigIntegerValue();
+    final NaturalLE nd = (NaturalLE) numerator().divide(denominator());
+    final BigInteger x = nd.bigIntegerValue();
     return (nonNegative() ? x : x.negate()); }
 
   //--------------------------------------------------------------
@@ -512,8 +512,8 @@ public final class Rational implements Ringlike<Rational> {
     //    super();
     //assert (0 == numerator.loBit()) || (0 == denominator.loBit());
     _nonNegative = nonNegative;
-    _numerator = numerator;//.immutable();
-    _denominator = denominator;//.immutable(); 
+    _numerator = (NaturalLE) numerator;//.immutable();
+    _denominator = (NaturalLE) denominator;//.immutable(); 
     }
 
   //--------------------------------------------------------------

@@ -25,6 +25,7 @@ import xfp.java.numbers.Doubles;
 import xfp.java.numbers.Floats;
 import xfp.java.numbers.Natural;
 import xfp.java.numbers.NaturalDivide;
+import xfp.java.numbers.NaturalLE;
 import xfp.java.numbers.Ringlike;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
@@ -378,8 +379,8 @@ public final class Common {
                            final BigInteger x0,
                            final BigInteger x1) {
     if (0 != x1.signum()) {
-      final Natural y0 = fromBI.apply(x0);
-      final Natural y1 = fromBI.apply(x1);
+      final NaturalLE y0 = (NaturalLE) fromBI.apply(x0);
+      final NaturalLE y1 = (NaturalLE) fromBI.apply(x1);
       final BigInteger[] x2 = x0.divideAndRemainder(x1);
       final List<Natural> y2 = y0.divideAndRemainderKnuth(y1);
       final BigInteger[] x3 = { toBI.apply(y2.get(0)), 
@@ -419,8 +420,8 @@ public final class Common {
                                      final BigInteger x0,
                                      final BigInteger x1) {
     if (0 != x1.signum()) {
-      final Natural y0 = fromBI.apply(x0);
-      final Natural y1 = fromBI.apply(x1);
+      final NaturalLE y0 = (NaturalLE) fromBI.apply(x0);
+      final NaturalLE y1 = (NaturalLE) fromBI.apply(x1);
       final BigInteger[] x2 = x0.divideAndRemainder(x1);
       final List<Natural> y2 = y0.divideAndRemainderBurnikelZiegler(y1);
       final Natural q = y2.get(0);

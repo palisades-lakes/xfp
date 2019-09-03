@@ -16,7 +16,7 @@ import xfp.java.prng.PRNG;
  * j --source 12 -ea src/scripts/java/xfp/java/scripts/Division.java > division.txt
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-13
+ * @version 2019-09-03
  */
 @SuppressWarnings("unchecked")
 public final class Division {
@@ -31,8 +31,8 @@ public final class Division {
       final BigInteger xq = xqr[0];
       final BigInteger xr = xqr[1];
       final List<Natural> yqr = y0.divideAndRemainder(y1);
-      final BigInteger yq = yqr.get(0).bigIntegerValue();
-      final BigInteger yr = yqr.get(1).bigIntegerValue();
+      final BigInteger yq = ((NaturalBEI0)yqr.get(0)).bigIntegerValue();
+      final BigInteger yr = ((NaturalBEI0)yqr.get(1)).bigIntegerValue();
 
       assert xq.equals(yq) :
         "\nquotients differ!"

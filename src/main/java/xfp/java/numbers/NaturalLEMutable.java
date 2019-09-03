@@ -2,16 +2,16 @@ package xfp.java.numbers;
 
 import static xfp.java.numbers.Numbers.unsigned;
 
-import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.List;
+
+import xfp.java.exceptions.Exceptions;
 
 /** mutable arbitrary-precision non-negative integers
  * (natural numbers) represented by little-endian
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-31
+ * @version 2019-09-03
  */
 
 public final class NaturalLEMutable implements Natural {
@@ -29,6 +29,19 @@ public final class NaturalLEMutable implements Natural {
     //assert isValid();
     return Arrays.copyOf(words(),words().length); }
 
+  @Override
+  public final NaturalLEMutable words (final int i0,
+                                       final int i1) {
+    //assert 0<=i0;
+    //assert i0<i1;
+    if ((0==i0) && (hiInt()<=i1)) { return unsafe(copyWords()); }
+    final int n = Math.max(0,i1-i0);
+    if (0>=n) { return (NaturalLEMutable) zero(); }
+    final int[] tt = words();
+    final int[] vv = new int[n];
+    for (int i=0;i<n;i++) { vv[i] =  tt[i+i0]; }
+    return unsafe(vv); }
+
   // TODO: grow faster?
   private final void expandTo (final int i) {
     //assert isValid();
@@ -40,109 +53,9 @@ public final class NaturalLEMutable implements Natural {
   //--------------------------------------------------------------
 
   @Override
-  public final boolean isZero () {
-    //assert isValid();
-    for (int i=0;i<hiInt();i++) {
-      if (0!=word(i)) { return false; } }
-    return true; }
-  
-  //--------------------------------------------------------------
-
-  @Override
-  public final NaturalLEMutable abs () { return this; }
-  
-  //--------------------------------------------------------------
-
-  @Override
   public final Natural add (final Natural u,
                             final int shift) {
-    //assert isValid();
-    //assert u.isValid();
-    //assert 0<=shift;
-    if (isZero()) { return u.shiftUp(shift); }
-    if (u.isZero()) { return this; }
-    if (0==shift) { return add(u); }
-    final int iShift = (shift>>>5);
-    final int bShift = (shift&0x1f);
-    // TODO: special case whole word shift?
-    final int rShift = 32-bShift;
-    final int n0 = hiInt();
-    final int n1 = u.hiInt()+iShift+1;
-    final int n = Math.max(n0,n1);
-    //final Natural us = u.shiftUp(shift);
-    final int[] v = new int[n];
-    int i=0;
-    for (;i<iShift;i++) { v[i] = word(i); }
-    long carry = 0L;
-    int u0 = 0;
-    for (;i<n;i++) {
-      final int u1 = u.word(i-iShift);
-      final int ui = 
-        ((bShift==0) ? u1 : ((u1<<bShift)|(u0>>>rShift)));
-      u0 = u1;
-      final long sum = uword(i) + Numbers.unsigned(ui) + carry;
-      carry = (sum>>>32);
-      v[i] = (int) sum; }
-    if (0L!=carry) { v[i] = (int) carry; }
-    return unsafe(v); }
-
-  //--------------------------------------------------------------
-
-  private final Natural subtract (final long u) {
-    //assert isValid();
-    //assert 0L<=u;
-    //assert 0<=compareTo(u);
-    if (0L==u) { return this; }
-    //assert 0L<=u;
-    if (0L==u) { return this; }
-    //assert ! isZero();
-    final long lo = Numbers.loWord(u);
-    final long hi = Numbers.hiWord(u);
-    //if (0L!=hi) { //assert 2<=hiInt(); }
-    //if (0L!=lo) { //assert 1<=hiInt(); }
-    Natural v = copy();
-    long dif = uword(0)-lo;
-    v = v.setWord(0,(int) dif);
-    long borrow = (dif>>32);
-    dif = (uword(1)-hi)+borrow;
-    v = v.setWord(1,(int) dif);
-    borrow = (dif>>32);
-    int i=2;
-    final int n = hiInt();
-    for (;(0L!=borrow)&&(i<n);i++) {
-      dif = uword(i)+borrow;
-      v = v.setWord(i,(int) dif);
-      borrow = (dif>>32); }
-    //assert 0L==borrow : borrow;
-    return v; }
-
-  public final Natural subtract (final long u,
-                                 final int upShift) {
-    //assert isValid();
-    //assert 0L<=u;
-    //assert 0<=upShift;
-    if (0L==u) { return this; }
-    if (0==upShift) { return subtract(u); }
-    final int iShift = (upShift>>>5);
-    final int bShift = (upShift&0x1f);
-    final int[] uu = Ints.littleEndian(u,bShift);
-    final int n0 = hiInt();
-    final int n1 = iShift+uu.length;
-    //assert n1<=n0;
-    final int[] v = new int[n0];
-    for (int i=0;i<iShift;i++) { v[i] = word(i); }
-    long borrow = 0L;
-    for (int i=iShift;i<n1;i++) {
-      final long ui = Numbers.unsigned(uu[i-iShift]);
-      final long dif = (uword(i)-ui) + borrow;
-      borrow = (dif>>32);
-      v[i] = (int) dif; }
-    for (int i=n1;i<n0;i++) {
-      final long dif = uword(i) + borrow;
-      borrow = (dif>>32);
-      v[i] = (int) dif; }
-    //assert 0L==borrow;
-    return unsafe(v); }
+    throw Exceptions.unsupportedOperation(this,"add",u,shift); }
 
   //--------------------------------------------------------------
   // Ringlike
@@ -223,64 +136,6 @@ public final class NaturalLEMutable implements Natural {
     return subtract(u); }
 
   //--------------------------------------------------------------
-
-  @Override
-  public final boolean isOne () {
-    //assert isValid();
-    if (1!=word(0)) { return false; }
-    for (int i=Math.max(1,startWord());i<endWord();i++) {
-      if (0!=word(i)) { return false; } }
-    return true; }
-
-  //--------------------------------------------------------------
-
-  @Override
-  public final Natural square () {
-    //assert isValid();
-    return NaturalMultiply.square(this); }
-
-  @Override
-  public final Natural multiply (final Natural u) {
-    //assert isValid();
-    //assert u.isValid();
-    return NaturalMultiply.multiply(this,u); }
-
-  //--------------------------------------------------------------
-
-  @Override
-  public final List<Natural> divideAndRemainder (final Natural u) {
-    //assert isValid();
-    //assert u.isValid();
-    return NaturalDivide.divideAndRemainder(this,u); }
-
-  @Override
-  public final  Natural divide (final Natural u) {
-    //assert isValid();
-    //assert u.isValid();
-    return divideAndRemainder(u).get(0); }
-
-  @Override
-  public final  Natural remainder (final Natural u) {
-    //assert isValid();
-    //assert u.isValid();
-    return divideAndRemainder(u).get(1); }
-
-  //--------------------------------------------------------------
-
-  @Override
-  public final Natural gcd (final Natural u) { 
-    //assert isValid();
-    //assert u.isValid();
-    return NaturalDivide.gcd(this,u); }
-
-  //--------------------------------------------------------------
-
-  @Override
-  public final List<Natural> reduce (final Natural d) {
-    //assert isValid();
-    return NaturalDivide.reduce(this,d); }
-
- //--------------------------------------------------------------
   // Uints
   //--------------------------------------------------------------
 
@@ -334,7 +189,7 @@ public final class NaturalLEMutable implements Natural {
       if (0!=word(i) ) { return i+1; } }
     //assert 0==start;
     return 0; }
-  
+
   @Override
   public final int loBit () {
     // Search for lowest order nonzero int
@@ -458,20 +313,21 @@ public final class NaturalLEMutable implements Natural {
     if (lo0<lo1) { return -1; }
     if (lo0>lo1) { return 1; }
     return 0; }
-  
+
   //--------------------------------------------------------------
   // 'Number' methods
   //--------------------------------------------------------------
 
   @Override
   public final int intValue () { 
-    //assert isValid();
-    return word(0); }
+    throw Exceptions.unsupportedOperation(this,"intValue"); }
+//   //assert isValid();
+//    return word(0); }
 
   @Override
   public final long longValue () {
-    //assert isValid();
-    return (uword(1)<<32) | uword(0); }
+    throw Exceptions.unsupportedOperation(this,"longValue"); }
+//    return (uword(1)<<32) | uword(0); }
 
   //--------------------------------------------------------------
   // Object methods
@@ -486,10 +342,25 @@ public final class NaturalLEMutable implements Natural {
   /** DANGER!!! Mutable!!! used in testing only!!! */
   @Override
   public final boolean equals (final Object x) {
-    //assert isValid();
     if (x==this) { return true; }
-    if (!(x instanceof Natural)) { return false; }
-    return uintsEquals((Natural) x); }
+    if (!(x instanceof NaturalLEMutable)) { return false; }
+    final NaturalLEMutable u = (NaturalLEMutable) x;
+    final int nt = hiInt();
+    if (nt!=u.hiInt()) { return false; }
+    for (int i=0; i<nt; i++) {
+      if (_words[i]!=u._words[i]) { return false; } }
+    return true; }
+
+  public final String toHexString () {
+    final StringBuilder b = new StringBuilder("");
+    final int n = hiInt()-1;
+    if (0>n) { b.append('0'); }
+    else {
+      b.append(String.format("%x",Long.valueOf(uword(n))));
+      for (int i=n-1;i>=0;i--) {
+        //b.append(" ");
+        b.append(String.format("%08x",Long.valueOf(uword(i)))); } }
+    return b.toString(); }
 
   /** hex string. */
   @Override
@@ -501,26 +372,16 @@ public final class NaturalLEMutable implements Natural {
   // Transience
   //--------------------------------------------------------------
 
-  public final Natural recycle () { 
+  private final Natural recycle () { 
     //assert isValid();
     final int[] t = _words;
     _words = null;
     return unsafe(t); }
 
-  public final Natural immutable () { 
-    //assert isValid();
-    //final int[] t = Ints.stripTrailingZeros(_words);
-    final int[] t = _words;
-    _words = null;
-    return NaturalLE.unsafe(t); }
-
-  @Override
+   @Override
   public final Natural copy () { 
     //assert isValid();
-    return copy(this); }
-
-//  @Override
-//  public final boolean isValid () { return null!=_words; }
+    return unsafe(copyWords()); }
 
   //--------------------------------------------------------------
   // construction
@@ -533,85 +394,10 @@ public final class NaturalLEMutable implements Natural {
   unsafe (final int[] words) {
     return new NaturalLEMutable(words); }
 
-  /** Copy <code>words</code>. 
-   */
-  public static final NaturalLEMutable make (final int[] words) {
-    return unsafe(Arrays.copyOf(words,words.length)); }
-
-  /** Copy <code>words</code>, allowing space for at least
-   * <code>n</code> words in the resulting natural number. 
-   */
-  public static final NaturalLEMutable make (final int[] words,
-                                             final int n) {
-    final int nn = Math.max(n,words.length);
-    final int[] w = new int[nn];
-    System.arraycopy(words,0,w,0,nn);
-    return unsafe(w); }
-
   /** Zero instance with space for <code>n</code> words. 
    */
   public static final NaturalLEMutable make (final int n) {
     return unsafe(new int[n]); }
-
-  //--------------------------------------------------------------
-  /** From a big endian {@code byte[]}, as produced by
-   * {@link BigInteger#toByteArray()}.
-   */
-
-  private static final NaturalLEMutable valueOf (final byte[] a) {
-    final int nBytes = a.length;
-    int keep = 0;
-    while ((keep<nBytes) && (a[keep]==0)) { keep++; }
-    final int nInts = ((nBytes-keep) + 3) >>> 2;
-    final int[] result = new int[nInts];
-    int b = nBytes-1;
-    for (int i = nInts - 1; i >= 0; i--) {
-      result[i] = a[b--] & 0xff;
-      final int bytesRemaining = (b - keep) + 1;
-      final int bytesToTransfer = Math.min(3,bytesRemaining);
-      for (int j = 8; j <= (bytesToTransfer << 3); j += 8) {
-        result[i] |= ((a[b--] & 0xff) << j); } }
-    Ints.reverse(result);
-    return unsafe(result); }
-
-  public static final NaturalLEMutable valueOf (final BigInteger u) {
-    //assert 0<=u.signum();
-    return valueOf(u.toByteArray()); }
-
-  //-------------------------------------------------------------
-
-  public static final NaturalLEMutable valueOf (final String s,
-                                                final int radix) {
-    return unsafe(Ints.littleEndian(s,radix)); }
-
-  public static final NaturalLEMutable valueOf (final String s) {
-    return valueOf(s,0x10); }
-
-  public static final NaturalLEMutable valueOf (final long u) {
-    //assert 0L<=u;
-    return unsafe(Ints.littleEndian(u)); }
-
-  public static final NaturalLEMutable valueOf (final int u) {
-    //assert 0L<=u;
-    return unsafe(new int[] {u}); }
-
-  //--------------------------------------------------------------
-
-  public static final NaturalLEMutable copy (final NaturalLE u) { 
-    return unsafe(u.copyWords()); }
-
-  public static final NaturalLEMutable 
-  copy (final NaturalLEMutable u) { return unsafe(u.copyWords()); }
-
-  public static final NaturalLEMutable copy (final Natural u) { 
-    if (u instanceof NaturalLEMutable) {
-      return copy((NaturalLEMutable) u); }
-    if (u instanceof NaturalLE) {
-      return copy((NaturalLE) u); }
-    final int n = u.hiInt();
-    final int[] w = new int[n];
-    for (int i=0;i<n;i++) { w[i] = u.word(i); }
-    return unsafe(w); }
 
   //--------------------------------------------------------------
 }

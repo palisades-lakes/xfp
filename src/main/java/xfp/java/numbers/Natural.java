@@ -1,10 +1,5 @@
 package xfp.java.numbers;
 
-import java.math.BigInteger;
-import java.util.List;
-
-import xfp.java.exceptions.Exceptions;
-
 /** An interface for nonnegative integers represented as
  * a sequence of <code>int</code> words, treated as unsigned.
  *
@@ -15,7 +10,7 @@ import xfp.java.exceptions.Exceptions;
  * TODO: utilities class to hide private stuff?
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-31
+ * @version 2019-09-03
  */
 
 @SuppressWarnings("unchecked")
@@ -38,9 +33,8 @@ public interface Natural extends Ringlike<Natural> {
    * valid.
    */
 
-  default Natural setWord (final int i,
-                           final int w) {
-    throw Exceptions.unsupportedOperation(this,"setWord",i,w); }
+  Natural setWord (final int i,
+                   final int w);
 
   /** The value of the unsigned <code>i</code>th (little endian) 
    * word as a <code>long</code>.
@@ -108,16 +102,8 @@ public interface Natural extends Ringlike<Natural> {
    * <code>Natural</code> with <code>[0,i1-i0)</code> words.
    */
 
-  default Natural words (final int i0,
-                         final int i1) {
-    //assert 0<=i0;
-    //assert i0<i1;
-    if ((0==i0) && (hiInt()<=i1)) { return copy(); }
-    final int n = Math.max(0,i1-i0);
-    if (0>=n) { return zero(); }
-    Natural u = zero();
-    for (int i=0;i<n;i++) { u =  u.setWord(i,word(i+i0)); }
-    return u; }
+  Natural words (final int i0,
+                 final int i1);
 
   //--------------------------------------------------------------
   // bit ops
@@ -141,106 +127,9 @@ public interface Natural extends Ringlike<Natural> {
 
   //--------------------------------------------------------------
 
-  default boolean testBit (final int n) {
-    //assert 0<=n;
-    final int w = word(n>>>5);
-    final int b = (1 << (n&0x1F));
-    return 0!=(w&b); }
-
-  default Natural setBit (final int i) {
-    //assert 0<=i;
-    final int iw = (i>>>5);
-    final int w = word(iw);
-    final int ib = (i&0x1F);
-    return setWord(iw,(w|(1<<ib))); }
-
-  //  default Natural clearBit (final int n) {
-  //    //assert 0<=n;
-  //    final int iw = (n>>>5);
-  //    final int w = word(iw);
-  //    final int ib = (n&0x1F);
-  //    return setWord(iw,(w&(~(1<<ib)))); }
-
-  //  default Natural flipBit (final int n) {
-  //    //assert 0<=n;
-  //    final int iw = (n>>>5);
-  //    final int w = word(iw);
-  //    final int ib = (n&0x1F);
-  //    return setWord(iw,(w^(1<<ib))); }
-
-  //--------------------------------------------------------------
-
   Natural shiftDown (final int shift);
 
   Natural shiftUp (final int shift);
-
-  //--------------------------------------------------------------
-  // 'Number' interface
-  //--------------------------------------------------------------
-
-  default byte[] littleEndianBytes () {
-    final int hi = hiBit();
-    // an extra zero byte to avoid getting a negative
-    // two's complement input to new BigInteger(b).
-    final int n = 1 + ((hi)/8);
-    final byte[] b = new byte[n];
-    int j = 0;
-    int w = 0;
-    for (int i=0;i<n;i++) {
-      if (0==(i%4)) { w = word(j++); }
-      else { w = (w>>>8); }
-      b[i] = (byte) w; }
-    return b; }
-
-  default byte[] bigEndianBytes () {
-    final int hi = hiBit();
-    // an extra zero byte to avoid getting a negative
-    // two's complement input to new BigInteger(b).
-    final int n = 1 + ((hi)/8);
-    final byte[] b = new byte[n];
-    int j = 0;
-    int w = 0;
-    for (int i=0;i<n;i++) {
-      if (0==(i%4)) { w = word(j++); }
-      else { w = (w>>>8); }
-      b[n-1-i] = (byte) w; }
-    return b; }
-
-  default BigInteger bigIntegerValue () {
-    return new BigInteger(bigEndianBytes()); }
-
-  default String toHexString () {
-    final StringBuilder b = new StringBuilder("");
-    final int n = hiInt()-1;
-    if (0>n) { b.append('0'); }
-    else {
-      b.append(String.format("%x",Long.valueOf(uword(n))));
-      for (int i=n-1;i>=0;i--) {
-        //b.append(" ");
-        b.append(String.format("%08x",Long.valueOf(uword(i)))); } }
-    return b.toString(); }
-
-  //--------------------------------------------------------------
-  // 'Object' interface
-  //--------------------------------------------------------------
-
-  default int uintsHashCode () {
-    int hashCode = 0;
-    for (int i=startWord(); i<hiInt(); i++) {
-      hashCode = ((31 * hashCode) + word(i)); }
-    return hashCode; }
-
-  // DANGER: equality across classes
-  default boolean uintsEquals (final Natural x) {
-    if (x==this) { return true; }
-    final Natural u = x;
-    final int n0 = startWord();
-    if (n0!=u.startWord()) { return false; }
-    final int n1 = hiInt();
-    if (n1!=u.hiInt()) { return false; }
-    for (int i=n0; i<n1; i++) {
-      if (word(i)!=u.word(i)) { return false; } }
-    return true; }
 
   //--------------------------------------------------------------
   // arithmetic
@@ -250,42 +139,5 @@ public interface Natural extends Ringlike<Natural> {
                final int upShift);
 
   //--------------------------------------------------------------
-  // multiply
-  //--------------------------------------------------------------
-
-  default Natural multiply (final long u) {
-    //assert isValid();
-    return NaturalMultiply.multiply(this,u); }
-
-//  Natural multiply (final long u,
-//                    final int upShift);
-
-  default Natural multiply (final long u,
-                            final int upShift) {
-    //assert isValid();
-    //assert 0L<=u;
-    //assert 0<=upShift;
-    if (0L==u) { return zero(); }
-    if (0==upShift) { return multiply(u); }
-    if (isZero()) { return this; }
-    return multiply(NaturalLE.valueOf(u,upShift)); }
-
-  //--------------------------------------------------------------
-  // division
-  //-------------------------------------------------------------
-
-  // for testing
-  default List<Natural> divideAndRemainderKnuth (final Natural u) {
-    //assert isValid();
-    //assert u.isValid();
-    return NaturalDivide.divideAndRemainderKnuth(this,u); }
-
-  // for testing
-  default List<Natural> divideAndRemainderBurnikelZiegler (final Natural u) {
-    //assert isValid();
-    //assert u.isValid();
-    return NaturalDivide.divideAndRemainderBurnikelZiegler(this,u); }
-
-   //--------------------------------------------------------------
 }
 //--------------------------------------------------------------

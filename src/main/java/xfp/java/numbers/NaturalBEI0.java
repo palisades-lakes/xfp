@@ -16,7 +16,7 @@ import xfp.java.exceptions.Exceptions;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-31
+ * @version 2019-09-03
  */
 
 @SuppressWarnings("unchecked")
@@ -61,6 +61,11 @@ public final class NaturalBEI0 implements Natural {
                                 final int w) {
     throw Exceptions.unsupportedOperation(this,"setWord",i,w); }
 
+  @Override
+  public final Natural words (final int i0,
+                              final int i1) {
+    throw Exceptions.unsupportedOperation(this,"words",i0,i1); }
+  
   //--------------------------------------------------------------
 
 
@@ -80,20 +85,6 @@ public final class NaturalBEI0 implements Natural {
       if (0!=word(i) ) { return i+1; } }
     //assert 0==start;
     return 0; }
-
-  //  @Override
-  //  public final NaturalLE setWord (final int i,
-  //                                  final int w) {
-  //    //assert 0<=i;
-  //    if (0==w) {
-  //      if (i>=hiInt()) { return this; }
-  //      final int[] u = Arrays.copyOf(words(),words().length);
-  //      u[i] = 0;
-  //      return unsafe(u); }
-  //    final int n = Math.max(i+1,hiInt());
-  //    final  int[] u = Arrays.copyOf(words(),n);
-  //    u[i] = w;
-  //    return unsafe(u); }
 
   public static final NaturalBEI0 ZERO = new NaturalBEI0(Bei0.ZERO);
 
@@ -292,16 +283,15 @@ public final class NaturalBEI0 implements Natural {
   // multiply
   //--------------------------------------------------------------
 
-  @Override
   public final NaturalBEI0 multiply (final long that) {
     //assert 1L<=that;
     return unsafe(Bei0.multiply(words(),that)); }
 
-  @Override
-  public final Natural multiply (final long that,
-                                 final int shift) {
-    //assert 1L<=that;
-    return multiply(valueOf(that,shift)); }
+//  @Override
+//  public final Natural multiply (final long that,
+//                                 final int shift) {
+//    //assert 1L<=that;
+//    return multiply(valueOf(that,shift)); }
 
   @Override
   public final Natural multiply (final Natural that) {
@@ -329,7 +319,6 @@ public final class NaturalBEI0 implements Natural {
     num.divideKnuth(den,q,false);
     return valueOf(q.getValue()); }
 
-  @Override
   public final List<Natural>
   divideAndRemainderKnuth (final Natural u) {
     final NaturalBEI0 that = (NaturalBEI0) u;
@@ -350,7 +339,6 @@ public final class NaturalBEI0 implements Natural {
 
   //--------------------------------------------------------------
 
-  @Override
   public final List<Natural>
   divideAndRemainderBurnikelZiegler (final Natural u) {
     final NaturalBEI0 that = (NaturalBEI0) u;
@@ -487,11 +475,9 @@ public final class NaturalBEI0 implements Natural {
 
   //--------------------------------------------------------------
 
-  @Override
   public final boolean testBit (final int n) {
     return Bei0.testBit(words(),n); }
 
-  @Override
   public final NaturalBEI0 setBit (final int n) {
     return unsafe(Bei0.setBit(words(),n)); }
 
@@ -559,11 +545,9 @@ public final class NaturalBEI0 implements Natural {
   // Number interface+
   //--------------------------------------------------------------
 
-  @Override
   public final byte[] bigEndianBytes () {
     return Bei0.toByteArray(words()); }
 
-  @Override
   public final BigInteger bigIntegerValue () {
     return Bei0.bigIntegerValue(words()); }
 

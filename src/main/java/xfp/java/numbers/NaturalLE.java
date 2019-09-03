@@ -22,7 +22,7 @@ import xfp.java.prng.GeneratorBase;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-31
+ * @version 2019-09-03
  */
 
 @SuppressWarnings("unchecked")
@@ -1165,9 +1165,10 @@ public final class NaturalLE implements Natural {
   //--------------------------------------------------------------
 
   @Override
-  public final Natural absDiff (final Natural u) {
+  public final NaturalLE absDiff (final Natural uu) {
     //assert isValid();
     //assert u.isValid();
+    final NaturalLE u = (NaturalLE) uu;
     final int c = compareTo(u);
     if (c==0) { return zero(); }
     if (c<0) { return u.subtract(this); }
@@ -1234,21 +1235,22 @@ public final class NaturalLE implements Natural {
    * the low bit of the input, so it doesn't need special care.
    */
 
-  public final NaturalLE squareSimple () {
-    final int n = hiInt();
-    final int[] vv = new int[2*n];
+  private final NaturalLE squareSimple () {
+    final int nt = hiInt();
+    final int[] tt = words();
+    final int[] vv = new int[2*nt];
     // diagonal
-    for (int i=0;i<n;i++) {
-      final long tti = uword(i);
+    for (int i=0;i<nt;i++) {
+      final long tti = unsigned(tt[i]);
       final long prod = tti*tti; 
       final int i2 = 2*i;
       vv[i2] = (int) prod;
       vv[i2+1] = (int) hiWord(prod); }
     // off diagonal
-    for (int i0=0;i0<n;i0++) {
+    for (int i0=0;i0<nt;i0++) {
       long prod = 0L;
       long carry = 0L;
-      final long tt0 = uword(i0);
+      final long tt0 = unsigned(tt[i0]);
       int i2 = 0;
       for (int i1=0;i1<i0;i1++) {
         i2 = i0+i1;
@@ -1256,7 +1258,7 @@ public final class NaturalLE implements Natural {
         carry = hiWord(prod); 
         long vvi2 = loWord(prod); 
         if (i0!=i1) {
-          final long tt1 = uword(i1);
+          final long tt1 = unsigned(tt[i1]);
           final long tt01 = tt0*tt1;
           prod = vvi2 + tt01; 
           carry = hiWord(prod) + carry;
@@ -1264,7 +1266,7 @@ public final class NaturalLE implements Natural {
           prod = vvi2 + tt01; 
           carry = hiWord(prod) + carry; 
           vv[i2] = (int) prod; } }
-      while ((0L!=carry)&&(i2<2*n)) {
+      while ((0L!=carry)&&(i2<2*nt)) {
         i2++;
         prod = unsigned(vv[i2]) + carry;
         carry = hiWord(prod); 
@@ -1273,24 +1275,62 @@ public final class NaturalLE implements Natural {
     }
     return unsafe(vv); }
 
+  //--------------------------------------------------------------
+
   @Override
-  public final Natural square () {
-    //assert isValid();
-    return NaturalMultiply.square(this); }
+  public final NaturalLE square () {
+    if (isZero()) { return zero(); }
+    if (isOne()) { return one(); }
+    final int n = hiInt();
+    if (n < NaturalMultiply.KARATSUBA_SQUARE_THRESHOLD) { 
+      return squareSimple(); }
+    if (n < NaturalMultiply.TOOM_COOK_SQUARE_THRESHOLD) {
+      return NaturalMultiply.squareKaratsuba(this); }
+    // For a discussion of overflow detection see multiply()
+    return NaturalMultiply.squareToomCook3(this); }
 
   //--------------------------------------------------------------
   // multiply
   //--------------------------------------------------------------
 
   @Override
-  public final Natural multiply (final Natural u) {
+  public final NaturalLE multiply (final Natural u) {
     //assert isValid();
     //assert u.isValid();
+    return NaturalMultiply.multiply(this,(NaturalLE) u); }
+
+  public final NaturalLE multiply (final long u) {
+    //assert isValid();
+
     return NaturalMultiply.multiply(this,u); }
+
+  public final NaturalLE multiply (final long u,
+                            final int upShift) {
+    //assert isValid();
+    //assert 0L<=u;
+    //assert 0<=upShift;
+    if (0L==u) { return zero(); }
+    if (0==upShift) { return multiply(u); }
+    if (isZero()) { return this; }
+    return multiply(NaturalLE.valueOf(u,upShift)); }
 
   //--------------------------------------------------------------
   // divide
   //--------------------------------------------------------------
+
+  // for testing
+  public final List<Natural> 
+  divideAndRemainderKnuth (final NaturalLE u) {
+    //assert isValid();
+    //assert u.isValid();
+    return NaturalDivide.divideAndRemainderKnuth(this,u); }
+
+  // for testing
+  public final List<Natural> 
+  divideAndRemainderBurnikelZiegler (final Natural u) {
+    //assert isValid();
+    //assert u.isValid();
+    return NaturalDivide.divideAndRemainderBurnikelZiegler(this,u); }
 
   @Override
   public final List<Natural> divideAndRemainder (final Natural u) {
@@ -1442,6 +1482,19 @@ public final class NaturalLE implements Natural {
     if (0==bShift) { return shiftUpBywords(iShift); }
     return shiftUpByBits(iShift,bShift); }
 
+  public final boolean testBit (final int n) {
+    //assert 0<=n;
+    final int w = word(n>>>5);
+    final int b = (1 << (n&0x1F));
+    return 0!=(w&b); }
+
+  public final NaturalLE setBit (final int i) {
+    //assert 0<=i;
+    final int iw = (i>>>5);
+    final int w = word(iw);
+    final int ib = (i&0x1F);
+    return setWord(iw,(w|(1<<ib))); }
+
   //--------------------------------------------------------------
 
   @Override
@@ -1472,18 +1525,55 @@ public final class NaturalLE implements Natural {
         throw new UnsupportedOperationException(
           "Too large for long:" + this); } }
 
+  private final byte[] bigEndianBytes () {
+    final int hi = hiBit();
+    // an extra zero byte to avoid getting a negative
+    // two's complement input to new BigInteger(b).
+    final int n = 1 + ((hi)/8);
+    final byte[] b = new byte[n];
+    int j = 0;
+    int w = 0;
+    for (int i=0;i<n;i++) {
+      if (0==(i%4)) { w = word(j++); }
+      else { w = (w>>>8); }
+      b[n-1-i] = (byte) w; }
+    return b; }
+
+  public final  BigInteger bigIntegerValue () {
+    return new BigInteger(bigEndianBytes()); }
+
   //--------------------------------------------------------------
   // Object methods
   //--------------------------------------------------------------
 
   @Override
-  public final int hashCode () { return uintsHashCode(); }
+  public final int hashCode () { 
+    int hashCode = 0;
+    for (int i=0; i<hiInt(); i++) {
+      hashCode = ((31 * hashCode) + _words[i]); }
+    return hashCode; }
 
   @Override
   public final boolean equals (final Object x) {
     if (x==this) { return true; }
     if (!(x instanceof NaturalLE)) { return false; }
-    return uintsEquals((NaturalLE) x); }
+    final NaturalLE u = (NaturalLE) x;
+    final int nt = hiInt();
+    if (nt!=u.hiInt()) { return false; }
+    for (int i=0; i<nt; i++) {
+      if (_words[i]!=u._words[i]) { return false; } }
+    return true; }
+
+  public final String toHexString () {
+    final StringBuilder b = new StringBuilder("");
+    final int n = hiInt()-1;
+    if (0>n) { b.append('0'); }
+    else {
+      b.append(String.format("%x",Long.valueOf(uword(n))));
+      for (int i=n-1;i>=0;i--) {
+        //b.append(" ");
+        b.append(String.format("%08x",Long.valueOf(uword(i)))); } }
+    return b.toString(); }
 
   /** hex string. */
   @Override
@@ -1665,23 +1755,23 @@ public final class NaturalLE implements Natural {
 
   //--------------------------------------------------------------
 
-  public static final NaturalLE 
-  copy (final NaturalLE u) { return make(u.words()); }
+//  public static final NaturalLE 
+//  copy (final NaturalLE u) { return make(u.words()); }
 
-  public static final NaturalLE 
-  copy (final NaturalLEMutable u) { 
-    return make(u.copyWords()); }
+//  public static final NaturalLE 
+//  copy (final NaturalLEMutable u) { 
+//    return make(u.copyWords()); }
 
-  public static final NaturalLE
-  copy (final Natural u) { 
-    if (u instanceof NaturalLEMutable) {
-      return copy((NaturalLEMutable) u); }
-    if (u instanceof NaturalLE) {
-      return copy((NaturalLE) u); }
-    final int n = u.hiInt();
-    final int[] w = new int[n];
-    for (int i=u.startWord();i<n;i++) { w[i] = u.word(i); }
-    return unsafe(w,n); }
+//  public static final NaturalLE
+//  copy (final Natural u) { 
+//    if (u instanceof NaturalLEMutable) {
+//      return copy((NaturalLEMutable) u); }
+//    if (u instanceof NaturalLE) {
+//      return copy((NaturalLE) u); }
+//    final int n = u.hiInt();
+//    final int[] w = new int[n];
+//    for (int i=u.startWord();i<n;i++) { w[i] = u.word(i); }
+//    return unsafe(w,n); }
 
   //--------------------------------------------------------------
 }
