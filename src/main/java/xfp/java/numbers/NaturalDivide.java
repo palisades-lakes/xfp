@@ -12,7 +12,7 @@ import java.util.List;
  * Non-instantiable.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-31
+ * @version 2019-09-04
  */
 
 @SuppressWarnings("unchecked")
@@ -50,9 +50,9 @@ public final class NaturalDivide {
       final long nn = u.uword(0);
       final int q = (int) (nn/dd);
       final int r = (int) (nn-(q*dd));
-      return List.of(NaturalLE.valueOf(q),NaturalLE.valueOf(r)); }
+      return List.of(Natural.valueOf(q),Natural.valueOf(r)); }
 
-    Natural qq = u.copy();
+    Natural qq = u;
 
     final int shift = Integer.numberOfLeadingZeros(d);
     int r = u.word(u.hiInt()-1);
@@ -78,8 +78,8 @@ public final class NaturalDivide {
         r = (int) Numbers.hiWord(tmp); }
       qq = qq.setWord(xlen-1,q);
       rr = unsigned(r); }
-    if (shift > 0) { return List.of(qq,NaturalLE.valueOf(r%d)); }
-    return List.of(qq,NaturalLE.valueOf(r)); }
+    if (shift > 0) { return List.of(qq,Natural.valueOf(r%d)); }
+    return List.of(qq,Natural.valueOf(r)); }
 
   //--------------------------------------------------------------
   /** Special shifted fused multiply-subtract 
@@ -148,11 +148,11 @@ public final class NaturalDivide {
     // D1 compact the divisor
     final int nv = v.hiInt();
     final int lShift = Integer.numberOfLeadingZeros(v.word(nv-1));
-    Natural d = v.copy().shiftUp(lShift);
+    Natural d = v.shiftUp(lShift);
     //assert v.isValid();
     final int nd = d.hiInt();
     //assert nv==nd;
-    Natural r = u.copy().shiftUp(lShift);
+    Natural r = u.shiftUp(lShift);
     //assert u.isValid();
     final int nr0 = r.hiInt();
 //    final int nu = u.hiInt();
@@ -324,7 +324,7 @@ public final class NaturalDivide {
     else {
       // step 3b: if a1>=b1, let quotient=beta^n-1
       //and r=a12-b1*2^n+b1
-      q = ((NaturalLE) a).ones(n);
+      q = Natural.ones(n);
       a12 = a12.add(b1);
       b1 = b1.shiftUp(32*n);
       r = a12.subtract(b1);
@@ -429,9 +429,9 @@ public final class NaturalDivide {
 
     // step 4a: shift b so its length is a multiple of n
     //assert 0<=sigma;
-    final Natural bShifted = v.copy().shiftUp(sigma);
+    final Natural bShifted = v.shiftUp(sigma);
     // step 4b: shift a by the same amount
-    final Natural aShifted = u.copy().shiftUp(sigma);
+    final Natural aShifted = u.shiftUp(sigma);
 
     // step 5: t is the number of blocks needed to accommodate a
     // plus one additional bit
@@ -524,7 +524,7 @@ public final class NaturalDivide {
       if ((an<2) && (bn<2)) {
         final int x = a.word(an-1);
         final int y = b.word(bn-1);
-        Natural r = NaturalLE.valueOf(Ints.unsignedGcd(x,y));
+        Natural r = Natural.valueOf(Ints.unsignedGcd(x,y));
         if (s > 0) { r = r.shiftUp(s); }
         //assert a.isValid();
         //assert b.isValid();

@@ -4,7 +4,7 @@ import java.util.function.BinaryOperator;
 
 import org.junit.jupiter.api.Test;
 
-import xfp.java.numbers.NaturalLE;
+import xfp.java.numbers.Natural;
 import xfp.java.numbers.Numbers;
 import xfp.java.numbers.RationalFloat;
 import xfp.java.test.Common;
@@ -32,19 +32,19 @@ public final class RationalFloatTest {
     final RationalFloat[] f =
     {
      RationalFloat.valueOf(
-       false,NaturalLE.valueOf("2366052b8b801d",0x10),-22),
+       false,Natural.valueOf("2366052b8b801d",0x10),-22),
      RationalFloat.valueOf(
-       true,NaturalLE.valueOf("2366052b8b801d",0x10),-22),
+       true,Natural.valueOf("2366052b8b801d",0x10),-22),
      RationalFloat.valueOf(
-       true,NaturalLE.valueOf("232330747ceeab",0x10),-23),
+       true,Natural.valueOf("232330747ceeab",0x10),-23),
      RationalFloat.valueOf(
-       false,NaturalLE.valueOf("232330747ceeab",0x10),-23),
+       false,Natural.valueOf("232330747ceeab",0x10),-23),
      RationalFloat.valueOf(
-       false,NaturalLE.valueOf("21ab528c4dbc181",0x10),-26),
+       false,Natural.valueOf("21ab528c4dbc181",0x10),-26),
      RationalFloat.valueOf(
-       true,NaturalLE.valueOf("8d9814ae2e0074",0x10),-25),
+       true,Natural.valueOf("8d9814ae2e0074",0x10),-25),
      RationalFloat.valueOf(
-       true,NaturalLE.valueOf("2c94d1dcb123a56b9c1",0x10),-43), };
+       true,Natural.valueOf("2c94d1dcb123a56b9c1",0x10),-43), };
     for (final RationalFloat fi : f) {
       //Debug.println(fi.toString());
       Common.doubleRoundingTest(

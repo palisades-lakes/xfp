@@ -155,8 +155,8 @@ public final class BigFloats implements Set {
         if (edge) { return edgeCases.sample(); }
         final BigInteger bi = (BigInteger) g0.next();
         final boolean nonNegative = (0 <= bi.signum());
-        final NaturalLE significand =
-          NaturalLE.valueOf(nonNegative ? bi : bi.negate());
+        final Natural significand =
+          Natural.valueOf(nonNegative ? bi : bi.negate());
         final int exponent = urp.nextInt(eRan) + eMin;
         return
           BigFloat.valueOf(nonNegative,significand,exponent); } }; }

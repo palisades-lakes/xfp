@@ -11,7 +11,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-30
+ * @version 2019-09-04
  */
 
 @SuppressWarnings("unchecked")
@@ -735,11 +735,11 @@ public final class BigFloat0 implements Ringlike<BigFloat0> {
     return new BigFloat0(p0, t0.shiftDown(shift),e0+shift); }
 
   public static final BigFloat0 valueOf (final boolean p0,
-                                        final Natural t0,
+                                        final NaturalBEI0 t0,
                                         final int e0) {
     if (t0.isZero()) { return ZERO; }
     //return reduce(p0,t0,e0); }
-  return new BigFloat0(p0,(NaturalBEI0) t0,e0); }
+  return new BigFloat0(p0,t0,e0); }
 
   //--------------------------------------------------------------
 

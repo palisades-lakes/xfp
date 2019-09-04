@@ -242,8 +242,8 @@ public final class Rationals implements Set {
         if (edge) { return edgeCases.sample(); }
         final BigInteger z0 = (BigInteger) g0.next();
         final BigInteger z1 = (BigInteger) g1.next();
-        final NaturalLE u0 = NaturalLE.valueOf(z0.abs());
-        final NaturalLE u1 = NaturalLE.valueOf(z1.abs());
+        final Natural u0 = Natural.valueOf(z0.abs());
+        final Natural u1 = Natural.valueOf(z1.abs());
         //assert ! u1.isZero();
         return RationalFloat.valueOf(0<=z0.signum(),u0,u1); } }; }
 

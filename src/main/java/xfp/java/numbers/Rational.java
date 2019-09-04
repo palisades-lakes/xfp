@@ -12,7 +12,7 @@ import xfp.java.exceptions.Exceptions;
 /** Ratios of {@link Natural}.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-09-03
+ * @version 2019-09-04
  */
 
 @SuppressWarnings("unchecked")
@@ -24,20 +24,20 @@ public final class Rational implements Ringlike<Rational> {
 
   private final boolean _nonNegative;
   public final boolean nonNegative () { return _nonNegative; }
-  private final NaturalLE _numerator;
-  public final NaturalLE numerator () { return _numerator; }
-  private final NaturalLE _denominator;
-  public final NaturalLE denominator () { return _denominator; }
+  private final Natural _numerator;
+  public final Natural numerator () { return _numerator; }
+  private final Natural _denominator;
+  public final Natural denominator () { return _denominator; }
 
   //--------------------------------------------------------------
 
   public static final Rational get (final long k) {
     
     return new Rational(
-      (0<=k),NaturalLE.valueOf(Math.abs(k)),NaturalLE.valueOf(1L)); }
+      (0<=k),Natural.valueOf(Math.abs(k)),Natural.valueOf(1L)); }
 
   public static final Rational getZero () {
-    return new Rational(true,NaturalLE.valueOf(0L),NaturalLE.valueOf(1L)); }
+    return new Rational(true,Natural.valueOf(0L),Natural.valueOf(1L)); }
 
   @Override
   public final Rational zero () { return getZero(); }
@@ -46,7 +46,7 @@ public final class Rational implements Ringlike<Rational> {
   public final boolean isZero () { return numerator().isZero(); }
 
   public static final Rational getOne () {
-    final Natural one = NaturalLE.valueOf(1L);
+    final Natural one = Natural.valueOf(1L);
     return new Rational(true,one,one); }
 
   private static final boolean isOne (final boolean nonNegative,
@@ -112,8 +112,8 @@ public final class Rational implements Ringlike<Rational> {
   //--------------------------------------------------------------
 
   private static final Rational add (final boolean p0,
-                                     final NaturalLE n0,
-                                     final NaturalLE d0,
+                                     final Natural n0,
+                                     final Natural d0,
                                      final boolean p1,
                                      final long n1) {
     final Natural n1d0 = d0.multiply(n1);
@@ -143,15 +143,15 @@ public final class Rational implements Ringlike<Rational> {
   //--------------------------------------------------------------
 
   private static final Rational add (final boolean p0,
-                                     final NaturalLE n0,
-                                     final NaturalLE d0,
+                                     final Natural n0,
+                                     final Natural d0,
                                      final boolean p1,
                                      final long n1,
                                      final int e1) {
-    final NaturalLE n0d1 = n0;
-    final NaturalLE n1d0 = d0.multiply(n1,e1);
+    final Natural n0d1 = n0;
+    final Natural n1d0 = d0.multiply(n1,e1);
     final boolean p;
-    final NaturalLE n;
+    final Natural n;
     if (p0) {
       if (p1) { n = n0d1.add(n1d0); p = true; }
       else {
@@ -166,7 +166,7 @@ public final class Rational implements Ringlike<Rational> {
         if (0 < c) { n = n1d0.subtract(n0d1); p = true; }
         else { n = n0d1.subtract(n1d0); p = false; } }
       else { n = n0d1.add(n1d0); p = false; } }
-    final NaturalLE d = d0;
+    final Natural d = d0;
     return valueOf(p,n,d); }
 
   private final Rational add (final boolean p,
@@ -190,7 +190,7 @@ public final class Rational implements Ringlike<Rational> {
     //Debug.println("n1=" + n1);
     //Debug.println("e1=" + e1);
     final BigFloat n0d1 = BigFloat.valueOf(p0,n0,e1);
-    final BigFloat n1d0 = BigFloat.product((NaturalLE)d0,p1,n1);
+    final BigFloat n1d0 = BigFloat.product(d0,p1,n1);
     final BigFloat n = n0d1.add(n1d0);
     final BigFloat d = BigFloat.valueOf(true,d0,e1);
     //Debug.println("n0d1=" + n0d1);
@@ -326,7 +326,7 @@ public final class Rational implements Ringlike<Rational> {
    * should there be more explicit round, floor, ceil, etc.?
    */
   public final BigInteger bigIntegerValue () {
-    final NaturalLE nd = (NaturalLE) numerator().divide(denominator());
+    final Natural nd = numerator().divide(denominator());
     final BigInteger x = nd.bigIntegerValue();
     return (nonNegative() ? x : x.negate()); }
 
@@ -512,8 +512,8 @@ public final class Rational implements Ringlike<Rational> {
     //    super();
     //assert (0 == numerator.loBit()) || (0 == denominator.loBit());
     _nonNegative = nonNegative;
-    _numerator = (NaturalLE) numerator;//.immutable();
-    _denominator = (NaturalLE) denominator;//.immutable(); 
+    _numerator = numerator;//.immutable();
+    _denominator = denominator;//.immutable(); 
     }
 
   //--------------------------------------------------------------
@@ -540,7 +540,7 @@ public final class Rational implements Ringlike<Rational> {
 
   public static final Rational valueOf (final boolean nonNegative,
                                         final Natural n) {
-    return reduce(nonNegative,n,NaturalLE.valueOf(1)); }
+    return reduce(nonNegative,n,Natural.valueOf(1)); }
 
   // TODO: compute gcd and reduce longs
 
@@ -551,8 +551,8 @@ public final class Rational implements Ringlike<Rational> {
     final boolean nonNegative = (0L <= n);
     return valueOf(
       nonNegative,
-      NaturalLE.valueOf(nonNegative ? n : -n),
-      NaturalLE.valueOf(d)); }
+      Natural.valueOf(nonNegative ? n : -n),
+      Natural.valueOf(d)); }
 
   // TODO: compute gcd and reduce ints
   public static final Rational valueOf (final int n,
@@ -562,8 +562,8 @@ public final class Rational implements Ringlike<Rational> {
     final boolean nonNegative = (0 <= n);
     return valueOf(
       nonNegative,
-      NaturalLE.valueOf(nonNegative ? n : -n),
-      NaturalLE.valueOf(d)); }
+      Natural.valueOf(nonNegative ? n : -n),
+      Natural.valueOf(d)); }
 
   //--------------------------------------------------------------
 
@@ -572,7 +572,7 @@ public final class Rational implements Ringlike<Rational> {
                                          final int e)  {
     if (0L == t) { return getZero(); }
     //assert 0L < t;
-    final Natural n0 = NaturalLE.valueOf(t);
+    final Natural n0 = Natural.valueOf(t);
     if (0 == e) {  return valueOf(nonNegative,n0); }
     if (0 < e) {
       return valueOf(nonNegative,n0.shiftUp(e)); }
@@ -580,7 +580,7 @@ public final class Rational implements Ringlike<Rational> {
       valueOf(
         nonNegative,
         n0,
-        NaturalLE.valueOf(0L).setBit(-e)); }
+        Natural.valueOf(0L).setBit(-e)); }
 
   public static final Rational valueOf (final double x)  {
     return valueOf(
@@ -595,7 +595,7 @@ public final class Rational implements Ringlike<Rational> {
                                          final int t)  {
     if (0 == t) { return getZero(); }
     //assert 0 < t;
-    final Natural n0 = NaturalLE.valueOf(t);
+    final Natural n0 = Natural.valueOf(t);
     if (0 == e) {  return valueOf(nonNegative,n0); }
     if (0 < e) {
       return valueOf(
@@ -605,7 +605,7 @@ public final class Rational implements Ringlike<Rational> {
       valueOf(
         nonNegative,
         n0,
-        NaturalLE.valueOf(0L).setBit(-e)); }
+        Natural.valueOf(0L).setBit(-e)); }
 
   public static final Rational valueOf (final float x)  {
     return valueOf(
@@ -619,25 +619,25 @@ public final class Rational implements Ringlike<Rational> {
     final boolean nonNegative = (0 <= x);
     return valueOf(
       nonNegative,
-      NaturalLE.valueOf(nonNegative ? x : -x)); }
+      Natural.valueOf(nonNegative ? x : -x)); }
 
   public static final Rational valueOf (final short x)  {
     final boolean nonNegative = (0 <= x);
     return valueOf(
       nonNegative,
-      NaturalLE.valueOf(nonNegative ? x : -x)); }
+      Natural.valueOf(nonNegative ? x : -x)); }
 
   public static final Rational valueOf (final int x)  {
     final boolean nonNegative = (0 <= x);
     return valueOf(
       nonNegative,
-      NaturalLE.valueOf(nonNegative ? x : -x)); }
+      Natural.valueOf(nonNegative ? x : -x)); }
 
   public static final Rational valueOf (final long x)  {
     final boolean nonNegative = (0 <= x);
     return valueOf(
       nonNegative,
-      NaturalLE.valueOf(nonNegative ? x : -x)); }
+      Natural.valueOf(nonNegative ? x : -x)); }
 
   //--------------------------------------------------------------
 
@@ -671,13 +671,13 @@ public final class Rational implements Ringlike<Rational> {
     //assert ! BigInteger.ZERO.equals(d);
     return valueOf(
       0 <= (n.signum()*d.signum()),
-      NaturalLE.valueOf(n.abs()),
-      NaturalLE.valueOf(d.abs())); }
+      Natural.valueOf(n.abs()),
+      Natural.valueOf(d.abs())); }
 
   public static final Rational valueOf (final BigInteger n) {
     return valueOf(
       0 <= (n.signum()),
-      NaturalLE.valueOf(n.abs())); }
+      Natural.valueOf(n.abs())); }
 
   public static final Rational valueOf (final BigFloat n0,
                                         final BigFloat d0) {
@@ -708,15 +708,17 @@ public final class Rational implements Ringlike<Rational> {
         valueOf(
           x.nonNegative(),
           t.shiftUp(e),
-          NaturalLE.valueOf(1)); }
+          Natural.valueOf(1)); }
     if (0 > e) {
       return valueOf(
         x.nonNegative(),
         t,
-        NaturalLE.valueOf(0L).setBit(-e)); }
-    return valueOf(x.nonNegative(),t,NaturalLE.valueOf(1)); }
+        Natural.valueOf(0L).setBit(-e)); }
+    return valueOf(x.nonNegative(),t,Natural.valueOf(1)); }
 
-  public static final Rational valueOf (final Number x)  {
+  public static final Rational valueOf (final Object x)  {
+    if (x instanceof Rational) { return (Rational) x; }
+    if (x instanceof BigFloat) { return valueOf((BigFloat) x); }
     if (x instanceof Double) { return valueOf((Double) x); }
     if (x instanceof Float) { return valueOf((Float) x); }
     if (x instanceof Byte) { return valueOf((Byte) x); }
@@ -728,11 +730,6 @@ public final class Rational implements Ringlike<Rational> {
     if (x instanceof BigDecimal) { return valueOf((BigDecimal) x); }
     throw Exceptions.unsupportedOperation(
       Rational.class,"valueOf",x); }
-
-  public static final Rational valueOf (final Object x)  {
-    if (x instanceof Rational) { return (Rational) x; }
-    if (x instanceof BigFloat) { return valueOf((BigFloat) x); }
-    return valueOf((Number) x); }
 
   //--------------------------------------------------------------
 

@@ -4,7 +4,7 @@ import java.math.BigInteger;
 
 import org.junit.jupiter.api.Test;
 
-import xfp.java.numbers.NaturalLE;
+import xfp.java.numbers.Natural;
 import xfp.java.test.Common;
 
 //----------------------------------------------------------------
@@ -28,9 +28,9 @@ public final class NaturalTest {
     final BigInteger u0 = new BigInteger("744fe560",0x10);
     final BigInteger u1 = new BigInteger("2e95eed2",0x10);
     Common.naturalTest(
-      NaturalLE::valueOf,
-      NaturalLE::valueOf,
-      (z) -> ((NaturalLE)z).bigIntegerValue(),
+      Natural::valueOf,
+      Natural::valueOf,
+      (z) -> ((Natural)z).bigIntegerValue(),
       u0,u1);
 
     final BigInteger z0 = new BigInteger(
@@ -40,15 +40,15 @@ public final class NaturalTest {
       "2e95eed2885cf8947f8dd2ebeedd33540b791bd49a724ec8cedf2d01222e9dc8ed8a4bfb370eb1485102e5600f3e950a5195e2195ab56af3b41e518870ac21c3cab340bc9b7e3ae4e35faa6ef615b544fe645155cd490121db31c81a1f27b08fd817f3292f30a0678edf413676d200dfb701dfa6c6002e522234d6956d6f4391b7c4659200b54ac3a27e3a16b290268f39a99a1143184ff09ae3f93788a5bd8181a6303a7d30fbb5c0139ae04d2152826c0b158629f8ae80cc795746ff90284db8a64aebd1bea47cac0332bca800aeaf4e457b449195feb8e7c82124f84ad72824410f76b77475ab8f8fa413aed062907c0334756274f597dcfa0aef23e7226c2847babf55df656c12acc3292c63402ed8ce325658b2eba45065f274252c7886407e464baeac3a78743f8b567974937b53b181330f30f2d46465364b6d8625a8823c418827559f7076d7da6e160799c84c28d6a575d50c75127e1aad8a174057370fcc72b8b9fc2f6955778228751fc2d5360e95a560ff2ce6646009570d4226644b3e9cb98d005523057f3a8313c533aba8164d3c7969d970c9baa1203651286ce90895a7403a50af86954a784c47a13e946af56eb2e6340d73a936f3ba8f0ea98991a3a51510609c22046d4722b2fe4c1cfc5d28c93f47f84ab70c496feb95d94fa80c93c36037e3f9249018baa6123b0000fcc4c146ac7cba5b9926fb9dd9bf47ff3dd43925fe992c796f7e60b69eaf8e687d6f737db0bcb16ac764eb46f001e1a16953ef225b4e4dbcd3d211ec0e2d17a0432a1f9b25f0dc4f2b160e124271a229a59e1874b5eaf63983d1de07bd340f9f00674664a719999c6c271c3fa8ea7cd5bd89629a79faf95849cbb80b1dec4e24b86ca667fa09c72f0474d169dccbd31524fdbfada5be787044e68cbd706858c8a55432575395d951b4219de55a17a88fb2a5ec1798389c249d001fd292493a0a2cf4cc670e26e7371f65ef42926a3efb854102122b03c0343aa0837872c463f64afbabb24c395ed2ac2a80572093ce26de9213cf26c76efe354f96e259622280eedbfaf72f4b9614760e25c4ef6efd6f93c978794c4c155412364aa4eab4d7e844fd18b139da769d57be0fb6fffc98ee033c73531269a13879d6ab4e5944e5256a4b54973be8c8a23744a01a2f172f0c3bf946451264bc1d98d8a88dd21e6042f52ce041d20b9471b26a93198662ac1538c3a5b7ed3acdcbbb91005b0c0bc9666c1d39b1cd80e3dfe3e9bc113cab746af6f955e291d4e95cb0108c4449dd2d4e23682b3498c3479d69d6b2a89abb8b6a37485d8c46c0de0783ec71ebed0a20e55cd12fc174053b478c1e2e6ab70f0498b25a1289e57f928650a1a7466faa3ad9ae1af5078e32fe76b7f4b5b4191409595e9074767db6e8efcc4cd99694c9f42fb4d43253db80278e7acf39ccc8",
       0x10);
     Common.naturalTest(
-      NaturalLE::valueOf,
-      NaturalLE::valueOf,
-      (z) -> ((NaturalLE)z).bigIntegerValue(),
+      Natural::valueOf,
+      Natural::valueOf,
+      (z) -> ((Natural)z).bigIntegerValue(),
       z0,z1);
 
     Common.naturalTest(
-      NaturalLE::valueOf,
-      NaturalLE::valueOf,
-      (z) -> ((NaturalLE)z).bigIntegerValue());
+      Natural::valueOf,
+      Natural::valueOf,
+      (z) -> ((Natural)z).bigIntegerValue());
 
     //Debug.DEBUG=false;
   }
