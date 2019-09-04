@@ -3,10 +3,10 @@ package xfp.java.scripts;
 import java.math.BigInteger;
 import java.util.List;
 
-import xfp.java.numbers.NaturalBEI0;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
 import xfp.java.prng.PRNG;
+import xfp.java.numbers.Natural;
 
 /** Compare BigInteger and Natural results.
  * At least 4*2<sup>32</sup> tests to get calls to Natural.divadd.
@@ -24,12 +24,12 @@ public final class Division {
   divideAndRemainder (final BigInteger x0,
                       final BigInteger x1) {
     if (0 != x1.signum()) {
-      final NaturalBEI0 y0 = NaturalBEI0.valueOf(x0);
-      final NaturalBEI0 y1 = NaturalBEI0.valueOf(x1);
+      final Natural y0 = Natural.valueOf(x0);
+      final Natural y1 = Natural.valueOf(x1);
       final BigInteger[] xqr = x0.divideAndRemainder(x1);
       final BigInteger xq = xqr[0];
       final BigInteger xr = xqr[1];
-      final List<NaturalBEI0> yqr = y0.divideAndRemainder(y1);
+      final List<Natural> yqr = y0.divideAndRemainder(y1);
       final BigInteger yq = yqr.get(0).bigIntegerValue();
       final BigInteger yr = yqr.get(1).bigIntegerValue();
 

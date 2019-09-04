@@ -2,8 +2,8 @@ package xfp.java.test.accumulators;
 
 import org.junit.jupiter.api.Test;
 
-import xfp.java.accumulators.BigFloatAccumulator0;
 import xfp.java.test.Common;
+import xfp.java.accumulators.EFloatAccumulator;
 
 //----------------------------------------------------------------
 /** Test summation algorithms.
@@ -50,7 +50,7 @@ public final class SumTest {
     Common.sumTests(
       Common.generators(DIM),
       Common.makeAccumulators(Common.accumulators()),
-      BigFloatAccumulator0.make());
+      EFloatAccumulator.make());
     //Debug.DEBUG=false;
   }
 
@@ -63,7 +63,7 @@ public final class SumTest {
     Common.l2DistanceTests(
       Common.generators(DIM),
       Common.makeAccumulators(Common.accumulators()),
-      BigFloatAccumulator0.make());
+      EFloatAccumulator.make());
     //Debug.DEBUG=false;
   }
 
@@ -76,7 +76,7 @@ public final class SumTest {
     Common.l1DistanceTests(
       Common.generators(DIM),
       Common.makeAccumulators(Common.accumulators()),
-      BigFloatAccumulator0.make());
+      EFloatAccumulator.make());
     //Debug.DEBUG=false;
   }
 
@@ -89,7 +89,7 @@ public final class SumTest {
     Common.dotTests(
       Common.generators(DIM),
       Common.makeAccumulators(Common.accumulators()),
-      BigFloatAccumulator0.make());
+      EFloatAccumulator.make());
     //Debug.DEBUG=false;
   }
 
@@ -103,7 +103,7 @@ public final class SumTest {
     Common.l2Tests(
       Common.generators(DIM),
       Common.makeAccumulators(Common.accumulators()),
-      BigFloatAccumulator0.make());
+      EFloatAccumulator.make());
     //Debug.DEBUG=false;
   }
 

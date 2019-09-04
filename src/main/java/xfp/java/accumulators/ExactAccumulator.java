@@ -6,7 +6,7 @@ package xfp.java.accumulators;
  * adds, so that they are exact if {@link #add(double)} is.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-30
+ * @version 2019-09-04
  */
 @SuppressWarnings("unchecked")
 public abstract class ExactAccumulator<T extends ExactAccumulator>
@@ -89,7 +89,7 @@ implements Accumulator<T> {
   // construction
   //--------------------------------------------------------------
 
-  ExactAccumulator () { super(); }
+  protected ExactAccumulator () { super(); }
 
   //--------------------------------------------------------------
 }

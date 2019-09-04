@@ -59,7 +59,6 @@ public final class Common {
             //"xfp.java.accumulators.EFloatAccumulator",
             "xfp.java.accumulators.DistilledAccumulator",
             "xfp.java.accumulators.ZhuHayesAccumulator",
-            //"xfp.java.accumulators.BigFloatAccumulator0",
             "xfp.java.accumulators.BigFloatAccumulator",
             "xfp.java.accumulators.RationalFloatAccumulator",
             "xfp.java.accumulators.RationalAccumulator",
@@ -379,8 +378,8 @@ public final class Common {
                            final BigInteger x0,
                            final BigInteger x1) {
     if (0 != x1.signum()) {
-      final Natural y0 = (Natural) fromBI.apply(x0);
-      final Natural y1 = (Natural) fromBI.apply(x1);
+      final Natural y0 = fromBI.apply(x0);
+      final Natural y1 = fromBI.apply(x1);
       final BigInteger[] x2 = x0.divideAndRemainder(x1);
       final List<Natural> y2 = y0.divideAndRemainderKnuth(y1);
       final BigInteger[] x3 = { toBI.apply(y2.get(0)), 
@@ -420,8 +419,8 @@ public final class Common {
                                      final BigInteger x0,
                                      final BigInteger x1) {
     if (0 != x1.signum()) {
-      final Natural y0 = (Natural) fromBI.apply(x0);
-      final Natural y1 = (Natural) fromBI.apply(x1);
+      final Natural y0 = fromBI.apply(x0);
+      final Natural y1 = fromBI.apply(x1);
       final BigInteger[] x2 = x0.divideAndRemainder(x1);
       final List<Natural> y2 = y0.divideAndRemainderBurnikelZiegler(y1);
       final Natural q = y2.get(0);

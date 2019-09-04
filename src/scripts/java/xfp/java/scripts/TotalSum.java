@@ -63,7 +63,7 @@ public final class TotalSum {
 //    //final Generator g = Generators.make("laplace",dim);
 //    //final Generator g = Generators.make("uniform",dim);
 //    final Accumulator a0 = 
-//      xfp.java.accumulators.BigFloatAccumulator0.make();
+//      xfp.jmh.accumulators.BigFloatAccumulator0.make();
 //    final Accumulator a1 = 
 //      xfp.java.accumulators.BigFloatAccumulator.make();
 //    assert a0.isExact();

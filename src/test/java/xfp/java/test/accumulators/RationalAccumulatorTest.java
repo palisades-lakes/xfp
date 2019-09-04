@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import xfp.java.accumulators.BigFloatAccumulator0;
 import xfp.java.test.Common;
+import xfp.java.accumulators.EFloatAccumulator;
 
 //----------------------------------------------------------------
 /** Test summation algorithms.
@@ -15,7 +15,7 @@ import xfp.java.test.Common;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-24
+ * @version 2019-09-04
  */
 
 public final class RationalAccumulatorTest {
@@ -34,15 +34,15 @@ public final class RationalAccumulatorTest {
     Common.l2Tests(
       Common.generators(DIM),
       Common.makeAccumulators(accumulators),
-      BigFloatAccumulator0.make());
+      EFloatAccumulator.make());
     Common.sumTests(
       Common.generators(DIM),
       Common.makeAccumulators(accumulators),
-      BigFloatAccumulator0.make());
+      EFloatAccumulator.make());
     Common.dotTests(
       Common.generators(DIM),
       Common.makeAccumulators(accumulators),
-      BigFloatAccumulator0.make());
+      EFloatAccumulator.make());
     //Debug.DEBUG=false;
   }
 

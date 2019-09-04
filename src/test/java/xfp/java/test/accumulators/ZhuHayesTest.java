@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import xfp.java.accumulators.BigFloatAccumulator0;
 import xfp.java.test.Common;
+import xfp.java.accumulators.EFloatAccumulator;
 
 //----------------------------------------------------------------
 /** Test summation algorithms.
@@ -45,7 +45,7 @@ public final class ZhuHayesTest {
     Common.sumTests(
       Common.generators(TEST_DIM),
       Common.makeAccumulators(accumulators),
-      BigFloatAccumulator0.make()); }
+      EFloatAccumulator.make()); }
 
   @SuppressWarnings("static-method")
   @Test
@@ -56,7 +56,7 @@ public final class ZhuHayesTest {
     Common.l2Tests(
       Common.generators(TEST_DIM),
       Common.makeAccumulators(accumulators),
-      BigFloatAccumulator0.make()); }
+      EFloatAccumulator.make()); }
 
   @SuppressWarnings("static-method")
   @Test
@@ -67,7 +67,7 @@ public final class ZhuHayesTest {
     Common.dotTests(
       Common.generators(TEST_DIM),
       Common.makeAccumulators(accumulators),
-      BigFloatAccumulator0.make()); }
+      EFloatAccumulator.make()); }
 
   // TODO: decide on expected behavior with non-finite input
   //  @SuppressWarnings("static-method")
