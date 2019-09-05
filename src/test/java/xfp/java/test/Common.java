@@ -25,7 +25,6 @@ import xfp.java.numbers.Doubles;
 import xfp.java.numbers.Floats;
 import xfp.java.numbers.Natural;
 import xfp.java.numbers.NaturalDivide;
-import xfp.java.numbers.Natural;
 import xfp.java.numbers.Ringlike;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;

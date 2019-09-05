@@ -15,7 +15,7 @@ import xfp.java.test.Common;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-09-03
+ * @version 2019-09-04
  */
 
 public final class NaturalTest {
@@ -30,7 +30,7 @@ public final class NaturalTest {
     Common.naturalTest(
       Natural::valueOf,
       Natural::valueOf,
-      (z) -> ((Natural)z).bigIntegerValue(),
+      (z) -> z.bigIntegerValue(),
       u0,u1);
 
     final BigInteger z0 = new BigInteger(
@@ -42,13 +42,13 @@ public final class NaturalTest {
     Common.naturalTest(
       Natural::valueOf,
       Natural::valueOf,
-      (z) -> ((Natural)z).bigIntegerValue(),
+      (z) -> z.bigIntegerValue(),
       z0,z1);
 
     Common.naturalTest(
       Natural::valueOf,
       Natural::valueOf,
-      (z) -> ((Natural)z).bigIntegerValue());
+      (z) -> z.bigIntegerValue());
 
     //Debug.DEBUG=false;
   }
