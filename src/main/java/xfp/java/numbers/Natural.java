@@ -431,6 +431,7 @@ public final class Natural implements Ringlike<Natural> {
     final int nv = Math.max(nt,nu);
     final int[] vv = new int[nv];
     for (int i=0;i<Math.min(iShift,nt);i++) { vv[i] = tt[i]; }
+
     long sum = loWord(u);
     int i = iShift;
     if (i<nt) { sum += unsigned(tt[i]); }
@@ -441,16 +442,19 @@ public final class Natural implements Ringlike<Natural> {
       if (i<nt) { sum += unsigned(tt[i]); }
       vv[i++] = (int) sum; 
       sum = hiWord(sum); }
+ 
     for (;i<nt;i++) {
       if (0L==sum) { break; }
       sum += unsigned(tt[i]);
       vv[i] = (int) sum; 
       sum = hiWord(sum); }
+
     if (0L!=sum) { 
       final int[] vvv = new int[nv+1];
       for (int j=0;j<nv;j++) { vvv[j]=vv[j]; } 
       vvv[nv] = 1; 
       return unsafe(vvv,nv+1); }
+    
     for (;i<nt;i++) { vv[i] = tt[i]; }
     return unsafe(vv,i); }
 
@@ -467,6 +471,7 @@ public final class Natural implements Ringlike<Natural> {
     final int[] vv = new int[nv];
     for (int i=0;i<Math.min(iShift,nt);i++) { vv[i] = tt[i]; }
     long sum = loWord(us);
+ 
     int i=iShift;
     if (i<nt) { sum += unsigned(tt[i]); }
     vv[i++] = (int) sum; 
@@ -728,9 +733,10 @@ public final class Natural implements Ringlike<Natural> {
     final int[] uu = u.words();
     //assert 0<u.hiInt();
     final int nu = u.hiInt()+iShift;
-    final int n = Math.max(nt,nu);
-    final int[] vv = new int[n+1];
+    final int nv = Math.max(nt,nu);
+    final int[] vv = new int[nv];
     for (int i=0;i<Math.min(nt,iShift);i++) { vv[i] = tt[i]; }
+
     long sum = 0L;
     int i=iShift;
     for (;i<nu;i++) {
@@ -738,12 +744,19 @@ public final class Natural implements Ringlike<Natural> {
       if (i<nt) { sum += unsigned(tt[i]); }
       vv[i] = (int) sum; 
       sum = hiWord(sum); }
+
     for (;i<nt;i++) { 
       if (0L==sum) { break; }
       sum += unsigned(tt[i]);
       vv[i] = (int) sum; 
       sum = hiWord(sum); }
-    if (0L!=sum) { vv[i] = (int) sum; return unsafe(vv,i+1); }
+    
+    if (0L!=sum) { 
+      final int[] vvv = new int[nv+1];
+      for (int j=0;j<nv;j++) { vvv[j]=vv[j]; } 
+      vvv[nv] = 1; 
+      return unsafe(vvv,nv+1); }
+
     for (;i<nt;i++) { vv[i] = tt[i]; }
     return unsafe(vv,i); }
 
@@ -752,17 +765,20 @@ public final class Natural implements Ringlike<Natural> {
                                    final int bShift) {
     final int nt = hiInt();
     final int[] tt = words();
+    final int nu0 = u.hiInt();
     final int[] uu = u.words();
     //assert 0<u.hiInt();
-    final int nu = u.hiInt()+iShift;
-    final int n = Math.max(nt,nu);
-    final int[] vv = new int[n+1];
-    for (int i=0;i<Math.min(nt,iShift);i++) { vv[i] = tt[i]; }
     final int rShift = 32-bShift;
+    final int uhi = (uu[nu0-1]>>rShift);
+    final int nu1 = nu0+iShift;
+    final int nv = Math.max(nt,nu1+((0==uhi)?0:1));
+    final int[] vv = new int[nv];
+    for (int i=0;i<Math.min(nt,iShift);i++) { vv[i] = tt[i]; }
+
     long sum = 0L;
     int u0 = 0;
     int i=iShift;
-    for (;i<nu;i++) {
+    for (;i<nu1;i++) {
       final int u1 = uu[i-iShift];
       sum += unsigned((u1<<bShift)|(u0>>>rShift));
       u0 = u1;
@@ -775,13 +791,20 @@ public final class Natural implements Ringlike<Natural> {
       if (i<nt) { sum += unsigned(tt[i]); }
       vv[i++] = (int) sum; 
       sum = hiWord(sum); }
+
     for (;i<nt;i++) { 
       if (0L==sum) { break; }
       sum += unsigned(tt[i]);
       vv[i] = (int) sum; 
       sum = hiWord(sum); }
-    if (0L!=sum) { vv[i] = (int) sum; return unsafe(vv,i+1); }
-    for (;i<nt;i++) { vv[i] = tt[i]; }
+
+    if (0L!=sum) { 
+      final int[] vvv = new int[nv+1];
+      for (int j=0;j<nv;j++) { vvv[j]=vv[j]; } 
+      vvv[nv] = 1; 
+      return unsafe(vvv,nv+1); }
+
+   for (;i<nt;i++) { vv[i] = tt[i]; }
     return unsafe(vv,i); }
 
   public final Natural add (final Natural u,

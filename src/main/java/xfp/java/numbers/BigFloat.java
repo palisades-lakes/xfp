@@ -11,7 +11,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-09-04
+ * @version 2019-09-06
  */
 
 @SuppressWarnings("unchecked")
@@ -190,7 +190,7 @@ public final class BigFloat implements Ringlike<BigFloat> {
     if (e0<e1) { return add6(p0,t0,p1,t1,e1-e0,e0); }
     if (e0==e1) { return add5a(p0,t0,p1,t1,e0); } 
     return add5a(p0,t0.shiftUp(e0-e1),p1,t1,e1); }
-  
+
   //--------------------------------------------------------------
 
   public final BigFloat
@@ -345,19 +345,23 @@ public final class BigFloat implements Ringlike<BigFloat> {
 
   //--------------------------------------------------------------
 
-  //  public final BigFloat
-  //  add2 (final double z) {
-  //    //assert Double.isFinite(z);
-  //    // twoMul gives 2 adds
-  //    final double z2 = z*z;
-  //    final double e = Math.fma(z,z,-z2);
-  //    return add(z2).add(e); }
-
   public final BigFloat
   add2 (final double z) {
     //assert Double.isFinite(z);
-    final long tz = Doubles.significand(z);
-    final int ez = Doubles.exponent(z);
+    if (0.0==z) { return this; }
+    final long bits = doubleToRawLongBits(z);
+    final long t0 = (bits&Doubles.STORED_SIGNIFICAND_MASK);
+    final long e0 = (bits&Doubles.EXPONENT_MASK);
+    final long tz;
+    final int ez;
+    if (0L==e0) { tz = t0; ez = 0; }
+    else {
+      tz = t0+Doubles.STORED_SIGNIFICAND_MASK+1;
+      ez = Math.max(
+        Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND,
+        ((int) (e0>>>Doubles.STORED_SIGNIFICAND_BITS))
+        -Doubles.EXPONENT_BIAS
+        -Doubles.STORED_SIGNIFICAND_BITS); }
     final int s = Numbers.loBit(tz);
     final long t;
     final int e;
@@ -380,49 +384,6 @@ public final class BigFloat implements Ringlike<BigFloat> {
     return s; }
 
   //--------------------------------------------------------------
-
-  public BigFloat addL1 (final double z0,
-                         final double z1) {
-    if (z0>z1) { return add(z0).add(-z1); }
-    if (z0<z1) { return add(-z0).add(z1); }
-    return this; }
-
-  public final BigFloat
-  addL1Distance (final double[] z0,
-                 final double[] z1) {
-    final int n = z0.length;
-    //assert n==z1.length;
-    BigFloat s = this;
-    for (int i=0;i<n;i++) { s = s.addL1(z0[i],z1[i]); }
-    return s; }
-
-  //--------------------------------------------------------------
-
-  public final BigFloat
-  addL2 (final double z0,
-         final double z1) {
-    final double mz1 = -z1;
-    return
-      add2(z0).add2(z1).addProduct(z0,mz1).addProduct(z0,mz1); }
-
-  public final BigFloat
-  addL2Distance (final double[] z0,
-                 final double[] z1) {
-    final int n = z0.length;
-    //assert n==z1.length;
-    BigFloat s = this;
-    for (int i=0;i<n;i++) { s = s.addL2(z0[i],z1[i]); }
-    return s; }
-
-  //--------------------------------------------------------------
-  //    public final BigFloat
-  //    addProduct (final double z0,
-  //                final double z1) {
-  //      // twoMul -> 2 adds.
-  //      final double z01 = z0*z1;
-  //      //assert Double.isFinite(z01);
-  //      final double e = Math.fma(z0,z1,-z01);
-  //      return add(z01).add(e); }
 
   public final BigFloat
   addProduct (final double z0,
@@ -481,6 +442,41 @@ public final class BigFloat implements Ringlike<BigFloat> {
     //assert n==z1.length;
     BigFloat s = this;
     for (int i=0;i<n;i++) { s = s.addProduct(z0[i],z1[i]); }
+    return s; }
+
+  //--------------------------------------------------------------
+
+  public BigFloat addL1 (final double z0,
+                         final double z1) {
+    if (z0>z1) { return add(z0).add(-z1); }
+    if (z0<z1) { return add(-z0).add(z1); }
+    return this; }
+
+  public final BigFloat
+  addL1Distance (final double[] z0,
+                 final double[] z1) {
+    final int n = z0.length;
+    //assert n==z1.length;
+    BigFloat s = this;
+    for (int i=0;i<n;i++) { s = s.addL1(z0[i],z1[i]); }
+    return s; }
+
+  //--------------------------------------------------------------
+
+  public final BigFloat
+  addL2 (final double z0,
+         final double z1) {
+    final double mz1 = -z1;
+    return
+      add2(z0).add2(z1).addProduct(z0,mz1).addProduct(z0,mz1); }
+
+  public final BigFloat
+  addL2Distance (final double[] z0,
+                 final double[] z1) {
+    final int n = z0.length;
+    //assert n==z1.length;
+    BigFloat s = this;
+    for (int i=0;i<n;i++) { s = s.addL2(z0[i],z1[i]); }
     return s; }
 
   //--------------------------------------------------------------

@@ -6,7 +6,7 @@ package xfp.java.accumulators;
  * adds, so that they are exact if {@link #add(double)} is.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-09-04
+ * @version 2019-09-06
  */
 @SuppressWarnings("unchecked")
 public abstract class ExactAccumulator<T extends ExactAccumulator>
@@ -19,13 +19,14 @@ implements Accumulator<T> {
 
   @Override
   public T add2 (final double z) {
+    // WARNING: WRONG: only works when 
+    // 2*exponent(z) >= min exponent + p -1
+    // where 
     //assert Double.isFinite(z);
     // preserve exactness using twoMul to convert to 2 adds.
     final double zz = z*z;
     final double e = Math.fma(z,z,-zz);
-    add(zz);
-    add(e);
-    return (T) this; }
+    return (T) add(zz).add(e); }
 
   @Override
   public T addProduct (final double z0,
@@ -35,9 +36,7 @@ implements Accumulator<T> {
     // preserve exactness using twoMul to convert to 2 adds.
     final double zz = z0*z1;
     final double e = Math.fma(z0,z1,-zz);
-    add(zz);
-    add(e);
-    return (T) this; }
+    return (T) add(zz).add(e); }
 
   @Override
   public T addL1 (final double z0,

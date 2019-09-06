@@ -1430,7 +1430,9 @@ public final class Common {
         final double pred = a.doubleValue();
         Assertions.assertEquals(truth,pred,()->
         Classes.className(aa)
-        + "\ni=" + ii + "\n" + Double.toHexString(truth)
+        + "\ni=" + ii + " of " + x.length
+        +"\nxi=" + xi + " (" + Double.toHexString(xi) + ")"
+        + "\n" + Double.toHexString(truth)
         + "\n" +  Double.toHexString(pred) + "\n"); } }
     final double truth = base.clear().add2All(x).doubleValue();
     for (final Accumulator a : accumulators) {
