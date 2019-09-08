@@ -442,7 +442,7 @@ public final class Natural implements Ringlike<Natural> {
       if (i<nt) { sum += unsigned(tt[i]); }
       vv[i++] = (int) sum; 
       sum = hiWord(sum); }
- 
+
     for (;i<nt;i++) {
       if (0L==sum) { break; }
       sum += unsigned(tt[i]);
@@ -454,7 +454,7 @@ public final class Natural implements Ringlike<Natural> {
       for (int j=0;j<nv;j++) { vvv[j]=vv[j]; } 
       vvv[nv] = 1; 
       return unsafe(vvv,nv+1); }
-    
+
     for (;i<nt;i++) { vv[i] = tt[i]; }
     return unsafe(vv,i); }
 
@@ -471,7 +471,7 @@ public final class Natural implements Ringlike<Natural> {
     final int[] vv = new int[nv];
     for (int i=0;i<Math.min(iShift,nt);i++) { vv[i] = tt[i]; }
     long sum = loWord(us);
- 
+
     int i=iShift;
     if (i<nt) { sum += unsigned(tt[i]); }
     vv[i++] = (int) sum; 
@@ -750,7 +750,7 @@ public final class Natural implements Ringlike<Natural> {
       sum += unsigned(tt[i]);
       vv[i] = (int) sum; 
       sum = hiWord(sum); }
-    
+
     if (0L!=sum) { 
       final int[] vvv = new int[nv+1];
       for (int j=0;j<nv;j++) { vvv[j]=vv[j]; } 
@@ -804,7 +804,7 @@ public final class Natural implements Ringlike<Natural> {
       vvv[nv] = 1; 
       return unsafe(vvv,nv+1); }
 
-   for (;i<nt;i++) { vv[i] = tt[i]; }
+    for (;i<nt;i++) { vv[i] = tt[i]; }
     return unsafe(vv,i); }
 
   public final Natural add (final Natural u,
@@ -1103,25 +1103,34 @@ public final class Natural implements Ringlike<Natural> {
     final long hi = (uword(iShift+1) << r2);
     return (int) (hi | lo); }
 
-  /** get the least significant two int words of (this >>> shift)
+  /** get the least significant two int words of 
+   * <code>(this>>>downShift)</code>
    * as a long.
    */
 
   public final long getShiftedLong (final int downShift) {
     //assert 0<=downShift;
+    final int nt = hiInt();
     final int iShift = (downShift>>>5);
-    if (hiInt()<=iShift) { return 0L; }
-    final int rShift = (downShift & 0x1f);
-    if (0==rShift) {
-      return ((uword(iShift+1)<<32) | uword(iShift)); }
-    // TODO: optimize using startWord and endWord.
-    final int r2 = 32-rShift;
-    final long lo0 = (uword(iShift)>>>rShift);
-    final long u1 = uword(iShift+1);
-    final long lo1 = (u1<<r2);
+    if (nt<=iShift) { return 0L; }
+    final long wi = unsigned(_words[iShift]);
+    final int bShift = (downShift&0x1F);
+    final int iShift1 = iShift+1;
+
+    if (0==bShift) {
+      if (nt==iShift1) { return wi; }
+      return ((unsigned(_words[iShift1])<<32) | wi); }
+
+    final long lo0 = (wi>>>bShift);
+    if (nt==iShift1) { return lo0; }
+    final long u1 = unsigned(_words[iShift1]);
+    final int rShift = 32-bShift;
+    final long lo1 = (u1<<rShift);
     final long lo = lo1 | lo0;
-    final long hi0 = (u1>>>rShift);
-    final long hi1 = (uword(iShift+2)<<r2);
+    final long hi0 = (u1>>>bShift);
+    final int iShift2 = iShift+2;
+    if (nt==iShift2) {   return (hi0 << 32) | lo; }
+    final long hi1 = (unsigned(_words[iShift2])<<rShift);
     final long hi = hi1 | hi0;
     return (hi << 32) | lo; }
 
@@ -1201,9 +1210,9 @@ public final class Natural implements Ringlike<Natural> {
 
   public final boolean testBit (final int n) {
     //assert 0<=n;
-    final int w = word(n>>>5);
-    final int b = (1 << (n&0x1F));
-    return 0!=(w&b); }
+    final int nn = (n>>>5);
+    if (hiInt()<=nn) { return false; }
+    return 0!=(_words[nn] & (1<<(n&0x1F))); }
 
   public final Natural setBit (final int i) {
     //assert 0<=i;
@@ -1213,8 +1222,82 @@ public final class Natural implements Ringlike<Natural> {
     return setWord(iw,(w|(1<<ib))); }
 
   //--------------------------------------------------------------
+  // used in BigFloat.doubleValue();
 
-  //  public final Natural copy () {  return this; }
+  private static final boolean testBit (final int[] tt,
+                                        final int nt,
+                                        final int i) {
+    //assert 0<=n;
+    final int iShift = (i>>>5);
+    if (nt<=iShift) { return false; }
+    final int bShift = (i&0x1F);
+    return 0!=(tt[iShift] & (1<<bShift)); }
+
+  final boolean roundUp (final int e) {
+    final int nt = hiInt();
+    if (nt<=(e>>>5)) { return false; }
+    final int[] tt = words();
+    final int e1 = e-1;
+    final int n1 = (e1>>>5);
+    if (nt<=n1) { return false; }
+    final int w1 = (tt[n1] & (1<<(e1&0x1F)));
+    if (0==w1) { return false; }
+    final int e2 = e-2;
+    if (0<=e2) {
+    final int n2 = (e2>>>5);
+    if (nt<=n2) { return false; }
+    final int tt2 = tt[n2];
+    for (int i=e2-(n2<<5);i>=0;i--) {
+      if (0!=(tt2&(1<<i))) { return true; } } 
+    for (int i=n2-1;i>=0;i--) { if (0!=tt[i]) { return true; } } }
+    return testBit(tt,nt,e); }
+
+//  final boolean roundUp (final int e) {
+//    final int nt = hiInt();
+//    if (nt<=(e>>>5)) { return false; }
+//    final int[] tt = words();
+//    final int e1 = e-1;
+//    final int n1 = (e1>>>5);
+//    if (nt<=n1) { return false; }
+//    final int w1 = (tt[n1] & (1<<(e1&0x1F)));
+//    if (0==w1) { return false; }
+//    final int e2 = e-2;
+//    if (0<=e2) {
+//    final int n2 = (e2>>>5);
+//    for (int i=e2;i>=(n2<<5);i--) {
+//      if (testBit(tt,nt,i)) { return true; } } 
+//    for (int i=n2-1;i>=0;i--) { if (0!=tt[i]) { return true; } } }
+//    return testBit(tt,nt,e); }
+
+//  final boolean roundUp (final int e) {
+//    final int nt = hiInt();
+//    if (nt<=(e>>>5)) { return false; }
+//    final int[] tt = words();
+//    if (! testBit(tt,nt,e-1)) { return false; }
+//    final int e2 = e-2;
+//    if (0<=e2) {
+//    final int n2 = (e2>>>5);
+//    for (int i=e2;i>=(n2<<5);i--) {
+//      if (testBit(tt,nt,i)) { return true; } } 
+//    for (int i=n2-1;i>=0;i--) { if (0!=tt[i]) { return true; } } }
+//    return testBit(tt,nt,e); }
+
+//  final boolean roundUp (final int e) {
+//    final int nt = hiInt();
+//    if (nt<=(e>>>5)) { return false; }
+//    final int[] tt = words();
+//    if (! testBit(tt,nt,e-1)) { return false; }
+//    for (int i=e-2;i>=0;i--) {
+//      if (testBit(tt,nt,i)) { return true; } }
+//    return testBit(tt,nt,e); }
+
+  //  final boolean roundUp (final int e) {
+//    final int nt = hiInt();
+//    final int[] tt = words();
+//    if (! testBit(tt,nt,e-1)) { return false; }
+//    for (int i=e-2;i>=0;i--) {
+//      if (testBit(tt,nt,i)) { return true; } }
+//    return testBit(tt,nt,e); }
 
   //--------------------------------------------------------------
   // 'Number' methods

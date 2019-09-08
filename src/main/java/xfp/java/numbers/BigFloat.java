@@ -1,6 +1,8 @@
 package xfp.java.numbers;
 
 import static java.lang.Double.doubleToRawLongBits;
+import static xfp.java.numbers.Doubles.doubleMergeBits;
+import static xfp.java.numbers.Floats.floatMergeBits;
 import static xfp.java.numbers.Numbers.loBit;
 
 import java.util.Objects;
@@ -502,39 +504,6 @@ public final class BigFloat implements Ringlike<BigFloat> {
 
   //--------------------------------------------------------------
 
-  private static final boolean roundUp (final Natural s,
-                                        final int e) {
-    if (! s.testBit(e-1)) { return false; }
-    for (int i=e-2;i>=0;i--) {
-      if (s.testBit(i)) { return true; } }
-    return s.testBit(e); }
-
-  //--------------------------------------------------------------
-  /** Adjust exponent from viewing signifcand as an integer
-   * to significand as a binary 'decimal'.
-   * <p>
-   * TODO: make integer/fractional significand consistent
-   * across all classes. Probably convert to integer
-   * interpretation everywhere.
-   */
-
-  private static final float floatMergeBits (final boolean nonNegative,
-                                             final int significand,
-                                             final int exponent) {
-    final int sh = Numbers.hiBit(significand);
-    if (sh > Doubles.SIGNIFICAND_BITS) {
-      return (nonNegative
-        ? Float.POSITIVE_INFINITY : Float.NEGATIVE_INFINITY); }
-
-    final int e =
-      ((sh==Floats.SIGNIFICAND_BITS)
-        ? exponent + Floats.STORED_SIGNIFICAND_BITS
-          : Floats.SUBNORMAL_EXPONENT);
-
-    return Floats.unsafeBits(nonNegative,e,significand); }
-
-  //--------------------------------------------------------------
-
   /** @return closest half-even rounded <code>float</code>
    */
 
@@ -560,7 +529,7 @@ public final class BigFloat implements Ringlike<BigFloat> {
       return floatMergeBits(nn,s1,e1); }
     if (eh <= es) { return (nn ? 0.0F : -0.0F); }
     // eh > es > 0
-    final boolean up = roundUp(s0,es);
+    final boolean up = s0.roundUp(es);
     // TODO: faster way to select the right bits as a int?
     //final int s1 = s0.shiftDown(es).intValue();
     final int s1 = s0.getShiftedInt(es);
@@ -576,32 +545,6 @@ public final class BigFloat implements Ringlike<BigFloat> {
       return floatMergeBits(nn,s2,e1); }
     // round down
     return floatMergeBits(nn,s1,e1); }
-
-  //--------------------------------------------------------------
-  /** Adjust exponent from viewing signifcand as an integer
-   * to significand as a binary 'decimal'.
-   * <p>
-   * TODO: make integer/fractional significand consistent
-   * across all classes. Probably convert to integer
-   * interpretation everywhere.
-   */
-
-  private static final double doubleMergeBits (final boolean nonNegative,
-                                               final long significand,
-                                               final int exponent) {
-    //assert 0L < significand;
-    final int sh = Numbers.hiBit(significand);
-    if (sh > Doubles.SIGNIFICAND_BITS) {
-      return (nonNegative
-        ? Double.POSITIVE_INFINITY
-          : Double.NEGATIVE_INFINITY); }
-
-    final int e =
-      ((sh==Doubles.SIGNIFICAND_BITS)
-        ? exponent + Doubles.STORED_SIGNIFICAND_BITS
-          : Doubles.SUBNORMAL_EXPONENT);
-
-    return Doubles.unsafeBits(nonNegative,e,significand); }
 
   //--------------------------------------------------------------
   /** @return closest half-even rounded <code>double</code>
@@ -627,7 +570,7 @@ public final class BigFloat implements Ringlike<BigFloat> {
       return doubleMergeBits(nn,s1,e1); }
     if (eh <= es) { return (nn ? 0.0 : -0.0); }
     // eh > es > 0
-    final boolean up = roundUp(s0,es);
+    final boolean up = s0.roundUp(es);
     final long s1 = s0.getShiftedLong(es);
     final int e1 = e0 + es;
     if (up) {

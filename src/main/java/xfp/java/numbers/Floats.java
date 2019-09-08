@@ -283,6 +283,30 @@ public final class Floats implements Set {
     return x; }
 
   //--------------------------------------------------------------
+  /** Adjust exponent from viewing signifcand as an integer
+   * to significand as a binary 'decimal'.
+   * <p>
+   * TODO: make integer/fractional significand consistent
+   * across all classes. Probably convert to integer
+   * interpretation everywhere.
+   */
+
+  public static final float floatMergeBits (final boolean nonNegative,
+                                             final int significand,
+                                             final int exponent) {
+    final int sh = Numbers.hiBit(significand);
+    if (sh > SIGNIFICAND_BITS) {
+      return (nonNegative
+        ? Float.POSITIVE_INFINITY : Float.NEGATIVE_INFINITY); }
+
+    final int e =
+      ((sh==SIGNIFICAND_BITS)
+        ? exponent + STORED_SIGNIFICAND_BITS
+          : SUBNORMAL_EXPONENT);
+
+    return unsafeBits(nonNegative,e,significand); }
+
+  //--------------------------------------------------------------
   /**
    * @param negative boolean version of sign bit
    * @param exponent unbiased, must be in

@@ -287,6 +287,32 @@ public final class Doubles implements Set {
     return x; }
 
   //--------------------------------------------------------------
+  /** Adjust exponent from viewing signifcand as an integer
+   * to significand as a binary 'decimal'.
+   * <p>
+   * TODO: make integer/fractional significand consistent
+   * across all classes. Probably convert to integer
+   * interpretation everywhere.
+   */
+
+  public static final double doubleMergeBits (final boolean nonNegative,
+                                               final long significand,
+                                               final int exponent) {
+    //assert 0L < significand;
+    final int sh = Numbers.hiBit(significand);
+    if (sh > SIGNIFICAND_BITS) {
+      return (nonNegative
+        ? Double.POSITIVE_INFINITY
+          : Double.NEGATIVE_INFINITY); }
+
+    final int e =
+      ((sh==SIGNIFICAND_BITS)
+        ? exponent + STORED_SIGNIFICAND_BITS
+          : SUBNORMAL_EXPONENT);
+
+    return unsafeBits(nonNegative,e,significand); }
+
+  //--------------------------------------------------------------
   private static final long SIGN_0 = 0x0L;
   private static final long SIGN_1 =
     (0x1L << (EXPONENT_BITS + STORED_SIGNIFICAND_BITS));
