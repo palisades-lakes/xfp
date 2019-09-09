@@ -428,14 +428,14 @@ public final class BigFloat implements Ringlike<BigFloat> {
     final long t1 = (t11>>>shift1);
     final int e1 = e11+shift1;
 
-    return
-      add(
-        ((Doubles.SIGN_MASK&b0)==(Doubles.SIGN_MASK&b1)),
-        Natural.product(t0,t1),
-        e0+e1,
-        nonNegative(),
-        significand(),
-        exponent()); }
+  return
+    add(
+      ((Doubles.SIGN_MASK&b0)==(Doubles.SIGN_MASK&b1)),
+      Natural.product(t0,t1),
+      e0+e1,
+      nonNegative(),
+      significand(),
+      exponent()); }
 
   public final BigFloat 
   addProducts (final double[] z0,
@@ -464,13 +464,65 @@ public final class BigFloat implements Ringlike<BigFloat> {
     return s; }
 
   //--------------------------------------------------------------
+  // internal special case: add 2*z0*z1
+
+  private final BigFloat
+  addProductTwice (final double z0,
+                   final double z1) {
+    //assert Double.isFinite(z0);
+    //assert Double.isFinite(z1);
+    if ((0.0==z0) || (0.0==z1)) { return this; }
+
+    final long b0 = doubleToRawLongBits(z0);
+    final long t00 = (b0&Doubles.STORED_SIGNIFICAND_MASK);
+    final long e00 = (b0&Doubles.EXPONENT_MASK);
+    final long t01;
+    final int e01;
+    if (0L==e00) { t01 = t00; e01 = 0; }
+    else {
+      t01 = t00+Doubles.STORED_SIGNIFICAND_MASK+1;
+      e01 = Math.max(
+        Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND,
+        ((int) (e00>>>Doubles.STORED_SIGNIFICAND_BITS))
+        -Doubles.EXPONENT_BIAS
+        -Doubles.STORED_SIGNIFICAND_BITS); }
+    final int shift0 = Numbers.loBit(t01);
+    final long t0 = (t01>>>shift0);
+    final int e0 = e01+shift0;
+
+    final long b1 = doubleToRawLongBits(z1);
+    final long t10 = (b1&Doubles.STORED_SIGNIFICAND_MASK);
+    final long e10 = (b1&Doubles.EXPONENT_MASK);
+    final long t11;
+    final int e11;
+    if (0L==e10) { t11 = t10; e11 = 0; }
+    else {
+      t11 = t10+Doubles.STORED_SIGNIFICAND_MASK+1;
+      e11 = Math.max(
+        Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND,
+        ((int) (e10>>>Doubles.STORED_SIGNIFICAND_BITS))
+        -Doubles.EXPONENT_BIAS
+        -Doubles.STORED_SIGNIFICAND_BITS); }
+    final int shift1 = Numbers.loBit(t11);
+    final long t1 = (t11>>>shift1);
+    final int e1 = e11+shift1;
+
+    return
+      add(nonNegative(),
+        significand(),
+        exponent(),
+        ((Doubles.SIGN_MASK&b0)==(Doubles.SIGN_MASK&b1)),
+        Natural.product(t0,t1),
+        e0+e1+1); }
+
+  //--------------------------------------------------------------
 
   public final BigFloat
   addL2 (final double z0,
          final double z1) {
     final double mz1 = -z1;
     return
-      add2(z0).add2(z1).addProduct(z0,mz1).addProduct(z0,mz1); }
+      add2(z0).add2(z1).addProductTwice(z0,mz1); }
 
   public final BigFloat
   addL2Distance (final double[] z0,

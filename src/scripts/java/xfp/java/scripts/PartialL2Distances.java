@@ -1,12 +1,9 @@
 package xfp.java.scripts;
 
-import org.apache.commons.rng.UniformRandomProvider;
-
 import xfp.java.accumulators.Accumulator;
 import xfp.java.accumulators.BigFloatAccumulator;
-import xfp.java.numbers.Doubles;
 import xfp.java.prng.Generator;
-import xfp.java.prng.PRNG;
+import xfp.java.prng.Generators;
 
 /** Benchmark partial l2 norms
  *
@@ -20,19 +17,20 @@ import xfp.java.prng.PRNG;
 public final class PartialL2Distances {
 
   public static final void main (final String[] args) {
-    final int n = (8*1024*1024) - 1;
-    final int trys = 1 * 1024;
-    final UniformRandomProvider urp =
-      PRNG.well44497b("seeds/Well44497b-2019-01-09.txt");
-    final int emax = Doubles.deMax(n)/2;
-    final Generator g = Doubles.finiteGenerator(n,urp,emax);
+    final int dim = (1*1024*1024) - 1;
+    final int trys = 8 * 1024;
+    final Generator g = Generators.make("exponential",dim);
+    //final Generator g = Generators.make("finite",dim);
+    //final Generator g = Generators.make("gaussian",dim);
+    //final Generator g = Generators.make("laplace",dim);
+    //final Generator g = Generators.make("uniform",dim);
     final Accumulator a = BigFloatAccumulator.make();
     assert a.isExact();
     for (int i=0;i<trys;i++) {
       final double[] x0 = (double[]) g.next();
       final double[] x1 = (double[]) g.next();
       final double[] z = a.partialL2Distances(x0,x1); 
-      assert ! Double.isNaN(z[n-1]);} }
+      assert ! Double.isNaN(z[dim-1]);} }
 
   //--------------------------------------------------------------
 }

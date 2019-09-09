@@ -109,7 +109,7 @@ extends ExactAccumulator<BigFloatAccumulator> {
                                  final double[] s) {
     final int n = x.length;
     //assert s.length==n;
-    BigFloat sum = BigFloat.valueOf(0L);
+    BigFloat sum = BigFloat.ZERO;
     for (int i=0;i<n;i++) { 
       sum = sum.add(x[i]);
       s[i] = sum.doubleValue(); } 
@@ -119,7 +119,7 @@ extends ExactAccumulator<BigFloatAccumulator> {
   public final double[] partialSums (final double[] x) {
     final int n = x.length;
     final double[] s = new double[n];
-    BigFloat sum = BigFloat.valueOf(0L);
+    BigFloat sum = BigFloat.ZERO;
     for (int i=0;i<n;i++) { 
       sum = sum.add(x[i]);
       s[i] = sum.doubleValue(); } 
@@ -130,7 +130,7 @@ extends ExactAccumulator<BigFloatAccumulator> {
   public final  double[] partialL1s (final double[] x) {
     final int n = x.length;
     final double[] s = new double[n];
-    BigFloat sum = BigFloat.valueOf(0L);
+    BigFloat sum = BigFloat.ZERO;
     for (int i=0;i<n;i++) { 
       sum = sum.addAbs(x[i]);
       s[i] = sum.doubleValue(); } 
@@ -141,7 +141,7 @@ extends ExactAccumulator<BigFloatAccumulator> {
   public final  double[] partialL2s (final double[] x) {
     final int n = x.length;
     final double[] s = new double[n];
-    BigFloat sum = BigFloat.valueOf(0L);
+    BigFloat sum = BigFloat.ZERO;
     for (int i=0;i<n;i++) { 
       sum = sum.add2(x[i]);
       s[i] = sum.doubleValue(); } 
@@ -153,7 +153,7 @@ extends ExactAccumulator<BigFloatAccumulator> {
                                       final double[] x1) {
     final int n = x0.length;
     final double[] s = new double[n];
-    BigFloat sum = BigFloat.valueOf(0L);
+    BigFloat sum = BigFloat.ZERO;
     for (int i=0;i<n;i++) {
       sum = sum.addProduct(x0[i],x1[i]);
       s[i] = sum.doubleValue(); } 
@@ -165,7 +165,7 @@ extends ExactAccumulator<BigFloatAccumulator> {
                                              final double[] x1) {
     final int n = x0.length;
     final double[] s = new double[n];
-    BigFloat sum = BigFloat.valueOf(0L);
+    BigFloat sum = BigFloat.ZERO;
     for (int i=0;i<n;i++) {
       sum = sum.addL1(x0[i],x1[i]);
       s[i] = sum.doubleValue(); } 
@@ -177,7 +177,7 @@ extends ExactAccumulator<BigFloatAccumulator> {
                                              final double[] x1) {
     final int n = x0.length;
     final double[] s = new double[n];
-    BigFloat sum = BigFloat.valueOf(0L);
+    BigFloat sum = BigFloat.ZERO;
     for (int i=0;i<n;i++) {
       sum = sum.addL2(x0[i],x1[i]);
       s[i] = sum.doubleValue(); } 
