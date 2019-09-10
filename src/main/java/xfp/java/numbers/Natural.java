@@ -341,10 +341,10 @@ public final class Natural implements Ringlike<Natural> {
     sum = hiWord(sum) + hi0*hi1;
     final int w2 = (int) sum;
     final int w3 = (int) hiWord(sum);
-    if (0!=w3) { return reallyUnsafe(new int[] {w0,w1,w2,w3,}); }
-    if (0!=w2) { return reallyUnsafe(new int[] {w0,w1,w2,}); }
-    if (0!=w1) { return reallyUnsafe(new int[] {w0,w1,}); }
-    if (0!=w0) { return reallyUnsafe(new int[] {w0,}); }
+    if (0!=w3) { return new Natural(new int[] {w0,w1,w2,w3,}); }
+    if (0!=w2) { return new Natural(new int[] {w0,w1,w2,}); }
+    if (0!=w1) { return new Natural(new int[] {w0,w1,}); }
+    if (0!=w0) { return new Natural(new int[] {w0,}); }
     return ZERO; }
 
   // TODO: fix lurking overflow issue
@@ -367,10 +367,10 @@ public final class Natural implements Ringlike<Natural> {
     final int w2 = (int) sum;
     final int w3 = (int) hiWord(sum);
 
-    if (0!=w3) { return reallyUnsafe(new int[] { w0,w1,w2,w3,}); }
-    if (0!=w2) { return reallyUnsafe(new int[] { w0,w1,w2, }); }
-    if (0!=w1) { return reallyUnsafe(new int[] {w0,w1}); }
-    if (0!=w0) { return reallyUnsafe(new int[] {w0}); }
+    if (0!=w3) { return new Natural(new int[] { w0,w1,w2,w3,}); }
+    if (0!=w2) { return new Natural(new int[] { w0,w1,w2, }); }
+    if (0!=w1) { return new Natural(new int[] {w0,w1}); }
+    if (0!=w0) { return new Natural(new int[] {w0}); }
     return ZERO; }
 
   //--------------------------------------------------------------
@@ -415,10 +415,10 @@ public final class Natural implements Ringlike<Natural> {
       final int[] vvv = new int[nv+1];
       for (int j=0;j<nv;j++) { vvv[j]=vv[j]; } 
       vvv[nv] = 1; 
-      return reallyUnsafe(vvv); }
+      return new Natural(vvv); }
 
     for (;i<nt;i++) { vv[i] = tt[i]; }
-    return reallyUnsafe(vv); }
+    return new Natural(vv); }
 
   //--------------------------------------------------------------
 
@@ -453,10 +453,10 @@ public final class Natural implements Ringlike<Natural> {
       final int[] vvv = new int[nv+1];
       for (int j=0;j<nv;j++) { vvv[j]=vv[j]; } 
       vvv[nv] = 1; 
-      return reallyUnsafe(vvv); }
+      return new Natural(vvv); }
 
     for (;i<nt;i++) { vv[i] = tt[i]; }
-    return reallyUnsafe(vv); }
+    return new Natural(vv); }
 
   private final Natural addByBits (final long u,
                                    final int iShift,
@@ -487,20 +487,33 @@ public final class Natural implements Ringlike<Natural> {
         vv[i++] = (int) sum; 
         sum = hiWord(sum); } }
 
-    for (;i<nt;i++) {
-      if (0L==sum) { break; }
-      sum += unsigned(tt[i]);
-      vv[i] = (int) sum; 
-      sum = hiWord(sum); }
+//    for (;i<nt;i++) {
+//      if (0L==sum) { break; }
+//      sum += unsigned(tt[i]);
+//      vv[i] = (int) sum; 
+//      sum = hiWord(sum); }
+//
+//    if (0L!=sum) { 
+//      final int[] vvv = new int[nv+1];
+//      for (int j=0;j<nv;j++) { vvv[j]=vv[j]; } 
+//      vvv[nv] = 1; 
+//      return new Natural(vvv); }
 
-    if (0L!=sum) { 
+    boolean nocarry = (0==(int)sum);
+    for (;i<nt;i++) {
+      if (nocarry) { break; }
+      final long vvi = 1L + unsigned(tt[i]);
+      vv[i] = (int) vvi; 
+      nocarry = (0==(int)hiWord(vvi)); }
+
+    if (!nocarry) { 
       final int[] vvv = new int[nv+1];
       for (int j=0;j<nv;j++) { vvv[j]=vv[j]; } 
       vvv[nv] = 1; 
-      return reallyUnsafe(vvv); }
+      return new Natural(vvv); }
 
     for (;i<nt;i++) { vv[i] = tt[i]; }
-    return reallyUnsafe(vv); }
+    return new Natural(vv); }
 
   public final Natural add (final long u,
                             final int upShift) {
@@ -755,10 +768,10 @@ public final class Natural implements Ringlike<Natural> {
       final int[] vvv = new int[nv+1];
       for (int j=0;j<nv;j++) { vvv[j]=vv[j]; } 
       vvv[nv] = 1; 
-      return reallyUnsafe(vvv); }
+      return new Natural(vvv); }
 
     for (;i<nt;i++) { vv[i] = tt[i]; }
-    return reallyUnsafe(vv); }
+    return new Natural(vv); }
 
   private final Natural addByBits (final Natural u,
                                    final int iShift,
@@ -802,10 +815,10 @@ public final class Natural implements Ringlike<Natural> {
       final int[] vvv = new int[nv+1];
       for (int j=0;j<nv;j++) { vvv[j]=vv[j]; } 
       vvv[nv] = 1; 
-      return reallyUnsafe(vvv); }
+      return new Natural(vvv); }
 
     for (;i<nt;i++) { vv[i] = tt[i]; }
-    return reallyUnsafe(vv); }
+    return new Natural(vv); }
 
   public final Natural add (final Natural u,
                             final int upShift) {
@@ -847,14 +860,14 @@ public final class Natural implements Ringlike<Natural> {
       vv[i] = (int) sum; 
       sum = hiWord(sum);}
     if (0L!=sum) { 
-      //vv[nt] = (int) sum; return reallyUnsafe(vv); }
+      //vv[nt] = (int) sum; return new Natural(vv); }
       final int[] vvv = new int[nt+1];
       for (int j=0;j<nt;j++) { vvv[j]=vv[j]; } 
       vvv[nt] = 1; 
-      return reallyUnsafe(vvv); }
+      return new Natural(vvv); }
 
     for (;i<nt;i++) { vv[i] = tt[i]; }
-    return reallyUnsafe(vv); }
+    return new Natural(vv); }
 
   //--------------------------------------------------------------
 
@@ -901,7 +914,7 @@ public final class Natural implements Ringlike<Natural> {
   //--------------------------------------------------------------
   // TODO: singleton class for one() and zero()?
 
-  private static final Natural ONE = reallyUnsafe(new int[] {1});
+  private static final Natural ONE = new Natural(new int[] {1});
 
   @Override
   public final Natural one () { return ONE; }
@@ -1149,7 +1162,7 @@ public final class Natural implements Ringlike<Natural> {
     final int[] vv = new int[nv];
     for (int i=0;i<nv;i++) { vv[i] = word(i+iShift); }
     //System.arraycopy(words(),iShift,vv,0,nv);
-    return reallyUnsafe(vv); }
+    return new Natural(vv); }
 
   private final Natural shiftDownByBits (final int iShift,
                                          final int bShift) {
@@ -1185,7 +1198,7 @@ public final class Natural implements Ringlike<Natural> {
     final int[] vv = new int[nv];
     for (int i=0;i<nt;i++) { vv[i+iShift] = tt[i]; }
     //System.arraycopy(words(),0,u,iShift,n0);
-    return reallyUnsafe(vv); }
+    return new Natural(vv); }
 
   private final Natural shiftUpByBits (final int iShift,
                                        final int bShift) {
@@ -1202,10 +1215,10 @@ public final class Natural implements Ringlike<Natural> {
       w0 = w1;
       vv[i+iShift] = w; }
     final int vvn = (w0>>>rShift);
-    if (0!=vvn) { vv[nv] = vvn; return reallyUnsafe(vv); }
+    if (0!=vvn) { vv[nv] = vvn; return new Natural(vv); }
     final int[] vvv = new int[nv];
     for  (int i=0;i<nv;i++) { vvv[i] = vv[i]; }
-    return reallyUnsafe(vvv); }
+    return new Natural(vvv); }
 
   public final Natural shiftUp (final int upShift) {
     //assert 0<=shift;
@@ -1427,16 +1440,14 @@ public final class Natural implements Ringlike<Natural> {
    * <code>loInt</code> or <code>hiInt</code.
    */
 
-  private Natural (final int[] words) { 
-    _words = words; 
-  }
+  private Natural (final int[] words) { _words = words; }
 
-  /** Doesn't copy <code>words</code>, check <code>hiInt</code>
-   * or array length. 
-   */
-
-  private static final Natural reallyUnsafe (final int[] words) {
-    return new Natural(words); }
+//  /** Doesn't copy <code>words</code>, check <code>hiInt</code>
+//   * or array length. 
+//   */
+//
+//  private static final Natural reallyUnsafe (final int[] words) {
+//    return new Natural(words); }
 
   /** Doesn't copy <code>words</code> or check <code>loInt</code>
    * or <code>hiInt</code>. 
@@ -1461,7 +1472,7 @@ public final class Natural implements Ringlike<Natural> {
    *  */
   public static final Natural make (final int[] words) {
     final int end = Ints.hiInt(words);
-    return reallyUnsafe(Arrays.copyOf(words,end)); }
+    return new Natural(Arrays.copyOf(words,end)); }
 
   //--------------------------------------------------------------
   /** From a big endian {@code byte[]}, as produced by
@@ -1505,9 +1516,9 @@ public final class Natural implements Ringlike<Natural> {
     final int lo = (int) u;
     final int hi = (int) hiWord(u);
     if (0==hi) { 
-      if (0==lo) { return reallyUnsafe(new int[0]); }
-      return reallyUnsafe(new int[] {lo}); }
-    return reallyUnsafe(new int[] { lo,hi }); }
+      if (0==lo) { return new Natural(new int[0]); }
+      return new Natural(new int[] {lo}); }
+    return new Natural(new int[] { lo,hi }); }
 
   public static final Natural valueOf (final long u,
                                        final int upShift) {
@@ -1531,16 +1542,16 @@ public final class Natural implements Ringlike<Natural> {
       vv[iShift] = vv0;
       vv[iShift+1] = vv1;
       vv[iShift+2] = vv2;
-      return reallyUnsafe(vv); }
+      return new Natural(vv); }
     if (0!=vv1) { 
       final int[] vv = new int[iShift+2];
       vv[iShift] = vv0;
       vv[iShift+1] = vv1;
-      return reallyUnsafe(vv); }
+      return new Natural(vv); }
     if (0!=vv0) { 
       final int[] vv = new int[iShift+1];
       vv[iShift] = vv0;
-      return reallyUnsafe(vv); }
+      return new Natural(vv); }
     return ZERO; }
 
   //--------------------------------------------------------------
