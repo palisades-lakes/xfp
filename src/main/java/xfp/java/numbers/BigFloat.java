@@ -13,7 +13,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-09-09
+ * @version 2019-10-01
  */
 
 @SuppressWarnings("unchecked")
@@ -86,58 +86,6 @@ public final class BigFloat implements Ringlike<BigFloat> {
       q.nonNegative(),
       q.significand(),
       q.exponent()); }
-
-  //--------------------------------------------------------------
-
-  //  private static final BigFloat
-  //  add0 (final boolean p0,
-  //        final long t0,
-  //        final boolean p1,
-  //        final long t1,
-  //        final int upShift,
-  //        final int e) {
-  //    if (p0^p1) { // different signs
-  //      final int c = Longs.compare(t0,t1,upShift);
-  //      if (0==c) { return ZERO; }
-  //      if (0>c) { // t1 > t0
-  //        return valueOf(
-  //          p1,
-  //          Natural.difference(t1,upShift,t0),
-  //          e); }
-  //      // t0 > t1
-  //      return valueOf(
-  //        p0,
-  //        Natural.difference(t0,t1,upShift),
-  //        e); }
-  //    return valueOf(p0,Natural.sum(t0,t1,upShift),e); }
-
-  //  private static final BigFloat
-  //  add (final boolean p0,
-  //       final long t00,
-  //       final int e00,
-  //       final boolean p1,
-  //       final long t11,
-  //       final int e11) {
-  //
-  //    //assert 0L<=t00;
-  //    //assert 0L<=t11;
-  //
-  //    // minimize long bits
-  //    final int shift0 = Numbers.loBit(t00);
-  //    // 64==shift0 if t00 is zero
-  //    if (64==shift0) { return valueOf(p1,t11,e11); }
-  //    final long t0=(t00>>>shift0);
-  //    final int e0=e00+shift0;
-  //
-  //    final int shift1 = Numbers.loBit(t11);
-  //    // 64==shift1 if t11 is zero
-  //    if (64==shift1) { return valueOf(p0,t0,e0); }
-  //    final long t1=(t11>>>shift1);
-  //    final int e1=e11+shift1;
-  //
-  //    final int de = e1-e0;
-  //    if (0<=de) { return add0(p0,t0,p1,t1,de,e0); }
-  //    return add0(p1,t1,p0,t0,-de,e1); }
 
   //--------------------------------------------------------------
 
@@ -270,27 +218,6 @@ public final class BigFloat implements Ringlike<BigFloat> {
       q.significand(),
       q.exponent()); }
 
-//  public final BigFloat
-//  subtract (final double z) {
-//    // escape on zero needed for add() 
-//    if (0.0==z) { return this; }
-//    return add(
-//      ! Doubles.nonNegative(z),
-//      Doubles.significand(z),
-//      Doubles.exponent(z)); }
-
-  //  public static final BigFloat
-  //  difference (final double z0,
-  //              final double z1) {
-  //    return
-  //      add(
-  //        Doubles.nonNegative(z0),
-  //        Doubles.significand(z0),
-  //        Doubles.exponent(z0),
-  //        ! Doubles.nonNegative(z1),
-  //        Doubles.significand(z1),
-  //        Doubles.exponent(z1)); }
-
   //--------------------------------------------------------------
 
   @Override
@@ -327,14 +254,39 @@ public final class BigFloat implements Ringlike<BigFloat> {
     return
       multiply(q.nonNegative(),q.significand(),q.exponent()); }
 
-//  public final BigFloat
-//  multiply (final double z) {
-//    //assert Double.isFinite(z);
-//    return
-//      multiply(
-//        Doubles.nonNegative(z),
-//        Natural.valueOf(Doubles.significand(z)),
-//        Doubles.exponent(z)); }
+  //--------------------------------------------------------------
+
+  private final BigFloat
+  multiply (final boolean p,
+            final long t,
+            final int e) {
+    return valueOf(
+      (! (nonNegative() ^ p)),
+      significand().multiply(t),
+      Math.addExact(exponent(),e)); }
+
+  public final BigFloat
+  multiply (final double z) {
+    //assert Double.isFinite(z);
+    // escape on zero needed for add() 
+    if (0.0==z) { return this; }
+    final long bits = doubleToRawLongBits(z);
+    final long t0 = (bits&Doubles.STORED_SIGNIFICAND_MASK);
+    final long e0 = (bits&Doubles.EXPONENT_MASK);
+    final long t;
+    final int e;
+    if (0L==e0) { t = t0; e = 0; }
+    else {
+      t = t0+Doubles.STORED_SIGNIFICAND_MASK+1;
+      e = Math.max(
+        Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND,
+        ((int) (e0>>>Doubles.STORED_SIGNIFICAND_BITS))
+        -Doubles.EXPONENT_BIAS
+        -Doubles.STORED_SIGNIFICAND_BITS); }
+    return multiply(
+      (0L==(Doubles.SIGN_MASK&bits)),
+      t,
+      e); }
 
   //--------------------------------------------------------------
 
@@ -445,6 +397,49 @@ public final class BigFloat implements Ringlike<BigFloat> {
     BigFloat s = this;
     for (int i=0;i<n;i++) { s = s.addProduct(z0[i],z1[i]); }
     return s; }
+
+  //--------------------------------------------------------------
+  /** Exact <code>a*x+y</code> (aka fma). */
+  
+  public static final BigFloat
+  axpy (final double a,
+        final double x,
+        final double y) {
+    return
+      valueOf(y).addProduct(a,x); }
+
+  /** Exact <code>a*x+y</code> (aka fma). */
+  
+  public static final BigFloat[]
+  axpy (final double[] a,
+        final double[] x,
+        final double[] y) {
+    final int n = a.length;
+    //assert n==x.length;
+    //assert n==y.length;
+    final BigFloat[] bf = new BigFloat[n];
+    for (int i=0;i<n;i++) { bf[i] = axpy(a[i],x[i],y[i]); }
+    return bf; }
+
+  /** Exact <code>this*x+y</code> (aka fma). */
+  
+  public final BigFloat
+  axpy (final double x,
+        final double y) {
+    return multiply(x).add(y); }
+
+  /** Exact <code>a*this+y</code> (aka fma). */
+  
+  public static final BigFloat[]
+  axpy (final BigFloat[] a,
+        final double[] x,
+        final double[] y) {
+    final int n = a.length;
+    //assert n==x.length;
+    //assert n==y.length;
+    final BigFloat[] bf = new BigFloat[n];
+    for (int i=0;i<n;i++) { bf[i] = a[i].axpy(x[i],y[i]); }
+    return bf; }
 
   //--------------------------------------------------------------
 
