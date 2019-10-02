@@ -26,6 +26,8 @@ import xfp.java.numbers.Floats;
 import xfp.java.numbers.Natural;
 import xfp.java.numbers.NaturalDivide;
 import xfp.java.numbers.Ringlike;
+import xfp.java.polynomial.Axpy;
+import xfp.java.polynomial.EFloatAxpy;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
 import xfp.java.prng.PRNG;
@@ -33,7 +35,7 @@ import xfp.java.prng.PRNG;
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-31
+ * @version 2019-10-02
  */
 @SuppressWarnings("unchecked")
 public final class Common {
@@ -1561,12 +1563,47 @@ public final class Common {
       //  + String.format("%8.2e",Double.valueOf(l1d/l1n)));
     } }
 
+  //--------------------------------------------------------------
+
   public static final void dotTests (final List<Generator> generators,
                                      final List<Accumulator> accumulators,
                                      final Accumulator base) {
 
     for (final Generator g : generators) {
       dotTest(g,accumulators,base); } }
+
+  //--------------------------------------------------------------
+
+  public static final void daxpy (final Axpy axpy) {
+    final int dim = 1024;
+    final int ntrys = 32;
+    final EFloatAxpy e = new EFloatAxpy();
+    final List<Generator> gs = generators(dim);
+    for (int k=0;k<ntrys;k++) {
+      for (final Generator g : gs) {
+        final double[] a = (double[]) g.next();
+        final double[] x = (double[]) g.next();
+        final double[] y = (double[]) g.next();
+        final double[] dz = axpy.daxpy(a,x,y);
+        final double[] ez = e.daxpy(a,x,y);
+        for (int i=0;i<dz.length;i++) {
+          final int ii=i;
+          final double ai = a[i];
+          final double xi =x[i];
+          final double yi = y[i];
+          final double ei = ez[i];
+          final double di = dz[i];
+          Assertions.assertEquals(ei,di,
+            () ->
+          "\naxpy=" + Classes.className(axpy)
+          + "\ni=" + ii
+          + "\na=" + Double.toHexString(ai)
+          + "\nx=" + Double.toHexString(xi)
+          + "\ny=" + Double.toHexString(yi)
+          + "\nfma=" + Double.toHexString(Math.fma(ai,xi,yi))
+          + "\ne=  " + Double.toHexString(ei)
+          + "\nd=  " + Double.toHexString(di)
+          + "\n"); } } } }
 
   //--------------------------------------------------------------
 }

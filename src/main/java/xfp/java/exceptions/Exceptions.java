@@ -9,7 +9,7 @@ import xfp.java.Classes;
  * Static methods only; no state.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-19
+ * @version 2019-10-02
  */
 
 public final class Exceptions {
@@ -84,6 +84,28 @@ public final class Exceptions {
                         final double z1) {
     return unsupportedOperation(
       receiver.getClass(),method,Double.TYPE,Double.TYPE); }
+
+  @SuppressWarnings("unused")
+  public static final UnsupportedOperationException
+  unsupportedOperation (final Object receiver,
+                        final String method,
+                        final double z0,
+                        final double z1,
+                        final double z2) {
+    return unsupportedOperation(
+      receiver.getClass(),method,
+      Double.TYPE,Double.TYPE,Double.TYPE); }
+
+  @SuppressWarnings("unused")
+  public static final UnsupportedOperationException
+  unsupportedOperation (final Object receiver,
+                        final String method,
+                        final Object z0,
+                        final double z1,
+                        final double z2) {
+    return unsupportedOperation(
+      receiver.getClass(),method,
+      z0.getClass(),Double.TYPE,Double.TYPE); }
 
   //--------------------------------------------------------------
   // disable constructor

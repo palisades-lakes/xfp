@@ -400,20 +400,19 @@ public final class BigFloat implements Ringlike<BigFloat> {
 
   //--------------------------------------------------------------
   /** Exact <code>a*x+y</code> (aka fma). */
-  
+
   public static final BigFloat
   axpy (final double a,
         final double x,
         final double y) {
-    return
-      valueOf(y).addProduct(a,x); }
+    return valueOf(y).addProduct(a,x); }
 
   /** Exact <code>a*x+y</code> (aka fma). */
-  
+
   public static final BigFloat[]
-  axpy (final double[] a,
-        final double[] x,
-        final double[] y) {
+    axpy (final double[] a,
+          final double[] x,
+          final double[] y) {
     final int n = a.length;
     //assert n==x.length;
     //assert n==y.length;
@@ -422,23 +421,23 @@ public final class BigFloat implements Ringlike<BigFloat> {
     return bf; }
 
   /** Exact <code>this*x+y</code> (aka fma). */
-  
-  public final BigFloat
-  axpy (final double x,
+
+  public static final BigFloat
+  axpy (final BigFloat a,
+        final double x,
         final double y) {
-    return multiply(x).add(y); }
+    return a.multiply(x).add(y); }
 
   /** Exact <code>a*this+y</code> (aka fma). */
-  
-  public static final BigFloat[]
-  axpy (final BigFloat[] a,
-        final double[] x,
-        final double[] y) {
+
+  public static final BigFloat[] axpy (final BigFloat[] a,
+                                       final double[] x,
+                                       final double[] y) {
     final int n = a.length;
     //assert n==x.length;
     //assert n==y.length;
     final BigFloat[] bf = new BigFloat[n];
-    for (int i=0;i<n;i++) { bf[i] = a[i].axpy(x[i],y[i]); }
+    for (int i=0;i<n;i++) { bf[i] = axpy(a[i],x[i],y[i]); }
     return bf; }
 
   //--------------------------------------------------------------
