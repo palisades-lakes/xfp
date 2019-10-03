@@ -6,7 +6,7 @@ import xfp.java.numbers.BigFloat;
  * values.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-10-02
+ * @version 2019-10-03
  */
 
 @SuppressWarnings("unchecked")
@@ -55,6 +55,9 @@ public final class BigFloatAxpy implements Axpy<BigFloat> {
     final double[] z = new double[n];
     for (int i=0;i<n;i++) { z[i] = daxpy(a[i],x[i],y[i]); }
     return z; }
+  
+  public static final BigFloatAxpy make () {
+    return new BigFloatAxpy(); }
 
 }
 //--------------------------------------------------------------

@@ -6,7 +6,7 @@ import com.upokecenter.numbers.EFloat;
  * values.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-10-02
+ * @version 2019-10-03
  */
 
 @SuppressWarnings("unchecked")
@@ -71,6 +71,8 @@ public final class EFloatAxpy implements Axpy<EFloat> {
     for (int i=0;i<n;i++) { z[i] = daxpy(a[i],x[i],y[i]); }
     return z; }
 
-}
-//--------------------------------------------------------------
+  public static final EFloatAxpy make () {
+    return new EFloatAxpy(); }
 
+//--------------------------------------------------------------
+}

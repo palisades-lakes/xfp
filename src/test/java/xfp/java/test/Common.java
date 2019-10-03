@@ -35,7 +35,7 @@ import xfp.java.prng.PRNG;
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-10-02
+ * @version 2019-10-03
  */
 @SuppressWarnings("unchecked")
 public final class Common {
@@ -1571,6 +1571,36 @@ public final class Common {
 
     for (final Generator g : generators) {
       dotTest(g,accumulators,base); } }
+
+  //--------------------------------------------------------------
+
+  public static final Axpy
+  makeAxpy (final String className) {
+    try {
+
+      final Class c = Class.forName(className);
+      final Method m = c.getMethod("make");
+      return (Axpy) m.invoke(null); }
+
+    catch (final
+      ClassNotFoundException
+      | NoSuchMethodException
+      | SecurityException
+      | IllegalAccessException
+      | IllegalArgumentException
+      | InvocationTargetException e) {
+      // e.printStackTrace();
+      throw new RuntimeException(className,e); } }
+
+  //--------------------------------------------------------------
+
+  public static final List<Axpy>
+  makeAxpys (final List<String> classNames) {
+    return
+      classNames
+      .stream()
+      .map(Common::makeAxpy)
+      .collect(Collectors.toUnmodifiableList()); }
 
   //--------------------------------------------------------------
 

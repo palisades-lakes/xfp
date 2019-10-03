@@ -5,11 +5,14 @@ package xfp.java.polynomial;
  * Just calls default methods from {@link Axpy}.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-10-02
+ * @version 2019-10-03
  */
 
 @SuppressWarnings("unchecked")
 public final class DoubleAxpy implements Axpy<Double> {
+
+  public static final DoubleAxpy make () {
+    return new DoubleAxpy(); }
 
   //--------------------------------------------------------------
 }
