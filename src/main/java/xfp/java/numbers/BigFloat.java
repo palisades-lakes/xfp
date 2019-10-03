@@ -1,6 +1,5 @@
 package xfp.java.numbers;
 
-import static java.lang.Double.doubleToRawLongBits;
 import static xfp.java.numbers.Doubles.doubleMergeBits;
 import static xfp.java.numbers.Floats.floatMergeBits;
 import static xfp.java.numbers.Numbers.loBit;
@@ -13,7 +12,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-10-01
+ * @version 2019-10-03
  */
 
 @SuppressWarnings("unchecked")
@@ -148,23 +147,10 @@ public final class BigFloat implements Ringlike<BigFloat> {
     //assert Double.isFinite(z);
     // escape on zero needed for add() 
     if (0.0==z) { return this; }
-    final long bits = doubleToRawLongBits(z);
-    final long t0 = (bits&Doubles.STORED_SIGNIFICAND_MASK);
-    final long e0 = (bits&Doubles.EXPONENT_MASK);
-    final long t;
-    final int e;
-    if (0L==e0) { t = t0; e = 0; }
-    else {
-      t = t0+Doubles.STORED_SIGNIFICAND_MASK+1;
-      e = Math.max(
-        Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND,
-        ((int) (e0>>>Doubles.STORED_SIGNIFICAND_BITS))
-        -Doubles.EXPONENT_BIAS
-        -Doubles.STORED_SIGNIFICAND_BITS); }
     return add(
-      (0L==(Doubles.SIGN_MASK&bits)),
-      t,
-      e); }
+      Doubles.nonNegative(z),
+      Doubles.significand(z),
+      Doubles.exponent(z)); }
 
   public final BigFloat
   addAll (final double[] z) {
@@ -180,23 +166,10 @@ public final class BigFloat implements Ringlike<BigFloat> {
     //assert Double.isFinite(z);
     // escape on zero needed for add() 
     if (0.0==z) { return this; }
-    final long bits = doubleToRawLongBits(z);
-    final long t0 = (bits&Doubles.STORED_SIGNIFICAND_MASK);
-    final long e0 = (bits&Doubles.EXPONENT_MASK);
-    final long t;
-    final int e;
-    if (0L==e0) { t = t0; e = 0; }
-    else {
-      t = t0+Doubles.STORED_SIGNIFICAND_MASK+1;
-      e = Math.max(
-        Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND,
-        ((int) (e0>>>Doubles.STORED_SIGNIFICAND_BITS))
-        -Doubles.EXPONENT_BIAS
-        -Doubles.STORED_SIGNIFICAND_BITS); }
     return add(
       true,
-      t,
-      e); }
+      Doubles.significand(z),
+      Doubles.exponent(z)); }
 
   public final BigFloat
   addAbsAll (final double[] z) {
@@ -270,23 +243,10 @@ public final class BigFloat implements Ringlike<BigFloat> {
     //assert Double.isFinite(z);
     // escape on zero needed for add() 
     if (0.0==z) { return this; }
-    final long bits = doubleToRawLongBits(z);
-    final long t0 = (bits&Doubles.STORED_SIGNIFICAND_MASK);
-    final long e0 = (bits&Doubles.EXPONENT_MASK);
-    final long t;
-    final int e;
-    if (0L==e0) { t = t0; e = 0; }
-    else {
-      t = t0+Doubles.STORED_SIGNIFICAND_MASK+1;
-      e = Math.max(
-        Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND,
-        ((int) (e0>>>Doubles.STORED_SIGNIFICAND_BITS))
-        -Doubles.EXPONENT_BIAS
-        -Doubles.STORED_SIGNIFICAND_BITS); }
     return multiply(
-      (0L==(Doubles.SIGN_MASK&bits)),
-      t,
-      e); }
+      Doubles.nonNegative(z),
+      Doubles.significand(z),
+      Doubles.exponent(z)); }
 
   //--------------------------------------------------------------
 
@@ -303,19 +263,8 @@ public final class BigFloat implements Ringlike<BigFloat> {
   add2 (final double z) {
     //assert Double.isFinite(z);
     if (0.0==z) { return this; }
-    final long bits = doubleToRawLongBits(z);
-    final long t0 = (bits&Doubles.STORED_SIGNIFICAND_MASK);
-    final long e0 = (bits&Doubles.EXPONENT_MASK);
-    final long tz;
-    final int ez;
-    if (0L==e0) { tz = t0; ez = 0; }
-    else {
-      tz = t0+Doubles.STORED_SIGNIFICAND_MASK+1;
-      ez = Math.max(
-        Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND,
-        ((int) (e0>>>Doubles.STORED_SIGNIFICAND_BITS))
-        -Doubles.EXPONENT_BIAS
-        -Doubles.STORED_SIGNIFICAND_BITS); }
+    final long tz = Doubles.significand(z);
+    final int ez = Doubles.exponent(z);
     final int s = Numbers.loBit(tz);
     final long t;
     final int e;
@@ -346,43 +295,21 @@ public final class BigFloat implements Ringlike<BigFloat> {
     //assert Double.isFinite(z1);
     if ((0.0==z0) || (0.0==z1)) { return this; }
 
-    final long b0 = doubleToRawLongBits(z0);
-    final long t00 = (b0&Doubles.STORED_SIGNIFICAND_MASK);
-    final long e00 = (b0&Doubles.EXPONENT_MASK);
-    final long t01;
-    final int e01;
-    if (0L==e00) { t01 = t00; e01 = 0; }
-    else {
-      t01 = t00+Doubles.STORED_SIGNIFICAND_MASK+1;
-      e01 = Math.max(
-        Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND,
-        ((int) (e00>>>Doubles.STORED_SIGNIFICAND_BITS))
-        -Doubles.EXPONENT_BIAS
-        -Doubles.STORED_SIGNIFICAND_BITS); }
+    final long t01 = Doubles.significand(z0);
+    final int e01 = Doubles.exponent(z0);
     final int shift0 = Numbers.loBit(t01);
     final long t0 = (t01>>>shift0);
     final int e0 = e01+shift0;
 
-    final long b1 = doubleToRawLongBits(z1);
-    final long t10 = (b1&Doubles.STORED_SIGNIFICAND_MASK);
-    final long e10 = (b1&Doubles.EXPONENT_MASK);
-    final long t11;
-    final int e11;
-    if (0L==e10) { t11 = t10; e11 = 0; }
-    else {
-      t11 = t10+Doubles.STORED_SIGNIFICAND_MASK+1;
-      e11 = Math.max(
-        Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND,
-        ((int) (e10>>>Doubles.STORED_SIGNIFICAND_BITS))
-        -Doubles.EXPONENT_BIAS
-        -Doubles.STORED_SIGNIFICAND_BITS); }
+    final long t11 = Doubles.significand(z1);
+    final int e11 = Doubles.exponent(z1);
     final int shift1 = Numbers.loBit(t11);
     final long t1 = (t11>>>shift1);
     final int e1 = e11+shift1;
 
     return
       add(
-        ((Doubles.SIGN_MASK&b0)==(Doubles.SIGN_MASK&b1)),
+        Doubles.nonNegative(z0)==Doubles.nonNegative(z1),
         Natural.product(t0,t1),
         e0+e1,
         nonNegative(),
@@ -467,45 +394,24 @@ public final class BigFloat implements Ringlike<BigFloat> {
     //assert Double.isFinite(z1);
     if ((0.0==z0) || (0.0==z1)) { return this; }
 
-    final long b0 = doubleToRawLongBits(z0);
-    final long t00 = (b0&Doubles.STORED_SIGNIFICAND_MASK);
-    final long e00 = (b0&Doubles.EXPONENT_MASK);
-    final long t01;
-    final int e01;
-    if (0L==e00) { t01 = t00; e01 = 0; }
-    else {
-      t01 = t00+Doubles.STORED_SIGNIFICAND_MASK+1;
-      e01 = Math.max(
-        Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND,
-        ((int) (e00>>>Doubles.STORED_SIGNIFICAND_BITS))
-        -Doubles.EXPONENT_BIAS
-        -Doubles.STORED_SIGNIFICAND_BITS); }
+    final long t01 = Doubles.significand(z0);
+    final int e01 = Doubles.exponent(z0);
     final int shift0 = Numbers.loBit(t01);
     final long t0 = (t01>>>shift0);
     final int e0 = e01+shift0;
 
-    final long b1 = doubleToRawLongBits(z1);
-    final long t10 = (b1&Doubles.STORED_SIGNIFICAND_MASK);
-    final long e10 = (b1&Doubles.EXPONENT_MASK);
-    final long t11;
-    final int e11;
-    if (0L==e10) { t11 = t10; e11 = 0; }
-    else {
-      t11 = t10+Doubles.STORED_SIGNIFICAND_MASK+1;
-      e11 = Math.max(
-        Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND,
-        ((int) (e10>>>Doubles.STORED_SIGNIFICAND_BITS))
-        -Doubles.EXPONENT_BIAS
-        -Doubles.STORED_SIGNIFICAND_BITS); }
+    final long t11 = Doubles.significand(z1);
+    final int e11 = Doubles.exponent(z1);
     final int shift1 = Numbers.loBit(t11);
     final long t1 = (t11>>>shift1);
     final int e1 = e11+shift1;
 
     return
-      add(nonNegative(),
+      add(
+        nonNegative(),
         significand(),
         exponent(),
-        ((Doubles.SIGN_MASK&b0)==(Doubles.SIGN_MASK&b1)),
+        Doubles.nonNegative(z0)==Doubles.nonNegative(z1),
         Natural.product(t0,t1),
         e0+e1+1); }
 
