@@ -19,7 +19,8 @@ public final class BigFloatAxpy implements Axpy<BigFloat> {
   public final BigFloat axpy (final double a,
                               final double x,
                               final double y) {
-    return BigFloat.axpy(a,x,y); }
+    return axpy(BigFloat.valueOf(a),x,y); }
+  //return BigFloat.axpy(a,x,y); }
 
   @Override
   public final BigFloat[] axpy (final double[] a,
@@ -55,7 +56,7 @@ public final class BigFloatAxpy implements Axpy<BigFloat> {
     final double[] z = new double[n];
     for (int i=0;i<n;i++) { z[i] = daxpy(a[i],x[i],y[i]); }
     return z; }
-  
+
   public static final BigFloatAxpy make () {
     return new BigFloatAxpy(); }
 
