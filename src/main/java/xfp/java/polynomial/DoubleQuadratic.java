@@ -2,7 +2,8 @@ package xfp.java.polynomial;
 
 import static java.lang.Math.fma;
 
-/** Approximate {@link Quadratic} using <code>double</code>.
+/** Approximate quadratic {@link Polynomial} 
+ * using <code>double</code>.
  * 
  * @author palisades dot lakes at gmail dot com
  * @version 2019-10-04
@@ -10,7 +11,7 @@ import static java.lang.Math.fma;
 
 @SuppressWarnings("unchecked")
 public final class DoubleQuadratic 
-implements Quadratic<Double> {
+implements Polynomial<Double> {
 
   private final double _a0;
   private final double _a1;

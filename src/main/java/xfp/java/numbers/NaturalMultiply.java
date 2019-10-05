@@ -1,6 +1,9 @@
 package xfp.java.numbers;
 
 import static xfp.java.numbers.Numbers.loWord;
+import static xfp.java.numbers.Numbers.unsigned;
+
+import java.util.Arrays;
 
 /** Multiplication of natural numbers.
  * 
@@ -279,31 +282,35 @@ public final class NaturalMultiply {
     return multiplyToomCook3(u,v); }
 
   public static final Natural multiply (final Natural u,
-                                          final long v) {
-    if (0L==v) { return u.zero(); }
+                                        final long v) {
+    if (0L==v) { return Natural.ZERO; }
+    if (u.isZero()) { return Natural.ZERO; }
     if (1L==v) { return u; }
     //assert 0L < v;
     final long hi = Numbers.hiWord(v);
     final long lo = Numbers.loWord(v);
     final int n0 = u.hiInt();
-    Natural t = u;
+    // TODO: assume minimal carry and allocate smaller array;
+    // then fix when needed
+    final int[] t = new int[n0+2];
     long carry = 0;
     int i=0;
     for (;i<n0;i++) {
       final long product = (u.uword(i)*lo) + carry;
-      t = t.setWord(i,(int) product);
+      t[i] = (int) product;
       carry = (product>>>32); }
-    t = t.setWord(i,(int) carry);
+    t[i] = (int) carry;
     if (hi != 0L) {
       carry = 0;
       i=0;
       for (;i<n0;i++) {
         final int i1 = i+1;
-        final long product = (u.uword(i)*hi) + t.uword(i1) + carry;
-        t = t.setWord(i1,(int) product);
-        carry = product >>> 32; }
-      t = t.setWord(i+1,(int) carry); }
-    return t; }
+        final long product = (u.uword(i)*hi) 
+          + unsigned(t[i1]) + carry;
+        t[i1] = (int) product;
+        carry = (product>>>32); }
+      t[i+1]= (int) carry; }
+    return Natural.unsafe(t); }
 
   //--------------------------------------------------------------
   // disable constructor

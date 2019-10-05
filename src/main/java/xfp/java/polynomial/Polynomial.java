@@ -2,24 +2,24 @@ package xfp.java.polynomial;
 
 import xfp.java.exceptions.Exceptions;
 
-/** Calculator for 2nd order polynomials 
- * <code>a0 + a1*x + a2*x<sup>2</sup>*x+y</code> 
+/** Calculator for polynomials 
+ * <code>a0 + a1*x + a2*x<sup>2</sup> + ...</code> 
  * over <code>double</code>
  * and <code>double[]</code>, which returns instances of 
  * <code>T</code> representing exact values (if possible)
  * and <code>double</code> approximations.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-10-04
+ * @version 2019-10-05
  */
 
 @SuppressWarnings("unchecked")
-public interface Quadratic<T> {
-  
+public interface Polynomial<T> {
+
   // TODO: better default methods if we assume something about T.
 
   //--------------------------------------------------------------
-  /** Can this Quadratic calculator return a representation of the
+  /** Can this calculator return a representation of the
    * exact value?
    */
 
@@ -27,7 +27,7 @@ public interface Quadratic<T> {
 
   //--------------------------------------------------------------
   /** Return a representation of the exact value of
-   * <code>a0 + a1*x + a2*x<sup>2</sup>*x+y</code>.
+   * <code>a0 + a1*x + a2*x<sup>2</sup> + ...</code> 
    * <p>
    * Optional operation.
    */
@@ -44,8 +44,9 @@ public interface Quadratic<T> {
     throw Exceptions.unsupportedOperation(this,"value",x); }
 
   //--------------------------------------------------------------
-  /** Return the exact value of <code>a*x+y</code> rounded
-   * to nearest, even ties. (Note that this is just 
+  /** Return the exact value of <
+   * <code>a0 + a1*x + a2*x<sup>2</sup> + ...</code> 
+   * rounded to nearest, even ties. (Note that this is just 
    * {@link Math#fma(double, double, double)}.)
    */
 
@@ -60,15 +61,6 @@ public interface Quadratic<T> {
     final double[] z = new double[n];
     for (int i=0;i<n;i++) { z[i] = doubleValue(x[i]); }
     return z; }
-
-  //--------------------------------------------------------------
-  /** Convert the exact representation to <code>double</code>. 
-   * <p>
-   * TODO: guarantee even round-to-nearest?
-   */
-
-  default double doubleValue (final T z) {
-    throw Exceptions.unsupportedOperation(this,"doubleValue",z); }
 
   //--------------------------------------------------------------
 }
