@@ -32,7 +32,7 @@ import xfp.java.prng.GeneratorBase;
 /** Utilities for <code>double</code>, <code>double[]</code>.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-18
+ * @version 2019-10-04
  */
 public final class Doubles implements Set {
 
@@ -129,7 +129,7 @@ public final class Doubles implements Set {
   /** Remember 0.0 can be negative. */
   public static final boolean nonNegative (final double x) {
     return 0==(SIGN_MASK&doubleToRawLongBits(x)); }
-    //return  0==signBit(x); }
+  //return  0==signBit(x); }
 
   //--------------------------------------------------------------
   /** Actual STORED_SIGNIFICAND_BITS stored bits, without the
@@ -242,29 +242,29 @@ public final class Doubles implements Set {
     //  ">" + Integer.toHexString(MAXIMUM_BIASED_EXPONENT);
 
     //if (SUBNORMAL_EXPONENT == exponent) {
-      //assert (0 <= significand) :
-      //  "subnormal significand too small:"
-      //  + Long.toHexString(significand);
-      //assert significand <= MAX_SUBNORMAL_SIGNIFICAND :
-      //  "subnormal significand too large:"
-      //  + Long.toHexString(significand); }
+    //assert (0 <= significand) :
+    //  "subnormal significand too small:"
+    //  + Long.toHexString(significand);
+    //assert significand <= MAX_SUBNORMAL_SIGNIFICAND :
+    //  "subnormal significand too large:"
+    //  + Long.toHexString(significand); }
     //else if (INFINITE_OR_NAN_EXPONENT == exponent) {
-      // no leading 1 bit for infinity or NaN
-      //assert (0 <= significand) :
-      //  "infinite or NaN significand too small:"
-      //  + Long.toHexString(significand);
-      //assert significand <= MAX_SUBNORMAL_SIGNIFICAND :
-      //  "infinite or NaN significand too large:"
-      //  + Long.toHexString(significand); }
+    // no leading 1 bit for infinity or NaN
+    //assert (0 <= significand) :
+    //  "infinite or NaN significand too small:"
+    //  + Long.toHexString(significand);
+    //assert significand <= MAX_SUBNORMAL_SIGNIFICAND :
+    //  "infinite or NaN significand too large:"
+    //  + Long.toHexString(significand); }
     //else { // normal numbers
-      //assert (MIN_NORMAL_SIGNIFICAND <= significand) :
-      //  "Normal significand too small: 0x"
-      //  + Long.toHexString(significand)
-      //  + "p" + exponent;
-      //assert (significand <= MAX_NORMAL_SIGNIFICAND) :
-      //  "Normal significand too large:"
-      //  + Long.toHexString(significand)
-      //  + "p" + exponent; }
+    //assert (MIN_NORMAL_SIGNIFICAND <= significand) :
+    //  "Normal significand too small: 0x"
+    //  + Long.toHexString(significand)
+    //  + "p" + exponent;
+    //assert (significand <= MAX_NORMAL_SIGNIFICAND) :
+    //  "Normal significand too large:"
+    //  + Long.toHexString(significand)
+    //  + "p" + exponent; }
 
     final long s = ((long) sign) <<
       (EXPONENT_BITS + STORED_SIGNIFICAND_BITS);
@@ -296,8 +296,8 @@ public final class Doubles implements Set {
    */
 
   public static final double doubleMergeBits (final boolean nonNegative,
-                                               final long significand,
-                                               final int exponent) {
+                                              final long significand,
+                                              final int exponent) {
     //assert 0L < significand;
     final int sh = Numbers.hiBit(significand);
     if (sh > SIGNIFICAND_BITS) {
@@ -556,6 +556,8 @@ public final class Doubles implements Set {
                   final Generator g) {
     return new GeneratorBase (g.name() + "-" + n) {
       @Override
+      public final double nextDouble () { return g.nextDouble(); }
+      @Override
       public final Object next () {
         final double[] z = new double[n];
         for (int i=0;i<n;i++) { z[i] = g.nextDouble(); }
@@ -566,6 +568,8 @@ public final class Doubles implements Set {
                   final int n,
                   final Generator g) {
     return new GeneratorBase (g.name() + "-" + m + "x" + n) {
+      @Override
+      public final double nextDouble () { return g.nextDouble(); }
       @Override
       public final Object next () {
         final double[][] z = new double[m][n];
@@ -596,6 +600,8 @@ public final class Doubles implements Set {
   zeroSumGenerator (final Generator g) {
     return new GeneratorBase ("zeroSum-" + g.name()) {
       @Override
+      public final double nextDouble () { return g.nextDouble(); }
+      @Override
       public final Object next () {
         final double[] z = (double[]) g.next();
         return concatenate(z,minus(z)); } }; }
@@ -618,6 +624,8 @@ public final class Doubles implements Set {
                      final UniformRandomProvider urp) {
     return new GeneratorBase ("shuffled-" + g.name()) {
       @Override
+      public final double nextDouble () { return g.nextDouble(); }
+      @Override
       public final Object next () {
         final double[] z = (double[]) g.next();
         return shuffle(z,urp); } }; }
@@ -631,6 +639,8 @@ public final class Doubles implements Set {
   public static final Generator
   sortedGenerator (final Generator g) {
     return new GeneratorBase ("sorted-" + g.name()) {
+      @Override
+      public final double nextDouble () { return g.nextDouble(); }
       @Override
       public final Object next () {
         final double[] z = (double[]) g.next();

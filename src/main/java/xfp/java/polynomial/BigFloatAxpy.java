@@ -32,13 +32,13 @@ public final class BigFloatAxpy implements Axpy<BigFloat> {
   public final BigFloat axpy (final BigFloat a,
                               final double x,
                               final double y) {
-    return BigFloat.axpy(a,x,y); }
+    return BigFloat.axpy(x,a,y); }
 
   @Override
   public final BigFloat[] axpy (final BigFloat[] a,
                                 final double[] x,
                                 final double[] y) {
-    return BigFloat.axpy(a,x,y); }
+    return BigFloat.axpy(x,a,y); }
 
   @Override
   public final double daxpy (final double a,

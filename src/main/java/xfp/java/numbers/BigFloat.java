@@ -12,7 +12,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-10-03
+ * @version 2019-10-04
  */
 
 @SuppressWarnings("unchecked")
@@ -350,17 +350,17 @@ public final class BigFloat implements Ringlike<BigFloat> {
   /** Exact <code>this*x+y</code> (aka fma). */
 
   public static final BigFloat
-  axpy (final BigFloat a,
-        final double x,
+  axpy (final double a,
+        final BigFloat x,
         final double y) {
-    return a.multiply(x).add(y); }
+    return x.multiply(a).add(y); }
 
   /** Exact <code>a*this+y</code> (aka fma). */
 
-  public static final BigFloat[] axpy (final BigFloat[] a,
-                                       final double[] x,
+  public static final BigFloat[] axpy (final double[] a,
+                                       final BigFloat[] x,
                                        final double[] y) {
-    final int n = a.length;
+    final int n = x.length;
     //assert n==x.length;
     //assert n==y.length;
     final BigFloat[] bf = new BigFloat[n];
@@ -514,6 +514,10 @@ public final class BigFloat implements Ringlike<BigFloat> {
         Math.min(
           Doubles.MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND-e0-1,
           eh-Doubles.SIGNIFICAND_BITS));
+    if (eh-es>Doubles.SIGNIFICAND_BITS) {
+      return 
+        (nn ? 
+          Double.POSITIVE_INFINITY : Double.NEGATIVE_INFINITY); }
     if (0==es) {
       return doubleMergeBits(nn,s0.longValue(),e0); }
     if (0 > es) {
@@ -529,7 +533,7 @@ public final class BigFloat implements Ringlike<BigFloat> {
       final long s2 = s1 + 1L;
       if (Numbers.hiBit(s2) > Doubles.SIGNIFICAND_BITS) { // carry
         // lost bit has to be zero, since there was just a carry
-        final long s3 = (s2 >> 1);
+        final long s3 = (s2>>1);
         final int e3 = e1 + 1;
         return doubleMergeBits(nn,s3,e3); }
       // no carry

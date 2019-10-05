@@ -28,6 +28,8 @@ import xfp.java.numbers.NaturalDivide;
 import xfp.java.numbers.Ringlike;
 import xfp.java.polynomial.Axpy;
 import xfp.java.polynomial.EFloatAxpy;
+import xfp.java.polynomial.EFloatQuadratic;
+import xfp.java.polynomial.Quadratic;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
 import xfp.java.prng.PRNG;
@@ -1634,6 +1636,79 @@ public final class Common {
           + "\ne=  " + Double.toHexString(ei)
           + "\nd=  " + Double.toHexString(di)
           + "\n"); } } } }
+
+  //--------------------------------------------------------------
+
+  public static final Quadratic
+  makeQuadratic (final String className,
+                 final double a0,
+                 final double a1,
+                 final double a2) {
+    try {
+
+      final Class c = Class.forName(className);
+      final Method m = c.getMethod(
+        "make",Double.TYPE,Double.TYPE,Double.TYPE);
+      return (Quadratic) m.invoke(null,
+        Double.valueOf(a0),
+        Double.valueOf(a1),
+        Double.valueOf(a2)); }
+
+    catch (final
+      ClassNotFoundException
+      | NoSuchMethodException
+      | SecurityException
+      | IllegalAccessException
+      | IllegalArgumentException
+      | InvocationTargetException e) {
+      // e.printStackTrace();
+      throw new RuntimeException(className,e); } }
+
+  //--------------------------------------------------------------
+
+  public static final void quadratic (final Class qclass) {
+    //  final UniformRandomProvider urp4 =
+    //  PRNG.well44497b("seeds/Well44497b-2019-04-01.txt");
+    //final Generator g = Doubles.uniformGenerator(dim,urp4,-1.0,1.0);
+    final int dim = 1024;
+    final int ntrys = 32;
+
+    try {
+      final Method make = qclass.getMethod(
+        "make",Double.TYPE,Double.TYPE,Double.TYPE);
+
+      final List<Generator> gs = baseGenerators(dim);
+      for (final Generator g : gs) {
+        for (int k=0;k<ntrys;k++) {
+          final double a0 = g.nextDouble();
+          final double a1 = g.nextDouble();
+          final double a2 = g.nextDouble();
+          final Quadratic e = EFloatQuadratic.make(a0,a1,a2);
+          final Quadratic q = (Quadratic) make.invoke(null,
+            Double.valueOf(a0),
+            Double.valueOf(a1),
+            Double.valueOf(a2));
+          final double[] x = (double[]) g.next();
+          final double[] qz = q.doubleValue(x);
+          final double[] ez = e.doubleValue(x);
+          for (int i=0;i<qz.length;i++) {
+            final int ii=i;
+            final double xi =x[i];
+            final double ei = ez[i];
+            final double qi = qz[i];
+            Assertions.assertEquals(ei,qi,
+              () ->
+            "\naxpy=" + Classes.className(q)
+            + "\ni=" + ii
+            + "\na0=" + Double.toHexString(a0)
+            + "\na1=" + Double.toHexString(a1)
+            + "\na2=" + Double.toHexString(a2)
+            + "\nx=" + Double.toHexString(xi)
+            + "\ne=  " + Double.toHexString(ei)
+            + "\nq=  " + Double.toHexString(qi)
+            + "\n"); } } } 
+    }
+    catch (final Throwable t) { throw new RuntimeException(t); } }
 
   //--------------------------------------------------------------
 }
