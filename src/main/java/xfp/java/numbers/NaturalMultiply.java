@@ -3,14 +3,12 @@ package xfp.java.numbers;
 import static xfp.java.numbers.Numbers.loWord;
 import static xfp.java.numbers.Numbers.unsigned;
 
-import java.util.Arrays;
-
 /** Multiplication of natural numbers.
  * 
  * Non-instantiable.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-09-03
+ * @version 2019-09-05
  */
 
 @SuppressWarnings("unchecked")
