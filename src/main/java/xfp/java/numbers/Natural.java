@@ -21,7 +21,7 @@ import xfp.java.prng.GeneratorBase;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-09-09
+ * @version 2019-10-06
  */
 
 @SuppressWarnings("unchecked")
@@ -486,18 +486,6 @@ public final class Natural implements Ringlike<Natural> {
         if (i<nt) { sum += unsigned(tt[i]); }
         vv[i++] = (int) sum; 
         sum = hiWord(sum); } }
-
-//    for (;i<nt;i++) {
-//      if (0L==sum) { break; }
-//      sum += unsigned(tt[i]);
-//      vv[i] = (int) sum; 
-//      sum = hiWord(sum); }
-//
-//    if (0L!=sum) { 
-//      final int[] vvv = new int[nv+1];
-//      for (int j=0;j<nv;j++) { vvv[j]=vv[j]; } 
-//      vvv[nv] = 1; 
-//      return new Natural(vvv); }
 
     boolean nocarry = (0==(int)sum);
     for (;i<nt;i++) {
@@ -1036,10 +1024,44 @@ public final class Natural implements Ringlike<Natural> {
     //assert u.isValid();
     return NaturalMultiply.multiply(this,u); }
 
-  public final Natural multiply (final long u) {
-    //assert isValid();
+  //--------------------------------------------------------------
 
-    return NaturalMultiply.multiply(this,u); }
+  //  public final Natural multiply (final long u) {
+//    return NaturalMultiply.multiply(this,u); }
+
+  public final Natural multiply (final long v) {
+    if (0L==v) { return Natural.ZERO; }
+    if (1L==v) { return this; }
+    if (isZero()) { return Natural.ZERO; }
+    //assert 0L < v;
+    final long hi = Numbers.hiWord(v);
+    final long lo = Numbers.loWord(v);
+    final int n0 = hiInt();
+    final int[] tt = words();
+    // TODO: assume minimal carry and allocate smaller array;
+    // then fix when needed
+    final int nv = n0+((hi==0)?1:2);
+    final int[] vv = new int[nv];
+    long carry = 0;
+    int i=0;
+    for (;i<n0;i++) {
+      final long product = (unsigned(tt[i])*lo) + carry;
+      vv[i] = (int) product;
+      carry = (product>>>32); }
+    vv[i] = (int) carry;
+    if (0!=hi) {
+      carry = 0;
+      i=0;
+      for (;i<n0;i++) {
+        final int i1 = i+1;
+        final long product = (unsigned(tt[i])*hi) 
+          + unsigned(vv[i1]) + carry;
+        vv[i1] = (int) product;
+        carry = (product>>>32); }
+      vv[i+1]= (int) carry; }
+    return Natural.unsafe(vv); }
+
+  //--------------------------------------------------------------
 
   public final Natural multiply (final long u,
                                  final int upShift) {

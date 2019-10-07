@@ -12,7 +12,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-10-04
+ * @version 2019-10-06
  */
 
 @SuppressWarnings("unchecked")
@@ -332,7 +332,27 @@ public final class BigFloat implements Ringlike<BigFloat> {
   axpy (final double a,
         final double x,
         final double y) {
-    return valueOf(y).addProduct(a,x); }
+    if ((0.0==a) || (0.0==x)) { return valueOf(y); }
+    final long t01 = Doubles.significand(a);
+    final int e01 = Doubles.exponent(a);
+    final int shift0 = Numbers.loBit(t01);
+    final long t0 = (t01>>>shift0);
+    final int e0 = e01+shift0;
+
+    final long t11 = Doubles.significand(x);
+    final int e11 = Doubles.exponent(x);
+    final int shift1 = Numbers.loBit(t11);
+    final long t1 = (t11>>>shift1);
+    final int e1 = e11+shift1;
+
+    return 
+      valueOf(
+        Doubles.nonNegative(a)==Doubles.nonNegative(x),
+        Natural.product(t0,t1),
+        e0+e1)
+      .add(y); }
+  
+  //    return valueOf(y).addProduct(a,x); }
 
   /** Exact <code>a*x+y</code> (aka fma). */
 

@@ -1,14 +1,13 @@
 package xfp.java.numbers;
 
 import static xfp.java.numbers.Numbers.loWord;
-import static xfp.java.numbers.Numbers.unsigned;
 
 /** Multiplication of natural numbers.
  * 
  * Non-instantiable.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-09-05
+ * @version 2019-10-06
  */
 
 @SuppressWarnings("unchecked")
@@ -94,7 +93,7 @@ public final class NaturalMultiply {
   //--------------------------------------------------------------
 
   private static final Natural multiplySimple (final Natural u,
-                                                 final Natural v) {
+                                               final Natural v) {
     final int n0 = u.hiInt();
     final int n1 = v.hiInt();
     Natural w = u.zero();
@@ -114,7 +113,7 @@ public final class NaturalMultiply {
   //--------------------------------------------------------------
 
   private static final Natural multiplyKaratsuba (final Natural u,
-                                                    final Natural v) {
+                                                  final Natural v) {
     final int n0 = u.hiInt();
     final int n1 = v.hiInt();
     final int half = (Math.max(n0,n1)+1) / 2;
@@ -157,10 +156,10 @@ public final class NaturalMultiply {
   //--------------------------------------------------------------
 
   private static final Natural getToomSlice (final Natural u,
-                                               final int lowerSize,
-                                               final int upperSize,
-                                               final int slice,
-                                               final int fullsize) {
+                                             final int lowerSize,
+                                             final int upperSize,
+                                             final int slice,
+                                             final int fullsize) {
     final int n = u.hiInt();
     final int offset = fullsize-n;
     int start;
@@ -183,7 +182,7 @@ public final class NaturalMultiply {
   //--------------------------------------------------------------
 
   private static final Natural multiplyToomCook3 (final Natural u,
-                                                    final Natural v) {
+                                                  final Natural v) {
     final int n0 = u.hiInt();
     final int n1 = v.hiInt();
     final int largest = Math.max(n0,n1);
@@ -265,50 +264,50 @@ public final class NaturalMultiply {
   //--------------------------------------------------------------
 
   public static final Natural multiply (final Natural u,
-                                          final Natural v) {
+                                        final Natural v) {
     if ((u.isZero()) || (v.isZero())) { return u.zero(); }
     final int n0 = u.hiInt();
     if (u.equals(v) && (n0>MULTIPLY_SQUARE_THRESHOLD)) {
       return u.square(); }
-    if (n0==1) { return multiply(v,u.uword(0)); }
+    if (n0==1) { return v.multiply(u.uword(0)); }
     final int n1 = v.hiInt();
-    if (n1==1) { return multiply(u,v.uword(0)); }
+    if (n1==1) { return u.multiply(v.uword(0)); }
     if ((n0<KARATSUBA_THRESHOLD) || (n1<KARATSUBA_THRESHOLD)) {
       return multiplySimple(u,v); }
     if ((n0<TOOM_COOK_THRESHOLD) && (n1<TOOM_COOK_THRESHOLD)) {
       return multiplyKaratsuba(u,v); }
     return multiplyToomCook3(u,v); }
 
-  public static final Natural multiply (final Natural u,
-                                        final long v) {
-    if (0L==v) { return Natural.ZERO; }
-    if (u.isZero()) { return Natural.ZERO; }
-    if (1L==v) { return u; }
-    //assert 0L < v;
-    final long hi = Numbers.hiWord(v);
-    final long lo = Numbers.loWord(v);
-    final int n0 = u.hiInt();
-    // TODO: assume minimal carry and allocate smaller array;
-    // then fix when needed
-    final int[] t = new int[n0+2];
-    long carry = 0;
-    int i=0;
-    for (;i<n0;i++) {
-      final long product = (u.uword(i)*lo) + carry;
-      t[i] = (int) product;
-      carry = (product>>>32); }
-    t[i] = (int) carry;
-    if (hi != 0L) {
-      carry = 0;
-      i=0;
-      for (;i<n0;i++) {
-        final int i1 = i+1;
-        final long product = (u.uword(i)*hi) 
-          + unsigned(t[i1]) + carry;
-        t[i1] = (int) product;
-        carry = (product>>>32); }
-      t[i+1]= (int) carry; }
-    return Natural.unsafe(t); }
+//  public static final Natural multiply (final Natural t,
+//                                        final long u) {
+//    if (0L==u) { return Natural.ZERO; }
+//    if (t.isZero()) { return Natural.ZERO; }
+//    if (1L==u) { return t; }
+//    //assert 0L < v;
+//    final long hi = Numbers.hiWord(u);
+//    final long lo = Numbers.loWord(u);
+//    final int n0 = t.hiInt();
+//    // TODO: assume minimal carry and allocate smaller array;
+//    // then fix when needed
+//    final int[] vv = new int[n0+2];
+//    long carry = 0;
+//    int i=0;
+//    for (;i<n0;i++) {
+//      final long product = (t.uword(i)*lo) + carry;
+//      vv[i] = (int) product;
+//      carry = (product>>>32); }
+//    vv[i] = (int) carry;
+//    if (hi != 0L) {
+//      carry = 0;
+//      i=0;
+//      for (;i<n0;i++) {
+//        final int i1 = i+1;
+//        final long product = (t.uword(i)*hi) 
+//          + unsigned(vv[i1]) + carry;
+//        vv[i1] = (int) product;
+//        carry = (product>>>32); }
+//      vv[i+1]= (int) carry; }
+//    return Natural.unsafe(vv); }
 
   //--------------------------------------------------------------
   // disable constructor
