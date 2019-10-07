@@ -18,7 +18,7 @@ import xfp.java.exceptions.Exceptions;
  * arithmetic on them faster.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-09-03
+ * @version 2019-10-07
  */
 
 @SuppressWarnings("unchecked")
@@ -303,6 +303,28 @@ implements Ringlike<RationalFloat> {
       q.denominator(),
       q.exponent()); }
 
+  //--------------------------------------------------------------
+
+  private final RationalFloat
+  multiply (final boolean p,
+            final long t,
+            final int e) {
+    return valueOf(
+      (! (nonNegative() ^ p)),
+      numerator().multiply(t),
+      denominator(),
+      Math.addExact(exponent(),e)); }
+
+  public final RationalFloat
+  multiply (final double z) {
+    //assert Double.isFinite(z);
+    // escape on zero needed for add() 
+    if (0.0==z) { return this; }
+    return multiply(
+      Doubles.nonNegative(z),
+      Doubles.significand(z),
+      Doubles.exponent(z)); }
+
   @Override
   public final RationalFloat square () {
     if (isZero() ) { return valueOf(0L); }
@@ -351,6 +373,68 @@ implements Ringlike<RationalFloat> {
     .multiply(Natural.valueOf(Doubles.significand(z1)));
     final int e = Doubles.exponent(z0) + Doubles.exponent(z1);
     return add(p,n,Natural.valueOf(1L),e); }
+
+  //--------------------------------------------------------------
+  /** Exact <code>a*x+y</code> (aka fma). */
+
+  public static final RationalFloat
+  axpy (final double a,
+        final double x,
+        final double y) {
+    if ((0.0==a) || (0.0==x)) { return valueOf(y); }
+    final long t01 = Doubles.significand(a);
+    final int e01 = Doubles.exponent(a);
+    final int shift0 = Numbers.loBit(t01);
+    final long t0 = (t01>>>shift0);
+    final int e0 = e01+shift0;
+
+    final long t11 = Doubles.significand(x);
+    final int e11 = Doubles.exponent(x);
+    final int shift1 = Numbers.loBit(t11);
+    final long t1 = (t11>>>shift1);
+    final int e1 = e11+shift1;
+
+    return 
+      valueOf(
+        Doubles.nonNegative(a)==Doubles.nonNegative(x),
+        Natural.product(t0,t1),
+        e0+e1)
+      .add(y); }
+  
+  //    return valueOf(y).addProduct(a,x); }
+
+  /** Exact <code>a*x+y</code> (aka fma). */
+
+  public static final RationalFloat[]
+    axpy (final double[] a,
+          final double[] x,
+          final double[] y) {
+    final int n = a.length;
+    //assert n==x.length;
+    //assert n==y.length;
+    final RationalFloat[] bf = new RationalFloat[n];
+    for (int i=0;i<n;i++) { bf[i] = axpy(a[i],x[i],y[i]); }
+    return bf; }
+
+  /** Exact <code>this*x+y</code> (aka fma). */
+
+  public static final RationalFloat
+  axpy (final double a,
+        final RationalFloat x,
+        final double y) {
+    return x.multiply(a).add(y); }
+
+  /** Exact <code>a*this+y</code> (aka fma). */
+
+  public static final RationalFloat[] axpy (final double[] a,
+                                       final RationalFloat[] x,
+                                       final double[] y) {
+    final int n = x.length;
+    //assert n==x.length;
+    //assert n==y.length;
+    final RationalFloat[] bf = new RationalFloat[n];
+    for (int i=0;i<n;i++) { bf[i] = axpy(a[i],x[i],y[i]); }
+    return bf; }
 
   //--------------------------------------------------------------
 

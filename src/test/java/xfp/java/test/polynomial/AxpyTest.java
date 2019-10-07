@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import xfp.java.polynomial.BigFloatAxpy;
 import xfp.java.polynomial.DoubleAxpy;
+import xfp.java.polynomial.RationalFloatAxpy;
 import xfp.java.test.Common;
 
 //----------------------------------------------------------------
@@ -14,7 +15,7 @@ import xfp.java.test.Common;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-10-03
+ * @version 2019-10-07
  */
 
 public final class AxpyTest {
@@ -67,6 +68,11 @@ public final class AxpyTest {
   @Test
   public final void bigFloatAxpy () { 
     Common.daxpy(new BigFloatAxpy()); } 
+
+  @SuppressWarnings({ "static-method" })
+  @Test
+  public final void rationalFloatAxpy () { 
+    Common.daxpy(new RationalFloatAxpy()); } 
 
   @SuppressWarnings({ "static-method" })
   @Test

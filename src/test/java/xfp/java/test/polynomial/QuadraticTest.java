@@ -8,6 +8,7 @@ import com.upokecenter.numbers.EFloat;
 import xfp.java.numbers.BigFloat;
 import xfp.java.polynomial.BigFloatQuadratic;
 import xfp.java.polynomial.EFloatQuadratic;
+import xfp.java.polynomial.RationalFloatQuadratic;
 import xfp.java.test.Common;
 
 //----------------------------------------------------------------
@@ -18,7 +19,7 @@ import xfp.java.test.Common;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-10-04
+ * @version 2019-10-07
  */
 
 public final class QuadraticTest {
@@ -47,9 +48,13 @@ public final class QuadraticTest {
 
   @SuppressWarnings({ "static-method" })
   @Test
+  public final void rationalFloatQuadratic () { 
+    Common.quadratic(RationalFloatQuadratic.class); } 
+
+  @SuppressWarnings({ "static-method" })
+  @Test
   public final void bigFloatQuadratic () { 
     Common.quadratic(BigFloatQuadratic.class); } 
-
 
   //--------------------------------------------------------------
 }
