@@ -21,6 +21,7 @@ import xfp.java.Debug;
 import xfp.java.accumulators.Accumulator;
 import xfp.java.function.FloatFunction;
 import xfp.java.function.ToFloatFunction;
+import xfp.java.linear.Dn;
 import xfp.java.numbers.Doubles;
 import xfp.java.numbers.Floats;
 import xfp.java.numbers.Natural;
@@ -30,6 +31,7 @@ import xfp.java.polynomial.Axpy;
 import xfp.java.polynomial.EFloatAxpy;
 import xfp.java.polynomial.EFloatCubic;
 import xfp.java.polynomial.EFloatQuadratic;
+import xfp.java.polynomial.MonomialEFloat;
 import xfp.java.polynomial.Polynomial;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
@@ -1717,10 +1719,10 @@ public final class Common {
 
   public static final Polynomial
   makeCubic (final String className,
-                 final double a0,
-                 final double a1,
-                 final double a2,
-                 final double a3) {
+             final double a0,
+             final double a1,
+             final double a2,
+             final double a3) {
     try {
 
       final Class c = Class.forName(className);
@@ -1789,6 +1791,66 @@ public final class Common {
             + "\ne=  " + Double.toHexString(ei)
             + "\nq=  " + Double.toHexString(qi)
             + "\n"); } } } 
+    }
+    catch (final Throwable t) { throw new RuntimeException(t); } }
+
+  //--------------------------------------------------------------
+
+  public static final Polynomial
+  makeMonomial (final String className,
+                final double[] a) {
+    try {
+
+      final Class c = Class.forName(className);
+      final Method m = c.getMethod("make",double[].class);
+      return (Polynomial) m.invoke(null,a); }
+
+    catch (final
+      ClassNotFoundException
+      | NoSuchMethodException
+      | SecurityException
+      | IllegalAccessException
+      | IllegalArgumentException
+      | InvocationTargetException e) {
+      // e.printStackTrace();
+      throw new RuntimeException(className,e); } }
+
+  //--------------------------------------------------------------
+
+  public static final void monomial (final Class qclass) {
+    try {
+      final int dim = 256;
+      final int ntrys = 4;
+      final Method make = qclass.getMethod("make",double[].class);
+      final List<Generator> gs = baseGenerators(dim);
+      for (int degree=0;degree<3;degree++) {
+        // coefficient generators
+        final List<Generator> ags = baseGenerators(degree+1);
+        for (final Generator ag : ags) {
+          final double[] a = (double[]) ag.next();
+          final Polynomial e = MonomialEFloat.make(a);
+          final Polynomial q = 
+            (Polynomial) make.invoke(null,a);
+          for (final Generator g : gs) {
+            for (int k=0;k<ntrys;k++) {
+              final double[] x = (double[]) g.next();
+              final double[] qz = q.doubleValue(x);
+              final double[] ez = e.doubleValue(x);
+              for (int i=0;i<qz.length;i++) {
+                final int ii=i;
+                final double xi =x[i];
+                final double ei = ez[i];
+                final double qi = qz[i];
+                if (q.isExact()) {
+                  Assertions.assertEquals(ei,qi,
+                    () ->
+                  "\n" + Classes.className(q)
+                  + "\ni=" + ii
+                  + "\na=" + Dn.toHexString(a)
+                  + "\nx=" + Double.toHexString(xi)
+                  + "\ne=  " + Double.toHexString(ei)
+                  + "\nq=  " + Double.toHexString(qi)
+                  + "\n"); } } } } } }
     }
     catch (final Throwable t) { throw new RuntimeException(t); } }
 

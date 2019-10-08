@@ -26,15 +26,52 @@ import xfp.java.prng.Generator;
  * <code>n</code>.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-04-27
+ * @version 2019-10-08
  */
 @SuppressWarnings("unchecked")
-strictfp
+//strictfp
 public final class Dn extends LinearSpaceLike {
 
   //--------------------------------------------------------------
   // operations on arrays of double
   // TODO: better elsewhere?
+  //--------------------------------------------------------------
+
+  public static final int hiElt (final double[] x) {
+    final int n = x.length;
+    if (0==n) { return 0; }
+    int i = n-1;
+    while ((0<=i) && (0.0==x[i])) { i--; }
+    return i+1; }
+
+  public static final double[] 
+    copyWoutTrailingZeros (final double[] x) {
+    final int n = hiElt(x);
+    return Arrays.copyOf(x,n); }
+  
+  /** DANGER: only copy if needed. */
+  public static final double[] 
+    stripTrailingZeros (final double[] x) {
+    final int n = hiElt(x);
+    if (n==x.length) { return x; }
+    return Arrays.copyOf(x,n); }
+  
+  //--------------------------------------------------------------
+  /** hex string. */
+
+  public static final String toHexString (final double[] m) {
+    //final StringBuilder b = new StringBuilder("0x");
+    final StringBuilder b = new StringBuilder();
+    final int n = m.length;
+    b.append("[");
+    if (0<n) { 
+      b.append(Double.toHexString(m[0]));
+      for (int i=1;i<n;i++) {
+        b.append(", ");
+        b.append(Double.toHexString(m[i])); } }
+    b.append("]");
+    return b.toString(); }
+
   //--------------------------------------------------------------
 
   public static final double[] concatenate (final double[] x0,
