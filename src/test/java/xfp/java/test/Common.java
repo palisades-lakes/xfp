@@ -1592,8 +1592,10 @@ public final class Common {
       | IllegalAccessException
       | IllegalArgumentException
       | InvocationTargetException e) {
-      // e.printStackTrace();
-      throw new RuntimeException(className,e); } }
+      e.printStackTrace();
+      throw new RuntimeException(
+        className + "\n" + e.getMessage(),
+        e); } }
 
   //--------------------------------------------------------------
 
