@@ -21,7 +21,7 @@ import xfp.java.prng.GeneratorBase;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-10-06
+ * @version 2019-10-09
  */
 
 @SuppressWarnings("unchecked")
@@ -902,7 +902,7 @@ public final class Natural implements Ringlike<Natural> {
   //--------------------------------------------------------------
   // TODO: singleton class for one() and zero()?
 
-  private static final Natural ONE = new Natural(new int[] {1});
+  static final Natural ONE = new Natural(new int[] {1});
 
   @Override
   public final Natural one () { return ONE; }

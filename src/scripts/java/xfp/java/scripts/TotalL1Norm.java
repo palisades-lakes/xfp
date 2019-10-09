@@ -10,7 +10,7 @@ import xfp.java.prng.Generators;
  * jy --source 12 src/scripts/java/xfp/java/scripts/TotalL1Norm.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-27
+ * @version 2019-10-09
  * 7
  */
 @SuppressWarnings("unchecked")
@@ -22,7 +22,8 @@ public final class TotalL1Norm {
     //final Generator g = Generators.make("finite",dim);
     final Generator g = Generators.make("uniform",dim);
     final Accumulator a = 
-      xfp.java.accumulators.BigFloatAccumulator.make();
+      xfp.java.accumulators.RationalFloatAccumulator.make();
+//    xfp.java.accumulators.BigFloatAccumulator.make();
     assert a.isExact();
     for (int i=0;i<trys;i++) {
       final double[] x = (double[]) g.next();

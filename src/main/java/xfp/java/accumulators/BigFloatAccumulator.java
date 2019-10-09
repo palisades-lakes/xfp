@@ -2,7 +2,7 @@ package xfp.java.accumulators;
 
 import xfp.java.numbers.BigFloat;
 
-/** Naive sum of <code>double</code> values with a BigFloat-valued
+/** Naive sum of <code>double</code> values with a BigFloat
  * accumulator.
  *
  * @author palisades dot lakes at gmail dot com
