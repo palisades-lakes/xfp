@@ -67,7 +67,7 @@ implements Ringlike<BigFloat> {
                                       final int e1) {
     if (e0<e1) { return add6(p1,t1,e1,p0,t0,e0); }
     final int de = e0-e1;
-    if (p0^p1) { 
+    if (p0!=p1) { 
       // different signs
       final Natural t0s = (de>0) ? t0.shiftUp(de) : t0; 
       final int c01 = t0s.compareTo(t1);
@@ -217,7 +217,7 @@ implements Ringlike<BigFloat> {
             final Natural t,
             final int e) {
     return valueOf(
-      (! (nonNegative() ^ p)),
+      (nonNegative()==p),
       significand().multiply(t),
       Math.addExact(exponent(),e)); }
 
@@ -230,13 +230,20 @@ implements Ringlike<BigFloat> {
   //--------------------------------------------------------------
 
   private final BigFloat
-  multiply (final boolean p,
-            final long t,
-            final int e) {
+  multiply (final boolean p1,
+            final long t11,
+            final int e11) {
+
+    // minimize long bits
+    final int shift = Numbers.loBit(t11);
+    final long t1 = (t11>>>shift);
+    final int e1 = e11+shift;
+
     return valueOf(
-      (! (nonNegative() ^ p)),
-      significand().multiply(t),
-      Math.addExact(exponent(),e)); }
+      (! (nonNegative() ^ p1)),
+      significand().multiply(t1),
+      exponent()+ e1); }
+//      Math.addExact(exponent(),e1)); }
 
   public final BigFloat
   multiply (final double z) {

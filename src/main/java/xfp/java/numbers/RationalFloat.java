@@ -77,7 +77,29 @@ implements Ringlike<RationalFloat> {
       -exponent()); }
 
   //--------------------------------------------------------------
-  // TODO: optimize denominator == 1 cases?
+
+  private static final RationalFloat add6 (final boolean p0,
+                                           final Natural t0,
+                                           final int e0,
+                                           final boolean p1,
+                                           final Natural t1,
+                                           final int e1) {
+    if (e0<e1) { return add6(p1,t1,e1,p0,t0,e0); }
+    final int de = e0-e1;
+    if (p0!=p1) { 
+      // different signs
+      final Natural t0s = (de>0) ? t0.shiftUp(de) : t0; 
+      final int c01 = t0s.compareTo(t1);
+      // t1 > t0s
+      if (0>c01) { return valueOf(p1,t1.subtract(t0s),e1); }
+      // t0s > t1
+      if (0<c01) { return valueOf(p0,t0s.subtract(t1),e1); }
+      return ZERO; }
+    // same signs
+    if (0<de) { return valueOf(p0,t1.add(t0,de),e1);}
+    return valueOf(p0,t0.add(t1),e1); }
+
+  //--------------------------------------------------------------
 
   private static final RationalFloat add7 (final boolean p0,
                                            final Natural n0,
@@ -123,12 +145,15 @@ implements Ringlike<RationalFloat> {
     final Natural d = d0;
     return valueOf(p,n,d,e); }
 
-  private final RationalFloat add3 (final boolean p1,
-                                    final Natural n1,
-                                    final int e1) {
-    return add7(
-      nonNegative(),numerator(),denominator(),exponent(),
-      p1,n1,e1); }
+  //  private final RationalFloat add3 (final boolean p1,
+  //                                    final Natural n1,
+  //                                    final int e1) {
+  //    final Natural d = denominator();
+  //    if (d.isOne()) {
+  //      return 
+  //        add6(nonNegative(),numerator(),exponent(),p1,n1,e1); }
+  //    return 
+  //      add7(nonNegative(),numerator(),d,exponent(),p1,n1,e1); }
 
   private static final RationalFloat add8 (final boolean p0,
                                            final Natural n0,
@@ -179,19 +204,33 @@ implements Ringlike<RationalFloat> {
                                     final Natural n1,
                                     final Natural d1,
                                     final int e1) {
-    return add8(
-      nonNegative(),numerator(),denominator(),exponent(),
-      p1,n1,d1,e1); }
+    final boolean p0 = nonNegative();
+    final Natural n0 = numerator();
+    final Natural d0 = denominator();
+    final int e0 = exponent();
+    if (d0.isOne()) {
+      if (d1.isOne()) { return add6(p0,n0,e0,p1,n1,e1); }
+      return add7(p1,n1,d1,e1,p0,n0,e0); }
+    if (d1.isOne()) { return add7(p0,n0,d0,e0,p1,n1,e1); }
+    return add8(p0,n0,d0,e0,p1,n1,d1,e1); }
 
   @Override
   public final RationalFloat add (final RationalFloat that) {
     if (isZero()) { return that; }
     if (that.isZero()) { return this; }
-    return add4(
-      that.nonNegative(),
-      that.numerator(),
-      that.denominator(),
-      that.exponent()); }
+    final boolean p0 = nonNegative();
+    final Natural n0 = numerator();
+    final Natural d0 = denominator();
+    final int e0 = exponent();
+    final boolean p1 = that.nonNegative();
+    final Natural n1 = that.numerator();
+    final Natural d1 = that.denominator();
+    final int e1 = that.exponent();
+    if (d0.isOne()) {
+      if (d1.isOne()) { return add6(p1,n1,e1,p0,n0,e0); }
+      return add7(p1,n1,d1,e1,p0,n0,e0); }
+    if (d1.isOne()) { return add7(p0,n0,d0,e0,p1,n1,e1); }
+    return add8(p0,n0,d0,e0,p1,n1,d1,e1); }
 
   //--------------------------------------------------------------
 
@@ -416,14 +455,25 @@ implements Ringlike<RationalFloat> {
   //--------------------------------------------------------------
 
   private final RationalFloat
-  multiply (final boolean p,
-            final long t,
-            final int e) {
+  multiply (final boolean p1,
+            final long t11,
+            final int e11) {
+
+    // minimize long bits
+    final int shift = Numbers.loBit(t11);
+    final long t1 = (t11>>>shift);
+    final int e1 = e11+shift;
+
+    final Natural d = denominator();
+    if (d.isOne()) {
+      return valueOf(
+        (nonNegative()==p1),numerator().multiply(t1),
+        exponent() + e1); }
+//        Math.addExact(exponent(),e1)); }
     return valueOf(
-      (! (nonNegative() ^ p)),
-      numerator().multiply(t),
-      denominator(),
-      Math.addExact(exponent(),e)); }
+      (nonNegative()==p1),numerator().multiply(t1),d,
+      exponent() + e1); }
+//      Math.addExact(exponent(),e1)); }
 
   public final RationalFloat
   multiply (final double z) {
@@ -456,27 +506,13 @@ implements Ringlike<RationalFloat> {
     else { t=(tz>>>s); e=ez+s; }
     final Natural t2 = Natural.fromSquare(t);
     final int e2 = (e<<1);
-    return add3( 
-      true,
-      t2,
-      e2); }
 
-
-  //  public final RationalFloat add2 (final double z) {
-  //    if (denominator().isOne()) {
-  //      final BigFloat sum =
-  //        BigFloat.valueOf(nonNegative(),numerator(),exponent())
-  //        .add2(z);
-  //      return valueOf(
-  //        sum.nonNegative(),sum.significand(),sum.exponent()); }
-  //
-  //    //assert Double.isFinite(z);
-  //    final Natural n1 =
-  //      Natural.valueOf(Doubles.significand(z));
-  //    // TODO: use optimized square
-  //    final Natural n2 = n1.multiply(n1);
-  //    final int e2 = 2*Doubles.exponent(z);
-  //    return add3(true,n2,e2); }
+    final boolean p0 = nonNegative();
+    final Natural n0 = numerator();
+    final Natural d0 = denominator();
+    final int e0 = exponent();
+    if (d0.isOne()) { return add6(p0,n0,e0,true,t2,e2); }
+    return add7(p0,n0,d0,e0,true,t2,e2); }
 
   public final RationalFloat
   add2All (final double[] z) {
@@ -506,7 +542,14 @@ implements Ringlike<RationalFloat> {
       Doubles.significand(z0))
       .multiply(Natural.valueOf(Doubles.significand(z1)));
     final int e = Doubles.exponent(z0) + Doubles.exponent(z1);
-    return add3(p,n,e); }
+
+    final boolean p0 = nonNegative();
+    final Natural n0 = numerator();
+    final Natural d0 = denominator();
+    final int e0 = exponent();
+
+    if (d0.isOne()) { return add6(p0,n0,e0,p,n,e); }
+    return add7(p0,n0,d0,e0,p,n,e); }
 
   public final RationalFloat 
   addProducts (final double[] z0,
@@ -618,11 +661,18 @@ implements Ringlike<RationalFloat> {
     final long t1 = (t11>>>shift1);
     final int e1 = e11+shift1;
 
-    return
-      add3(
-        Doubles.nonNegative(z0)==Doubles.nonNegative(z1),
-        Natural.product(t0,t1),
-        e0+e1+1); }
+    final boolean p = nonNegative();
+    final Natural n = numerator();
+    final Natural d = denominator();
+    final int e = exponent();
+
+    final boolean p3 = 
+      Doubles.nonNegative(z0)==Doubles.nonNegative(z1);
+    final Natural n3 = Natural.product(t0,t1);
+    final int e3 = e0+e1+1;
+
+    if (d.isOne()) { return add6(p,n,e,p3,n3,e3); }
+    return add7(p,n,d,e,p3,n3,e3); }
 
   public final RationalFloat
   addL2 (final double z0,
@@ -997,7 +1047,8 @@ implements Ringlike<RationalFloat> {
                                              final Natural n,
                                              final Natural d,
                                              final int e) {
-    return reduce(nonNegative,n,d,e); }
+//    return reduce(nonNegative,n,d,e); }
+  return new RationalFloat(nonNegative,n,d,e); }
 
   public static final RationalFloat valueOf (final boolean nonNegative,
                                              final Natural n,

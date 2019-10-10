@@ -4,13 +4,13 @@ import xfp.java.accumulators.Accumulator;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
 
-/** Benchmark dot products.
+/** Profile L2 distance.
  *
  * <pre>
  * jy --source 12 src/scripts/java/xfp/java/scripts/TotalL2Distance.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-09-06
+ * @version 2019-10-10
  */
 @SuppressWarnings("unchecked")
 public final class TotalL2Distance {
@@ -22,7 +22,8 @@ public final class TotalL2Distance {
     //final Generator g = Generators.make("finite",dim);
     //final Generator g = Generators.make("uniform",dim);
     final Accumulator a = 
-      xfp.java.accumulators.BigFloatAccumulator.make();
+      xfp.java.accumulators.RationalFloatAccumulator.make();
+//    xfp.java.accumulators.BigFloatAccumulator.make();
     assert a.isExact();
     for (int i=0;i<trys;i++) {
       final double[] x0 = (double[]) g.next();

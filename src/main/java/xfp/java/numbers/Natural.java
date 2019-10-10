@@ -21,7 +21,7 @@ import xfp.java.prng.GeneratorBase;
  * unsigned <code>int[]</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-10-09
+ * @version 2019-10-10
  */
 
 @SuppressWarnings("unchecked")
@@ -1030,9 +1030,9 @@ public final class Natural implements Ringlike<Natural> {
 //    return NaturalMultiply.multiply(this,u); }
 
   public final Natural multiply (final long v) {
-    if (0L==v) { return Natural.ZERO; }
+    if (0L==v) { return ZERO; }
     if (1L==v) { return this; }
-    if (isZero()) { return Natural.ZERO; }
+    if (isZero()) { return ZERO; }
     //assert 0L < v;
     final long hi = Numbers.hiWord(v);
     final long lo = Numbers.loWord(v);
