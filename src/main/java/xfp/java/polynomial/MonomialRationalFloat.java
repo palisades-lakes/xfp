@@ -7,7 +7,7 @@ import xfp.java.numbers.RationalFloat;
  * using <code>RationalFloat</code>.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-10-08
+ * @version 2019-10-11
  */
 
 @SuppressWarnings("unchecked")
@@ -26,7 +26,8 @@ implements Polynomial<RationalFloat> {
   private static final RationalFloat fma (final double a,
                                      final RationalFloat b,
                                      final RationalFloat c) {
-    return b.multiply(a).add(c); }
+    //return b.multiply(a).add(c); }
+  return c.add(b.multiply(a)); }
 
   @Override
   public final RationalFloat value (final double x) {

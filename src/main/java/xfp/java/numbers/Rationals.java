@@ -25,7 +25,7 @@ import xfp.java.prng.Generators;
  * <code>Rational</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-30
+ * @version 2019-10-11
  */
 @SuppressWarnings({"unchecked","static-method"})
 public final class Rationals implements Set {
@@ -245,7 +245,7 @@ public final class Rationals implements Set {
         final Natural u0 = Natural.valueOf(z0.abs());
         final Natural u1 = Natural.valueOf(z1.abs());
         //assert ! u1.isZero();
-        return RationalFloat.valueOf(0<=z0.signum(),u0,u1); } }; }
+        return RationalFloat.valueOf(0<=z0.signum(),u0,u1,0); } }; }
 
   // Is this characteristic of most inputs?
   public static final Generator

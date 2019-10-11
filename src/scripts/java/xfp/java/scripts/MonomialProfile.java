@@ -10,7 +10,7 @@ import xfp.java.prng.Generators;
  * jy --source 12 src/scripts/java/xfp/java/scripts/MonomialProfile.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-10-10
+ * @version 2019-10-11
  */
 @SuppressWarnings("unchecked")
 public final class MonomialProfile {
@@ -29,6 +29,7 @@ public final class MonomialProfile {
       final double[] a = (double[]) ag.next();
       final double[] x = (double[]) g.next();
       final Polynomial q = 
+        //xfp.java.polynomial.MonomialBigFloat.make(a);
         xfp.java.polynomial.MonomialRationalFloat.make(a);
       final double[] z = q.doubleValue(x);
       for (int j=0;j<dim;j++) {

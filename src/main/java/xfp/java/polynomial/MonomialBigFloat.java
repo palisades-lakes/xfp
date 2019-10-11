@@ -7,7 +7,7 @@ import xfp.java.numbers.BigFloat;
  * using <code>BigFloat</code>.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-10-08
+ * @version 2019-10-11
  */
 
 @SuppressWarnings("unchecked")
@@ -26,7 +26,8 @@ implements Polynomial<BigFloat> {
   private static final BigFloat fma (final double a,
                                      final BigFloat b,
                                      final BigFloat c) {
-    return b.multiply(a).add(c); }
+    //return b.multiply(a).add(c); }
+  return c.add(b.multiply(a)); }
 
   @Override
   public final BigFloat value (final double x) {

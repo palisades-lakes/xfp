@@ -136,7 +136,7 @@ public final class RationalFloats implements Set {
    * and convert to <code></code>
    * with {@link #DOUBLE_P} probability;
    * otherwise return {@link #EMPTY} or
-   * {@link #ONE}, {@link #MINUS_ONE},
+   * {@link #ONE}, 
    * with equal probability (these are potential edge cases).
    */
 

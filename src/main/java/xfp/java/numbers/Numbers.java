@@ -18,7 +18,7 @@ import xfp.java.prng.Generators;
 /** Utilities for Object and primitive numbers.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-30
+ * @version 2019-10-11
  */
 @SuppressWarnings("unchecked")
 public final class Numbers implements Set {
@@ -311,7 +311,7 @@ public final class Numbers implements Set {
    * and convert to <code>BigFraction</code>
    * with {@link #DOUBLE_P} probability;
    * otherwise return {@link BigFraction#EMPTY} or
-   * {@link BigFractrion#ONE}, {@link BigFractrion#MINUS_ONE},
+   * {@link BigFraction#ONE}, {@link BigFraction#MINUS_ONE},
    * with equal probability (these are potential edge cases).
    */
 

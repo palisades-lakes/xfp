@@ -1,17 +1,16 @@
 package xfp.java.scripts;
 
 import xfp.java.accumulators.Accumulator;
-import xfp.java.accumulators.BigFloatAccumulator;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
 
-/** Benchmark partial sums.
+/** Profile partial sums.
  *
  * <pre>
  * jy --source 12 src/scripts/java/xfp/java/scripts/PartialSums.java
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-09-07
+ * @version 2019-10-11
  */
 @SuppressWarnings("unchecked")
 public final class PartialSums {
@@ -24,7 +23,9 @@ public final class PartialSums {
     //final Generator g = Generators.make("gaussian",dim);
     //final Generator g = Generators.make("laplace",dim);
     final Generator g = Generators.make("uniform",dim);
-    final Accumulator a = BigFloatAccumulator.make();
+    final Accumulator a = 
+      xfp.java.accumulators.RationalFloatAccumulator.make();
+    //xfp.java.accumulators.BigFloatAccumulator.make();
     assert a.isExact();
     for (int i=0;i<trys;i++) {
       final double[] x = (double[]) g.next();

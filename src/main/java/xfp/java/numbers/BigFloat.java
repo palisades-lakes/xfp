@@ -12,7 +12,7 @@ import xfp.java.exceptions.Exceptions;
  * <code>int</code> exponent.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-10-06
+ * @version 2019-10-11
  */
 
 @SuppressWarnings("unchecked")
@@ -240,10 +240,9 @@ implements Ringlike<BigFloat> {
     final int e1 = e11+shift;
 
     return valueOf(
-      (! (nonNegative() ^ p1)),
+      (nonNegative()==p1),
       significand().multiply(t1),
-      exponent()+ e1); }
-//      Math.addExact(exponent(),e1)); }
+      exponent()+e1); }
 
   public final BigFloat
   multiply (final double z) {
@@ -483,16 +482,10 @@ implements Ringlike<BigFloat> {
 
   //--------------------------------------------------------------
 
-  /** @return closest half-even rounded <code>float</code>
-   */
-
-  @Override
-  public final float floatValue () {
-    final boolean nn = nonNegative();
-    final Natural s0 = significand();
-    final int e0 = exponent();
-    if (s0.isZero()) { return (nn ? 0.0F : -0.0F); }
-
+  public static final float floatValue (final boolean p0,
+                                        final Natural s0,
+                                        final int e0) {
+    if (s0.isZero()) { return (p0 ? 0.0F : -0.0F); }
     // DANGER: what if hiBit isn't in the int range?
     final int eh = s0.hiBit();
     final int es =
@@ -501,12 +494,12 @@ implements Ringlike<BigFloat> {
           Floats.MAXIMUM_EXPONENT_INTEGRAL_SIGNIFICAND-e0-1,
           eh-Floats.SIGNIFICAND_BITS));
     if (0==es) {
-      return floatMergeBits(nn,s0.intValue(),e0); }
+      return floatMergeBits(p0,s0.intValue(),e0); }
     if (0 > es) {
       final int e1 = e0 + es;
       final int s1 = (s0.intValue() << -es);
-      return floatMergeBits(nn,s1,e1); }
-    if (eh <= es) { return (nn ? 0.0F : -0.0F); }
+      return floatMergeBits(p0,s1,e1); }
+    if (eh <= es) { return (p0 ? 0.0F : -0.0F); }
     // eh > es > 0
     final boolean up = s0.roundUp(es);
     // TODO: faster way to select the right bits as a int?
@@ -519,22 +512,27 @@ implements Ringlike<BigFloat> {
         // lost bit has to be zero, since there was just a carry
         final int s3 = (s2 >> 1);
         final int e3 = e1 + 1;
-        return floatMergeBits(nn,s3,e3); }
+        return floatMergeBits(p0,s3,e3); }
       // no carry
-      return floatMergeBits(nn,s2,e1); }
+      return floatMergeBits(p0,s2,e1); }
     // round down
-    return floatMergeBits(nn,s1,e1); }
+    return floatMergeBits(p0,s1,e1); }
 
+  /** @return closest half-even rounded <code>float</code>
+   */
+
+  @Override
+  public final float floatValue () {
+    return floatValue(nonNegative(),significand(),exponent()); }
+  
   //--------------------------------------------------------------
   /** @return closest half-even rounded <code>double</code>
    */
 
-  @Override
-  public final double doubleValue () {
-    final boolean nn = nonNegative();
-    final Natural s0 = significand();
-    final int e0 = exponent();
-    if (s0.isZero()) { return (nn ? 0.0 : -0.0); }
+  public static final double doubleValue (final boolean p0,
+                                          final Natural s0,
+                                          final int e0) {
+    if (s0.isZero()) { return (p0 ? 0.0 : -0.0); }
     final int eh = s0.hiBit();
     final int es =
       Math.max(Doubles.MINIMUM_EXPONENT_INTEGRAL_SIGNIFICAND-e0,
@@ -543,15 +541,15 @@ implements Ringlike<BigFloat> {
           eh-Doubles.SIGNIFICAND_BITS));
     if (eh-es>Doubles.SIGNIFICAND_BITS) {
       return 
-        (nn ? 
+        (p0 ? 
           Double.POSITIVE_INFINITY : Double.NEGATIVE_INFINITY); }
     if (0==es) {
-      return doubleMergeBits(nn,s0.longValue(),e0); }
+      return doubleMergeBits(p0,s0.longValue(),e0); }
     if (0 > es) {
       final int e1 = e0 + es;
       final long s1 = (s0.longValue() << -es);
-      return doubleMergeBits(nn,s1,e1); }
-    if (eh <= es) { return (nn ? 0.0 : -0.0); }
+      return doubleMergeBits(p0,s1,e1); }
+    if (eh <= es) { return (p0 ? 0.0 : -0.0); }
     // eh > es > 0
     final boolean up = s0.roundUp(es);
     final long s1 = s0.getShiftedLong(es);
@@ -562,11 +560,15 @@ implements Ringlike<BigFloat> {
         // lost bit has to be zero, since there was just a carry
         final long s3 = (s2>>1);
         final int e3 = e1 + 1;
-        return doubleMergeBits(nn,s3,e3); }
+        return doubleMergeBits(p0,s3,e3); }
       // no carry
-      return doubleMergeBits(nn,s2,e1); }
+      return doubleMergeBits(p0,s2,e1); }
     // round down
-    return doubleMergeBits(nn,s1,e1); }
+    return doubleMergeBits(p0,s1,e1); }
+
+  @Override
+  public final double doubleValue () {
+    return doubleValue(nonNegative(),significand(),exponent()); }
 
   //--------------------------------------------------------------
   // Comparable methods
@@ -633,13 +635,13 @@ implements Ringlike<BigFloat> {
   // construction
   //--------------------------------------------------------------
 
-  private BigFloat (final boolean p0,
-                    final Natural t0,
-                    final int e0) {
+  private BigFloat (final boolean p,
+                    final Natural t,
+                    final int e) {
     //assert null!=t0;
-    _nonNegative = p0;
-    _significand = t0;
-    _exponent = e0; } 
+    _nonNegative = p;
+    _significand = t;
+    _exponent = e; } 
 
   //--------------------------------------------------------------
 
@@ -676,11 +678,11 @@ implements Ringlike<BigFloat> {
     if (0>=shift) { return this; }
     return new BigFloat(p0, t0.shiftDown(shift),e0+shift); }
 
-  public static final BigFloat valueOf (final boolean p0,
-                                        final Natural t0,
-                                        final int e0) {
+  public static final BigFloat valueOf (final boolean p,
+                                        final Natural t,
+                                        final int e) {
     //return reduce(p0,t0,e0); }
-    return new BigFloat(p0,t0,e0); }
+    return new BigFloat(p,t,e); }
 
   //--------------------------------------------------------------
 
