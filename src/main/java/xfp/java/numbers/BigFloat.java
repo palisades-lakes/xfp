@@ -135,6 +135,7 @@ implements Ringlike<BigFloat> {
         final int e11) {
     //assert 0L<=t11;
     //if (0L==t11) { return this; }
+    
     final boolean p0 = nonNegative();
     final Natural t0 = significand();
     final int e0 = exponent();
@@ -143,6 +144,7 @@ implements Ringlike<BigFloat> {
     final int shift = Numbers.loBit(t11);
     final long t1 = (t11>>>shift);
     final int e1 = e11+shift;
+   
     if (e0<e1) { return add6(p0,t0,p1,t1,e1-e0,e0); }
     if (e0==e1) { return add5(p0,t0,p1,t1,e0); } 
     return add5(p0,t0.shiftUp(e0-e1),p1,t1,e1); }
