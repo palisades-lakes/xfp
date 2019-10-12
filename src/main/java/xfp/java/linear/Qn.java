@@ -19,8 +19,8 @@ import xfp.java.numbers.Doubles;
 import xfp.java.numbers.Floats;
 import xfp.java.numbers.Numbers;
 import xfp.java.numbers.Q;
-import xfp.java.numbers.Rational;
-import xfp.java.numbers.Rationals;
+import xfp.java.numbers.RationalFloat;
+import xfp.java.numbers.RationalFloats;
 import xfp.java.prng.Generator;
 import xfp.java.prng.GeneratorBase;
 import xfp.java.prng.Generators;
@@ -42,7 +42,7 @@ import xfp.java.prng.Generators;
  * that can be used to represent tuples of rational numbers.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-25
+ * @version 2019-10-12
  */
 @SuppressWarnings("unchecked")
 public final class Qn extends LinearSpaceLike {
@@ -51,7 +51,7 @@ public final class Qn extends LinearSpaceLike {
   // operations for algebraic structures over rational arrays.
   //--------------------------------------------------------------
   /** A <code>BinaryOperator</code> that adds elementwise
-   * <code>Rational[]</code> instances of length
+   * <code>RationalFloat[]</code> instances of length
    * <code>dimension</code>.
    */
 
@@ -60,39 +60,39 @@ public final class Qn extends LinearSpaceLike {
                            final Object x1) {
     assert contains(x0);
     assert contains(x1);
-    final Rational[] q0 = Rationals.toRational(x0);
-    final Rational[] q1 = Rationals.toRational(x1);
-    final Rational[] qq = new Rational[dimension()];
+    final RationalFloat[] q0 = RationalFloats.toRationalFloat(x0);
+    final RationalFloat[] q1 = RationalFloats.toRationalFloat(x1);
+    final RationalFloat[] qq = new RationalFloat[dimension()];
     for (int i=0;i<dimension();i++) { qq[i] = q0[i].add(q1[i]); }
     return qq; }
 
   //--------------------------------------------------------------
 
   @Override
-  public final Rational[] zero (final int n) {
-    final Rational[] z = new Rational[n];
-    Arrays.fill(z,Rational.getZero());
+  public final RationalFloat[] zero (final int n) {
+    final RationalFloat[] z = new RationalFloat[n];
+    Arrays.fill(z,RationalFloat.ZERO);
     return z; }
 
   //--------------------------------------------------------------
 
   @Override
-  public final Rational[] negate (final Object x) {
+  public final RationalFloat[] negate (final Object x) {
     assert contains(x);
-    final Rational[] q = Rationals.toRational(x);
-    final Rational[] qq = new Rational[dimension()];
+    final RationalFloat[] q = RationalFloats.toRationalFloat(x);
+    final RationalFloat[] qq = new RationalFloat[dimension()];
     for (int i=0;i<dimension();i++) { qq[i] = q[i].negate(); }
     return qq; }
 
   //--------------------------------------------------------------
 
   @Override
-  public final Rational[] scale (final Object a,
+  public final RationalFloat[] scale (final Object a,
                                  final Object x) {
     assert contains(x);
-    final Rational b = Rational.valueOf(a);
-    final Rational[] q = Rationals.toRational(x);
-    final Rational[] qq = new Rational[dimension()];
+    final RationalFloat b = RationalFloat.valueOf(a);
+    final RationalFloat[] q = RationalFloats.toRationalFloat(x);
+    final RationalFloat[] qq = new RationalFloat[dimension()];
     for (int i=0;i<dimension();i++) { qq[i] = q[i].multiply(b); }
     return qq; }
 
@@ -105,8 +105,8 @@ public final class Qn extends LinearSpaceLike {
                                final Object x1) {
     assert contains(x0);
     assert contains(x1);
-    final Rational[] q0 = Rationals.toRational(x0);
-    final Rational[] q1 = Rationals.toRational(x1);
+    final RationalFloat[] q0 = RationalFloats.toRationalFloat(x0);
+    final RationalFloat[] q1 = RationalFloats.toRationalFloat(x1);
     for (int i=0;i<dimension();i++) {
       if (! q0[i].equals(q1[i])) { return false; } }
     return true; }
@@ -135,7 +135,7 @@ public final class Qn extends LinearSpaceLike {
     final UniformRandomProvider urp = Set.urp(options);
     return
       new Supplier () {
-      final Generator g = Rationals.generator(dimension(),urp);
+      final Generator g = RationalFloats.generator(dimension(),urp);
       @Override
       public final Object get () { return g.next(); } }; }
 
@@ -173,7 +173,7 @@ public final class Qn extends LinearSpaceLike {
             //bigDecimalGenerator(n,urp),
             Floats.finiteGenerator(n,urp),
             Doubles.finiteGenerator(n,urp),
-            Rationals.generator(urp)
+            RationalFloats.generator(urp)
             // ERational correct, but slow
             //ERationals.eIntegerGenerator(n,urp),
             //ERationals.eRationalFromDoubleGenerator(n,urp)
@@ -224,7 +224,7 @@ public final class Qn extends LinearSpaceLike {
   _spaceCache = new IntObjectHashMap();
 
   /** n-dimensional rational vector space, implemented with
-   * <code>Rational[]</code>.
+   * <code>RationalFloat[]</code>.
    */
   public static final TwoSetsOneOperation
   space (final int dimension) {

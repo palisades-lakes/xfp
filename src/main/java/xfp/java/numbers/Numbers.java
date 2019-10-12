@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.BiPredicate;
 
 import org.apache.commons.rng.UniformRandomProvider;
 import org.apache.commons.rng.sampling.CollectionSampler;
@@ -18,7 +17,7 @@ import xfp.java.prng.Generators;
 /** Utilities for Object and primitive numbers.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-10-11
+ * @version 2019-10-12
  */
 @SuppressWarnings("unchecked")
 public final class Numbers implements Set {
@@ -91,8 +90,6 @@ public final class Numbers implements Set {
       return ((BigFloat) x).doubleValue(); }
     if (x instanceof RationalFloat) { 
       return ((RationalFloat) x).doubleValue(); }
-    if (x instanceof Rational) { 
-      return ((Rational) x).doubleValue(); }
     if (x instanceof Natural) { 
       return ((Natural) x).doubleValue(); }
     if (x instanceof Number) { 
@@ -104,8 +101,6 @@ public final class Numbers implements Set {
       return ((BigFloat) x).floatValue(); }
     if (x instanceof RationalFloat) { 
       return ((RationalFloat) x).floatValue(); }
-    if (x instanceof Rational) { 
-      return ((Rational) x).floatValue(); }
     if (x instanceof Natural) { 
       return ((Natural) x).floatValue(); }
     if (x instanceof Number) { 
@@ -170,7 +165,7 @@ public final class Numbers implements Set {
     return 0 == x.signum(); }
 
   public static final boolean isZero (final BigDecimal x) {
-    return 0 == BigDecimal.valueOf(0L).compareTo(x); }
+    return 0 == BigDecimal.ZERO.compareTo(x); }
 
   public static final boolean isZero (final Number x) {
     if (x instanceof BigInteger) { return isZero((BigInteger) x); }
@@ -190,9 +185,9 @@ public final class Numbers implements Set {
     throw Exceptions.unsupportedOperation(null,"valueOf",x); }
 
   public static final boolean isZero (final Object x) {
-    if (x instanceof Rational) { return ((Rational) x).isZero(); }
+    if (x instanceof Ringlike) { return ((Ringlike) x).isZero(); }
     if (x instanceof Number) { return isZero((Number) x); }
-    throw Exceptions.unsupportedOperation(null,"valueOf",x); }
+    throw Exceptions.unsupportedOperation(x,"valueOf",x); }
 
     //--------------------------------------------------------------
 
@@ -252,31 +247,6 @@ public final class Numbers implements Set {
     return true; }
 
   //--------------------------------------------------------------
-  // Double.equals reduces both arguments before checking
-  // numerator and denominators are equal.
-  // Guessing our Doubles are usually already reduced.
-  // Try n0*d1 == n1*d0 instead
-  // TODO: use BigInteger.bitLength() to decide
-  // which method to use?
-
-  @SuppressWarnings("static-method")
-  public final boolean equals (final Number x0,
-                               final Number x1) {
-    //assert null != x0;
-    //assert null != x1;
-    final Rational q0 = Rational.valueOf(x0);
-    final Rational q1 = Rational.valueOf(x1);
-    return q0.equals(q1); }
-
-  @Override
-  public final BiPredicate equivalence () {
-    return new BiPredicate<Number,Number>() {
-      @Override
-      public final boolean test (final Number q0,
-                                 final Number q1) {
-        return Numbers.this.equals(q0,q1); } }; }
-
-  //--------------------------------------------------------------
   // Object methods
   //--------------------------------------------------------------
 
@@ -330,7 +300,7 @@ public final class Numbers implements Set {
             Doubles.finiteGenerator(urp),
             Generators.bigIntegerGenerator(urp),
             //bigDecimalGenerator(urp),
-            Rationals.generator(urp)));
+            RationalFloats.generator(urp)));
       @Override
       public final Object next () {
         return generators.sample().next(); } }; }
@@ -361,7 +331,7 @@ public final class Numbers implements Set {
             Doubles.generator(urp),
             Generators.bigIntegerGenerator(urp),
             //bigDecimalGenerator(urp),
-            Rationals.generator(urp)
+            RationalFloats.generator(urp)
             ));
       @Override
       public final Object next () {

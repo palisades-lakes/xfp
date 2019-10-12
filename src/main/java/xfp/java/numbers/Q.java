@@ -18,7 +18,7 @@ import xfp.java.prng.Generator;
  * necessary.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-31
+ * @version 2019-10-12
  */
 
 // TODO: change name to 'QQ', imitating tex font?
@@ -37,8 +37,8 @@ public final class Q implements Set {
                             final Object x1) {
     //assert(contains(x0));
     //assert(contains(x1));
-    final Rational q0 = Rational.valueOf(x0);
-    final Rational q1 = Rational.valueOf(x1);
+    final RationalFloat q0 = RationalFloat.valueOf(x0);
+    final RationalFloat q1 = RationalFloat.valueOf(x1);
     return q0.add(q1); }
 
   public final BinaryOperator adder () {
@@ -53,16 +53,16 @@ public final class Q implements Set {
   //--------------------------------------------------------------
 
   public final Object additiveIdentity () {
-    return Rational.getZero(); }
+    return RationalFloat.ZERO; }
 
   //--------------------------------------------------------------
 
   // TODO: is consistency with other algebraic structure classes
   // worth the indirection?
 
-  private final Rational negate (final Object x) {
+  private final RationalFloat negate (final Object x) {
     //assert contains(x);
-    return Rational.valueOf(x).negate(); }
+    return RationalFloat.valueOf(x).negate(); }
 
   public final UnaryOperator additiveInverse () {
     return new UnaryOperator () {
@@ -74,14 +74,14 @@ public final class Q implements Set {
 
   //--------------------------------------------------------------
 
-  private final Rational multiply (final Object x0,
+  private final RationalFloat multiply (final Object x0,
                                    final Object x1) {
     //assert contains(x0) :
     // "x0 " + Classes.className(x0) + ":" + x0 + " not in " + this;
     //assert contains(x1)  :
     //  "x1 " + Classes.className(x1) + ":" + x1 + " not in " + this;
-    final Rational q0 = Rational.valueOf(x0);
-    final Rational q1 = Rational.valueOf(x1);
+    final RationalFloat q0 = RationalFloat.valueOf(x0);
+    final RationalFloat q1 = RationalFloat.valueOf(x1);
     return q0.multiply(q1); }
 
   public final BinaryOperator multiplier () {
@@ -96,16 +96,16 @@ public final class Q implements Set {
   //--------------------------------------------------------------
 
   public final Object multiplicativeIdentity () {
-    return Rational.getOne(); }
+    return RationalFloat.ONE; }
 
   //--------------------------------------------------------------
 
-  private final Rational reciprocal (final Object x) {
+  private final RationalFloat reciprocal (final Object x) {
     //assert contains(x);
     // only a partial inverse
     // TODO: throw exception
     if (Numbers.isZero(x)) { return null; }
-    final Rational q = Rational.valueOf(x);
+    final RationalFloat q = RationalFloat.valueOf(x);
     return q.reciprocal();  }
 
   public final UnaryOperator multiplicativeInverse () {
@@ -130,7 +130,6 @@ public final class Q implements Set {
   public static final boolean knownRational (final Object x) {
     if (x instanceof BigFloat) { return true; }
     if (x instanceof RationalFloat) { return true; }
-    if (x instanceof Rational) { return true; }
     if (x instanceof Natural) { return true; }
     if (x instanceof Number) { return true; }
     return false; }
@@ -138,7 +137,6 @@ public final class Q implements Set {
   public static final boolean knownRational (final Class c) {
     if (BigFloat.class.isAssignableFrom(c)) { return true; }
     if (RationalFloat.class.isAssignableFrom(c)) { return true; }
-    if (Rational.class.isAssignableFrom(c)) { return true; }
     if (Natural.class.isAssignableFrom(c)) { return true; }
     if (Number.class.isAssignableFrom(c)) { return true; }
     if (Byte.TYPE.equals(c)) { return true; }
@@ -189,8 +187,8 @@ public final class Q implements Set {
                                 final Object x1) {
     //assert(contains(x0));
     //assert(contains(x1));
-    final Rational q0 = Rational.valueOf(x0);
-    final Rational q1 = Rational.valueOf(x1);
+    final RationalFloat q0 = RationalFloat.valueOf(x0);
+    final RationalFloat q1 = RationalFloat.valueOf(x1);
     return q0.equals(q1); }
 
   @Override
@@ -208,7 +206,6 @@ public final class Q implements Set {
   public final Supplier generator (final Map options) {
     final UniformRandomProvider urp = Set.urp(options);
     final Generator g = Numbers.finiteNumberGenerator(urp);
-    //final Generator g = Rationals.generator(urp);
     return
       new Supplier () {
       @Override

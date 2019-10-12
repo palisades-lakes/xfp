@@ -15,7 +15,6 @@ import xfp.java.numbers.BigDecimals;
 import xfp.java.numbers.BigFloats;
 import xfp.java.numbers.Q;
 import xfp.java.numbers.RationalFloats;
-import xfp.java.numbers.Rationals;
 import xfp.java.prng.PRNG;
 
 //----------------------------------------------------------------
@@ -25,7 +24,7 @@ import xfp.java.prng.PRNG;
  * mvn -q -Dtest=xfp/java/test/algebra/SetTests test > Sets.txt
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-06-26
+ * @version 2019-10-12
  */
 
 @SuppressWarnings("unchecked")
@@ -69,11 +68,6 @@ public final class SetTests {
   @Test
   public final void Q () {
     SetTests.tests(Q.get()); }
-
-  @SuppressWarnings({ "static-method" })
-  @Test
-  public final void Rationals () {
-    SetTests.tests(Rationals.get()); }
 
   @SuppressWarnings({ "static-method" })
   @Test

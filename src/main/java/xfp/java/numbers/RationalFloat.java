@@ -6,6 +6,8 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Objects;
 
+import xfp.java.exceptions.Exceptions;
+
 /** Representing a rational number as a sign times a ratio of
  * {@link Natural} numbers times 2 to a <code>int</code> exponent.
  *
@@ -15,7 +17,7 @@ import java.util.Objects;
  * arithmetic on them faster.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-10-11
+ * @version 2019-10-12
  */
 
 @SuppressWarnings("unchecked")
@@ -1079,38 +1081,43 @@ implements Ringlike<RationalFloat> {
 
   //--------------------------------------------------------------
 
-  //  public static final RationalFloat valueOf (final Double x)  {
-  //    return valueOf(x.doubleValue()); }
-  //
-  //  public static final RationalFloat valueOf (final Float x)  {
-  //    return valueOf(x.floatValue()); }
-  //
-  //  public static final RationalFloat valueOf (final Byte x)  {
-  //    return valueOf(x.byteValue()); }
-  //
-  //  public static final RationalFloat valueOf (final Short x)  {
-  //    return valueOf(x.shortValue()); }
-  //
-  //  public static final RationalFloat valueOf (final Integer x)  {
-  //    return valueOf(x.intValue()); }
-  //
-  //  public static final RationalFloat valueOf (final Long x)  {
-  //    return valueOf(x.longValue()); }
-  //
+  public static final RationalFloat valueOf (final Double x)  {
+    return valueOf(x.doubleValue()); }
+
+  public static final RationalFloat valueOf (final Float x)  {
+    return valueOf(x.floatValue()); }
+
+  public static final RationalFloat valueOf (final Byte x)  {
+    return valueOf(x.byteValue()); }
+
+  public static final RationalFloat valueOf (final Short x)  {
+    return valueOf(x.shortValue()); }
+
+  public static final RationalFloat valueOf (final Integer x)  {
+    return valueOf(x.intValue()); }
+
+  public static final RationalFloat valueOf (final BigInteger x)  {
+    return valueOf(0<=x.signum(),Natural.valueOf(x.abs()),0); }
+
+  public static final RationalFloat valueOf (final Long x)  {
+    return valueOf(x.longValue()); }
+
   ////  public static final RationalFloat valueOf (final BigDecimal x)  {
   ////    throw Exceptions.unsupportedOperation(null,"valueOf",x); }
-  //
-  //  public static final RationalFloat valueOf (final Object x)  {
-  //    if (x instanceof RationalFloat) { return (RationalFloat) x; }
-  //    if (x instanceof Double) { return valueOf((Double) x); }
-  //    if (x instanceof Float) { return valueOf((Float) x); }
-  //    if (x instanceof Byte) { return valueOf((Byte) x); }
-  //    if (x instanceof Short) { return valueOf((Short) x); }
-  //    if (x instanceof Integer) { return valueOf((Integer) x); }
-  //    if (x instanceof Long) { return valueOf((Long) x); }
-  //    if (x instanceof Natural) { return valueOf(x); }
-  ////    if (x instanceof BigDecimal) { return valueOf((BigDecimal) x); }
-  //    throw Exceptions.unsupportedOperation(null,"valueOf",x); }
+
+  public static final RationalFloat valueOf (final Object x)  {
+    if (x instanceof RationalFloat) { return (RationalFloat) x; }
+    if (x instanceof BigInteger) { return valueOf((BigInteger) x); }
+    if (x instanceof Double) { return valueOf((Double) x); }
+    if (x instanceof Float) { return valueOf((Float) x); }
+    if (x instanceof Byte) { return valueOf((Byte) x); }
+    if (x instanceof Short) { return valueOf((Short) x); }
+    if (x instanceof Integer) { return valueOf((Integer) x); }
+    if (x instanceof Long) { return valueOf((Long) x); }
+    if (x instanceof Natural) { return valueOf(x); }
+    //    if (x instanceof BigDecimal) { return valueOf((BigDecimal) x); }
+    throw Exceptions.unsupportedOperation(
+      RationalFloat.class,"valueOf",x); }
 
   //--------------------------------------------------------------
   // Note: these need to be reduced.

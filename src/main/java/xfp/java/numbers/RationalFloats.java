@@ -16,6 +16,7 @@ import org.apache.commons.rng.sampling.distribution.ContinuousUniformSampler;
 import xfp.java.algebra.OneSetOneOperation;
 import xfp.java.algebra.OneSetTwoOperations;
 import xfp.java.algebra.Set;
+import xfp.java.exceptions.Exceptions;
 import xfp.java.prng.Generator;
 import xfp.java.prng.GeneratorBase;
 import xfp.java.prng.Generators;
@@ -24,10 +25,84 @@ import xfp.java.prng.Generators;
  * <code>RationalFloat</code>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-30
+ * @version 2019-10-12
  */
 @SuppressWarnings({"unchecked","static-method"})
 public final class RationalFloats implements Set {
+
+  //--------------------------------------------------------------
+
+  public static final RationalFloat[] toRationalFloat (final Number[] x) {
+    final int n = x.length;
+    final RationalFloat[] y = new RationalFloat[n];
+    for (int i=0;i<n;i++) { y[i] = RationalFloat.valueOf(x[i]); }
+    return y; }
+
+  public static final RationalFloat[] toRationalFloat (final double[] x) {
+    final int n = x.length;
+    final RationalFloat[] y = new RationalFloat[n];
+    for (int i=0;i<n;i++) { y[i] = RationalFloat.valueOf(x[i]); }
+    return y; }
+
+  public static final RationalFloat[] toRationalFloat (final float[] x) {
+    final int n = x.length;
+    final RationalFloat[] y = new RationalFloat[n];
+    for (int i=0;i<n;i++) { y[i] = RationalFloat.valueOf(x[i]); }
+    return y; }
+
+  public static final RationalFloat[] toRationalFloat (final long[] x) {
+    final int n = x.length;
+    final RationalFloat[] y = new RationalFloat[n];
+    for (int i=0;i<n;i++) { y[i] = RationalFloat.valueOf(x[i]); }
+    return y; }
+
+  public static final RationalFloat[] toRationalFloat (final int[] x) {
+    final int n = x.length;
+    final RationalFloat[] y = new RationalFloat[n];
+    for (int i=0;i<n;i++) { y[i] = RationalFloat.valueOf(x[i]); }
+    return y; }
+
+  public static final RationalFloat[] toRationalFloat (final short[] x) {
+    final int n = x.length;
+    final RationalFloat[] y = new RationalFloat[n];
+    for (int i=0;i<n;i++) { y[i] = RationalFloat.valueOf(x[i]); }
+    return y; }
+
+  public static final RationalFloat[] toRationalFloat (final byte[] x) {
+    final int n = x.length;
+    final RationalFloat[] y = new RationalFloat[n];
+    for (int i=0;i<n;i++) { y[i] = RationalFloat.valueOf(x[i]); }
+    return y; }
+
+  //--------------------------------------------------------------
+
+  public static final RationalFloat[] toRationalFloat (final Object x) {
+
+    if (x instanceof RationalFloat[]) { return (RationalFloat[]) x; }
+
+    if (x instanceof byte[]) {
+      return toRationalFloat((byte[]) x); }
+
+    if (x instanceof short[]) {
+      return toRationalFloat((short[]) x); }
+
+    if (x instanceof int[]) {
+      return toRationalFloat((int[]) x); }
+
+    if (x instanceof long[]) {
+      return toRationalFloat((long[]) x); }
+
+    if (x instanceof float[]) {
+      return toRationalFloat((float[]) x); }
+
+    if (x instanceof double[]) {
+      return toRationalFloat((double[]) x); }
+
+    if (x instanceof Number[]) {
+      return toRationalFloat((Number[]) x); }
+
+    throw Exceptions.unsupportedOperation(
+      RationalFloats.class,"toRationalFloat",x); }
 
   //--------------------------------------------------------------
   // operations for algebraic structures over RationalFloats.

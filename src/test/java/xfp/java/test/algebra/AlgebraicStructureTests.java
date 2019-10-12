@@ -16,14 +16,13 @@ import xfp.java.linear.BigDecimalsN;
 import xfp.java.linear.Dn;
 import xfp.java.linear.Fn;
 import xfp.java.linear.Qn;
-import xfp.java.linear.RationalsN;
+import xfp.java.linear.RationalFloatsN;
 import xfp.java.numbers.BigDecimals;
 import xfp.java.numbers.BigFloats;
 import xfp.java.numbers.Doubles;
 import xfp.java.numbers.Floats;
 import xfp.java.numbers.Q;
 import xfp.java.numbers.RationalFloats;
-import xfp.java.numbers.Rationals;
 import xfp.java.prng.PRNG;
 
 //----------------------------------------------------------------
@@ -31,7 +30,7 @@ import xfp.java.prng.PRNG;
  * mvn -q -Dtest=xfp/java/test/algebra/AlgebraicStructureTests test > AST.txt
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-24
+ * @version 2019-10-12
  */
 
 @SuppressWarnings("unchecked")
@@ -71,10 +70,6 @@ public final class AlgebraicStructureTests {
     structureTests(RationalFloats.MULTIPLICATIVE_MAGMA,TRYS);
     structureTests(RationalFloats.FIELD,TRYS);
 
-    structureTests(Rationals.ADDITIVE_MAGMA,TRYS);
-    structureTests(Rationals.MULTIPLICATIVE_MAGMA,TRYS);
-    structureTests(Rationals.FIELD,TRYS);
-
     structureTests(Q.FIELD,TRYS);
 
     structureTests(BigDecimals.ADDITIVE_MAGMA,TRYS);
@@ -93,8 +88,8 @@ public final class AlgebraicStructureTests {
       structureTests(BigDecimalsN.group(n),SPACE_TRYS);
       structureTests(BigDecimalsN.space(n),SPACE_TRYS);
 
-      structureTests(RationalsN.group(n),SPACE_TRYS);
-      structureTests(RationalsN.space(n),SPACE_TRYS);
+      structureTests(RationalFloatsN.group(n),SPACE_TRYS);
+      structureTests(RationalFloatsN.space(n),SPACE_TRYS);
 
       structureTests(Qn.group(n),SPACE_TRYS);
       structureTests(Qn.space(n),SPACE_TRYS);

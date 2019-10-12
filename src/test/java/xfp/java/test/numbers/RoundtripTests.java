@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import xfp.java.numbers.BigFloat;
 import xfp.java.numbers.Doubles;
 import xfp.java.numbers.Floats;
-import xfp.java.numbers.Rational;
 import xfp.java.numbers.RationalFloat;
 import xfp.java.prng.Generator;
 import xfp.java.prng.PRNG;
@@ -67,34 +66,6 @@ public final class RoundtripTests {
           f + "\n"
           //+ f.toHexString(f) + "\n"
           );
-        return false; } }
-    return true; }
-
-  //--------------------------------------------------------------
-  /** Rational should be able to represent any double exactly.
-   */
-
-  private static final boolean double2Rational2Double () {
-    final Generator g =
-      finiteDoubles();
-    //subnormalDoubles();
-    for (int i=0;i<TRYS;i++) {
-      final double x = g.nextDouble();
-      final Rational f = Rational.valueOf(x);
-      final double xf = f.doubleValue();
-      if (x != xf) {
-        System.out.println("\n\n" +
-          "Rational.doubleValue:" + Doubles.isNormal(x) + "\n"
-          + "exponent: " + Doubles.exponent(x) + "\n"
-          + "significand: "
-          + Long.toHexString(Doubles.significand(x)) + "\nn"
-          + x + " :x\n" + xf + " : xf\n\n" +
-          Double.toHexString(x) + " :x\n" +
-          Double.toHexString(xf) + " :xf\n\n" +
-          f.numerator() + "\n" +
-          f.denominator() + "\n\n" +
-          f.numerator().toHexString() + "\n" +
-          f.denominator().toHexString());
         return false; } }
     return true; }
 
@@ -160,7 +131,6 @@ public final class RoundtripTests {
   @Test
   public final void doubleRoundTripTest () {
 
-    assertTrue(double2Rational2Double());
     assertTrue(double2RF2Double());
     assertTrue(double2BF2Double());
     assertTrue(double2BigDecimal2Double());
@@ -220,7 +190,7 @@ public final class RoundtripTests {
       final float xf = f.floatValue();
       if (x != xf) {
         System.out.println("\n\n" +
-          "Rational.floatValue:" + Floats.isNormal(x) + "\n"
+          "RationalFloat.floatValue:" + Floats.isNormal(x) + "\n"
           + "exponent: " + Floats.exponent(x) + "\n"
           + "significand: "
           + Long.toHexString(Floats.significand(x)) + "\nn"
@@ -234,35 +204,7 @@ public final class RoundtripTests {
         return false; } }
     return true; }
 
-  //--------------------------------------------------------------
-  /** Rational should be able to represent any float exactly.
-   */
-
-  private static final boolean float2Rational2Float () {
-    final Generator g =
-      finiteFloats();
-    //subnormalFloats();
-    for (int i=0;i<TRYS;i++) {
-      final float x = g.nextFloat();
-      final Rational f = Rational.valueOf(x);
-      final float xf = f.floatValue();
-      if (x != xf) {
-        System.out.println("\n\n" +
-          "Rational.floatValue:" + Floats.isNormal(x) + "\n"
-          + "exponent: " + Floats.exponent(x) + "\n"
-          + "significand: "
-          + Long.toHexString(Floats.significand(x)) + "\nn"
-          + x + " :x\n" + xf + " : xf\n\n" +
-          Float.toHexString(x) + " :x\n" +
-          Float.toHexString(xf) + " :xf\n\n" +
-          f.numerator() + "\n" +
-          f.denominator() + "\n\n" +
-          f.numerator().toHexString() + "\n" +
-          f.denominator().toHexString());
-        return false; } }
-    return true; }
-
-  //--------------------------------------------------------------
+   //--------------------------------------------------------------
   /** check for round trip consistency:
    * float -&gt; rational -&gt; float
    * should be an identity transform.
@@ -271,7 +213,6 @@ public final class RoundtripTests {
   @Test
   public final void floatRoundTripTest () {
 
-    assertTrue(float2Rational2Float());
     assertTrue(float2RBF2Float());
     assertTrue(float2BigDecimal2Float());
   }

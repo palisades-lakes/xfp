@@ -12,8 +12,8 @@ import com.carrotsearch.hppc.IntObjectMap;
 import xfp.java.algebra.OneSetOneOperation;
 import xfp.java.algebra.Set;
 import xfp.java.algebra.TwoSetsOneOperation;
-import xfp.java.numbers.Rational;
-import xfp.java.numbers.Rationals;
+import xfp.java.numbers.RationalFloat;
+import xfp.java.numbers.RationalFloats;
 import xfp.java.prng.Generator;
 
 /** The set of instances of <code>Rational[dimension]</code>).
@@ -30,45 +30,45 @@ import xfp.java.prng.Generator;
  * that can be used to represent tuples of rational numbers.
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-03-22
+ * @version 2019-10-12
  */
 @SuppressWarnings("unchecked")
-public final class RationalsN extends LinearSpaceLike  {
+public final class RationalFloatsN extends LinearSpaceLike  {
 
   //--------------------------------------------------------------
   // operations for algebraic structures over Rational arrays.
   //--------------------------------------------------------------
   /** A <code>BinaryOperator</code> that adds elementwise
-   * <code>Rational[]</code> instances of length
+   * <code>RationalFloat[]</code> instances of length
    * <code>dimension</code>.
    */
 
   @Override
-  public final Rational[] add (final Object x0,
+  public final RationalFloat[] add (final Object x0,
                                final Object x1) {
     assert contains(x0);
     assert contains(x1);
-    final Rational[] q0 = (Rational[]) x0;
-    final Rational[] q1 = (Rational[]) x1;
-    final Rational[] qq = new Rational[dimension()];
+    final RationalFloat[] q0 = (RationalFloat[]) x0;
+    final RationalFloat[] q1 = (RationalFloat[]) x1;
+    final RationalFloat[] qq = new RationalFloat[dimension()];
     for (int i=0;i<dimension();i++) { qq[i] = q0[i].add(q1[i]); }
     return qq; }
 
   //--------------------------------------------------------------
 
   @Override
-  public final Rational[] zero (final int n) {
-    final Rational[] z = new Rational[n];
-    Arrays.fill(z,Rational.getZero());
+  public final RationalFloat[] zero (final int n) {
+    final RationalFloat[] z = new RationalFloat[n];
+    Arrays.fill(z,RationalFloat.ZERO);
     return z; }
 
   //--------------------------------------------------------------
 
   @Override
-  public final Rational[] negate (final Object x) {
+  public final RationalFloat[] negate (final Object x) {
     assert contains(x);
-    final Rational[] q = (Rational[]) x;
-    final Rational[] qq = new Rational[dimension()];
+    final RationalFloat[] q = (RationalFloat[]) x;
+    final RationalFloat[] qq = new RationalFloat[dimension()];
     for (int i=0;i<dimension();i++) { qq[i] = q[i].negate(); }
     return qq; }
 
@@ -78,9 +78,9 @@ public final class RationalsN extends LinearSpaceLike  {
   public final Object scale (final Object a,
                              final Object x) {
     assert contains(x);
-    final Rational b = (Rational) a;
-    final Rational[] q = (Rational[]) x;
-    final Rational[] qq = new Rational[dimension()];
+    final RationalFloat b = (RationalFloat) a;
+    final RationalFloat[] q = (RationalFloat[]) x;
+    final RationalFloat[] qq = new RationalFloat[dimension()];
     for (int i=0;i<dimension();i++) { qq[i] = q[i].multiply(b); }
     return qq; }
 
@@ -93,8 +93,8 @@ public final class RationalsN extends LinearSpaceLike  {
                                final Object x1) {
     assert contains(x0);
     assert contains(x1);
-    final Rational[] q0 = (Rational[]) x0;
-    final Rational[] q1 = (Rational[]) x1;
+    final RationalFloat[] q0 = (RationalFloat[]) x0;
+    final RationalFloat[] q1 = (RationalFloat[]) x1;
     for (int i=0;i<dimension();i++) {
       if (! q0[i].equals(q1[i])) { return false; } }
     return true; }
@@ -104,9 +104,9 @@ public final class RationalsN extends LinearSpaceLike  {
   @Override
   public final boolean contains (final Object element) {
     return
-      (element instanceof Rational[])
+      (element instanceof RationalFloat[])
       &&
-      (((Rational[]) element).length == dimension()); }
+      (((RationalFloat[]) element).length == dimension()); }
 
   //--------------------------------------------------------------
   /** Intended primarily for testing.
@@ -117,7 +117,7 @@ public final class RationalsN extends LinearSpaceLike  {
     final UniformRandomProvider urp = Set.urp(options);
     return
       new Supplier () {
-      final Generator g = Rationals.generator(dimension(),urp);
+      final Generator g = RationalFloats.generator(dimension(),urp);
       @Override
       public final Object get () { return g.next(); } }; }
 
@@ -133,22 +133,22 @@ public final class RationalsN extends LinearSpaceLike  {
   //--------------------------------------------------------------
   // TODO: support zero-dimensional space?
 
-  private RationalsN (final int dimension) { super(dimension); }
+  private RationalFloatsN (final int dimension) { super(dimension); }
 
-  private static final IntObjectMap<RationalsN> _cache =
+  private static final IntObjectMap<RationalFloatsN> _cache =
     new IntObjectHashMap();
 
-  public static final RationalsN get (final int dimension) {
-    final RationalsN s0 = _cache.get(dimension);
+  public static final RationalFloatsN get (final int dimension) {
+    final RationalFloatsN s0 = _cache.get(dimension);
     if (null != s0) { return s0; }
-    final RationalsN s1 = new RationalsN(dimension);
+    final RationalFloatsN s1 = new RationalFloatsN(dimension);
     _cache.put(dimension,s1);
     return s1; }
 
   //--------------------------------------------------------------
 
   public static final OneSetOneOperation group (final int n) {
-    final RationalsN g = get(n);
+    final RationalFloatsN g = get(n);
     return OneSetOneOperation.commutativeGroup(
       g.adder(),
       g,
@@ -166,7 +166,7 @@ public final class RationalsN extends LinearSpaceLike  {
       TwoSetsOneOperation.linearSpaceLike(
         get(n).scaler(),
         group(n),
-        Rationals.FIELD); }
+        RationalFloats.FIELD); }
 
   private static final IntObjectMap<TwoSetsOneOperation>
   _spaceCache = new IntObjectHashMap();
