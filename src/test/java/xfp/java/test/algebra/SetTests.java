@@ -11,7 +11,6 @@ import com.google.common.collect.ImmutableMap;
 import xfp.java.Classes;
 import xfp.java.algebra.Set;
 import xfp.java.algebra.Sets;
-import xfp.java.numbers.BigDecimals;
 import xfp.java.numbers.BigFloats;
 import xfp.java.numbers.Q;
 import xfp.java.numbers.RationalFloats;
@@ -78,11 +77,6 @@ public final class SetTests {
   @Test
   public final void RationalFloats () {
     SetTests.tests(RationalFloats.get()); }
-
-  @SuppressWarnings({ "static-method" })
-  @Test
-  public final void bigDecimals () {
-    SetTests.tests(BigDecimals.get()); }
 
   //--------------------------------------------------------------
 }

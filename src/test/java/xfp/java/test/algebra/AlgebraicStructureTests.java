@@ -12,12 +12,10 @@ import com.google.common.collect.ImmutableMap;
 
 import xfp.java.algebra.Set;
 import xfp.java.algebra.Structure;
-import xfp.java.linear.BigDecimalsN;
 import xfp.java.linear.Dn;
 import xfp.java.linear.Fn;
 import xfp.java.linear.Qn;
 import xfp.java.linear.RationalFloatsN;
-import xfp.java.numbers.BigDecimals;
 import xfp.java.numbers.BigFloats;
 import xfp.java.numbers.Doubles;
 import xfp.java.numbers.Floats;
@@ -30,7 +28,7 @@ import xfp.java.prng.PRNG;
  * mvn -q -Dtest=xfp/java/test/algebra/AlgebraicStructureTests test > AST.txt
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-10-12
+ * @version 2019-10-15
  */
 
 @SuppressWarnings("unchecked")
@@ -72,11 +70,7 @@ public final class AlgebraicStructureTests {
 
     structureTests(Q.FIELD,TRYS);
 
-    structureTests(BigDecimals.ADDITIVE_MAGMA,TRYS);
-    structureTests(BigDecimals.MULTIPLICATIVE_MAGMA,TRYS);
-    structureTests(BigDecimals.RING,TRYS);
-
-    structureTests(Floats.ADDITIVE_MAGMA,TRYS);
+     structureTests(Floats.ADDITIVE_MAGMA,TRYS);
     structureTests(Floats.MULTIPLICATIVE_MAGMA,TRYS);
     structureTests(Floats.FLOATING_POINT,TRYS);
 
@@ -85,9 +79,6 @@ public final class AlgebraicStructureTests {
     structureTests(Doubles.FLOATING_POINT,TRYS);
 
     for (final int n : new int[] { 1, 3, 63, 257 }) {
-      structureTests(BigDecimalsN.group(n),SPACE_TRYS);
-      structureTests(BigDecimalsN.space(n),SPACE_TRYS);
-
       structureTests(RationalFloatsN.group(n),SPACE_TRYS);
       structureTests(RationalFloatsN.space(n),SPACE_TRYS);
 

@@ -3,13 +3,11 @@ package xfp.java.accumulators;
 import com.upokecenter.numbers.EInteger;
 import com.upokecenter.numbers.ERational;
 
-import xfp.java.numbers.ERationals;
-
 /** Naive sum of <code>double</code> values with ERational
  * accumulator (for testing).
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-10-07
+ * @version 2019-10-15
  */
 public final class ERationalAccumulator
 
@@ -90,9 +88,17 @@ extends ExactAccumulator<ERationalAccumulator> {
   // Object methods
   //--------------------------------------------------------------
 
+  public static final String toHexString (final ERational q) {
+    return
+      "(" + q.getNumerator().ToRadixString(0x10)
+      + " / "
+      //      + "\n/\n"
+      + q.getDenominator().ToRadixString(0x10) + ")"; }
+
+  //--------------------------------------------------------------
+
   @Override
-  public final String toString () {
-    return ERationals.toHexString(_sum); }
+  public final String toString () { return toHexString(_sum); }
 
   //--------------------------------------------------------------
   // construction
