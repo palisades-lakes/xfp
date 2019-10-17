@@ -1,7 +1,9 @@
-package xfp.java.accumulators;
+package xfp.java.test.accumulators;
 
 import com.upokecenter.numbers.EInteger;
 import com.upokecenter.numbers.ERational;
+
+import xfp.java.accumulators.ExactAccumulator;
 
 /** Naive sum of <code>double</code> values with ERational
  * accumulator (for testing).

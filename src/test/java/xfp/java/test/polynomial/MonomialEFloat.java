@@ -1,16 +1,17 @@
-package xfp.java.polynomial;
+package xfp.java.test.polynomial;
 
 import static com.upokecenter.numbers.EFloat.FromDouble;
 
 import com.upokecenter.numbers.EFloat;
 
 import xfp.java.linear.Dn;
+import xfp.java.polynomial.Polynomial;
 
 /** Approximate cubic {@link Polynomial} 
  * using <code>EFloat</code>.
  * 
  * @author palisades dot lakes at gmail dot com
- * @version 2019-10-08
+ * @version 2019-10-17
  */
 
 @SuppressWarnings("unchecked")

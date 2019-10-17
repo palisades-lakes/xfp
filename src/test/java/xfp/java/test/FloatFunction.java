@@ -1,4 +1,4 @@
-package xfp.java.function;
+package xfp.java.test;
 
 /** Like {@link java.util.function.DoubleFunction}.
  *

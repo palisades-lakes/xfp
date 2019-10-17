@@ -19,19 +19,17 @@ import org.junit.jupiter.api.Assertions;
 import xfp.java.Classes;
 import xfp.java.Debug;
 import xfp.java.accumulators.Accumulator;
-import xfp.java.function.FloatFunction;
-import xfp.java.function.ToFloatFunction;
 import xfp.java.linear.Dn;
 import xfp.java.numbers.Doubles;
 import xfp.java.numbers.Floats;
 import xfp.java.numbers.Natural;
 import xfp.java.numbers.NaturalDivide;
 import xfp.java.numbers.Ringlike;
-import xfp.java.polynomial.MonomialEFloat;
 import xfp.java.polynomial.Polynomial;
 import xfp.java.prng.Generator;
 import xfp.java.prng.Generators;
 import xfp.java.prng.PRNG;
+import xfp.java.test.polynomial.MonomialEFloat;
 
 /** Test utilities
  *

@@ -6,7 +6,6 @@ import xfp.java.polynomial.MonomialBigFloat;
 import xfp.java.polynomial.MonomialDouble;
 import xfp.java.polynomial.MonomialDoubleBF;
 import xfp.java.polynomial.MonomialDoubleRF;
-import xfp.java.polynomial.MonomialERational;
 import xfp.java.polynomial.MonomialRationalFloat;
 import xfp.java.test.Common;
 

@@ -1,7 +1,9 @@
-package xfp.java.accumulators;
+package xfp.java.test.accumulators;
 
 import com.upokecenter.numbers.EFloat;
 import com.upokecenter.numbers.EInteger;
+
+import xfp.java.accumulators.ExactAccumulator;
 
 /** Naive sum of <code>double</code> values with EFloat
  * accumulator (for testing).

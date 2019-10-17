@@ -1,10 +1,11 @@
-package xfp.java.polynomial;
+package xfp.java.test.polynomial;
 
 import static com.upokecenter.numbers.ERational.FromDouble;
 
 import com.upokecenter.numbers.ERational;
 
 import xfp.java.linear.Dn;
+import xfp.java.polynomial.Polynomial;
 
 /** Approximate cubic {@link Polynomial} 
  * using <code>ERational</code>.

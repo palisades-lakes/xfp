@@ -7,8 +7,8 @@ import java.util.function.IntFunction;
 import org.apache.commons.rng.UniformRandomProvider;
 
 import xfp.java.accumulators.Accumulator;
+import xfp.java.accumulators.BigFloatAccumulator;
 import xfp.java.accumulators.DistilledAccumulator;
-import xfp.java.accumulators.EFloatAccumulator;
 import xfp.java.numbers.Doubles;
 import xfp.java.prng.Generator;
 import xfp.java.prng.PRNG;
@@ -19,7 +19,7 @@ import xfp.java.prng.PRNG;
  * j --source 12 -ea src/scripts/java/xfp/java/scripts/Distill.java > distilled.txt
  * </pre>
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-23
+ * @version 2019-10-17
  */
 @SuppressWarnings("unchecked")
 public final class Distill {
@@ -126,7 +126,7 @@ public final class Distill {
 
   public static final void main (final String[] args) {
     //Debug.DEBUG=false;
-    final Accumulator bfa = EFloatAccumulator.make();
+    final Accumulator bfa = BigFloatAccumulator.make();
     final Accumulator da = DistilledAccumulator.make();
     final int dim = (32 * 1024) - 1;
     //Debug.println("dim=" + dim);

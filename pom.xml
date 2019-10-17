@@ -114,6 +114,7 @@
    <groupId>com.github.peteroupc</groupId>
    <artifactId>numbers</artifactId>
    <version>${numbers-java-version}</version>
+   <scope>test</scope>
   </dependency>
  </dependencies>
 </project>
