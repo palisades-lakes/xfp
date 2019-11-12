@@ -1,0 +1,45 @@
+\chapter{Annoyances}
+
+\section{mathematics}
+
+\section{computation}
+
+\subsection{Java}
+\lstset{language=Java}
+
+Generics
+
+Auto boxing/unboxing.
+
+Sorted collections can't handle partial ordering.
+
+BigDecimal.valueOf(x).doubleValue() != x.
+
+\subsection{Clojure}
+\lstset{language=Clojure}
+
+Standard math notation: 
+enumerated finite set: $\Set{S} = \{0, 1, 2\}$ 
+and cardinality $\#\{0, 1, 2\}
+\rightarrow 3$.
+
+\lstinline|#{0 1 2}| $\rightarrow$ \lstinline|java.util.Set|
+\lstinline|(count #{0 1 2})| $\rightarrow$
+\lstinline|3|.
+
+and
+\lstinline|{:x 1 :y 2}| $\rightarrow$ \lstinline|java.util.Map|.
+
+(double (rationalize (double x))) != (double x)
+
+Transducers compose in the reverse direction from functions:
+
+\lstinline|((comp f g) x)| $\rightarrow$
+\lstinline|(f (g x))|, but
+
+\lstinline|((comp (filter f) (map m) (reduce r)) s)| $\rightarrow$
+\lstinline|(reduce r (map m (filter f s)))|, or, to make clearer
+
+
+\lstinline|((comp (partial reduce r) (partial map m) (partial filter f)) s)| 
+$\rightarrow$ \lstinline|(reduce r (map m (filter f s)))|.

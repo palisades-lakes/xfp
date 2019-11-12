@@ -1,0 +1,54 @@
+%%% -*-TeX-*-
+%%% ====================================================================
+%%%  @LaTeX-style-file{
+%%%     author          = "Nelson H. F. Beebe",
+%%%     version         = "1.00",
+%%%     date            = "24 April 2000",
+%%%     time            = "08:43:27 MDT",
+%%%     filename        = "ieeestd.sty",
+%%%     address         = "Center for Scientific Computing
+%%%                        University of Utah
+%%%                        Department of Mathematics, 322 INSCC
+%%%                        155 S 1400 E RM 233
+%%%                        Salt Lake City, UT 84112-0090
+%%%                        USA",
+%%%     telephone       = "+1 801 581 5254",
+%%%     FAX             = "+1 801 585 1640, +1 801 581 4148",
+%%%     URL             = "http://www.math.utah.edu/~beebe",
+%%%     checksum        = "44844 54 253 2420",
+%%%     email           = "beebe@math.utah.edu, beebe@acm.org,
+%%%                        beebe@computer.org, beebe@ieee.org (Internet)",
+%%%     codetable       = "ISO/ASCII",
+%%%     keywords        = "IEEE Standards",
+%%%     supported       = "yes",
+%%%     docstring       = "This style file contains macro definitions
+%%%                        needed by ieeestd.bib.
+%%%
+%%%                        The checksum field above contains a CRC-16
+%%%                        checksum as the first value, followed by the
+%%%                        equivalent of the standard UNIX wc (word
+%%%                        count) utility output of lines, words, and
+%%%                        characters.  This is produced by Robert
+%%%                        Solovay's checksum utility.",
+%%%  }
+%%% ====================================================================
+
+\ifx \documentclass \undefined
+    %% LaTeX 2.09
+    \ifx \undefined \textregistered
+        %% NB: This definition is deficient: the letter R does not
+        %% scale according to the prevailing font size.  Removing the
+        %% \small makes the R overlap the surrounding circle, sigh...
+        \def \textregistered {{\ooalign{\hfil \raise.07ex\hbox{\small\sc R}\hfil
+                               \crcr \mathhexbox20D}}}%
+    \fi
+\else
+    %% LaTeX 2e and later
+    \ifx \undefined \textregistered
+	\def \textregistered {\textcircled{{\sc R}}}%
+    \fi
+    \ifx \undefined \textcircled
+	\def \textcircled #1{\ooalign{\hfil \raise .07ex\hbox {#1}\hfil
+                             \crcr \char 79}}%
+    \fi
+\fi

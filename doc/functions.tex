@@ -1,0 +1,272 @@
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}}
+\levelstay{Functions and relations}
+\label{sec:Functions-and-relations}
+
+In mathematics literature, \textit{function} is usually defined as
+a special kind of \textit{relation} --- essentially a set of
+ordered pairs with certain properties.
+
+This approach is useful for some purposes, but here we will be
+more interested in ``computable'' functions, at least in the sense
+that a function is a ``machine'' that takes an element of one set
+as input and returns an element of another, with the constraint
+that a given input always returns the same output.
+
+Because we need the notion of ``relation'' anyway, I'm going to
+provide both definitions.
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\levelstay{Relations}
+\label{sec:Relations}
+
+A \textit{relation}, 
+$\Set{R}$, on $\Set{S}_0, \Set{S}_1, \ldots \Set{S}_{n-1}$,  
+is any subset 
+$\Set{R} \subseteq \Set{S}_0 \times \Set{S}_1 \times \ldots 
+\times \Set{S}_{n-1}$,
+that is, a set of tuples.
+
+Ambiguity note: a given set of tuples, $\Set{R}$, can be
+considered as a relation over many cartesian product sets.
+The minimal such set is 
+$\Set{R}_0 \times \Set{R}_1 \times \ldots \times
+\Set{R}_{n-1}$, 
+where 
+$\Set{R}_i = \SetSpec{ x }{ \exists r 
+\in \Set{R} \text{ s.t. } r_i = x }$.
+
+A general \textit{binary relation} is a set of ordered
+pairs $\Set{R} \subseteq \Set{S}_0 \times \Set{S}_1$.
+It's common to write a binary relation as a predicate, 
+$r(s_0,s_1) = ([s_0 \, s_1] \in \Set{R})$,
+or $(r \, s_0 \, s_1)$ in pseudo-code,
+or as a binary operation $s_0 \, R \, s_1$.
+
+An important special case
+are binary relations on $\Set{S}^2 = \Set{S} \times \Set{S}$
+(often just written as ``binary relation on $\Set{S}$''). 
+In this case we can define certain properties:
+
+\begin{description}
+\item[Transitive]
+$r(s_0,s_1) \text{ and } r(s_1,s_2) \Rightarrow r(s_0,s_2)$.
+\item[Reflexive] $r(s,s)$ is always true.
+\item[Symmetric] For $s_0 \neq s_1$, $r(s_0,s_1)$ implies
+$r(s_1,s_0)$.
+\item[Antisymmetric] For $s_0 \neq s_1$, $r(s_0,s_1)$ implies not
+$r(s_1,s_0)$.
+\end{description}
+These properties determine 2 important classes of relations:
+\begin{description}
+\item[Equivalence] Transitive, reflexive, and symmetric.
+\item[Partial order] \label{def:partial-order}
+Transitive, reflexive, and antisymmetric.
+\end{description}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\levelstay{Functions}
+\label{sec:Functions}
+
+A \textit{functional} binary relation, $\Set{F}$ on $\Set{X}
+\times \Set{Y}$ has exactly one $y \in \Set{Y}$ for each
+$x \in \Set{X}$ such that $[x \, y] \in \Set{F}$.
+More conventional notation writes the \textit{function}, 
+$f : \Set{X} \rightarrow \Set{Y}$ as $y = f(x)$.
+In that case, $\Set{X}$ is the \textit{domain} of $f$
+and $\Set{Y}$ is the $codomain$.
+
+It is nearly universal to extend or identify a function $f$ that maps 
+elements of the domain $\Set{X}$
+to elements of 
+the codomain $\Set{Y}$
+the closely related function that maps
+subsets of $\Set{X}$ to subsets of $\Set{Y}$,
+via $f\left( \Set{A} \right) = 
+\SetSpec{y \in \Set{Y}}{\exists \, x \in \Set{A} 
+\text{ such that } f\left( x \right) = y}$
+
+The \textit{range} of $f$ is then $f\left( \Set{X} \right)$.
+
+Arbitrariness of codomain:
+Note that $\text{range}\left( f \right)$ 
+is unambiguous.
+If  $f_0 : \Set{X} \rightarrow \Set{Y}_0$,
+and $\Set{Y}_0 \subset \rightarrow \Set{Y}_1$,
+then is $f_1 : \Set{X} \rightarrow \Set{Y}_1$
+defined by $f_1(x) = f_0(x)$
+the same function as $f_0$?
+
+We will also frequently encounter the notion of the 
+\textit{support} of a function, which is less consisntently
+defined. In general, the support is a subset of the domain
+where the function takes on some non-trivial value, for example,
+where a numerically valued function is non-zero, or sometimes,
+finite.
+
+Partial functions: support vs domain.
+
+Any function, $f : \Set{X} \rightarrow \Set{Y}$ defines an
+equivalence relation on $\Set{X}$ via 
+$\Set{E}_f = \SetSpec{[x_0 \, x_1]}{f(x_0) = f(x_1)}$
+(see~\ref{sec:Implicit-functions}).
+
+$\Set{F}\left( \Set{D}, \Set{C} \right)$ is the set of all 
+functions with domain $\Set{D}$ and codomain $\Set{C}.$
+
+
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\levelstay{Equivalence classes and quotient sets}
+
+If $\Set{E}$ is an equivalence relation on $\Set{S}^2$, then we
+can define the \textit{equivalence class} of $s_0$, $E(s_0) = \{
+\SetSpec{s_1 \in \Set{S}}{[s_0 \, s_1] \in \Set{E} }$.
+The set of distinct equivalence classes partitions $\Set{S}$,
+and is called the \textit{quotient set}: $\Set{S} / \Set{E}$.
+
+In the case where the equivalence relation is derived from a
+function, we write $\Set{S} / f$.
+
+Equivalence classes and quotient sets will turn out to be
+important. A common representational/implementation trick is to
+use a larger but simpler (in some sense) space for calculations
+which are meant to apply to a quotient space that actually has the
+properties of interest. Homogeneous coordinates for affine and
+projective spaces  are an important example.
+The first one we will encounter here will be the rational numbers,
+which are represented/implemented as pairs of integers
+$[\text{numerator} \, \text{denominator}]$, but the actual
+rational numbers are the equivalence classes defined by 
+$\SetSpec{ [[p_0 \, q_0] \, [p_1 \, q_1]]}{p_0*q_1 = p_1*q_0 }$,
+that is, $[1 \, 2]$ and $[2 \, 4]$ represent the same rational.
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\levelstay{Inverses and pseudo-inverses}
+\label{sec:Inverses-and-pseudo-inverses}
+
+Given a function $f : \Set{D} \mapsto \Set{C}$,
+the \textit{inverse} of $f$ is 
+$f^{-1}(c) = \SetSpec{d}{f(d) = c}$.
+Note that $f^{-1} : \Set{C}  \mapsto \PowerSet{\Set{D}}$.
+
+$\Set{L}\left( f , c \right) = f^{-1}(c)$ is a \textit{level set} of
+$f$ at $c$.
+
+For more symmetry, we can extend $f$ and $f^{-1}$ to 
+$\PowerSet{\Set{D}}  , \PowerSet{\Set{C}}$
+by defining
+$f(\Set{S}) = 
+\SetSpec{c}{\exists \, d \, \in \Set{S} \; \text{s.t.} \; c = f \left( d \right)}$
+
+The usual definition of inverse treats $f^{-1}$
+as a function from $\Set{C} \mapsto \Set{D}$,
+which is undefined where the value of the true
+inverse is not a set containing a single point.
+
+\textbf{TODO:} When is a function 
+$\PowerSet{\Set{D}}  \mapsto \PowerSet{\Set{C}}$
+derivable from a function $\Set{D} \mapsto \Set{C}$?
+
+Inverse function theorem~\cite[Theorem~2-1]{spivak-1965}
+for $\Space{R}^n$. 
+
+Generalizations?~\cite{wiki:Inverse-function-theorem}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\levelstay{Level sets and implicit functions}
+\label{sec:Implicit-functions}
+
+Suppose 
+$f : \left( \Set{D}_0 \times \Set{D}_1 \right) \mapsto \Set{C}$.
+Then each level set $f^{-1}\left( c \right)$ defines a relation on 
+$\Set{R}_{f^{-1}(c)} \left( \Set{D}_0 , \Set{D}_1 \right)$.
+If that relation is a function
+(one $d_1$ paired to each $d_0$),
+we call it an \textit{implicit function},
+which we might write $g_{f^{-1}(c)} : \Set{D}_0 \mapsto \Set{D}_1$
+
+Implicit functions are generally difficult to use,
+because they don't tell us how to compute 
+$g_{f^{-1}(c)} \left( d_0 \right)$.
+Essentially, one has to use an iterativc zero-finding 
+algorithm, which is difficult and non-robust except
+for very low dimensional problems.
+An alternative is to minimize something like
+$\| c - f\left( d_0, d_1 \right) \|^2$ over $d_0$,
+and check that the minimum value is close enough to $0$.
+
+\textbf{TODO:} When does a level set correspond to a function?
+Implicit function theorem~\cite[Theorem~2-2]{spivak-1965}
+for $\Space{R}^n$. 
+
+Generalizations?~\cite{wiki:Implicit-function-theorem,
+wiki:Inverse-function-theorem}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\levelstay{Multiple arguments}
+\label{sec:Multiple-arguments}
+
+Often useful to consider 
+functions of several arguments
+$f \left( x_0, x_1, \ldots x_{n-1}\right)$.
+
+Simpler in general to deal with functions of one argument.
+Two ways to identify a function of several argmuments
+with a single argument function:
+\begin{description}
+\item[Catesian product domains]
+Define $f \left( x_0, x_1, \ldots x_{n-1} \right) 
+= f \left( \left[x_0, x_1, \ldots , x_{n-1} \right]\right)$
+where $\left[x_0, x_1, \ldots x_{n-1} \right] \in
+\Set{X}_0 \times \Set{X}_1 \times \ldots \times \Set{X}_{n-1}$. 
+(Note that domain/support may be a strict subset of full cartesian 
+product.)
+\item[Currying]
+In pseudo-lisp: $\left(f \, x_0 \, x_1 \, \ldots x_{n-1} \right) 
+= 
+\left(
+\left(
+\ldots 
+\left( 
+\left( 
+f 
+\, x_0 
+\right) 
+\, x_1
+\right) 
+\ldots 
+\right) 
+\, x_{n-1}
+\right) 
+$.
+This is easier to follow in the $2$ argument case.
+Then we interpret $f : \Set{X}_0 \rightarrow 
+\Set{F}\left(\Set{X}_1, \Set{Y} \right)$,
+that is, the value $f \left( x_0 \right)$ is a function 
+$\Set{X}_1 \mapsto \Set{Y}$,
+so, in confusing infix notation,
+$f \left( x_0 , x_1 \right) = 
+f \left( x_0 \right) \left( x_1 \right) \Rightarrow y \in \Set{Y}$,
+or, in pseudo-lisp, 
+$\left( f \, x_0 \, x_1 \right) = \left( \left( f \, x_0 \right) x_1 \right) \Rightarrow y$
+\end{description}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+%\levelstay{Computable functions}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+%\levelstay{implementation}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+%\levelstay{examples}
+

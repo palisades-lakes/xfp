@@ -1,0 +1,1712 @@
+\setcounter{currentlevel}{\value{baseSectionLevel}}
+\levelstay{Polynomial Interpolation}
+
+\cite{wiki:Interpolation,wiki:Polynomial-interpolation}
+
+TODO:
+\begin{itemize}
+\item Better to way to characterize space of polynomials,
+than just monomial form?
+\item Polynomial form supporting updating algorithm when
+ adding and droping constraints.
+\item Basis functions supporting updating algorithm when
+ adding and droping constraints --- any difference from above?
+\item numerical accuracy by representation and degree?
+\item sensitivity of interpolant values as function of constraint
+ values, as function of degree of polynomial?
+\item deriviative of argmin as function of knot location, value, 
+ slope, etc., as function of degree.
+ \item Tests for 'singular' interpolation problem in the sense 
+ that not all coefficients are determined --- 
+ for example, $3$ xy pairs that lie on a line. 
+ \item Consistent naming for basis functions and coefficients?
+\end{itemize}
+
+Motivation: 
+\begin{enumerate}
+ \item Minimization of real-valued functions on linear spaces.
+ \item Iterated line search methods.
+ \item $1$d minimization of real-valued functions on a line,
+ identified with \glssymbol{RealNumbers}.
+ \item $1$d minimization methods based on visiting the
+ argmin of a model function.
+ \item model function constructed using values and derivatives
+ of the $1$d objective function at recently visited locations.
+ \item common model function are low degree polynomials 
+ interpolating the supplied values and derivatives.
+\end{enumerate}
+
+$1$d minimization methods only use the argmin of the model 
+function, so constructing a representation of the interpolating 
+polynomial is usually unnecessary expense.
+This code is intended to make it easy to either 
+compute the argmin alone,
+or reify the model function, for visualization and debugging.
+(Maybe a lazy polynomial constructor that provides argmin with
+minimum effort and defers other work until first call to 
+\texttt{value} or \texttt{derivative}.)
+
+The polynomials of degree $k$ form a linear space of dimension
+$k+1$~\cite{wiki:Polynomial}.
+The most common interpolating polynomials are quadratic or cubic,
+so we will have $3$ or $4$ dimensions (degrees of freedom) to play
+with. 
+(I will discuss affine and constant interpolation for 
+completeness.)
+
+Why not higher order? Are other interpolating functions useful?
+What about splines?
+
+An interpolating polynomial matches some number of $x,y$
+and $x,d$ pairs, where $x$ is a location in the domain,
+$y$ a value in the codomain (range) and $d$ the slope.
+
+The polynomials of degree $k$ for a linear space of dimension
+$k+1$. 
+
+A degree $k$ polynomial can match a combination of $k+1$ value 
+and/or 
+slope constraints, where there are at most $k$ slope constraints,
+and where the value constraints are at distinct $x$'s and the
+slope constraint are at distinct $x$'s, but a slope and a value 
+constraint can be given at the same $x$.
+
+A key issue is the choice of basis.
+
+Some bases are may be more convenient when constructing a 
+polynomial by interpolation.
+
+Another consideration is the accuracy and cost of 
+argmin \texttt{argmin}, \texttt{value}, and \texttt{derivative} 
+when the interpolating polynomial is approximated with 
+floating point numbers.
+
+\texttt{BigFraction} implementation
+
+Accuracy of evaluating the interpolating polynomial
+versus how far the interpolating function is from the function it
+interpolates.
+
+Extrapolation often results when using the \texttt{argmin}.
+Relationship between \texttt{argmin} and inverse interpolation.
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\levelstay{Monomial basis}
+\label{sec:Monomial-basis}
+
+The most common basis is the monomial:
+\begin{equation}
+\mu(x) = \sum_{i=0}^{k} \mu_i x^i
+\end{equation}
+
+\textbf{TODO:} 
+\begin{itemize}
+  \item Evaluation speed?
+  \item Horner's algorithm and fma
+  \item differentiation/argmin advantage?
+  \item numerical accuracy?
+  \item easy to sum and multiply and divide within monomial
+  representation
+  \item degree obvious
+\end{itemize}
+
+(Note: these basis function aren't orthogonal or normalized)
+in any
+sense. In fact, choosing a distance or an inner product for
+a polynomial space is not a simple question.)
+
+Constructing an interpolating polynomial in the monomial basis
+requires solving a dense system of equations. 
+No advantage for small changes to constraints.
+
+Suppose, for example, we have $x_0,y_0,d_0$ and
+$x_1,y_1,d_1$, that is, we have specified the value and slope we
+want at $x_0 \neq x_1$.
+That's $4$ constraints, impying a cubic interpolant.
+To determine the monomial basis coefficients,
+solve the linear system:
+
+\begin{equation}
+\begin{pmatrix}
+y_0 \\ d_0 \\ y_1 \\ d_1
+\end{pmatrix}
+=
+\begin{pmatrix}
+1 & x_0 & \phantom{2} x_0^2 & \phantom{3} x_0^3 \\
+  & 1   & 2 x_0 & 3 x_0^2 \\
+1 & x_1 & \phantom{2} x_1^2 & \phantom{3} x_1^3 \\
+  & 1   & 2 x_1 & 3 x_1^2 
+\end{pmatrix}
+\begin{pmatrix}
+\mu_0 \\ \mu_1 \\ \mu_2 \\ \mu_3
+\end{pmatrix}
+\end{equation}
+
+% \begin{align}
+%  y_0 & = \mu_0 + \mu_1 x_0 + \phantom{2} \mu_2 x_0^2 + \phantom{3} \mu_3 x_0^3 \\
+%  d_0 & = \phantom{\mu_0} \phantom{+} \mu_1 \phantom{x_0} + 2 \mu_2 x_0 + 3 \mu_3 x_0^2 \nonumber \\
+%  y_1 & = \mu_0 + \mu_1 x_1 + \phantom{2} \mu_2 x_1^2 + \phantom{3} \mu_3 x_1^3 \nonumber \\
+%  d_1 & = \phantom{\mu_0} \phantom{+} \mu_1 \phantom{x_0} + 2 \mu_2 x_1 + 3 \mu_3 x_1^2 \nonumber
+% \end{align}
+% 
+% \begin{align}
+%  y_0 = & {\mu_0 + \mu_1 x_0 + \phantom{2} \mu_2 x_0^2 + \phantom{3} \mu_3 x_0^3} \\
+%  d_0 = & \pushright{\mu_1 \phantom{x_0} + 2 \mu_2 x_0 + 3 \mu_3 x_0^2} \nonumber \\
+%  y_1 = & {\mu_0 + \mu_1 x_1 + \phantom{2} \mu_2 x_1^2 + \phantom{3} \mu_3 x_1^3 }\nonumber \\
+%  d_1 = & \pushright{\mu_1 \phantom{x_0} + 2 \mu_2 x_1 + 3 \mu_3 x_1^2} \nonumber
+% \end{align}
+% 
+% \begin{align}
+%  y_0 = & {\mu_0 + \mu_1 x_0 + \mu_2 x_0^2 + \mu_3 x_0^3} \\
+%  d_0 = & \pushright{\mu_1 + 2 \mu_2 x_0 + 3 \mu_3 x_0^2} \nonumber \\
+%  y_1 = & {\mu_0 + \mu_1 x_1 + \mu_2 x_1^2 + \mu_3 x_1^3 }\nonumber \\
+%  d_1 = & \pushright{\mu_1 + 2 \mu_2 x_1 + 3 \mu_3 x_1^2} \nonumber
+% \end{align}
+% 
+% \begin{align}\label{eq:hermite-eqns}
+%  y_0 & = \mu_0 + \mu_1 x_0 + \mu_2 x_0^2 + \mu_3 x_0^3 \\
+%  d_0 & = \mu_1 + 2 \mu_2 x_0 + 3 \mu_3 x_0^2 \nonumber \\
+%  y_1 & = \mu_0 + \mu_1 x_1 + \mu_2 x_1^2 + \mu_3 x_1^3 \nonumber \\
+%  d_1 & = \mu_1 + 2 \mu_2 x_1 + 3 \mu_3 x_1^2 \nonumber 
+% \end{align}
+% 
+% \begin{align}
+%  y_0 = &\mu_0 + \mu_1 x_0 + \mu_2 x_0^2 + \mu_3 x_0^3 \\
+%  d_0 = &\specialcell{\hfill \mu_1 + 2 \mu_2 x_0 + 3 \mu_3 x_0^2} \nonumber \\
+%  y_1 = &\mu_0 + \mu_1 x_1 + \mu_2 x_1^2 + \mu_3 x_1^3 \nonumber \\
+%  d_1 = &\specialcell{{\hfill \mu_1 + 2 \mu_2 x_1 + 3 \mu_3 x_1^2}} \nonumber 
+% \end{align}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Differentiation and \texttt{argmin}}
+
+Degree $k$ polynomial:
+\begin{align}
+\mu(x) & = \sum_{i=0}^{k} \mu_i x^i
+\\
+\partial{\mu}(x) & = \sum_{i=1}^{k} i \mu_i x^{i-1}
+\nonumber
+\\
+\partial^2{\mu}(x) & = \sum_{i=2}^{k} i (i-1) \mu_i x^{i-2}
+\nonumber
+\end{align}
+
+Critical points $\hat{x}$ occur where 
+$ 0 = \partial{\mu}(\hat{x}) $,
+with $\hat{x}$ is a local minimum if 
+$ 0 < \partial^2{\mu}(\hat{x}) $.
+It can be helpful to look at how $\hat{x}$ depends
+on the parameters of the polynomial representation,
+and on the inputs to interpolation that determine those 
+parameters.
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Constant Monomial}
+
+\begin{equation}
+\mu(x) = \mu_0
+\end{equation}
+
+Constant monomials have no critical points or local/global
+minima. 
+(So implementation returns \texttt{NaN} for \texttt{(argmin mu)}).
+
+The only possibility is to 'interpolate' $(x_0,y_0)$ with
+$\mu_0 = y_0$ (and $\mu_i = 0$ for other $i$). 
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Affine Monomial}
+
+\begin{equation}
+\mu(x) = \mu_0 + \mu_1 x
+\end{equation}
+
+Affine monomials have no critical points.
+The global minimum/maximum is at $\mp \sign(\mu_1) \infty$.
+
+For interpolation, there are $2$ possibilities, finding the line thru $2$
+points, $(x_0,y_0)$ and $(x_1,y_1)$, or or matching the value and slope at
+$(x_0,y_0,d_0)$.
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-3}
+\levelstay{Input: $(x_0,y_0),(x_1,y_1)$}
+
+\begin{align}
+  y_0 & = \mu_0+\mu_1 x_0  \\
+   y_1 & = \mu_0+\mu_1 x_1  
+\end{align}
+
+ 
+\begin{align}
+  \mu_0 & = \frac
+{x_0 y_1 - x_1 y_0}
+{x_0 - x_1} \\
+   \mu_1 & = \frac
+{y_0 - y_1}
+{x_0 - x_1} 
+\end{align}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-3}
+\levelstay{Input: $(x_0,y_0,d_0)$}
+
+\begin{align}
+  y_0 & = \mu_0+\mu_1 x_0  \\
+   d_1 & = \mu_1  
+\end{align}
+
+ 
+\begin{align}
+  \mu_0 & =  - d_1 x_0+y_0  \\
+   \mu_1 & = d_1  
+\end{align}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Quadratic Monomial}
+
+\begin{equation}
+\mu(x) = \mu_0 + \mu_1 x + \mu_2 x^2
+\end{equation}
+
+Critical point at
+\begin{equation}
+\hat{x} = \frac{- \mu_1}{2 \mu_2}
+\end{equation}
+$\hat{x}$ is the global minimum if $\mu_2>0$ 
+and the global maximum if $\mu_2>0$.
+If $\mu_2 = 0$, the global maximum is at 
+$\text{sign}(\mu_1)\infty$
+and the minimum is at $-\text{sign}(\mu_1)\infty$.
+
+Dependence on monomial coeficients:
+\begin{equation}
+\nabla_{\vec{\mu}} \hat{x} =
+\begin{pmatrix}[2]
+0 
+\\
+\dfrac{-1}{2 \mu_2} 
+\\
+\dfrac{\mu_1}{\mu_2^2}
+\end{pmatrix}
+\end{equation}
+
+Note that $\hat{x} \to  \pm \infty$ as $\mu_2 \to 0$. 
+This is not surprising, since $\mu_2 = 0$ is equivalent to
+an affine polynomial, which has no critical points.
+This key issue it raises is how, for each concrete problem,
+to determine what degree interpolant the inputs can support,\
+and reverting to a lower degree polynomial when that is all that
+can be accurately fit.
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-3}
+\levelstay{Input: $(x_0,y_0), (x_1,y_1), (x_2,y_2)$}
+\label{sec:monomial-yyy}
+
+Constraints:
+\begin{align}
+y_0 & = \mu_0+\mu_1 x_0+\mu_2 x_0^{2}  
+\\
+y_1 & = \mu_0+\mu_1 x_1+\mu_2 x_1^{2}  
+\nonumber 
+\\
+y_2 & = \mu_0+\mu_1 x_2+\mu_2 x_2^{2}  
+\nonumber 
+\\
+0 & = \mu_1 + 2 \mu_2 \hat{x}  
+\nonumber 
+\end{align}
+
+Solution (using $z_{ij} \defeq z_i - z_j$):
+\begin{align}
+\mu_0 & =
+- \frac{
+x_0 x_1 y_2 x_{10}
++
+x_1 x_2 y_0 x_{21}
++
+x_2 x_0 y_1 x_{02}
+}{
+x_{10} x_{21} x_{02}
+} 
+\\
+\mu_1 & =
+- \frac{
+x_0^{2} y_{21}
++ 
+x_1^{2} y_{02} 
++
+x_2^{2} y_{10}
+}{
+x_{10} x_{21} x_{02}
+} 
+\nonumber \\
+\mu_2 & = 
+\frac{
+x_0 y_{21} 
++
+x_1 y_{02}
++
+x_2 y_{10} 
+}{
+x_{10} x_{21} x_{02}
+ } 
+\nonumber  \\ 
+ \hat{x} & = 
+\frac{
+x_0^{2} y_{21} 
+ +
+x_1^{2} y_{02} 
+ +
+x_2^{2} y_{10} 
+}{
+2 \left(
+x_0 y_{21} 
++ 
+x_1 y_{02} 
++ 
+x_2 y_{10}  
+\right)
+}
+\nonumber 
+\end{align}
+
+Derivative of $\hat{x}$ with respect to inputs
+$(x_0,y_0,x_1,y_1,x_2,y_2)$
+(using $z_{ij} \defeq z_i - z_j$):
+
+\begin{equation}
+\nabla \hat{x} =
+\begin{pmatrix}[3]
+\dfrac{
+\left(
+x_0^2 y_{21}
+-
+x_1 \left( x_1 - 2 x_0 \right) y_{02}
+- 
+x_2 \left( x_2 - 2 x_0 \right) y_{10}
+\right)
+y_{21}
+}{ %---------------------------------------------------
+2 \left( x_0 y_{21} + x_1 y_{02} + x_2 y_{10} \right)^{2}
+} 
+\\ %---------------------------------------------------
+\dfrac{
+- x_{10} x_{02} x_{21} y_{21}
+}{
+2 \left( x_0 y_{21} + x_1 y_{02} + x_2 y_{10} \right)^{2}
+} 
+\\  %---------------------------------------------------
+\dfrac{
+\left(
+x_1^2 y_{02}
+-
+x_2 \left( x_2 - 2 x_1 \right) y_{10}
+- 
+x_0 \left( x_0 - 2 x_1 \right) y_{21}
+\right)
+y_{02}
+}{ %---------------------------------------------------
+2 \left( x_0 y_{21} + x_1 y_{02} + x_2 y_{10} \right)^{2}
+}
+\\ %---------------------------------------------------
+\dfrac{
+- x_{21} x_{10} x_{02} y_{02}
+}{ %---------------------------------------------------
+2 \left( x_0 y_{21} + x_1 y_{02} + x_2 y_{10} \right)^{2}
+} 
+\\ %---------------------------------------------------
+\dfrac{
+\left(
+x_2^2 y_{10}
+-
+x_0 \left( x_0 - 2 x_2 \right) y_{21}
+- 
+x_1 \left( x_1 - 2 x_2 \right) y_{02}
+\right)
+y_{10}
+}{ %---------------------------------------------------
+2 \left( x_0 y_{21} + x_1 y_{02} + x_2 y_{10} \right)^{2}
+}
+\\ %---------------------------------------------------
+\dfrac{
+- x_{02} x_{21} x_{10} y_{10}
+}{ %---------------------------------------------------
+2 \left( x_0 y_{21} + x_1 y_{02} + x_2 y_{10} \right)^{2}
+}
+\end{pmatrix}
+\end{equation}
+
+Note that all the components of the gradient have the same 
+denominatior, and
+$\hat{x}$ is unstable when that denominator is small.
+Also note that:
+\begin{equation}
+x_0 y_{21} + x_1 y_{02} + x_2 y_{10}
+=
+- \left(
+y_0 x_{21} + y_1 x_{02} + y_2 x_{10}
+\right)
+\end{equation}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-3}
+\levelstay{Input: 
+\texorpdfstring{$(x_0,y_0),(x_1,y_1,d_1)$}{(x0,y0),(x1,y1,d1)}}
+\label{sec:monomial-yyd}
+
+This not one of the standard interpolation problems.
+It's close to hermite interpolation,
+which uses a cubic polynomial to match
+$(x_0,y_0,d_0),(x_1,y_1,d_1)$.
+We'll see this in detail below,
+in section~\ref{sec:Monomial-cubic-hermite}.
+
+\textbf{Questions:}
+Does this have advantages compared to the cubic hermite argmin?
+Is the cubic argmin more
+unstable, especially with respect to changes in the
+slope constraint that is farther away?
+When used for $1$d optimization,
+does the cubic argmin tend to get more unstable as we get closer
+to the objective function's argmin, 
+when we are likely to be working in a neightborhood where
+the objective is close to quadratic?
+
+\newpage 
+
+Constraints:
+\begin{align}
+y_0 & = \mu_0+\mu_1 x_0+\mu_2 x_0^{2}  
+\\
+y_1 & = \mu_0+\mu_1 x_0+\mu_2 x_1^{2}  
+\nonumber
+\\
+d_1 & = \mu_1 + 2 \mu_2 x_1  
+\nonumber
+\\
+0 & = \mu_1 + 2 \mu_2 \hat{x}  
+\nonumber
+\end{align}
+
+Solution:
+\begin{align}
+\mu_0 & =
+\dfrac{
+x_0 x_{10} \left( x_1 d_1 - x_0 y_1 \right) 
++ x_1 \left( x_1 y_0 - x_0 y_1 \right)
+}{x_{10}^{2}}
+\\
+\mu_1 & =
+\dfrac{2 y_{10} x_1 - \left(x_0+x_1\right) x_{10} d_1}{x_{10}^{2}}
+\nonumber
+\\
+\mu_2 & = \dfrac{x_{10} d_1 - y_{10}}{x_{10}^{2}}
+\nonumber 
+\\
+\hat{x} & =
+\dfrac{
+\left(x_0+x_1\right) x_{10} d_1 - 2 y_{10} x_1
+}{2 \left( x_{10} d_1 - y_{10} \right)}
+\nonumber 
+\end{align}
+
+\newpage
+
+Derivative of $\hat{x}$ with respect to inputs
+$(x_0,y_0,x_1,y_1,d_1)$,
+using $z_{ij} \defeq z_i - z_j$:
+\begin{equation}
+\nabla \hat{x} =
+\begin{pmatrix}[3]
+\dfrac{
+x_{10} d_1 \left[ \left(x_1 d_0 - x_0 d_1 \right) -2 y_{10}\right]
+}{
+2 \left(y_{10} - x_{10} d_1\right)^{2}
+}
+\\
+\dfrac{
+d_1 x_{10}^{2}
+}{
+2 \left(y_{10} - x_{10} d_1\right)^{2}
+} 
+\\
+\dfrac{
+d_1 \left[ 2 y_{10} - \left( x_0 + x_1 \right) x_{10} d_1 \right]
++
+2 
+\left(y_{10} - x_1 d_1 \right) \left( y_{10} - x_{10} d_1 \right)
+}{
+2 \left(y_{10} - x_{10} d_1\right)^{2}
+}
+\\
+\dfrac{
+-d_1 x_{01}^{2}
+}{
+2 \left(y_{10} - x_{10} d_1\right)^{2}
+}
+\\ 
+\dfrac{x_{10}^{2} y_{10}}{
+2 \left(y_{10} - x_{10} d_1\right)^{2}
+}
+\end{pmatrix}
+\end{equation}
+%\newgeometry{one=false}
+Note $\hat{x} \to \pm \infty$ if $y_{10} \to x_{10} d_1$,
+in other words, if the constraints are consistent with an
+affine interpolant.
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-3}
+\levelstay{Input: $(x_0,d_0),(x_1,y_1,d_1)$}
+\label{sec:monomial-dyd}
+
+Like section~\ref{sec:monomial-yyd},
+this is another semi-hermite interpolation problem,
+in this case, dropping one of the value constraints to enable 
+quadratic interpolation.
+
+A perhaps better way to think about it is as an interpolation
+version of the \textit{secant step.}
+
+The secant step generates a guess for a critical point
+of a function to be minimized using affine interpolation
+of $2$ slopes to find an approximate zero of the derivative.
+Here, I am adding a not-strictly-necessary value constraint 
+to fully specify a quadratic interpolating function that can be 
+plotted for debugging.
+
+Constraints:
+\begin{align}
+d_0 & = \mu_1 + 2 \mu_2 x_0
+\\
+y_1 & = \mu_0 + \mu_1 x_1 + \mu_2 x_1^2
+\nonumber
+\\
+d_1 & = \mu_1 + 2 \mu_2 x_1
+\nonumber
+\\
+0 & = \mu_1 + 2 \mu_2 \hat{x}
+\nonumber
+\end{align}
+
+Solution:
+\begin{align}
+\mu_0 & = 
+y_1 
+- 
+\dfrac{d_1}{2}
+-
+\dfrac{x_1 \left[x_1 d_0 - x_0 d_1 \right]}{2 x_{10}}
+\\
+\mu_1 & =
+\dfrac{x_1 d_0 - x_0 d_1}{x_{10}}
+\nonumber
+\\
+\mu_2 & = \dfrac{d_{10}}{2 x_{10}}
+\nonumber
+\\
+\hat{x} & = \dfrac{- \left( x_1 d_0 - x_0 d_1 \right)}{d_{10}}
+\nonumber
+\end{align}
+
+Derivative of $\hat{x}$ with respect to inputs
+$(x_0,d_0,x_1,y_1,d_1)$,
+using $z_{ij} \defeq z_i - z_j$:
+\begin{equation}
+\nabla \hat{x} =
+\begin{pmatrix}[3]
+\dfrac{d_1}{d_{10}}
+\\
+\dfrac{ x_{10} d_1}{d_{10}^{2}}
+\\
+\dfrac{- d_0}{d_{10}}
+\\
+0
+\\
+\dfrac{- x_{10} d_0}{d_{10}^{2}
+}
+\end{pmatrix}
+\end{equation}
+ 
+Note that $\hat{x} \to \pm \infty$ as $d_{10} \to 0$,
+in other words,
+if the affine interpolant of the slopes is constant,
+either no zero or all zero.
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Cubic Monomial}
+
+\begin{equation}
+\mu(x) = \mu_0 + \mu_1 x + \mu_2 x^2 + \mu_3 x^3
+\end{equation}
+Critical points are at
+\begin{equation}
+\hat{x}_{\pm} = \frac{-\mu_2 \pm \sqrt{ \mu_2^{2} - 3 \mu_1 \mu_3 }}{3 \mu_3}
+\end{equation}
+when $\mu_2^{2} > 3 \mu_1 \mu_3$.
+One point is a local minimum, one a local maximum, 
+determined by the signs of of the second derivatives
+$\partial^2\mu(\hat{x}_{\pm}) = 2 \mu_2 + 6 \mu_3 \hat{x}_{\pm}$.
+
+If $\mu_2^{2} = 3 \mu_1 \mu_3$, 
+then $\hat{x} = \hat{x}_{+} = \hat{x}_{-}$ is just a stationary
+point, neither a local minimum or maximum.
+
+If $\mu_2^{2} < 3 \mu_1 \mu_3$, then there are no critical points,
+no local minima/maxima, and the global minimum (maximum) is at
+$\mp\text{sign}(\mu_3)\infty$.
+
+Dependence on monomial coeficients:
+\begin{equation}
+\nabla_{\vec{\mu}} \hat{x} =
+\begin{pmatrix}[4]
+0 
+\\
+\dfrac{
+\mp \mu_3^{2}
+}{
+2 \sqrt{\mu_2^{2} -3 \mu_1 \mu_3}
+}
+\\
+\dfrac{
+-\mu_3 \left(\sqrt{\mu_2^{2} -3 \mu_1 \mu_3} \mp \mu_2\right)
+}{
+3 \sqrt{\mu_2^{2} -3 \mu_1 \mu_3}
+}
+\\
+\dfrac{
+\mp \mu_1 \mu_3
++ 2 \sqrt{\mu_2^{2} - 3 \mu_1 \mu_3}
+\left(\pm \sqrt{\mu_2^{2} - 3 \mu_1 \mu_3}  - \mu_2 \right)
+}{
+6 \sqrt{\mu_2^{2} -3 \mu_1 \mu_3}
+}
+\end{pmatrix}
+\end{equation}
+
+%-----------------------------------------------------------------
+% \setcounter{currentlevel}{\value{baseSectionLevel}-3}
+% \levelstay{Input: $(x_0,y_0),(x_1,y_1),(x_2,y_2),(x_3,y_3)$}
+% \label{sec:monomial-yyyy}
+% 
+% Constraints:
+% \begin{equation}
+% \begin{aligned}
+% y_0 & = \mu_0 + \mu_1 x_0 + \mu_2 x_0^2 + \mu_3 x_0^3
+% \\
+% y_1 & = \mu_0 + \mu_1 x_1 + \mu_2 x_1^2 + \mu_3 x_1^3
+% \\
+% y_2 & = \mu_0 + \mu_1 x_2 + \mu_2 x_2^2 + \mu_3 x_2^3
+% \\
+% y_3 & = \mu_0 + \mu_1 x_3 + \mu_2 x_3^2 + \mu_3 x_3^3
+% \\
+% 0 & =  \mu_1 + 2 \mu_2 \hat{x} + 3 \mu_3 \hat{x}^2
+% \end{aligned}
+% \end{equation}
+% 
+% \newgeometry{onecolumn=true}
+% 
+% Solutions (using $z_{ij} \defeq z_i - z_j$):
+% \begin{equation}
+% \begin{aligned}
+% \mu_0 & = \dfrac{
+% \left(
+% \left(x_2^{2} y_3-x_3^{2} y_2\right) x_1^{3}
+% +x_{23} x_2^{2} x_3^{2} y_1
+% -\left(x_2^{3} y_3-x_3^{3} y_2\right) x_1^{2}
+% -\left(
+%   \left(x_2 y_3-x_3 y_2\right) x_1^{3}
+%   +\left(x_2+x_3\right) x_{23} x_2 x_3 y_1
+%  -\left(x_2^{3} y_3-x_3^{3} y_2\right) x_1
+%  \right) x_0
+%  \right) x_0
+%  +\left(
+% \left(x_2 y_3-x_3 y_2\right) x_1^{2}+x_{23} x_2 x_3 y_1-\left(x_2^{2}
+%  y_3-x_3^{2} y_2\right) x_1\right) x_0^{3}-x_{12} \left(x_1-x_3
+% \right) x_{23} x_1 x_2 x_3 y_0
+% }{
+% x_{01} x_{02} x_{03} x_{12} x_{13} x_{23}
+% }
+% \\[2ex]
+% \mu_1 & = \dfrac{
+% -\left(
+%    \left(y_{02} x_3^{2}-y_{03} x_2^{2}\right) x_1^{3}
+%   -x_{23} y_{01} x_2^{2} x_3^{2}
+%   -\left(y_{02} x_3^{3}-y_{03} x_2^{3}\right) x_1^{2}
+%  \right)
+% +\left(y_{13} x_2^{3}-y_{23} x_1^{3}-y_{12} x_3^{3}
+%   -\left(
+%     y_{13} x_2^{2}-y_{23} x_1^{2}-y_{12} x_3^{2}
+%    \right) x_0
+%   \right) x_0^{2}
+%  }{
+% x_{01} x_{02} x_{03} x_{12} x_{13} 
+% x_{23}
+% }
+% \\[2ex]
+% \mu_2 & = \dfrac{
+% \left(y_{02} x_3-y_{03} x_2\right) x_1^{3}
+% -\left(x_2+x_3\right) x_{23} 
+% y_{01} x_2 x_3
+% -\left(y_{02} x_3^{3}-y_{03} x_2^{3}\right) x_1
+% -\left(y_{13} x_2^{3}-y_{23} x_1^{3}-y_{12} x_3^{3}
+%   -\left(y_{13} x_2-y_{23} x_1-y_{12} x_3\right) x_0^{2}
+%  \right) 
+%  x_0
+% }{
+% x_{01} x_{02} x_{03} x_{12} x_{13} x_{23}
+% }
+% \\[2ex]
+% \mu_3 & = \dfrac{
+% -\left(\left(
+% y_{02} x_3-y_{03} x_2\right) x_1^{2}-\left(x_2-x_3
+% \right) y_{01} x_2 x_3-\left(y_{02} x_3^{2}-\left(
+% y_0-y_3\right) x_2^{2}\right) x_1\right)+\left(y_{13} x_2^{2}-
+% y_{23} x_1^{2}-y_{12} x_3^{2}-\left(\left(y_1-y_3
+% \right) x_2-y_{23} x_1-y_{12} x_3\right) x_0\right) 
+% x_0
+% }{
+% x_{01} x_{02} x_{03} x_{12} x_{13} x_{23}
+%  }
+% \\[2ex]
+% \hat{x} & = 
+% \dfrac{
+% -\left(
+%   \left(y_{13} x_2^{3}-y_{23} x_1^{3}-y_{12} x_3^{3}-
+%    \left(y_{13} x_2-y_{23} x_1-y_{12} x_3\right) x_0^{2}
+%   \right) x_0
+%  -\sqrt{
+%   -\left(
+%     \left(
+%      \left(y_{03} x_2+3 y_{23} x_1-y_{02} x_3\right) y_{23} x_1
+%    -\left(
+%      \left(3 y_2-y_3\right) y_1
+%      -2 
+%      \left(3 y_2-2 y_3\right) y_3
+%      +
+%      \left(3 y_2-y_3-2 y_1\right) y_0
+%     \right) x_2^{2}
+%    -\left(
+%      \left(2 
+%       \left(2 y_2-3 y_3\right) y_2 
+%      -\left(y_2-3 y_3\right) y_1
+%      -\left(y_2-3 y_3 + 2 y_1\right) y_0
+%      \right) x_3-2 
+%      \left(
+%       \left(y_2+y_3\right) y_1-2 y_2 y_3
+%      +\left(y_2 + y_3-2 y_1\right) y_0
+%      \right) x_2
+%     \right) x_3
+%    \right) x_1^{3}-
+%    \left(
+%     \left(4 y_1^{2}+3 y_2 y_3-
+%      \left(y_2+6 y_3\right) y_1
+%     -\left(2 y_2-3 y_3+y_1\right) y_0
+%     \right) x_2 ^{3} x_3^{2}
+%    -\left(3 
+%      \left(y_{12}^{2} x_3^{5} + 
+%       \left(y_1-y_3 \right)^{2} x_2^{5}
+%      \right)-
+%      \left(y_{12} x_3^{3} + 
+%       \left(y_1-y_3\right) x_2^{3}
+%      \right) y_{01} x_2 x_3
+%     \right) +
+%     \left(4 y_1^{2}+3 y_2 y_3 -
+%      \left(6 y_2+y_3\right) y_1 +
+%      \left(3 y_2-2 y_3-y_1\right) y_0
+%     \right) x_2^{2} 
+%  x_3^{3}\right)+\left(3 \left(\left(y_2+y_3\right) y_1-2 y_2 y_3+\left(y_2+y_3-2
+%  y_1\right) y_0\right) x_2^{2} x_3^{2}+y_{02} y_{12}
+%  x_3^{4}+y_{03} y_{13} x_2^{4}-2 \left(\left(2 y_2-
+% y_3-y_1\right) y_0-\left(\left(y_2-2 y_3\right) y_1+y_2 y_3\right)\right) x_2^{3}
+%  x_3-2 \left(\left(2 y_2-y_3\right) y_1-y_2 y_3-\left(y_2-2 y_3+y_1\right) y_0
+% \right) x_2 x_3^{3}\right) x_1-\left(\left(3 \left(\left(\left(2 y_2-y_3
+% \right) y_1-y_2 y_3-\left(y_2-2 y_3+y_1\right) y_0\right) x_2+\left(\left(2 y_2-
+% y_3-y_1\right) y_0-\left(\left(y_2-2 y_3\right) y_1+y_2 y_3\right)\right) x_3
+% \right) x_3-\left(\left(2 y_2+y_3-3 y_1\right) y_0-\left(3 \left(y_2-2 y_3
+% \right) y_1-\left(y_2-4 y_3\right) y_3\right)\right) x_2^{2}\right) x_2+\left(
+% \left(4 y_2-y_3\right) y_2-3 \left(2 y_2-y_3\right) y_1-\left(y_2+2 y_3-3 y_1
+% \right) y_0\right) x_3^{3}\right) x_1^{2}\right) x_0^{3}+\left(3 \left(
+% \left(\left(2 y_2-y_3-y_1\right) y_0-\left(\left(y_2-2 y_3\right) y_1+y_2 y_3
+% \right)\right) x_2^{2} x_3^{3}+y_{02} y_{12} x_3^{5
+% }+y_{03} y_{13} x_2^{5}+\left(\left(2 y_2-y_3
+% \right) y_1-y_2 y_3-\left(y_2-2 y_3+y_1\right) y_0\right) x_2^{3} x_3^{2}\right) 
+% x_1+3 \left(\left(2 x_2-x_3\right) y_{12} x_3^{3}-\left(x_2-2 x_3
+% \right) y_{13} x_2^{3}\right) y_{01} x_2 x_3+\left(
+% y_1-y_2\right)^{2} x_3^{6}+y_{13}^{2} x_2^{6}+\left(2 \left(2 y_1
+% ^{2}-y_2 y_3\right)-\left(y_2+y_3\right) y_1+3 \left(y_2+y_3-2 y_1\right) y_0
+% \right) x_2^{3} x_3^{3}+\left(\left(\left(3 y_{03} x_2+\left(y_2
+% -y_3\right) x_1-3 y_{02} x_3\right) x_1+6 \left(\left(y_0-y_2
+% \right) x_3^{2}-y_{03} x_2^{2}\right)\right) \left(y_2-y_3
+% \right) x_1^{2}-3 \left(\left(\left(y_2+y_3\right) y_1-2 y_2 y_3+\left(y_2+y_3-2
+%  y_1\right) y_0\right) \left(x_2^{2}+x_3^{2}\right) x_2 x_3+2 \left(\left(y_0-
+% y_2\right) y_{12} x_3^{4}+y_{03} \left(y_1-y_3
+% \right) x_2^{4}\right)\right)\right) x_1^{2}+\left(\left(3 \left(\left(
+% \left(2 y_2-y_3\right) y_1-y_2 y_3-\left(y_2-2 y_3+y_1\right) y_0\right) x_3+
+% \left(\left(2 y_2-y_3-y_1\right) y_0-\left(\left(y_2-2 y_3\right) y_1+y_2 y_3
+% \right)\right) x_2\right) x_3-\left(\left(2 y_2+y_3\right) y_1+\left(y_2-4 y_3
+% \right) y_3-3 \left(y_2-2 y_3+y_1\right) y_0\right) x_2^{2}\right) x_2+\left(
+% \left(4 y_2-y_3\right) y_2-\left(y_2+2 y_3\right) y_1-3 \left(2 y_2-y_3-y_1
+% \right) y_0\right) x_3^{3}\right) x_1^{3}\right) x_0^{2}-\left(\left(\left(3
+%  \left(y_{02} x_3^{2}-y_{03} x_2^{2}\right)-2 
+% \left(y_{02} x_3-y_{03} x_2\right) x_1\right) 
+% y_{23} x_1^{4}-\left(2 y_{13} x_2^{3}+\left(y_2-y_3
+% \right) x_1^{3}-2 y_{12} x_3^{3}\right) \left(\left(y_0-y_2
+% \right) x_3^{3}-y_{03} x_2^{3}\right)\right) x_1-\left(\left(2 
+% x_2-x_3\right) y_{13} x_2^{3}+\left(x_2-2 x_3\right) \left(y_1-y_2
+% \right) x_3^{3}\right) x_{23} y_{01} x_2 x_3-3 
+% \left(\left(\left(2 y_2-y_3-y_1\right) y_0-\left(\left(y_2-2 y_3\right) y_1+y_2 
+% y_3\right)\right) x_2^{3} x_3^{2}+y_{02} y_{12} x_3
+% ^{5}+y_{03} y_{13} x_2^{5}+\left(\left(2 y_2-y_3
+% \right) y_1-y_2 y_3-\left(y_2-2 y_3+y_1\right) y_0\right) x_2^{2} x_3^{3}\right) 
+% x_1^{2}+\left(3 \left(\left(y_2+y_3\right) y_1-2 y_2 y_3+\left(y_2+y_3-2 y_1
+% \right) y_0\right) x_2^{2} x_3^{2}+y_{02} y_{12} x_3
+% ^{4}+y_{03} y_{13} x_2^{4}-2 \left(\left(2 y_2-y_3-
+% y_1\right) y_0-\left(\left(y_2-2 y_3\right) y_1+y_2 y_3\right)\right) x_2 x_3^{3}
+% -2 \left(\left(2 y_2-y_3\right) y_1-y_2 y_3-\left(y_2-2 y_3+y_1\right) y_0\right)
+%  x_2^{3} x_3\right) x_1^{3}\right) x_0-\left(\left(3 \left(\left(y_1-y_3
+% \right) x_2^{2}-y_{23} x_1^{2}-y_{12} x_3^{2}
+% \right)-\left(y_{13} x_2-y_{23} x_1-\left(y_1-y_2
+% \right) x_3\right) x_0\right) \left(y_{13} x_2-\left(y_2-y_3
+% \right) x_1-y_{12} x_3\right) x_0-\left(4 \left(\left(y_1-y_2
+% \right)^{2} x_3^{4}+y_{13}^{2} x_2^{4}\right)-\left(x_2^{2}+6 
+% x_2 x_3+x_3^{2}\right) y_{12} y_{13} x_2 x_3\right)+
+% \left(\left(\left(y_{13} x_2-4 y_{23} x_1-\left(y_1
+% -y_2\right) x_3\right) x_1-6 \left(y_{12} x_3^{2}-\left(y_1-y_3
+% \right) x_2^{2}\right)\right) x_1-\left(y_{12} x_3^{3}-\left(y_1
+% -y_3\right) x_2^{3}\right)\right) y_{23} x_1\right) x_0^{4}+
+% \left(\left(4 y_0^{2}+3 y_2 y_3+\left(3 y_2-2 y_3\right) y_1-\left(6 y_2+y_3+y_1
+% \right) y_0\right) x_2^{2} x_3^{3}-\left(3 \left(y_{02}^{2} x_3
+% ^{5}+y_{03}^{2} x_2^{5}\right)+\left(y_{02} x_3^{3
+% }+y_{03} x_2^{3}\right) y_{01} x_2 x_3\right)-
+% \left(\left(y_2+6 y_3+y_1-4 y_0\right) y_0+\left(2 y_2-3 y_3\right) y_1-3 y_2 y_3
+% \right) x_2^{3} x_3^{2}\right) x_1^{3}-\left(\left(\left(y_2+y_3+6 y_1-4 y_0
+% \right) y_0-\left(3 \left(y_2+y_3\right) y_1-2 y_2 y_3\right)\right) x_2^{3} x_3
+% ^{3}+3 \left(\left(2 x_2-x_3\right) y_{02} x_3^{3}-\left(x_2-2 
+% x_3\right) y_{03} x_2^{3}\right) y_{01} x_2 x_3-
+% \left(y_{02}^{2} x_3^{6}+y_{03}^{2} x_2^{6}\right)
+% \right) x_1^{2}+\left(4 \left(y_{02}^{2} x_3^{4}+\left(y_0-y_3
+% \right)^{2} x_2^{4}\right)-\left(x_2^{2}+6 x_2 x_3+x_3^{2}\right) \left(y_0-y_2
+% \right) y_{03} x_2 x_3\right) x_1^{4}-\left(\left(2 x_2-x_3
+% \right) y_{03} x_2^{3}+\left(x_2-2 x_3\right) \left(y_0-y_2
+% \right) x_3^{3}\right) x_{23} y_{01} x_1 x_2 x_3-3 
+% \left(y_{02} x_3^{2}-y_{03} x_2^{2}\right) \left(
+% y_{02} x_3-y_{03} x_2\right) x_1^{5}+\left(\left(y_0
+% -y_2\right) x_3-y_{03} x_2\right)^{2} x_1^{6}+\left(x_2^{2}-x_2 x_3
+% +x_3^{2}\right) x_{23}^{2} y_{01}^{2} x_2^{2} x_3^{
+% 2}}\right)+\left(y_{02} x_3-y_{03} x_2\right) x_1^{
+% 3}-\left(x_2+x_3\right) x_{23} y_{01} x_2 x_3-\left(
+% y_{02} x_3^{3}-y_{03} x_2^{3}\right) x_1
+% }{
+% 3 \left(\left(y_{02} x_3-y_{03} x_2\right) 
+% x_1^{2}-x_{23} y_{01} x_2 x_3-\left(\left(y_0-y_2
+% \right) x_3^{2}-y_{03} x_2^{2}\right) x_1\right)-3 \left(\left(
+% y_1-y_3\right) x_2^{2}-y_{23} x_1^{2}-y_{12} x_3^{2}-
+% \left(y_{13} x_2-y_{23} x_1-y_{12} x_3
+% \right) x_0\right) x_0
+% }
+% \end{aligned}
+% \end{equation}
+
+\setcounter{currentlevel}{\value{baseSectionLevel}-3}
+\levelstay{Input: $(x_0,y_0,d_0),(x_1,y_1,d_1)$}
+\label{sec:Monomial-cubic-hermite}
+
+Standard cubic hermite interpolation.
+
+Constraints:
+\begin{equation}
+\begin{aligned}
+y_0 & = \mu_0 + \mu_1 x_0 + \mu_2 x_0^{2}  + \mu_3 x_0^{3}  
+\\
+d_0 & = \mu_1 + 2 \mu_2 x_0 + 3 \mu_3 x_0^{2} 
+\\
+y_1 & = \mu_0 + \mu_1 x_0+\mu_2 x_1^{2}  + \mu_3 x_1^{3}  
+\\
+d_1 & = \mu_1 + 2 \mu_2 x_1 + 3 \mu_3 x_1^{2} 
+\\
+0 & = \mu_1 + 2 \mu_2 \hat{x}  + 3 \mu_3 \hat{x}^3  
+\end{aligned}
+\end{equation}
+
+\newgeometry{onecolumn=true}
+Solutions (using $z_{ij} \defeq z_i - z_j$):
+\begin{equation}
+\begin{aligned}
+\mu_0 & = \dfrac{
+-\left(d_0 x_1+d_1 x_0\right) x_{01} x_0 x_1+x_0^{3} y_1-3
+ x_0^{2} x_1 y_1+3 x_0 x_1^{2} y_0-x_1^{3} y_0
+}{x_{01}^{3}}
+\\
+\mu_1 & = \dfrac{
+\left(\left(x_0+2 x_1\right) x_{01} d_1-6 \left(y_0-y_1
+\right) x_1\right) x_0+\left(2 x_0+x_1\right) x_{01} d_0 x_1
+}{
+x_{01}^{3}}
+\\
+\mu_2 & = \dfrac{
+-\left(\left(x_0+2 x_1\right) 
+x_{01} d_0-3 \left(x_0+x_1\right) y_{01}\right)-
+\left(2 x_0+x_1\right) x_{01} d_1
+}{
+x_{01}^{3}}
+\\
+\mu_3 & = \dfrac{\left(d_0+d_1\right) x_{01}-2 y_{01}
+}{
+x_{01}^{3}}
+\\
+\hat{x} & = \dfrac{
+x_{01} \left(
+\left(x_0+x_1\right) \left( d_0 + d_1 \right)
++ x_0 d_1 + x_1 d_0
+\pm
+\sqrt{
+x_{01}^2 \left( d_0^2 + d_0 d_1 + d_1^2 \right)
+-
+6 x_{01} y_{01} \left( d_0 + d_1 \right)
++ 9 y_{01}^2}
+\right) 
+- 3 \left(x_0+x_1\right) y_{01}
+}{
+3 \left(d_0+d_1\right) x_{01}-6 y_{01}
+}
+\end{aligned}
+\end{equation}
+
+Gradient:
+\begin{equation}
+\nabla \hat{x} =
+\begin{pmatrix}[6]
+\dfrac{
+\splitfrac{
+\splitfrac{
+  \left(
+    2 \left(x_{01} d_1-3 y_{01}\right) d_1
+    + \left(d_0+d_1\right) x_{01} d_0
+    + \left(\left(d_0+d_1\right) x_{01}-6 y_{01} \right) d_0
+  + 4 d_1 \sqrt{
+        \left(\left(d_0+d_1\right) x_{01}-6 y_{01}\right) x_{01} d_0
+        +\left(x_{01} d_1-3 y_{01}\right)^{2}
+      } \right) x_{01}
+      }{
++ 2 \sqrt{
+      \left(\left(d_0+d_1\right) x_{01}-6 y_{01}\right)
+      x_{01} d_0
+      +\left(x_{01} d_1-3 y_{01}\right)^{2}
+      } 
+  \left(
+    \left(2 x_0+x_1\right) d_1
+    + \sqrt{
+        \left(\left(d_0+d_1\right) x_{01} -6 y_{01} \right) x_{01} d_0
+       + \left(x_{01} d_1 - 3 y_{01} \right)^{2}
+       }
+    + 2 d_0 x_0
+    + d_0 x_1-3 y_0
+    + 3 y_1 \right)
+}}{
+\left(
+  \left(d_0+d_1\right) x_{01}-2 y_{01}
+\right)
+-2 \sqrt{\left(\left(d_0+d_1\right) x_{01}-6 y_{01}\right) x_{01} d_0
+       + \left(x_{01} d_1-3 y_{01}\right)^{2}} 
+\left(
+  \left(
+    \left(
+      2 x_0+x_1\right) d_1
+      +\sqrt{
+        \left(\left(d_0+d_1\right) x_{01}-6 y_{01}\right) x_{01} d_0
+        +\left(x_{01} d_1-3 y_{01}\right)^{2}}
+    \right) x_{01}
+   +\left(x_0+2 x_1\right) x_{01} d_0
+   -3 \left(x_0+x_1\right) y_{01}
+ \right)  
+\left(d_0+d_1\right)
+}
+}{
+6 \sqrt {\left(\left(d_0+d_1\right) x_{01}
+-6 y_{01}\right) x_{01} d_0+\left(
+x_{01} d_1-3 y_{01}\right)^{2}} \left(\left(d_0+d_1\right) x_{01}-2 y_{01}\right)^{2}
+}
+\\
+\dfrac{
+-\left(\sqrt {\left(\left(d_0+d_1\right) x_{01}
+-6 y_{01}\right) x_{01} d_0+\left(x_{01} d_1-3 
+y_{01}\right)^{2}} d_0-\sqrt {\left(\left(d_0+d_1\right) 
+x_{01}-6 y_{01}\right) x_{01} d_0+
+\left(x_{01} d_1-3 y_{01}\right)^{2}} d_1+d_0^{2} x_0-d_0^{
+2} x_1+4 d_0 d_1 x_0-4 d_0 d_1 x_1-3 d_0 y_0+3 d_0 y_1
++d_1^{2} x_0-d_1^{2} x_1-3 d_1 y_0+
+3 d_1 y_1\right) x_{01}^{2}
+}{
+3 \sqrt {\left(\left(d_0+d_1\right) x_{01}-6 y_{01}\right) 
+x_{01} d_0+\left(x_{01} d_1-3 y_{01}\right)^{2}} 
+\left(\left(d_0+d_1\right) x_{01}-2 y_{01}\right)
+^{2}
+}
+\\
+\dfrac{
+\splitfrac{
+- 2 \sqrt {\left(\left(d_0+d_1\right) x_{01}-6 y_{01}\right) x_{01} d_0
++ \left(x_{01} d_1-3 y_{01}\right)^{2}} d_1 x_0
++ 2 \sqrt {\left(\left(d_0+d_1\right) x_{01}-6 y_{01}\right) x_{01} d_0
++ \left(x_{01} d_1-3 y_{01}\right)^{2}} d_1 x_1
+}{
+\splitfrac{          
++ 2 \sqrt {\left(\left(d_0+d_1\right) x_{01}-6 y_{01}\right) x_{01} d_0
++ \left(x_{01} d_1-3 y_{01}\right)^{2}} y_0
+- 2 \sqrt{\left(\left(d_0+d_1\right) x_{01}-6 y_{01}\right) 
+          x_{01} d_0+\left(x_{01} d_1-3 y_{01}\right)^{2}} y_1
+}{
++ d_0 d_1 x_0^{2}
+- 2 d_0 d_1 x_0 x_1
++ d_0 d_1 x_1^{2}
++ 2 d_0 x_0 y_0
+- 2 d_0 x_0 y_1
+- 2 d_0 x_1 y_0
++ 2 d_0 x_1 y_1
+- d_1^{2} x_0^{2}
++ 2 d_1^{2} x_0 x_1
+- d_1^{2} x_1^{2}
++ 4 d_1 x_0 y_0
+- 4 d_1 x_0 y_1
+- 4 d_1 x_1 y_0
++ 4 d_1 x_1 y_1
+- 6 y_0^{2}
++ 12 y_0 y_1
+- 6 y_1^{2} x_{01}^{2}
+}}
+}{
+6 \sqrt {\left(\left(d_0+d_1\right) 
+x_{01}-6 y_{01}\right) x_{01} d_0+
+\left(x_{01} d_1-3 y_{01}\right)^{2}} 
+\left(\left(d_0+d_1\right) x_{01}-2 y_{01}\right)^{2}
+}
+\end{pmatrix}
+\end{equation}
+
+\restoregeometry
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\levelstay{Lagrange basis}
+\label{sec:Lagrange-basis}
+
+The standard Lagrange\cite{wiki:Lagrange-polynomial}
+form of a polynomial  is
+\begin{equation}
+f(x) = \sum_{i} y_i \prod_{j \neq i} \frac{x - x_j}{x_i -x_j}
+\end{equation}
+
+We can interpret this as a linear combination of basis functions,
+$\lambda_i (x) = \prod_{j \neq i} \frac{x - x_j}{x_i -x_j}$.
+Each $\lambda_i$ is $1$ at $x_i$ and $0$ at all the other $x_j$.
+So we can use $\lambda_i$ to satisfy a value constraint at $x_i$
+without interfering with value constraints at the other $x_j$.
+
+That suggests that it might be useful to construct similar basis
+functions to interpolate combinations of value and slope 
+constraints.
+
+\textbf{TODO:} 
+\begin{itemize}
+  \item Can all real polynomials be represented in this form? 
+        With addition of constants? Maybe not, since some
+        quadratics can't be factored over reals.
+  \item Evaluation speed?
+  \item Horner's algorithm and fma
+  \item differentiation/argmin disadvantage?
+  \item numerical accuracy?
+  \item easy to sum and multiply and divide within monomial
+  representation
+\end{itemize}
+
+(Note: these basis function aren't orthogonal or normalized)
+in any
+sense. In fact, choosing a distance or an inner product for
+a polynomial space is not a simple question.)
+
+Constructing an interpolating polynomial in the monomial basis
+requires solving a dense system of equations. 
+No advantage for small changes to constraints.
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Differentiation and \texttt{argmin}}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Affine Lagrange}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-3}
+\levelstay{Input: $(x_0,y_0),(x_1,y_1)$}
+
+It's easy enough to see that:
+\begin{align}
+\lambda^{\text{yy}}_0(x) & = \frac {(x - x_1)} {(x_0 - x_1)} \\
+\lambda^{\text{yy}}_1(x) & = \frac {(x - x_0)} {(x_1 - x_0)} \nonumber
+\end{align}
+satisfies
+\begin{align}
+\lambda^{\text{yy}}_0(x_0) & = 1 \\
+\lambda^{\text{yy}}_0(x_1) & = 0 \nonumber \\
+\lambda^{\text{yy}}_1(x_0) & = 0 \nonumber \\
+\lambda^{\text{yy}}_1(x_1) & = 1 \nonumber 
+\end{align}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-3}
+\levelstay{Input: $(x_0,y_0,d_0)$}
+
+Constraints:
+\begin{equation}
+\begin{aligned}
+y_0 & = l_0 \lambda^{\text{yd}}_0 (x_0) + l_1 \lambda^{\text{yd}}_1 (x_0) 
+\\
+d_0 & = l_0 \partial\lambda^{\text{yd}}_0 (x_0) + l_1 \partial\lambda^{\text{yd}}_1 (x_0) 
+\end{aligned}
+\end{equation}
+We use $\lambda^{\text{yd}}_0$ to satisfy the first constraint,
+and $\lambda^{\text{yd}}_1$ the second.
+
+We need $\partial\lambda^{\text{yd}}_0 (x_0) = 0$,
+which implies affine $\lambda^{\text{yd}}_0$ 
+must be a constant.
+So we have to extend our definition of Lagrange basis functions
+to include constants.
+We also need $\lambda^{\text{yd}}_1 (x_0) = 0$ and
+$\partial\lambda^{\text{yd}}_1 (x_0) = 1$, leading to the basis:
+\begin{align}
+\lambda^{\text{yd}}_0 (x) & = 1 \\
+\lambda^{\text{yd}}_1 (x) & = x - x_0 \nonumber
+\end{align}
+with $l_0 = y_0$ and $l_1 = d_0$.
+
+The argmin $\hat{x}$ is $-\sign(d_0)\infty$.
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Quadratic Lagrange}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-3}
+\levelstay{Input: $(x_0,y_0),(x_1,y_1),(x_2,y_2)$}
+
+This is the standard case, and the basis functions are,
+for example:
+\begin{equation}
+\lambda^{\text{yyy}}_0(x) = 
+\frac {(x - x_1) (x - x_2)} {(x_0 - x_1) (x_0 - x_2)}
+\end{equation}
+
+The interpolating function is 
+\begin{equation}
+\lambda^{\text{yyy}}(x) = 
+\sum y_i \lambda^{\text{yyy}}_i(x)
+\end{equation}
+
+The argmin (should equal the monomial case):
+\begin{equation}
+\hat{x} = 
+\dfrac{y_{02} x_1^{2}-y_{12} x_0^{2}-y_{01} x_2^{2}
+}{
+2 \left(y_{02} x_1-y_{12} x_0\right)-2 y_{01} x_2
+}
+\end{equation}
+
+Gradient (should equal the monomial case):
+\begin{equation}
+\nabla \hat{x} =
+\begin{pmatrix}[3]
+\dfrac{
+\left(y_{02} x_1^{2}-y_{12} x_0^{2}-y_{01} x_2^{2}
+-2 \left(y_{02} x_1-y_{12} x_0-y_{01} x_2\right) x_0\right) y_{12}
+}{
+2 \left(y_{02} x_1-y_{12} x_0-y_{01} x_2 \right)^{2}
+}
+\\
+\dfrac{
+x_{01} x_{02} x_{12} y_{12}
+}{
+2 \left(y_{02} x_1-y_{12} x_0-y_{01} x_2\right)^{2}
+}
+\end{pmatrix}
+\end{equation}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-3}
+\levelstay{Input: $(x_0,y_0),(x_1,y_1,d_1)$}
+\label{sec:lagrange-yyd}
+
+This is again the 'semi-hermite' problem (section~\ref{sec:monomial-yyd}).
+
+We need 
+$\lambda^{\text{yyd}}_0(x_0) = 1$, 
+$\lambda^{\text{yyd}}_0(x_1) = 0$, and
+$\partial\lambda^{\text{yyd}}_0(x_2) = 0$. 
+
+The second constraint suggests looking at functions of the form
+$f(x) = (x - x_1) (x - c)$, which includes all quadratic 
+polynomials that are zero at $x_1$, up to a scaling factor.  
+$\partial{f}(x) = (x - x_1) + (x - c) = 2 x - x_1 - c$.
+$\partial{f}(x_2) = 0$ implies that
+$c = 2 x_2 - x_1$,
+so
+\begin{equation}
+\lambda^{\text{yyd}}_0(x) = 
+\frac 
+{(x - x_1) \left( (x - x_2) + (x_1 - x_2) \right)} 
+{(x_0 - x_1) ((x_0 - x_2) + (x_1 - x_2))}
+\end{equation}
+Note that we may have $x_0 = x_2$ or $x_1 = x_2$, but not both,
+and not $x_0 = x_1$ --- otherwise it would be impossible to 
+satisfy the constraints.
+
+By symmetry, 
+\begin{equation}
+\lambda^{\text{yyd}}_1(x) = 
+\frac 
+{(x - x_0) \left( (x - x_2) + (x_0 - x_2) \right)} 
+{(x_1 - x_0) \left( (x_1 - x_2) + (x_0 - x_2) \right)}
+\end{equation}
+
+ For $\lambda^{\text{yyd}}_2$, we need 
+$\lambda^{\text{yyd}}_2(x_0) = 0$, 
+$\lambda^{\text{yyd}}_2(x_1) = 0$, and
+$\partial\lambda^{\text{yyd}}_2(x_2) = 1$. 
+The standard form $f(x) = (x-x_0) (x-x_1)$ satisfies the first 
+$2$ constraints. 
+To satisfy the third, we simply need to normailize with
+$\partial{f}(x_2) = (x_2 - x_0) + (x_2 - x_1)$:
+
+\begin{equation}
+\lambda^{\text{yyd}}_2(x) = 
+\frac 
+{(x - x_0) (x - x_1)} 
+{(x_2 - x_0) + (x_2 - x_1)}
+\end{equation}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-3}
+\levelstay{Input: $(x_0,d_0),(x_1,y_1,d_1)$}
+\label{sec:lagrange-dyd}
+
+This is an elaboration of the secant step 
+(as in section~\ref{sec:monomial-dyd}),
+extending an affine interpolation of function slopes
+to a quadratic interpolant of function values.
+
+For $\lambda^{\text{ydd}}_0$ we need:
+\begin{align}
+\lambda^{\text{ydd}}_0(x_0) & = 1 \\
+\partial\lambda^{\text{ydd}}_0(x_1) & = 0 \nonumber \\
+\partial\lambda^{\text{ydd}}_0(x_2) & = 0 \nonumber
+\end{align}
+Because $\lambda^{\text{ydd}}_0$ is quadratic,
+$\partial\lambda^{\text{ydd}}_0$ is affine, 
+and the only way its values
+at $x_1$ and $x_2$ can both be zero is if it is a constant, so 
+\begin{equation}
+\lambda^{\text{ydd}}_0(x) = 1
+\end{equation}
+
+$\lambda^{\text{ydd}}_1$ must satisfy:
+\begin{align}
+\lambda^{\text{ydd}}_1(x_0) & = 0 \\
+\partial\lambda^{\text{ydd}}_1(x_1) & = 1 \nonumber \\
+\partial\lambda^{\text{ydd}}_1(x_2) & = 0 \nonumber
+\end{align}
+This suggests functions proportional to $(x - x_0) (x - c)$ 
+for some $c$. Then 
+$ 0 = (x_2 - x_0) + (x_2 - c)$
+implies $ c = 2 x_2 - x_0$.
+Then we normalize with 
+$\partial\lambda^{\text{ydd}}_1(x_1) = (x_1 - x_0) + (x_1 - x_2) + (x_0 - x_2) 
+= 2 (x_1 - x_2)$, so 
+\begin{equation}
+\lambda^{\text{ydd}}_1(x) = 
+\frac {(x - x_0) \left((x - x_2) + (x_0 - x_2)\right)} 
+{2 (x_1 - x_2)}
+\end{equation}
+and, by symmetry,
+\begin{equation}
+\lambda^{\text{ydd}}_2(x) = 
+\frac {(x - x_0) \left( (x -x_1) + (x_0 - x_1) \right)} 
+{2 (x_2 - x_1)}
+\end{equation}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Cubic Lagrange}
+ 
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-3}
+\levelstay{Input: $(x_0,y_0),(x_1,y_1),(x_2,y_2),(x_3,y_3)$}
+\label{sec:lagrange-yyyy}
+
+For example:
+
+\begin{equation}
+\lambda^{\text{yyy}}_0(x) = 
+\frac {(x - x_1) (x - x_2) (x - x_3)} 
+{(x_0 - x_1) (x_0 - x_2) (x_0 - x_3)}
+\end{equation}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-3}
+\levelstay{Input: $(x_0,y_0,d_0), (x_1,y_1,d_1)$}
+\label{sec:Lagrange-cubic-hermite}
+
+Hermite interpolation as in section~\ref{sec:Monomial-cubic-hermite}
+\cite{wiki:Cubic-hermite-spline}.
+
+In Lagrange value interpolation, we choose basis
+functions that are $1$ at one of contraint locations (knots)
+and zero at the others, so each one can be used to satisfy
+one of the constraints without interfering with the others.
+
+Here, we will construct $2$ value basis functions,
+$\lambda_{00}$ and
+$\lambda_{01}$,
+and $2$ slope basis functions,
+$\lambda_{10}$ and
+$\lambda_{11}$, 
+such that
+each can be used to satisfy one of the constraints,
+without affecting the others.
+
+This implies constraints on the basis functions are:
+\begin{equation}
+\begin{array}{llll}
+\lambda_{00}(x_0) = 1 & 
+\lambda_{00}(x_1) = 0 &
+\partial\lambda_{00}(x_0) = 0 &
+\partial\lambda_{00}(x_1) = 0 \\
+\lambda_{01}(x_0) = 0 &
+\lambda_{01}(x_1) = 1 &
+\partial\lambda_{01}(x_0) = 0 &
+\partial\lambda_{01}(x_1) = 0  \\
+\lambda_{10}(x_0) = 0 & 
+\lambda_{10}(x_1) = 0 &
+\partial\lambda_{10}(x_0) = 1 &
+\partial\lambda_{10}(x_1) = 0 \\
+\lambda_{11}(x_0) = 0 & 
+\lambda_{11}(x_1) = 0 &
+\partial\lambda_{11}(x_0) = 0 &
+\partial\lambda_{11}(x_1) = 1  
+\end{array}
+\end{equation}
+
+It is easy enough to determine a Lagrange-like form
+that satisfies these constraints.
+
+For example, for $\lambda_{00}$,
+consider functions proportional to 
+$\left( x - x_1 \right)^2 \left( x - a \right)$.
+This satisfies the value and slope constraints
+at $x_1$ for any $a$.
+Plugging it into the slope constraint at $x_0$,
+we get $a = \dfrac{3 x_0 - x_1}{2}$.
+
+For $\lambda_{10}$, it easy to verify that 
+functions proportional to 
+$\left( x - x_1 \right)^2 \left( x - x_0\right)$.
+satisfy the value and slope constraints
+
+Then normalizing and simplifying gives:
+\begin{equation}
+\begin{aligned}
+\lambda_{00}(x) & =
+\frac
+{(x-x_1)^2 \left( 2 x - 3 x_0 + x_1 \right)}
+{(x_1-x_0)^3}
+\\
+\lambda_{01}(x) & =
+\frac
+{(x-x_0)^2 \left( 2 x - 3 x_1 + x_0 \right)}
+{(x_0-x_1)^3}
+\\
+\lambda_{10}(x) & =
+\frac {(x-x_1)^2(x-x_0)} {(x_0-x_1)^2}
+\\
+\lambda_{11}(x) & =
+\frac {(x-x_0)^2(x-x_1)} {(x_1-x_0)^2}
+\end{aligned}
+\end{equation}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\levelstay{Newton basis}
+
+One advantage of the Lagrange basis 
+(section~\ref{sec:Lagrange-basis})
+over the monomial (section~\ref{sec:Monomial-basis}),
+besides giving a simpler system of equations to solve initially,
+is the fact that the basis functions depend only on the locations
+of the knots, and not the values or slopes specified at those 
+points. 
+That makes it easy to update the interpolant 
+(though not its argmin) if we change the specified values
+or slopes.
+ 
+However, it doesn't help if we want add and remove knots,
+as is the case in one-dimensional search applications.
+
+The Newton basis~\cite{wiki:Newton-polynomial}
+supports adding knots, increasing the degree
+of the interpolating polynomial with each added constraint.
+So it, too, is of limited value for our driving application.
+
+General form interpolating 
+$(x_{0},y_{0}),\ldots ,(x_{j},y_{j}),\ldots ,(x_{k},y_{k})$:
+
+\begin{equation}
+\nu(x) = \sum _{{j=0}}^{{k}}a_{{j}} {\beta}_{{j}}(x)
+\end{equation}
+where the basis functions are similar to the Lagrange:
+\begin{equation}
+{\beta}_{j}(x) \defeq \prod_{{i=0}}^{{j-1}}(x-x_{i})
+\end{equation}
+but the coefficients are defined using 
+\textit{divided differences} 
+(section~\ref{sec:Divided-differences}):
+\begin{equation}
+a_{j} \defeq [y_{0},\ldots ,y_{j}] 
+\end{equation}
+
+Note that adding an additonal constraint
+adds anew basis function and term in the sum, without affecting 
+any of the previous ones.
+Because we are only interested at most cubic interpolants,
+and delete constraints as often as we add them,
+this property has limited value.
+
+As with the Lagrange basis, we can extend the usual definition
+to handle slope constraints as well as value constraints.
+In this case, however, it's not feasible to work through
+all the quadratic and cubic cases, since the result depends
+on the order in which constraints are specified, not just
+how many of each kind there are.
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Quadratic: $(x_0,y_0),(x_1,y_1,d_1)$}
+
+Quadratic case where value is specified at $x_0$ and $x_1$,
+and slope is also specified at $x_1$.
+General quadratic function in terms of Newton basis at
+$x_0, x_1$:
+\begin{align}
+\nu(x) & = \nu_0 + \nu_1 (x - x_0) + \nu_2 (x - x_0) (x - x_1) 
+\\
+\partial{\nu}(x) & = \nu_1 + \nu_2 \left( (x - x_0) + (x - x_1) \right)
+\nonumber
+\end{align}
+
+\begin{align}
+y_0 = \nu(x_0) = \nu_0 & \Rightarrow \nu_0 = y_0 
+\\
+y_1 = \nu(x_1) = \nu_0 + \nu_1 (x_1 - x_0) & \Rightarrow 
+\nu_1 = \frac{y_1-y_0}{x_1 - x_0} 
+\nonumber \\
+d_1 = \partial{\nu}(x_1) = \nu_1 + \nu_2 (x_1 - x_0) & \Rightarrow 
+\nu_2 = \frac{d_1 (x_1 - x_0) - (y_1-y_0)}{(x_1 - x_0)^2} 
+\nonumber
+\end{align}
+
+In this case, the critical point is at
+\begin{equation}
+x = x_0 + \frac{x_{01} y_{01}}{d_1 x_{01} - y_{01}}
+\end{equation}
+This is a global minimum if 
+$\nu_2 = \frac{y_{01} - d_1 x_{01}}{x_{01}^2}$
+is positive.
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Cubic: $(x_0,y_0,d_0),(x_1,y_1,d_1)$}
+
+Cubic (Hermite~\cite{wiki:cubic-hermite-spline}) 
+case where value and slope are specified at $x_0$ and $x_1$.
+General cubic function in terms of Newton basis at
+$x_0, x_1$:
+\begin{align}
+\nu(x) & = \nu_0 + \nu_1 x_{{\star}0} + \nu_2 x_{{\star}0} x_{{\star}1} 
+ + \nu_3 x_{{\star}0} x_{{\star}1} x_{{\star}2} \\
+\partial{\nu}(x) & = \nu_1 
++ \nu_2 \left( x_{{\star}0} + x_{{\star}1} \right) 
++ \nu_3 \left( 
+ x_{{\star}0} x_{{\star}1} +
+ x_{{\star}1} x_{{\star}2} +
+ x_{{\star}2} x_{{\star}0} +
+\right)
+\nonumber
+\end{align}
+where $x_{{\star}i} = \left(x - x_i\right)$.
+
+The interpolation constraints are:
+\begin{align}
+y_0 & = \nu_0 
+\\
+y_1 & = \nu_0 + \nu_1 x_{10}  
+\nonumber 
+\\
+d_0 & = \nu_1 + \nu_2 x_{01} - \nu_3 x_{01} x_{20} 
+\\
+d_1 & = \nu_1 - \nu_2 x_{01} - \nu_3 x_{01} x_{12} 
+\nonumber
+\end{align}
+(using $x_{ij} = - x_{ji}$).
+
+We have $4$ constraints but $5$ unknowns, counting $x_2$
+as unspecified.
+If we take $x_2 = \frac{x_0 + x_1}{2}$,
+then $x_{20} = x_{12} = -\frac{x_{01}}{2}$,
+and the constraints reduce to
+\begin{align}
+y_0 & = \nu_0 
+\\
+y_1 & = \nu_0 + \nu_1 x_{10}  
+\nonumber 
+\\
+d_0 & = \nu_1 + \nu_2 x_{01} + \nu_3 \frac{x_{01}^2}{2} 
+\\
+d_1 & = \nu_1 - \nu_2 x_{01} + \nu_3 \frac{x_{01}^2}{2} 
+\nonumber
+\end{align}
+
+(\textbf{TODO:} Is this the best choice for $x_2$? 
+If so, is there a good argument why?)
+
+The Newton coefficients are then
+\begin{align}
+\nu_0 & = y_0 
+\\
+\nu_1 & = \frac{y_{01}}{x_{01}}
+\nonumber
+\\ 
+\nu_2 & = \frac{d_{01}}{2 x_{01}}
+\nonumber
+\\ 
+\nu_3 & = \frac{ \left(d_0 + d_1 \right) x_{01} + 2 y_{01}}{x_{01}^3}
+\nonumber
+\end{align} 
+
+In terms of those coefficients, the critical points are at
+\begin{equation}
+x=\frac{-2 \nu_2 + 3 \nu_3 \left( x_0 + x_1 \right) 
+\pm \sqrt{-12 \nu_1 \nu_3 + 4 \nu_2^{2} + 3 \nu_3^{2} x_{01}^{2}}
+}
+{ 6 \nu_3}
+\end{equation}
+when the argument of the square root is non-negative.
+One of these is a local minimum when the $2$nd derivative is positive:
+\begin{equation}
+\partial^2 \nu(x) = 2\nu_2
+ + 2 \nu_3 \left(x_{{\star}0} + x_{{\star}1} + x_{{\star}2}\right)
+\end{equation}
+
+\newpage
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\levelstay{Divided differences}
+\label{sec:Divided-differences}
+\cite{wiki:Divided-differences}
+Given $k+1$ pairs 
+$\left( x_0, y_0 \right) \ldots \left( x_k, y_k \right) $:
+
+For $0 \leq \nu \leq k$:
+
+\begin{align}
+\left[ y_{\nu} \right] & \defeq y_{\nu}
+\\
+\left[ y_{\nu}, \ldots , y_{\nu + j} \right] & \defeq 
+\frac{
+\left[ y_{\nu + 1}, \ldots ,  y_{\nu + j} \right]
+-
+\left[ y_{\nu}, \ldots ,  y_{\nu + j - 1} \right]
+}{
+x_{\nu + j} - x_{\nu}
+} 
+\; \text{(forward)}
+\nonumber
+\\
+\left[ y_{\nu}, \ldots , y_{\nu - j} \right] & \defeq 
+\frac{
+\left[ y_{\nu}, \ldots ,  y_{\nu - j + 1} \right]
+-
+\left[ y_{\nu - 1}, \ldots ,  y_{\nu - j} \right]
+}{
+x_{\nu} - x_{\nu - j}
+} 
+\; \text{(backward)}
+\nonumber
+\end{align}
+
+Note: $x_i$ are implied in the standard 
+$\left[ y_{\nu}, \ldots , y_{\nu + j} \right]$ notation.
+
+Given $x_0, \ldots , x_k$ and $f$:
+
+For $0 \leq \nu \leq k$:
+
+\begin{align}
+f \left[ x_{\nu} \right] & \defeq f \left( x_{\nu} \right)
+\\
+f \left[ x_{\nu}, \ldots , x_{\nu + j} \right] & \defeq 
+\frac{
+f \left[ x_{\nu + 1}, \ldots ,  x_{\nu + j} \right]
+-
+f \left[ x_{\nu}, \ldots ,  x_{\nu + j - 1} \right]
+}{
+x_{\nu + j} - x_{\nu}
+} 
+\nonumber
+\end{align}
+
+Relevant special cases ($z_{ij} \defeq z_i - z_j$ for $z$ 
+either $x$ or $y$): 
+\begin{align}
+\left[ y_0 \right] & = y_0 
+\\
+\left[ y_0 , y_1  \right] & = 
+\dfrac{y_{01}}{x_{01}} 
+\nonumber
+\\
+\left[ y_0 , y_1 , y_2 \right] & = 
+\dfrac{
+\left( \dfrac{y_{12}}{x_{12}} - \dfrac{y_{01}}{x_{01}} \right)
+}{
+x_{20}
+} 
+\nonumber
+\\
+\left[ y_0 , y_1 , y_2 , y_3 \right] & = 
+\dfrac{
+ \left(
+ \dfrac{
+ \left(
+  \frac{y_{23}}{x_{23}} - \frac{y_{12}}{x_{12}}
+  \right)
+  }{x_{31}}
+  \right)
+ -
+ \left(
+ \dfrac{
+ \left(
+  \frac{y_{12}}{x_{12}} - \frac{y_{01}}{x_{01}}
+  \right)
+  }{x_{20}}
+  \right)
+}{
+x_{30}
+} 
+\nonumber
+\end{align}

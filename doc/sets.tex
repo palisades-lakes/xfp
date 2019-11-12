@@ -1,0 +1,477 @@
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}}
+\levelstay{Sets}
+\index{Set}
+\epigraph{A pack of wolves, a bunch of grapes, or a flock of
+pigeons are all examples of sets of things.
+The mathematical concept of a set can be used as the foundation
+for all known mathematics.
+The purpose of this little book is to develop the basic properties
+of sets.\\
+\ldots \\
+One thing that this development will not include is a definition
+of sets.
+The situation is analogous to the familiar axiomatic approach to
+elementary geometry.
+That approach does not offer a definition of points and lines;
+instead it describes what it is that one can do with those
+objects.
+The semi-axiomatic point of view adopted here assumes that the
+reader has the ordinary, human, intuitive (and frequently
+erroneous) understanding of what sets are; the purpose of the
+exposition is to delineate some of the things one can correctly do
+with them.}%
+{Halmos, \textit{Naive Set Theory}\cite{Halmos1960Naive}}
+
+\vfill
+
+\emph{Sets} are a foundation for everything we are going to do,
+but they turn out to be surprisingly hard to define precisely,
+from first principles, without introducing paradoxes.
+
+\vfill
+
+\label{sec:math-sets}
+\lstset{language=Clojure}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\levelstay{Defining sets}
+\epigraph{All the basic principles of set theory, except only the
+axiom of extension, are designed to make new sets out of old ones.
+The first and most important of these basic principles of set
+manufacture says, roughly speaking, that anything intelligent one
+can assert about the elements of a set specifies a subset, namely,
+the subset of those elements about which the assertion is true.}
+{Halmos, \textit{Naive Set Theory}~\cite[section~2]{Halmos1960Naive}}
+
+\begin{description}
+
+\item[Specification]
+
+A \gls{Set}, at its most fundamental, is a defined by a rule,
+or method,
+for determining if any given 'thing' is an element: 
+$s \glssymbol{elementOf} \Set{S}$.
+\footnote{$(s \notin \Set{S}) = \text{not}(s \in \Set{S})$.}
+($s \not\in \Set{S}$)
+%, or in pseudocode:
+%\lstinline|(element-of $\Set{S}$ $s$)|.
+An example, in standard set notation:
+the even numbers 
+$= \SetSpec{ i }{ \, i/2 \, \text{is an integer} }$.
+
+\item[Enumeration]
+
+However, it's difficult to do much interesting with a set
+unless we have some way of finding, or generating elements.
+So another common way to specify a set is by enumeration:
+For example, the even numbers $= \{ \ldots, -4, -2, 0, 2 ,4,
+\ldots \}$.
+
+The enumeration notation above is something of a cheat ---
+although it's straightforward enough for finite sets, it relies on
+the reader correctly recognizing the implied pattern for countable
+sets.
+And it fails for uncountable sets like the real numbers.
+
+\end{description}
+
+What's unstated, but required, in both these approaches, is the
+existence of some prior 'universe' set, $\Set{U}$, and a function
+(see~\autoref{sec:Functions}) we can apply to the elements of
+$\Set{U}$ to determine the set of interest:
+
+\begin{description}
+\item[Specification] 
+$\Set{S} =
+\SetSpec{ u \glssymbol{elementOf} \Set{U} }{ p(u) = \text{true} }$ 
+
+For example: the even numbers
+ $= \SetSpec{ i \glssymbol{elementOf} 
+\glssymbol{Integers} }{
+ i/2 \glssymbol{elementOf} \glssymbol{Integers} }$.
+
+\item[Enumeration]
+$\Set{S} =
+\SetSpec{ f(u) }{ u \glssymbol{elementOf} \Set{U} }$ 
+
+For example: the even numbers 
+$= \SetSpec{ 2*i }{ i \glssymbol{elementOf} \glssymbol{Integers} }$.
+
+\end{description}
+A variation on 
+``turtles all the way down''~\cite{xkcd:Turtles, wiki:Turtles},
+this approach may be a bit unsatisfying.
+It does, however, have the advantage of preventing self-reference
+paradoxes (for example, 
+the set of all sets that do not contain themselves); 
+see Halmos, 
+\textit{Naive Set Theory}~\cite[section 2]{Halmos1960Naive} 
+for details.
+
+% \gls{empty set}
+One set that doesn't require any turtles is 
+the empty set, $\varnothing$.
+
+
+Both approaches raise the fascinating issue of 
+computability/decidability~\cite{church1936unsolvable,
+turing1936computability,
+turing1938computable-correction,
+turing1937computability-lambda},
+which I am going to pass over here, except to note the 
+'halting problem'~\cite{wiki:Halting-problem}:
+
+If we call $p(u)$ to determine if $u \in \Set{S}$, 
+it might return $\text{true}$, might return $\text{false}$,
+or it might not return at all.
+In the third case, we might define $u \in \Set{S}$ as only those
+$u$ where $p(u)$ halts and returns $\text{true}$, but it turns 
+out that given $p$ and $u$, deciding whether $p(u)$ will ever
+finish is itself undecidable (more turtles \ldots).
+
+The practical version of this is that, even in cases where we
+might be able to determine that $p(u)$ that will eventually halt
+and return something, we might not be able to afford to wait that
+long.
+Pragmatically, we will have to restrict ourselves to sets where we
+can guarantee an answer fast enough for the context in which the
+sets are being used.
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\levelstay{Cardinality}
+
+% \gls{cardinality}  \gls{countable infinity} \gls{uncountable
+% infinity} \gls{cardinal numbers}
+The cardinality of a set in the number of elements.
+For our purposes, the possibilities that matter are \emph{finite,}
+\emph{countably infinite}, the cardinality of the
+\gls{NaturalNumbers}, $\aleph_{0}$, or \emph{uncountably
+infinite}, which means the set has more elements than the
+\gls{NaturalNumbers}.
+(I'm ignoring the distinction between different uncountable
+infinities.
+See~\cite{wiki:cardinal-number} for an introduction to the other
+possibilities.)
+
+Notation for set cardinality varies widely:
+$\#\Set{S}$,  $|\Set{S}|$,
+$\bar{\bar{\Set{S}}}$, $n(\Set{S})$,
+$\text{card}(\Set{S})$, \ldots, nearly all of which conflict
+with something (eg $\#\{ 0 \, 1 \, 2 \} = 3$ vs 
+\lstinline|#{1 2 3}| Clojure set syntax).
+I will use $\text{cardinality}(\Set{S})$.
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\levelstay{Identity}
+
+The question of whether two sets are the same set is a recurring
+locus of ambiguity in mathematics.
+
+One issue is the difference between the 'set' and the 
+'set definition', which is rarely made clear.
+
+Halmos~\cite{Halmos1960Naive} starts with the \emph{Axiom of
+extension:} two sets are the \emph{same thing} if they have the
+same elements (regardless of how they are defined).
+
+Example: 
+$\SetSpec{ 2*i }{ \, i \in \glssymbol{Integers} }$
+and
+$\SetSpec{ i \in \glssymbol{Integers} }
+{ i/2 \in \glssymbol{Integers} }$
+are two distinct definitions of the same set. 
+ 
+Pragmatically, however, it's going to be much easier to determine
+if two set definitions are the same, than determining if two
+different definitions generate the same elements, which would,
+after all, be undecidable in general.
+
+Another source of ambiguity is a common tendency to blur the 
+distinction between sets whose elements are related by some natural
+identity. 
+
+Example: we can define the rational numbers as (equivalence
+classes of) pairs of integers:
+$\glssymbol{RationalNumbers} = \glsdesc{RationalNumbers}$.
+Strictly speaking, the rational number $i/1$ is a different thing
+from the integer $i$, but it's nearly universal to identify the
+subset of the rationals with denominator $1$ with the integers and
+take $\glssymbol{Integers} \subset \glssymbol{RationalNumbers}$.
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\levelstay{Subsets, partitions, and quotients}
+
+Families: 
+$\SetSpec{ \Set{S}_{i} }{ i \in \, \text{index set} \, \Set{I} }$.
+
+
+%\gls{subset} \gls{superset}
+
+$\Set{A} \subseteq \Set{B}$ ($\Set{B} \supseteq \Set{A}$)
+means
+every element of $\Set{A}$ is an element of $\Set{B}$, 
+that is, $a \in \Set{A}$ 
+implies $a \in \Set{B}$.
+I reserve $\Set{A} \subset \Set{B}$ (($\Set{B} \supset
+\Set{A}$)) for strict subsets;
+it means $\Set{A} \subseteq \Set{B}$
+and there is some $\b\in\Set{B}$ which
+is not in $\Set{A}$.
+
+%\gls{power set}
+
+The \emph{power set}, $\PowerSet{\Set{S}}$,
+ is the set 
+of all subsets of
+$\Set{S}$.
+
+%\gls{intersection} \gls{union} \gls{set-difference}
+As usual, $\Set{A} \cap \Set{B}$ is the set of elements in both 
+$\Set{A}$ and $\Set{B}$; $\Set{A} \cup \Set{B}$ are those things
+that are in either $\Set{A}$ or $\Set{B}$.
+
+$\Set{A} \cap \Set{B} \cap \Set{C} 
+= (\Set{A} \cap \Set{B}) \cap \Set{C} 
+= \Set{A} \cap (\Set{B} \cap \Set{C}) $
+
+$\bigcap_{i \in \Set{I}} \Set{S}_{i} = 
+\SetSpec{ s }{ s \in \Set{S}_{i} \forall \Set{S}_{i} }$
+
+$\Set{A} \setminus \Set{B}$ are the elements of $\Set{A}$ 
+not in $\Set{B}$.
+
+%\gls{partition}
+A partition of $\Set{S}$ is a set of disjoint nonempty subsets of
+$\Set{S}$ whose union is $\Set{S}$.
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\levelstay{Implementation}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Java}
+\lstset{language=Java}
+
+Java provides an interface \lstinline|java.util.Set| intended for
+possibly mutable, finite sets (\autoref{java.util.Set:general},
+ \autoref{java.util.Set:countable}, 
+ \autoref{java.util.Set:finite}, 
+ and
+\autoref{java.util.Set:optional}).
+
+%-----------------------------------------------------------------
+\begin{lstlisting}[
+ caption={[\texttt{java.util.Set} general]\texttt{java.util.Set} 
+ operations applicable to any set.}, 
+ label=java.util.Set:general]
+boolean contains (Object o) //$ \; o \in \Set{S}$
+boolean containsAll (Collection c) //$\;\Set{C}\subseteq\Set{S}$ 
+boolean isEmpty () //$ \; \Set{S} = \varnothing $
+boolean equals (Object o) //$\; \Set{S} = \Set{O} $
+\end{lstlisting}
+%-----------------------------------------------------------------
+\begin{lstlisting}[
+ caption={[\texttt{java.util.Set} countable]\texttt{java.util.Set} 
+ operations requiring countable sets. Note, however, that 
+ iterators that never end will cause havoc with almost all Java
+ code}, 
+ label=java.util.Set:countable]
+Iterator iterator ()
+Spliterator spliterator ()
+\end{lstlisting}
+%-----------------------------------------------------------------
+\begin{lstlisting}[
+ caption={[\texttt{java.util.Set} finite]\texttt{java.util.Set} 
+ operations requiring finite sets. Note that changing to
+ \texttt{size()} to be Object valued would enable representing sets
+ of arbitrary cardinality.}, 
+ label=java.util.Set:finite] 
+int size () 
+Object[] toArray ()
+Object[] toArray (Object[] a)
+\end{lstlisting}
+%-----------------------------------------------------------------
+\begin{lstlisting}[
+ caption={[\texttt{java.util.Set}]\texttt{java.util.Set} optional
+ operations, requiring mutable sets.}, 
+ label=java.util.Set:optional,]
+boolean add(E e) //$\; \Set{S} \leftarrow \Set{S} \cup \{e\} $
+boolean addAll(Collection c) //$\;\Set{S}\leftarrow\Set{S}\cup\Set{C}$ 
+void  clear() //$\; \Set{S} \leftarrow \varnothing $ 
+boolean remove (Object o) //$\;\Set{S}\leftarrow\Set{S}\setminus\{e\}$
+boolean removeAll (Collection c) //$\;\Set{S}\leftarrow\Set{S}\setminus\Set{C}$ 
+boolean retainAll (Collection c) //$\;\Set{S}\leftarrow\Set{S}\cap\Set{C}$
+\end{lstlisting}
+%-----------------------------------------------------------------
+
+More Java set classes? Guava or Apache Commons?
+Set operations, union, cartesian products, \ldots.
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Clojure}
+\lstset{language=Clojure}
+
+Idiomatic Clojure sets are immutable, although it provides easy
+access to any mutable or immutable Java implementation of
+\lstinline|java.util.Set|.
+
+Clojure provides an (unfortunate) literal syntax for finite
+enumerated sets: 
+\lstinline|#{0 1 2}|, and 4 ways to create sets:
+\begin{description}
+\item[\texttt{hash-set}] A function equivalent to the
+literal syntax \lstinline|#{}|
+\item[\texttt{sorted-set}/\texttt{sorted-set-by}] Returns
+sets that iterate over their elements in their natural order (in the
+order of the supplied comparator). Like Java sorted collections,
+can't handle partial orderings.
+\item[\texttt{set}] Coerce any collection into a set.
+\item[\texttt{into}] A general way to coerce any collection
+into another type.
+\end{description}
+
+Idiomatic Clojure provides an informally specified functional
+'API' for finite sets. Most of these functions do will something
+for all Clojure collections, not always what you would expect:
+\begin{lstlisting}[
+ caption={Clojure set 'API'}, 
+ label=Clojure:set-API,]
+(contains? s x) ;;  $x \in \Set{S}$.
+(empty? s) ;; $\Set{S} = \varnothing$
+(count s) ;; $\text{cardinality}(\Set{S})$
+(conj s x) ;; $\Set{S} \cup \{x\}$
+(disj s x) ;; $\Set{S} \setminus \{x\}$
+(clojure.set/intersection s0 s1 s2 $\ldots$) ;; $\Set{S}_0 \cap \Set{S}_1 \cap \Set{S}_2 \cap \ldots$ 
+(clojure.set/union s0 s1 s2 $\ldots$) ;; $\Set{S}_0 \cup \Set{S}_1 \cup \Set{S}_2 \cup \ldots$ 
+(clojure.set/difference s0 s1 s2 $\ldots$) ;; $\Set{S}_0 \setminus (\Set{S}_1 \cup \Set{S}_2 \cup \ldots)$
+\end{lstlisting}
+
+Confusion with dictionary 'API':
+ \lstinline|(s x)| and \lstinline|(get s x)| are similar to
+ \lstinline|(contains? s x)| except \lstinline|(contains? s x)| returns
+ \lstinline|true| or \lstinline|false|, while the other two return
+ \lstinline|x| if \lstinline|x| is in \lstinline|s| \lstinline|nil| otherwise.
+The behavior of \lstinline|(s x)| and \lstinline|(get s x)| reflect an
+incomplete/inconsistent API treating Clojure collections as
+dictionaries (key-value pairs), modeling sets as dictionaries
+where the key and value are constrained to be the same.
+However, other functions designed for dictionaries (eg
+\lstinline|keys|) don't work for sets.
+ 
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Les Elemens}
+
+Set interface.
+
+Implementation almost always requires multiple objects
+representing a single set element
+
+\begin{equation}
+a \parallel b
+\end{equation}
+vs
+\begin{equation}
+a = b
+\end{equation}
+
+vs
+\begin{equation}
+a \equiv b
+\end{equation}
+
+% \begin{lstlisting}[
+% caption={[checksum namespace]Checksum and related functions via
+% Java calls}, label=checksum-namespace,]
+% (set! *warn-on-reflection* true)
+% (set! *unchecked-math* :warn-on-boxed)
+% (ns ^{:doc "compute a file checksum."}
+%   
+%   curate.scripts.checksum
+%   
+%   (:require [clojure.java.io :as io])
+%   (:use [clojure.set :only [difference]])
+%   (:gen-class))
+% ;;-----------------------------------------------------------------
+% (defn checksum [file]
+%   (let [input (java.io.FileInputStream. file)
+%         digest (java.security.MessageDigest/getInstance "MD5")
+%         stream (java.security.DigestInputStream. input digest)
+%         bufsize (* 1024 1024)
+%         buf (byte-array bufsize)]
+% 
+%   (while (not= -1 (.read stream buf 0 bufsize)))
+%   (apply str (map (partial format "%02x") (.digest digest)))))
+% 
+% (defn list-dir [dir]
+%   (remove #(.isDirectory %)
+%           (file-seq (java.io.File. dir))))
+% 
+% (defn find-dupes [root]
+%   (let [files (list-dir root)]
+%     (let [summed (zipmap (pmap #(checksum %) files) files)]
+%       (difference
+%        (into #{} files)
+%        (into #{} (vals summed))))))
+% 
+% (defn remove-dupes [files]
+%   (prn "Duplicates files to be removed:")
+%   (doseq [f files] (prn (.toString f)))
+%   (prn "Delete files? [y/n]:")
+%   (if-let [choice (= (read-line) "y")]
+%     (doseq [f files] (.delete f))))
+% 
+% (defn -main [& args]
+%   (if (empty? args)
+%     (println "Enter a root directory")
+%     (remove-dupes (find-dupes (first args))))
+%   (System/exit 0))
+% \end{lstlisting}
+% 
+% \lstinputlisting[
+% float=htbp,
+% caption={[checksum function]Compute a checksum for a file thru Java},
+% label=checksum,
+% firstline=11,lastline=18]{listings/checksum.clj}
+ 
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\levelstay{Examples}
+ 
+1d and 2d intervals.
+ 
+% \begin{minipage}{\linewidth}
+% \begin{lstlisting}[
+% caption={[FileTypeFilter]A file .suffix filter},
+% label=FileTypeFilter]
+% package img;
+% 
+% public final class FileTypeFilter 
+%   implements java.io.FilenameFilter {
+% 
+%   private final String _suffix;
+% 
+%   public final boolean accept (final java.io.File dir,
+%                                final String name) {
+%     return name.toLowerCase().endsWith(_suffix); }
+% 
+%   public FileTypeFilter (final String suffix) {
+%     super();
+%     _suffix = suffix.toLowerCase(); } }
+% \end{lstlisting}
+% \end{minipage}
+% 
+% \index{Sets|)}
+% 
+% \begin{figure}[htbp]
+% \centering
+% \includegraphics[scale=0.7]{figs/arara.png}
+% \caption{Configuring {\TeX}works for \texttt{arara}.}
+% \end{figure}

@@ -1,0 +1,1115 @@
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}}
+\levelstay{Derivatives}
+\label{sec:Derivatives}
+
+One way to view the derivative of a 
+function~\cite{wiki:Frechet-derivative}
+$\f:\Space{V} \mapsto \Space{W}$,
+at a point $\v$,
+is as the linear function $\Lmap:\Space{V} \mapsto \Space{W}$,
+that best approximates the local 'slope' of $\f$ at $\v$.
+(In the following, $\v$, $\u$, and $\t$ are elements of $\Space{V}$.)
+To be a little more precise, we want
+\begin{equation}
+\lim_{ \|{\bf \delta}  \| \mapsto 0}
+\frac{ \| \f(\v + {\bf \delta}) - (\f(\v) + \Lmap({\bf\delta})) \|}
+{\|{\bf \delta}  \| }
+ = 0
+\end{equation}
+
+\textbf{Note:} for a linear function $\Lmap$,
+the derivative is constant over the domain
+and the value is $\Lmap$ itself.
+
+\textbf{TODO:} G\^{a}teaux derivative: collection of all
+directional derivatives.
+
+\textbf{TODO:} Generalized functions/distributions.
+
+\textbf{TODO:}
+relationship to currying and standard notation ambiguity vs
+lisp notation.
+
+For a concise and correct discussion, 
+see Spivak \cite[chapter 2]{spivak-1965}.
+
+\textbf{TODO:} better notation for derivatives, especially 
+'evaluated at' and partial.
+
+\begin{itemize}
+
+\item $\Da{\f}$
+
+In its most general form,
+I denote the derivative of $\f$ by $\Da{\f}$.
+Note that this is linear-function-valued function of the domain of $\f$.
+
+\item $\Db{\f}{\u}$
+
+I denote the derivative of $\f$ at $\u$ by $\Db{\f}{\u}$.
+$\Db{\f}{\u}$ is a specific linear transformation from
+the domain of $\f$ to the codomain of $\f$.
+
+\item $\Dc{\f}{\u}{\t}$
+
+The derivative is most often represented by the \textit{Jacobian},
+the $m \times n$ matrix of partial derivatives
+with respect to some bases for $\Space{V}$ and $\Space{W}$.
+However, it's often easier to express the derivative clearly if we
+explicitly include the argument of the linear transformation.
+In this case, I write $\Dc{\f}{\u}{\t}$
+for the derivative of $f$ at the point $\u$
+applied to the vector $\t$.
+
+\item $\Dd{\v_i}{\f}{(\u_0 \ldots \u_{n-1})}{\t_i}$
+
+For functions on direct sum spaces,
+$\f(\v_0,\v_1, \ldots, \v_{n-1})$, $\v_i \in \Space{V}_i$,
+it's often easier to consider the derivative
+with respect to one argument at a time.
+I write $\Dd{\v_i}{\f}{(\u_0 \ldots \u_{n-1})}{\t_0 \ldots \t_{n-1}}$
+for the derivative of $\f$ with respect to $\v_i$,
+at the point $(\u_0 \ldots \u_{n-1}) \in \oplus_{i=0}^{n-1} \Space{V}_i$,
+applied to the vector $\t_i \in \Space{V}_i$.
+
+\item $\da{j}{\f} = \da{v_j}{\f}$
+
+The traditional partial derivative of $\f$ is with respect to
+a single coordinate $v_j$ of the domain.
+More formally, this is the directional derivative of $\f$
+in the direction of the $j$-th canonical basis vector $\e_j^{\Space{V}}$.
+
+$\da{j}{\f}$ is a function from the domain of $\f$ to the co-domain of $\f$.
+$\db{j}{\f}{\u}$ is the value of that function at $\u$.
+The partial derivative is related to the derivative by
+\begin{eqnarray}
+\label{eq:partial-full-dervatives}
+\Db{\f}{\u}
+& = &
+\sum_{j=0}^{m-1} \db{j}{\f}{\u} \otimes \e_j^{\Space{V}}
+\\
+\db{j}{\f}{\u}
+& = &
+\Db{\f}{\u} \e_j^{\Space{V}}
+\nonumber
+\end{eqnarray}
+
+\item $\da{j}{\f_i}$
+
+The Jacobian partial derivatives are the derivatives of
+a particular coordinate of $\f$, $\f_i$, with respect to
+a single coordinate $v_j$ of the domain.
+$\da{j}{\f_i}$ is a real-valued function on the domain of $\f$.
+$\db{j}{\f_i}{\u}$ is the value of that function at $\u$.
+The Jacobian partial derivatives form the 'matrix' representation of the derivative:
+\begin{equation}
+\Db{\f}{\u} =
+\sum_{i=0}^{m-1}
+\sum_{j=0}^{n-1}
+\db{j}{\f_i}{\u} \left( \e_i^{\Space{W}} \otimes \e_j^{\Space{V}} \right)
+\end{equation}
+
+\end{itemize}
+
+In minimizing a real-valued function, $f(\v)$, $\v \in \Space{V}$,
+we frequently need to know both the direction of maximum increase of $f$
+the rate of increase, or slope, of $f$ in that direction.
+
+$\Ga{f}$ is the \textit{gradient} of $f$.
+The gradient has a close relationship to the derivative, $\Da{f}$,
+and the two are often confused.
+Recall that the derivative is a linear transformation
+from the domain of $f$ to its codomain.
+In the case of real-valued functions,
+this means the derivative is a linear function on $\Space{V}$,
+an element of the dual space of $\Space{V}$, a 'row' vector.
+It's easy to see that the gradient is simply the dual (the 'transpose')
+of the derivative, $\Ga{f} = (\Da{f})^{\dagger}$
+(see Spivak \cite[p.~96, ex.~4-18]{spivak-1965}).
+
+$\Ga{f}$ maps $\Space{V} \mapsto \Space{V}$.
+$\Gb{f}{\u} \in \Space{V}$ is the gradient of $f$ at $\u \in \Space{V}$;
+it points in the direction of most rapid increase of
+$f$ and its magnitude $\| \Gb{f}{\u} \|$ is the
+slope of $f$ in that direction.
+
+Notation for the various versions of the gradient
+follows that for derivatives:
+$\Gc{\v_i}{f}{\u}$ is the partial gradient of $f$ with respect to $\v_i$ at
+$\u = \left( \u_0 \ldots \u_{n-1} \right) \in \Space{V} = \oplus_{i=0}^{n-1} \Space{V}_i$
+$\Gc{\v_i}{f}{\u}$ is an element of $\Space{V}_i$.
+
+$(\Gb{f}{\u}) \bullet  \t$
+and
+$(\Gc{\v_i}{f}{\u}) \bullet \t_i$
+are the analogs to exressing the derivative as a linear transformation
+with an explicit argument.
+$(\Gb{f}{\u}) \bullet  \t$ is a real number.
+If we take $t$ to be the canonical basis for $\Space{V}$
+we get an expression for $\Ga{f}$ in terms of the partial derivatives of $f$:
+\begin{equation}
+\label{eq:gradient-from-partials}
+\Gb{f}{\u} = \sum_{j=0}^{m-1} \left( \db{j}{f}{\u} \right) \e_j^{\Space{V}}
+\end{equation}
+
+$\Ga{\f_i}$ is the gradient of a particular (real-valued) coordinate
+of a vector-valued function. It is related to the derivative $\Da{\f}$
+in a way simlilar to the relationship between $\Da{\f}$ and its partials $\da{j}{\f}$.
+\begin{equation}
+\Db{\f}{\u} = \sum_{i=0}^{n-1}  \e_i^{\Space{W}} \otimes \Gb{\f_i}{\u}
+\end{equation}
+
+The most general identity used in computing derivatives is the \textit{chain rule.}
+Suppose
+$\f:\Space{U} \mapsto \Space{V}$,
+$\g:\Space{V} \mapsto \Space{W}$,
+and
+$\h = \g \circ \f : \Space{U}_0 \mapsto \Space{W}$
+Then
+\begin{equation}
+\label{eq:chain-rule}
+\Db{\h}{\u}
+=  \Db{(\g \circ \f)}{\v}
+=  \Db{\g}{\f(\v)}  \circ  \Db{\f} {\v}.
+\end{equation}
+
+It is sometimes useful to express this in terms of the partial derivatives:
+\begin{equation}
+\label{eq:chain-rule_partials}
+\Db{\h}{\u} =  \sum_{i=0}^{n-1} \db{i}{\g}{\f(\u)} \otimes  \Gb{\f_i}{\u}.
+\end{equation}
+
+See Spivak \cite[Theorem~2-2]{spivak-1965}.
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\levelstay{Vector-valued functions}
+\label{sec:Derivatives-of-Vector-valued-functions}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Implicit functions}
+\label{sec:Derivatives-of-implicit-functions}
+
+Suppose 
+$\Vector{f} : \Space{X} \times \Space{Y} \rightarrow \Space{Y}$,
+for topological linear spaces $\Space{X}$ and $\Space{Y}$.
+
+WLOG, consider the level set 
+$\SetSpec{\left[ \Vector{x} , \Vector{y} \right]}
+{\Vector{0} = \Vector{f}\left( \left[ \Vector{x} , \Vector{y} \right] \right)}$
+(other level sets are equivalent to modifying $\Vector{f}$
+by adding or subtracting 
+an element of $\Space{Y}$).
+
+All level sets are relations on $\Space{X} \times \Space{Y}$.
+Under conditions on $\Da{\Vector{f}}$
+(Spivak \cite[Theorem~2-12]{spivak-1965}),
+there is a subset of the relation which is a 
+function.
+
+\textbf{TODO:} Implicit functions without differentiability
+conditions, eg, when the level set isn't a smooth manifold,
+maybe only piecewise smooth?
+
+Specifically, 
+there exists an open subset $\Set{D}  \subset \Space{X}$
+and a differentiable function $\Vector{g} : \Set{D} \rightarrow \Space{Y}$
+such that 
+\begin{equation}\label{eq:Implicit-function}
+\Vector{0} = \Vector{f}\left( \left[ \Vector{x} , \Vector{g} \left( \Vector{x} \right) \right] \right)
+\end{equation}
+for all 
+$\Vector{x} \in  \Set{D}$.
+
+\textbf{TODO:} Not really a very useful theorem --- 
+how do you find $\Vector{g}$ and $\Set{D}$?
+When is $\Set{D}$ big enough?
+
+\textbf{TODO:} Can we extend $\Vector{g}$ to all of $\Space{X}$?
+
+Note that 
+\begin{equation}\label{eq:Implicit-derivative}
+\begin{aligned}
+\Vector{h}\left(\Vector{x}\right) 
+& = 
+\Vector{f}\left( \left[ \Vector{x} , \Vector{g} \left( \Vector{x} \right) \right] \right)
+\\
+& =
+\left( \Vector{f} \circ \left( \Vector{I}_{\Space{X}} \times \Vector{g} \right) \right) 
+\left( \Vector{x} \right)
+\end{aligned} 
+\end{equation}
+
+Equation~\ref{eq:Implicit-function}, 
+the chain rule (equation~\ref{eq:chain-rule}),
+and the linearity of $\Vector{I}_{\Space{X}}$
+imply
+\begin{equation}\label{eq:Implicit-derivative}
+\begin{aligned}
+\Vector{0} & = \Db{\Vector{h}}{\Vector{x}_0}
+\\
+& = \Db{\Vector{f}}{\left[ \Vector{x}_0 , \Vector{g}\left( \Vector{x}_0 \right) \right]}
+\circ \left( 
+\Vector{I}_{\Space{X}} 
+\times 
+\Db{\Vector{g}}{\Vector{x}_0}
+\right)
+\\
+& = 
+\left(
+\De{\Vector{x}}{\Vector{f}}{\left[ \Vector{x}_0 , \Vector{g}\left( \Vector{x}_0 \right) \right]}
+\circ 
+\Vector{I}_{\Space{X}}
+\right)
++ 
+\left(
+\De{\Vector{y}}{\Vector{f}}{\left[ \Vector{x}_0 , \Vector{g}\left( \Vector{x}_0 \right) \right]}
+\circ 
+\De{\Vector{x}}{\Vector{g}}{\Vector{x}_0}
+\right)
+\\
+& = 
+\De{\Vector{x}}{\Vector{f}}{\left[ \Vector{x}_0 , \Vector{g}\left( \Vector{x}_0 \right) \right]}
++ 
+\left(
+\De{\Vector{y}}{\Vector{f}}{\left[ \Vector{x}_0 , \Vector{g}\left( \Vector{x}_0 \right) \right]}
+\circ 
+\De{\Vector{x}}{\Vector{g}}{\Vector{x}_0}
+\right)
+\end{aligned}
+\end{equation}
+which implies
+\begin{equation}
+\De{\Vector{x}}{\Vector{g}}{\Vector{x}_0}
+=
+\left(
+\De{\Vector{y}}{\Vector{f}}{\left[ \Vector{x}_0 , \Vector{g}\left( \Vector{x}_0 \right) \right]}
+\right)^{-1}
+\circ 
+\De{\Vector{x}}{\Vector{f}}{\left[ \Vector{x}_0 , \Vector{g}\left( \Vector{x}_0 \right) \right]}
+\end{equation}
+
+When $\Space{Y}=\Space{R}$, this reduces to:
+\begin{equation}
+\De{\Vector{x}}{\Vector{g}}{\Vector{x}_0}
+=
+\dfrac{
+\De{\Vector{x}}{\Vector{f}}{\left[ \Vector{x}_0 , \Vector{g}\left( \Vector{x}_0 \right) \right]}
+}{
+\db{\Vector{y}}{\Vector{f}}{\left[ \Vector{x}_0 , \Vector{g}\left( \Vector{x}_0 \right) \right]}
+}
+\end{equation}
+
+\begin{example}[Circle]
+$x^2 + y^2 - d = 0$
+\end{example}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Multilinear functions}
+\label{sec:Derivatives-of-multilinear-functions}
+
+A function
+ $\f(\v_0 \ldots \v_k):\Space{V}_0 \oplus \ldots \oplus \Space{V}_k \mapsto \Space{W}$
+is \textit{multilinear} if
+\begin{equation}
+\f(a_{00} \v_{00} + a_{01} \v_{01}, \ldots, a_{k0} \v_{k0} + a_{k1} \v_{k1})
+ =  \sum_{i_0 \ldots i_k = 0,1} (a_{0i_0} \ldots a_{ki_k}) \f(\v_{0i_0} \ldots \v_{ki_k}).
+\end{equation}
+
+The derivative of $\f$
+at the point $(\v_0 \ldots \v_k)$, applied to the vector $(\u_0 \ldots \u_k)$ is
+
+\begin{equation}
+\Dc{\f}{(\v_0 \ldots \v_k)}{\u_0 \ldots \u_k}
+ =  \sum_{i=0,k} \f(\v_0 \ldots \v_{i-1},\u_i,\v_{i+1} \ldots \v_k).
+\end{equation}
+
+See Spivak \cite[ex.~2-14]{spivak-1965}.
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Bilinear functions}
+\label{sec:Derivatives-of-bilinear-functions}
+
+Bilinear functions are a useful special case of multilinear functions.
+
+A function $\f(\v,\u):\Space{V}_0 \oplus \Space{V}_1 \mapsto \Space{W}$
+is \textit{bilinear} if
+\begin{eqnarray}
+\f(a_0 \v_0 + a_1 \v_1, b_0 \u_0 + b_1 \u_1)
+& =  & a_0 b_0 f(\v_0,\u_0)
++  a_0 b_1 f(\v_0,\u_1)
+\\
+& +  & a_1 b_0 f(\v_q,\u_0)
+ +  a_1 b_1 f(\v_q,\u_1).
+\nonumber
+\end{eqnarray}
+
+The derivative of $\f$
+at the point $(\v_0,\u_0)$, applied to the vector $(\v,\u)$ is
+\begin{equation}
+\label{eq:bilinear-derivative}
+\Dc{\f}{(\v_0,\u_0)}{\v,\u} = \f(\v_0,\u) + \f(\v,\u_0).
+\end{equation}
+
+See Spivak \cite[ex.~2-12]{spivak-1965}.
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-3}
+\levelstay{Cross products}
+\label{sec:Derivatives-of-cross-products}
+
+We can view the 3-dimensional cross product
+$ \times $
+as a bilinear function
+$\times(\v,\u) = \v \times \u : \Reals^3 \oplus \Reals^3 \mapsto \Reals^3$.
+From equation \ref{eq:bilinear-derivative},
+$\Dc{\times}{(\v_0,\u_0)}{\v,\u} = \v_0 \times \u + \v \times \u_0$.
+
+Suppose
+$\f:\Space{V} \mapsto \Reals^3$, and
+$\g:\Space{V} \mapsto \Reals^3$.
+The derivative of $\f \times \g$ is:
+\begin{eqnarray}
+\Dc{(\f \times \g)}{\v_0}{\v}
+& =
+& \Db{\times}{(\f(\v_0),\g(\v_0))} \circ (\Dc{\f}{\v_0}{\v}, \Dc{\g}{\v_0}{\v})
+\\
+& =
+& \f(\v_0) \times \Dc{\g}{\v_0}{\v} + \Dc{\f}{\v_0}{\v} \times \g(\v_0) \nonumber
+\end{eqnarray}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Scalar products}
+\label{sec:Derivatives-of-scalar-products}
+
+Suppose
+$f:\Space{V} \mapsto \Reals$, and
+$\g:\Space{V} \mapsto \Space{W}$.
+It follows from the chain rule that the derivative of $\h = f\g$ is:
+\begin{equation}
+\label{eq:scalar_product_derivative}
+\Db{(f\g)}{\v} =  f(\v) \Db{\g}{\v} + \g(\v) \otimes \Gb{f}{\v}
+\end{equation}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Normalized functions}
+\label{sec:Derivatives-of-normalized-functionss}
+
+Let $\tilde{\f}$ be the normalized version of $\f$:
+$\tilde{\f}  =  \frac{\f}{\| \f \|}$.
+Then, from equations \ref{eq:scalar_product_derivative}
+and \ref{eq:norm_derivative}:
+\begin{eqnarray}
+\Dc{\tilde{\f}}{\v}{\u}
+& = &
+\Dc{\left( \frac{\f}{\| \f \|}\right)}{\v}{\u}
+\\
+& = &
+\frac{\Dc{\f}{\v}{\u}}{ \| \f(\v) \|}
+ +
+\f(\v)  \Dc{ \left( \frac{1}{\| \f \|} \right) }{\v}{\u} \nonumber \\
+& = &
+\frac{\Dc{\f}{\v}{\u}}
+{\| \f(\v) \|}
+ -
+\f(\v)
+\frac{\Dc{\| \f \|}{\v}{\u}}
+{\|\f(\v)\|^2} \nonumber \\
+& = &
+\frac{\Dc{\f}{\v}{\u}}{ \| \f(\v) \| }
+ -
+\f(\v) \left( \frac{\f(\v)^\dagger}{\| \f(\v) \|^3}  \Dc{\f}{\v}{\u} \right) \nonumber \\
+& = &
+\frac{
+\| \f(\v) \|^2 \Dc{\f}{\v}{\u}
+ -
+\f(\v)\left( \f(\v) \bullet \Dc{\f}{\v}{\u} \right)
+}
+{\| \f(\v) \|^3}  \nonumber \\
+& = &
+\frac{\| \f(\v) \|^2 \Identity_{\Space{W}} - \left( \f(\v) \otimes \f(\v) \right)  }
+{ \| \f(\v) \|^3 }
+\Dc{\f}{\v}{\u} \nonumber \\
+& = &
+\frac{\Identity_{\Space{W}} - \left( \tilde{\f}(\v) \otimes \tilde{\f}(\v) \right)  }
+{\| \f(\v) \|}
+\Dc{\f}{\v}{\u} \nonumber
+\end{eqnarray}
+
+
+We can write the derivative above without reference to the argument $\u$:
+\begin{equation}
+\label{eq:normalized_function_derivative}
+\Db{\tilde{\f}}{\v}
+ =
+\Db{\left( \frac{\f}{\| \f \|} \right)}{\v}
+ =
+\frac{\Identity_{\Space{W}} - \left( \tilde{\f}(\v) \otimes \tilde{\f}(\v) \right) }
+{ \| \f(\v) \| }
+\Db{\f}{\v}
+\end{equation}
+
+A common, trivial, normalized function is the normalized version of
+a vector: $\tilde{\v} =  \frac{\v}{ \| \v \| }$.
+
+From equation \ref{eq:normalized_function_derivative}
+it follows that:
+\begin{equation}
+\label{eq:normalized_vector_derivative}
+\Db{\tilde{\v}}{\u}
+ =
+\Db{ \left( \frac{\v}{ \| \v \| } \right) }{\u}
+ =
+\frac{\Identity_{\Space{V}} - \left( \tilde{\u} \otimes \tilde{\u} \right) }
+{ \| \u \| }
+ =
+\frac{\| \u \|^2 \Identity_{\Space{V}} - \left( \u \otimes \u \right) }
+{\| \u \|^3}
+\end{equation}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\levelstay{Real-valued functions}
+\label{sec:derivatives-of-real-valued-functions}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Inner products}
+\label{sec:derivatives-of-inner-products}
+
+We can view the inner product on $\Space{V}$, $\v \bullet \u$,
+as a bilinear function $\bullet(\v,\u) : \Space{V} \oplus \Space{V} \mapsto \Reals$.
+Thus
+\begin{equation}
+\Dc{\bullet}{(\v_0,\u_0)}{\v,\u} = \v_0 \bullet \u + \v \bullet \u_0.
+\end{equation}
+
+Suppose
+$\f:\Space{V} \mapsto \Space{V}$, and
+$\g:\Space{V} \mapsto \Space{V}$.
+The derivative of $\f \bullet \g$ is:
+\begin{eqnarray}
+\label{eq:dot_derivative}
+\Dc{(\f \bullet \g)}{\v_0}{\v}
+& =
+& \Db{\bullet}{(\f(\v_0),\g(\v_0))} \circ (\Dc{\f}{\v_0}{\v}, \Dc{\g}{\v_0}{\v})
+\\
+& =
+& \f(\v_0) \bullet \Dc{\g}{\v_0}{\v}  +  \g(\v_0) \bullet \Dc{\f}{\v_0}{\v} \nonumber
+\end{eqnarray}
+
+See Spivak \cite[ex.~2-13]{spivak-1965}.
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Angles}
+\label{sec:derivatives-of-angles}
+
+The angle between 2 vectors $\v_0, \v_1 \in \Space{V}$,
+is the inverse cosine of their normalized inner product:
+$\theta(\v_0,\v_1)
+=
+\cos^{-1} \left( \frac{ \v_0 \bullet \v_1 } {\|\v_0\| \|\v_1\|} \right)$.
+Recall that the derivative of the $\cos^{-1}$ is
+$\frac{\mathrm d}{\mathrm dx} \cos^{-1}(x) = \frac{-1}{\sqrt{1 - x^2} }$.
+It follows that:
+\begin{eqnarray*}
+\Gc{\v_0}{\theta(\v_0,\v_1)}{\u}
+& = &
+\frac{-1}
+{ \sqrt{1 - \left( \frac{\u_0 \bullet \u_1}{\| \u_0 \| \| \u_1 \|} \right)^2 }}
+\Gc{\v_0}{\left( \frac{\u_0 \bullet \u_1}{\| \u_0 \| \| \u_1 \|} \right)}{\u}
+\\
+& = &
+\frac{-\|\u_0\|\|\u_1\|}
+{ \sqrt{\|\u_0\|^2\|\u_1\|^2 - \left( \u_0 \bullet \u_1 \right)^2 }}
+\left[
+\frac{\u_1}{\|\u_0\|\|\u_1\|}
++
+\frac{\left( \u_0 \bullet \u_1 \right)}{\| \u1 \|}
+\Gc{\v_0}{\left( \frac{1}{\| \v_0 \|} \right)} {\u}
+\right]
+\nonumber
+\\
+& = &
+\frac{-\|\u_0\|\|\u_1\|}
+{ \sqrt{\|\u_0\|^2\|\u_1\|^2 - \left( \u_0 \bullet \u_1 \right)^2 }}
+\left[
+\frac{\u_1}{\|\u_0\|\|\u_1\|}
+-
+\frac{\left( \u_0 \bullet \u_1 \right) \u0}{\| \u1 \| \|\u_0\|^3}
+\right]
+\nonumber
+\\
+& = &
+\frac{-1}
+{ \sqrt{\|\u_0\|^2\|\u_1\|^2 - \left( \u_0 \bullet \u_1 \right)^2 }}
+\left[
+\u_1
+-
+\frac{\left( \u_0 \bullet \u_1 \right) \u0}{\|\u_0\|^2}
+\right]
+\nonumber
+\end{eqnarray*}
+which results in
+\begin{eqnarray}
+\label{eq:angle_gradient}
+\Gc{\v_0}{\theta(\v_0,\v_1)}{\u}
+& = &
+\frac{- \u_1 \perp \u_0}
+{ \sqrt{\|\u_0\|^2\|\u_1\|^2 - \left( \u_0 \bullet \u_1 \right)^2 }}
+\\
+\Gc{\v_1}{\theta(\v_0,\v_1)}{\u}
+& = &
+\frac{- \u_0 \perp \u_1}
+{ \sqrt{\|\u_0\|^2\|\u_1\|^2 - \left( \u_0 \bullet \u_1 \right)^2 }}
+\nonumber
+\end{eqnarray}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Euclidean norm}
+\label{sec:derivatives-of-euclidean-norm}
+
+Let $l_2(\v) = \| \v  \|: \Space{V} \mapsto \Reals$
+be the usual euclidean norm on $\Space{V}$.
+Let $l_2^2(\v) = \| \v  \|^2 $
+be its square and $ \| \v  \|^3$ the cube.
+\begin{eqnarray}
+\label{eq:l2-gradient}
+\Gb{l_2}{\v} = \frac{ \v }{ \| \v  \|} &
+\Gb{l_2^2}{\v} =  2\v &
+\Gb{l_2^3}{\v} = 3 \| \v  \| \v \\
+\Db{l_2}{\v} = \frac{ \v^\dagger }{ \| \v  \|} &
+\Db{l_2^2}{\v} = 2\v{^\dagger} &
+\Db{l_2^3}{\v} = 3 \| \v  \| \v^\dagger \nonumber
+\end{eqnarray}
+
+Let $\f(\v) : \Space{V} \mapsto \Space{W}$.
+By the chain rule:
+$\Db{\| \f \|^2}{\v}  =  2 {\f(\v)}^{\dagger} \Db{\f}{\v} $
+and
+$\Gb{\| \f \|^2}{\v}  =  2 \Db{\f}{\v}^\dagger \circ \f(\v)$.
+\begin{eqnarray}
+\label{eq:norm_derivative}
+\Db{\| \f \|}{\v}
+& = &
+\frac{\f(\v)^\dagger}{\| \f(\v) \|} \Db{\f}{\v}  \\
+\Gb{\| \f \|}{\v}
+& = &
+\left(\Db{\f}{\v}\right)^\dagger \circ  \frac{\f(\v)}{ \| \f(\v)  \|}
+\label{eq:norm_gradient}
+\end{eqnarray}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-3}
+\levelstay{Canonical vector 'volume'}
+\label{sec:Derivative-of-canonical-vector-volume}
+
+Let $\text{volume} : \times^{n} \Space{R} \mapsto \Space{R}$ 
+be defined as
+\begin{equation}
+\text{volume} \left( x_0 , \ldots , x_{n-1} \right) = \prod_{i=0}^{n-1} x_i
+\end{equation}
+This is multilinear as a functional on $\times^{n} \Space{R}$.
+
+We can also interpret this as a multilinear function on the
+inner product space
+$\oplus^{n} \Space{R}$.
+In that case, $\text{volume}$ is the volume of the coordinate axis aligned
+$n$-rectangle whose diagonal is $\Vector(x)$.
+
+Note the dependence on both the choice of inner product, 
+and the coordinate system.
+
+\begin{equation}
+\Dc{\text{volume}}{(\v_0 \ldots \v_{n-1})}{\u_0 \ldots \u_{n-1}}
+ =  \sum_{i=0}^{n-1} \u_i \left( \prod_{j \neq i} \v_j \right).
+\end{equation}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\levelstay{Linear-function-valued functions}
+\label{sec:Derivatives-of-linear-function-valued-functions}
+
+The set of linear functions between two inner product spaces
+$\{ \Lmap : \Space{V} \mapsto \Space{W} \}$
+is itself a inner product space $\Space{L}(\Space{V},\Space{W})$,
+with the inner product defined by
+$\Lmap \bullet \Mmap = \sum_{i=0}^{m-1} \sum_{j=0}^{n-1} \Lmap_{ij} \Mmap_{ij}$.
+The set of linear functions
+$\Emap_{ij}^{\Space{L}(\Space{V},\Space{W})}  = \e_i^{\Space{W}} \otimes \e_j^{\Space{V}}$
+are the canonical basis vectors for $\Space{L}(\Space{V},\Space{W})$.
+
+If $\f$ is a function between spaces of linear functions,
+$\f : \Space{L}(\Space{V}_0,\Space{W}_0) \mapsto \Space{L}(\Space{V}_1,\Space{W}_1)$,
+its derivative, $\Da{\f}$,
+is a function from a space of linear functions
+to a space of linear functions between two
+spaces of linear functions:
+$\Da{\f} : \Space{L}(\Space{V}_0,\Space{W}_0) \mapsto
+\Space{L}(\Space{L}(\Space{V}_0,\Space{W}_0), \Space{L}(\Space{V}_1,\Space{W}_1))$.
+This can get a little confusing,
+and it often helps to consider both the partial derivatives of $\f$
+and the gradients of the coordinates of $\f$,
+which can make it easier to apply the chain rule to
+compositions of functions of functions via equation \ref{eq:chain-rule_partials}.
+
+$\da{ij}{\f}$ is the partial derivative with respect to its $ij$-th matrix coordinate,
+that is, the directional derivative of $\f$ in the direction
+of the $ij$-th canonical basis vector, $\Emap_{ij}^{\Space{L}(\Space{V}_0,\Space{W}_0)}$.
+As usual the value of the partial derivative at a specific
+$\Lmap_0 \in  \Space{L}(\Space{V}_0,\Space{W}_0)$,
+$\db{ij}{\f}{\Lmap_0}$ is an element of the co-domain of $\f$,
+a linear function in  $\Space{L}(\Space{V}_1,\Space{W}_1)$.
+
+$\Ga{\f_{kl}}$ is the gradient of the $kl$-th matrix coordinate of the value of $\f$.
+As usual, the value of the gradient at a specific $\Lmap_0$,
+$\Gb{\f_{kl}}{\Lmap_0}$ is an element of the domain of $\f$,
+a linear function in $\Space{L}(\Space{V}_0,\Space{W}_0)$.
+
+Note that nether of these are elements of the Jacobian of $\f$,
+which needs 4 indexes: $\da{ij}{\f_{kl}}$.
+
+I am particularly interested in computing the derivative of the
+pseudo-inverse: $\Pseudoinverse(\Lmap) \equiv \Lmap^{-}$.
+The set of full rank linear functions is an open set,
+and we can define the derivative of $\Pseudoinverse(\Lmap)$ there.
+For full rank linear functions,
+we can use the chain rule and the identity
+$\Lmap^{-} = \left( \Lmap^{\dagger} \Lmap \right)^{-1} \Lmap^{\dagger}$
+(equation \ref{eq:full-rank-pseudo-inverse})
+to compute the derivative of the pseudo-inverse
+(section \ref{sec:Derivative-of-pseudo-inverse}).
+
+To do this I will first establish partial derivatives and gradients of:
+\begin{equation}
+\begin{aligned}
+\label{eq:transpose-derivative}
+&\Transpose(\Lmap) \equiv \Lmap^{\dagger}
+&&\db{ij}{\Transpose}{\Lmap} =  \e_j^{\Space{V}} \otimes \e_i^{\Space{W}}
+\forall \Lmap
+\\
+&\h( \Lmap ) = \f ( \Lmap ) \g ( \Lmap )
+&&\text{Section~\ref{sec:Derivatives-of-function-products} }
+\\
+&\LTL(\Lmap) \equiv \Lmap^{\dagger} \Lmap
+&&\text{Section~\ref{sec:Derivatives-of-LTL} }
+\\
+&\Inverse(\Lmap) \equiv \Lmap^{-1}
+&&\text{Section~\ref{sec:Derivative-of-inverse} }
+\end{aligned}
+\end{equation}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Function products}
+\label{sec:Derivatives-of-function-products}
+
+Let
+$\f : \Space{L}(\Space{V}_0,\Space{W}_0) \mapsto \Space{L}(\Space{V}_1,\Space{W}_1)$,
+$\g : \Space{L}(\Space{V}_0,\Space{W}_0) \mapsto \Space{L}(\Space{U}_1,\Space{V}_1)$,
+and
+$\h = \f\g : \Space{L}(\Space{V}_0,\Space{W}_0) \mapsto \Space{L}(\Space{U}_1,\Space{W}_1)$.
+Note that
+$\db{ij}{\f}{\Lmap} \in  \Space{L}(\Space{V}_1,\Space{W}_1)$,
+$\db{ij}{\g}{\Lmap} \in  \Space{L}(\Space{U}_1,\Space{V}_1)$,
+and
+$\db{ij}{\h}{\Lmap} \in  \Space{L}(\Space{U}_1,\Space{W}_1)$.
+Consider the matrix representation of $\db{ij}{\h}{\Lmap}$:
+\begin{eqnarray}
+\left( \db{ij}{\h}{\Lmap} \right)_{kl}
+& = &
+\db{ij}{\h_{kl}}{\Lmap}
+\\
+& = &
+\db{ij}{\left( \sum_{m} \f_{km} \g_{ml} \right)}{\Lmap}
+\nonumber
+\\
+& = &
+\sum_{m}  \left[
+\left( \db{ij}{\f_{km}}{\Lmap} \right) \g_{ml}(\Lmap)
++
+\f_{km}(\Lmap) \left( \db{ij}{\g_{ml}}{\Lmap} \right)
+\right]
+\nonumber
+\\
+& = &
+\left[
+\left( \db{ij}{\f}{\Lmap} \right) \g(\Lmap)
++
+\f(\Lmap) \left( \db{ij}{\g}{\Lmap} \right)
+\right]_{kl}
+\nonumber
+\end{eqnarray}
+Therefore
+\begin{equation}
+\label{eq:function-product-derivative}
+\db{ij}{\h}{\Lmap}
+ =
+\left( \db{ij}{\f}{\Lmap} \right) \g(\Lmap)
++
+\f(\Lmap) \left( \db{ij}{\g}{\Lmap} \right)
+\end{equation}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{$\Lmap^{\dagger} \Lmap$}
+\label{sec:Derivatives-of-LTL}
+
+A simple function on linear functions
+is $\LTL(\Lmap) \equiv \Lmap^{\dagger} \Lmap
+: \Space{L}(\Space{V},\Space{W}) \mapsto \Space{L}(\Space{V},\Space{V})$.
+
+The partial derivative is computed using equations
+\ref{eq:transpose-derivative}
+and
+\ref{eq:function-product-derivative}:
+
+\begin{equation}
+\db{ij}{\LTL}{\Lmap}
+=
+\left( \e_j^{\Space{V}} \otimes \e_i^{\Space{W}} \right) \Lmap
++
+\Lmap^{\dagger} \left( \e_i^{\Space{W}} \otimes \e_j^{\Space{V}} \right)
+=
+\left( \e_j^{\Space{V}} \otimes \r_i^{\Lmap} \right)
++
+\left( \r_i^{\Lmap} \otimes \e_j^{\Space{V}} \right)
+\end{equation}
+where $\r_i^{\Lmap} \in \Space{V}$ is the $i$th 'row' of $\Lmap$
+in the representation $\Lmap = \sum_{i=0}^{m-1} \e_i^{\Space{W}} \otimes \r_i^{\Lmap}$.
+
+The Jacobian, which has 4 indexes here, is given by:
+\begin{equation}
+\db{ij}{\LTL_{kl}}{\Lmap}
+ =
+\left( \db{ij}{\LTL}{\Lmap} \right)_{kl}
+=
+\delta_{jl} \Lmap_{ik}
++
+\delta_{jk} \Lmap_{il}
+\end{equation}
+where, as usual, $\delta_{ij} = 1$ if $i=j$ and  $0$ if $i \neq j$.
+From the Jacobian, we can compute the gradients of $\LTL_{kl}$
+using equation \ref{eq:gradient-from-partials}
+and the fact that
+$\Emap_{ij}^{\Space{L}(\Space{V},\Space{W})}  = \e_i^{\Space{W}} \otimes \e_j^{\Space{V}}$
+are the canonical basis vectors for $\Space{L}(\Space{V},\Space{W})$:
+\begin{eqnarray}
+\Gb{\LTL_{kl}}{\Lmap}
+& = &
+\sum_{ij}
+\left( \db{ij}{\LTL_{kl}}{\Lmap} \right)
+\left( \e_i^{\Space{W}} \otimes \e_j^{\Space{V}} \right)
+\\
+& = &
+\sum_{ij}
+\left( \delta_{jl} \Lmap_{ik} + \delta_{jk} \Lmap_{il} \right)
+\left( \e_i^{\Space{W}} \otimes \e_j^{\Space{V}} \right)
+\nonumber
+\\
+& = &
+\sum_{i}
+\left(
+\Lmap_{ik}  \e_i^{\Space{W}} \otimes \e_l^{\Space{V}}
+\right)
++
+\sum_{i}
+\left(
+\Lmap_{il}  \e_i^{\Space{W}} \otimes \e_k^{\Space{V}}
+\right)
+\nonumber
+\\
+& = &
+\left(
+\c_k^{\Lmap} \otimes \e_l^{\Space{V}}
+\right)
++
+\left(
+\c_l^{\Lmap} \otimes \e_k^{\Space{V}}
+\right)
+\nonumber
+\end{eqnarray}
+where $\c_j^{\Lmap} \in \Space{W}$ is the $j$th 'column' of $\Lmap$
+in the representation
+$\Lmap = \sum_{j=0}^{n-1} \c_j^{\Lmap} \otimes \e_j^{\Space{V}}$.
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Inverse}
+\label{sec:Derivative-of-inverse}
+
+$\Inverse()$ here is interpreted in the traditional sense:
+$\Lmap^{-1}(\w) = \v$ if there exists a unique $\v$ such that $\w = \Lmap(\v)$,
+and is either considered undefined, or assigned an arbitrary
+value, such as $\0$, otherwise.
+A function $\Lmap : \Space{V} \mapsto \Space{W}$ is \textit{invertible}
+if, for all $\w \in \Space{W}$, there exists a $\v$ such that
+$\w = \Lmap \v$.
+In any reasonable topology,
+the set of invertible linear functions $\Space{V} \mapsto \Space{W}$
+is an open subset of the set of all linear functions,
+and $\Inverse()$ is continuous and differentiable there.
+
+The partial derivative is the value of the following, when the limit exists:
+\begin{displaymath}
+\db{ij}{\Inverse()}{\Lmap}
+ =
+\lim_{ h \mapsto 0}
+\frac{ \left( \Lmap + h (\e_i^{\Space{W}} \otimes \e_j^{\Space{V}}) \right)^{-1} - \Lmap^{-1} }{h}
+\end{displaymath}
+Note that
+\begin{displaymath}
+\Lmap + h (\e_i^{\Space{W}} \otimes \e_j^{\Space{V}})
+ =
+\left( \Identity^{\Space{W}} - ( -h ( \e_i^{\Space{W}} \otimes \e_j^{\Space{V}} )) \Lmap^{-1} \right) \Lmap
+\end{displaymath}
+and
+\begin{eqnarray*}
+\left( \Lmap + h (\e_i^{\Space{W}} \otimes \e_j^{\Space{V}}) \right)^{-1}
+& = &
+\Lmap^{-1} \left( \Identity^{\Space{W}} - ( -h )( \e_i^{\Space{W}} \otimes \e_j^{\Space{V}} ) \Lmap^{-1} \right)^{-1}
+\\
+& = &
+\Lmap^{-1} \sum_{k=0}^{\infty} \left( -h ( \e_i^{\Space{W}} \otimes \e_j^{\Space{V}} ) \Lmap^{-1} \right)^{k}
+\nonumber
+\end{eqnarray*}
+Therefore
+\begin{displaymath}
+\frac{ \left( \Lmap + h (\e_i^{\Space{W}} \otimes \e_j^{\Space{V}}) \right)^{-1} - \Lmap^{-1} }{h}
+ =
+- \Lmap^{-1} ( \e_i^{\Space{W}} \otimes \e_j^{\Space{V}} )  \Lmap^{-1} + O(h)
+\end{displaymath}
+which implies
+\begin{equation}
+\da{ij}{\Lmap^{-1}}
+ =
+- \left[
+\Lmap^{-1}
+\left( \e_i^{\Space{W}} \otimes \e_j^{\Space{V}} \right)
+\Lmap^{-1}
+\right]
+\end{equation}
+
+\newgeometry{onecolumn=true}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Pseudo-inverse}
+\label{sec:Derivative-of-pseudo-inverse}
+
+$\Pseudoinverse(\Lmap) \equiv \Lmap^{-}$
+
+If $\kernel(\Lmap) = \0$, $\Lmap$ is said to have \textit{full rank}.
+The set of full rank linear functions is an open set,
+and we can define the derivative of $\Pseudoinverse(\Lmap)$ there.
+For a full rank function,
+$\Lmap^{-} = \left( \Lmap^{\dagger} \Lmap \right)^{-1} \Lmap^{\dagger}$
+(see equation \ref{eq:full-rank-pseudo-inverse}).
+It follows from equation \ref{eq:function-product-derivative} that
+\begin{eqnarray}
+\db{ij}{\Pseudoinverse}{\Lmap}
+& = &
+\db{ij}{\Inverse(\LTL())\Transpose()}{\Lmap}
+\\
+& = &
+\left[
+\left( \db{ij}{\Inverse(\LTL())}{\Lmap} \right)
+\Lmap^{\dagger}
+\right]
++
+\left[
+\left( \Lmap^{\dagger} \Lmap \right)^{-1}
+\db{ij}{\Transpose()}{\Lmap}
+\right]
+\nonumber
+\\
+& = &
+\left[
+\left( \db{ij}{\Inverse(\LTL())}{\Lmap} \right)
+\Lmap^{\dagger}
+\right]
++
+\left[
+\left( \Lmap^{\dagger} \Lmap \right)^{-1}
+\left( \e_j^{\Space{V}} \otimes \e_i^{\Space{W}} \right)
+\right]
+\nonumber
+\end{eqnarray}
+
+By the chain rule
+\begin{eqnarray}
+\Db{\Inverse(\LTL())}{\Lmap}
+& = &
+\sum_{kl}
+\db{kl}{\Inverse}{\Lmap^{\dagger}\Lmap}
+\otimes
+\Gb{\LTL_{kl}}{\Lmap}
+\\
+& = &
+\sum_{kl}
+- \left[
+\left( \Lmap^{\dagger} \Lmap \right)^{-1}
+\left( \e_k^{\Space{V}} \otimes \e_l^{\Space{V}} \right)
+\left( \Lmap^{\dagger} \Lmap \right)^{-1}
+\right]
+\otimes
+\left[
+\left( \c_k^{\Lmap} \otimes \e_l^{\Space{V}} \right)
++
+\left( \c_l^{\Lmap} \otimes \e_k^{\Space{V}} \right)
+\right]
+\nonumber
+\end{eqnarray}
+
+To minimize confusion,
+recall that $\Db{\Inverse(\LTL())}{\Lmap}$ is
+a linear function from $\Space{L}(\Space{V},\Space{W}) \mapsto \Space{L}(\Space{V},\Space{V})$.
+Note that the central tensor product ($\otimes$) above
+is a product of
+$
+- \left[
+\left( \Lmap^{\dagger} \Lmap \right)^{-1}
+\left( \e_k^{\Space{V}} \otimes \e_l^{\Space{V}} \right)
+\left( \Lmap^{\dagger} \Lmap \right)^{-1}
+\right]
+$,
+an element of $\Space{L}(\Space{V},\Space{V})$
+and
+$
+\left[
+\left( \c_k^{\Lmap} \otimes \e_l^{\Space{V}} \right)
++
+\left( \c_l^{\Lmap} \otimes \e_k^{\Space{V}} \right)
+\right]
+$,
+an element of $\Space{L}(\Space{V},\Space{W})$.
+
+It follows from equation \ref{eq:partial-full-dervatives} that
+\begin{eqnarray}
+\db{ij}{\Inverse(\LTL())}{\Lmap}
+& = &
+\Db{\Inverse(\LTL())}{\Lmap}
+\left( \e_i^{\Space{W}} \otimes \e_j^{\Space{V}} \right)
+\\
+& = &
+\sum_{kl}
+- \left[
+\left( \Lmap^{\dagger} \Lmap \right)^{-1}
+\left( \e_k^{\Space{V}} \otimes \e_l^{\Space{V}} \right)
+\left( \Lmap^{\dagger} \Lmap \right)^{-1}
+\right]
+\otimes
+\left[
+\left( \c_k^{\Lmap} \otimes \e_l^{\Space{V}} \right)
++
+\left( \c_l^{\Lmap} \otimes \e_k^{\Space{V}} \right)
+\right]
+\left( \e_i^{\Space{W}} \otimes \e_j^{\Space{V}} \right)
+\nonumber
+\\
+& = &
+\sum_{kl}
+- \left[
+\left( \Lmap^{\dagger} \Lmap \right)^{-1}
+\left( \e_k^{\Space{V}} \otimes \e_l^{\Space{V}} \right)
+\left( \Lmap^{\dagger} \Lmap \right)^{-1}
+\right]
+\left[
+\delta_{jl}
+\Lmap_{ik}
++
+\delta_{jk}
+\Lmap_{il}
+\right]
+\nonumber
+\\
+& = &
+-
+\left( \Lmap^{\dagger} \Lmap \right)^{-1}
+\left[
+\sum_{k}
+\Lmap_{ik}
+\left(
+\left( \e_k^{\Space{V}} \otimes \e_j^{\Space{V}} \right)
++
+\left( \e_j^{\Space{V}} \otimes \e_k^{\Space{V}} \right)
+\right)
+\right]
+\left( \Lmap^{\dagger} \Lmap \right)^{-1}
+\nonumber
+\\
+& = &
+-
+\left( \Lmap^{\dagger} \Lmap \right)^{-1}
+\left[
+\left( \r_i^{\Lmap} \otimes \e_j^{\Space{V}} \right)
++
+\left( \e_j^{\Space{V}} \otimes \r_i^{\Lmap} \right)
+\right]
+\left( \Lmap^{\dagger} \Lmap \right)^{-1}
+\nonumber
+\end{eqnarray}
+
+Putting it all together:
+\begin{eqnarray}
+\db{ij}{\Pseudoinverse}{\Lmap}
+& = &
+\left[
+-
+\left( \Lmap^{\dagger} \Lmap \right)^{-1}
+\left[
+\left( \r_i^{\Lmap} \otimes \e_j^{\Space{V}} \right)
++
+\left( \e_j^{\Space{V}} \otimes \r_i^{\Lmap} \right)
+\right]
+\left( \Lmap^{\dagger} \Lmap \right)^{-1}
+\Lmap^{\dagger}
+\right]
++
+\left[
+\left( \Lmap^{\dagger} \Lmap \right)^{-1}
+\left( \e_j^{\Space{V}} \otimes \e_i^{\Space{W}} \right)
+\right]
+\nonumber
+\\
+& = &
+\left( \Lmap^{\dagger} \Lmap \right)^{-1}
+\left[
+\left( \e_j^{\Space{V}} \otimes \e_i^{\Space{W}} \right)
+-
+\left(
+\left[
+\left( \r_i^{\Lmap} \otimes \e_j^{\Space{V}} \right)
++
+\left( \e_j^{\Space{V}} \otimes \r_i^{\Lmap} \right)
+\right]
+\left( \Lmap^{\dagger} \Lmap \right)^{-1}
+\Lmap^{\dagger}
+\right)
+\right]
+\nonumber
+\\
+& = &
+\left( \Lmap^{\dagger} \Lmap \right)^{-1}
+\left[
+\left( \e_j^{\Space{V}} \otimes \e_i^{\Space{W}} \right)
+-
+\left(
+\left( \r_i^{\Lmap} \otimes \e_j^{\Space{V}} \right)
++
+\left( \e_j^{\Space{V}} \otimes \r_i^{\Lmap} \right)
+\right)
+\Lmap^{-}
+\right]
+\end{eqnarray}
+
+\restoregeometry
+

@@ -1,0 +1,219 @@
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}}
+\levelstay{Algebraic structures}
+\label{sec:Algebraic-structures}
+
+\textbf{TODO:} redo as Universal Algebras?
+Implies more operations, typically binary, unary, and nullary
+(nullary function equivalent to element of set).
+
+An algebraic 
+structure~\cite{
+wiki:Algebraic-structure,
+wiki:Mathematical-structure,
+wiki:Outline-of-algebraic-structures,
+BWilliams:Algebraic-structure-and-protocols,
+BWilliams:Algebra-of-predicates-and-sorting-functions,
+BWilliams:Semirings-and-predicates}
+consists of:
+\begin{itemize}
+  \item A primary set --- the \textit{elements} of the structure.
+  \item zero or a few auxilliary sets.
+  \item functions (called \textit{operations})
+that take a small number of arguments from one or more of the sets
+and return elements of the sets.
+\end{itemize}
+
+The type of an algebraic structure corresponds to identities
+that the operations satisfy.
+(\textbf{TODO:} Examples of operation identities?)
+
+Unfortunately, the names for algebraic structures 
+are, as a rule, not very informative.
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\levelstay{One set, one operation}
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Monoid}
+\label{sec:Monoid}
+
+Set $\Set{S}$ and operation $\diamond$ such that,
+if $a, b, c \in \Set{S}$, then
+\begin{description}
+\item[Closed] $a \diamond b = \diamond \left( a, b \right) 
+= \left( \diamond \; a \; b \right) \in \Set{S}$
+\item[Associative] $a \diamond b \diamond c =
+ \left( a \diamond b \right) \diamond c =  
+ a \diamond \left( b \diamond c \right) $
+ \item[Identity] There is an $i \in \Set{S}$ such that 
+ $i \diamond a = a \; \forall a \in \Set{S}$.
+ Exercise: show that $i$ is unique.
+ \end{description}
+
+Example: 
+
+$\Set{S}$ the functions from some domain $\Set{X}$ to itself. 
+Operation $\diamond$ is function composition:
+$\left( f \diamond g \right) (x) = 
+f \left( g \left( x \right) \right)$.
+
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Group}
+
+Monoid $\left[ \Set{S}, \diamond \right]$ such that
+\begin{description}
+ \item[Inverse] For every $a \in \Set{S}$ there exists an
+ $a^{-1}$ such that $a^{-1} \diamond a = i$.
+ Exercise: show that this implies that $a \diamond a^{-1} = i$ .
+\end{description}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Commutative group}
+
+(aka abelian group.)
+
+A group $\left[ \Set{S}, \diamond \right]$ where
+\begin{description}
+ \item[Commutative] $a \diamond b = b \diamond a \; \forall a,b \in \Set{S}$.
+\end{description}
+
+Example: 
+$\left[ \glssymbol{Integers}, *_{\glssymbol{Integers}} \right]$
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\levelstay{One set, two operations}
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Semiring}
+\label{sec:Semiring}
+
+A set and $2$ operations: $\left[ \Set{S}, +, * \right]$
+where
+\begin{description}
+  \item[Addition] $+$ is commutative, associative, and has an 
+  identity element ($0$):
+  $a + b = b + a$; 
+  $a + \left( b + c \right) =\left( a + b  \right) + c $;
+   and $ 0 + a = a$, for all $a,b,c \in \Set{S}$.
+  \item[Multiplication] $*$ is associative, and has an 
+  identity element ($1$):
+ $a * \left( b * c \right) =\left( a * b \right) * c $
+  and $ 1 * a = a$, for all $a,b,c \in \Set{S}$.]
+  \item[Distributive] $a * \left( b + c \right) 
+  = \left( a * b \right) + \left( a * c \right)$
+\end{description}
+
+Example: 
+
+The \textit{\gls{NaturalNumbers}}: 
+$\glssymbol{NaturalNumbers} = \glsdesc{NaturalNumbers}$.
+(sec~\ref{sec:Natural-numbers}).
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Ring}
+\label{sec:Ring}
+\cite{wiki:Ring-mathematics}
+
+A set and $2$ operations: $\left[ \Set{S}, +, * \right]$
+where
+\begin{description}
+  \item[Addition group] $\left[ \Set{S}, + \right]$ 
+  is a commutative group (with the identity written $0$).
+  \item[Multiplication monoid] $\left[ \Set{S}, * \right]$ 
+  is a monoid (with the identity written $1$).
+  Note this means $*$ may not commute. If it does, 
+  then this is a \textit{commutative ring}.
+  \item[Distributive] $a * \left( b + c \right) 
+  = \left( a * b \right) + \left( a * c \right)$
+\end{description}
+
+Example:
+
+The \textit{\gls{Integers}}: 
+$\glssymbol{Integers} = \{\cdots, -2, -1, 0, 1, 2, \cdots\}$.
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Field}
+\label{sec:Field}
+\cite{wiki:Field-mathematics}
+
+A ring $\left[ \Set{S}, +, * \right]$ where
+$*$ is commutative and the nonzero elements of $\Set{S}$
+have multiplicative inverses.
+
+Without refering to other structures:
+A \textit{field} is set and 2 operations: 
+$\left[ \Set{S}, +, * \right]$
+where
+\begin{description}
+  \item[Additive closure] $a + b \in \Set{S} \; 
+  \forall \, a,b \in \Set{S}$ 
+  \item[Additive associativity] 
+  $\left( a + b \right) + c = a + \left( b + c \right)$ 
+  \item[Additive commutativity] $a + b = b + a$ 
+  \item[Additive identity] $\exists \, 0 \in \Set{S} \text{ s.t. } 
+  a + 0 = 0 + a = a \; \forall \, a \in \Set{S}$ 
+  \item[Additive inverse] $\forall a \in \Set{S} \; 
+  \exists \, {-a} \in \Set{S} 
+  \text{ s.t. }  a + \left( -a \right) = \left( -a \right) + a = 0$ 
+  \item[Multiplicative closure] $a * b \in \Set{S} \; \forall \,a,b \in \Set{S}$ 
+  \item[Multiplicative associativity] 
+  $\left( a * b \right) * c = a * \left( b * c \right)$ 
+  \item[Multiplicative commutativity] $a * b = b * a$ 
+  \item[Multiplicative identity] $\exists 1 \in \Set{S}
+   \text{ s.t. } 
+  a * 1 = 1 * a = a \; \forall \, a \in \Set{S}$ 
+  \item[Multiplicative inverse] $\forall a \ne 0 \in \Set{S} 
+  \exists a^{-1} \in \Set{S}
+  \text{ s.t. }  a * a^{-1} = a^{-1} * a = 1$ 
+  (Note the restriction to elements other than the additive identity.) 
+  \item[Distributive] $a * \left( b + c \right) 
+  = \left( a * b \right) + \left( a * c \right)$
+\end{description}
+
+
+Examples: 
+\glssymbol{RationalNumbers}, \glssymbol{RealNumbers}.
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\levelstay{Two sets, one operation}
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Category}
+
+A base set, $\Set{O}$, 
+whose elements are ususally refered to as \textit{objects}.
+A second set, $\Set{M}$, of \textit{morphisms}, 
+each of which depends on an ordered pair 
+$\left( \text{source} , \text{target} \right)$ of elements of 
+$\Set{O}$. 
+A \textit{composition} operation, $\circ$, on 
+the subset of the pairs of morphisms $f , g \in \Set{M}$
+where $\text{source}(f) = \text{target}(g)$, satisfying:
+\begin{description}
+\item[Associativity:] $f \circ g \circ g \defeq 
+\left( f \circ g \right) \circ h 
+= f \circ \left( g \circ h \right)$
+\item[Identity:] For each $x \in \Set{O}$, there exists an element
+$1_x \in \Set{M}$ such that 
+$x = \text{source}(1_x) = \text{target}(1_x)$, and 
+$1_x \circ f = f$ (when $x = \text{target(f)}$) and
+$f \circ 1_x = f$ (when $x = \text{source(f)}$).
+\end{description}
+
+ \begin{example}[The Set category]
+ $\Set{O} = $ some collection of sets;
+ $\Set{M} = $ the functions between those sets;
+ $\circ = $ function composition.  
+ \end{example}
+%-----------------------------------------------------------------
+ 

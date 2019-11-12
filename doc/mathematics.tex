@@ -1,0 +1,118 @@
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}}
+\levelstay{Mathematical Structures}
+
+A mathematical structure~\cite{wiki:Mathematical-structure} 
+consists of a few sets, and functions between those sets.
+Types of structure:
+\begin{description}
+\item[Algebraic] 
+Characterized by operations (functions of $2$ arguments, 
+sometimes more) that have given properties, like commutativity:
+$\left(+ \, a \, b \right) = \left(+ \, b \, a \right)$.
+
+\item[Order and equivalence] 
+A set plus a one or more relations. 
+See~\ref(sec:Relations).
+
+\item[Topology] A primary set plus a family of 'open' subsets of the
+primary set. The subsets have to obey certain properties which 
+enable to be used to define what is 'connected' to what in the 
+primary set.
+
+\item[Metric] A set plus a \textit{distance} function,
+mapping each pairs of elements to non-negative real number,
+having certain properties.
+Metric/distance induces a topology:
+$\Set{B}(x_0,r) = \SetSpec{ x \in \Set{X} }{ 
+\text{distance} \left(x_0 , x \right) < r }$ 
+See~\ref{sec:Metric-spaces}.
+
+\item[Measure] A set plus a function that assigns a non-negative
+real value to some subsets of the primary set. 
+Examples are length, area, volume.
+
+\item[Geometry] \textbf{TODO:}
+\end{description}
+
+For \glssymbol{RealNumbers}:
+Order and Metric induce Topology.
+Order and Algebraic structure lead to ordered field.
+Algebraic structure and topology make Lie group.
+
+There is usually a primary set, whose elements are the 'elements'
+of the structure:
+
+\begin{example}[Linear Space]
+\bigskip
+A \textit{linear space} $\Space{V}$ is:
+\begin{itemize}
+  \item a set of vectors $\Set{V}$,
+  \item a field of scalars $\Space{F}$,
+  \item a linear combination operation/function: 
+\begin{equation}
+\left( \text{linear-combination} 
+\, a_0 \, \Vector{v}_0 \, a_1 \, \Vector{v}_1 \right) \; 
+= \; a_0*\Vector{v}_0 + a_1*\Vector{v}_1
+\; \rightarrow \; \Vector{v}_2  \in \Set{V}
+\end{equation}
+for $\Vector{v}_0, \Vector{v}_1 \in \Set{V} $
+and $a_0, a_1 \in \Space{F}$.
+Linear combination is often defined in terms of
+$2$ other operations:
+scalar multiplication $a * \Vector{v} \in \Set{V}$,
+and vector addition $\Vector{v}_0 + \Vector{v}_1 \in \Set{V}$
+\end{itemize}
+Usually the distinction between $\Set{V}$ and 
+$\Space{V} = \left[ \Set{V}, \Space{F}, \text{linear-combination} \right]$
+is ignored.
+\end{example}
+
+It's tempting to identify a mathematical structure with a class,
+but that won't work, because you will need to support multiple
+representations (dense and sparse vectors, \texttt{double}
+and \texttt{BigFraction}) and the functions
+operate on multiple sets (vectors and scalars)
+each with multiple representations.
+Interfaces also don't work, because 
+operations are typically functions of more than one argument,
+with multiple representations for each.
+
+Implementation is easier with \textit{generic functions}
+(aka ``multimethods'').
+Or context object determining what $\left(+ \, a \, b \right)$
+means for any acceptable implementation of $a$ and $b$.
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}}
+\input{sets}
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}}
+\input{functions}
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}}
+\input{cartesian-products}
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}}
+\input{algebra}
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}}
+\input{numbers}
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}}
+\input{polynomial}
+%-----------------------------------------------------------------
+%\setcounter{currentlevel}{\value{baseSectionLevel}}
+%\levelstay{Simplexes}
+%-----------------------------------------------------------------
+%\leveldown{Orientation}
+%-----------------------------------------------------------------
+%\levelstay{Implementation}
+%-----------------------------------------------------------------
+%\levelstay{examples}
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}}
+\input{spaces}
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}}
+\input{derivatives}

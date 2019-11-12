@@ -1,0 +1,71 @@
+%------------------------------------------------------------------------------
+% \begingroup  % Temporarily disable \clearpage to show both lists on one page
+%   %\let\clearpage\relax    % http://tex.stackexchange.com/a/14511/104449
+%   \renewcommand{\listtheoremname}{List of definitions}
+%   \textsf{\listoftheorems[ignoreall, show={definition}]}
+% \endgroup
+%-------------------------------------------------------------------------------
+\pagebreak
+\renewcommand{\listfigurename}{Figures}
+\addcontentsline{toc}{chapter}{\listfigurename}
+\begingroup
+\let\onecolumn\twocolumn
+\sffamily
+\listoffigures
+\rmfamily
+\endgroup
+%-------------------------------------------------------------------------------
+\pagebreak
+\renewcommand{\lstlistlistingname}{Code samples}
+\addcontentsline{toc}{chapter}{\lstlistlistingname}
+\begingroup
+\let\onecolumn\twocolumn
+\sffamily
+\lstlistoflistings
+\rmfamily
+\endgroup
+%-------------------------------------------------------------------------------
+\pagebreak
+\renewcommand{\listtheoremname}{Definitions}
+\addcontentsline{toc}{chapter}{\listtheoremname}
+\begingroup
+\let\onecolumn\twocolumn
+\sffamily
+\listoftheorems[ignoreall,show={definition}]
+\rmfamily
+\endgroup
+%-------------------------------------------------------------------------------
+\pagebreak
+\renewcommand{\listtheoremname}{Theorems}
+\addcontentsline{toc}{chapter}{\listtheoremname}
+\begingroup
+\let\onecolumn\twocolumn
+\sffamily
+\listoftheorems[ignoreall,show={theorem}]
+\rmfamily
+\endgroup
+%-------------------------------------------------------------------------------
+\pagebreak
+\renewcommand{\listtheoremname}{Examples}
+\addcontentsline{toc}{chapter}{\listtheoremname}
+\begingroup
+\let\onecolumn\twocolumn
+\sffamily
+\listoftheorems[ignoreall,show={example}]
+\rmfamily
+\endgroup
+%-------------------------------------------------------------------------------
+% \newglossarystyle{mystyle}{%
+%  \glossarystyle{altlist}%
+%  \renewcommand*{\glossaryentryfield}[5]{%
+%    \item[\glsentryitem{##1}\glstarget{##1}{##2}]%
+%       :\hspace{1em}##3\glspostdescription\space ##5}%
+% }
+\pagebreak
+\printglossary[title=Glossary,toctitle=Glossary]
+%-------------------------------------------------------------------------------
+\pagebreak
+\printbibliography[heading=bibintoc, title={References}]
+%-------------------------------------------------------------------------------
+\printindex
+%-------------------------------------------------------------------------------
