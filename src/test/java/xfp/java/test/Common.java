@@ -34,7 +34,7 @@ import xfp.java.test.polynomial.MonomialEFloat;
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-10-05
+ * @version 2019-11-30
  */
 @SuppressWarnings("unchecked")
 public final class Common {
@@ -701,9 +701,8 @@ public final class Common {
   floatRoundingTest (final FloatFunction<Comparable> fromFloat,
                      final ToFloatFunction toFloat,
                      final BinaryOperator<Comparable> dist,
-                     @SuppressWarnings("unused")
-  final Function<Comparable,String> toString,
-  final Comparable f) {
+                     @SuppressWarnings("unused") final Function<Comparable,String> toString,
+                     final Comparable f) {
 
     //Debug.println("f=" + toString.apply(f));
 
@@ -754,6 +753,11 @@ public final class Common {
                      final BinaryOperator<Comparable> dist,
                      final Function<Comparable,String> string) {
 
+    floatRoundingTest(fromFloat,toFloat,dist,string,
+      fromBigIntegers.apply(
+        BigInteger.valueOf(13997867686541385L),
+        BigInteger.valueOf(1073741824L)));
+    
     floatRoundingTest(fromFloat,toFloat,dist,string,
       fromBigIntegers.apply(
         BigInteger.valueOf(13),
@@ -940,9 +944,15 @@ public final class Common {
         + "\nxlo=" + Double.toString(x1o)
         + "\nx  =" + Double.toString(x)
         + "\nxhi=" + Double.toString(xhi)
+        + "\nxlo=" + Double.toHexString(x1o)
+        + "\nx  =" + Double.toHexString(x)
+        + "\nxhi=" + Double.toHexString(xhi)
         + "\ndlo=" + dlo
         + "\ndx =" + dx
-        + "\ndhi=" + dhi); } } }
+        + "\ndhi=" + dhi
+        + "\nflo=" + flo
+        + "\nfx =" + fx
+        + "\nfhi=" + fhi); } } }
 
   //--------------------------------------------------------------
 
@@ -953,6 +963,11 @@ public final class Common {
                       final BinaryOperator<Comparable> dist,
                       final Function<Comparable,String> string) {
 
+    doubleRoundingTest(fromDouble,toDouble,dist,string,
+      fromBigIntegers.apply(
+        BigInteger.valueOf(13997867686541385L),
+        BigInteger.valueOf(1073741824L)));
+    
     doubleRoundingTest(fromDouble,toDouble,dist,string,
       fromBigIntegers.apply(
         BigInteger.valueOf(13),
