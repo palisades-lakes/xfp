@@ -35,7 +35,7 @@ import xfp.java.test.polynomial.MonomialEFloat;
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-12-01
+ * @version 2019-12-02
  */
 @SuppressWarnings("unchecked")
 public final class Common {
@@ -56,8 +56,8 @@ public final class Common {
     return
       Arrays.asList(
         new String[]
-          { //"xfp.java.accumulators.ERationalAccumulator",
-            //"xfp.java.accumulators.EFloatAccumulator",
+          { //"xfp.java.test.accumulators.ERationalAccumulator",
+            //"xfp.java.test.accumulators.EFloatAccumulator",
             "xfp.java.accumulators.DistilledAccumulator",
             "xfp.java.accumulators.ZhuHayesAccumulator",
             "xfp.java.accumulators.BigFloatAccumulator",
