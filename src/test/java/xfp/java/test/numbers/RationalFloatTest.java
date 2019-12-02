@@ -17,7 +17,7 @@ import xfp.java.test.Common;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-08-30
+ * @version 2019-12-01
  */
 
 public final class RationalFloatTest {
@@ -49,19 +49,23 @@ public final class RationalFloatTest {
       //Debug.println(fi.toString());
       Common.doubleRoundingTest(
         RationalFloat::valueOf, Numbers::doubleValue, dist,
-        Object::toString, fi);
+        Object::toString, fi, 
+        Common::compareTo, Common::compareTo);
       Common.floatRoundingTest(
         RationalFloat::valueOf, Numbers::floatValue, dist,
-        Object::toString, fi);  }
+        Object::toString, fi, 
+        Common::compareTo, Common::compareTo);  }
     //Debug.DEBUG=false;
 
     Common.doubleRoundingTests(
       RationalFloat::valueOf, RationalFloat::valueOf,
-      Numbers::doubleValue, dist, Object::toString);
+      Numbers::doubleValue, dist, Object::toString, 
+      Common::compareTo, Common::compareTo);
 
     Common.floatRoundingTests(
       RationalFloat::valueOf, RationalFloat::valueOf,
-      Numbers::floatValue, dist, Object::toString);
+      Numbers::floatValue, dist, Object::toString, 
+      Common::compareTo, Common::compareTo);
   }
 
   //--------------------------------------------------------------

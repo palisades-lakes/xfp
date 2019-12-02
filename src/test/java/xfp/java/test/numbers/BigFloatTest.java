@@ -21,14 +21,14 @@ import xfp.java.test.Common;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-07-24
+ * @version 2019-12-01
  */
 
 public final class BigFloatTest {
 
   private static final int TRYS = 257;
 
-  private static final BinaryOperator<Comparable> dist = (q0,q1) -> ((BigFloat) q0).subtract((BigFloat) q1).abs();
+  private static final BinaryOperator dist = (q0,q1) -> ((BigFloat) q0).subtract((BigFloat) q1).abs();
 
   @SuppressWarnings({ "static-method" })
   @Test
@@ -51,19 +51,20 @@ public final class BigFloatTest {
     for (final BigFloat fi : f) {
       Common.doubleRoundingTest(
         BigFloat::valueOf,Numbers::doubleValue,dist,
-        Object::toString,fi);
+        Object::toString,fi, 
+        Common::compareTo, Common::compareTo);
       Common.floatRoundingTest(
         BigFloat::valueOf,Numbers::floatValue,dist,
-        Object::toString,fi);  }
+        Object::toString,fi, Common::compareTo, Common::compareTo);  }
     //Debug.DEBUG=false;
 
     Common.doubleRoundingTests(
       null,BigFloat::valueOf,Numbers::doubleValue,dist,
-      Object::toString);
+      Object::toString, Common::compareTo, Common::compareTo);
 
     Common.floatRoundingTests(
       null,BigFloat::valueOf,Numbers::floatValue,dist,
-      Object::toString);
+      Object::toString, Common::compareTo, Common::compareTo);
     //Debug.DEBUG=false;
   }
 
