@@ -3,20 +3,20 @@
 % arara: biber
 % arara: makeglossaries
 % arara: makeindex
-% arara: xelatex: { synctex: on, options: [-halt-on-error]  } 
-% arara: xelatex: { synctex: on, options: [-halt-on-error]   } 
-% arara: clean: { files: [algebra-notes.aux,algebra-notes.bbl] }
-% arara: clean: { files: [algebra-notes.bcf,algebra-notes.blg] }
-% arara: clean: { files: [algebra-notes.glg,algebra-notes.glo] }
-% arara: clean: { files: [algebra-notes.gls,algebra-notes.gls] }
-% arara: clean: { files: [algebra-notes.idx,algebra-notes.ilg] }
-% arara: clean: { files: [algebra-notes.ind,algebra-notes.loe] }
-% arara: clean: { files: [algebra-notes.lof,algebra-notes.log ] }
-% arara: clean: { files: [algebra-notes.log,algebra-notes.lol ] }
-% arara: clean: { files: [algebra-notes.out ] }
-% arara: clean: { files: [algebra-notes.run.xml] }
-% arara: clean: { files: [algebra-notes.toc,algebra-notes.xdy] }
-% arara: clean: { files: [algebra-notes.synctex.gz] }
+% arara: xelatex: { synctex: on, options: [-halt-on-error] } 
+% arara: xelatex: { synctex: on, options: [-halt-on-error] } 
+% arara: clean: { files: [arithmetic-notes.aux,arithmetic-notes.bbl] }
+% arara: clean: { files: [arithmetic-notes.bcf,arithmetic-notes.blg] }
+% arara: clean: { files: [arithmetic-notes.glg,arithmetic-notes.glo] }
+% arara: clean: { files: [arithmetic-notes.gls,arithmetic-notes.gls] }
+% arara: clean: { files: [arithmetic-notes.idx,arithmetic-notes.ilg] }
+% arara: clean: { files: [arithmetic-notes.ind,arithmetic-notes.loe] }
+% arara: clean: { files: [arithmetic-notes.lof,arithmetic-notes.log] }
+% arara: clean: { files: [arithmetic-notes.log,arithmetic-notes.lol] }
+% arara: clean: { files: [arithmetic-notes.out] }
+% arara: clean: { files: [arithmetic-notes.run.xml] }
+% arara: clean: { files: [arithmetic-notes.toc,arithmetic-notes.xdy] }
+% arara: clean: { files: [arithmetic-notes.synctex.gz] }
 %-------------------------------------------------------------------------------
 \documentclass[10pt,openany]{book}
 \input{../tex/head}
@@ -35,7 +35,7 @@
 \addbibresource{../bib/interpolation.bib}
 %\addbibresource{../bib/ieeestd.bib}
 \addbibresource{../bib/tex.bib}
-\addbibresource{../bib/fparith.bib}
+%\addbibresource{../bib/fparith.bib}
 %-------------------------------------------------------------------------------
 \title{Notes on arithmetic}
 \author{\textsc{John Alan McDonald}}
@@ -68,68 +68,10 @@
 \setcounter{currentlevel}{\value{baseSectionLevel}}
 
 \input{../mathematics}
+\input{../arithmetic}
 
 %-----------------------------------------------------------------
-\setcounter{currentlevel}{\value{baseSectionLevel}}
-\levelstay{Libraries for exact or multi-precision arithmetic}
-
-\setcounter{currentlevel}{\value{baseSectionLevel}-1}
-\levelstay{GMP}
-
-\setcounter{currentlevel}{\value{baseSectionLevel}-1}
-\levelstay{MPFR}
-
-\setcounter{currentlevel}{\value{baseSectionLevel}-1}
-\levelstay{ICReals}
-
-\cite{Briggs:2006,Briggs:XRC:2013}
-
-\setcounter{currentlevel}{\value{baseSectionLevel}-1}
-\levelstay{XRC}
-
-\cite{Briggs:2006,Briggs:XRC:2013}
-
-\setcounter{currentlevel}{\value{baseSectionLevel}-1}
-\levelstay{LEDA}
-
-\cite{Burnikel:1996,Burnikel:1999,Melhorn:1995,LEDA:2009}
-
-\setcounter{currentlevel}{\value{baseSectionLevel}-1}
-\levelstay{CGAL}
-
-\setcounter{currentlevel}{\value{baseSectionLevel}-1}
-\levelstay{Core2}
-
-
-\cite{Karamcheti:1999}
-
-\setcounter{currentlevel}{\value{baseSectionLevel}-1}
-\levelstay{iRRAM}
-
-\setcounter{currentlevel}{\value{baseSectionLevel}-1}
-\levelstay{CRcalc}
-
-\setcounter{currentlevel}{\value{baseSectionLevel}-1}
-\levelstay{Spire}
-
-\cite{Spire:2019}
-
-\setcounter{currentlevel}{\value{baseSectionLevel}-2}
-\levelstay{Rational}
-
-\setcounter{currentlevel}{\value{baseSectionLevel}-2}
-\levelstay{Algebraic}
-
-Based on
-\cite{yap:guaranteed:2004,li-pion-yap:progress:2004,pion-yap:kary:2003,Pion:2006,Li:2001,Burnikel:2001}
-
-\setcounter{currentlevel}{\value{baseSectionLevel}-2}
-\levelstay{Real}
-
-Based on \cite{Lester:2012}.
-
-
-%-------------------------------------------------------------------------------
+\%-------------------------------------------------------------------------------
 \pagebreak
 \appendix
 %\part{Appendices}

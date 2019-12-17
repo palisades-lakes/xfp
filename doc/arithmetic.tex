@@ -1,0 +1,134 @@
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}}
+\levelstay{Peano arithmetic}
+
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}}
+\levelstay{Zermelo Fraenkel set theory}
+
+\cite{wiki:Zermelo–Fraenkel-set-theory}
+
+Avoid Russell's paradox\cite{wiki:Russell-paradox}.
+
+\begin{description}
+\item[ZF] Zermelo-Fraenkel set theory
+\item[ZFC] with axiom of choice\cite{wiki:AxiomOfChoice}.
+ \end{description}
+
+Multiple equivalent sets of axioms.
+Each axiom should be true if interpreted as a statement about the
+collection of all sets in the Von Neumann 
+universe\cite{wiki:Von_Neumann_universe},
+more or less the closure under powerset and union starting
+from the empty set.
+
+Hereditary set: elements are all hereditary sets, 
+starting from empty set\cite{wiki:Hereditary-set}.
+
+Well-founded set: if set membership relation
+is well-founded on the transistive closure of the set.
+
+Well-founded relation\cite{wiki:Well-founded-relation}:  
+Relation $R$ on class $\Set{X}$ s.t. 
+$(\forall S\subseteq X)
+\; \left(S\neq \emptyset \implies 
+(\exists m\in S)(\forall s\in S)\lnot (sRm)\right).$
+Well-founded relations enable a version of transfinite induction.
+
+Class\cite{wiki:Class-set-theory}:
+a collection of sets that is unambiguously defined
+by property that all elements share. 
+(Constrast with ``proper class'' 
+in NBG set theory\cite{wiki:NBG-set-theory},
+ie, entities that are not elements of another entity.)
+
+Transitive closure: the elements, the elements of the elements,
+etc.
+
+Axiom of regularity (aka axiom of foundation)\cite{wiki:axiom-of-regularity}:
+$\forall x\,(x\neq \varnothing
+ \rightarrow 
+ \exists y\in x\,(y\cap x=\varnothing ))$.
+ 
+Equivalent to axiom of induction\cite{wiki:Epsilon-induction} 
+in ZF:
+$\forall x
+{\Big (}
+\forall y\,(y\in x\rightarrow P(y))\rightarrow P(x)
+{\Big )}
+\rightarrow \forall z\,P(z)$.
+
+With axiom of pairing, implies no set contains itself.
+
+Axiom of pairing\cite{wiki:Axiom_of_pairing}:
+$\forall A\,\forall B\,\exists C\,\forall D\,
+[D\in C\iff (D=A\lor D=B)]$;
+that is, for any $2$ sets $\Set{A}$ and $\Set{B}$,
+there exists a set containing exactly $\Set{A}$ and $\Set{B}$.
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}}
+\levelstay{Church, Godel, Turing}
+
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}}
+\levelstay{Libraries for exact or multi-precision arithmetic}
+
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\levelstay{GMP}
+
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\levelstay{MPFR}
+
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\levelstay{ICReals}
+
+\cite{Briggs:2006,Briggs:XRC:2013}
+
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\levelstay{XRC}
+
+\cite{Briggs:2006,Briggs:XRC:2013}
+
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\levelstay{LEDA}
+
+\cite{Burnikel:1996,Burnikel:1999,Mehlhorn:1995,LEDA:2009}
+
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\levelstay{CGAL}
+
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\levelstay{Core2}
+
+
+\cite{Karamcheti:1999}
+
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\levelstay{iRRAM}
+
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\levelstay{CRcalc}
+
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\levelstay{Spire}
+
+\cite{Spire:2019}
+
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Rational}
+
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Algebraic}
+
+Based on
+\cite{yap:guaranteed:2004,li-pion-yap:progress:2004,pion-yap:kary:2003,Pion:2006,Li:2001,Burnikel:2001}
+
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Real}
+
+Based on \cite{Lester:2012}.
+
+ 
