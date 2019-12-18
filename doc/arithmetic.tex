@@ -2,34 +2,67 @@
 \setcounter{currentlevel}{\value{baseSectionLevel}}
 \levelstay{Peano arithmetic}
 
+\begin{description}
+\item[\textbf{PA}] Peano arithmetic
+\end{description}
+
 
 %-----------------------------------------------------------------
+%-----------------------------------------------------------------
+%-----------------------------------------------------------------
+%-----------------------------------------------------------------
 \setcounter{currentlevel}{\value{baseSectionLevel}}
-\levelstay{Zermelo Fraenkel set theory}
+\levelstay{Set theories}
 
-\cite{wiki:Zermelo–Fraenkel-set-theory}
+%-----------------------------------------------------------------
+%-----------------------------------------------------------------
+%-----------------------------------------------------------------
+\leveldown{Zermelo Fraenkel set theory}
 
-Avoid Russell's paradox\cite{wiki:Russell-paradox}.
+Purpose: avoid Russell's paradox\cite{wiki:Russell-paradox}.
 
 \begin{description}
-\item[ZF] Zermelo-Fraenkel set theory
-\item[ZFC] with axiom of choice\cite{wiki:AxiomOfChoice}.
- \end{description}
+\item[\textbf{ZF}] Zermelo-Fraenkel set theory\cite{wiki:Zermelo–Fraenkel-set-theory}
+\item[\textbf{ZFC}] \textbf{ZF} with axiom of choice\cite{wiki:AxiomOfChoice}.
+\item[\textbf{ZFA}] \textbf{ZF} with ur-elements
+\item[\textbf{ZFAC}] \textbf{ZFA} with axiom of choice.
+\end{description}
 
-Multiple equivalent sets of axioms.
-Each axiom should be true if interpreted as a statement about the
-collection of all sets in the Von Neumann 
-universe\cite{wiki:Von_Neumann_universe},
-more or less the closure under powerset and union starting
-from the empty set.
+Universe of discourse: 
+Hereditary well-founded sets.
+All elements of sets are sets themselves.
+
+No \textsl{ur-elements}\cite{wiki:Urelement} 
+(aka ``atoms'', ``individuals'') ---
+non-set things that may belong to a set.
+
+(Note: \textsl{proper class} is dual to ur-element in the sense that
+ur-elements do not have elements and proper classes cannot be 
+elements.)
+
+(Perhaps elegant---sets all the way down---, but unsatisfactory. 
+In application, sets are useful for organizing the things
+of real interest---the ur-elements.
+Constructing an isomorphism between hereditary sets
+and numbers, and isomorhisms between structures built
+from numbers and other axiomatic structures seems
+backwards to me.
+I think the abstract axiomatic structure comes first, 
+and isomorphic representations (or models) in terms of 
+(equivalence classes over) more concrete/primitive
+entities a secondary technique useful in proofs and calculation.)
 
 Hereditary set: elements are all hereditary sets, 
 starting from empty set\cite{wiki:Hereditary-set}.
 
+(Question: is the empty set a special case of an ur-element?
+See also: Quine atoms\cite{wiki:Urelement}.)
+
 Well-founded set: if set membership relation
 is well-founded on the transistive closure of the set.
 
-Well-founded relation\cite{wiki:Well-founded-relation}:  
+Well-founded relation\cite{wiki:Well-founded-relation}: 
+ 
 Relation $R$ on class $\Set{X}$ s.t. 
 $(\forall S\subseteq X)
 \; \left(S\neq \emptyset \implies 
@@ -46,11 +79,85 @@ ie, entities that are not elements of another entity.)
 Transitive closure: the elements, the elements of the elements,
 etc.
 
-Axiom of regularity (aka axiom of foundation)\cite{wiki:axiom-of-regularity}:
-$\forall x\,(x\neq \varnothing
- \rightarrow 
- \exists y\in x\,(y\cap x=\varnothing ))$.
+Consistency of \textbf{ZFC} cannot be proved, 
+by G\"{o}del's 2nd incompleteness theorem.
+
+Multiple equivalent sets of axioms.
+Each axiom should be true if interpreted as a statement about the
+collection of all sets in the Von Neumann 
+universe\cite{wiki:Von_Neumann_universe},
+more or less the closure under powerset and union starting
+from the empty set.
+
+%-----------------------------------------------------------------
+\leveldown{Axiom of extensionality}
+
+Sets are equal if they have the same 
+elements.\cite{wiki:Axiom_of_extensionality,wiki:Extensionality}
+
+$\forall A\,\forall B\,
+(\forall X\,(X\in A\iff X\in B)
+\implies A=B)$
+
+What about identity? 
+
+What's the difference between two things being equal vs
+being the \textit{same} thing?
+
+Is it really some kind of ``set specification'' that's equal?
+
+Version without equality:
+
+$\forall x
+\forall y
+[\forall z(z\in x\Leftrightarrow z\in y)
+\Rightarrow 
+\forall w(x\in w\Leftrightarrow y\in w)]$
+
+In other words: if $x$ and $y$ have the same elements, 
+they are in the same sets.
+
+This is even more unsatisfying. 
+Raises the same unanswered issues about set identity.
+Worse, it relies on some property of all sets in an undefined 
+universe of possible sets.
+
+Version with ur-elements:
+
+$\forall A\,\forall B\,(\exists X\,(X\in A)\implies
+ [\forall Y\,(Y\in A\iff Y\in B)\implies A=B]\,)$
  
+In words: 
+if $A$ is non-empty, $B$ any set, and $A$ and $B$ have the same
+elements, they are equal.
+
+(Question: ur-element version without equality?)
+
+%-----------------------------------------------------------------
+\levelstay{Axiom of regularity}
+
+(aka axiom of foundation)~\cite{wiki:Axiom_of_regularity}
+
+Every non-empty set $A$ contains a set which is disjoint from $A$.
+
+$\forall x\,(x\neq \varnothing
+\rightarrow 
+\exists y\in x\,(y\cap x=\varnothing ))$.
+ 
+or
+ 
+$\forall x\,(x\neq \varnothing \Rightarrow 
+ \exists y\in x\,(y\cap x=\varnothing ))$
+ 
+(No infinite loops? Guarantee halting? 
+For $\Set{A} = \{\Set{A}\}$,
+\textsf{(hasElement A x)} 
+returns \textsf{true} if \textsf{(== A x)}
+and \textsf{false} otherwise. )
+
+Consequences:
+\begin{itemize}
+\item 
 Equivalent to axiom of induction\cite{wiki:Epsilon-induction} 
 in ZF:
 $\forall x
@@ -58,20 +165,83 @@ $\forall x
 \forall y\,(y\in x\rightarrow P(y))\rightarrow P(x)
 {\Big )}
 \rightarrow \forall z\,P(z)$.
+(Assuming induction preferred in constructionist theories?)
 
-With axiom of pairing, implies no set contains itself.
+\item With the \nameref{sec:Axiom-of-pairing}, 
+implies no set contains itself.
 
-Axiom of pairing\cite{wiki:Axiom_of_pairing}:
-$\forall A\,\forall B\,\exists C\,\forall D\,
-[D\in C\iff (D=A\lor D=B)]$;
-that is, for any $2$ sets $\Set{A}$ and $\Set{B}$,
-there exists a set containing exactly $\Set{A}$ and $\Set{B}$.
+s\item No infinite descending sequences of sets.
+``Descending'' in the sense that each set is an element of the
+preceeding set in the sequence.
+
+\item Simplifies definition of ordered pair.
+
+\item Enables defining ordinal rank for every set.
+
+\item Given 2 sets, at most one can be an element of the other.
+\end{itemize}
+
+Implied by axiom of dependent choice and 
+no descending infinite sequence.
+
+Independent of other \textbf{ZF} axioms, like axiom of choice.
+Added to \textbf{ZF} to 
+``exclude models with some undesirable properties''.
 
 %-----------------------------------------------------------------
+\levelstay{Axiom schema of specification}
+
+``Given any set $A$, there is a set $B$ (a subset of $A$) 
+such that, given any set $x$, 
+$x$ is a member of $B$ if and only if $x$ is a member of $A$ 
+and $\varphi$ holds for $x$.''
+\cite{wiki:Axiom_schema_of_specification}
+
+${\displaystyle 
+\forall w_{1},\ldots ,w_{n}\,
+\forall A\,\exists B\,
+\forall x\,
+(x\in B
+\Leftrightarrow
+[x\in A\land \varphi (x,w_{1},\ldots ,w_{n},A)])}$
+ 
+2nd order axiom schema because it is quantified over predicates
+ $\varphi$.
+ 
+%-----------------------------------------------------------------
+\levelstay{Axiom of pairing}
+\label{sec:Axiom-of-pairing}
+
+$\forall A\,\forall B\,\exists C\,\forall D\,
+[D\in C\iff (D=A\lor D=B)]$;
+
+that is, for any $2$ sets $\Set{A}$ and $\Set{B}$,
+there exists a set containing exactly $\Set{A}$ and 
+$\Set{B}$~\cite{wiki:Axiom_of_pairing}.
+
+%-----------------------------------------------------------------
+\levelstay{Axiom of union}
+\label{sec:Axiom-of-union}
+
+%-----------------------------------------------------------------
+\levelstay{Axiom schema of replacement}
+
+%-----------------------------------------------------------------
+\levelstay{Axiom of infinity}
+
+%-----------------------------------------------------------------
+\levelstay{Axiom of power set}
+
+%-----------------------------------------------------------------
+\levelstay{Well-ordering theorem}
+
+%-----------------------------------------------------------------
+%-----------------------------------------------------------------
 \setcounter{currentlevel}{\value{baseSectionLevel}}
-\levelstay{Church, Godel, Turing}
+\levelstay{Church, G\"{o}del, Turing}
 
 
+%-----------------------------------------------------------------
 %-----------------------------------------------------------------
 \setcounter{currentlevel}{\value{baseSectionLevel}}
 \levelstay{Libraries for exact or multi-precision arithmetic}
