@@ -14,10 +14,29 @@
 \setcounter{currentlevel}{\value{baseSectionLevel}}
 \levelstay{Set theories}
 
+\setcounter{currentlevel}{\value{currentlevel}-1}
 %-----------------------------------------------------------------
 %-----------------------------------------------------------------
 %-----------------------------------------------------------------
-\leveldown{Zermelo Fraenkel set theory}
+\levelstay{Zermelo set theory}
+
+\textbf{Z}\cite{wiki:Zermelo_set_theory}
+
+Predecessor of \nameref{sec:Zermelo-Fraenkel-set-theory}.
+
+Insufficient for theory of infinite 
+ordinals\cite{wiki:Ordinal_number}
+and cardinals.
+
+Strongler, original ``2nd order'' version 
+vs  later 1st order variants.
+
+See also MacLane set theory\cite{maclane:mff:1986}.
+%-----------------------------------------------------------------
+%-----------------------------------------------------------------
+%-----------------------------------------------------------------
+\levelstay{Zermelo Fraenkel set theory}
+\label{sec:Zermelo-Fraenkel-set-theory}
 
 Purpose: avoid Russell's paradox\cite{wiki:Russell-paradox}.
 
@@ -102,7 +121,8 @@ $\forall A\,\forall B\,
 What about identity? 
 
 What's the difference between two things being equal vs
-being the \textit{same} thing?
+being the \textit{same} thing? 
+\textsf{= a b)} vs \textsf{(identical? a b)}?
 
 Is it really some kind of ``set specification'' that's equal?
 
@@ -190,6 +210,7 @@ Added to \textbf{ZF} to
 
 %-----------------------------------------------------------------
 \levelstay{Axiom schema of specification}
+\label{sec:Axiom-schema-of-specification}
 
 ``Given any set $A$, there is a set $B$ (a subset of $A$) 
 such that, given any set $x$, 
@@ -212,25 +233,102 @@ ${\displaystyle
 \levelstay{Axiom of pairing}
 \label{sec:Axiom-of-pairing}
 
+Axiom of pairing unnecessary.
+A consequence of \nameref{sec:Axiom-schema-of-replacement}
+applied to any set with $2$ or more elements.
+Existence of a set with $\geq 2$ elements
+(eq $\{ \{\}, \{ \{\} \} \}$)
+deduced from \nameref{sec:Axiom-of-infinity}
+(or 
+axiom of empty set\cite{wiki:Axiom_of_empty_set}
+and \nameref{sec:Axiom-of-power-set}).
+
+For any $2$ sets $\Set{A}$ and $\Set{B}$,
+there exists a set containing exactly $\Set{A}$ and 
+$\Set{B}$~\cite{wiki:Axiom_of_pairing}.
+
 $\forall A\,\forall B\,\exists C\,\forall D\,
 [D\in C\iff (D=A\lor D=B)]$;
 
-that is, for any $2$ sets $\Set{A}$ and $\Set{B}$,
-there exists a set containing exactly $\Set{A}$ and 
-$\Set{B}$~\cite{wiki:Axiom_of_pairing}.
+Given any set $\Set{A}$ and any set $\Set{B}$, 
+there is a set $\Set{C}$ such that, 
+given any set $\Set{D}$, 
+$\Set{D}$ is a member of $\Set{C}$ 
+if and only if 
+$\Set{D}$ is equal to $\Set{A}$ 
+or 
+$\Set{D}$ is equal to $\Set{B}$.
+
+Special case of axiom of elementary 
+sets\cite{wiki:Zermelo_set_theory}.
+
+Singleton:
+(Another identity/equality issue)
+$\Set{S}=\{\Set{A},\Set{A}\}$, abbreviated $\{\Set{A}\}$,
+defines a singleton as a repeated pair---which doesn't make sense,
+sonce there's no provision for having the same element
+in a set ``more than once'', whatever that might mean.
+Axiom as stated doesn't specify $\Set{A} \neq \Set{B}$
+
+Ordered pair:
+$(a,b)=\{\{a\},\{a,b\}\}$.
+See also Halmos\cite{Halmos1960Naive}.
+Is this really necessary? 
+
+Weaker versions:
+ 
+${\displaystyle 
+\forall A \forall B 
+\exists C
+\forall D((D=A\lor D=B) \Rightarrow D\in C)}$
+plus 
+\nameref{sec:Axiom-schema-of-specification}
+implies usual axiom of pairing.
+
+${\displaystyle 
+\forall A\,\forall B\,
+\exists C\,
+\forall D\,[D\in C\iff (D\in A\lor D=B)]}$.
+plus 
+axiom of empty set
+implies usual axiom of pairing.
+
+Stronger versions:
+
+With axiom of empty set and axiom of union,
+implies existence of a (unique) set containing exactly
+any finite number of given sets.
+
 
 %-----------------------------------------------------------------
 \levelstay{Axiom of union}
 \label{sec:Axiom-of-union}
 
+The union over the elements of a set 
+exists\cite{wiki:Axiom_of_union}.
+
+$\forall {\Set{F}}\,
+\exists A\,\
+forall Y\,\forall x
+[(x\in Y\land Y\in {\Set{F}})\Rightarrow x\in A]$
+
+Using \nameref{sec:Axiom-schema-of-replacement}:
+
+${\displaystyle 
+\cup {\Set{F}}:=
+\{x\in A:\exists Y(x\in Y\land Y\in {\Set{F}})\}.}$
+
 %-----------------------------------------------------------------
 \levelstay{Axiom schema of replacement}
+\label{sec:Axiom-schema-of-replacement}
 
 %-----------------------------------------------------------------
 \levelstay{Axiom of infinity}
+\label{sec:Axiom-of-infinity}
 
 %-----------------------------------------------------------------
 \levelstay{Axiom of power set}
+\label{sec:Axiom-of-power-set}
 
 %-----------------------------------------------------------------
 \levelstay{Well-ordering theorem}
