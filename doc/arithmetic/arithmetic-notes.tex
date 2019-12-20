@@ -37,12 +37,12 @@
 %\addbibresource{../bib/ieeestd.bib}
 \addbibresource{../bib/tex.bib}
 %\addbibresource{../bib/fparith.bib}
-%-------------------------------------------------------------------------------
+%-----------------------------------------------------------------
 \title{Notes on arithmetic}
 \author{\textsc{John Alan McDonald}}
 %\email{mcdonald.john.alan at gmail.com}
 \date{draft of \today}
-%-------------------------------------------------------------------------------
+%-----------------------------------------------------------------
 \begin{document}
 
 \maketitle
@@ -68,20 +68,23 @@
 \setcounter{baseSectionLevel}{6}
 \setcounter{currentlevel}{\value{baseSectionLevel}}
 
-\input{../mathematics}
+%\input{../mathematics}
+\input{../sets}
 \input{../arithmetic}
 
 %-----------------------------------------------------------------
-\%-------------------------------------------------------------------------------
-\pagebreak
-\appendix
+%\pagebreak
+%\appendix
 %\part{Appendices}
-\input{../tex/typesetting}
-%-------------------------------------------------------------------------------
+%\input{../tex/typesetting}
+%-----------------------------------------------------------------
 \backmatter
 
 
 %\part{Backmatter}
-\input{../tex/tail}
-%-------------------------------------------------------------------------------
+% un-comment \input and comment \printbibiliography
+% to get index, glossary, list of theorems, etc.
+%\input{../tex/tail}
+\printbibliography[heading=bibintoc, title={References}]
+%-----------------------------------------------------------------
 \end{document}

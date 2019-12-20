@@ -1,10 +1,10 @@
 %-----------------------------------------------------------------
-\setcounter{currentlevel}{\value{baseSectionLevel}}
-\levelstay{Peano arithmetic}
-
-\begin{description}
-\item[\textbf{PA}] Peano arithmetic
-\end{description}
+% \setcounter{currentlevel}{\value{baseSectionLevel}}
+% \levelstay{Peano arithmetic}
+% 
+% \begin{description}
+% \item[\textbf{PA}] Peano arithmetic
+% \end{description}
 
 
 %-----------------------------------------------------------------
@@ -13,6 +13,9 @@
 %-----------------------------------------------------------------
 \setcounter{currentlevel}{\value{baseSectionLevel}}
 \levelstay{Set theories}
+
+Axiomatic theories of various kinds.
+Notes almost entirely from Wikipedia.
 
 \setcounter{currentlevel}{\value{currentlevel}-1}
 %-----------------------------------------------------------------
@@ -42,9 +45,9 @@ Purpose: avoid Russell's paradox\cite{wiki:Russell-paradox}.
 
 \begin{description}
 \item[\textbf{ZF}] Zermelo-Fraenkel set theory\cite{wiki:Zermelo–Fraenkel-set-theory}
-\item[\textbf{ZFC}] \textbf{ZF} with axiom of choice\cite{wiki:AxiomOfChoice}.
-\item[\textbf{ZFA}] \textbf{ZF} with ur-elements
-\item[\textbf{ZFAC}] \textbf{ZFA} with axiom of choice.
+\item[\textbf{ZFC}] \textbf{ZF} with axiom of choice\cite{wiki:Axiom_of_choice}.
+\item[\textbf{ZFA}] \textbf{ZF} with ur-elements\cite{wiki:Urelement}
+\item[\textbf{ZFAC}] \textbf{ZFA} with axiom of choice\cite{wiki:Axiom_of_choice}.
 \end{description}
 
 Universe of discourse: 
@@ -74,6 +77,12 @@ entities a secondary technique useful in proofs and calculation.)
 Hereditary set: elements are all hereditary sets, 
 starting from empty set\cite{wiki:Hereditary-set}.
 
+Existence of empty set is either an 
+axiom\cite{wiki:Axiom_of_empty_set}
+or a theorem dereived from \nameref{sec:Axiom-of-infinity}
+or derived from \nameref{sec:Axiom-schema-of-specification}
+and ``a set-existence axiom''.
+
 (Question: is the empty set a special case of an ur-element?
 See also: Quine atoms\cite{wiki:Urelement}.)
 
@@ -83,12 +92,12 @@ is well-founded on the transistive closure of the set.
 Well-founded relation\cite{wiki:Well-founded-relation}: 
  
 Relation $R$ on class $\Set{X}$ s.t. 
-$(\forall S\subseteq X)
-\; \left(S\neq \emptyset \implies 
-(\exists m\in S)(\forall s\in S)\lnot (sRm)\right).$
+$(\forall \Set{S} \subseteq \Set{X})
+\; \left(\Set{S} \neq \emptyset \implies 
+(\exists m \in \Set{S})(\forall s\in \Set{S})\lnot (sRm)\right).$
 Well-founded relations enable a version of transfinite induction.
 
-Class\cite{wiki:Class-set-theory}:
+Class\cite{wiki:Class_set_theory}:
 a collection of sets that is unambiguously defined
 by property that all elements share. 
 (Constrast with ``proper class'' 
@@ -114,9 +123,9 @@ from the empty set.
 Sets are equal if they have the same 
 elements.\cite{wiki:Axiom_of_extensionality,wiki:Extensionality}
 
-$\forall A\,\forall B\,
-(\forall X\,(X\in A\iff X\in B)
-\implies A=B)$
+$\forall \Set{A}\,\forall \Set{B}\,
+(\forall \Set{X}\,(\Set{X}\in \Set{A}\iff \Set{X}\in \Set{B})
+\implies \Set{A}=\Set{B})$
 
 What about identity? 
 
@@ -144,11 +153,18 @@ universe of possible sets.
 
 Version with ur-elements:
 
-$\forall A\,\forall B\,(\exists X\,(X\in A)\implies
- [\forall Y\,(Y\in A\iff Y\in B)\implies A=B]\,)$
+$\forall \Set{A}\,
+\forall \Set{B}\,
+(\exists \Set{X}\,(\Set{X}\in \Set{A})
+\implies
+ [\forall Y\,
+ (Y\in \Set{A}
+ \iff 
+ Y\in \Set{B}) \implies \Set{A}=\Set{B}]\,)$
  
 In words: 
-if $A$ is non-empty, $B$ any set, and $A$ and $B$ have the same
+if $\Set{\Set{A}}$ is non-empty, $\Set{B}$ any set, 
+and $\Set{\Set{A}}$ and $\Set{B}$ have the same
 elements, they are equal.
 
 (Question: ur-element version without equality?)
@@ -158,9 +174,9 @@ elements, they are equal.
 
 (aka axiom of foundation)~\cite{wiki:Axiom_of_regularity}
 
-Every non-empty set $A$ contains a set which is disjoint from $A$.
+Every non-empty set $\Set{A}$ contains a set which is disjoint from $\Set{A}$.
 
-$\forall x\,(x\neq \varnothing
+$\forall x\,(x \neq \varnothing
 \rightarrow 
 \exists y\in x\,(y\cap x=\varnothing ))$.
  
@@ -179,18 +195,16 @@ Consequences:
 \begin{itemize}
 \item 
 Equivalent to axiom of induction\cite{wiki:Epsilon-induction} 
-in ZF:
+in \textbf{ZF}:
 $\forall x
-{\Big (}
-\forall y\,(y\in x\rightarrow P(y))\rightarrow P(x)
-{\Big )}
+[\forall y\,(y\in x\rightarrow P(y))\rightarrow P(x)]
 \rightarrow \forall z\,P(z)$.
 (Assuming induction preferred in constructionist theories?)
 
 \item With the \nameref{sec:Axiom-of-pairing}, 
 implies no set contains itself.
 
-s\item No infinite descending sequences of sets.
+\item No infinite descending sequences of sets.
 ``Descending'' in the sense that each set is an element of the
 preceeding set in the sequence.
 
@@ -212,23 +226,74 @@ Added to \textbf{ZF} to
 \levelstay{Axiom schema of specification}
 \label{sec:Axiom-schema-of-specification}
 
-``Given any set $A$, there is a set $B$ (a subset of $A$) 
+aka axiom schema of separation, subset axiom scheme,
+axiom schema of restricted comprehension \ldots .
+
+Restricted comprehension avoids Russell paradox,
+so claimed to be ``most important'' axiom.
+
+``Given any set $\Set{A}$, there is a set $\Set{B}$
+ (a subset of $\Set{A}$) 
 such that, given any set $x$, 
-$x$ is a member of $B$ if and only if $x$ is a member of $A$ 
+$x$ is a member of $\Set{B}$ if and only if $x$ 
+is a member of $\Set{A}$ 
 and $\varphi$ holds for $x$.''
 \cite{wiki:Axiom_schema_of_specification}
 
 ${\displaystyle 
 \forall w_{1},\ldots ,w_{n}\,
-\forall A\,\exists B\,
+\forall \Set{A}\,\exists \Set{B}\,
 \forall x\,
-(x\in B
+(x\in \Set{B}
 \Leftrightarrow
-[x\in A\land \varphi (x,w_{1},\ldots ,w_{n},A)])}$
- 
+[x\in \Set{A}\land \varphi (x,w_{1},\ldots ,w_{n},\Set{A})])}$
+
+Essence:
+Every \textsl{subclass}
+of a set defined by a predicate is a set.
+
+(What is a predicate?
+A predicate is a true/false valued function.
+What is a function? 
+Does platonic relation-based definition require sets,
+thus circular?
+If functions are computable, does that make the
+russell paradox just an infinite loop,
+and not a contradiction?
+IS a known infinite loop different from 
+unknown predicate value, or knowable but unproven?
+)
+
+\ldots``a subclass is a class contained in some other class in 
+the same way that a subset is a set contained in some other set.''
+\cite{wiki:Subclass_set_theory}
+(???!!!)
+
+``\dots a \textsl{class} is a collection of sets 
+(or \ldots other \ldots objects)
+the can be unambiguously defined by a property 
+that all its members share.``\cite{wiki:Class_set_theory}
+(???!!!)
+
+A \textsl{proper} class is not a set. (???!!)
+
 2nd order axiom schema because it is quantified over predicates
  $\varphi$.
- 
+
+Implied by \nameref{sec:Axiom-schema-of-replacement}
+and \cite{wiki:Axiom_of_empty_set}.
+
+Distinction from Axiom schema of (unrestricted) comprehension:
+
+$\forall w_1,\ldots,w_n \, \exists \Set{B} \, 
+\forall x \, ( x \in \Set{B} 
+\Leftrightarrow \varphi(x, w_1, \ldots, w_n) )$
+There exists a (unique) set $\Set{B}$ 
+whose members are precisely those objects 
+that satisfy the predicate $\varphi$.
+This give the Russell paradox if 
+$\varphi(x) \doteq \neg(x \in x)$
+
 %-----------------------------------------------------------------
 \levelstay{Axiom of pairing}
 \label{sec:Axiom-of-pairing}
@@ -239,16 +304,15 @@ applied to any set with $2$ or more elements.
 Existence of a set with $\geq 2$ elements
 (eq $\{ \{\}, \{ \{\} \} \}$)
 deduced from \nameref{sec:Axiom-of-infinity}
-(or 
-axiom of empty set\cite{wiki:Axiom_of_empty_set}
+(or axiom of empty set\cite{wiki:Axiom_of_empty_set}
 and \nameref{sec:Axiom-of-power-set}).
 
 For any $2$ sets $\Set{A}$ and $\Set{B}$,
 there exists a set containing exactly $\Set{A}$ and 
 $\Set{B}$~\cite{wiki:Axiom_of_pairing}.
 
-$\forall A\,\forall B\,\exists C\,\forall D\,
-[D\in C\iff (D=A\lor D=B)]$;
+$\forall \Set{A}\,\forall \Set{B}\,\exists \Set{C}\,\forall \Set{D}\,
+[\Set{D}\in \Set{C}\iff (\Set{D}=\Set{A}\lor \Set{D}=\Set{B})]$;
 
 Given any set $\Set{A}$ and any set $\Set{B}$, 
 there is a set $\Set{C}$ such that, 
@@ -278,27 +342,28 @@ Is this really necessary?
 Weaker versions:
  
 ${\displaystyle 
-\forall A \forall B 
-\exists C
-\forall D((D=A\lor D=B) \Rightarrow D\in C)}$
+\forall \Set{A} \forall \Set{B} 
+\exists \Set{C}
+\forall \Set{D}((\Set{D}=\Set{A}\lor \Set{D}=\Set{B}) \Rightarrow \Set{D}\in \Set{C})}$
 plus 
 \nameref{sec:Axiom-schema-of-specification}
 implies usual axiom of pairing.
 
 ${\displaystyle 
-\forall A\,\forall B\,
-\exists C\,
-\forall D\,[D\in C\iff (D\in A\lor D=B)]}$.
+\forall \Set{A}\,\forall \Set{B}\,
+\exists \Set{C}\,
+\forall \Set{D}\,[\Set{D}\in \Set{C}
+\iff (\Set{D}\in \Set{A}\lor \Set{D}=\Set{B})]}$.
 plus 
 axiom of empty set
 implies usual axiom of pairing.
 
 Stronger versions:
 
-With axiom of empty set and axiom of union,
+With axiom of empty set\cite{wiki:Axiom_of_empty_set} 
+and \nameref{sec:Axiom-of-union},
 implies existence of a (unique) set containing exactly
 any finite number of given sets.
-
 
 %-----------------------------------------------------------------
 \levelstay{Axiom of union}
@@ -307,31 +372,165 @@ any finite number of given sets.
 The union over the elements of a set 
 exists\cite{wiki:Axiom_of_union}.
 
+Note that this is using the incestuous nature of 
+\textbf{ZF} without ur-elements---the elements of sets
+are all sets themselves. 
+ 
 $\forall {\Set{F}}\,
-\exists A\,\
-forall Y\,\forall x
-[(x\in Y\land Y\in {\Set{F}})\Rightarrow x\in A]$
+\exists \Set{A}\,
+\forall \Set{Y}\,\forall x
+[(x\in \Set{Y} \land \Set{Y}\in \Set{F})
+\Rightarrow x\in \Set{A}]$
 
 Using \nameref{sec:Axiom-schema-of-replacement}:
 
+Union defined as an operation on a single set:\hfill\break
 ${\displaystyle 
-\cup {\Set{F}}:=
-\{x\in A:\exists Y(x\in Y\land Y\in {\Set{F}})\}.}$
+\cup {\Set{F}} \; \doteq \;
+\{x\in \Set{A}:\exists \Set{Y} 
+(x \in \Set{Y} \land \Set{Y} \in \Set{F})\}.}$
+
+Define usual set union via axiom of pairing:
+$\Set{A} \cup \Set{B} \; \doteq \; \cup \{ \Set{A}, \Set{B}\}$
+
+Define union of indexed family (?) of sets
+using \nameref{sec:Axiom-schema-of-replacement}.
+
+With \nameref{sec:Axiom-schema-of-specification},
+can define a weaker form:
+$\forall {\Set{F}}\,\exists \Set{A}\,\forall \Set{Y}\,
+\forall x
+[(x\in \Set{Y} 
+\land 
+\Set{Y}\in {\Set{F}})
+\Rightarrow 
+x\in \Set{A}]$.
+
+Note that intersection can be defined from 
+\nameref{sec:Axiom-schema-of-specification}:\hfill\linebreak
+${\displaystyle 
+\bigcap \Set{A}=\{c\in \Set{E}:
+\forall \Set{D} (\Set{D} \in \Set{A} \Rightarrow c\in \Set{D})\}}$.
+Note also that applying this to the empty set
+is not permitted by ''the axioms'';
+otherwise we would get a universe set 
+(skeptical about this.
+couldn't we require the elements of the intersection
+to be elements of some element of $\Set{A}$?
+or evaluate the predicate over $\bigcup \Set{A}$)
 
 %-----------------------------------------------------------------
 \levelstay{Axiom schema of replacement}
 \label{sec:Axiom-schema-of-replacement}
 
+Version 1: 
+The image of a definable (?) function applied to a set
+is contained in some set.\cite{wiki:Axiom_schema_of_replacement}
+(``image of set under function'' is usually defined as a set.)
+aka axiom schema of collection.
+
+Version 2: 
+
+The image of any set under a definable mapping is a set.
+
+Suppose $P$ is a definable (?) relation such that for every
+set $X$ there is a unique set $Y$ such that $P(X,Y)$.
+$P$ may be a proper class\cite{wiki:Class_set_theory}, 
+ie, not a \textit{set}, of ordered pairs. 
+(Leads to some hackiness about relations that are not sets,
+for unconvincing reasons\cite{wiki:Binary_relation}.)
+Definable (class) function: $F_P(X)\,=\,Y \iff P(X,Y)$.
+Collection $\Set{B}$ (may be a proper class)
+defined so that for all $y\in\Set{B}$ there exist $x \in \Set{A}$
+such that $y=F_P(x)$.
+(Something backwards about this.)
+
+$\Set{B}\,=\,F_p(\Set{A}) \,=\, \{F_p(x) : x \in \Set{A}\}$ 
+is the \textsl{image} of $\Set{A}$ under $F_p$.
+
+Principle of smallness: if $\Set{A}$ is 
+``small enough'' to be a set,
+then so is $F(\Set{A})$.
+
+\nameref{sec:Axiom-schema-of-replacement} implied by stronger
+axiom of limitation of 
+size\cite{wiki:Axiom_of_limitation_of_size}:
+a class that is a member of a class is a set (???!!!).
+
+nameref{sec:Axiom-schema-of-replacement} not needed for most math;
+not present in \textbf{Z};
+``drastically increases the strength of \textbf{ZF}''.
+
+Used in proving theorems about ordinals.
+
+Axiom schema of collection: some superclass of 
+the image of relation is a set.
+Stronger than replacement
+in some axiom systems, weaker in others.
+See also axiom shcema of boundedness.
+
+With axiom of empty set, replacement implies specification.,
+using law of excluded middle.
+
+Replacement is main thing distinguishing \textbf{Z}
+frpm \textbf{ZF}.
+
+Skoelem's 1st order version vs Fraenkel's 2nd order?
 %-----------------------------------------------------------------
 \levelstay{Axiom of infinity}
 \label{sec:Axiom-of-infinity}
 
+Roughly, there exists a set with infinitely many 
+elements\cite{wiki:Axiom_of_infinity}.
+(Some nonsense about 2 elements being the same.)
+
+More formally, asserts existance of an infinite set 
+constructed via von Neumann:
+$\emptyset, \{\emptyset\}, \{ \emptyset, \{\emptyset\} \} \cdots$
+
+Even more formal, take the minimal set satisfying:
+${\displaystyle 
+\exists \mathbf {I}
+ \,(\emptyset \in \mathbf {I}
+ \,\land \,
+ \forall x\in \mathbf {I} \,
+ (\,(x\cup \{x\})\in \mathbf {I} )).}$
+ 
+ Proved independent of other \textbf{ZFC} axioms.
+ 
+ 
 %-----------------------------------------------------------------
 \levelstay{Axiom of power set}
 \label{sec:Axiom-of-power-set}
 
+\textsl{Subset}:
+$(z\subseteq x)
+ \Leftrightarrow 
+ (\forall q(q\in z\Rightarrow q\in x)).$
+ 
+The power set is the set of all subsets of a given set.
+The \nameref{sec:Axiom-of-power-set} says the the power set
+always exists\cite{wiki:Axiom_of_power_set}:
+
+${\displaystyle {\mathcal{P}}(x) \,=\, \{z\in y:z\subseteq x\}}$
+
 %-----------------------------------------------------------------
 \levelstay{Well-ordering theorem}
+\label{sec:Well_ordering_theorem}
+
+Previous 8 axioms define \textbf{ZF}.
+
+The Well-ordering ``theorem'' axiom turns \textbf{ZF}
+into \textbf{ZFC}\cite{wiki:Well_ordering_theorem}.
+
+For any set $\Set{X}$ there is a binary relation $R$ which
+ well-orders $\Set{X}$.
+ $R$ is a linear order and every non-empty subset of $\Set{X}$
+ has an element which is minimal under $R$.
+
+Equivalent to axiom of choice\cite{wiki:Axiom_of_choice}, 
+assuming previous 8 axioms, iun 1st order logic;
+stronger in 2nd order logic.
 
 %-----------------------------------------------------------------
 %-----------------------------------------------------------------
