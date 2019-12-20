@@ -3,7 +3,7 @@
 % \levelstay{Peano arithmetic}
 % 
 % \begin{description}
-% \item[\textbf{PA}] Peano arithmetic
+% \item[\textsf{PA}] Peano arithmetic
 % \end{description}
 
 
@@ -21,37 +21,18 @@ Notes almost entirely from Wikipedia.
 %-----------------------------------------------------------------
 %-----------------------------------------------------------------
 %-----------------------------------------------------------------
-\levelstay{Zermelo set theory}
+\levelstay{von Neumann universe}
+\label{sec:von_Neumann_universe}
 
-\textbf{Z}\cite{wiki:Zermelo_set_theory}
+Attributed to von Neumann, but may really be due to
+Zermelo\cite{Zermelo:1930:ZERBGU}.
 
-Predecessor of \nameref{sec:Zermelo-Fraenkel-set-theory}.
+von Neumann universe: \textsf{V}\cite{wiki:Von_Neumann_universe},
+the class of hereditary well-founded sets.
 
-Insufficient for theory of infinite 
-ordinals\cite{wiki:Ordinal_number}
-and cardinals.
+Hereditary set: elements are all hereditary sets, 
+starting from empty set\cite{wiki:Hereditary-set}.
 
-Strongler, original ``2nd order'' version 
-vs  later 1st order variants.
-
-See also MacLane set theory\cite{maclane:mff:1986}.
-%-----------------------------------------------------------------
-%-----------------------------------------------------------------
-%-----------------------------------------------------------------
-\levelstay{Zermelo Fraenkel set theory}
-\label{sec:Zermelo-Fraenkel-set-theory}
-
-Purpose: avoid Russell's paradox\cite{wiki:Russell-paradox}.
-
-\begin{description}
-\item[\textbf{ZF}] Zermelo-Fraenkel set theory\cite{wiki:Zermelo–Fraenkel-set-theory}
-\item[\textbf{ZFC}] \textbf{ZF} with axiom of choice\cite{wiki:Axiom_of_choice}.
-\item[\textbf{ZFA}] \textbf{ZF} with ur-elements\cite{wiki:Urelement}
-\item[\textbf{ZFAC}] \textbf{ZFA} with axiom of choice\cite{wiki:Axiom_of_choice}.
-\end{description}
-
-Universe of discourse: 
-Hereditary well-founded sets.
 All elements of sets are sets themselves.
 
 No \textsl{ur-elements}\cite{wiki:Urelement} 
@@ -74,18 +55,6 @@ and isomorphic representations (or models) in terms of
 (equivalence classes over) more concrete/primitive
 entities a secondary technique useful in proofs and calculation.)
 
-Hereditary set: elements are all hereditary sets, 
-starting from empty set\cite{wiki:Hereditary-set}.
-
-Existence of empty set is either an 
-axiom\cite{wiki:Axiom_of_empty_set}
-or a theorem dereived from \nameref{sec:Axiom-of-infinity}
-or derived from \nameref{sec:Axiom-schema-of-specification}
-and ``a set-existence axiom''.
-
-(Question: is the empty set a special case of an ur-element?
-See also: Quine atoms\cite{wiki:Urelement}.)
-
 Well-founded set: if set membership relation
 is well-founded on the transistive closure of the set.
 
@@ -107,7 +76,122 @@ ie, entities that are not elements of another entity.)
 Transitive closure: the elements, the elements of the elements,
 etc.
 
-Consistency of \textbf{ZFC} cannot be proved, 
+Transfinite recursive definition:
+
+$V_{0} \,\doteq\, \varnothing$.
+
+$V_{\beta +1} \,\doteq\, {\mathcal{P}}(V_{\beta })$.
+$\beta$ any ordinal\cite{wiki:Ordinal_number}.
+EG: $V_1 = \{ V_0 \} = \{ \varnothing \}$,
+ $V_2 = \{ \varnothing,  \{ \varnothing \} \}$, \ldots .
+
+$V_{\lambda }\,\doteq\,\bigcup _{\beta <\lambda }V_{\beta }$.
+$\lambda$ any limit ordinal\cite{wiki:Limit_ordinal}.
+
+$V_{\alpha}$ are the stages or ranks.
+
+$V\,\doteq\,\bigcup _{\alpha }V_{\alpha }$.
+
+Alternative definition of ranks:
+
+$V_{\alpha }
+\,\doteq\,
+\bigcup _{\beta <\alpha }{\mathcal {P}}(V_{\beta })$.
+
+$V$ is not the set of all sets, 
+because (a) it is a proper class, not a set,
+(b) it only contains well-founded sets,
+and (c) it may be that not all sets are pure,
+ie, there may be ur-elements (non-set things) in sets.
+
+Existence of $V$: Wikipedia article pivots to consistency instead.
+Discussion seems to leave the question open (???!!!).
+ 
+
+Models for set theories:
+
+$V_{\omega}$ is the set of hereditary finite sets,
+a model for set theory without axiom of infinity.
+
+$V_{\omega+1}$ corresonds to $\mathbb{N}, \mathbb{Z}$;
+$V_{\omega+2}$ corresonds to $\mathbb{R}$
+ 
+$V_{\omega+\omega}$ model for \nameref{sec:Zermelo_set_theory},
+``universe of ordinary mathemetics''.
+
+$V_{\kappa}$ is a model for \textsf{ZFC} 
+if $\kappa$ is an inaccessible cardinal\cite{wiki:Inaccessible_cardinal}.
+
+$\kappa$ is an strongly inaccessible cardinal 
+if it is uncountable, 
+not a sum of fewer than $\kappa$ cardinals each $<\,\kappa$,
+and
+$(\alpha \,<\, \kappa) \;\Rightarrow\; (2^{\alpha}\,<\,\kappa)$.
+(Not the most intuitive\ldots .)
+
+$\kappa$ is an weakly inaccessible cardinal 
+if it is uncountable,
+and
+it is a regular weak limit 
+cardinal\cite{wiki:Regular_cardinal,wiki:Limit_cardinal}.
+
+%-----------------------------------------------------------------
+%-----------------------------------------------------------------
+%-----------------------------------------------------------------
+\levelstay{Constructible universe}
+\label{sec:Constructible_universe}
+
+aka G\"{o}del's universe\cite{wiki:Constructible_universe}.
+
+Roughly a restriction of \nameref{sec:von_Neumann_universe}. 
+
+%-----------------------------------------------------------------
+%-----------------------------------------------------------------
+%-----------------------------------------------------------------
+\levelstay{Zermelo set theory}
+\label{sec:Zermelo_set_theory}
+
+\textsf{Z}\cite{wiki:Zermelo_set_theory}
+
+Predecessor of \nameref{sec:Zermelo-Fraenkel-set-theory}.
+
+Insufficient for theory of infinite 
+ordinals\cite{wiki:Ordinal_number}
+and cardinals.
+
+Strongler, original ``2nd order'' version 
+vs  later 1st order variants.
+
+See also MacLane set theory\cite{maclane:mff:1986}.
+%-----------------------------------------------------------------
+%-----------------------------------------------------------------
+%-----------------------------------------------------------------
+\levelstay{Zermelo Fraenkel set theory}
+\label{sec:Zermelo-Fraenkel-set-theory}
+
+Purpose: avoid Russell's paradox\cite{wiki:Russell-paradox}.
+
+\begin{description}
+\item[\textsf{ZF}] Zermelo-Fraenkel set theory\cite{wiki:Zermelo–Fraenkel-set-theory}
+\item[\textsf{ZFC}] \textsf{ZF} with axiom of choice\cite{wiki:Axiom_of_choice}.
+\item[\textsf{ZFA}] \textsf{ZF} with ur-elements\cite{wiki:Urelement}
+\item[\textsf{ZFAC}] \textsf{ZFA} with axiom of choice\cite{wiki:Axiom_of_choice}.
+\end{description}
+
+Universe of discourse: 
+Hereditary well-founded sets 
+(from the \nameref{sec:von_Neumann_universe}).
+
+Existence of empty set is either an 
+axiom\cite{wiki:Axiom_of_empty_set}
+or a theorem dereived from \nameref{sec:Axiom-of-infinity}
+or derived from \nameref{sec:Axiom-schema-of-specification}
+and ``a set-existence axiom''.
+
+(Question: is the empty set a special case of an ur-element?
+See also: Quine atoms\cite{wiki:Urelement}.)
+
+Consistency of \textsf{ZFC} cannot be proved, 
 by G\"{o}del's 2nd incompleteness theorem.
 
 Multiple equivalent sets of axioms.
@@ -116,6 +200,11 @@ collection of all sets in the Von Neumann
 universe\cite{wiki:Von_Neumann_universe},
 more or less the closure under powerset and union starting
 from the empty set.
+
+G\"{o}del's 2nd incompleteness theorem implies \textsf{ZFC}
+cannot be proved consistent (within \textsf{ZFC}) 
+unless it is inconsistent 
+(an inconsistent set of axioms can prove anything).
 
 %-----------------------------------------------------------------
 \leveldown{Axiom of extensionality}
@@ -195,7 +284,7 @@ Consequences:
 \begin{itemize}
 \item 
 Equivalent to axiom of induction\cite{wiki:Epsilon-induction} 
-in \textbf{ZF}:
+in \textsf{ZF}:
 $\forall x
 [\forall y\,(y\in x\rightarrow P(y))\rightarrow P(x)]
 \rightarrow \forall z\,P(z)$.
@@ -218,8 +307,8 @@ preceeding set in the sequence.
 Implied by axiom of dependent choice and 
 no descending infinite sequence.
 
-Independent of other \textbf{ZF} axioms, like axiom of choice.
-Added to \textbf{ZF} to 
+Independent of other \textsf{ZF} axioms, like axiom of choice.
+Added to \textsf{ZF} to 
 ``exclude models with some undesirable properties''.
 
 %-----------------------------------------------------------------
@@ -373,7 +462,7 @@ The union over the elements of a set
 exists\cite{wiki:Axiom_of_union}.
 
 Note that this is using the incestuous nature of 
-\textbf{ZF} without ur-elements---the elements of sets
+\textsf{ZF} without ur-elements---the elements of sets
 are all sets themselves. 
  
 $\forall {\Set{F}}\,
@@ -458,8 +547,8 @@ size\cite{wiki:Axiom_of_limitation_of_size}:
 a class that is a member of a class is a set (???!!!).
 
 nameref{sec:Axiom-schema-of-replacement} not needed for most math;
-not present in \textbf{Z};
-``drastically increases the strength of \textbf{ZF}''.
+not present in \textsf{Z};
+``drastically increases the strength of \textsf{ZF}''.
 
 Used in proving theorems about ordinals.
 
@@ -472,8 +561,8 @@ See also axiom shcema of boundedness.
 With axiom of empty set, replacement implies specification.,
 using law of excluded middle.
 
-Replacement is main thing distinguishing \textbf{Z}
-frpm \textbf{ZF}.
+Replacement is main thing distinguishing \textsf{Z}
+frpm \textsf{ZF}.
 
 Skoelem's 1st order version vs Fraenkel's 2nd order?
 %-----------------------------------------------------------------
@@ -496,7 +585,7 @@ ${\displaystyle
  \forall x\in \mathbf {I} \,
  (\,(x\cup \{x\})\in \mathbf {I} )).}$
  
- Proved independent of other \textbf{ZFC} axioms.
+ Proved independent of other \textsf{ZFC} axioms.
  
  
 %-----------------------------------------------------------------
@@ -518,19 +607,36 @@ ${\displaystyle {\mathcal{P}}(x) \,=\, \{z\in y:z\subseteq x\}}$
 \levelstay{Well-ordering theorem}
 \label{sec:Well_ordering_theorem}
 
-Previous 8 axioms define \textbf{ZF}.
+Previous 8 axioms define \textsf{ZF}.
 
-The Well-ordering ``theorem'' axiom turns \textbf{ZF}
-into \textbf{ZFC}\cite{wiki:Well_ordering_theorem}.
+The Well-ordering ``theorem'' axiom turns \textsf{ZF}
+into \textsf{ZFC}\cite{wiki:Well_ordering_theorem}.
 
 For any set $\Set{X}$ there is a binary relation $R$ which
  well-orders $\Set{X}$.
  $R$ is a linear order and every non-empty subset of $\Set{X}$
  has an element which is minimal under $R$.
 
+Independent of previous 8 axioms.
+
 Equivalent to axiom of choice\cite{wiki:Axiom_of_choice}, 
-assuming previous 8 axioms, iun 1st order logic;
+assuming previous 8 axioms, in 1st order logic;
 stronger in 2nd order logic.
+
+Stronger than axiom of choice without 8 axioms.
+
+Consequence of Zorn's lemma\cite{wiki:Zorns_lemma}.
+
+%-----------------------------------------------------------------
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}}
+\levelstay{Tarski–Grothendieck set theory}
+\textsf{TG}
+
+%-----------------------------------------------------------------
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}}
+\levelstay{Constructive set theory}
 
 %-----------------------------------------------------------------
 %-----------------------------------------------------------------
