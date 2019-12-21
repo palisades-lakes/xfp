@@ -23,6 +23,38 @@ Wikipedia\cite{wiki:Set_theory,iep:Set_theory,eom:Set_theory,sep:Set_theory}.
 %-----------------------------------------------------------------
 %-----------------------------------------------------------------
 %-----------------------------------------------------------------
+\levelstay{Cantor's set theory}
+\label{sec:Cantors_set_theory}
+
+``In his development of set theory, 
+Cantor identified a single fundamental principle, 
+called the Comprehension Principle, 
+under which one can form a set.
+Cantor’s principle states that, 
+given any specific property $\varphi(x)$ 
+concerning a variable $x$, 
+the collection $\{x:\varphi(x)\}$ is a set, 
+where $\{x:\varphi(x)\}$ is 
+the set of all objects x that satisfy the property φ(x).
+For example, let $\varphi(x)$ be the property that 
+'$x$ is an odd natural number.' 
+The Comprehension Principle implies that
+
+$\Set{S}=\{x:\varphi(x)\}=\{1,3,5,7,\dots\}$ ``\cite{iep:Set_theory}
+
+Problems: \hfill\break
+where do we get the $x$ to plug into $\varphi(x)$?\hfill\break
+if $x\in\mathbb{N}$, I think I know how to tell if it's odd;
+how do I verify $x\in\mathbb{N}$,?\hfill\break
+what does ``\dots'' mean?\hfill\break
+what is $\varphi$ exactly?\hfill\break
+if $\varphi$ is ``computable'' in some sense,
+then it might return true, or return false, or not return
+(infinite loop or recursion). what happens then?
+
+%-----------------------------------------------------------------
+%-----------------------------------------------------------------
+%-----------------------------------------------------------------
 \levelstay{von Neumann universe}
 \label{sec:von_Neumann_universe}
 
@@ -82,7 +114,7 @@ Transfinite recursive definition:
 
 $V_{0} \,\doteq\, \varnothing$.
 
-$V_{\beta +1} \,\doteq\, {\wp}(V_{\beta })$.
+$V_{\beta +1} \,\doteq\, \wp(V_{\beta })$.
 $\beta$ any ordinal\cite{wiki:Ordinal_number}.
 EG: $V_1 = \{ V_0 \} = \{ \varnothing \}$,
  $V_2 = \{ \varnothing,  \{ \varnothing \} \}$, \ldots .
@@ -98,7 +130,7 @@ Alternative definition of ranks:
 
 $V_{\alpha }
 \,\doteq\,
-\bigcup _{\beta <\alpha }{\wp}(V_{\beta })$.
+\bigcup _{\beta <\alpha }\wp(V_{\beta })$.
 
 $V$ is not the set of all sets, 
 because (a) it is a proper class, not a set,
@@ -173,12 +205,38 @@ See also MacLane set theory\cite{maclane:mff:1986}.
 
 Purpose: avoid Russell's paradox\cite{wiki:Russell-paradox}.
 
-``Over time, it became clear that, to resolve the paradoxes in Cantor’s set theory, the Comprehension Principle needed to be modified. Thus, the following question needed to be addressed:
+``Over time, it became clear that, to resolve the 
+paradoxes in Cantor’s set theory, the Comprehension Principle 
+needed to be modified. Thus, the following question needed to 
+be addressed:
 
 How can one correctly construct a set? 
-Ernst Zermelo (1871–1953) observed that to eliminate the paradoxes, the Comprehension Principle could be restricted as follows: Given any set A and any property ψ(x), one can form the set {x∈A:ψ(x)}, that is, the collection of all elements x∈A that satisfy ψ(x), is a set. Zermelo’s approach differs from Cantor’s method of forming a set. Cantor declared that for every property one can form a set of all the objects that satisfy the property. Zermelo adopted a different approach: To form a set, one must use a property together with a set.
+Ernst Zermelo (1871–1953) observed that t
+o eliminate the paradoxes, 
+the Comprehension Principle could be restricted as follows: 
+Given any set A and any property ψ(x), 
+one can form the set {x∈A:ψ(x)}, that is, 
+the collection of all elements x∈A that satisfy ψ(x), is a set.
+Zermelo’s approach differs from Cantor’s method of forming a set. 
+Cantor declared that for every property one can form 
+a a set of all the objects that satisfy the property.
+Zermelo adopted a different approach: 
+To form a set, one must use a property together with a set.
 
-Zermelo also realized that in order to more fully develop Cantor’s set theory, one would need additional methods for forming sets. Moreover, these additional methods would need to avoid the paradoxes. In 1908, Zermelo published an axiomatic system for set theory that, to the best of our knowledge, avoids the difficulties faced by Cantor’s development of set theory. In 1930, after receiving some proposed revisions from Abraham Fraenkel, Zermelo presented his final axiomatization of set theory, now known as the Zermelo–Fraenkel axioms and denoted by ZF. 
+Zermelo also realized that in order to more fully develop 
+Cantor’s set theory, 
+one would need additional methods for forming sets. 
+Moreover, these additional methods would need 
+to avoid the paradoxes. 
+In 1908, 
+Zermelo published an axiomatic system for set theory that, 
+to the best of our knowledge, 
+avoids the difficulties faced by 
+Cantor’s development of set theory. 
+In 1930, 
+after receiving some proposed revisions from Abraham Fraenkel,
+ Zermelo presented his final axiomatization of set theory, 
+ now known as the Zermelo–Fraenkel axioms and denoted by ZF. 
 These axioms have become the accepted formulation 
 of Cantor’s ideas about the nature of sets.''\cite{iep:Set_theory} 
 
@@ -205,6 +263,10 @@ This language involves variables and the logical connectives
    a formula in the language of set theory. Such formulas are used 
    to give meaning to the notion of 
    'property.'''\cite{iep:Set_theory}
+
+Question: 
+contrast 1st order logic above 
+with intuitionist logic?\cite{wiki:Intuitionistic_logic}
 
 \begin{description}
 \item[\textsf{ZF}] Zermelo-Fraenkel set theory\cite{wiki:Zermelo–Fraenkel-set-theory}
@@ -638,7 +700,7 @@ The power set is the set of all subsets of a given set.
 The \nameref{sec:Axiom-of-power-set} says the the power set
 always exists\cite{wiki:Axiom_of_power_set}:
 
-${\displaystyle {\wp}(x) \,=\, \{z\in y:z\subseteq x\}}$
+${\displaystyle \wp(x) \,=\, \{z\in y:z\subseteq x\}}$
 
 %-----------------------------------------------------------------
 \levelstay{Well-ordering theorem}
@@ -663,6 +725,15 @@ stronger in 2nd order logic.
 Stronger than axiom of choice without 8 axioms.
 
 Consequence of Zorn's lemma\cite{wiki:Zorns_lemma}.
+
+%-----------------------------------------------------------------
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\levelstay{vonNeumann-Bernays-G\"{o}del set theory}
+\label{vonNeumann-Bernays-Godel_set_theory}
+\textsf{NBG}\cite{wiki:NBG-set-theory}
+
+Axiomatic definition of ``class'', ``proper class''.
 
 %-----------------------------------------------------------------
 %-----------------------------------------------------------------
