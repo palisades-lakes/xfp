@@ -14,8 +14,10 @@
 \setcounter{currentlevel}{\value{baseSectionLevel}}
 \levelstay{Set theories}
 
+
 Axiomatic theories of various kinds.
-Notes almost entirely from Wikipedia.
+Notes almost entirely from 
+Wikipedia\cite{wiki:Set_theory,iep:Set_theory,eom:Set_theory,sep:Set_theory}.
 
 \setcounter{currentlevel}{\value{currentlevel}-1}
 %-----------------------------------------------------------------
@@ -80,7 +82,7 @@ Transfinite recursive definition:
 
 $V_{0} \,\doteq\, \varnothing$.
 
-$V_{\beta +1} \,\doteq\, {\mathcal{P}}(V_{\beta })$.
+$V_{\beta +1} \,\doteq\, {\wp}(V_{\beta })$.
 $\beta$ any ordinal\cite{wiki:Ordinal_number}.
 EG: $V_1 = \{ V_0 \} = \{ \varnothing \}$,
  $V_2 = \{ \varnothing,  \{ \varnothing \} \}$, \ldots .
@@ -96,7 +98,7 @@ Alternative definition of ranks:
 
 $V_{\alpha }
 \,\doteq\,
-\bigcup _{\beta <\alpha }{\mathcal {P}}(V_{\beta })$.
+\bigcup _{\beta <\alpha }{\wp}(V_{\beta })$.
 
 $V$ is not the set of all sets, 
 because (a) it is a proper class, not a set,
@@ -171,6 +173,39 @@ See also MacLane set theory\cite{maclane:mff:1986}.
 
 Purpose: avoid Russell's paradox\cite{wiki:Russell-paradox}.
 
+``Over time, it became clear that, to resolve the paradoxes in Cantor’s set theory, the Comprehension Principle needed to be modified. Thus, the following question needed to be addressed:
+
+How can one correctly construct a set? 
+Ernst Zermelo (1871–1953) observed that to eliminate the paradoxes, the Comprehension Principle could be restricted as follows: Given any set A and any property ψ(x), one can form the set {x∈A:ψ(x)}, that is, the collection of all elements x∈A that satisfy ψ(x), is a set. Zermelo’s approach differs from Cantor’s method of forming a set. Cantor declared that for every property one can form a set of all the objects that satisfy the property. Zermelo adopted a different approach: To form a set, one must use a property together with a set.
+
+Zermelo also realized that in order to more fully develop Cantor’s set theory, one would need additional methods for forming sets. Moreover, these additional methods would need to avoid the paradoxes. In 1908, Zermelo published an axiomatic system for set theory that, to the best of our knowledge, avoids the difficulties faced by Cantor’s development of set theory. In 1930, after receiving some proposed revisions from Abraham Fraenkel, Zermelo presented his final axiomatization of set theory, now known as the Zermelo–Fraenkel axioms and denoted by ZF. 
+These axioms have become the accepted formulation 
+of Cantor’s ideas about the nature of sets.''\cite{iep:Set_theory} 
+
+``As noted by Zermelo, to avoid paradoxes, 
+the Comprehension Principle can be replaced with the principle: 
+Given a set A and a property φ(x) with a variable x, the 
+collection {x∈A:φ(x)} is a set. 
+However, this raises a new question: 
+What is a property? 
+The most favored way to address this question is to express 
+the axioms of set theory
+in the formal language of first-order logic, 
+and then declare that its formulas designate properties. 
+This language involves variables and the logical connectives
+ ∧ (and), ∨ (or), ¬ (not), → (if … then …), 
+ and ↔ (if and only if), 
+ together with the quantifier symbols ∀ (for all) 
+ and ∃ (there exists). 
+ In addition, this language uses the relation symbols
+  = and ∈ (as well as ≠ and ∉). 
+  In this language, the variables and quantifiers range over sets 
+  and only sets. 
+  A formula constructed in this formal language is referred to as
+   a formula in the language of set theory. Such formulas are used 
+   to give meaning to the notion of 
+   'property.'''\cite{iep:Set_theory}
+
 \begin{description}
 \item[\textsf{ZF}] Zermelo-Fraenkel set theory\cite{wiki:Zermelo–Fraenkel-set-theory}
 \item[\textsf{ZFC}] \textsf{ZF} with axiom of choice\cite{wiki:Axiom_of_choice}.
@@ -207,7 +242,9 @@ unless it is inconsistent
 (an inconsistent set of axioms can prove anything).
 
 %-----------------------------------------------------------------
-\leveldown{Axiom of extensionality}
+\setcounter{currentlevel}{\value{currentlevel}-1}
+%-----------------------------------------------------------------
+\levelstay{Axiom of extensionality}
 
 Sets are equal if they have the same 
 elements.\cite{wiki:Axiom_of_extensionality,wiki:Extensionality}
@@ -562,7 +599,7 @@ With axiom of empty set, replacement implies specification.,
 using law of excluded middle.
 
 Replacement is main thing distinguishing \textsf{Z}
-frpm \textsf{ZF}.
+from \textsf{ZF}.
 
 Skoelem's 1st order version vs Fraenkel's 2nd order?
 %-----------------------------------------------------------------
@@ -601,7 +638,7 @@ The power set is the set of all subsets of a given set.
 The \nameref{sec:Axiom-of-power-set} says the the power set
 always exists\cite{wiki:Axiom_of_power_set}:
 
-${\displaystyle {\mathcal{P}}(x) \,=\, \{z\in y:z\subseteq x\}}$
+${\displaystyle {\wp}(x) \,=\, \{z\in y:z\subseteq x\}}$
 
 %-----------------------------------------------------------------
 \levelstay{Well-ordering theorem}
@@ -629,13 +666,13 @@ Consequence of Zorn's lemma\cite{wiki:Zorns_lemma}.
 
 %-----------------------------------------------------------------
 %-----------------------------------------------------------------
-\setcounter{currentlevel}{\value{baseSectionLevel}}
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
 \levelstay{Tarski–Grothendieck set theory}
 \textsf{TG}
 
 %-----------------------------------------------------------------
 %-----------------------------------------------------------------
-\setcounter{currentlevel}{\value{baseSectionLevel}}
+\setcounter{currentlevel}{\value{baseSectionLevel}-1}
 \levelstay{Constructive set theory}
 
 %-----------------------------------------------------------------
