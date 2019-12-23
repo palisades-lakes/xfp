@@ -141,49 +141,66 @@ BoldItalicFont = *08-Italic ]
 \newtheorem{theorem}{Theorem}
 \newtheorem{definition}{Definition}
 \newtheorem{example}{Example}
-%\usepackage{thmtools}
+%-----------------------------------------------------------------
+% 2019-12-22 thmtools broken by change to kvsetkeys
+% \usepackage{thmtools}
 
 % https://tex.stackexchange.com/questions/249963/remove-repeated-theorem-in-the-list-of-theorems
-% \usepackage{etoolbox}
-% \makeatletter
-% \patchcmd\thmt@mklistcmd
-%   {\thmt@thmname}
-%   {\check@optarg{\thmt@thmname}}
-%   {}{}
-% \patchcmd\thmt@mklistcmd
-%   {\thmt@thmname\ifx}
-%   {\check@optarg{\thmt@thmname}\ifx}
-%   {}{}
-% \protected\def\check@optarg#1{%
-%   \@ifnextchar\thmtformatoptarg\@secondoftwo{#1}%
-% }
-% \makeatother
-
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\thmt@mklistcmd
+  {\thmt@thmname}
+  {\check@optarg{\thmt@thmname}}
+  {}{}
+\patchcmd\thmt@mklistcmd
+  {\thmt@thmname\ifx}
+  {\check@optarg{\thmt@thmname}\ifx}
+  {}{}
+\protected\def\check@optarg#1{%
+  \@ifnextchar\thmtformatoptarg\@secondoftwo{#1}%
+}
+\makeatother
+%---------------------------------------------------------
+% \newtheoremstyle{break}%
+% {}{}%
+% {}{}%
+% {}{}% % Note that final punctuation is omitted.
+% {\newline}{}
 % \theoremstyle{break}
-
+% \newtheorem{example}{Example}[section]
+% \newtheorem{definition}{\textsf{Definition}}[section]
+% \newtheorem{fact}{\textsf{Fact}}[section]
+%\DeclareRobustCommand{\rvspace}[1]{\vspace{#1}}
+% \theoremstyle{break}
+%---------------------------------------------------------
 % \declaretheoremstyle[
 % % TODO: should be relative to parskip, or something like that
 % spaceabove=16pt,
 % spacebelow=12pt,
 % headfont=\normalfont\mdseries,
 % headpunct={\vspace{\topsep}\newline\vspace{\topsep}\vspace{\topsep}},
-% %notefont=\sffamily\bfseries, 
-% notefont=\sffamily, 
+% %notefont=\sffamily\bfseries,
+% notefont=\sffamily,
 % notebraces={\hspace{1em}}{},
 % shaded={bgcolor=GhostWhite},
 % bodyfont=\normalfont,
 % postheadspace=1em,
 % ]{mythmstyle}
-%\declaretheorem[style=mythmstyle,title=Theorem,name={Theorem}]{theorem}
-%\declaretheorem[style=mythmstyle,title=Definition,name={Definition}]{definition}
-%\declaretheorem[style=mythmstyle,title=Example,name={Example}]{example}
+% \declaretheorem[style=mythmstyle,title=Theorem,name={Theorem}]{theorem}
+% \declaretheorem[style=mythmstyle,title=Definition,name={Definition}]{definition}
+% \declaretheorem[style=mythmstyle,title=Example,name={Example}]{example}
 %\renewcommand{\thmtformatoptarg}[1]{#1}%
 %-----------------------------------------------------------------
-\numberwithin{theorem}{chapter}
-\numberwithin{definition}{chapter}
-\numberwithin{example}{chapter}
-\numberwithin{equation}{chapter}
-\numberwithin{figure}{chapter}
+% \numberwithin{theorem}{chapter}
+% \numberwithin{definition}{chapter}
+% \numberwithin{example}{chapter}
+% \numberwithin{equation}{chapter}
+% \numberwithin{figure}{chapter}
+\numberwithin{theorem}{section}
+\numberwithin{definition}{section}
+\numberwithin{example}{section}
+\numberwithin{equation}{section}
+\numberwithin{figure}{section}
 %-----------------------------------------------------------------
 \usepackage{listings}
 \lstset{backgroundcolor={\color{GhostWhite}},
