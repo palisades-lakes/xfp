@@ -1,0 +1,198 @@
+%-----------------------------------------------------------------
+%-----------------------------------------------------------------
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}}
+\levelstay{Logic}
+\label{sec:Logic}
+
+\cite{wiki:Logic}
+
+\setcounter{currentlevel}{\value{currentlevel}-1}
+
+%-----------------------------------------------------------------
+\levelstay{Zeroth order logic}
+\label{sec:Zeroth_order_logic}
+
+Classical Zeroth-order (propositional) 
+logic~\cite{iep:Propositional_logic,
+wiki:Propositional_calculus,
+wiki:Zeroth_order_logic}
+
+Subtle difference sometimes between propositional
+and zeroth-order logic 
+(=binary truth functional propositional logic).
+
+Formal system:
+language with atomic symbols
+and logical operators defining well-formed formulas,
+and inference rules that a set of axiom formulas 
+and return deduced formulas.
+\begin{description}
+\item[Atoms]  $A, B, \ldots P, Q, \ldots$, 
+that may be asisgned values \textsf{true} or \textsf{false}.
+
+\item[Operators] $\lnot P$, $P \wedge Q$, $P \vee Q$, 
+$P \Rightarrow Q$, $P \Leftrightarrow Q$. 
+Minimal set is $\lnot$ and 
+any $2$ of  $\wedge, \vee, \Rightarrow$;
+sufficient to define $2$ remaining operators.
+
+\item[Propositions] (Well formed formulas)
+Recursively: atoms and propostions combined with operators,
+including parens for grouping: $(P \wedge Q) \Rightarrow R$.
+
+\item[Inference rules] ${P \Rightarrow Q), P} \vdash Q$:
+Takes a set of propositions (with truth assignments?)
+and returns another proposition.
+\end{description}
+
+A variety of such formal languages.
+
+Syntatic entailment: formula derived from set of axioms 
+using inference rules ina fininte number of steps.
+
+Semantic entailment: formula evaluates to \textsf{true}
+under all possible truth assignements to variables
+in axioms.
+
+Issues are 
+\begin{description}
+\item[Soundness]
+All syntactically entailed formulas
+are semantically entailed, that is,
+a sequence of inferences will never lead to a contradiction.
+
+\item[Completeness] 
+all semantically entailed formaulas 
+are syntactically entailed, that is,
+any statement which is consistent with the axioms under all 
+possible truth assignements is derivable (somehow) using the 
+inference rules.
+\end{description}soundness 
+
+%-----------------------------------------------------------------
+\levelstay{Intuitionist zeroth order logic}
+\label{sec:Intuitionist_zeroth_order_logic}
+
+No law of excluded middle~\cite{wiki:Law_of_excluded_middle}
+
+%-----------------------------------------------------------------
+\levelstay{Modal logic}
+\label{sec:Modal_logic}
+
+\cite{wiki:Modal_logic}
+
+Possibility vs necessity.
+
+Epistemic: state of kn owledge
+
+Temporal 
+
+%-----------------------------------------------------------------
+\levelstay{Paraconsistent logic}
+\label{sec:Paraconsistent_logic}
+
+\cite{wiki:Paraconsistent_logic}
+
+Get rid of "from a contradiction, anything follows".
+%-----------------------------------------------------------------
+\levelstay{First order logic}
+\label{sec:First_order_logic}
+
+First-order (aka predicate) logic.~\cite{wiki:First_order_logic,
+sep:logic_firstorder_emergence}
+
+\begin{description}
+\item[Truth values] Usually $\{\mathsf{true},\mathsf{false}\}$,
+but more than $2$ values is possible.
+\item[Domain of discourse] A set $\Set{D}$.
+\item[Constants] $A,B,C, \ldots$ names for values in the
+domain.
+\item[Variables] $a,b,c, \ldots x,y,\dots$ taking on values in the
+domain.~\cite{wiki:Free_variables_and_bound_variables}
+\item[Equality] combine atoms and variables.
+\item[Functions] combine atoms and variables.
+\item[Quantifiers]   
+$\exists x \in \Set{S}$, $\forall x \in \Set{S}$ 
+(where $\Set{S} \subseteq \Set{D}$);
+$\exists x$ means $\exists x \in \Set{D}$, 
+and
+$\forall x$ means $\forall x \in \Set{D}$) 
+bind variables in
+formulas.~\cite{wiki:Quantifier_logic}
+More specialized quantifiers are possible:
+$\exists \textrm{ a unique } x \in \Set{S}$
+\item[Predicates] combine atoms and variables.
+\end{description} 
+
+Differentiate 1st order \textit{language} 
+(no domain of discourse, just symbols)
+from \textit{interpretation} 
+(assignment of terms to elements of $\Set{D}$).
+
+See also models/structures.~\cite{wiki:Model_theory}
+
+(Circularity w.r.t set theory?
+Zermelo-Fraenkel uses 1st order logic to define sets,
+but 1st order logic is defined using sets\ldots?)
+
+\setcounter{currentlevel}{\value{currentlevel}-1}
+
+\levelstay{First order language}
+\label{sec:First_order_language}
+
+Syntactic rules without domain of discourse.
+
+Signature: arities of predicates and functions.
+
+\levelstay{First order model}
+\label{sec:First_order_model}
+
+Domain of discourse and evaluation of formulas.
+
+Equality.
+(does this belong here? can also be axioms on a theory.)
+
+\levelstay{First order theory}
+\label{sec:First_order_theory}
+
+Axioms (and axiom schemas).
+
+Consistency: no contradiction derivable from axioms.
+
+Completeness: any formula can be proven 
+\textsf{true} or \textsf{false} 
+(axioms plus formula permit derivation of 
+\textsf{true} or \textsf{false} but not both).
+
+\levelstay{First order deductive systems}
+\label{sec:First_order_deductive_systems}
+
+Rules of inference.
+
+\levelstay{Many sorted first order models}
+\label{sec:Many_sorted_first_order_models}
+
+Domain of discourse has multiple sets;
+variables 'typed' as having values in some particular set.
+
+(Is this really different from
+axiom restricting variable to subset of domain?()
+
+
+\setcounter{currentlevel}{\value{currentlevel}+1}
+%-----------------------------------------------------------------
+\levelstay{Second order logic}
+\label{sec:Second_order_logic}
+
+Second-order logic~\cite{wiki:Second_order_logic,
+wiki:Second_order_propositional_logic}
+
+%-----------------------------------------------------------------
+\levelstay{Higher order logic}
+\label{sec:Higher_order_logic}
+
+Higher-order logic~\cite{wiki:Higher_order_logic}
+
+
+ 
