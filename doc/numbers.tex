@@ -32,7 +32,8 @@
 The \textit{\gls{NaturalNumbers}} 
 (aka non-negative integers, aka counting
 numbers):\label{NaturalNumbers}
-$\glssymbol{NaturalNumbers} = \glsdesc{NaturalNumbers}$.\footnote{ 
+$\glssymbol{NaturalNumbers} = 
+\glsdesc{NaturalNumbers}$.\footnote{ 
 Some
 equate \gls{NaturalNumbers} with \glssymbol{PositiveIntegers} 
 or $\glssymbol{NaturalNumbers}^{+}$ and use
@@ -63,7 +64,7 @@ commutative semiring
 
 
 %-----------------------------------------------------------------
-\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
 \levelstay{Cyclic natural numbers}
 
 ${\glssymbol{NaturalNumbers}}_{k} = 
@@ -78,7 +79,7 @@ $a +_{\glssymbol{NaturalNumbers}_{k}} b =
 Also a commutative semiring.
 
 %-----------------------------------------------------------------
-\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
 \levelstay{\texttt{unsigned int}}
 \label{sec:unsigned-int}
 
@@ -106,7 +107,7 @@ $\glssymbol{Integers} = \{\cdots, -2, -1, 0, 1, 2, \cdots\}$.
 A ring (sec~\ref{sec:Ring}).
 
 %-----------------------------------------------------------------
-\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
 \levelstay{Cyclic integers}
 \label{sec:Cyclic-integers}
 
@@ -119,7 +120,7 @@ is a ring (?):
 \end{itemize}
 
 %-----------------------------------------------------------------
-\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
 \levelstay{\texttt{byte}, \texttt{short}, \texttt{int},
  \texttt{long}}
 \label{sec:int}
@@ -127,7 +128,7 @@ is a ring (?):
 Clojure favors \texttt{long} --- why?
 
 %-----------------------------------------------------------------
-\setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
 \levelstay{\texttt{BigInteger}}
 \label{sec:BigInteger}
 
@@ -140,7 +141,233 @@ The \textit{\gls{RationalNumbers}}:
 $\glssymbol{RationalNumbers} = \glsdesc{RationalNumbers}$.
 
 %-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Axiomatic definition of $\mathbb{Q}$}
+\label{sec:Axiomatic_definition_of_Q}
+
+``The rational numbers are the prime field of characteristic 
+0."~\cite{quora:Rational_axioms}.
+
+Prime field: has no proper subfields.
+
+Characteristic~\cite{wiki:Field_mathematics}: 
+Field $\mathbb{F}$ with additive identity $0_{\mathbb{F}}$
+and multiplicative identity $1_{\mathbb{F}}$.
+Define $n \ast f$, for $n \in \mathbb{N}$ and $f \in \mathbb{F}$
+as $f +_{\mathbb{F}} f +_{\mathbb{F}} \ldots +_{\mathbb{F}} f$, 
+with $n$ $f$'s added.
+The \textit{characteristic} of $\mathbb{F}$
+is the smallest $n$ such that 
+$n \ast 1_{\mathbb{F}} \,=\, 0_{\mathbb{F}}$.
+If there is no such $n$, then the characteristic is 
+$0$.
+
+
+Not possible in 1st order language of fields:
+$ \mathcal{L}_{\text{Field}} $.
+Requires a second order language:
+
+
+``1. There Exists No First-Order Characterization of $ \mathbb{Q} $
+
+The answer is ‘no’, if one is seeking a first-order 
+characterization of $ \mathbb{Q} $. 
+This follows from the Upward Löwenheim-Skolem Theorem, 
+which is a classical tool in logic and model theory.
+
+Observe that $ \mathbb{Q} $ is an infinite 
+$ \mathcal{L}_{\text{Field}} $-structure 
+of cardinality $ \aleph_{0} $. 
+The Upward L\"{o}wenheim-Skolem Theorem then says that 
+there exists an $ \mathcal{L}_{\text{Field}} $-structure 
+(i.e., a field) $ \mathbb{F} $ of cardinality $ \aleph_{1} $ 
+that is an elementary extension of $ \mathbb{Q} $. 
+By definition, this means that $ \mathbb{Q} $ and $ \mathbb{F} $ 
+satisfy the same set of $ \mathcal{L}_{\text{Field}} $-sentences, 
+so we cannot use first-order logic to distinguish $ \mathbb{Q} $ 
+and $ \mathbb{F} $. In other words, as far as first-order logic 
+can tell, these two fields are identical
+(an analogy may be found in point-set topology,
+where two distinct points of a non-$ T_{0} $ topological space 
+can be topologically indistinguishable). 
+However, $ \mathbb{Q} $ and $ \mathbb{F} $ have different 
+cardinalities, so they are not isomorphic. 
+This phenomenon is ultimately due to the fact 
+that the notion of cardinality cannot be formalized
+ using $ \mathcal{L}_{\text{Field}} $. 
+ Therefore, any difference between the two fields 
+ can only be seen externally, outside of first-order logic.
+
+2. Finding a Second-Order Characterization of $ \mathbb{Q} $
+
+This part is inspired by lhf's answer below, 
+which I believe deserves more credit. 
+We start by formalizing the notion of proper subfield 
+using second-order logic.
+
+Let $ P $ be a variable for unary predicates. 
+Consider the following six formulas: 
+\begin{align} 
+\Phi^{P}_{1} &\stackrel{\text{def}}{\equiv} 
+(\exists x) \neg P(x); 
+\\ \Phi^{P}_{2} &\stackrel{\text{def}}{\equiv} P(0); 
+\\ \Phi^{P}_{3} &\stackrel{\text{def}}{\equiv} P(1); 
+\\ \Phi^{P}_{4} &\stackrel{\text{def}}{\equiv} 
+(\forall x)(\forall y)((P(x) \land P(y)) 
+\rightarrow P(x + y)); \\ \Phi^{P}_{5} 
+&\stackrel{\text{def}}{\equiv} 
+(\forall x)(\forall y)
+((P(x) 
+\land P(y)) \rightarrow P(x \cdot y));
+\\ \Phi^{P}_{6} 
+&\stackrel{\text{def}}{\equiv} 
+(\forall x)((P(x) \land \neg (x = 0)) \rightarrow
+(\exists y)(P(y) \land (x \cdot y = 1))). 
+\end{align} 
+What $ \Phi^{P}_{1},\ldots,\Phi^{P}_{6} $ are saying is that 
+the set of all elements of the domain of discourse 
+that satisfy the predicate $ P $ 
+forms a proper subfield of the domain. 
+The domain itself will be a field 
+if we impose upon it the first-order field axioms. 
+Hence, 
+$ \{ \text{First-order field axioms} \} 
+\cup 
+\{ \text{First-order axioms defining characteristic $ 0 $} \}
+ \cup
+\{ \neg (\exists P)(\Phi^{P}_{1} 
+~ \land ~ \Phi^{P}_{2} ~ \land ~ 
+\Phi^{P}_{3} ~ \land ~ 
+\Phi^{P}_{4} ~ \land ~ 
+\Phi^{P}_{5} ~ \land ~ \Phi^{P}_{6}) \} $
+is a set of first- and second-order axioms that characterizes
+$ \mathbb{Q} $ uniquely because of the following two reasons:
+
+Up to isomorphism, 
+$ \mathbb{Q} $ is the only field with characteristic $ 0 $ 
+that contains no proper subfield.
+
+If $ \mathbb{F} \ncong \mathbb{Q} $ is 
+a field with characteristic $ 0 $, 
+then $ \mathbb{F} $ does not model this set of axioms. 
+Otherwise, interpreting “$ P(x) $” as 
+“$ x \in \mathbb{Q}_{\mathbb{F}} $” yields a contradiction, 
+where $ \mathbb{Q}_{\mathbb{F}} $ is the copy of $ \mathbb{Q} $ 
+sitting inside 
+$ \mathbb{F} $.''~\cite{stackexchange:Rational_axioms}.
+
+
+See also \cite{physics_insights:Rationals}.
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{$\mathbb{Q} as a subset of \$\mathbb{R}$}
+\label{sec:Q_subset_of_R}
+
+Alternative 'axiomatic' characterization
+might be possible by starting from axiomatic definition of
+$\mathbb{R}$ and defining $\mathbb{Q}$ as a certain subset.
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Equivalence classes of integer pairs}
+\label{sec:Equivalence_classes_of_integer_pairs}
+
+Pair space (fractions) is $\mathbb{Z} \times \mathbb{N}_{+}$.
+
+Equivalence relation is 
+%$(a,b) \, =_{\mathbb{Q}} \, (c,d) \; \Leftrightarrow \; ad = bc$.
+$(a,b) \, \overset{\mathbb{Q}}{=} \, (c,d) 
+\; \Leftrightarrow \; 
+ad \overset{\mathbb{N}}{=} bc$.
+
+Then 
+$\mathbb{Q} = 
+(\mathbb{Z} \times \mathbb{N}_{+}) 
+\, / 
+\overset{\mathbb{Q}}{=}$.
+
+%-----------------------------------------------------------------
 \setcounter{currentlevel}{\value{baseSectionLevel}-1}
+\levelstay{B-adic numbers}
+\label{Sec:b_adic_numbers}
+
+Generalized floating point.
+
+Subset of $\mathbb{Q}$:
+$\{t \ast b^n$; $b\,\in\,\mathbb{N};\; t,n\,\in\,\mathbb{Z}\}$.
+
+Most often $b=2$; 
+next most often, $b=10$;
+also see $b=2^k$, where $k=8,16,32,64,\ldots$.
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{IEEE 754 floating point}
+
+What algebraic structure?
+
+Not associative.
+
+\texttt{NaN} absorbing in arithmetic, not self equal.
+
+Similar to extended real numbers, but also distinguish $\pm 0$.
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{\texttt{float}, \texttt{double}}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{\texttt{DoubleDouble}}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Extending floating point to be a field}
+
+Fix associativity by carrying accumulator bank,
+as in exact sum.
+
+But \texttt{NaN}: $0$ doesn't annihilate,
+no additive or multiplicative inverse.
+
+Change behavior of $0 / 0$, etc.?
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{Floating point numbers as an algebraic structure}
+
+Two non-associative commutative operations on a finite,
+almost ordered set.
+\begin{example}[Floating point arithmetic is not associative]
+
+clojure/java code showing how different results can be\ldots
+ 
+\end{example}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
+\levelstay{'Exact' floating point arithmetic}
+\cite{Higham2002ASNA,Muller-et-al-2010,Zhu:2010:A9O:1824801.1824815}
+
+\textbf{TODO:} do TwoPlus and TwoMutliply 
+suggest any way to get associative operations?
+Idea is to carry error accumulators so 
+any sequence of additions and multiplies 
+returns the correct \glssymbol{RealNumbers} value rounded to float.
+EG: $ a +_{\text{fl}} b = c +_{\text{fl}} \epsilon$
+where $\text{fl} c +_{\glssymbol{RealNumbers}} \epsilon) = c$
+Absorbing elements at $\pm\infty$, \texttt{NaN} make that hard.
+Is it possible to replace $\pm\infty$ and \texttt{NaN}
+by symbolic expressions that can later be combined to get 
+accurate finite values?
+
+
+\textbf{TODO:} is it possible for a clojure macro/compiler
+to support exact floating operations generated from
+$+$ and $*$ within a function, by incorporating an error
+accumulator?
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-2}
 \levelstay{\texttt{BigFraction}}
 \label{sec:BigFraction}
 
@@ -169,72 +396,6 @@ $\text{undefined}$.
 Can this be fixed by changing $=$ to handle $\text{undefined}$
 appropriately?
 
-%-----------------------------------------------------------------
-\setcounter{currentlevel}{\value{baseSectionLevel}-1}
-\levelstay{IEEE 754 floating point}
-
-What algebraic structure?
-
-Not associative.
-
-\texttt{NaN} absorbing in arithmetic, not self equal.
-
-Similar to extended real numbers, but also distinguish $\pm 0$.
-
-%-----------------------------------------------------------------
-\setcounter{currentlevel}{\value{baseSectionLevel}-1}
-\levelstay{\texttt{float}, \texttt[double]}
-
-%-----------------------------------------------------------------
-\setcounter{currentlevel}{\value{baseSectionLevel}-1}
-\levelstay{\texttt{DoubleDouble}}
-
-%-----------------------------------------------------------------
-\setcounter{currentlevel}{\value{baseSectionLevel}-1}
-\levelstay{Extending floating point to be a field}
-
-Fix associativity by carrying accumulator bank,
-as in exact sum.
-
-But \texttt{NaN}: $0$ doesn't annihilate,
-no additive or multiplicative inverse.
-
-Change behavior of $0 / 0$, etc.?
-
-%-----------------------------------------------------------------
-\setcounter{currentlevel}{\value{baseSectionLevel}-1}
-\levelstay{Floating point numbers as an algebraic structure}
-
-Two non-associative commutative operations on a finite,
-almost ordered set.
-\begin{example}[Floating point arithmetic is not associative]
-
-clojure/java code showing how different results can be\ldots
- 
-\end{example}
-
-%-----------------------------------------------------------------
-\setcounter{currentlevel}{\value{baseSectionLevel}-1}
-\levelstay{'Exact' floating point arithmetic}
-\cite{Higham2002ASNA,Muller-et-al-2010,Zhu:2010:A9O:1824801.1824815}
-
-\textbf{TODO:} do TwoPlus and TwoMutliply 
-suggest any way to get associative operations?
-Idea is to carry error accumulators so 
-any sequence of additions and multiplies 
-returns the correct \glssymbol{RealNumbers} value rounded to float.
-EG: $ a +_{\text{fl}} b = c +_{\text{fl}} \epsilon$
-where $\text{fl} c +_{\glssymbol{RealNumbers}} \epsilon) = c$
-Absorbing elements at $\pm\infty$, \texttt{NaN} make that hard.
-Is it possible to replace $\pm\infty$ and \texttt{NaN}
-by symbolic expressions that can later be combined to get 
-accurate finite values?
-
-
-\textbf{TODO:} is it possible for a clojure macro/compiler
-to support exact floating operations generated from
-$+$ and $*$ within a function, by incorporating an error
-accumulator?
 
 %-----------------------------------------------------------------
 \setcounter{currentlevel}{\value{baseSectionLevel}-1}
