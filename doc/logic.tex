@@ -145,6 +145,25 @@ Syntactic rules without domain of discourse.
 
 Signature: arities of predicates and functions.
 
+Prenex normal form (PNF):~\cite{wiki:Prenex_normal_form} 
+\textit{prefix} containing all quantifiers 
+followed by quantifier-free \textit{matrix}.
+
+In classical logic, every wff has a prenex equivalent;
+not true for intuitionistic logic.
+
+Example:
+$\forall x 
+((\exists y\phi (y))
+\lor 
+((\exists z\psi (z))\rightarrow \rho (x)))$ is not prenex.
+$\forall x\exists y\forall z
+(\phi (y)\lor (\psi (z)\rightarrow \rho (x)))$ 
+is equivalent prenex. 
+(does this fail in intuitionistic logic?)
+
+
+
 \levelstay{First order model}
 \label{sec:First_order_model}
 
@@ -156,7 +175,7 @@ Equality.
 \levelstay{First order theory}
 \label{sec:First_order_theory}
 
-Axioms (and axiom schemas).
+Axioms (and axiom schemas).~\cite{wiki:List_of_first_order_theories}
 
 Consistency: no contradiction derivable from axioms.
 
@@ -170,11 +189,22 @@ Completeness: any formula can be proven
 
 Rules of inference.
 
+\levelstay{Monadic first order logic}
+\label{sec:Monadic_first_order_logic}
+
+All predicates and functions are unary 
+(1 argument).~\cite{wiki:Monadic_predicate_calculus}
+
+Decidable, not very expressive.
+
 \levelstay{Many sorted first order models}
 \label{sec:Many_sorted_first_order_models}
 
+Hilbert's function calculus.~\cite{sep:logic_firstorder_emergence}
+
 Domain of discourse has multiple sets;
-variables 'typed' as having values in some particular set.
+variables 'typed' as having values in some particular 
+set.~\cite{sep:modeltheory_fo}
 
 (Is this really different from
 axiom restricting variable to subset of domain?()
