@@ -271,34 +271,47 @@ keywordstyle={\ttfamily}}
 \usepackage{titling}
 %\newfontfamily\titlefont[Scale=MatchUppercase]{Gill Sans MT}
 %\renewcommand{\maketitlehooka}{\titlefont}
-\pretitle{\begin{flushright}\Huge\sffamily\bfseries}
+%\pretitle{\begin{flushright}\Huge\sffamily\bfseries}
+\pretitle{\begin{flushright}\Huge\bfseries}
 \posttitle{\par\end{flushright}\vskip 0.25em}
-\preauthor{\begin{flushright}\sffamily\scshape\mdseries}
+%\preauthor{\begin{flushright}\sffamily\scshape\mdseries}
+\preauthor{\begin{flushright}\scshape\mdseries}
 \postauthor{\par\end{flushright}}
-\predate{\begin{flushright}\sffamily\scshape\mdseries}
+%\predate{\begin{flushright}\sffamily\scshape\mdseries}
+\predate{\begin{flushright}\scshape\mdseries}
 \postdate{\par\end{flushright}}
 \setlength{\droptitle}{-80pt}
 %-------------------------------------------------------------------------------
 \usepackage{enumitem}
 %\setlist[description]{font=\small\sffamily\mdseries,style=unboxed,leftmargin=0cm}
-\setlist[description]{font=\sffamily\mdseries}
+%\setlist[description]{font=\sffamily\mdseries}
+\setlist[description]{font=\bfseries}
 \setlist[itemize]{style=unboxed,itemindent=0cm}
 \setlist[enumerate]{style=unboxed,itemindent=0cm}
 %-----------------------------------------------------------------
-\usepackage[sf,small,compact]{titlesec}
+%\usepackage[sf,small,compact]{titlesec}
+\usepackage[small,compact]{titlesec}
 %\newfontfamily\headingfont[]{New Yorker}
 %\newfontfamily\headingfont[Scale=MatchUppercase]{Libre Caslon Display}
 %\newfontfamily\headingfont[]{Perpetua Titling MT}
 %\newfontfamily\headingfont[Scale=MatchUppercase]{Gill Sans MT}
 %\newfontfamily\headingfont[Scale=MatchUppercase]{Gillius ADF}
 
-\titleformat{\part}{\huge\sffamily\bfseries}{\thepart}{0.5em}{}
-\titleformat{\chapter}{\LARGE\sffamily\bfseries}{\thechapter}{0.5em}{}
-\titleformat{\section}{\Large\sffamily\bfseries}{\thesection}{0.5em}{}
-\titleformat{\subsection}{\large\sffamily\bfseries}{\thesubsection}{0.5em}{}
-\titleformat{\subsubsection}{\large\sffamily\mdseries}{\thesubsubsection}{0.5em}{}
-\titleformat{\paragraph}[runin]{\normalsize\sffamily\mdseries}{\theparagraph}{0.5em}{}[\hspace{1em}]
-\titleformat{\subparagraph}[runin]{\normalsize\sffamily\mdseries}{\thesubparagraph}{0.5em}{}[\hspace{1em}]
+% \titleformat{\part}{\huge\sffamily\bfseries}{\thepart}{0.5em}{}
+% \titleformat{\chapter}{\LARGE\sffamily\bfseries}{\thechapter}{0.5em}{}
+% \titleformat{\section}{\Large\sffamily\bfseries}{\thesection}{0.5em}{}
+% \titleformat{\subsection}{\large\sffamily\bfseries}{\thesubsection}{0.5em}{}
+% \titleformat{\subsubsection}{\large\sffamily\mdseries}{\thesubsubsection}{0.5em}{}
+% \titleformat{\paragraph}[runin]{\normalsize\sffamily\mdseries}{\theparagraph}{0.5em}{}[\hspace{1em}]
+% \titleformat{\subparagraph}[runin]{\normalsize\sffamily\mdseries}{\thesubparagraph}{0.5em}{}[\hspace{1em}]
+
+\titleformat{\part}{\huge\bfseries}{\thepart}{0.5em}{}
+\titleformat{\chapter}{\LARGE\bfseries}{\thechapter}{0.5em}{}
+\titleformat{\section}{\Large\bfseries}{\thesection}{0.5em}{}
+\titleformat{\subsection}{\large\bfseries}{\thesubsection}{0.5em}{}
+\titleformat{\subsubsection}{\large\mdseries}{\thesubsubsection}{0.5em}{}
+\titleformat{\paragraph}[runin]{\normalsize\mdseries}{\theparagraph}{0.5em}{}[\hspace{1em}]
+\titleformat{\subparagraph}[runin]{\normalsize\mdseries}{\thesubparagraph}{0.5em}{}[\hspace{1em}]
 
 \titlespacing\section{0pt}{12pt plus 12pt minus 2pt}{5pt plus 5pt minus 2pt}
 \titlespacing\subsection{0pt}{11pt plus 11pt minus 2pt}{5pt plus 5pt minus 2pt}
@@ -306,12 +319,20 @@ keywordstyle={\ttfamily}}
 
 \setcounter{secnumdepth}{7}
 %-------------------------------------------------------------------------------
+% \makeatletter
+% \let\oldl@chapter\l@chapter
+% \def\l@chapter#1#2{\oldl@chapter{#1}{\textsf{#2}}}
+% \let\old@dottedcontentsline\@dottedtocline
+% \def\@dottedtocline#1#2#3#4#5{%
+% \old@dottedcontentsline{#1}{#2}{#3}{#4}{{\textsf{#5}}}}
+% \makeatother
+
 \makeatletter
 \let\oldl@chapter\l@chapter
-\def\l@chapter#1#2{\oldl@chapter{#1}{\textsf{#2}}}
+\def\l@chapter#1#2{\oldl@chapter{#1}{\textrm{#2}}}
 \let\old@dottedcontentsline\@dottedtocline
 \def\@dottedtocline#1#2#3#4#5{%
-\old@dottedcontentsline{#1}{#2}{#3}{#4}{{\textsf{#5}}}}
+\old@dottedcontentsline{#1}{#2}{#3}{#4}{{\textrm{#5}}}}
 \makeatother
 %-------------------------------------------------------------------------------
 % \usepackage{tocloft}
