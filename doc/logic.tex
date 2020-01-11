@@ -74,7 +74,9 @@ inference rules.
 \levelstay{Intuitionist zeroth order logic}
 \label{sec:Intuitionist_zeroth_order_logic}
 
-No law of excluded middle~\cite{wiki:Law_of_excluded_middle}
+\cite{wiki:Intuitionistic_logic}
+
+No law of excluded middle~\cite{wiki:Law_of_excluded_middle}.
 
 %-----------------------------------------------------------------
 \levelstay{Modal logic}
@@ -225,4 +227,128 @@ wiki:Second_order_propositional_logic}
 Higher-order logic~\cite{wiki:Higher_order_logic}
 
 
+ %-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}}
+\levelstay{Constructivism}
+\label{sec:Constructivism}
+
+\cite{Feferman:2000,Diez:2002,sep:mathematics-constructive}
+
+As opposed to classical logic~\cite{wiki:Classical_logic}.
+
+Usually drop law of excluded middle 
+($P \vee \lnot P$).\cite{wiki:Law_of_excluded_middle}
+It is possible that both $P$ and $\lnot P$ are not provable,
+so $P \vee \lnot P$ is not provable.
+
+But keep law of non-contradiction
+($\lnot ( P \wedge (\lnot P))$).~\cite{wiki:Law_of_noncontradiction}
+In other words, it is impossible to prove both.
+
+Witnesses: Proving $\exists _{x\in \Set{X}}P(x)$ requires
+constructing a specific $a \in \Set{X}$ such that $P(a)$ is true; 
+$a$ is a \textit{witness} for $\exists _{x\in \Set{X}}P(x)$.
+
+People\cite{wiki:Constructivism_philosophy_of_mathematics}:
+\begin{description}
+\item[Leopold Kronecker] old constructivism, semi-intuitionism.
+\item[L. E. J. Brouwer] forefather of intuitionism.
+\item[A. A. Markov ] forefather of Russian school of constructivism.
+\item[Arend Heyting] formalized intuitionistic logic and theories.
+\item[Per Martin-Löf] founder of constructive type theories.
+\item[Errett Bishop] promoted a version of constructivism 
+claimed to be consistent with classical mathematics.
+\item[Paul Lorenzen] developed constructive analysis.
+\end{description}
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{currentlevel}-1}
+\levelstay{Constructive analysis}
+\label{Constructive analysis}
+
+In constructive 
+analysis~\cite{wiki:Constructive_analysis,
+Bridger:2019,henle:2012:numbers},
+varieties of constructionism are divided by
+what sort of countable $\rightarrow$ countable functions can be 
+constructed?~\cite{wiki:Constructivism_philosophy_of_mathematics}
+\begin{description}
+\item[Free choice sequences] 
+\autoref{sec:Choice_sequence}\cite{wiki:Choice_sequence}.
+\item[Algorithms/Computable functions] 
+\autoref{sec:Computable_function}~\cite{wiki:Computable_function}
+ results in computable numbers (reals?).
+\end{description}
+
+\setcounter{currentlevel}{\value{currentlevel}-1}
+\levelstay{Choice sequences}
+\label{sec:Choice_sequences}
+
+\begin{description}
+\item[Lawlike] determined completely (somehow?),
+eg, $\mathbb{N}$ or functions $\mathbb{N} \mapsto \mathbb{N}$,
+functions from the first $k$ elements of the sequence to 
+$\mathbb{N}$.
+(How is this different from a computable function?)
+\item[Lawless] only a finite prefix determined at any point.
+Example is rolls of a die. (Very dubious\ldots.)
+\end{description}
+
+Axioms 
+(Are these only for lawless sequences?
+They don't seem 'constructive' to me\ldots):
+\begin{description}
+\item[open data] Let $\alpha \in n$ mean that the first items
+in the choice sequence $\alpha$ match the finite sequence $n$.
+Then for any predicate $A$,
+$A(\alpha )$ implies  $\exists n$ such that
+$\alpha \in n$ and $\forall \beta \in n$ we have $A(\beta )$.
+In other words, the truth of any predicate on a sequence can be
+determined from a finite prefix.
+\item[density] $\forall n\,\exists \alpha [\alpha \in n]$.
+There exists some sequence that has any given finite prefix.
+\end{description}
+
+
+\levelstay{Computable function}
+\label{sec:Computable_function}
+\cite{wiki:Computable_function}
+
+%-----------------------------------------------------------------
+\levelstay{Cardinality of $\mathbb{R}$}
+\label{sec:Cardinality_of_R}
+
+Issues with Cantor's diagonal 
+argument~\cite{wiki:Cantors_diagonal_argument}.
+
+(Starts with a given enumeration of (say) binary expansions of 
+elements of $\mathbb{R}$, then \textit{constructs} a missing
+element. But where does the enumeration come from?
+Seems like a proof by contradiction\ldots?)
+
+%-----------------------------------------------------------------
+\levelstay{Axiom of choice}
+\label{sec:Axiom_of_choice}
+
+One interpretation of 'constructive' is
+'provable in $\textsf{ZF}$ set theory without the axiom of 
+choice.'~\cite{iep:Set_theory,wiki:Axiom_of_choice}
+(See \autoref{sec:Zermelo-Fraenkel-set-theory} for \textsf{ZF}.)
+But \textsf{ZF} may be considered 'not constructive'
+itself.
+
+In some set theories, the axiom of choice implies
+the law of excluded middle; in others it doesn't.
+When it does, constructionists use weaker versions
+that don't imply $P \, \wedge \, \lnot P$.
+So some constructionists restrict themselve
+
+ %-----------------------------------------------------------------
+\levelstay{Measure theory}
+\label{sec:Measure_theory}
+
+Bishop~\cite{bishop1967foundations,bishop1972constructive,bishop1985constructive}
+
+ %-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{currentlevel}+1}
  

@@ -272,7 +272,7 @@ keywordstyle={\ttfamily}}
 %\newfontfamily\titlefont[Scale=MatchUppercase]{Gill Sans MT}
 %\renewcommand{\maketitlehooka}{\titlefont}
 %\pretitle{\begin{flushright}\Huge\sffamily\bfseries}
-\pretitle{\begin{flushright}\Huge\bfseries}
+\pretitle{\begin{flushright}\Huge\scshape\bfseries}
 \posttitle{\par\end{flushright}\vskip 0.25em}
 %\preauthor{\begin{flushright}\sffamily\scshape\mdseries}
 \preauthor{\begin{flushright}\scshape\mdseries}
@@ -285,7 +285,7 @@ keywordstyle={\ttfamily}}
 \usepackage{enumitem}
 %\setlist[description]{font=\small\sffamily\mdseries,style=unboxed,leftmargin=0cm}
 %\setlist[description]{font=\sffamily\mdseries}
-\setlist[description]{font=\bfseries}
+\setlist[description]{font=\scshape\bfseries}
 \setlist[itemize]{style=unboxed,itemindent=0cm}
 \setlist[enumerate]{style=unboxed,itemindent=0cm}
 %-----------------------------------------------------------------
@@ -305,13 +305,13 @@ keywordstyle={\ttfamily}}
 % \titleformat{\paragraph}[runin]{\normalsize\sffamily\mdseries}{\theparagraph}{0.5em}{}[\hspace{1em}]
 % \titleformat{\subparagraph}[runin]{\normalsize\sffamily\mdseries}{\thesubparagraph}{0.5em}{}[\hspace{1em}]
 
-\titleformat{\part}{\huge\bfseries}{\thepart}{0.5em}{}
-\titleformat{\chapter}{\LARGE\bfseries}{\thechapter}{0.5em}{}
-\titleformat{\section}{\Large\bfseries}{\thesection}{0.5em}{}
-\titleformat{\subsection}{\large\bfseries}{\thesubsection}{0.5em}{}
-\titleformat{\subsubsection}{\large\mdseries}{\thesubsubsection}{0.5em}{}
-\titleformat{\paragraph}[runin]{\normalsize\mdseries}{\theparagraph}{0.5em}{}[\hspace{1em}]
-\titleformat{\subparagraph}[runin]{\normalsize\mdseries}{\thesubparagraph}{0.5em}{}[\hspace{1em}]
+\titleformat{\part}{\huge\scshape\bfseries}{\thepart}{0.5em}{}
+\titleformat{\chapter}{\LARGE\scshape\bfseries}{\thechapter}{0.5em}{}
+\titleformat{\section}{\Large\scshape\bfseries}{\thesection}{0.5em}{}
+\titleformat{\subsection}{\large\scshape\bfseries}{\thesubsection}{0.5em}{}
+\titleformat{\subsubsection}{\large\scshape\mdseries}{\thesubsubsection}{0.5em}{}
+\titleformat{\paragraph}[runin]{\normalsize\scshape\mdseries}{\theparagraph}{0.5em}{}[\hspace{1em}]
+\titleformat{\subparagraph}[runin]{\normalsize\scshape\mdseries}{\thesubparagraph}{0.5em}{}[\hspace{1em}]
 
 \titlespacing\section{0pt}{12pt plus 12pt minus 2pt}{5pt plus 5pt minus 2pt}
 \titlespacing\subsection{0pt}{11pt plus 11pt minus 2pt}{5pt plus 5pt minus 2pt}
@@ -378,9 +378,18 @@ timezeros=true,
 %-------------------------------------------------------------------------------
 %\usepackage[titletoc]{appendix}
 %-------------------------------------------------------------------------------
-\usepackage[unicode=true,pdfusetitle,
- bookmarks=true,bookmarksnumbered=false,bookmarksopen=true,bookmarksopenlevel=1,
- breaklinks=false,pdfborder={0 0 0},backref=false,colorlinks=true]{hyperref}
+\usepackage[unicode=true,
+pdfusetitle,
+bookmarks=true,
+bookmarksnumbered=false,
+bookmarksopen=true,
+bookmarksopenlevel=1,
+breaklinks=false,
+pdfborder={0 0 0},
+pdftoolbar=false,
+pdffitwindow=true,
+backref=false,
+colorlinks=true]{hyperref}
 % these renewcommands don't seem to work
 % \renewcommand{\chapterautorefname}{\S}
 % \renewcommand{\sectionautorefname}{\S}
