@@ -232,9 +232,159 @@ Higher-order logic~\cite{wiki:Higher_order_logic}
 \levelstay{Constructivism}
 \label{sec:Constructivism}
 
-\cite{Feferman:2000,Diez:2002,sep:mathematics-constructive}
+\cite{Feferman:2000,Diez:2002,sep:mathematics_constructive,
+wiki:Constructivism_philosophy_of_mathematics}
 
 As opposed to classical logic~\cite{wiki:Classical_logic}.
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-1 }
+\levelstay{SEP}
+\label{sec:Constructivism_SEP}
+\cite{sep:mathematics_constructive}
+
+Multiple references to ``the informal, though rigorous, 
+style of the practising analyst, algebraist, topologist, \ldots''
+???
+
+Section 1 has problems:
+
+Discussion of
+$ \forall x \in \mathbb{R} (x = 0 \vee x \ne 0)$.
+
+``However, because the computer can handle real numbers 
+only by means of finite rational approximations, 
+we have the problem of underflow, 
+in which a sufficiently small positive number can be misread as 0 
+by the computer;\ldots''
+
+\ldots which is nonsense;
+real issue is non-termination of test for $x=0$.
+
+Section 2:
+
+BHK interpretation~\cite{wiki:Brouwer_Heyting_Kolmogorov_interpretation}:
+\begin{itemize}
+  \item A proof of $P\wedge Q$ 
+  is a pair $(a,b)$ where $a$ is a proof of $P$ 
+  and $b$ is a proof of $Q$.
+\item A proof of $P\vee Q$ is a pair $(a,b)$ 
+where $a$ is $0$ and 
+$b$ is a proof of $P$, 
+or $a$ is $1$ 
+and $b$ is a proof of $Q$.
+\item A proof of $P\Rightarrow Q$ is 
+a function $f$ that converts 
+a proof of $P$ into a proof of $Q$.
+\item A proof of $\exists x\in S:\varphi (x)$ is 
+a pair $(a,b)$ where 
+$a$ is an element of $S$, 
+and $b$ is a proof of $\varphi (a)$.
+\item A proof of $\forall x\in S:\varphi (x)$ is 
+a function $f$ that converts 
+an element (any element?) $a$ of $S$ into a proof of $\varphi (a)$.
+\item The formula $\neg P$ is defined as $P\Rightarrow \bot$, 
+so a proof of it is a function $f$ that converts 
+a proof of $P$ into a proof of $\bot$.
+\item There is no proof of $\bot$
+(the absurdity, or bottom type 
+(nontermination in some programming languages)).
+\end{itemize}
+
+Analysis examples too detailed and lacking motivation 
+to make point clear, fell cut-and-pasted from the middle
+of a more coherent presentation:
+
+Bishop: constructive $\mathbb{R}$ 
+from Cauchy sequences 
+in $\mathbb{Q}$~\cite{bishop1985constructive}.
+
+Bridges and Vita: constructive $\mathbb{R}$ from sequences
+of intervals in $\mathbb{Q}$~\cite{Bridger:2019}.
+
+Intermediate value theorem C: 
+``If $f$ is a continuous real-valued mapping 
+on the closed interval $[0,1]$ such that $f(0)⋅f(1)<0$, 
+then there exists $x$ such that $0<x<1$ and $f(x)=0$.
+
+Proof requirement: 
+An algorithm which, applied to the function $f$, 
+a modulus of continuity for $f$, and the values $f(0)$ and $f(1)$,
+computes an object $x$ and shows that $x$ is a real number 
+between $0$ and $1$; and
+shows that $f(x)=0$.''~\cite{sep:mathematics_constructive}
+
+Not constructive because it requires
+``lesser limited principle of omniscience (LLPO)''.
+
+Intermediate value theorem D:
+``If $f$ is a continuous real-valued mapping 
+on the closed interval $[0,1]$ 
+such that $f(0)⋅f(1)<0$, 
+then for each $\epsilon>0$ 
+there exists $x$ such that $0<x<1$ and $|f(x)|<\epsilon$.
+Proof requirement: 
+An algorithm which, applied to the function $f$, 
+a modulus of continuity for $f$, the values $f(0)$ and $f(1)$, 
+and a positive number $\epsilon$,
+computes an object $x$ 
+and shows that $x$ is a real number between $0$ and $1$; and
+shows that $|f(x)|<\epsilon$.''~\cite{sep:mathematics_constructive}
+
+Can be proved constructively.
+
+Stronger intermediate value thm:
+``Let $f$ be a continuous real-valued mapping 
+on the closed interval $[0,1]$ 
+such that $f(0)⋅f(1)<0$. 
+Suppose also that $f$ is locally nonzero, 
+in the sense that for each $x \in [0,1]$
+and each $r>0$, 
+there exists $y$ such that $|x−y|<r$ and $f(y) \neq 0$. 
+Then there exists $x$ such that $0<x<1$ and $f(x)=0$.''
+
+Section 3: Varieties
+
+Section 3.1: Inuitionist (Brouwer)
+
+``Brouwer was not the clearest expositor of his ideas, 
+as is shown by the following quotation:
+
+Mathematics arises when the subject of two-ness, 
+which results from the passage of time, 
+is abstracted from all special occurrences. 
+The remaining empty form [the relation of n to n+1] 
+of the common content of all these two-nesses 
+becomes the original intuition of mathematics 
+and repeated unlimitedly creates new mathematical subjects. 
+(quoted in Kline [1972], 1199–2000)''
+
+(Nederlands to Deutsch to English?)
+
+``According to [Brouwer’s] view and reading of history, 
+classical logic was abstracted 
+from the mathematics of finite sets and their subsets. \ldots 
+Forgetful of this limited origin, 
+one afterwards mistook that logic 
+for something above and prior to all mathematics, 
+and finally applied it, without justification, 
+to the mathematics of infinite sets. 
+This is the Fall and original sin of set theory, 
+for which it is justly punished by the antinomies. 
+It is not that such contradictions showed up that is surprising,
+ but that they showed up at such a late stage of the game. 
+ (Weyl [1946])''
+ 
+Weyl may have worked out a description of
+$\mathbb{R}$ without (uncountable) infinity or
+axiom of choice?
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-1 }
+\levelstay{Wikipedia}
+\label{sec:Constructivism_Wikipedia}
+
+\cite{wiki:Constructivism_philosophy_of_mathematics}
 
 Usually drop law of excluded middle 
 ($P \vee \lnot P$).\cite{wiki:Law_of_excluded_middle}
@@ -350,5 +500,5 @@ So some constructionists restrict themselve
 Bishop~\cite{bishop1967foundations,bishop1972constructive,bishop1985constructive}
 
  %-----------------------------------------------------------------
-\setcounter{currentlevel}{\value{currentlevel}+1}
+\setcounter{currentlevel}{\value{baseSectionLevel}}
  
