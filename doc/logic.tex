@@ -290,6 +290,8 @@ a proof of $P$ into a proof of $\bot$.
 (the absurdity, or bottom type 
 (nontermination in some programming languages)).
 \end{itemize}
+What is a 'function' here? 
+Other sources use 'algorithm', also without definition.
 
 Analysis examples too detailed and lacking motivation 
 to make point clear, fell cut-and-pasted from the middle
@@ -378,6 +380,69 @@ It is not that such contradictions showed up that is surprising,
 Weyl may have worked out a description of
 $\mathbb{R}$ without (uncountable) infinity or
 axiom of choice?
+
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-1 }
+\levelstay{IEP}
+\label{sec:Constructivism_IEP}
+\cite{iep:Constructive_mathematics}
+
+``An implication ($A \Rightarrow B$) is not equivalent 
+to a disjunction ($\lnot A \vee B$), 
+and neither are equivalent to a negated conjunction 
+($\not (A \wedge \lnot B$)). 
+In practice, constructive mathematics may be viewed 
+as mathematics done using intuitionistic 
+logic.''\cite{iep:Constructive_mathematics}
+
+Hilbert vs Brouwer circa 1900: 
+non-constructive existence thms via contradiction.
+
+Usual example: Prove $\exists a,b \notin \mathbb{Q}$
+such that $a^b \in \mathbb{Q}$. \hfill\break
+Non-constructive: Use law of excluded middle.
+If $\sqrt{2}^{\sqrt{2}} \in \mathbb{Q}$, done.
+If not, consider ${\sqrt{2}^{\sqrt{2}}}^{\sqrt{2}}$.
+\hfill\break
+Constructive: consider $a=\sqrt{2}$ and $b=\log_2(9)$.
+
+BHK interpretation of intuitionistic 
+logic\cite{wiki:Brouwer_Heyting_Kolmogorov_interpretation}.
+
+\setcounter{currentlevel}{\value{currentlevel}-1 }
+\levelstay{Martin-L\"{o}f}
+\label{sec:Martin_Lof_IEP}
+
+``However he soon revisited foundations in a different way, 
+which harks back to Russell's type theory, 
+albeit using a more constructive and less logicist approach. 
+The basic idea of Martin-Löf's theory of types (Martin-Löf, 1975) 
+is
+that mathematical objects all come as types, 
+and are always given in terms of a
+type (for example, one such type is that of functions 
+from natural numbers to
+natural numbers), due to an intuitive understanding 
+that we have of the notion
+of the given type.
+
+The central distinction Martin-Löf makes is that 
+between proof and derivation.
+Derivations convince us of the truth of a statement, 
+whereas a proof contains the data necessary for computational
+(that is, mechanical) verification of a proposition. 
+Thus what one finds in standard mathematical textbooks are
+derivations; 
+a proof is a kind of realizability (c.f. Kleene, 1945) and links
+mathematics to implementation (at least implicitly).
+
+The theory is very reminiscent of a kind of cumulative hierarchy. 
+Propositions can be represented as types 
+(a proposition's type is the type of its proofs),
+and to each type one may associate a proposition 
+(that the associated type is not empty). 
+One then builds further types by construction on already existing
+types.''
 
 %-----------------------------------------------------------------
 \setcounter{currentlevel}{\value{baseSectionLevel}-1 }
