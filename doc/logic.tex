@@ -239,6 +239,79 @@ As opposed to classical logic~\cite{wiki:Classical_logic}.
 
 %-----------------------------------------------------------------
 \setcounter{currentlevel}{\value{baseSectionLevel}-1 }
+\levelstay{Feferman}
+\label{sec:Feferman}
+\cite{Feferman:2000}
+
+\setcounter{currentlevel}{\value{currentlevel}-1 }
+\levelstay{Is Cantor Necessary?}
+\label{sec:Is_Cantor_Necessary}
+\cite{Feferman1989CantorNecessary}
+
+Cantor diagonal argument:
+\hfill\break
+$\OneToOne$ map between binary sequences ($2^{\mathbb{N}}$)
+and $[0,1]\subset\mathbb{R}$
+Does that need a proof?
+What about finite sequences vs trailing $1$s? 
+\hfill\break
+Then assume existence of a $\OneToOne$  
+map between $2^{\mathbb{N}}$s 
+and $\mathbb{N}$,
+without any explicit construction.
+Construct an explict missing sequence 
+for any candidate $\OneToOne$ map,
+by flipping the $i$th bit in the $i$th sequence,
+thus a contradiction?
+So $\mathfrak{c} = \mathrm{card}(2^{\mathbb{N}}) 
+= \mathrm{card}(\mathbb{R})$ must be greater than 
+$\aleph_0 = \mathrm{card}(\mathbb{N})$. 
+\hfill\break
+Claim this can be extended to any set $\Set{S}$,
+proving $\mathrm{card}(\Set{S}) < \mathrm{card}(2^{\Set{S}}))$,
+including $\mathrm{card}(\mathbb{R}) < \mathrm{card}(2^{\mathbb{R}}))$?
+Doesn't seem obvious.
+\hfill\break
+How does all this play with 
+the Hilbert hotel paradox?~\cite{wiki:Hilbert_hotel}
+(Problem with Hilbert hotel is 
+always space for new customer, if everybody moves one room up,
+but infinite time required to make that space.
+
+Implicit of axiom of choice (AOC) used to 'prove' 
+well ordering (WO) of cardinals.
+('Cardinals' not clearly defined.
+Should it be equivalence classes of sets where
+equivalence means 'there exists'/'we can construct'
+a $\OneToOne$ mapping.)
+\hfill\break
+Well ordering used to show 'scale' of infinite cardinals
+$\alpeh_0, \alpeh_1, \ldots$. (Is this countable?)
+\hfill\break
+Continuum hypothesis: 
+$\mathfrak{c} = \mathrm{card}(2^{\mathbb{N}}) 
+= \mathrm{card}(\mathbb{R}) = \aleph_1$
+\hfill\break
+
+Zermelo axioms of set theory, including AC.
+Start from axioms defining initial universe:
+empty set and $\mathbb{N}$.
+Then set operations including predicated subsets,
+'finessing' the contradiction of the
+cardinality of the set of all cardinalities,
+set of all sets,
+sets of all sets not containing themselves, 
+\ldots.
+\hfill\break
+'\ldots more fuel for criticism \ldots.'
+Weyl and Skolem improvements by basing it on 1st order logic.
+(But doesn't a first order language require sets,
+eg, a set of atomic symbols?)
+
+
+\setcounter{currentlevel}{\value{currentlevel}+1 }
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}-1 }
 \levelstay{SEP}
 \label{sec:Constructivism_SEP}
 \cite{sep:mathematics_constructive}
@@ -565,5 +638,5 @@ So some constructionists restrict themselve
 Bishop~\cite{bishop1967foundations,bishop1972constructive,bishop1985constructive}
 
  %-----------------------------------------------------------------
-\setcounter{currentlevel}{\value{currentlevel+1}}
+\setcounter{currentlevel}{\value{currentlevel}+1}
  
