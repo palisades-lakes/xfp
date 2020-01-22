@@ -10,10 +10,20 @@
 \setcounter{currentlevel}{\value{currentlevel}-1}
 
 %-----------------------------------------------------------------
+\levelstay{Formal languages}
+\label{sec:Formal_languages}
+
+\levelstay{Proof theory}
+\label{sec:Proof_theory}
+
+\levelstay{Model theory}
+\label{sec:Model_theory}
+
+%-----------------------------------------------------------------
 \levelstay{Zeroth order logic}
 \label{sec:Zeroth_order_logic}
 
-Classical Zeroth-order (propositional) 
+Classical zeroth-order (propositional) 
 logic~\cite{iep:Propositional_logic,
 wiki:Propositional_calculus,
 wiki:Zeroth_order_logic}
@@ -241,13 +251,41 @@ As opposed to classical logic~\cite{wiki:Classical_logic}.
 \setcounter{currentlevel}{\value{baseSectionLevel}-1 }
 \levelstay{Feferman}
 \label{sec:Feferman}
-\cite{Feferman:2000}
+\cite{Feferman1998LightOfLogic,Feferman:2000}
 
 \setcounter{currentlevel}{\value{currentlevel}-1 }
+
+\levelstay{Deciding the undecidable}
+\label{sec:Deciding_the_undecidable}
+
+\cite[ch.~1 ``Deciding the undecidable'']{Feferman1998LightOfLogic}
+
+Target general audience.
+
+Background on $3$ of Hilbert's problems
+and effect of G\"{o}del incompleteness theorems.
+
+Some discussion of constructive approaches, 
+predicative/impredicative, finitary/infinitary.
+
+Metamathematical proof theory as result.
+
+Question of (non)existence 
+'genuine absolutely undeciable problems'.
+
+Conclusion mentions recent progess
+in purely finitary approaches~\cite[ch.~10]{Feferman1998LightOfLogic}
+and 
+use of 'proof-theoretically very weak systems'
+as basis for 'an enormous amount of scientifically applicable
+mathematics.'~\cite[ch.~14]{Feferman1998LightOfLogic}
+(!! what I'm looking for !!, ie, 
+what's the 'minimal' mathematical structure needed to
+solve the real world problems I'm interested in?)
+
 \levelstay{Is Cantor Necessary?}
 \label{sec:Is_Cantor_Necessary}
 \cite{Feferman1989CantorNecessary}
-
 Cantor diagonal argument:
 \hfill\break
 $\OneToOne$ map between binary sequences ($2^{\mathbb{N}}$)
@@ -304,7 +342,6 @@ Continuum hypothesis:
 $\mathfrak{c} = \mathrm{card}(2^{\mathbb{N}}) 
 > \mathrm{card}(\mathbb{R}) = \aleph_1$
 (and there are no cardinalities in between).
-\hfill\break
 
 Zermelo axioms of set theory, including AC.
 Start from axioms defining initial universe:
@@ -321,12 +358,46 @@ Weyl and Skolem improvements by basing it on 1st order logic.
 (But doesn't a first order language require sets,
 eg, a set of atomic symbols?)
 
-P. $60$ $2$nd paragraph (Skolem's paradox):
+P.~$60$ $2$nd paragraph (Skolem's paradox):
 \hfill\break
 What's the difference between $\Set{A} \sim \PowerSet{\Set{A}}$ 
 ($\mathrm{card}(\Set{A})=\mathrm{card}(\Set{\PowerSet{\Set{A}}})$
  'externally' vs 'internally'?
 
+\textsf{G\"{o}del's incompleteness theorems:}
+don't follow completely.
+
+\textsf{Postscript on second-order logic:}
+``second-order logic cannot be axiomatized effectively.''
+Don't follow much of argument.
+
+\textsf{Elimination of the law of the excluded middle:}
+\hfill\break
+LEM implies (for Hilbert) completed infinity (?).
+\hfill\break
+Heyting arithmetic (HA) excludes LEM;
+any true statement in PA (Peano arithmetic) 
+(and many other arithmetic systems)
+can be translated into
+a true statement in HA.
+\hfill\break
+This (somehow) implies that a finite consistency proof
+of PA would not eliminate completed infinity.
+
+\textsf{The elusiveness of Canotr's continuum problem:}
+\hfill\break
+Hilbert's program can't solve the continuum problem.
+
+
+\textsf{New axioms?}
+\hfill\break
+Dubiousness of large cardinals.
+\hfill\break
+Freiling axiom of 
+symmetry (AX)~\cite{freiling1986,wiki:Freilings_axiom_of_symmetry}
+'disproves' CH.
+
+%-----------------------------------------------------------------
 \setcounter{currentlevel}{\value{currentlevel}+1 }
 %-----------------------------------------------------------------
 \setcounter{currentlevel}{\value{baseSectionLevel}-1 }
