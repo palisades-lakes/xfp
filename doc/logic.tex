@@ -54,7 +54,7 @@ and inference rules that a set of axiom formulas
 and return deduced formulas.
 \begin{description}
 \item[Atoms]  $A, B, \ldots P, Q, \ldots$, 
-that may be asisgned values \textsf{true} or \textsf{false}.
+that may be assigned values \textsf{true} or \textsf{false}.
 
 \item[Operators] $\lnot P$, $P \wedge Q$, $P \vee Q$, 
 $P \Rightarrow Q$, $P \Leftrightarrow Q$. 
@@ -63,7 +63,7 @@ any $2$ of  $\wedge, \vee, \Rightarrow$;
 sufficient to define $2$ remaining operators.
 
 \item[Propositions] (Well formed formulas)
-Recursively: atoms and propostions combined with operators,
+Recursively: atoms and propositions combined with operators,
 including parens for grouping: $(P \wedge Q) \Rightarrow R$.
 
 \item[Inference rules] ${P \Rightarrow Q), P} \vdash Q$:
@@ -74,10 +74,10 @@ and returns another proposition.
 A variety of such formal languages.
 
 Syntatic entailment: formula derived from set of axioms 
-using inference rules ina fininte number of steps.
+using inference rules in a finite number of steps.
 
 Semantic entailment: formula evaluates to \textsf{true}
-under all possible truth assignements to variables
+under all possible truth assignments to variables
 in axioms.
 
 Issues are 
@@ -88,7 +88,7 @@ are semantically entailed, that is,
 a sequence of inferences will never lead to a contradiction.
 
 \item[Completeness] 
-all semantically entailed formaulas 
+all semantically entailed formulas 
 are syntactically entailed, that is,
 any statement which is consistent with the axioms under all 
 possible truth assignments is derivable (somehow) using the 
@@ -111,7 +111,7 @@ No law of excluded middle~\cite{wiki:Law_of_excluded_middle}.
 
 Possibility vs necessity.
 
-Epistemic: state of kn owledge
+Epistemic: state of knowledge
 
 Temporal 
 
@@ -275,6 +275,8 @@ As opposed to classical logic~\cite{wiki:Classical_logic}.
 
 Fourteen collected essays about logic and foundations of 
 math.~\cite{Feferman1998LightOfLogic}
+Not strictly about constructivism, but many references to it.
+Probably more focused on finitism.
 
 %-----------------------------------------------------------------
 \setcounter{currentlevel}{\value{currentlevel}-1 }
@@ -294,9 +296,9 @@ predicative/impredicative, finitary/infinitary.
 Metamathematical proof theory as result.
 
 Question of (non)existence 
-'genuine absolutely undeciable problems'.
+'genuine absolutely undecidable problems'.
 
-Conclusion mentions recent progess
+Conclusion mentions recent progress
 in purely finitary approaches~\cite[ch.~10]{Feferman1998LightOfLogic}
 and 
 use of 'proof-theoretically very weak systems'
@@ -324,7 +326,7 @@ Then assume existence of a $\OneToOne$
 map between $2^{\mathbb{N}}$s 
 and $\mathbb{N}$,
 without any explicit construction.
-Construct an explict missing sequence 
+Construct an explicit missing sequence 
 for any candidate $\OneToOne$ map,
 by flipping the $i$th bit in the $i$th sequence,
 thus a contradiction?
@@ -456,7 +458,7 @@ Neither Lakatos or P\'{o}lya ``\ldots attempted to deal with
 \ldots
 finding the technical but general concepts that 
 help organize masses of material and make difficult 
-proofs understandible.''
+proofs understandable.''
 
 %-----------------------------------------------------------------
 \levelstay{Foundational ways}
@@ -465,7 +467,7 @@ proofs understandible.''
 \cite[ch~4 ``Foundational ways'']{Feferman1998LightOfLogic}
 
 $20$th century crisis in mathematics and grand solutions 
-(``logicism, formalisam, platonism, and constructivism \ldots
+(``logicism, formalism, platonism, and constructivism \ldots
 are all rather tired looking now, if not suffering from
 senescence and still more basic ills. \ldots
 most mathematicians have given up worrying \dots .
@@ -553,15 +555,15 @@ Is non-halting evaluation a way out of paradoxes?)
 
 ``Thus if truth of number theory \textit{were}
 definable within itself, one could find a precise version of the
-Liar statement, gving a contradiction.
+Liar statement, giving a contradiction.
 It follows that truth is not so definable.
 But provability in the system \textit{is} definable,
 so the notions of provability and truth must be distinct.
 In particular, if all provable sentences are true,
-there must be true nonprovable sentences.
+there must be true non-provable sentences.
 The self-referential construction applied to provability
 (which \textit{is} definable) instead of truth then 
-leads to a specific example of an undeciable 
+leads to a specific example of an undecidable 
 sentence.''~\cite[p~159]{Feferman1998LightOfLogic}
 
 (Is 'provability' the same as non-halting truth evaluation?)
@@ -580,11 +582,11 @@ See also~\cite{godel1995CollectedIII}.
 
 \cite[ch~9 ``What does logic have to tell us about mathematical proofs?'']{Feferman1998LightOfLogic}
 
-``One part of the analogy with physiscs is not so apt.
+``One part of the analogy with physics is not so apt.
 The experimental method provides highly sophisticated, refined
 means to test physical theories {\ldots}.
 We have no such tests of logical theories.
-Rather it is primarily a matter of individual judgement
+Rather it is primarily a matter of individual judgment
 how well these square with ordinary
 experience."~\cite[p~178]{Feferman1998LightOfLogic}
 
@@ -592,7 +594,7 @@ experience."~\cite[p~178]{Feferman1998LightOfLogic}
 us to expand our basic vocabulary systematically,
 is necessary to keep formal representations of informal concepts
 down to a manageable size. \ldots\ 
-If evertything were written out in terms of primitive notions,
+If everything were written out in terms of primitive notions,
 mathematics would be 
 unlearnable.''~\cite[p~180]{Feferman1998LightOfLogic}
 
@@ -613,6 +615,71 @@ could be translated into the intuitionistic system HA of
 Heyting's arithmetic,
 which differs from PA on in omitting the 
 Law of the Excluded Middle{\ldots}.''~\cite[190]{Feferman1998LightOfLogic}
+
+%-----------------------------------------------------------------
+\levelstay{G\"{o}del's \textit{Dialectica} interpretation and its
+two-way-stretch}
+\label{sec:Godels_Dialectica_interpretation}
+
+\cite[ch~11 ``G\"{o}del's \textit{Dialectica} interpretation and its
+two-way-stretch'']{Feferman1998LightOfLogic}
+
+%-----------------------------------------------------------------
+\levelstay{Infinity in mathematics: is Cantor necessary? (conclusion)}
+\label{sec:Cantor_necessary_conclusion}
+
+\cite[ch~12 ``Infinity in mathematics: is Cantor necessary? (conclusion)'']{Feferman1998LightOfLogic}
+
+Classes of statements and formulas:
+\begin{description}
+\item[$\Pi^0_1$] statements of the form
+$\forall x (F(n) = 0)$ where $F$ is primitive recursive.
+\item[$\Sigma^0_1$] statements of the form
+$\exists x (F(n) \neq 0)$ (negations of statement in $\Pi^0_1$).
+\item[$\Pi^0_k$] sequence of $k$ alternating quantifiers,
+starting with $\forall x$.
+\textsf{(Why alternating?)}
+\item[$\Sigma^0_k$] sequence of $k$ alternating quantifiers,
+starting with $\exists x$.
+\textsf{(Why alternating?)}
+\item[$\Delta^0_k$] statements that are in both $\Pi^0_k$
+and $\Sigma^0_k$. 
+\textsf{(How is that possible?)}
+\end{description}
+Superscript $0$ is above classes refers to the fact that
+quantified variables range over $x,y,\ldots \in \mathbb{N}$.
+\textsf{(first order logic/arithmetic?)}
+When we add variables $X,Y,\ldots \subseteq \mathbb{N}$,
+then the classes are $\Pi^1_k, \Sigma^1_k, \Delta^1_k$.
+
+Collecting all arities into a single class:
+\begin{itemize}
+  \item $\Pi^i_{\infty} \, = \, \bigcup_k \Pi^i_k$
+  \item $\Sigma^i_{\infty} \, = \, \bigcup_k \Sigma^i_k$
+  \item $\Delta^i_{\infty} \, = \, \bigcup_k \Delta^i_k$
+\end{itemize}
+
+\textit{Comprehension axiom schema:}
+\begin{equation}
+\tag{$\mathcal{F}{-}\text{CA}$}
+\exists X \forall n \left[ (n \in X) \Leftrightarrow P(n) \right]
+\end{equation}
+where $\mathcal{F}$ is a class of formulas 
+\textsf{(meaning $\Pi^0_k$ or $\Sigma^0_k$?)}
+and $P \in \mathcal{F}$.
+
+For formulas in $\mathcal{F}$ and its complement,
+\begin{equation}
+\tag{$\Delta_{\mathcal{F}}{-}\text{CA}$}
+\forall n \left[ P(n) \Leftrightarrow Q(n) \right]
+\Rightarrow 
+\exists X \forall n \left[ (n \in X) \Leftrightarrow P(n) \right]
+\end{equation}
+where $P \in \mathcal{F}$ and $\sim Q \in \mathcal(F)$.
+\textsf{
+(Is ``$\sim Q$'' the same as ``$\lnot Q$'', ie, 
+``$(\text{not}\, Q)$''?)}
+
 %-----------------------------------------------------------------
 \setcounter{currentlevel}{\value{currentlevel}+1 }
 %-----------------------------------------------------------------
@@ -622,7 +689,7 @@ Law of the Excluded Middle{\ldots}.''~\cite[190]{Feferman1998LightOfLogic}
 \cite{sep:mathematics_constructive}
 
 Multiple references to ``the informal, though rigorous, 
-style of the practising analyst, algebraist, topologist, \ldots''
+style of the practicing analyst, algebraist, topologist, \ldots''
 ???
 
 Section 1 has problems:
@@ -666,7 +733,7 @@ so a proof of it is a function $f$ that converts
 a proof of $P$ into a proof of $\bot$.
 \item There is no proof of $\bot$
 (the absurdity, or bottom type 
-(nontermination in some programming languages)).
+(non-termination in some programming languages)).
 \end{itemize}
 What is a 'function' here? 
 Other sources use 'algorithm', also without definition.
@@ -713,7 +780,7 @@ shows that $|f(x)|<\epsilon$.''~\cite{sep:mathematics_constructive}
 
 Can be proved constructively.
 
-Stronger intermediate value thm:
+Stronger intermediate value theorem:
 ``Let $f$ be a continuous real-valued mapping 
 on the closed interval $[0,1]$ 
 such that $f(0)⋅f(1)<0$. 
@@ -725,7 +792,7 @@ Then there exists $x$ such that $0<x<1$ and $f(x)=0$.''
 
 Section 3: Varieties
 
-Section 3.1: Inuitionist (Brouwer)
+Section 3.1: Intuitionist (Brouwer)
 
 ``Brouwer was not the clearest expositor of his ideas, 
 as is shown by the following quotation:
@@ -750,7 +817,7 @@ for something above and prior to all mathematics,
 and finally applied it, without justification, 
 to the mathematics of infinite sets. 
 This is the Fall and original sin of set theory, 
-for which it is justly punished by the antinomies. 
+for which it is justly punished by the antimonies. 
 It is not that such contradictions showed up that is surprising,
  but that they showed up at such a late stage of the game. 
  (Weyl [1946])''
@@ -774,7 +841,7 @@ as mathematics done using intuitionistic
 logic.''\cite{iep:Constructive_mathematics}
 
 Hilbert vs Brouwer circa 1900: 
-non-constructive existence thms via contradiction.
+non-constructive existence theorems via contradiction.
 
 Usual example: Prove $\exists a,b \notin \mathbb{Q}$
 such that $a^b \in \mathbb{Q}$. \hfill\break
@@ -878,7 +945,7 @@ constructed?~\cite{wiki:Constructivism_philosophy_of_mathematics}
 \label{sec:Choice_sequences}
 
 \begin{description}
-\item[Lawlike] determined completely (somehow?),
+\item[Law-like] determined completely (somehow?),
 eg, $\mathbb{N}$ or functions $\mathbb{N} \mapsto \mathbb{N}$,
 functions from the first $k$ elements of the sequence to 
 $\mathbb{N}$.
@@ -934,7 +1001,7 @@ In some set theories, the axiom of choice implies
 the law of excluded middle; in others it doesn't.
 When it does, constructionists use weaker versions
 that don't imply $P \, \wedge \, \lnot P$.
-So some constructionists restrict themselve
+So some constructionists restrict themselves
 
  %-----------------------------------------------------------------
 \levelstay{Measure theory}
