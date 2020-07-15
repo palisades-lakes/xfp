@@ -1,0 +1,152 @@
+% !TEX TS-program = arara
+% arara: xelatex: { synctex: on, options: [--halt-on-error] } 
+% arara: biber
+% arara: makeglossaries
+% arara: makeindex
+% arara: xelatex: { synctex: on, options: [-halt-on-error] } 
+% arara: xelatex: { synctex: on, options: [-halt-on-error] } 
+% arara: clean: { files: [topos-notes.aux,topos-notes.bbl] }
+% arara: clean: { files: [topos-notes.bcf,topos-notes.blg] }
+% arara: clean: { files: [topos-notes.glg,topos-notes.glo] }
+% arara: clean: { files: [topos-notes.gls,topos-notes.gls] }
+% arara: clean: { files: [topos-notes.idx,topos-notes.ilg] }
+% arara: clean: { files: [topos-notes.ind,topos-notes.loe] }
+% arara: clean: { files: [topos-notes.lof,topos-notes.log] }
+% arara: clean: { files: [topos-notes.log,topos-notes.lol] }
+% arara: clean: { files: [topos-notes.out] }
+% arara: clean: { files: [topos-notes.run.xml] }
+% arara: clean: { files: [topos-notes.toc,topos-notes.xdy] }
+% arara: clean: { files: [topos-notes.synctex.gz] }
+%-------------------------------------------------------------------------------
+\documentclass[10pt,openany]{book}
+\input{../tex/head}
+\input{../tex/symbols}
+%-----------------------------------------------------------------
+%\input{../kindle-paperwhite}
+%\input{../tex/landscape-2col-letter}
+\input{../tex/landscape-2col-8x17}
+%\input{../portrait-1col}
+\input{../tex/clj-listings}
+\input{../glossary}
+\addbibresource{../bib/algebra.bib}
+\addbibresource{../bib/arithmetic.bib}
+\addbibresource{../bib/cactus.bib}
+\addbibresource{../bib/proglang.bib}
+\addbibresource{../bib/halmos.bib}
+\addbibresource{../bib/interpolation.bib}
+\addbibresource{../bib/logic.bib}
+\addbibresource{../bib/mop.bib}
+\addbibresource{../bib/numbers.bib}
+%\addbibresource{../bib/ieeestd.bib}
+\addbibresource{../bib/sets.bib}
+\addbibresource{../bib/tex.bib}
+%\addbibresource{../bib/fparith.bib}
+%-----------------------------------------------------------------
+\title{Notes on category and topos theory}
+\author{\textsc{John Alan McDonald}}
+%\email{mcdonald.john.alan at gmail.com}
+\date{draft of \today}
+%-----------------------------------------------------------------
+\begin{document}
+
+\maketitle
+
+%-----------------------------------------------------------------
+% 7 for part level
+% 6 for chapter level
+% 5 for section level
+% 4 for subsection level
+% 3 for subsubsection level
+% 2 for paragraph level
+% 1 for subparagraph level
+\setcounter{baseSectionLevel}{6}
+%-----------------------------------------------------------------
+
+%\frontmatter
+
+% \begingroup
+% \let\onecolumn\twocolumn
+% \sffamily
+% \tableofcontents
+% \rmfamily
+% \endgroup
+% 
+%-----------------------------------------------------------------
+\setcounter{currentlevel}{\value{baseSectionLevel}}
+\levelstay{Preface-2020-07-15}
+\label{sec:Preface-2020-07-15}
+% \mainmatter
+
+Why?
+
+%-----------------------------------------------------------------
+\epigraph{
+\textsl{das Wesen der Mathematik liegt gerade in ihrer Freiheit.}
+\par
+(The essence of mathematics lies precisely in its freedom.)}%
+{Cantor~\cite{Cantor1883},
+as quoted in~\cite{ferreiros2007labyrinth}.}
+
+motivation from empirical problems; 
+see eg~\cite{maclane1981mathModels}.
+goal ``breadth, clarity, and depth''.
+
+\epigraph{
+Mathematics is not the rigid and rigidity-producing schema 
+that the layman thinks it is; 
+rather, in it we find ourselves at that meeting point 
+of constraint and freedom 
+that is the very essence of human nature.}%
+{Hermann Weyl ?}
+
+
+adjoint functors?
+
+axioms on composition of functions as alternative to set theory
+as foundation of mathematics
+
+Cantorian set theory: platonic sets with $2$nd order axioms.
+
+my point of view: 
+mathematics (notation) and programming languages
+as \textit{written} languages,
+used to formulate real world problems,
+and construct their solutions.
+
+express an idea in at most a couple pages of text.
+
+say enough and not too much, especially not irrelevant things.
+abstract just enough; 
+concrete details of model/representation/implementation.
+
+key issue: is the solution correct?
+mathematics evaluated by consensus;
+software by testing.
+
+\epigraph{Mathematics as we practice it is much more formally 
+complete and precise than
+other sciences, but it is much less formally complete and precise 
+for its content
+than computer programs.}%
+{Thurston, 
+\textit{On proof and progress in mathematics
+}~\cite{thurston1994proof}}
+
+
+
+%-----------------------------------------------------------------
+%\pagebreak
+%\appendix
+%\part{Appendices}
+%\input{../tex/typesetting}
+%-----------------------------------------------------------------
+\backmatter
+
+
+%\part{Backmatter}
+% un-comment \input and comment \printbibiliography
+% to get index, glossary, list of theorems, etc.
+%\input{../tex/tail}
+\printbibliography[heading=bibintoc, title={References}]
+%-----------------------------------------------------------------
+\end{document}
