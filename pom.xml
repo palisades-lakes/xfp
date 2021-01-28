@@ -7,12 +7,12 @@
  <modelVersion>4.0.0</modelVersion>
  <groupId>palisades-lakes</groupId>
  <artifactId>xfp</artifactId>
- <description>Utilities for exsact floating point calculation</description>
- <version>0.0.0-SNAPSHOT</version>
+ <description>Utilities for exact floating point calculation</description>
+ <version>0.0.1-SNAPSHOT</version>
  <parent>
   <groupId>palisades-lakes</groupId>
   <artifactId>palisades-lakes-parent</artifactId>
-  <version>0.0.10-SNAPSHOT</version>
+  <version>0.0.11-SNAPSHOT</version>
  </parent>
  <build>
   <plugins>

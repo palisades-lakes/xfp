@@ -35,7 +35,7 @@ import xfp.java.test.polynomial.MonomialEFloat;
 /** Test utilities
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-12-02
+ * @version 2021-01-27
  */
 @SuppressWarnings("unchecked")
 public final class Common {
@@ -1218,9 +1218,11 @@ public final class Common {
     final UniformRandomProvider urp4 =
       PRNG.well44497b("seeds/Well44497b-2019-04-01.txt");
 
+    // TODO: this doesn't seem correct....
     // as large as will still have finite float l2 norm squared
     final int emax = Doubles.deMax(dim)/2;
-    final double dmax = (1<<emax);
+    final double dmax = Math.abs((double) (1<<emax));
+    assert (0.0<dmax) : "\n0>= " + dmax + "\nemax=" + emax;
     return Arrays.asList(
       new Generator[]
         {

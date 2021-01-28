@@ -17,7 +17,7 @@ import xfp.java.test.Common;
  * </pre>
  *
  * @author palisades dot lakes at gmail dot com
- * @version 2019-10-08
+ * @version 2021-01-27
  */
 
 public final class MonomialTest {
