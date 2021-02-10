@@ -1,7 +1,7 @@
 \setcounter{currentlevel}{\value{baseSectionLevel}}
 \levelstay{Polynomial Interpolation}
 
-\cite{wiki:Interpolation,wiki:Polynomial-interpolation}
+\cite{wiki:Interpolation,wiki:PolynomialInterpolation}
 
 TODO:
 \begin{itemize}
@@ -1098,7 +1098,7 @@ x_{01}-6 y_{01}\right) x_{01} d_0+
 \levelstay{Lagrange basis}
 \label{sec:Lagrange-basis}
 
-The standard Lagrange\cite{wiki:Lagrange-polynomial}
+The standard Lagrange\cite{wiki:LagrangePolynomial}
 form of a polynomial  is
 \begin{equation}
 f(x) = \sum_{i} y_i \prod_{j \neq i} \frac{x - x_j}{x_i -x_j}
@@ -1365,7 +1365,7 @@ For example:
 \label{sec:Lagrange-cubic-hermite}
 
 Hermite interpolation as in section~\ref{sec:Monomial-cubic-hermite}
-\cite{wiki:Cubic-hermite-spline}.
+\cite{wiki:CubicHermiteSpline}.
 
 In Lagrange value interpolation, we choose basis
 functions that are $1$ at one of contraint locations (knots)
@@ -1459,7 +1459,7 @@ or slopes.
 However, it doesn't help if we want add and remove knots,
 as is the case in one-dimensional search applications.
 
-The Newton basis~\cite{wiki:Newton-polynomial}
+The Newton basis~\cite{wiki:NewtonPolynomial}
 supports adding knots, increasing the degree
 of the interpolating polynomial with each added constraint.
 So it, too, is of limited value for our driving application.
@@ -1533,7 +1533,7 @@ is positive.
 \setcounter{currentlevel}{\value{baseSectionLevel}-2}
 \levelstay{Cubic: $(x_0,y_0,d_0),(x_1,y_1,d_1)$}
 
-Cubic (Hermite~\cite{wiki:Cubic-hermite-spline}) 
+Cubic (Hermite~\cite{wiki:CubicHermiteSpline}) 
 case where value and slope are specified at $x_0$ and $x_1$.
 General cubic function in terms of Newton basis at
 $x_0, x_1$:
@@ -1618,7 +1618,7 @@ One of these is a local minimum when the $2$nd derivative is positive:
 \setcounter{currentlevel}{\value{baseSectionLevel}-1}
 \levelstay{Divided differences}
 \label{sec:Divided-differences}
-\cite{wiki:Divided-differences}
+\cite{wiki:DividedDifferences}
 Given $k+1$ pairs 
 $\left( x_0, y_0 \right) \ldots \left( x_k, y_k \right) $:
 

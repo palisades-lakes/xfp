@@ -16,7 +16,7 @@ import xfp.java.numbers.Doubles;
  * <a href="http://dl.acm.org/citation.cfm?id=1824815" >
  * Yong Kang Zhu and Wayne B. Hayes,
  * "Algorithm 908: Online Exact Summation of Floating-Point Streams",
- * ACM TOMS Volume 37 Issue 3, September 2010</a>
+ * {ACM} TOMS Volume 37 Issue 3, September 2010</a>
  * <p>
  * Also see:
  * <p>
@@ -27,7 +27,7 @@ import xfp.java.numbers.Doubles;
  * <a href="http://epubs.siam.org/doi/abs/10.1137/070710020?journalCode=sjoce3" >
  * Yong Kang Zhu and Wayne B. Hayes,
  * "Correct Rounding and a Hybrid Approach to Exact Floating-Point Summation,"
- * SIAM J. Scientific Computing,  31(4), p 2981–3001, June 2009. (21 pages)</a>
+ * {SIAM} J. Scientific Computing,  31(4), p 2981–3001, June 2009. (21 pages)</a>
  * <p>
  * This implementation based on the code with TOMS 908 and:
  * <p>

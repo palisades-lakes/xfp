@@ -76,7 +76,7 @@ representations\ldots}
 
 My approach to linear (aka vector) spaces is largely based on
 the texts I used as a college freshman for linear algebra and
-multivariate calculus: Halmos \cite{Halmos1958Finite}
+multivariate calculus: Halmos \cite{Halmos:1958:Finite}
 and Spivak \cite{spivak-1965}.
 
 \begin{definition}[Linear space]
@@ -137,7 +137,7 @@ Where $\Space{K}$ is any field.
 \vspace{\topsep}
 \setlength{\parskip}{5pt}
 \setlength{\parindent}{0pt}
-See \cite[chapter~1]{spivak-1965} and \cite[chapter~1]{Halmos1958Finite}.
+See \cite[chapter~1]{spivak-1965} and \cite[chapter~1]{Halmos:1958:Finite}.
 %\leavevmode \vspace{-\baselineskip}
 \begin{itemize}
   \item vectors:
@@ -206,7 +206,7 @@ $\Vector{f}\left( d \right) \; \forall d \in \Set{D}$
 \begin{example}[{ $\Space{R}^n$ as a function space }]
 %{}
 %\bigskip
-We can identify~\cite[sec.~24]{Halmos1958Finite} 
+We can identify~\cite[sec.~24]{Halmos:1958:Finite} 
 $\Space{R}^n$ and 
 $ \Space{F} \left[ \{ 0, 1, \ldots, {n-1} \}, \Space{R} \right] $
 by
@@ -223,7 +223,7 @@ $\Vector{v}_0, \ldots , \Vector{v}_{n-1} \in \Space{V}$.
 If there exists $a_0, \ldots , a_{n-1}$ such that
 $\Vector{0} = \sum a_i \Vector{v}_i$ then the $\{ \Vector{v}_i \}$
 are \textit{linearly dependent}.
-\cite[section~5]{Halmos1958Finite}
+\cite[section~5]{Halmos:1958:Finite}
 
 Otherwise they are \textit{linearly independent}.
 \end{definition}
@@ -344,7 +344,7 @@ then
 %\setcounter{currentlevel}{\value{baseSectionLevel}}
 %\leveldown{Oriented projective spaces}
 %\label{sec:Oriented-projective-spaces}
-%\cite{Stolfi1991opg}
+%\cite{Stolfi:1991:OrientedProjectiveGeometry}
 %-----------------------------------------------------------------
 %\setcounter{currentlevel}{\value{baseSectionLevel}}
 %\leveldown{Barycentric (convex) spaces and functions}
@@ -433,11 +433,11 @@ Then $\Lmap$ can be expressed as
 \sum_{i=0}^{m-1} \sum_{j=0}^{n-1} L_{ij} ( \e_i^{\Space{W}} \otimes \e_j^{\Space{V}} )
 \end{equation}
 $(L_{ij})$ is the matrix representation of $\Lmap$ with respect to
-the two bases~\cite{Halmos1958Finite}.
+the two bases~\cite{Halmos:1958:Finite}.
 
 It is important to note that there are many usful
 representations for linear functions other than 
-matrices~\cite{mcdonald-1989b}.
+matrices~\cite{McDonald:1989:OOPSLA}.
 Sometimes other representations are used for convenience,
 or to enforce some constraint like symmetry.
 In some cases, a non-matrix representation must be used,
@@ -517,7 +517,7 @@ An orthonormal basis for $\linearspan\{ \v_0 \ldots \v_{m-1} \}$
 can be computed using the QR decomposition
 of the function $\Vmap = \sum_{i=0}^{m-1} \v_i \otimes \e_i$,
 (the $n \times m$ matrix whose columns are the $\v_i$)
-(see \cite[sec.~5.2 ]{golub-vanloan-2012}).
+(see \cite[sec.~5.2 ]{GolubVanLoan:2012}).
 
 The \textit{affine span} of a set of $m+1$ vectors in $\Space{V}$
 is the set of affine combinations of those vectors:
@@ -583,7 +583,7 @@ such that $\Lmap(\hat{\v}) = \hat{\w}$.
 
 The pseudo-inverse of a linear function can be characterized
 by the four Moore-Penrose 
-conditions~\cite[sec.~5.5.2]{golub-vanloan-2012}:
+conditions~\cite[sec.~5.5.2]{GolubVanLoan:2012}:
 \begin{enumerate}
 \item $\Lmap \Lmap^{-} \Lmap = \Lmap$
 \item $\Lmap^{-} \Lmap \Lmap^{-} = \Lmap^{-}$
@@ -602,10 +602,10 @@ then a useful identity is:
 
 The pseudoinverse can be computed
 using standard matrix decompositions such as
-the QR and SVD \cite{golub-vanloan-2012}.
+the QR and SVD \cite{GolubVanLoan:2012}.
 The pseudoinverse is an example of a linear transformation
 which should {\em not} be represented by a matrix
-\cite{mcdonald-1989b}.
+\cite{McDonald:1989:OOPSLA}.
 
 If $\Amap$ is affine,
 let $\Amap = \Lmap + \t$,

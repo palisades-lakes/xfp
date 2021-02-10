@@ -34,7 +34,7 @@ from first principles, without introducing paradoxes.
 \label{sec:math-sets}
 \lstset{language=Clojure}
 
-\cite{ferreiros2007labyrinth,sep-dedekind-foundations}
+\cite{Ferreiros:2007:Labyrinth,sep:DedekindFoundations}
 
 %-----------------------------------------------------------------
 \setcounter{currentlevel}{\value{baseSectionLevel}-1}
@@ -103,7 +103,7 @@ $= \SetSpec{ 2*i }{ i \glssymbol{elementOf} \glssymbol{Integers} }$.
 
 \end{description}
 A variation on 
-``turtles all the way down''~\cite{xkcd:Turtles, wiki:Turtles},
+``turtles all the way down''~\cite{Munroe:2014:XKCDTurtles, wiki:Turtles},
 this approach may be a bit unsatisfying.
 It does, however, have the advantage of preventing self-reference
 paradoxes (for example, 
@@ -118,12 +118,12 @@ the empty set, $\varnothing$.
 
 
 Both approaches raise the fascinating issue of 
-computability/decidability~\cite{church1936unsolvable,
-turing1936computability,
-turing1938computable-correction,
-turing1937computability-lambda},
+computability/decidability~\cite{Church:1936:Unsolvable,
+Turing:1936:Computability,
+Turing:1938:ComputabilityCorrection,
+Turing:1937:ComputabilityLambda},
 which I am going to pass over here, except to note the 
-'halting problem'~\cite{wiki:Halting-problem}:
+'halting problem'~\cite{wiki:HaltingProblem}:
 
 If we call $p(u)$ to determine if $u \in \Set{S}$, 
 it might return $\text{true}$, might return $\text{false}$,
@@ -155,7 +155,7 @@ infinite}, which means the set has more elements than the
 \gls{NaturalNumbers}.
 (I'm ignoring the distinction between different uncountable
 infinities.
-See~\cite{wiki:cardinal-number} for an introduction to the other
+See~\cite{wiki:CardinalNumbers} for an introduction to the other
 possibilities.)
 
 Notation for set cardinality varies widely:
@@ -484,9 +484,9 @@ a \equiv b
 \levelstay{Paradoxes}
 \label{sec:Paradoxes}
 
-Russell paradox~\cite{iep:Russell_paradox}
+Russell paradox~\cite{iep:RussellParadox}
 
-Russell-Myhill paradox(\cite{iep:Russell_Myhill_paradox})
+Russell-Myhill paradox(\cite{iep:RussellMyhillParadox})
 
 %-----------------------------------------------------------------
 %-----------------------------------------------------------------
@@ -498,7 +498,7 @@ Russell-Myhill paradox(\cite{iep:Russell_Myhill_paradox})
 
 Axiomatic theories of various kinds.
 Notes almost entirely from 
-Wikipedia\cite{wiki:Set_theory,iep:Set_theory,eom:Set_theory,sep:Set_theory}.
+Wikipedia\cite{wiki:Set_theory,iep:SetTheory,eom:SetTheory,sep:SetTheory}.
 
 \setcounter{currentlevel}{\value{currentlevel}-1}
 %-----------------------------------------------------------------
@@ -521,7 +521,7 @@ For example, let $\varphi(x)$ be the property that
 '$x$ is an odd natural number.' 
 The Comprehension Principle implies that
 
-$\Set{S}=\{x:\varphi(x)\}=\{1,3,5,7,\dots\}$ ``\cite{iep:Set_theory}
+$\Set{S}=\{x:\varphi(x)\}=\{1,3,5,7,\dots\}$ ``\cite{iep:SetTheory}
 
 Problems: \hfill\break
 where do we get the $x$ to plug into $\varphi(x)$?\hfill\break
@@ -540,9 +540,9 @@ then it might return true, or return false, or not return
 \label{sec:von_Neumann_universe}
 
 Attributed to von Neumann, but may really be due to
-Zermelo\cite{Zermelo:1930:ZERBGU}.
+Zermelo\cite{Zermelo:1930:SetTheory}.
 
-von Neumann universe: \textsf{V}\cite{wiki:Von_Neumann_universe},
+von Neumann universe: \textsf{V}\cite{wiki:VonNeumannUniverse},
 the class of hereditary well-founded sets.
 
 Hereditary set: elements are all hereditary sets, 
@@ -573,7 +573,7 @@ entities a secondary technique useful in proofs and calculation.)
 Well-founded set: if set membership relation
 is well-founded on the transistive closure of the set.
 
-Well-founded relation\cite{wiki:Well-founded-relation}: 
+Well-founded relation\cite{wiki:WellFoundedRelation}: 
  
 Relation $R$ on class $\Set{X}$ s.t. 
 $(\forall \Set{S} \subseteq \Set{X})
@@ -581,11 +581,11 @@ $(\forall \Set{S} \subseteq \Set{X})
 (\exists m \in \Set{S})(\forall s\in \Set{S})\lnot (sRm)\right).$
 Well-founded relations enable a version of transfinite induction.
 
-Class\cite{wiki:Class_set_theory}:
+Class\cite{wiki:ClassSetTheory}:
 a collection of sets that is unambiguously defined
 by property that all elements share. 
 (Constrast with ``proper class'' 
-in NBG set theory\cite{wiki:NBG-set-theory},
+in NBG set theory\cite{wiki:NBGSetTheory},
 ie, entities that are not elements of another entity.)
 
 Transitive closure: the elements, the elements of the elements,
@@ -596,12 +596,12 @@ Transfinite recursive definition:
 $V_{0} \,\doteq\, \varnothing$.
 
 $V_{\beta +1} \,\doteq\, \wp(V_{\beta })$.
-$\beta$ any ordinal\cite{wiki:Ordinal_number}.
+$\beta$ any ordinal\cite{wiki:OrdinalNumber}.
 EG: $V_1 = \{ V_0 \} = \{ \varnothing \}$,
  $V_2 = \{ \varnothing,  \{ \varnothing \} \}$, \ldots .
 
 $V_{\lambda }\,\doteq\,\bigcup _{\beta <\lambda }V_{\beta }$.
-$\lambda$ any limit ordinal\cite{wiki:Limit_ordinal}.
+$\lambda$ any limit ordinal\cite{wiki:LimitOrdinal}.
 
 $V_{\alpha}$ are the stages or ranks.
 
@@ -635,7 +635,7 @@ $V_{\omega+\omega}$ model for \nameref{sec:Zermelo_set_theory},
 ``universe of ordinary mathemetics''.
 
 $V_{\kappa}$ is a model for \textsf{ZFC} 
-if $\kappa$ is an inaccessible cardinal\cite{wiki:Inaccessible_cardinal}.
+if $\kappa$ is an inaccessible cardinal\cite{wiki:InaccessibleCardinal}.
 
 $\kappa$ is an strongly inaccessible cardinal 
 if it is uncountable, 
@@ -648,7 +648,7 @@ $\kappa$ is an weakly inaccessible cardinal
 if it is uncountable,
 and
 it is a regular weak limit 
-cardinal\cite{wiki:Regular_cardinal,wiki:Limit_cardinal}.
+cardinal\cite{wiki:RegularCardinal,wiki:LimitCardinal}.
 
 %-----------------------------------------------------------------
 %-----------------------------------------------------------------
@@ -657,7 +657,7 @@ cardinal\cite{wiki:Regular_cardinal,wiki:Limit_cardinal}.
 \label{sec:Constructible_universe}
 
 aka G\"{o}del's Constructible 
-universe\cite{wiki:Constructible_universe}.
+universe\cite{wiki:ConstructibleUniverse}.
 
 Roughly a restriction of the \nameref{sec:von_Neumann_universe}. 
 
@@ -667,25 +667,25 @@ Roughly a restriction of the \nameref{sec:von_Neumann_universe}.
 \levelstay{Zermelo set theory}
 \label{sec:Zermelo_set_theory}
 
-\textsf{Z}\cite{wiki:Zermelo_set_theory}
+\textsf{Z}\cite{wiki:ZermeloSetTheory}
 
 Predecessor of \nameref{sec:Zermelo-Fraenkel-set-theory}.
 
 Insufficient for theory of infinite 
-ordinals\cite{wiki:Ordinal_number}
+ordinals\cite{wiki:OrdinalNumber}
 and cardinals.
 
 Strongler, original ``2nd order'' version 
 vs  later 1st order variants.
 
-See also MacLane set theory\cite{maclane:mff:1986}.
+See also MacLane set theory\cite{Maclane:1986:MathFormFunction}.
 %-----------------------------------------------------------------
 %-----------------------------------------------------------------
 %-----------------------------------------------------------------
 \levelstay{Zermelo Fraenkel set theory}
 \label{sec:Zermelo-Fraenkel-set-theory}
 
-Purpose: avoid Russell's paradox\cite{wiki:Russell-paradox}.
+Purpose: avoid Russell's paradox\cite{wiki:RussellParadox}.
 
 ``Over time, it became clear that, to resolve the 
 paradoxes in Cantor’s set theory, the Comprehension Principle 
@@ -720,7 +720,7 @@ after receiving some proposed revisions from Abraham Fraenkel,
  Zermelo presented his final axiomatization of set theory, 
  now known as the Zermelo–Fraenkel axioms and denoted by ZF. 
 These axioms have become the accepted formulation 
-of Cantor’s ideas about the nature of sets.''\cite{iep:Set_theory} 
+of Cantor’s ideas about the nature of sets.''\cite{iep:SetTheory} 
 
 ``As noted by Zermelo, to avoid paradoxes, 
 the Comprehension Principle can be replaced with the principle: 
@@ -744,17 +744,17 @@ This language involves variables and the logical connectives
   A formula constructed in this formal language is referred to as
    a formula in the language of set theory. Such formulas are used 
    to give meaning to the notion of 
-   'property.'''\cite{iep:Set_theory}
+   'property.'''\cite{iep:SetTheory}
 
 Question: 
 contrast 1st order logic above 
-with intuitionist logic?\cite{wiki:Intuitionistic_logic}
+with intuitionist logic?\cite{wiki:IntuitionisticLogic}
 
 \begin{description}
-\item[\textsf{ZF}] Zermelo-Fraenkel set theory\cite{wiki:Zermelo–Fraenkel-set-theory}
-\item[\textsf{ZFC}] \textsf{ZF} with axiom of choice\cite{wiki:Axiom_of_choice}.
+\item[\textsf{ZF}] Zermelo-Fraenkel set theory\cite{wiki:ZermeloFraenkelSetTheory}
+\item[\textsf{ZFC}] \textsf{ZF} with axiom of choice\cite{wiki:AxiomOfChoice}.
 \item[\textsf{ZFA}] \textsf{ZF} with ur-elements\cite{wiki:Urelement}
-\item[\textsf{ZFAC}] \textsf{ZFA} with axiom of choice\cite{wiki:Axiom_of_choice}.
+\item[\textsf{ZFAC}] \textsf{ZFA} with axiom of choice\cite{wiki:AxiomOfChoice}.
 \end{description}
 
 Universe of discourse: 
@@ -762,7 +762,7 @@ Hereditary well-founded sets
 (from the \nameref{sec:von_Neumann_universe}).
 
 Existence of empty set is either an 
-axiom\cite{wiki:Axiom_of_empty_set}
+axiom\cite{wiki:AxiomOfEmptySet}
 or a theorem dereived from \nameref{sec:Axiom-of-infinity}
 or derived from \nameref{sec:Axiom-schema-of-specification}
 and ``a set-existence axiom''.
@@ -776,7 +776,7 @@ by G\"{o}del's 2nd incompleteness theorem.
 Multiple equivalent sets of axioms.
 Each axiom should be true if interpreted as a statement about the
 collection of all sets in the Von Neumann 
-universe\cite{wiki:Von_Neumann_universe},
+universe\cite{wiki:VonNeumannUniverse},
 more or less the closure under powerset and union starting
 from the empty set.
 
@@ -791,7 +791,7 @@ unless it is inconsistent
 \levelstay{Axiom of extensionality}
 
 Sets are equal if they have the same 
-elements.\cite{wiki:Axiom_of_extensionality,wiki:Extensionality}
+elements.\cite{wiki:AxiomOfExtensionality,wiki:Extensionality}
 
 $\forall \Set{A}\,\forall \Set{B}\,
 (\forall \Set{X}\,(\Set{X}\in \Set{A}\iff \Set{X}\in \Set{B})
@@ -842,7 +842,7 @@ elements, they are equal.
 %-----------------------------------------------------------------
 \levelstay{Axiom of regularity}
 
-(aka axiom of foundation)~\cite{wiki:Axiom_of_regularity}
+(aka axiom of foundation)~\cite{wiki:AxiomOfRegularity}
 
 Every non-empty set $\Set{A}$ contains a set which is disjoint from $\Set{A}$.
 
@@ -864,7 +864,7 @@ and \textsf{false} otherwise. )
 Consequences:
 \begin{itemize}
 \item 
-Equivalent to axiom of induction\cite{wiki:Epsilon-induction} 
+Equivalent to axiom of induction\cite{wiki:EpsilonInduction} 
 in \textsf{ZF}:
 $\forall x
 [\forall y\,(y\in x\rightarrow P(y))\rightarrow P(x)]
@@ -908,7 +908,7 @@ such that, given any set $x$,
 $x$ is a member of $\Set{B}$ if and only if $x$ 
 is a member of $\Set{A}$ 
 and $\varphi$ holds for $x$.''
-\cite{wiki:Axiom_schema_of_specification}
+\cite{wiki:AxiomSchemaOfSpecification}
 
 ${\displaystyle 
 \forall w_{1},\ldots ,w_{n}\,
@@ -936,13 +936,13 @@ unknown predicate value, or knowable but unproven?
 
 \ldots``a subclass is a class contained in some other class in 
 the same way that a subset is a set contained in some other set.''
-\cite{wiki:Subclass_set_theory}
+\cite{wiki:SubclassSetTheory}
 (???!!!)
 
 ``\dots a \textsl{class} is a collection of sets 
 (or \ldots other \ldots objects)
 the can be unambiguously defined by a property 
-that all its members share.``\cite{wiki:Class_set_theory}
+that all its members share.``\cite{wiki:ClassSetTheory}
 (???!!!)
 
 A \textsl{proper} class is not a set. (???!!)
@@ -951,7 +951,7 @@ A \textsl{proper} class is not a set. (???!!)
  $\varphi$.
 
 Implied by \nameref{sec:Axiom-schema-of-replacement}
-and \cite{wiki:Axiom_of_empty_set}.
+and \cite{wiki:AxiomOfEmptySet}.
 
 Distinction from Axiom schema of (unrestricted) comprehension:
 
@@ -974,12 +974,12 @@ applied to any set with $2$ or more elements.
 Existence of a set with $\geq 2$ elements
 (eq $\{ \{\}, \{ \{\} \} \}$)
 deduced from \nameref{sec:Axiom-of-infinity}
-(or axiom of empty set\cite{wiki:Axiom_of_empty_set}
+(or axiom of empty set\cite{wiki:AxiomOfEmptySet}
 and \nameref{sec:Axiom-of-power-set}).
 
 For any $2$ sets $\Set{A}$ and $\Set{B}$,
 there exists a set containing exactly $\Set{A}$ and 
-$\Set{B}$~\cite{wiki:Axiom_of_pairing}.
+$\Set{B}$~\cite{wiki:AxiomOfPairing}.
 
 $\forall \Set{A}\,\forall \Set{B}\,\exists \Set{C}\,\forall \Set{D}\,
 [\Set{D}\in \Set{C}\iff (\Set{D}=\Set{A}\lor \Set{D}=\Set{B})]$;
@@ -994,7 +994,7 @@ or
 $\Set{D}$ is equal to $\Set{B}$.
 
 Special case of axiom of elementary 
-sets\cite{wiki:Zermelo_set_theory}.
+sets\cite{wiki:ZermeloSetTheory}.
 
 Singleton:
 (Another identity/equality issue)
@@ -1030,7 +1030,7 @@ implies usual axiom of pairing.
 
 Stronger versions:
 
-With axiom of empty set\cite{wiki:Axiom_of_empty_set} 
+With axiom of empty set\cite{wiki:AxiomOfEmptySet} 
 and \nameref{sec:Axiom-of-union},
 implies existence of a (unique) set containing exactly
 any finite number of given sets.
@@ -1040,7 +1040,7 @@ any finite number of given sets.
 \label{sec:Axiom-of-union}
 
 The union over the elements of a set 
-exists\cite{wiki:Axiom_of_union}.
+exists\cite{wiki:AxiomOfUnion}.
 
 Note that this is using the incestuous nature of 
 \textsf{ZF} without ur-elements---the elements of sets
@@ -1095,7 +1095,7 @@ or evaluate the predicate over $\bigcup \Set{A}$)
 
 Version 1: 
 The image of a definable (?) function applied to a set
-is contained in some set.\cite{wiki:Axiom_schema_of_replacement}
+is contained in some set.\cite{wiki:AxiomSchemaOfReplacement}
 (``image of set under function'' is usually defined as a set.)
 aka axiom schema of collection.
 
@@ -1105,10 +1105,10 @@ The image of any set under a definable mapping is a set.
 
 Suppose $P$ is a definable (?) relation such that for every
 set $X$ there is a unique set $Y$ such that $P(X,Y)$.
-$P$ may be a proper class\cite{wiki:Class_set_theory}, 
+$P$ may be a proper class\cite{wiki:ClassSetTheory}, 
 ie, not a \textit{set}, of ordered pairs. 
 (Leads to some hackiness about relations that are not sets,
-for unconvincing reasons\cite{wiki:Binary_relation}.)
+for unconvincing reasons\cite{wiki:BinaryRelation}.)
 Definable (class) function: $F_P(X)\,=\,Y \iff P(X,Y)$.
 Collection $\Set{B}$ (may be a proper class)
 defined so that for all $y\in\Set{B}$ there exist $x \in \Set{A}$
@@ -1124,7 +1124,7 @@ then so is $F(\Set{A})$.
 
 \nameref{sec:Axiom-schema-of-replacement} implied by stronger
 axiom of limitation of 
-size\cite{wiki:Axiom_of_limitation_of_size}:
+size\cite{wiki:AxiomOfLimitationOfSize}:
 a class that is a member of a class is a set (???!!!).
 
 nameref{sec:Axiom-schema-of-replacement} not needed for most math;
@@ -1151,7 +1151,7 @@ Skoelem's 1st order version vs Fraenkel's 2nd order?
 \label{sec:Axiom-of-infinity}
 
 Roughly, there exists a set with infinitely many 
-elements\cite{wiki:Axiom_of_infinity}.
+elements\cite{wiki:AxiomOfInfinity}.
 (Some nonsense about 2 elements being the same.)
 
 More formally, asserts existance of an infinite set 
@@ -1180,7 +1180,7 @@ $(z\subseteq x)
  
 The power set is the set of all subsets of a given set.
 The \nameref{sec:Axiom-of-power-set} says the the power set
-always exists\cite{wiki:Axiom_of_power_set}:
+always exists\cite{wiki:AxiomOfPowerSet}:
 
 ${\displaystyle \wp(x) \,=\, \{z\in y:z\subseteq x\}}$
 
@@ -1191,7 +1191,7 @@ ${\displaystyle \wp(x) \,=\, \{z\in y:z\subseteq x\}}$
 Previous 8 axioms define \textsf{ZF}.
 
 The Well-ordering ``theorem'' axiom turns \textsf{ZF}
-into \textsf{ZFC}\cite{wiki:Well_ordering_theorem}.
+into \textsf{ZFC}\cite{wiki:WellOrderingTheorem}.
 
 For any set $\Set{X}$ there is a binary relation $R$ which
  well-orders $\Set{X}$.
@@ -1200,20 +1200,20 @@ For any set $\Set{X}$ there is a binary relation $R$ which
 
 Independent of previous 8 axioms.
 
-Equivalent to axiom of choice\cite{wiki:Axiom_of_choice}, 
+Equivalent to axiom of choice\cite{wiki:AxiomOfChoice}, 
 assuming previous 8 axioms, in 1st order logic;
 stronger in 2nd order logic.
 
 Stronger than axiom of choice without 8 axioms.
 
-Consequence of Zorn's lemma\cite{wiki:Zorns_lemma}.
+Consequence of Zorn's lemma\cite{wiki:ZornsLemma}.
 
 %-----------------------------------------------------------------
 %-----------------------------------------------------------------
 \setcounter{currentlevel}{\value{baseSectionLevel}-1}
 \levelstay{vonNeumann-Bernays-G\"{o}del set theory}
 \label{vonNeumann-Bernays-Godel_set_theory}
-\textsf{NBG}\cite{wiki:NBG-set-theory}
+\textsf{NBG}\cite{wiki:NBGSetTheory}
 
 Axiomatic definition of ``class'', ``proper class''.
 
@@ -1228,13 +1228,13 @@ Axiomatic definition of ``class'', ``proper class''.
 \setcounter{currentlevel}{\value{baseSectionLevel}-1}
 \levelstay{Finitist set theory}
 
-\cite{wiki:Finitist_set_theory}
+\cite{wiki:FinitistSetTheory}
 
 %-----------------------------------------------------------------
 %-----------------------------------------------------------------
 \setcounter{currentlevel}{\value{baseSectionLevel}-1}
 \levelstay{Constructive set theory}
-\cite{wiki:Constructive_set_theory}
+\cite{wiki:ConstructiveSetTheory}
 
 %-----------------------------------------------------------------
 %-----------------------------------------------------------------

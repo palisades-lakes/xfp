@@ -35,9 +35,9 @@ makes it necessary to create new classes of
 numbers, since with the original sequence 
 of the absolute integers that requirement cannot be
 satisfied.)}%
-{Dedekind~\cite{Dedekind1854}, 
+{Dedekind~\cite{Dedekind:1854}, 
 translation from~\cite{Ewald2005KantToHilbert},
-as quoted in~\cite{ferreiros2007labyrinth}.}
+as quoted in~\cite{Ferreiros:2007:Labyrinth}.}
 
 \epigraph{
 \textsl{Und was wird der geduldige Leser am
@@ -49,7 +49,7 @@ work, has happily managed to surround the clearest ideas in a disturbing obscuri
 )}%
 {Dedekind to Klein, April 1888, 
 from~\cite{dugac1976DedekindFondements},
-as quoted in~\cite{ferreiros2007labyrinth}.}
+as quoted in~\cite{Ferreiros:2007:Labyrinth}.}
 
 
 % In this chapter, I'm listing a number of things I'm taken as 
@@ -195,11 +195,11 @@ $\glssymbol{RationalNumbers} = \glsdesc{RationalNumbers}$.
 \label{sec:Axiomatic_definition_of_Q}
 
 ``The rational numbers are the prime field of characteristic 
-0."~\cite{quora:Rational_axioms}.
+0."~\cite{quora:RationalAxioms}.
 
 Prime field: has no proper subfields.
 
-Characteristic~\cite{wiki:Field_mathematics}: 
+Characteristic~\cite{wiki:FieldMathematics}: 
 Field $\mathbb{F}$ with additive identity $0_{\mathbb{F}}$
 and multiplicative identity $1_{\mathbb{F}}$.
 Define $n \ast f$, for $n \in \mathbb{N}$ and $f \in \mathbb{F}$
@@ -303,10 +303,10 @@ Otherwise, interpreting “$ P(x) $” as
 “$ x \in \mathbb{Q}_{\mathbb{F}} $” yields a contradiction, 
 where $ \mathbb{Q}_{\mathbb{F}} $ is the copy of $ \mathbb{Q} $ 
 sitting inside 
-$ \mathbb{F} $.''~\cite{stackexchange:Rational_axioms}.
+$ \mathbb{F} $.''~\cite{HaskellCurry:2012:RationalAxioms}.
 
 
-See also \cite{physics_insights:Rationals}.
+See also \cite{Lawrence:2017:Rationals}.
 
 %-----------------------------------------------------------------
 \setcounter{currentlevel}{\value{baseSectionLevel}-2}
@@ -351,7 +351,7 @@ also see $b=2^k$, where $k=8,16,32,64,\ldots$.
 
 %-----------------------------------------------------------------
 \setcounter{currentlevel}{\value{baseSectionLevel}-2}
-\levelstay{IEEE 754 floating point}
+\levelstay{{IEEE} 754 floating point}
 
 What algebraic structure?
 
@@ -396,7 +396,7 @@ clojure/java code showing how different results can be\ldots
 %-----------------------------------------------------------------
 \setcounter{currentlevel}{\value{baseSectionLevel}-2}
 \levelstay{'Exact' floating point arithmetic}
-\cite{Higham2002ASNA,Muller-et-al-2010,Zhu:2010:A9O:1824801.1824815}
+\cite{Higham:2002:ASNA,Muller-et-al-2010,ZhuHayes:2010:ExactSummation}
 
 \textbf{TODO:} do TwoPlus and TwoMutliply 
 suggest any way to get associative operations?
@@ -503,15 +503,15 @@ strictly positive.
 Homeomorphic to irrational numbers
 via interpretation as 
 continued 
-fraction?\cite{wiki:Baire_space_set_theory,
-wiki:Baire_category_theorem,wiki:Baire_space}
+fraction?\cite{wiki:BaireSpaceSetTheory,
+wiki:BaireCategoryTheorem,wiki:BaireSpace}
 
 %-----------------------------------------------------------------
 \setcounter{currentlevel}{\value{baseSectionLevel}-1}
 \levelstay{Generating spaces by 'closure'}
 
 Generating these 'spaces' by closure under arithmetic operations
-\cite{pickert-gorke-real-numbers-1974}.
+\cite{PickertGorke:1974:RealNumbers}.
 
 A common pattern: a problem defined in terms of an existing mathematical
 structure. Some combination of convenience, simplicity, computational
@@ -647,5 +647,5 @@ which will generate compile-time warnings
 
 Clojure adds rational numbers, which turn out to rarely be useful.\\
 \lstinline|clojure.lang.Ratio| rational numbers
-\lstinline|clojure.lang.BigInt|~\cite[p.~428]{Emerick2012ClojureProgramming}
+\lstinline|clojure.lang.BigInt|~\cite[p.~428]{EmerickCarperGrand:2012:ClojureProgramming}
 
