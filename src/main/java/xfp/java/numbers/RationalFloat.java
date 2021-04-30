@@ -13,7 +13,7 @@ import xfp.java.exceptions.Exceptions;
  *
  * The idea is that most data will start as <code>double</code>;
  * extracting the resulting powers of 2 from the numerator and
- * denominator should keep the NaturalLEs smaller, and make
+ * denominator should keep the RationalFLoats smaller, and make
  * arithmetic on them faster.
  *
  * @author palisades dot lakes at gmail dot com
