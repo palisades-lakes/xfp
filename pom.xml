@@ -5,7 +5,6 @@
  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
 >
  <modelVersion>4.0.0</modelVersion>
- <groupId>palisades-lakes</groupId>
  <artifactId>xfp</artifactId>
  <description>Utilities for exact floating point calculation</description>
  <version>1.1</version>
@@ -45,7 +44,7 @@
      </execution>
     </executions>
     <configuration>
-     <vmArgs>${clojure.vmargs}</vmArgs>
+     <vmargs>${clojure.vmargs}</vmargs>
      <clojureOptions>${clojure.options}</clojureOptions>
      <namespaces>
       <namespace>!xfp.test.*</namespace>
