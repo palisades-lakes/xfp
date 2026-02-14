@@ -11,7 +11,7 @@
  <parent>
   <groupId>palisades-lakes</groupId>
   <artifactId>palisades-lakes-parent</artifactId>
-  <version>0.0.11-SNAPSHOT</version>
+  <version>0.0.11</version>
  </parent>
  <build>
   <plugins>
@@ -60,6 +60,61 @@
   </plugins>
  </build>
  <dependencies>
+  <dependency>
+   <groupId>org.jsoup</groupId>
+   <artifactId>jsoup</artifactId>
+   <version>${jsoup-version}</version>
+  </dependency>
+  <dependency>
+   <groupId>org.ow2.asm</groupId>
+   <artifactId>asm-util</artifactId>
+   <version>${asm-version}</version>
+  </dependency>
+  <dependency>
+   <groupId>org.mozilla</groupId>
+   <artifactId>rhino</artifactId>
+   <version>${rhino-version}</version>
+   <scope>compile</scope>
+  </dependency>
+  <dependency>
+   <groupId>codox</groupId>
+   <artifactId>codox</artifactId>
+   <version>${codox-version}</version>
+   <exclusions>
+    <exclusion>
+     <groupId>org.mozilla</groupId>
+     <artifactId>rhino</artifactId>
+    </exclusion>
+    <exclusion>
+     <groupId>org.jsoup</groupId>
+     <artifactId>jsoup</artifactId>
+    </exclusion>
+    <exclusion>
+     <groupId>org.parboiled</groupId>
+     <artifactId>parboiled-java</artifactId>
+    </exclusion>
+    <exclusion>
+     <groupId>org.ow2.asm</groupId>
+     <artifactId>asm</artifactId>
+    </exclusion>
+    <exclusion>
+     <groupId>org.ow2.asm</groupId>
+     <artifactId>asm-analysis</artifactId>
+    </exclusion>
+    <exclusion>
+     <groupId>org.ow2.asm</groupId>
+     <artifactId>asm-tree</artifactId>
+    </exclusion>
+    <exclusion>
+     <groupId>org.ow2.asm</groupId>
+     <artifactId>asm-util</artifactId>
+    </exclusion>
+    <exclusion>
+     <groupId>org.ow2.asm</groupId>
+     <artifactId>asm-all</artifactId>
+    </exclusion>
+   </exclusions>
+  </dependency>
   <dependency>
    <groupId>criterium</groupId>
    <artifactId>criterium</artifactId>
